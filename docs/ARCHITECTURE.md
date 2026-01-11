@@ -14,7 +14,7 @@ We utilize a **Feature-Based** directory structure. Code is organized by what it
 ```text
 CyaniTalk/
 ├── assets/                  # Static resources
-│   ├── fonts/               # Custom fonts (Inter, JetBrains Mono, etc.)
+│   ├── fonts/               # Custom fonts (Google Sans, JetBrains Mono, etc.)
 │   ├── images/              # Icons, logos, placeholders
 │   └── sounds/              # Notification sounds (wav/mp3)
 ├── lib/
