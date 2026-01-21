@@ -65,6 +65,26 @@ dev_dependencies:
   riverpod_lint: ^3.1.0
   freezed: ^3.2.3
   json_serializable: ^6.11.2
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/logo/android/playstore-icon.png"
+  image_path_android: "assets/icons/logo/android/playstore-icon.png"
+  image_path_ios: "assets/icons/logo/apple-devices/AppIcon.appiconset/icon-ios-1024x1024.png"
+  adaptive_icon_background: "assets/icons/logo/android/drawable/ic_launcher_background.xml"
+  adaptive_icon_foreground: "assets/icons/logo/android/mipmap-xxxhdpi/ic_launcher_foreground.png"
+  windows:
+    generate: true
+    image_path: "assets/icons/logo/desktop/logo-desktop-transparent.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/icons/logo/desktop/logo-desktop.png"
+  linux:
+    generate: true
+    image_path: "assets/icons/logo/desktop/logo-desktop-transparent.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
