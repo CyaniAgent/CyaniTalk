@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../features/misskey/presentation/misskey_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
 import '../features/forum/presentation/forum_page.dart';
 import '../features/notifications/presentation/notifications_page.dart';
 import '../features/profile/presentation/profile_page.dart';
-import '../features/timeline/presentation/timeline_page.dart';
 import '../shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
@@ -17,7 +17,7 @@ GoRouter goRouter(Ref ref) {
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/timeline',
+    initialLocation: '/misskey',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -27,9 +27,9 @@ GoRouter goRouter(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/timeline',
+                path: '/misskey',
                 pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: TimelinePage()),
+                    const NoTransitionPage(child: MisskeyPage()),
               ),
             ],
           ),

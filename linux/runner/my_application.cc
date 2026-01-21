@@ -52,6 +52,14 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "cyanitalk");
   }
 
+  // Set the window icon
+  GError* error = nullptr;
+  gtk_window_set_icon_from_file(window, "linux/runner/logo.png", &error);
+  if (error) {
+    g_warning("Could not load icon: %s", error->message);
+    g_error_free(error);
+  }
+
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
