@@ -10,6 +10,7 @@ import 'pages/misskey_explore_page.dart';
 import 'pages/misskey_discover_page.dart';
 import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_announcements_page.dart';
+import 'pages/misskey_post_page.dart';
 
 class MisskeyPage extends StatefulWidget {
   const MisskeyPage({super.key});
@@ -53,6 +54,15 @@ class _MisskeyPageState extends State<MisskeyPage> {
             _selectedIndex = index;
           });
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => const MisskeyPostPage(),
+          );
+        },
+        child: const Icon(Icons.edit),
       ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
