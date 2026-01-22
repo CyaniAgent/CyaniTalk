@@ -52,11 +52,6 @@ class MisskeyDrawer extends StatelessWidget {
           label: Text('Explore'),
         ),
         NavigationDrawerDestination(
-          icon: Icon(Icons.travel_explore_outlined),
-          selectedIcon: Icon(Icons.travel_explore),
-          label: Text('Discover'),
-        ),
-        NavigationDrawerDestination(
           icon: Icon(Icons.person_add_outlined),
           selectedIcon: Icon(Icons.person_add),
           label: Text('Follow Requests'),

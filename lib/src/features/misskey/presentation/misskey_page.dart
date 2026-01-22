@@ -7,7 +7,6 @@ import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_antennas_page.dart';
 import 'pages/misskey_channels_page.dart';
 import 'pages/misskey_explore_page.dart';
-import 'pages/misskey_discover_page.dart';
 import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_announcements_page.dart';
 import 'pages/misskey_post_page.dart';
@@ -28,7 +27,6 @@ class _MisskeyPageState extends State<MisskeyPage> {
     MisskeyAntennasPage(key: ValueKey('antennas')),
     MisskeyChannelsPage(key: ValueKey('channels')),
     MisskeyExplorePage(key: ValueKey('explore')),
-    MisskeyDiscoverPage(key: ValueKey('discover')),
     MisskeyFollowRequestsPage(key: ValueKey('follow_requests')),
     MisskeyAnnouncementsPage(key: ValueKey('announcements')),
   ];
@@ -39,7 +37,6 @@ class _MisskeyPageState extends State<MisskeyPage> {
     'Antennas',
     'Channels',
     'Explore',
-    'Discover',
     'Follow Requests',
     'Announcements',
   ];
