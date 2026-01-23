@@ -50,6 +50,8 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   flutter_animate: ^4.5.2
+  package_info_plus: ^9.0.0
+  audioplayers: ^6.5.1
 
 dev_dependencies:
   flutter_test:
@@ -98,6 +100,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/images/
+    - assets/sounds/
+    - assets/icons/logo/desktop/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
