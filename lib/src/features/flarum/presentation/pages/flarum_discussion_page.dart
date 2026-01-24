@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cyanitalk/src/features/flarum/presentation/pages/flarum_post_details_page.dart';
+
 
 class FlarumDiscussionPage extends StatelessWidget {
   const FlarumDiscussionPage({super.key});

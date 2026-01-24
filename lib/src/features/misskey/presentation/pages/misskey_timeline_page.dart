@@ -2,7 +2,7 @@
 //
 // 该文件包含MisskeyTimelinePage组件，用于显示Misskey的不同类型时间线。
 import 'package:flutter/material.dart';
-import 'misskey_post_details_page.dart';
+
 
 /// Misskey时间线页面组件
 ///
