@@ -29,7 +29,7 @@ class CyaniTalkApp extends ConsumerWidget {
       routerConfig: goRouter,
       title: 'CyaniTalk',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF39C5BB)),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,

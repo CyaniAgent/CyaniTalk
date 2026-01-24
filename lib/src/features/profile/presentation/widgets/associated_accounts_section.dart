@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
+import '../../../auth/presentation/widgets/add_account_dialog.dart';
 
 /// 关联账户管理组件
 ///
@@ -45,193 +46,22 @@ class AssociatedAccountsSection extends ConsumerWidget {
           error: (err, stack) => Text('Error loading accounts: $err'),
         ),
         const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            FilledButton.tonalIcon(
-              onPressed: () => _showAddMisskeyDialog(context, ref),
-              icon: const Icon(Icons.add),
-              label: const Text('Link Misskey'),
-            ),
-            FilledButton.tonalIcon(
-              onPressed: () => _showAddFlarumDialog(context, ref),
-              icon: const Icon(Icons.add),
-              label: const Text('Link Flarum'),
-            ),
-          ],
+        Center(
+          child: FilledButton.tonalIcon(
+            onPressed: () => _showAddAccountDialog(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Add Account or Endpoint'),
+          ),
         ),
       ],
     );
   }
 
-  /// 显示添加Misskey账户的对话框
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
-  void _showAddMisskeyDialog(BuildContext context, WidgetRef ref) {
-    final hostController = TextEditingController();
+  /// 显示添加账户或端点的对话框
+  void _showAddAccountDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Link Misskey Account'),
-        content: TextField(
-          controller: hostController,
-          decoration: const InputDecoration(
-            labelText: 'Host (e.g. misskey.io)',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final host = hostController.text.trim();
-              if (host.isNotEmpty) {
-                try {
-                  final session = await ref
-                      .read(authServiceProvider.notifier)
-                      .startMiAuth(host);
-                  // 显示等待授权的对话框
-                  if (context.mounted) {
-                    _showCheckAuthDialog(context, ref, host, session);
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                  }
-                }
-              }
-            },
-            child: const Text('Next'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 显示检查Misskey授权状态的对话框
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
-  /// [host] - Misskey实例的主机地址
-  /// [session] - 认证会话ID
-  void _showCheckAuthDialog(
-    BuildContext context,
-    WidgetRef ref,
-    String host,
-    String session,
-  ) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Waiting for Authorization'),
-        content: const Text(
-          'Please authorize the app in your browser, then click "Done".',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // 取消
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              try {
-                Navigator.pop(context); // 先关闭对话框
-                await ref
-                    .read(authServiceProvider.notifier)
-                    .checkMiAuth(host, session);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Misskey account linked successfully!'),
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Failed: $e')));
-                }
-              }
-            },
-            child: const Text('Done'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 显示添加Flarum账户的对话框
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
-  void _showAddFlarumDialog(BuildContext context, WidgetRef ref) {
-    final hostController = TextEditingController();
-    final tokenController = TextEditingController();
-    final userController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Link Flarum Account'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: hostController,
-              decoration: const InputDecoration(
-                labelText: 'Host (e.g. discuss.flarum.org)',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: userController,
-              decoration: const InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: tokenController,
-              decoration: const InputDecoration(
-                labelText: 'Token',
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final host = hostController.text.trim();
-              final user = userController.text.trim();
-              final token = tokenController.text.trim();
-
-              if (host.isNotEmpty && user.isNotEmpty && token.isNotEmpty) {
-                await ref
-                    .read(authServiceProvider.notifier)
-                    .linkFlarumAccount(host, token, user);
-                if (context.mounted) Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
+      builder: (context) => const AddAccountDialog(),
     );
   }
 }
