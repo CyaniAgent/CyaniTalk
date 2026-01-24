@@ -90,8 +90,8 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/cyanitalk.git
-    cd cyanitalk
+    git clone https://github.com/CyaniAgent/CyaniTalk.git
+    cd CyaniTalk
     ```
 
 2.  **Install dependencies:**
@@ -101,8 +101,8 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 
 3.  **Run the app:**
     ```bash
-    # For Mobile
-    flutter run
+    # For Mobile（You need Android Platform Tools, and use 'adb devices' to list your mobile's device code.）
+    flutter run -d {your-android-device-code}
 
     # For Desktop (macOS/Windows/Linux)
     flutter run -d windows # or macos/linux
