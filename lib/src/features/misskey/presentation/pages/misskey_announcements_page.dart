@@ -1,8 +1,22 @@
+// Misskey公告页面
+//
+// 该文件包含MisskeyAnnouncementsPage组件，用于显示Misskey服务器的公告列表。
 import 'package:flutter/material.dart';
 
+/// Misskey公告页面组件
+///
+/// 显示Misskey服务器的公告列表，包括重要维护通知和版本更新信息。
 class MisskeyAnnouncementsPage extends StatelessWidget {
+  /// 创建一个新的MisskeyAnnouncementsPage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const MisskeyAnnouncementsPage({super.key});
 
+  /// 构建公告页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个显示公告列表的ListView.builder组件
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -65,7 +79,7 @@ class MisskeyAnnouncementsPage extends StatelessWidget {
                   '2026-01-20',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: isImportant
-                        ? Theme.of(context).colorScheme.onErrorContainer.withValues(alpha: 0.7)
+                        ? Theme.of(context).colorScheme.onErrorContainer.withOpacity(0.7)
                         : null,
                   ),
                 ),

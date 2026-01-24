@@ -1,22 +1,40 @@
+// Misskey侧边栏导航组件
+//
+// 该文件包含MisskeyDrawer组件，用于显示Misskey功能模块的侧边栏导航菜单。
 import 'package:flutter/material.dart';
 
+/// Misskey功能模块的侧边栏导航组件
+///
+/// 显示Misskey各功能页面的导航选项，允许用户切换不同的页面。
 class MisskeyDrawer extends StatelessWidget {
+  /// 当前选中的导航项索引
   final int selectedIndex;
+  
+  /// 导航项选中时的回调函数
   final ValueChanged<int> onDestinationSelected;
 
+  /// 创建一个新的MisskeyDrawer实例
+  ///
+  /// [selectedIndex] - 当前选中的导航项索引
+  /// [onDestinationSelected] - 导航项选中时的回调函数
   const MisskeyDrawer({
     super.key,
     required this.selectedIndex,
     required this.onDestinationSelected,
   });
 
+  /// 构建Misskey侧边栏导航的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个NavigationDrawer组件，包含所有Misskey功能导航项
   @override
   Widget build(BuildContext context) {
     return NavigationDrawer(
       selectedIndex: selectedIndex,
       onDestinationSelected: (index) {
         onDestinationSelected(index);
-        Navigator.pop(context); // Close the drawer
+        Navigator.pop(context); // 关闭侧边栏
       },
       children: const [
         Padding(

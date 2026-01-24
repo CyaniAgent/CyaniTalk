@@ -1,8 +1,22 @@
+// Misskey发现页面
+//
+// 该文件包含MisskeyExplorePage组件，用于显示Misskey的发现内容，包括热门话题、标签和用户。
 import 'package:flutter/material.dart';
 
+/// Misskey发现页面组件
+///
+/// 显示Misskey平台上的热门内容，包括热门话题、标签和用户列表。
 class MisskeyExplorePage extends StatelessWidget {
+  /// 创建一个新的MisskeyExplorePage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const MisskeyExplorePage({super.key});
 
+  /// 构建发现页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个包含TabBar和TabBarView的Column组件
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -30,6 +44,11 @@ class MisskeyExplorePage extends StatelessWidget {
     );
   }
 
+  /// 构建热门话题列表
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个显示热门话题的ListView.builder组件
   Widget _buildTrendingList(BuildContext context) {
     return ListView.builder(
       itemCount: 10,
@@ -50,6 +69,11 @@ class MisskeyExplorePage extends StatelessWidget {
     );
   }
 
+  /// 构建标签列表
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个显示热门标签的ListView.builder组件
   Widget _buildHashtagList(BuildContext context) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -68,6 +92,11 @@ class MisskeyExplorePage extends StatelessWidget {
     );
   }
 
+  /// 构建热门用户列表
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个显示热门用户的ListView.builder组件
   Widget _buildUserList(BuildContext context) {
     return ListView.builder(
       itemCount: 10,

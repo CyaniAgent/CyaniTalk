@@ -1,9 +1,23 @@
+// 全局搜索代理类
+//
+// 该文件包含GlobalSearchDelegate类，用于处理应用程序的全局搜索功能，
+// 负责构建搜索界面、处理搜索操作和显示搜索结果。
 import 'package:flutter/material.dart';
 import 'global_search_service.dart';
 
+/// 全局搜索代理
+///
+/// 继承自Flutter的SearchDelegate，负责处理应用程序的全局搜索功能，
+/// 支持跨Misskey和Flarum平台搜索内容。
 class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
+  /// 全局搜索服务实例
   final GlobalSearchService _searchService = GlobalSearchService();
 
+  /// 构建搜索界面的操作按钮
+  ///
+  /// [context] - 构建上下文
+  ///
+  /// 返回包含操作按钮的Widget列表，当前实现了清除搜索词的功能
   @override
   List<Widget>? buildActions(BuildContext context) {
     return [
@@ -18,6 +32,11 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
     ];
   }
 
+  /// 构建搜索界面的返回按钮
+  ///
+  /// [context] - 构建上下文
+  ///
+  /// 返回一个IconButton，用于关闭搜索界面
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
@@ -28,6 +47,11 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
     );
   }
 
+  /// 构建搜索结果界面
+  ///
+  /// [context] - 构建上下文
+  ///
+  /// 返回一个Widget，用于显示搜索结果列表
   @override
   Widget buildResults(BuildContext context) {
     return FutureBuilder<List<SearchResult>>(
@@ -65,15 +89,17 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
     );
   }
 
+  /// 构建搜索建议界面
+  ///
+  /// [context] - 构建上下文
+  ///
+  /// 返回一个Widget，用于显示搜索建议
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
       return const Center(child: Text('Enter a query to search across Misskey and Flarum'));
     }
-    // Implement suggestions if needed, for now just show results directly or nothing
-    // Typically suggestions are lighter weight or history.
-    // For this prototype, we'll trigger search on buildResults mostly,
-    // but we can also debounced search here.
+    // 目前仅在搜索词为空时显示提示信息，未实现完整的搜索建议功能
     return Container();
   }
 }

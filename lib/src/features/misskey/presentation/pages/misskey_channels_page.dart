@@ -1,8 +1,22 @@
+// Misskey频道页面
+//
+// 该文件包含MisskeyChannelsPage组件，用于显示Misskey的频道列表。
 import 'package:flutter/material.dart';
 
+/// Misskey频道页面组件
+///
+/// 以网格布局显示Misskey平台上的频道列表，每个频道显示名称、描述和成员数量。
 class MisskeyChannelsPage extends StatelessWidget {
+  /// 创建一个新的MisskeyChannelsPage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const MisskeyChannelsPage({super.key});
 
+  /// 构建频道页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个显示频道列表的GridView.builder组件
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
@@ -22,7 +36,7 @@ class MisskeyChannelsPage extends StatelessWidget {
             children: [
               Container(
                 height: 80,
-                color: Colors.primaries[index % Colors.primaries.length].withValues(alpha: 0.2),
+                color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.2),
                 child: Center(
                   child: Icon(
                     Icons.hub,
