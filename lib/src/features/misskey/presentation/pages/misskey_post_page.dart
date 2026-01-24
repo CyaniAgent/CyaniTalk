@@ -1,28 +1,55 @@
+// Misskey发布笔记页面
+//
+// 该文件包含MisskeyPostPage组件，用于创建和发布Misskey笔记。
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+/// Misskey发布笔记页面组件
+///
+/// 用于创建和发布Misskey笔记，支持设置可见性、本地仅可见等选项，
+/// 并提供预览功能。
 class MisskeyPostPage extends StatefulWidget {
+  /// 创建一个新的MisskeyPostPage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const MisskeyPostPage({super.key});
 
+  /// 创建MisskeyPostPage的状态管理对象
   @override
   State<MisskeyPostPage> createState() => _MisskeyPostPageState();
 }
 
+/// MisskeyPostPage的状态管理类
 class _MisskeyPostPageState extends State<MisskeyPostPage> {
+  /// 文本编辑控制器，用于管理笔记内容
   final TextEditingController _controller = TextEditingController();
+  
+  /// 是否显示预览
   bool _showPreview = false;
+  
+  /// 是否仅本地可见（不参与联邦）
   bool _localOnly = false;
+  
+  /// 笔记可见性，可选值：'public', 'home', 'followers', 'direct'
   String _visibility = 'public';
 
+  /// 释放资源
+  ///
+  ///  dispose文本编辑控制器资源。
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  /// 构建发布笔记页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个居中的发布笔记对话框组件
   @override
   Widget build(BuildContext context) {
-    // Used as a dialog/modal content
+    // 用作对话框/模态框内容
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
@@ -37,24 +64,24 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // --- Top Section ---
+                  // --- 顶部区域 ---
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'Close',
+                        tooltip: '关闭',
                       ),
                       const SizedBox(width: 8),
-                      // Account Menu
+                      // 账户菜单
                       PopupMenuButton<String>(
-                        tooltip: 'Account',
+                        tooltip: '账户',
                         icon: const CircleAvatar(
                           radius: 16,
                           child: Icon(Icons.person, size: 20),
                         ),
                         onSelected: (value) {
-                          // Handle selection
+                          // 处理选择
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Selected: $value')),
                           );
@@ -62,47 +89,47 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                         itemBuilder: (context) => [
                           const PopupMenuItem(
                             value: 'drafts',
-                            child: Text('Drafts list'),
+                            child: Text('草稿列表'),
                           ),
                           const PopupMenuItem(
                             value: 'scheduled',
-                            child: Text('Scheduled posts list'),
+                            child: Text('定时发布列表'),
                           ),
                           const PopupMenuItem(
                             value: 'switch',
-                            child: Text('Switch account'),
+                            child: Text('切换账户'),
                           ),
                         ],
                       ),
                       const SizedBox(width: 8),
-                      // Visibility
+                      // 可见性设置
                       PopupMenuButton<String>(
-                        tooltip: 'Visibility',
+                        tooltip: '可见性',
                         icon: Icon(_getVisibilityIcon(_visibility)),
                         onSelected: (value) =>
                             setState(() => _visibility = value),
                         itemBuilder: (context) => [
                           const PopupMenuItem(
                             value: 'public',
-                            child: Text('Public'),
+                            child: Text('公开'),
                           ),
                           const PopupMenuItem(
                             value: 'home',
-                            child: Text('Home'),
+                            child: Text('首页'),
                           ),
                           const PopupMenuItem(
                             value: 'followers',
-                            child: Text('Followers'),
+                            child: Text('关注者'),
                           ),
                           const PopupMenuItem(
                             value: 'direct',
-                            child: Text('Direct'),
+                            child: Text('仅提及'),
                           ),
                         ],
                       ),
-                      // Local Only
+                      // 仅本地可见
                       IconButton(
-                        tooltip: 'Do not participate in federation',
+                        tooltip: '不参与联邦',
                         icon: Icon(
                           _localOnly
                               ? Icons.rocket_launch
@@ -115,9 +142,9 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                             setState(() => _localOnly = !_localOnly),
                       ),
                       const Spacer(),
-                      // Other Menu
+                      // 其他选项菜单
                       PopupMenuButton<String>(
-                        tooltip: 'Other',
+                        tooltip: '其他',
                         icon: const Icon(Icons.more_horiz),
                         itemBuilder: (context) => [
                           const PopupMenuItem(
@@ -127,19 +154,19 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                                 Icon(
                                   Icons.check_box_outline_blank,
                                   size: 18,
-                                ), // Mock checkbox
+                                ), // 模拟复选框
                                 SizedBox(width: 8),
-                                Text('Accept emoji reactions'),
+                                Text('接受表情反应'),
                               ],
                             ),
                           ),
                           const PopupMenuItem(
                             value: 'draft',
-                            child: Text('Save to draft'),
+                            child: Text('保存到草稿'),
                           ),
                           const PopupMenuItem(
                             value: 'schedule',
-                            child: Text('Scheduled posting'),
+                            child: Text('定时发布'),
                           ),
                           PopupMenuItem(
                             value: 'preview',
@@ -155,7 +182,7 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                                       : null,
                                 ),
                                 const SizedBox(width: 8),
-                                const Text('Preview'),
+                                const Text('预览'),
                               ],
                             ),
                             onTap: () {
@@ -164,7 +191,7 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                           ),
                           PopupMenuItem(
                             value: 'reset',
-                            child: const Text('Reset'),
+                            child: const Text('重置'),
                             onTap: () {
                               setState(() {
                                 _controller.clear();
@@ -177,33 +204,33 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                         ],
                       ),
                       const SizedBox(width: 8),
-                      // Post Button
+                      // 发布按钮
                       FilledButton(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Posted!')),
+                            const SnackBar(content: Text('已发布!')),
                           );
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Post'),
+                        child: const Text('发布'),
                       ),
                     ],
                   ),
                   const Divider(),
 
-                  // --- Middle Section ---
+                  // --- 中间区域 ---
                   TextField(
                     controller: _controller,
                     maxLines: 8,
                     minLines: 4,
                     maxLength: 3000,
                     decoration: const InputDecoration(
-                      hintText: 'What are you thinking about?',
+                      hintText: '你在想什么？',
                       border: InputBorder.none,
                     ),
                   ),
 
-                  // Preview Section
+                  // 预览区域
                   if (_showPreview) ...[
                     const Divider(),
                     Container(
@@ -211,20 +238,20 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Preview',
+                            '预览',
                             style: Theme.of(context).textTheme.labelSmall,
                           ),
                           const SizedBox(height: 4),
                           Text(
                             _controller.text.isEmpty
-                                ? '(Preview will appear here)'
+                                ? '(预览将显示在这里)'
                                 : _controller.text,
                           ),
                         ],
@@ -234,7 +261,7 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
 
                   const Divider(),
 
-                  // --- Bottom Section ---
+                  // --- 底部区域 ---
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
@@ -242,42 +269,42 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.image_outlined),
-                        tooltip: 'Insert attachment from local',
+                        tooltip: '从本地插入附件',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.cloud_queue),
-                        tooltip: 'Insert attachment from cloud storage',
+                        tooltip: '从云存储插入附件',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.poll_outlined),
-                        tooltip: 'Poll',
+                        tooltip: '投票',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.visibility_off_outlined),
-                        tooltip: 'Hide content',
+                        tooltip: '隐藏内容',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.tag),
-                        tooltip: 'Hashtags',
+                        tooltip: '标签',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.alternate_email),
-                        tooltip: 'Mentions',
+                        tooltip: '提及',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.emoji_emotions_outlined),
-                        tooltip: 'Emojis',
+                        tooltip: '表情',
                         onPressed: () {},
                       ),
                       IconButton(
                         icon: const Icon(Icons.code),
-                        tooltip: 'MFM formatting',
+                        tooltip: 'MFM格式',
                         onPressed: () {},
                       ),
                     ],
@@ -291,6 +318,11 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
     );
   }
 
+  /// 根据可见性值获取对应的图标
+  ///
+  /// [visibility] - 可见性字符串，可选值：'public', 'home', 'followers', 'direct'
+  ///
+  /// 返回对应的图标Data
   IconData _getVisibilityIcon(String visibility) {
     switch (visibility) {
       case 'home':

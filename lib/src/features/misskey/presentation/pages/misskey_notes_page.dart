@@ -1,8 +1,22 @@
+// Misskey笔记页面
+//
+// 该文件包含MisskeyNotesPage组件，用于显示用户的笔记列表。
 import 'package:flutter/material.dart';
 
+/// Misskey笔记页面组件
+///
+/// 显示用户创建的笔记列表，包括回复和自己发布的内容。
 class MisskeyNotesPage extends StatelessWidget {
+  /// 创建一个新的MisskeyNotesPage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const MisskeyNotesPage({super.key});
 
+  /// 构建笔记页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个显示笔记列表的ListView.builder组件
   @override
   Widget build(BuildContext context) {
     return ListView.builder(

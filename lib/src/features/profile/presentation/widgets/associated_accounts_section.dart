@@ -1,11 +1,27 @@
+// 关联账户管理组件
+//
+// 该文件包含AssociatedAccountsSection组件，用于显示和管理用户关联的账户列表，
+// 支持添加和删除Misskey和Flarum账户。
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 
+/// 关联账户管理组件
+///
+/// 显示用户关联的账户列表，支持添加和删除Misskey和Flarum账户。
 class AssociatedAccountsSection extends ConsumerWidget {
+  /// 创建一个新的AssociatedAccountsSection实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const AssociatedAccountsSection({super.key});
 
+  /// 构建关联账户管理界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
+  ///
+  /// 返回包含账户列表和添加按钮的Column组件
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(authServiceProvider);
@@ -48,6 +64,10 @@ class AssociatedAccountsSection extends ConsumerWidget {
     );
   }
 
+  /// 显示添加Misskey账户的对话框
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
   void _showAddMisskeyDialog(BuildContext context, WidgetRef ref) {
     final hostController = TextEditingController();
     showDialog(
@@ -75,7 +95,7 @@ class AssociatedAccountsSection extends ConsumerWidget {
                   final session = await ref
                       .read(authServiceProvider.notifier)
                       .startMiAuth(host);
-                  // Show a dialog or snackbar with a "I have authorized" button
+                  // 显示等待授权的对话框
                   if (context.mounted) {
                     _showCheckAuthDialog(context, ref, host, session);
                   }
@@ -95,6 +115,12 @@ class AssociatedAccountsSection extends ConsumerWidget {
     );
   }
 
+  /// 显示检查Misskey授权状态的对话框
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
+  /// [host] - Misskey实例的主机地址
+  /// [session] - 认证会话ID
   void _showCheckAuthDialog(
     BuildContext context,
     WidgetRef ref,
@@ -111,13 +137,13 @@ class AssociatedAccountsSection extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context), // Cancel
+            onPressed: () => Navigator.pop(context), // 取消
             child: const Text('Cancel'),
           ),
           FilledButton(
             onPressed: () async {
               try {
-                Navigator.pop(context); // Close dialog first
+                Navigator.pop(context); // 先关闭对话框
                 await ref
                     .read(authServiceProvider.notifier)
                     .checkMiAuth(host, session);
@@ -143,6 +169,10 @@ class AssociatedAccountsSection extends ConsumerWidget {
     );
   }
 
+  /// 显示添加Flarum账户的对话框
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
   void _showAddFlarumDialog(BuildContext context, WidgetRef ref) {
     final hostController = TextEditingController();
     final tokenController = TextEditingController();
@@ -206,11 +236,25 @@ class AssociatedAccountsSection extends ConsumerWidget {
   }
 }
 
+/// 单个账户卡片组件
+///
+/// 显示单个关联账户的信息，包括头像、用户名、平台和主机地址，
+/// 并提供删除账户的功能。
 class _AccountCard extends ConsumerWidget {
+  /// 账户信息
   final Account account;
 
+  /// 创建一个新的_AccountCard实例
+  ///
+  /// [account] - 要显示的账户信息
   const _AccountCard({required this.account});
 
+  /// 构建单个账户卡片的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
+  ///
+  /// 返回一个包含账户信息和删除按钮的Card组件
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMisskey = account.platform == 'misskey';

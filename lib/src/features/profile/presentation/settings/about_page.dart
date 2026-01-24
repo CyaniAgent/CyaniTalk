@@ -1,23 +1,47 @@
+// 关于页面
+//
+// 该文件包含AboutPage组件，用于显示应用程序的关于信息，包括版本号、贡献者列表和GitHub链接。
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:audioplayers/audioplayers.dart';
 
+/// 应用程序的关于页面组件
+///
+/// 显示应用程序的版本信息、贡献者列表和GitHub链接，
+/// 并在页面打开时播放音效。
 class AboutPage extends StatefulWidget {
+  /// 创建一个新的AboutPage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const AboutPage({super.key});
 
+  /// 创建AboutPage的状态管理对象
   @override
   State<AboutPage> createState() => _AboutPageState();
 }
 
+/// AboutPage的状态管理类
 class _AboutPageState extends State<AboutPage> {
+  /// 应用程序名称
   String _appName = 'CyaniTalk';
+  
+  /// 应用程序版本号
   String _version = '';
+  
+  /// 贡献者列表
   List<dynamic> _contributors = [];
+  
+  /// 是否正在加载贡献者数据
   bool _isLoadingContributors = true;
+  
+  /// 音频播放器实例，用于播放页面打开音效
   final AudioPlayer _audioPlayer = AudioPlayer();
 
+  /// 初始化页面状态
+  ///
+  /// 加载应用程序信息、贡献者数据并播放页面打开音效。
   @override
   void initState() {
     super.initState();
@@ -26,12 +50,16 @@ class _AboutPageState extends State<AboutPage> {
     _playSound();
   }
 
+  /// 释放资源
+  ///
+  ///  dispose音频播放器资源。
   @override
   void dispose() {
     _audioPlayer.dispose();
     super.dispose();
   }
 
+  /// 播放页面打开音效
   Future<void> _playSound() async {
     try {
       await _audioPlayer.play(AssetSource('sounds/AboutPageEntrance.mp3'));
@@ -40,6 +68,9 @@ class _AboutPageState extends State<AboutPage> {
     }
   }
 
+  /// 初始化应用程序包信息
+  ///
+  /// 获取应用程序的版本号和构建号。
   Future<void> _initPackageInfo() async {
     final info = await PackageInfo.fromPlatform();
     setState(() {
@@ -48,6 +79,9 @@ class _AboutPageState extends State<AboutPage> {
     });
   }
 
+  /// 获取GitHub贡献者列表
+  ///
+  /// 从GitHub API获取项目的贡献者数据。
   Future<void> _fetchContributors() async {
     try {
       final dio = Dio();
@@ -70,6 +104,9 @@ class _AboutPageState extends State<AboutPage> {
     }
   }
 
+  /// 打开GitHub项目页面
+  ///
+  /// 在外部浏览器中打开项目的GitHub仓库页面。
   Future<void> _launchGitHub() async {
     final url = Uri.parse('https://github.com/CyaniAgent/CyaniTalk');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -81,6 +118,11 @@ class _AboutPageState extends State<AboutPage> {
     }
   }
 
+  /// 构建关于页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个包含应用程序信息、贡献者列表和GitHub链接的Scaffold组件
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,7 +207,7 @@ class _AboutPageState extends State<AboutPage> {
                               contributor['avatar_url'],
                             ),
                             radius: 30,
-                            onBackgroundImageError: (_, __) {},
+                            onBackgroundImageError: (_, _) {},
                             child: const Icon(
                               Icons.person,
                               color: Colors.transparent,

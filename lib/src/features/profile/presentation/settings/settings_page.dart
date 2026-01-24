@@ -1,9 +1,23 @@
+// 设置页面
+//
+// 该文件包含SettingsPage组件，用于显示应用程序的设置选项。
 import 'package:flutter/material.dart';
 import 'about_page.dart';
 
+/// 应用程序设置页面组件
+///
+/// 显示应用程序的各种设置选项，包括账户管理、连接配置、界面设置等。
 class SettingsPage extends StatelessWidget {
+  /// 创建一个新的SettingsPage实例
+  ///
+  /// [key] - 组件的键，用于唯一标识组件
   const SettingsPage({super.key});
 
+  /// 构建设置页面的UI界面
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  ///
+  /// 返回一个包含各种设置选项的Scaffold组件
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +59,12 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  /// 构建设置页面的分区标题
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [title] - 分区标题文本
+  ///
+  /// 返回一个显示分区标题的Widget
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -57,6 +77,15 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  /// 构建设置选项瓦片
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [icon] - 选项图标
+  /// [title] - 选项标题
+  /// [subtitle] - 选项描述
+  /// [onTap] - 点击事件回调
+  ///
+  /// 返回一个显示设置选项的ListTile组件
   Widget _buildSettingsTile(
     BuildContext context,
     IconData icon,
