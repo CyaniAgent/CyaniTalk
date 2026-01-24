@@ -4,7 +4,11 @@
 // 管理不同Misskey页面的切换和导航。
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../../../core/services/search/global_search_delegate.dart';
+import '../../auth/application/auth_service.dart';
 import 'widgets/misskey_drawer.dart';
 import 'pages/misskey_timeline_page.dart';
 import 'pages/misskey_notes_page.dart';
@@ -18,7 +22,7 @@ import 'pages/misskey_post_page.dart';
 /// Misskey功能模块的主页面组件
 ///
 /// 负责管理不同Misskey页面的切换，包含侧边栏导航、顶部导航栏和浮动操作按钮。
-class MisskeyPage extends StatefulWidget {
+class MisskeyPage extends ConsumerStatefulWidget {
   /// 创建一个新的MisskeyPage实例
   ///
   /// [key] - 组件的键，用于唯一标识组件
@@ -26,13 +30,22 @@ class MisskeyPage extends StatefulWidget {
 
   /// 创建MisskeyPage的状态管理对象
   @override
-  State<MisskeyPage> createState() => _MisskeyPageState();
+  ConsumerState<MisskeyPage> createState() => _MisskeyPageState();
 }
 
 /// MisskeyPage的状态管理类
-class _MisskeyPageState extends State<MisskeyPage> {
+class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   /// 当前选中的页面索引
   int _selectedIndex = 0;
+  
+  /// 音频播放器实例
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   /// 所有可用的Misskey页面列表
   final List<Widget> _pages = const [
@@ -73,11 +86,39 @@ class _MisskeyPageState extends State<MisskeyPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => const MisskeyPostPage(),
+        onPressed: () async {
+          // 检查是否已登录 Misskey
+          final authState = ref.read(authServiceProvider);
+          final hasMisskeyAccount = authState.maybeWhen(
+            data: (accounts) => accounts.any((a) => a.platform == 'misskey'),
+            orElse: () => false,
           );
+
+          if (hasMisskeyAccount) {
+            // 已登录，打开发布窗口
+            showDialog(
+              context: context,
+              builder: (context) => const MisskeyPostPage(),
+            );
+          } else {
+            // 未登录，播放提示音并跳转到登录页面
+            try {
+              await _audioPlayer.play(AssetSource('sounds/SpeechNoti/PleaseLogin-default.wav'));
+            } catch (e) {
+              debugPrint('Error playing sound: $e');
+            }
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please login to a Misskey instance first'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              // 跳转到 Profile 页面进行登录
+              context.go('/profile');
+            }
+          }
         },
         child: const Icon(Icons.edit),
       ),

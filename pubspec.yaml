@@ -135,8 +135,10 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/icons/
     - assets/images/
     - assets/sounds/
+    - assets/sounds/SpeechNoti/
     - assets/icons/logo/desktop/
 
   # 要向你的应用程序添加资源，请在此处添加一个 assets 部分，如下所示：
