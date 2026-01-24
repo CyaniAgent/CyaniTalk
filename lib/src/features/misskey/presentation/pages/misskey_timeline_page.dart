@@ -2,6 +2,7 @@
 //
 // 该文件包含MisskeyTimelinePage组件，用于显示Misskey的不同类型时间线。
 import 'package:flutter/material.dart';
+import 'misskey_post_details_page.dart';
 
 /// Misskey时间线页面组件
 ///
@@ -68,87 +69,31 @@ class _MisskeyTimelinePageState extends State<MisskeyTimelinePage> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: 10,
-            itemBuilder: (context, index) {
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                            child: Text('U$index'),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'User $index',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Text(
-                                  '@user$index@example.com',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.outline,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '2h',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '[${_selectedTimeline.first}] This is a sample note content for item $index. Misskey notes can be quite long or short, and may contain MFM.',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.reply_outlined),
-                            onPressed: () {},
-                            tooltip: 'Reply',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.repeat),
-                            onPressed: () {},
-                            tooltip: 'Renote',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add_reaction_outlined),
-                            onPressed: () {},
-                            tooltip: 'React',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.more_horiz),
-                            onPressed: () {},
-                            tooltip: 'More',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.auto_awesome_motion_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
-              );
-            },
+                const SizedBox(height: 16),
+                Text(
+                  'No notes found',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Your ${_selectedTimeline.first} timeline is empty.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
