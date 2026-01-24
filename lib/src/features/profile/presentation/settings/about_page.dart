@@ -62,7 +62,7 @@ class _AboutPageState extends State<AboutPage> {
   /// 播放页面打开音效
   Future<void> _playSound() async {
     try {
-      await _audioPlayer.play(AssetSource('sounds/AboutPageEntrance.wav'));
+      await _audioPlayer.play(AssetSource('sounds/AboutPageEntrance.mp3'));
     } catch (e) {
       debugPrint('Error playing sound: $e');
     }

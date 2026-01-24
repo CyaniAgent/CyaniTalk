@@ -15,6 +15,8 @@ import '../shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 /// 提供应用程序的GoRouter实例
 ///
 /// 定义了应用程序的所有路由配置，包括初始位置和各个页面的路由路径。
@@ -25,8 +27,6 @@ part 'router.g.dart';
 /// 返回配置好的GoRouter实例
 @riverpod
 GoRouter goRouter(Ref ref) {
-  final rootNavigatorKey = GlobalKey<NavigatorState>();
-
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/misskey',
