@@ -79,7 +79,7 @@ class MisskeyAnnouncementsPage extends StatelessWidget {
                   '2026-01-20',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: isImportant
-                        ? Theme.of(context).colorScheme.onErrorContainer.withOpacity(0.7)
+                        ? Theme.of(context).colorScheme.onErrorContainer.withValues(alpha: 0.7)
                         : null,
                   ),
                 ),

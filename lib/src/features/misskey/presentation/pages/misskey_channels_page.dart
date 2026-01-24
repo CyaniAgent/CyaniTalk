@@ -36,7 +36,7 @@ class MisskeyChannelsPage extends StatelessWidget {
             children: [
               Container(
                 height: 80,
-                color: Colors.primaries[index % Colors.primaries.length].withOpacity(0.2),
+                color: Colors.primaries[index % Colors.primaries.length].withValues(alpha: 0.2),
                 child: Center(
                   child: Icon(
                     Icons.hub,
