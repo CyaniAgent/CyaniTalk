@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
@@ -40,14 +41,14 @@ class AssociatedAccountsSection extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'No accounts linked yet.',
+          'accounts_no_linked'.tr(),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 24),
         FilledButton.icon(
           onPressed: () => _showAddAccountDialog(context),
           icon: const Icon(Icons.add),
-          label: const Text('Add Account'),
+          label: Text('accounts_add_account'.tr()),
         ),
       ],
     );
@@ -151,19 +152,19 @@ class AssociatedAccountsSection extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Account'),
-        content: Text('Are you sure you want to remove ${account.username}?'),
+        title: Text('accounts_remove_title'.tr()),
+        content: Text('accounts_remove_confirm'.tr(args: [account.username ?? 'Unknown'])),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('accounts_remove_cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               ref.read(authServiceProvider.notifier).removeAccount(account.id);
               Navigator.pop(context);
             },
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text('accounts_remove_confirm_button'.tr(), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

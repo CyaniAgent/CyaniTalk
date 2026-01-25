@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/domain/channel.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
@@ -45,7 +46,7 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
       body: timelineAsync.when(
         data: (notes) {
           if (notes.isEmpty) {
-            return const Center(child: Text('No notes in this channel'));
+            return Center(child: Text('channel_details_no_notes_in_this_channel'.tr()));
           }
           return RefreshIndicator(
             onRefresh: () => ref

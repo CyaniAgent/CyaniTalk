@@ -31,6 +31,13 @@ dependencies:
 
   # iOS风格的图标库，提供CupertinoIcons类用于获取iOS原生风格的图标
   cupertino_icons: ^1.0.8
+  # Flutter本地化支持
+  flutter_localizations:
+    sdk: flutter
+  # 国际化工具库
+  intl: ^0.20.2
+  # 简化国际化实现的库
+  easy_localization: ^3.0.8
   # 强大的Dart网络请求库，支持RESTful API、拦截器、FormData等
   dio: ^5.9.0
   # WebSocket通信支持，用于实时数据传输
@@ -140,6 +147,7 @@ flutter:
     - assets/sounds/
     - assets/sounds/SpeechNoti/
     - assets/icons/logo/desktop/
+    - assets/translations/
 
   # 要向你的应用程序添加资源，请在此处添加一个 assets 部分，如下所示：
   # assets:

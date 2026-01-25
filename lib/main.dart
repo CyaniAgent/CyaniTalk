@@ -3,12 +3,27 @@
 // 该文件包含应用程序的启动逻辑，负责初始化Flutter应用并运行主组件。
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'src/app.dart';
 
 /// 应用程序的入口点
 ///
 /// 初始化Riverpod的ProviderScope并运行CyaniTalkApp组件，
 /// 这是应用程序的根组件。
-void main() {
-  runApp(const ProviderScope(child: CyaniTalkApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('zh', 'CN'),
+        Locale('en', 'US'),
+        Locale('ja', 'JP'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('zh', 'CN'),
+      child: const ProviderScope(child: CyaniTalkApp()),
+    ),
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/domain/channel.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_channel_details_page.dart';
@@ -63,7 +64,7 @@ class MisskeyChannelsPage extends ConsumerWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
-        channel.description ?? 'No description',
+        channel.description ?? 'channels_no_description'.tr(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
@@ -102,7 +103,7 @@ class MisskeyChannelsPage extends ConsumerWidget {
             color: Theme.of(context).colorScheme.outlineVariant,
           ),
           const SizedBox(height: 16),
-          const Text('No joined channels found'),
+          Text('channels_no_joined_channels_found'.tr()),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FlarumTagsPage extends StatelessWidget {
   const FlarumTagsPage({super.key});
@@ -16,7 +17,7 @@ class FlarumTagsPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No tags found',
+            'flarum_tags_no_tags'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),

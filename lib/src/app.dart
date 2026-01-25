@@ -3,6 +3,7 @@
 // 该文件包含应用程序的根组件CyaniTalkApp，负责配置应用程序的主题、路由和整体结构。
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'routing/router.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
 
@@ -25,6 +26,9 @@ class CyaniTalkApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
     );
   }
 }

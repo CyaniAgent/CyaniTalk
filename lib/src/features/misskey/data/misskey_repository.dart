@@ -28,11 +28,22 @@ class MisskeyRepository {
 }
 
 @riverpod
-MisskeyRepository misskeyRepository(Ref ref) {
-  final account = ref.watch(selectedAccountProvider);
-  if (account == null || account.platform != 'misskey') {
-    throw Exception('No Misskey account selected');
-  }
-  final api = MisskeyApi(host: account.host, token: account.token);
-  return MisskeyRepository(api);
+MisskeyRepository? misskeyRepository(Ref ref) {
+  final accountsAsync = ref.watch(authServiceProvider);
+  
+  return accountsAsync.maybeWhen(
+    data: (accounts) {
+      final misskeyAccount = accounts.where(
+        (acc) => acc.platform == 'misskey',
+      ).firstOrNull;
+      
+      if (misskeyAccount == null) {
+        return null;
+      }
+      
+      final api = MisskeyApi(host: misskeyAccount.host, token: misskeyAccount.token);
+      return MisskeyRepository(api);
+    },
+    orElse: () => null,
+  );
 }

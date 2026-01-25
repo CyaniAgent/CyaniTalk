@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FlarumPostDetailsPage extends StatelessWidget {
   final int discussionId;
@@ -14,7 +15,7 @@ class FlarumPostDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Discussion Details'),
+        title: Text('flarum_post_details_title'.tr()),
       ),
       body: Center(
         child: Column(
@@ -27,7 +28,7 @@ class FlarumPostDetailsPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Loading discussion content...',
+              'flarum_post_details_loading'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
 
@@ -42,7 +43,7 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
       body: timelineAsync.when(
         data: (notes) {
           if (notes.isEmpty) {
-            return const Center(child: Text('No notes found in Global timeline'));
+            return Center(child: Text('notes_no_notes_found_in_global_timeline'.tr()));
           }
           return RefreshIndicator(
             onRefresh: () => ref

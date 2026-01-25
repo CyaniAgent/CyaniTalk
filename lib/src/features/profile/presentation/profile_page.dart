@@ -2,6 +2,7 @@
 //
 // 该文件包含ProfilePage组件，用于显示用户的个人资料信息和关联账户。
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'widgets/associated_accounts_section.dart';
 import 'settings/settings_page.dart';
 
@@ -23,11 +24,11 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Unified Login Manager'),
+        title: Text('profile_unified_login_manager'.tr()),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
+            tooltip: 'profile_settings'.tr(),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const SettingsPage()),

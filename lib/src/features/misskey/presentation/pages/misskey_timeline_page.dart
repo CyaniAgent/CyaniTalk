@@ -3,6 +3,7 @@
 // 该文件包含MisskeyTimelinePage组件，用于显示Misskey的不同类型时间线。
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
 
@@ -62,25 +63,25 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment<String>(
                   value: 'Home',
-                  label: Text('Home'),
+                  label: Text('timeline_home'.tr()),
                   icon: Icon(Icons.home_outlined),
                 ),
                 ButtonSegment<String>(
                   value: 'Local',
-                  label: Text('Local'),
+                  label: Text('timeline_local'.tr()),
                   icon: Icon(Icons.location_city),
                 ),
                 ButtonSegment<String>(
                   value: 'Social',
-                  label: Text('Social'),
+                  label: Text('timeline_social'.tr()),
                   icon: Icon(Icons.group_outlined),
                 ),
                 ButtonSegment<String>(
                   value: 'Global',
-                  label: Text('Global'),
+                  label: Text('timeline_global'.tr()),
                   icon: Icon(Icons.public),
                 ),
               ],
@@ -127,7 +128,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                     onPressed: () => ref
                         .read(misskeyTimelineProvider(timelineType).notifier)
                         .refresh(),
-                    child: const Text('Retry'),
+                    child: Text('timeline_retry'.tr()),
                   ),
                 ],
               ),
@@ -150,14 +151,14 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No notes found',
+            'timeline_no_notes_found'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Your ${_selectedTimeline.first} timeline is empty.',
+            'timeline_your_timeline_is_empty'.tr(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
