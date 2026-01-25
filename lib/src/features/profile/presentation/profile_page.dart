@@ -23,7 +23,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Unified Login Manager'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),

@@ -1,120 +1,241 @@
-// 关联账户管理组件
-//
-// 该文件包含AssociatedAccountsSection组件，用于显示和管理用户关联的账户列表，
-// 支持添加和删除Misskey和Flarum账户。
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
+import 'user_details_view.dart';
 
-/// 关联账户管理组件
+/// 统一登录管理器组件
 ///
-/// 显示用户关联的账户列表，支持添加和删除Misskey和Flarum账户。
+/// 显示用户关联的账户列表，支持切换查看详细资料以及添加/删除账户。
 class AssociatedAccountsSection extends ConsumerWidget {
   /// 创建一个新的AssociatedAccountsSection实例
-  ///
-  /// [key] - 组件的键，用于唯一标识组件
   const AssociatedAccountsSection({super.key});
 
-  /// 构建关联账户管理界面
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
-  ///
-  /// 返回包含账户列表和添加按钮的Column组件
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(authServiceProvider);
+    final selectedAccount = ref.watch(selectedAccountProvider);
 
+    return accountsAsync.when(
+      data: (accounts) {
+        if (accounts.isEmpty) {
+          return _buildEmptyState(context);
+        }
+        return _buildManagerLayout(context, ref, accounts, selectedAccount);
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Center(child: Text('Error: $err')),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 40),
+        Icon(
+          Icons.account_circle_outlined,
+          size: 80,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'No accounts linked yet.',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 24),
+        FilledButton.icon(
+          onPressed: () => _showAddAccountDialog(context),
+          icon: const Icon(Icons.add),
+          label: const Text('Add Account'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildManagerLayout(
+    BuildContext context,
+    WidgetRef ref,
+    List<Account> accounts,
+    Account? selected,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Associated Accounts',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 16),
-        accountsAsync.when(
-          data: (accounts) => Column(
+        // Top Horizontal Account List
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
             children: [
-              ...accounts.map((account) => _AccountCard(account: account)),
-              if (accounts.isEmpty) const Text('No accounts linked yet.'),
+              ...accounts.map((account) => _AccountAvatarItem(
+                    account: account,
+                    isSelected: selected?.id == account.id,
+                    onTap: () => ref
+                        .read(selectedAccountProvider.notifier)
+                        .state = account,
+                  )),
+              _AddAccountButton(onTap: () => _showAddAccountDialog(context)),
             ],
           ),
-          loading: () => const CircularProgressIndicator(),
-          error: (err, stack) => Text('Error loading accounts: $err'),
         ),
-        const SizedBox(height: 16),
-        Center(
-          child: FilledButton.tonalIcon(
-            onPressed: () => _showAddAccountDialog(context),
-            icon: const Icon(Icons.add),
-            label: const Text('Add Account or Endpoint'),
+        const Divider(height: 32),
+        if (selected != null) ...[
+          _buildSelectedHeader(context, selected),
+          const SizedBox(height: 16),
+          UserDetailsView(account: selected),
+          const SizedBox(height: 24),
+          Center(
+            child: TextButton.icon(
+              onPressed: () => _confirmDelete(context, ref, selected),
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              label: const Text('Remove this account',
+                  style: TextStyle(color: Colors.red)),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSelectedHeader(BuildContext context, Account account) {
+    final isMisskey = account.platform == 'misskey';
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 30,
+          backgroundImage: account.avatarUrl != null
+              ? NetworkImage(account.avatarUrl!)
+              : null,
+          child: account.avatarUrl == null
+              ? const Icon(Icons.person, size: 30)
+              : null,
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                account.username ?? 'Unknown',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              Row(
+                children: [
+                  Image.asset(
+                    isMisskey ? 'assets/icons/misskey.png' : 'assets/icons/flarum.png',
+                    width: 16,
+                    height: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${isMisskey ? "Misskey" : "Flarum"} @ ${account.host}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  /// 显示添加账户或端点的对话框
   void _showAddAccountDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => const AddAccountDialog(),
     );
   }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, Account account) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Account'),
+        content: Text('Are you sure you want to remove ${account.username}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(authServiceProvider.notifier).removeAccount(account.id);
+              Navigator.pop(context);
+            },
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-/// 单个账户卡片组件
-///
-/// 显示单个关联账户的信息，包括头像、用户名、平台和主机地址，
-/// 并提供删除账户的功能。
-class _AccountCard extends ConsumerWidget {
-  /// 账户信息
+class _AccountAvatarItem extends StatelessWidget {
   final Account account;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  /// 创建一个新的_AccountCard实例
-  ///
-  /// [account] - 要显示的账户信息
-  const _AccountCard({required this.account});
+  const _AccountAvatarItem({
+    required this.account,
+    required this.isSelected,
+    required this.onTap,
+  });
 
-  /// 构建单个账户卡片的UI界面
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [ref] - Riverpod的WidgetRef，用于访问和监听状态
-  ///
-  /// 返回一个包含账户信息和删除按钮的Card组件
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isMisskey = account.platform == 'misskey';
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(32),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: CircleAvatar(
+            radius: 24,
+            backgroundImage: account.avatarUrl != null
+                ? NetworkImage(account.avatarUrl!)
+                : null,
+            child: account.avatarUrl == null
+                ? Text(account.username?[0].toUpperCase() ?? '?')
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isMisskey
-              ? Colors.green.shade100
-              : Colors.orange.shade100,
-          backgroundImage: account.avatarUrl != null
-              ? NetworkImage(account.avatarUrl!)
-              : null,
-          child: account.avatarUrl == null
-              ? Icon(
-                  isMisskey ? Icons.public : Icons.forum,
-                  color: isMisskey ? Colors.green : Colors.deepOrange,
-                )
-              : null,
+class _AddAccountButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AddAccountButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(32),
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
         ),
-        title: Text(account.username ?? 'Unknown'),
-        subtitle: Text('${account.platform} @ ${account.host}'),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: () {
-            ref.read(authServiceProvider.notifier).removeAccount(account.id);
-          },
-        ),
+        child: const Icon(Icons.add),
       ),
     );
   }

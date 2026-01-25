@@ -20,7 +20,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   final _misskeyHostController = TextEditingController();
   final _flarumHostController = TextEditingController();
   final _flarumUsernameController = TextEditingController();
-  final _flarumTokenController = TextEditingController();
+  final _flarumPasswordController = TextEditingController();
   final _flarumEndpointController = TextEditingController();
 
   bool _loading = false;
@@ -30,7 +30,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     _misskeyHostController.dispose();
     _flarumHostController.dispose();
     _flarumUsernameController.dispose();
-    _flarumTokenController.dispose();
+    _flarumPasswordController.dispose();
     _flarumEndpointController.dispose();
     super.dispose();
   }
@@ -120,7 +120,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildOptionCard(
-          icon: Icons.public,
+          icon: Image.asset('assets/icons/misskey.png', width: 24, height: 24),
           title: 'Log in with Misskey',
           subtitle: 'Connect using MiAuth',
           color: Colors.green,
@@ -128,7 +128,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         ),
         const SizedBox(height: 12),
         _buildOptionCard(
-          icon: Icons.forum,
+          icon: Image.asset('assets/icons/flarum.png', width: 24, height: 24),
           title: 'Log in with Flarum',
           subtitle: 'Connect using API Token',
           color: Colors.deepOrange,
@@ -136,7 +136,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         ),
         const SizedBox(height: 12),
         _buildOptionCard(
-          icon: Icons.api,
+          icon: Icon(Icons.api, color: Colors.blue),
           title: 'Configure Flarum Endpoint',
           subtitle: 'Add a custom forum server',
           color: Colors.blue,
@@ -147,7 +147,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   }
 
   Widget _buildOptionCard({
-    required IconData icon,
+    required Widget icon,
     required String title,
     required String subtitle,
     required Color color,
@@ -175,7 +175,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                   color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color),
+                child: icon,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -249,22 +249,29 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         TextField(
           controller: _flarumUsernameController,
           decoration: const InputDecoration(
-            labelText: 'Username',
+            labelText: 'Username or Email',
             border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 12),
         TextField(
-          controller: _flarumTokenController,
+          controller: _flarumPasswordController,
           decoration: const InputDecoration(
-            labelText: 'Token',
+            labelText: 'Password',
             border: OutlineInputBorder(),
           ),
+          obscureText: true,
         ),
         const SizedBox(height: 24),
         FilledButton(
-          onPressed: _loading ? null : _linkFlarumAccount,
-          child: const Text('Add Account'),
+          onPressed: _loading ? null : _loginToFlarum,
+          child: _loading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Log in'),
         ),
       ],
     );
@@ -314,17 +321,22 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     }
   }
 
-  Future<void> _linkFlarumAccount() async {
+  Future<void> _loginToFlarum() async {
     final host = _flarumHostController.text.trim();
     final user = _flarumUsernameController.text.trim();
-    final token = _flarumTokenController.text.trim();
+    final password = _flarumPasswordController.text;
 
-    if (host.isEmpty || user.isEmpty || token.isEmpty) return;
+    if (host.isEmpty || user.isEmpty || password.isEmpty) return;
 
     setState(() => _loading = true);
     try {
-      await ref.read(authServiceProvider.notifier).linkFlarumAccount(host, token, user);
-      if (mounted) Navigator.pop(context);
+      await ref.read(authServiceProvider.notifier).loginToFlarum(host, user, password);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Flarum account linked successfully!')),
+        );
+        Navigator.pop(context);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -369,42 +381,84 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Waiting for Authorization'),
-        content: const Text(
-          'Please authorize the app in your browser, then click "Done".',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              try {
-                await ref
-                    .read(authServiceProvider.notifier)
-                    .checkMiAuth(host, session);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Misskey account linked successfully!'),
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed: $e')),
-                  );
-                }
-              }
-            },
-            child: const Text('Done'),
-          ),
-        ],
+      builder: (context) => _CheckAuthDialog(
+        host: host,
+        session: session,
       ),
+    );
+  }
+}
+
+class _CheckAuthDialog extends ConsumerStatefulWidget {
+  final String host;
+  final String session;
+
+  const _CheckAuthDialog({
+    required this.host,
+    required this.session,
+  });
+
+  @override
+  ConsumerState<_CheckAuthDialog> createState() => _CheckAuthDialogState();
+}
+
+class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
+  bool _loading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Waiting for Authorization'),
+      content: const Text(
+        'Please authorize the app in your browser, then click "Done".',
+      ),
+      actions: [
+        TextButton(
+          onPressed: _loading ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _loading
+              ? null
+              : () async {
+                  setState(() => _loading = true);
+                  try {
+                    await ref
+                        .read(authServiceProvider.notifier)
+                        .checkMiAuth(widget.host, widget.session);
+                    if (mounted) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Misskey account linked successfully!'),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      setState(() => _loading = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed: $e'),
+                          duration: const Duration(seconds: 5),
+                          action: SnackBarAction(
+                            label: 'Retry',
+                            onPressed: () {}, // User can just click Done again
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+          child: _loading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Done'),
+        ),
+      ],
     );
   }
 }

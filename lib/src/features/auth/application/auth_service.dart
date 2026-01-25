@@ -2,6 +2,7 @@
 //
 // 该文件包含AuthService类，负责处理认证流程，包括Misskey的MiAuth流程
 // 和Flarum的账户链接功能。
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,6 +10,7 @@ import 'package:dio/dio.dart';
 
 import '../data/auth_repository.dart';
 import '../domain/account.dart';
+import '../../../core/api/flarum_api.dart';
 
 part 'auth_service.g.dart';
 
@@ -58,68 +60,107 @@ class AuthService extends _$AuthService {
   ///
   /// 成功时保存账户信息并刷新状态，失败时抛出异常
   Future<void> checkMiAuth(String host, String session) async {
-    final dio = Dio(); // 生产环境中应使用适当的Dio提供者
+    // 稍微等待，确保服务器已经处理了授权
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://$host',
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {'User-Agent': 'CyaniTalk/1.0.0'},
+      ),
+    );
+
     try {
-      final response = await dio.post(
-        'https://$host/api/miauth/$session/check',
-      );
+      final response = await dio.post('/api/miauth/$session/check');
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        if (data['ok'] == true) {
-          final token = data['token'];
-          final user = data['user'];
+      final data = response.data;
+      if (data is Map && data['ok'] == true) {
+        final token = data['token'];
+        final user = data['user'];
 
-          final account = Account(
-            id: '${user['id']}@$host', // 复合ID
-            platform: 'misskey',
-            host: host,
-            username: user['username'],
-            avatarUrl: user['avatarUrl'],
-            token: token,
-          );
-
-          await ref.read(authRepositoryProvider).saveAccount(account);
-
-          // 刷新状态
-          ref.invalidateSelf();
-        } else {
-          throw Exception('MiAuth检查失败: 未授予令牌');
+        if (token == null || user == null) {
+          throw Exception('MiAuth响应缺少必要字段 (token或user)');
         }
+
+        final account = Account(
+          id: '${user['id']}@$host', // 复合ID
+          platform: 'misskey',
+          host: host,
+          username: user['username'],
+          avatarUrl: user['avatarUrl'],
+          token: token,
+        );
+
+        await ref.read(authRepositoryProvider).saveAccount(account);
+
+        // 刷新状态
+        ref.invalidateSelf();
       } else {
-        throw Exception('MiAuth检查失败: ${response.statusCode}');
+        final errorMsg = data is Map ? data['error'] ?? '未授予令牌' : '响应格式错误';
+        throw Exception('MiAuth检查失败: $errorMsg (Data: $data)');
       }
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      final responseData = e.response?.data;
+      throw Exception(
+        '检查MiAuth失败 (HTTP $statusCode): ${e.message} \nResponse: $responseData',
+      );
     } catch (e) {
-      throw Exception('检查MiAuth失败: $e');
+      throw Exception('检查MiAuth时发生意外错误: $e');
     }
   }
 
-  /// 链接Flarum账户
+  /// 登录 Flarum 账户
   ///
-  /// [host] - Flarum实例的主机地址
-  /// [token] - Flarum访问令牌
-  /// [username] - Flarum用户名
+  /// [host] - Flarum 实例的主机地址
+  /// [identification] - 用户名或电子邮箱
+  /// [password] - 密码
   ///
-  /// 目前信任用户输入，实际应用中应通过API调用验证令牌
-  Future<void> linkFlarumAccount(
+  /// 验证成功后保存账户信息并刷新状态
+  Future<void> loginToFlarum(
     String host,
-    String token,
-    String username,
+    String identification,
+    String password,
   ) async {
-    // 目前根据"结构优先"的要求信任用户输入
-    // 实际应用中，我们应该通过API调用（如/api/users）验证令牌
+    final api = FlarumApi();
+    final originalBaseUrl = api.baseUrl;
 
-    final account = Account(
-      id: '$username@$host',
-      platform: 'flarum',
-      host: host,
-      username: username,
-      avatarUrl: null, // 占位符
-      token: token,
-    );
+    try {
+      // 临时设置 BaseUrl 进行登录验证
+      api.setBaseUrl('https://$host');
+      final loginData = await api.login(identification, password);
 
-    await ref.read(authRepositoryProvider).saveAccount(account);
-    ref.invalidateSelf();
+      final token = loginData['token'];
+      final userId = loginData['userId'].toString();
+
+      // 获取用户信息以填充头像和准确的用户名（可选，但推荐）
+      // 这里暂时使用登录时提供的标识符，如果有 userId 可以后续通过 API 获取详细资料
+
+      final account = Account(
+        id: '$userId@$host',
+        platform: 'flarum',
+        host: host,
+        username: identification,
+        avatarUrl: null, // 如果需要，可以进一步调用 API 获取
+        token: token,
+      );
+
+      await ref.read(authRepositoryProvider).saveAccount(account);
+
+      // 保存到 FlarumApi 的持久化存储中
+      await api.saveEndpoint('https://$host');
+      await api.saveToken('https://$host', token);
+
+      ref.invalidateSelf();
+    } catch (e) {
+      // 还原 BaseUrl
+      if (originalBaseUrl != null) {
+        api.setBaseUrl(originalBaseUrl);
+      }
+      throw Exception('Flarum 登录失败: $e');
+    }
   }
 
   /// 删除指定ID的账户
@@ -132,3 +173,12 @@ class AuthService extends _$AuthService {
     ref.invalidateSelf();
   }
 }
+
+/// 提供当前选中的账户，默认为第一个可用账户
+final selectedAccountProvider = StateProvider<Account?>((ref) {
+  final accountsAsync = ref.watch(authServiceProvider);
+  return accountsAsync.maybeWhen(
+    data: (accounts) => accounts.isNotEmpty ? accounts.first : null,
+    orElse: () => null,
+  );
+});

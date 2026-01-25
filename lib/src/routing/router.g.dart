@@ -8,13 +8,38 @@ part of 'router.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 提供应用程序的GoRouter实例
+///
+/// 定义了应用程序的所有路由配置，包括初始位置和各个页面的路由路径。
+/// 使用StatefulShellRoute实现底部导航栏的状态保持。
+///
+/// [ref] - Riverpod的Ref，用于访问和监听状态
+///
+/// 返回配置好的GoRouter实例
 
 @ProviderFor(goRouter)
 final goRouterProvider = GoRouterProvider._();
 
+/// 提供应用程序的GoRouter实例
+///
+/// 定义了应用程序的所有路由配置，包括初始位置和各个页面的路由路径。
+/// 使用StatefulShellRoute实现底部导航栏的状态保持。
+///
+/// [ref] - Riverpod的Ref，用于访问和监听状态
+///
+/// 返回配置好的GoRouter实例
+
 final class GoRouterProvider
     extends $FunctionalProvider<GoRouter, GoRouter, GoRouter>
     with $Provider<GoRouter> {
+  /// 提供应用程序的GoRouter实例
+  ///
+  /// 定义了应用程序的所有路由配置，包括初始位置和各个页面的路由路径。
+  /// 使用StatefulShellRoute实现底部导航栏的状态保持。
+  ///
+  /// [ref] - Riverpod的Ref，用于访问和监听状态
+  ///
+  /// 返回配置好的GoRouter实例
   GoRouterProvider._()
     : super(
         from: null,
@@ -48,4 +73,4 @@ final class GoRouterProvider
   }
 }
 
-String _$goRouterHash() => r'ad568331edcf37d253aa47b7c20347a322e1b220';
+String _$goRouterHash() => r'299f2b7f047f64795602b6bc9d82a32a9ca63b75';

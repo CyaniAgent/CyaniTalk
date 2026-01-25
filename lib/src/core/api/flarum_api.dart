@@ -296,6 +296,62 @@ class FlarumApi {
     setBaseUrl('https://flarum.imikufans.cn');
   }
 
+  /// 使用用户名/邮箱和密码登录 Flarum
+  ///
+  /// [identification] - 用户名或邮箱
+  /// [password] - 密码
+  ///
+  /// 成功时返回包含 token 和 userId 的 Map
+  Future<Map<String, dynamic>> login(
+    String identification,
+    String password,
+  ) async {
+    try {
+      final response = await post(
+        '/api/token',
+        data: {
+          'identification': identification,
+          'password': password,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map && data.containsKey('token')) {
+          final token = data['token'];
+          setToken(token);
+          return Map<String, dynamic>.from(data);
+        }
+      }
+      throw Exception('Login failed: ${response.statusCode}');
+    } catch (e) {
+      if (e is DioException) {
+        final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
+        throw Exception('Flarum login error: $msg');
+      }
+      rethrow;
+    }
+  }
+
+  /// 获取 Flarum 用户详细资料
+  ///
+  /// [userId] - 用户 ID
+  Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    try {
+      final response = await get('/api/users/$userId');
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(response.data);
+      }
+      throw Exception('Failed to fetch user profile: ${response.statusCode}');
+    } catch (e) {
+      if (e is DioException) {
+        final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
+        throw Exception('Flarum fetch profile error: $msg');
+      }
+      rethrow;
+    }
+  }
+
   Future<Response> get(
     String path, {
     Map<String, dynamic>? queryParameters,

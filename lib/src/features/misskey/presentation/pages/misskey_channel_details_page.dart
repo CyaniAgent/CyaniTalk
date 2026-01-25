@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
+import 'package:cyanitalk/src/features/misskey/domain/channel.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
 
-/// Misskey 笔记页面组件
-/// 
-/// 这里展示全域时间线（Global Timeline）作为探索发现页面。
-class MisskeyNotesPage extends ConsumerStatefulWidget {
-  const MisskeyNotesPage({super.key});
+class MisskeyChannelDetailsPage extends ConsumerStatefulWidget {
+  final Channel channel;
+
+  const MisskeyChannelDetailsPage({super.key, required this.channel});
 
   @override
-  ConsumerState<MisskeyNotesPage> createState() => _MisskeyNotesPageState();
+  ConsumerState<MisskeyChannelDetailsPage> createState() => _MisskeyChannelDetailsPageState();
 }
 
-class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
+class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetailsPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -30,23 +30,26 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      ref.read(misskeyTimelineProvider('Global').notifier).loadMore();
+      ref.read(misskeyChannelTimelineProvider(widget.channel.id).notifier).loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final timelineAsync = ref.watch(misskeyTimelineProvider('Global'));
+    final timelineAsync = ref.watch(misskeyChannelTimelineProvider(widget.channel.id));
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.channel.name),
+      ),
       body: timelineAsync.when(
         data: (notes) {
           if (notes.isEmpty) {
-            return const Center(child: Text('No notes found in Global timeline'));
+            return const Center(child: Text('No notes in this channel'));
           }
           return RefreshIndicator(
             onRefresh: () => ref
-                .read(misskeyTimelineProvider('Global').notifier)
+                .read(misskeyChannelTimelineProvider(widget.channel.id).notifier)
                 .refresh(),
             child: ListView.builder(
               controller: _scrollController,

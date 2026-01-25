@@ -8,9 +8,16 @@ part of 'auth_repository.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 提供FlutterSecureStorage实例的Riverpod提供者
+///
+/// 该提供者创建并返回一个FlutterSecureStorage实例，用于安全存储数据。
 
 @ProviderFor(secureStorage)
 final secureStorageProvider = SecureStorageProvider._();
+
+/// 提供FlutterSecureStorage实例的Riverpod提供者
+///
+/// 该提供者创建并返回一个FlutterSecureStorage实例，用于安全存储数据。
 
 final class SecureStorageProvider
     extends
@@ -20,6 +27,9 @@ final class SecureStorageProvider
           FlutterSecureStorage
         >
     with $Provider<FlutterSecureStorage> {
+  /// 提供FlutterSecureStorage实例的Riverpod提供者
+  ///
+  /// 该提供者创建并返回一个FlutterSecureStorage实例，用于安全存储数据。
   SecureStorageProvider._()
     : super(
         from: null,
@@ -54,14 +64,25 @@ final class SecureStorageProvider
   }
 }
 
-String _$secureStorageHash() => r'1803ee54eebc4038de1cd19ff9f0850676721a7f';
+String _$secureStorageHash() => r'a4f75721472cf77465bf47f759c90de5ca30856e';
+
+/// 提供AuthRepository实例的Riverpod提供者
+///
+/// 该提供者创建并返回一个AuthRepository实例，用于处理账户信息的存储和检索。
 
 @ProviderFor(authRepository)
 final authRepositoryProvider = AuthRepositoryProvider._();
 
+/// 提供AuthRepository实例的Riverpod提供者
+///
+/// 该提供者创建并返回一个AuthRepository实例，用于处理账户信息的存储和检索。
+
 final class AuthRepositoryProvider
     extends $FunctionalProvider<AuthRepository, AuthRepository, AuthRepository>
     with $Provider<AuthRepository> {
+  /// 提供AuthRepository实例的Riverpod提供者
+  ///
+  /// 该提供者创建并返回一个AuthRepository实例，用于处理账户信息的存储和检索。
   AuthRepositoryProvider._()
     : super(
         from: null,
@@ -95,4 +116,4 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'5b9cf0041f7cff1020a3db62d3f0c2253d3bd449';
+String _$authRepositoryHash() => r'd0914b479f5647ec971241863e2451ee94c5bf63';
