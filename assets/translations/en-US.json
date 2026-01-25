@@ -51,6 +51,8 @@
   "misskey_page_follow_requests": "Follow Requests",
   "misskey_page_announcements": "Announcements",
   "misskey_page_please_login": "Please login to a Misskey instance first",
+  "misskey_page_no_account_title": "Oops, you haven't connected to any Misskey instance yet!",
+  "misskey_page_no_account_subtitle": "Please log in to a Misskey instance first.",
   "misskey_page_widgets": "Widgets",
   "misskey_page_misskey_widgets_opened": "Misskey Widgets opened",
   "misskey_page_global_search": "Global Search",

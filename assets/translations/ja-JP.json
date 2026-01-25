@@ -51,6 +51,8 @@
   "misskey_page_follow_requests": "フォローリクエスト",
   "misskey_page_announcements": "お知らせ",
   "misskey_page_please_login": "まずMisskeyインスタンスにログインしてください",
+  "misskey_page_no_account_title": "おっと、まだ Misskey インスタンスに接続されていません！",
+  "misskey_page_no_account_subtitle": "まず Misskey インスタンスにログインしてください。",
   "misskey_page_widgets": "ウィジェット",
   "misskey_page_misskey_widgets_opened": "Misskeyウィジェットを開きました",
   "misskey_page_global_search": "グローバル検索",

@@ -77,6 +77,8 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   /// 返回包含侧边栏、顶部导航栏和内容区域的Scaffold组件
   @override
   Widget build(BuildContext context) {
+    final selectedAccountAsync = ref.watch(selectedMisskeyAccountProvider);
+
     return Scaffold(
       drawer: MisskeyDrawer(
         selectedIndex: _selectedIndex,
@@ -102,11 +104,15 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               builder: (context) => const MisskeyPostPage(),
             );
           } else {
-            // 未登录，播放提示音并跳转到登录页面
+            // 未登录，根据当前语言播放提示音并跳转到登录页面
             try {
-              await _audioPlayer.play(
-                AssetSource('sounds/SpeechNoti/PleaseLogin-default.wav'),
-              );
+              final String soundPath = switch (context.locale.languageCode) {
+                'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
+                'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
+                'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
+                _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
+              };
+              await _audioPlayer.play(AssetSource(soundPath));
             } catch (e) {
               debugPrint('Error playing sound: $e');
             }
@@ -162,29 +168,78 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
             ),
           ];
         },
-        body: AnimatedSwitcher(
-          duration: 400.ms,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.05, 0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: ScaleTransition(
-                  scale: Tween<double>(
-                    begin: 0.95,
-                    end: 1.0,
-                  ).animate(animation),
-                  child: child,
-                ),
-              ),
+        body: selectedAccountAsync.when(
+          data: (account) {
+            if (account == null) {
+              return _buildNoAccountState(context);
+            }
+            return AnimatedSwitcher(
+              duration: 400.ms,
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.05, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: ScaleTransition(
+                      scale: Tween<double>(
+                        begin: 0.95,
+                        end: 1.0,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: _pages[_selectedIndex],
             );
           },
-          child: _pages[_selectedIndex],
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text('Error: $err')),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoAccountState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.account_circle_outlined,
+              size: 80,
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ).animate().scale(delay: 200.ms).fadeIn(),
+            const SizedBox(height: 24),
+            Text(
+              'misskey_page_no_account_title'.tr(),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ).animate().slideY(begin: 0.2, curve: Curves.easeOutQuad).fadeIn(),
+            const SizedBox(height: 12),
+            Text(
+              'misskey_page_no_account_subtitle'.tr(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+              textAlign: TextAlign.center,
+            ).animate().slideY(begin: 0.3, curve: Curves.easeOutQuad).fadeIn(),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () => context.go('/profile'),
+              icon: const Icon(Icons.login),
+              label: const Text('Login Now'),
+            ).animate().scale(delay: 400.ms).fadeIn(),
+          ],
         ),
       ),
     );
