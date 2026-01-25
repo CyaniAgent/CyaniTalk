@@ -65,36 +65,24 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             child: SegmentedButton<String>(
               segments: [
                 ButtonSegment<String>(
-<<<<<<< HEAD
                   value: 'Global',
-                  label: Text('Global'),
-                  icon: Icon(Icons.public),
-=======
-                  value: 'Home',
-                  label: Text('timeline_home'.tr()),
-                  icon: Icon(Icons.home_outlined),
->>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
+                  label: Text('timeline_global'.tr()),
+                  icon: const Icon(Icons.public),
                 ),
                 ButtonSegment<String>(
                   value: 'Local',
                   label: Text('timeline_local'.tr()),
-                  icon: Icon(Icons.location_city),
+                  icon: const Icon(Icons.location_city),
                 ),
                 ButtonSegment<String>(
                   value: 'Social',
                   label: Text('timeline_social'.tr()),
-                  icon: Icon(Icons.group_outlined),
+                  icon: const Icon(Icons.group_outlined),
                 ),
                 ButtonSegment<String>(
-<<<<<<< HEAD
                   value: 'Home',
-                  label: Text('Home'),
-                  icon: Icon(Icons.home_outlined),
-=======
-                  value: 'Global',
-                  label: Text('timeline_global'.tr()),
-                  icon: Icon(Icons.public),
->>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
+                  label: Text('timeline_home'.tr()),
+                  icon: const Icon(Icons.home_outlined),
                 ),
               ],
               selected: _selectedTimeline,
@@ -134,7 +122,6 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) => Center(
-<<<<<<< HEAD
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -152,21 +139,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                         onPressed: () => ref
                             .read(misskeyTimelineProvider(timelineType).notifier)
                             .refresh(),
-                        child: const Text('Retry'),
+                        child: Text('timeline_retry'.tr()),
                       ),
                     ],
-=======
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: $err'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => ref
-                        .read(misskeyTimelineProvider(timelineType).notifier)
-                        .refresh(),
-                    child: Text('timeline_retry'.tr()),
->>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
                   ),
                 ),
               ),

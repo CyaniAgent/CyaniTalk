@@ -44,7 +44,6 @@ class MisskeyRepository {
 }
 
 @riverpod
-<<<<<<< HEAD
 MisskeyRepository misskeyRepository(Ref ref) {
   final accountAsync = ref.watch(selectedMisskeyAccountProvider);
   final account = accountAsync.asData?.value;
@@ -54,24 +53,4 @@ MisskeyRepository misskeyRepository(Ref ref) {
   }
   final api = MisskeyApi(host: account.host, token: account.token);
   return MisskeyRepository(api);
-=======
-MisskeyRepository? misskeyRepository(Ref ref) {
-  final accountsAsync = ref.watch(authServiceProvider);
-  
-  return accountsAsync.maybeWhen(
-    data: (accounts) {
-      final misskeyAccount = accounts.where(
-        (acc) => acc.platform == 'misskey',
-      ).firstOrNull;
-      
-      if (misskeyAccount == null) {
-        return null;
-      }
-      
-      final api = MisskeyApi(host: misskeyAccount.host, token: misskeyAccount.token);
-      return MisskeyRepository(api);
-    },
-    orElse: () => null,
-  );
->>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
 }
