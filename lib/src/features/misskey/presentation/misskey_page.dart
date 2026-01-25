@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/services/search/global_search_delegate.dart';
 import '../../auth/application/auth_service.dart';
 import 'widgets/misskey_drawer.dart';
@@ -37,7 +38,7 @@ class MisskeyPage extends ConsumerStatefulWidget {
 class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   /// 当前选中的页面索引
   int _selectedIndex = 0;
-  
+
   /// 音频播放器实例
   final AudioPlayer _audioPlayer = AudioPlayer();
 
@@ -59,14 +60,14 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   ];
 
   /// 对应页面的标题列表
-  final List<String> _titles = const [
-    'Timeline',
-    'Notes',
-    'Antennas',
-    'Channels',
-    'Explore',
-    'Follow Requests',
-    'Announcements',
+  final List<String> _titles = [
+    'misskey_page_timeline'.tr(),
+    'misskey_page_notes'.tr(),
+    'misskey_page_antennas'.tr(),
+    'misskey_page_channels'.tr(),
+    'misskey_page_explore'.tr(),
+    'misskey_page_follow_requests'.tr(),
+    'misskey_page_announcements'.tr(),
   ];
 
   /// 构建Misskey主页面的UI界面
@@ -103,15 +104,17 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
           } else {
             // 未登录，播放提示音并跳转到登录页面
             try {
-              await _audioPlayer.play(AssetSource('sounds/SpeechNoti/PleaseLogin-default.wav'));
+              await _audioPlayer.play(
+                AssetSource('sounds/SpeechNoti/PleaseLogin-default.wav'),
+              );
             } catch (e) {
               debugPrint('Error playing sound: $e');
             }
-            
+
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Please login to a Misskey instance first'),
+                SnackBar(
+                  content: Text('misskey_page_please_login'.tr()),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -134,16 +137,20 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.widgets_outlined),
-                  tooltip: 'Widgets',
+                  tooltip: 'misskey_page_widgets'.tr(),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Misskey Widgets opened')),
+                      SnackBar(
+                        content: Text(
+                          'misskey_page_misskey_widgets_opened'.tr(),
+                        ),
+                      ),
                     );
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.search),
-                  tooltip: 'Global Search',
+                  tooltip: 'misskey_page_global_search'.tr(),
                   onPressed: () {
                     showSearch(
                       context: context,
@@ -168,7 +175,10 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                   end: Offset.zero,
                 ).animate(animation),
                 child: ScaleTransition(
-                  scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                  scale: Tween<double>(
+                    begin: 0.95,
+                    end: 1.0,
+                  ).animate(animation),
                   child: child,
                 ),
               ),

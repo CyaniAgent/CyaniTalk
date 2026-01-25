@@ -10,6 +10,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   @override
   FutureOr<List<Note>> build(String type) async {
     final repository = ref.watch(misskeyRepositoryProvider);
+    if (repository == null) {
+      return [];
+    }
     return repository.getTimeline(type);
   }
 
@@ -17,6 +20,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
+      if (repository == null) {
+        return [];
+      }
       return repository.getTimeline(type);
     });
   }
@@ -31,6 +37,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
+      if (repository == null) {
+        return currentNotes;
+      }
       final newNotes = await repository.getTimeline(type, untilId: lastId);
       return [...currentNotes, ...newNotes];
     });
@@ -42,6 +51,9 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
   @override
   FutureOr<List<Channel>> build() async {
     final repository = ref.watch(misskeyRepositoryProvider);
+    if (repository == null) {
+      return [];
+    }
     return repository.getChannels();
   }
 
@@ -49,6 +61,9 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
+      if (repository == null) {
+        return [];
+      }
       return repository.getChannels();
     });
   }
@@ -59,6 +74,9 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
   @override
   FutureOr<List<Note>> build(String channelId) async {
     final repository = ref.watch(misskeyRepositoryProvider);
+    if (repository == null) {
+      return [];
+    }
     return repository.getChannelTimeline(channelId);
   }
 
@@ -66,6 +84,9 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
+      if (repository == null) {
+        return [];
+      }
       return repository.getChannelTimeline(channelId);
     });
   }
@@ -80,6 +101,9 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
+      if (repository == null) {
+        return currentNotes;
+      }
       final newNotes = await repository.getChannelTimeline(channelId, untilId: lastId);
       return [...currentNotes, ...newNotes];
     });

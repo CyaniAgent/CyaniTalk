@@ -68,13 +68,13 @@ class GlobalSearchService {
     results.add(SearchResult(
       title: 'Note containing "$query"',
       subtitle: '@user: This is a misskey note about $query...',
-      source: 'Misskey',
+      source: 'misskey',
       type: 'Note',
     ));
     results.add(SearchResult(
       title: 'User $query',
       subtitle: '@$query@misskey.io',
-      source: 'Misskey',
+      source: 'misskey',
       type: 'User',
     ));
 
@@ -82,13 +82,13 @@ class GlobalSearchService {
     results.add(SearchResult(
       title: 'Discussion about "$query"',
       subtitle: 'Latest reply in General tag',
-      source: 'Flarum',
+      source: 'flarum',
       type: 'Discussion',
     ));
     results.add(SearchResult(
       title: '#$query',
       subtitle: 'Flarum Tag',
-      source: 'Flarum',
+      source: 'flarum',
       type: 'Tag',
     ));
 

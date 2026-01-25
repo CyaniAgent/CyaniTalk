@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FlarumDrawer extends StatelessWidget {
   final int selectedIndex;
@@ -18,28 +19,28 @@ class FlarumDrawer extends StatelessWidget {
         onDestinationSelected(index);
         Navigator.pop(context);
       },
-      children: const [
+      children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(28, 16, 16, 10),
+          padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
           child: Text(
-            'Flarum Menu',
-            style: TextStyle(fontWeight: FontWeight.bold),
+            'flarum_drawer_menu_title'.tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         NavigationDrawerDestination(
-          icon: Icon(Icons.forum_outlined),
-          selectedIcon: Icon(Icons.forum),
-          label: Text('Discussions'),
+          icon: const Icon(Icons.forum_outlined),
+          selectedIcon: const Icon(Icons.forum),
+          label: Text('flarum_drawer_discussions'.tr()),
         ),
         NavigationDrawerDestination(
-          icon: Icon(Icons.label_outlined),
-          selectedIcon: Icon(Icons.label),
-          label: Text('Tags'),
+          icon: const Icon(Icons.label_outlined),
+          selectedIcon: const Icon(Icons.label),
+          label: Text('flarum_drawer_tags'.tr()),
         ),
         NavigationDrawerDestination(
-          icon: Icon(Icons.notifications_outlined),
-          selectedIcon: Icon(Icons.notifications),
-          label: Text('Notifications'),
+          icon: const Icon(Icons.notifications_outlined),
+          selectedIcon: const Icon(Icons.notifications),
+          label: Text('flarum_drawer_notifications'.tr()),
         ),
       ],
     );

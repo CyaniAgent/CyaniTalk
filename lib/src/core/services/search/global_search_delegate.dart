@@ -3,6 +3,7 @@
 // 该文件包含GlobalSearchDelegate类，用于处理应用程序的全局搜索功能，
 // 负责构建搜索界面、处理搜索操作和显示搜索结果。
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'global_search_service.dart';
 
 /// 全局搜索代理
@@ -62,7 +63,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No results found.'));
+          return Center(child: Text('search_no_results'.tr()));
         }
 
         final results = snapshot.data!;
@@ -70,13 +71,14 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
           itemCount: results.length,
           itemBuilder: (context, index) {
             final result = results[index];
+            final sourceText = result.source == 'misskey' ? 'search_source_misskey'.tr() : 'search_source_flarum'.tr();
             return ListTile(
               leading: Icon(
-                result.source == 'Misskey' ? Icons.public : Icons.forum,
-                color: result.source == 'Misskey' ? Colors.green : Colors.orange,
+                result.source == 'misskey' ? Icons.public : Icons.forum,
+                color: result.source == 'misskey' ? Colors.green : Colors.orange,
               ),
               title: Text(result.title),
-              subtitle: Text('${result.source} • ${result.type}\n${result.subtitle}'),
+              subtitle: Text('$sourceText • ${result.type}\n${result.subtitle}'),
               isThreeLine: true,
               onTap: () {
                 close(context, result);
@@ -97,7 +99,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
-      return const Center(child: Text('Enter a query to search across Misskey and Flarum'));
+      return Center(child: Text('search_enter_query'.tr()));
     }
     // 目前仅在搜索词为空时显示提示信息，未实现完整的搜索建议功能
     return Container();

@@ -52,7 +52,7 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'71cf6b45ea86c947b2c7a45adf10f4e489729519';
+    r'57f3f0436dd17aa2026f935f531188bdbb870dc6';
 
 final class MisskeyTimelineNotifierFamily extends $Family
     with
@@ -125,7 +125,7 @@ final class MisskeyChannelsNotifierProvider
 }
 
 String _$misskeyChannelsNotifierHash() =>
-    r'b20ed42812999e5bf102b020c75bcc173a05fe17';
+    r'a2e71845694e14c494d85fd7b11e9ba72ad7ea94';
 
 abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
   FutureOr<List<Channel>> build();
@@ -188,7 +188,7 @@ final class MisskeyChannelTimelineNotifierProvider
 }
 
 String _$misskeyChannelTimelineNotifierHash() =>
-    r'68bf05a52c5be8ed44a3c65068774e89f42f22b1';
+    r'47dd5fec4143914dddbf5010ea7e0b2bf54e9884';
 
 final class MisskeyChannelTimelineNotifierFamily extends $Family
     with

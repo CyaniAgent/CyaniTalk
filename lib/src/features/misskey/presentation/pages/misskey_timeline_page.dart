@@ -3,6 +3,7 @@
 // 该文件包含MisskeyTimelinePage组件，用于显示Misskey的不同类型时间线。
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
 
@@ -62,26 +63,38 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment<String>(
+<<<<<<< HEAD
                   value: 'Global',
                   label: Text('Global'),
                   icon: Icon(Icons.public),
+=======
+                  value: 'Home',
+                  label: Text('timeline_home'.tr()),
+                  icon: Icon(Icons.home_outlined),
+>>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
                 ),
                 ButtonSegment<String>(
                   value: 'Local',
-                  label: Text('Local'),
+                  label: Text('timeline_local'.tr()),
                   icon: Icon(Icons.location_city),
                 ),
                 ButtonSegment<String>(
                   value: 'Social',
-                  label: Text('Social'),
+                  label: Text('timeline_social'.tr()),
                   icon: Icon(Icons.group_outlined),
                 ),
                 ButtonSegment<String>(
+<<<<<<< HEAD
                   value: 'Home',
                   label: Text('Home'),
                   icon: Icon(Icons.home_outlined),
+=======
+                  value: 'Global',
+                  label: Text('timeline_global'.tr()),
+                  icon: Icon(Icons.public),
+>>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
                 ),
               ],
               selected: _selectedTimeline,
@@ -121,6 +134,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) => Center(
+<<<<<<< HEAD
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -141,6 +155,18 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                         child: const Text('Retry'),
                       ),
                     ],
+=======
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Error: $err'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref
+                        .read(misskeyTimelineProvider(timelineType).notifier)
+                        .refresh(),
+                    child: Text('timeline_retry'.tr()),
+>>>>>>> 261e8f5a782bb23e629bbff063be5bc20034fbcc
                   ),
                 ),
               ),
@@ -163,14 +189,14 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No notes found',
+            'timeline_no_notes_found'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Your ${_selectedTimeline.first} timeline is empty.',
+            'timeline_your_timeline_is_empty'.tr(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),

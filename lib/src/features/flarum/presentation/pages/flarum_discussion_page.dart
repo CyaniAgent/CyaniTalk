@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 class FlarumDiscussionPage extends StatelessWidget {
@@ -17,7 +18,7 @@ class FlarumDiscussionPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No discussions found',
+            'flarum_discussion_no_discussions'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: Theme.of(context).colorScheme.outline,
             ),

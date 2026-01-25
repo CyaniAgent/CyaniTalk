@@ -2,6 +2,7 @@
 //
 // 该文件包含SettingsPage组件，用于显示应用程序的设置选项。
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'about_page.dart';
 
 /// 应用程序设置页面组件
@@ -22,32 +23,39 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text('settings_title'.tr()),
       ),
       body: ListView(
         children: [
-          _buildSectionHeader(context, 'Account'),
-          _buildSettingsTile(context, Icons.person_outline, 'Account', 'Manage your accounts'),
+          _buildSectionHeader(context, 'settings_section_account'.tr()),
+          _buildSettingsTile(context, Icons.person_outline, 'settings_account_title'.tr(), 'settings_account_description'.tr()),
           
-          _buildSectionHeader(context, 'Connections'),
-          _buildSettingsTile(context, Icons.api, 'Flarum Endpoint', 'Configure Flarum server URL'),
-          _buildSettingsTile(context, Icons.wifi, 'Network & Real-time', 'WebSocket and API settings'),
+          _buildSectionHeader(context, 'settings_section_connections'.tr()),
+          _buildSettingsTile(context, Icons.api, 'settings_flarum_endpoint_title'.tr(), 'settings_flarum_endpoint_description'.tr()),
+          _buildSettingsTile(context, Icons.wifi, 'settings_network_title'.tr(), 'settings_network_description'.tr()),
 
-          _buildSectionHeader(context, 'Interface'),
-          _buildSettingsTile(context, Icons.palette_outlined, 'Appearance', 'Theme, colors, and layout'),
-          _buildSettingsTile(context, Icons.notifications_outlined, 'Notifications', 'Push and in-app alerts'),
-          _buildSettingsTile(context, Icons.volume_up_outlined, 'Sound', 'Volume and sound effects'),
+          _buildSectionHeader(context, 'settings_section_interface'.tr()),
+          _buildSettingsTile(context, Icons.palette_outlined, 'settings_appearance_title'.tr(), 'settings_appearance_description'.tr()),
+          _buildSettingsTile(
+            context,
+            Icons.language_outlined,
+            'settings_language_title'.tr(),
+            'settings_language_description'.tr(),
+            onTap: () => _showLanguageDialog(context),
+          ),
+          _buildSettingsTile(context, Icons.notifications_outlined, 'settings_notifications_title'.tr(), 'settings_notifications_description'.tr()),
+          _buildSettingsTile(context, Icons.volume_up_outlined, 'settings_sound_title'.tr(), 'settings_sound_description'.tr()),
 
-          _buildSectionHeader(context, 'System'),
-          _buildSettingsTile(context, Icons.history, 'Logs', 'View application logs'),
-          _buildSettingsTile(context, Icons.storage_outlined, 'Storage', 'Cache and data management'),
+          _buildSectionHeader(context, 'settings_section_system'.tr()),
+          _buildSettingsTile(context, Icons.history, 'settings_logs_title'.tr(), 'settings_logs_description'.tr()),
+          _buildSettingsTile(context, Icons.storage_outlined, 'settings_storage_title'.tr(), 'settings_storage_description'.tr()),
           
-          _buildSectionHeader(context, 'About'),
+          _buildSectionHeader(context, 'settings_section_about'.tr()),
           _buildSettingsTile(
             context,
             Icons.info_outline,
-            'About CyaniTalk',
-            'Version, licenses, and contributors',
+            'settings_about_title'.tr(),
+            'settings_about_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const AboutPage()),
@@ -100,9 +108,61 @@ class SettingsPage extends StatelessWidget {
       onTap: onTap ??
           () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Tapped $title')),
+              SnackBar(content: Text('settings_tapped'.tr(args: [title]))),
             );
           },
+    );
+  }
+
+  /// 显示语言选择对话框
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final currentLocale = context.locale;
+        
+        return AlertDialog(
+          title: Text('settings_language_select_title'.tr()),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<Locale>(
+                title: Text('settings_language_chinese'.tr()),
+                value: const Locale('zh', 'CN'),
+                groupValue: currentLocale,
+                onChanged: (value) {
+                  if (value != null) {
+                    context.setLocale(value);
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              RadioListTile<Locale>(
+                title: Text('settings_language_english'.tr()),
+                value: const Locale('en', 'US'),
+                groupValue: currentLocale,
+                onChanged: (value) {
+                  if (value != null) {
+                    context.setLocale(value);
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              RadioListTile<Locale>(
+                title: Text('settings_language_japanese'.tr()),
+                value: const Locale('ja', 'JP'),
+                groupValue: currentLocale,
+                onChanged: (value) {
+                  if (value != null) {
+                    context.setLocale(value);
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../auth/domain/account.dart';
 import '../../../../core/api/misskey_api.dart';
 import '../../../../core/api/flarum_api.dart';
@@ -40,10 +41,10 @@ class UserDetailsView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(context, 'Basic Information'),
+        _buildSectionTitle(context, 'user_details_basic_information'.tr()),
         _buildInfoCard(context, data),
         const SizedBox(height: 16),
-        _buildSectionTitle(context, 'Roles & Permissions'),
+        _buildSectionTitle(context, 'user_details_roles_permissions'.tr()),
         _buildRolesCard(context, data),
         const SizedBox(height: 16),
         _buildRawDataCard(context, data),
@@ -130,7 +131,7 @@ class UserDetailsView extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
         title: Text(
-          'Raw Data',
+          'user_details_raw_data'.tr(),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,

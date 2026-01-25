@@ -2,6 +2,7 @@
 //
 // 该文件包含MisskeyDrawer组件，用于显示Misskey功能模块的侧边栏导航菜单。
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Misskey功能模块的侧边栏导航组件
 ///
@@ -36,48 +37,48 @@ class MisskeyDrawer extends StatelessWidget {
         onDestinationSelected(index);
         Navigator.pop(context); // 关闭侧边栏
       },
-      children: const [
+      children: [
         Padding(
           padding: EdgeInsets.fromLTRB(28, 16, 16, 10),
           child: Text(
-            'Misskey Menu',
+            'misskey_drawer_misskey_menu'.tr(),
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.timeline_outlined),
           selectedIcon: Icon(Icons.timeline),
-          label: Text('Timeline'),
+          label: Text('misskey_drawer_timeline'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.note_outlined),
           selectedIcon: Icon(Icons.note),
-          label: Text('Notes'),
+          label: Text('misskey_drawer_notes'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.satellite_alt_outlined),
           selectedIcon: Icon(Icons.satellite_alt),
-          label: Text('Antennas'),
+          label: Text('misskey_drawer_antennas'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.hub_outlined),
           selectedIcon: Icon(Icons.hub),
-          label: Text('Channels'),
+          label: Text('misskey_drawer_channels'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.explore_outlined),
           selectedIcon: Icon(Icons.explore),
-          label: Text('Explore'),
+          label: Text('misskey_drawer_explore'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.person_add_outlined),
           selectedIcon: Icon(Icons.person_add),
-          label: Text('Follow Requests'),
+          label: Text('misskey_drawer_follow_requests'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.campaign_outlined),
           selectedIcon: Icon(Icons.campaign),
-          label: Text('Announcements'),
+          label: Text('misskey_drawer_announcements'.tr()),
         ),
       ],
     );

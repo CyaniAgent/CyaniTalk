@@ -2,6 +2,7 @@
 //
 // 该文件包含AboutPage组件，用于显示应用程序的关于信息，包括版本号、贡献者列表和GitHub链接。
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
@@ -112,7 +113,7 @@ class _AboutPageState extends State<AboutPage> {
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch GitHub URL')),
+          SnackBar(content: Text('about_github_launch_error'.tr())),
         );
       }
     }
@@ -126,7 +127,7 @@ class _AboutPageState extends State<AboutPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('About CyaniTalk')),
+      appBar: AppBar(title: Text('about_title'.tr())),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -159,7 +160,7 @@ class _AboutPageState extends State<AboutPage> {
             FilledButton.icon(
               onPressed: _launchGitHub,
               icon: const Icon(Icons.code),
-              label: const Text('GitHub'),
+              label: Text('about_github'.tr()),
             ),
             const SizedBox(height: 32),
             const Divider(),
@@ -170,7 +171,7 @@ class _AboutPageState extends State<AboutPage> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Contributors',
+                  'about_contributors'.tr(),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -185,9 +186,9 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               )
             else if (_contributors.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Text('No contributors found (or API limit reached).'),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text('about_no_contributors'.tr()),
               )
             else
               SizedBox(
@@ -227,7 +228,7 @@ class _AboutPageState extends State<AboutPage> {
             const SizedBox(height: 32),
             // Copyright
             Text(
-              '© 2026 CyaniAgent. All rights reserved.',
+              'about_copyright'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
