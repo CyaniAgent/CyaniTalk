@@ -18,6 +18,8 @@ class AuthRepository {
   
   /// 存储账户信息的密钥
   static const _kAccountsKey = 'cyani_accounts';
+  static const _kSelectedMisskeyIdKey = 'cyani_selected_misskey_id';
+  static const _kSelectedFlarumIdKey = 'cyani_selected_flarum_id';
 
   /// 创建一个新的AuthRepository实例
   ///
@@ -38,6 +40,22 @@ class AuthRepository {
       // 在数据损坏的情况下，返回空列表
       return [];
     }
+  }
+
+  Future<String?> getSelectedMisskeyId() async {
+    return await _storage.read(key: _kSelectedMisskeyIdKey);
+  }
+
+  Future<void> saveSelectedMisskeyId(String id) async {
+    await _storage.write(key: _kSelectedMisskeyIdKey, value: id);
+  }
+
+  Future<String?> getSelectedFlarumId() async {
+    return await _storage.read(key: _kSelectedFlarumIdKey);
+  }
+
+  Future<void> saveSelectedFlarumId(String id) async {
+    await _storage.write(key: _kSelectedFlarumIdKey, value: id);
   }
 
   /// 保存或更新账户

@@ -23,7 +23,7 @@ class MisskeyTimelinePage extends ConsumerStatefulWidget {
 /// MisskeyTimelinePage的状态管理类
 class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   /// 当前选中的时间线类型集合
-  Set<String> _selectedTimeline = {'Home'};
+  Set<String> _selectedTimeline = {'Global'};
   
   final ScrollController _scrollController = ScrollController();
 
@@ -64,9 +64,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             child: SegmentedButton<String>(
               segments: const [
                 ButtonSegment<String>(
-                  value: 'Home',
-                  label: Text('Home'),
-                  icon: Icon(Icons.home_outlined),
+                  value: 'Global',
+                  label: Text('Global'),
+                  icon: Icon(Icons.public),
                 ),
                 ButtonSegment<String>(
                   value: 'Local',
@@ -79,9 +79,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   icon: Icon(Icons.group_outlined),
                 ),
                 ButtonSegment<String>(
-                  value: 'Global',
-                  label: Text('Global'),
-                  icon: Icon(Icons.public),
+                  value: 'Home',
+                  label: Text('Home'),
+                  icon: Icon(Icons.home_outlined),
                 ),
               ],
               selected: _selectedTimeline,
@@ -108,7 +108,10 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   itemCount: notes.length + 1,
                   itemBuilder: (context, index) {
                     if (index < notes.length) {
-                      return NoteCard(note: notes[index]);
+                      return NoteCard(
+                        key: ValueKey(notes[index].id),
+                        note: notes[index],
+                      );
                     } else {
                       return _buildLoadMoreIndicator();
                     }
@@ -118,18 +121,28 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error: $err'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => ref
-                        .read(misskeyTimelineProvider(timelineType).notifier)
-                        .refresh(),
-                    child: const Text('Retry'),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error: $err',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => ref
+                            .read(misskeyTimelineProvider(timelineType).notifier)
+                            .refresh(),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

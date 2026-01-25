@@ -21,18 +21,19 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
   @override
   void build() {
     // Listen to account changes
-    ref.listen(selectedAccountProvider, (previous, next) {
-      if (next?.platform == 'misskey') {
-        _connect(next!);
-      } else {
-        _disconnect();
-      }
+    ref.listen(selectedMisskeyAccountProvider, (previous, next) {
+       final account = next.asData?.value;
+       if (account != null) {
+         _connect(account);
+       } else {
+         _disconnect();
+       }
     });
 
     // Initial connection check
-    final initialAccount = ref.read(selectedAccountProvider);
-    if (initialAccount?.platform == 'misskey') {
-      _connect(initialAccount!);
+    final initialAccount = ref.read(selectedMisskeyAccountProvider).asData?.value;
+    if (initialAccount != null) {
+      _connect(initialAccount);
     }
 
     ref.onDispose(() {

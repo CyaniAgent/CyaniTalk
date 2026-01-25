@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/note.dart';
+import '../../data/misskey_repository.dart';
 
-class NoteCard extends StatelessWidget {
+class NoteCard extends ConsumerWidget {
   final Note note;
 
   const NoteCard({super.key, required this.note});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = note.user;
     final text = note.text;
     final cw = note.cw;
@@ -88,7 +90,7 @@ class NoteCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     height: 200,
                     width: double.infinity,
                     child: const Center(child: Icon(Icons.image_outlined, size: 48)),
@@ -100,10 +102,30 @@ class NoteCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildAction(Icons.reply, note.repliesCount.toString()),
-                _buildAction(Icons.repeat, note.renoteCount.toString()),
-                _buildAction(Icons.add_reaction_outlined, note.reactions.length.toString()),
-                _buildAction(Icons.share_outlined, ""),
+                _buildAction(
+                  context,
+                  Icons.reply,
+                  note.repliesCount.toString(),
+                  () => _handleReply(context, ref),
+                ),
+                _buildAction(
+                  context,
+                  Icons.repeat,
+                  note.renoteCount.toString(),
+                  () => _handleRenote(context, ref),
+                ),
+                _buildAction(
+                  context,
+                  Icons.add_reaction_outlined,
+                  note.reactions.length.toString(),
+                  () => _handleReaction(context, ref),
+                ),
+                _buildAction(
+                  context,
+                  Icons.share_outlined,
+                  "",
+                  () => _handleShare(context),
+                ),
               ],
             ),
           ],
@@ -112,13 +134,22 @@ class NoteCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAction(IconData icon, String label) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
+  Widget _buildAction(BuildContext context, IconData icon, String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: Colors.grey),
+            if (label.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -128,5 +159,88 @@ class NoteCard extends StatelessWidget {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
     return '${diff.inDays}d';
+  }
+
+  Future<void> _handleRenote(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(misskeyRepositoryProvider).renote(note.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Renoted successfully!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to renote: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleReply(BuildContext context, WidgetRef ref) async {
+    final textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reply'),
+        content: TextField(
+          controller: textController,
+          decoration: const InputDecoration(hintText: 'What\'s on your mind?'),
+          maxLines: 3,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await ref.read(misskeyRepositoryProvider).reply(note.id, textController.text);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Reply sent!')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to reply: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Reply'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleReaction(BuildContext context, WidgetRef ref) async {
+     try {
+      // Default to heart for now
+      await ref.read(misskeyRepositoryProvider).addReaction(note.id, '❤️');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reaction added!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to react: $e')),
+        );
+      }
+    }
+  }
+
+  void _handleShare(BuildContext context) {
+    // Placeholder for share functionality
+     ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Share functionality coming soon!')),
+    );
   }
 }

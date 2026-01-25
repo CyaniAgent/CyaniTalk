@@ -8,21 +8,45 @@ import 'user_details_view.dart';
 /// 统一登录管理器组件
 ///
 /// 显示用户关联的账户列表，支持切换查看详细资料以及添加/删除账户。
-class AssociatedAccountsSection extends ConsumerWidget {
+class AssociatedAccountsSection extends ConsumerStatefulWidget {
   /// 创建一个新的AssociatedAccountsSection实例
   const AssociatedAccountsSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AssociatedAccountsSection> createState() => _AssociatedAccountsSectionState();
+}
+
+class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSection> {
+  Account? _focusedAccount;
+
+  @override
+  Widget build(BuildContext context) {
     final accountsAsync = ref.watch(authServiceProvider);
-    final selectedAccount = ref.watch(selectedAccountProvider);
+    final selectedMisskey = ref.watch(selectedMisskeyAccountProvider).asData?.value;
+    final selectedFlarum = ref.watch(selectedFlarumAccountProvider).asData?.value;
 
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
           return _buildEmptyState(context);
         }
-        return _buildManagerLayout(context, ref, accounts, selectedAccount);
+        
+        // Ensure focused account is valid
+        if (_focusedAccount == null || !accounts.contains(_focusedAccount)) {
+           // Default to one of the active accounts or the first one
+           _focusedAccount = selectedMisskey ?? selectedFlarum ?? accounts.first;
+        }
+        
+        // If the user just switched via some other means (unlikely here but good for consistency), 
+        // we could sync _focusedAccount, but local tap priority is better.
+
+        return _buildManagerLayout(
+          context, 
+          ref, 
+          accounts, 
+          selectedMisskey, 
+          selectedFlarum,
+        );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
@@ -57,7 +81,8 @@ class AssociatedAccountsSection extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     List<Account> accounts,
-    Account? selected,
+    Account? selectedMisskey,
+    Account? selectedFlarum,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,26 +92,44 @@ class AssociatedAccountsSection extends ConsumerWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              ...accounts.map((account) => _AccountAvatarItem(
+              ...accounts.map((account) {
+                 final isMisskeyActive = account.id == selectedMisskey?.id;
+                 final isFlarumActive = account.id == selectedFlarum?.id;
+                 final isActive = isMisskeyActive || isFlarumActive;
+                 final isFocused = account.id == _focusedAccount?.id;
+                 
+                 return _AccountAvatarItem(
                     account: account,
-                    isSelected: selected?.id == account.id,
-                    onTap: () => ref
-                        .read(selectedAccountProvider.notifier)
-                        .state = account,
-                  )),
+                    isActive: isActive,
+                    isFocused: isFocused,
+                    activeColor: isMisskeyActive 
+                        ? const Color(0xFF39C5BB) // Miku Green
+                        : (isFlarumActive ? Colors.orange : Colors.grey),
+                    onTap: () {
+                      setState(() {
+                        _focusedAccount = account;
+                      });
+                      if (account.platform == 'misskey') {
+                        ref.read(selectedMisskeyAccountProvider.notifier).select(account);
+                      } else if (account.platform == 'flarum') {
+                        ref.read(selectedFlarumAccountProvider.notifier).select(account);
+                      }
+                    },
+                  );
+              }),
               _AddAccountButton(onTap: () => _showAddAccountDialog(context)),
             ],
           ),
         ),
         const Divider(height: 32),
-        if (selected != null) ...[
-          _buildSelectedHeader(context, selected),
+        if (_focusedAccount != null) ...[
+          _buildSelectedHeader(context, _focusedAccount!),
           const SizedBox(height: 16),
-          UserDetailsView(account: selected),
+          UserDetailsView(account: _focusedAccount!),
           const SizedBox(height: 24),
           Center(
             child: TextButton.icon(
-              onPressed: () => _confirmDelete(context, ref, selected),
+              onPressed: () => _confirmDelete(context, ref, _focusedAccount!),
               icon: const Icon(Icons.delete_outline, color: Colors.red),
               label: const Text('Remove this account',
                   style: TextStyle(color: Colors.red)),
@@ -162,6 +205,9 @@ class AssociatedAccountsSection extends ConsumerWidget {
             onPressed: () {
               ref.read(authServiceProvider.notifier).removeAccount(account.id);
               Navigator.pop(context);
+              setState(() {
+                _focusedAccount = null; // Reset focus
+              });
             },
             child: const Text('Remove', style: TextStyle(color: Colors.red)),
           ),
@@ -173,12 +219,16 @@ class AssociatedAccountsSection extends ConsumerWidget {
 
 class _AccountAvatarItem extends StatelessWidget {
   final Account account;
-  final bool isSelected;
+  final bool isActive;
+  final bool isFocused;
+  final Color activeColor;
   final VoidCallback onTap;
 
   const _AccountAvatarItem({
     required this.account,
-    required this.isSelected,
+    required this.isActive,
+    required this.isFocused,
+    required this.activeColor,
     required this.onTap,
   });
 
@@ -194,11 +244,16 @@ class _AccountAvatarItem extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.transparent,
+              color: isActive ? activeColor : (isFocused ? Theme.of(context).colorScheme.primary : Colors.transparent),
               width: 2,
             ),
+            boxShadow: isActive ? [
+              BoxShadow(
+                color: activeColor.withValues(alpha: 0.3),
+                blurRadius: 4,
+                spreadRadius: 1,
+              )
+            ] : null,
           ),
           child: CircleAvatar(
             radius: 24,

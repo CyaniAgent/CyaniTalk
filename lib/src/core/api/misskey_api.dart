@@ -113,4 +113,58 @@ class MisskeyApi {
       rethrow;
     }
   }
+
+  Future<void> createNote({String? text, String? replyId, String? renoteId}) async {
+    try {
+      await _dio.post(
+        '/api/notes/create',
+        data: {
+          'i': token,
+          if (text != null) 'text': text,
+          if (replyId != null) 'replyId': replyId,
+          if (renoteId != null) 'renoteId': renoteId,
+        },
+      );
+    } catch (e) {
+      if (e is DioException) {
+        throw Exception('Misskey API error: ${e.message}');
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> createReaction(String noteId, String reaction) async {
+    try {
+      await _dio.post(
+        '/api/notes/reactions/create',
+        data: {
+          'i': token,
+          'noteId': noteId,
+          'reaction': reaction,
+        },
+      );
+    } catch (e) {
+      if (e is DioException) {
+        throw Exception('Misskey API error: ${e.message}');
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> deleteReaction(String noteId) async {
+    try {
+      await _dio.post(
+        '/api/notes/reactions/delete',
+        data: {
+          'i': token,
+          'noteId': noteId,
+        },
+      );
+    } catch (e) {
+      if (e is DioException) {
+        throw Exception('Misskey API error: ${e.message}');
+      }
+      rethrow;
+    }
+  }
 }

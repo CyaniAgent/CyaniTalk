@@ -32,14 +32,31 @@ class AuthService extends _$AuthService {
   }
 
   /// 启动Misskey的MiAuth认证流程
+
   ///
+
   /// [host] - Misskey实例的主机地址
+
   ///
+
   /// 返回会话ID，用于后续检查认证状态
+
   Future<String> startMiAuth(String host) async {
+    final accounts = await ref.read(authRepositoryProvider).getAccounts();
+
+    final misskeyAccounts = accounts
+        .where((a) => a.platform == 'misskey')
+        .length;
+
+    if (misskeyAccounts >= 10) {
+      throw Exception('You have reached the limit of 10 Misskey accounts.');
+    }
+
     final session = const Uuid().v4();
+
     final uri = Uri.https(host, '/miauth/$session', {
       'name': 'CyaniTalk',
+
       'permission':
           'read:account,write:notes,read:channels,write:channels,read:drive,write:drive,read:notifications,read:messaging,write:messaging', // 请求所需权限
       // 'callback': 'cyanitalk://callback', // 未来可能需要的深度链接
@@ -47,6 +64,7 @@ class AuthService extends _$AuthService {
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+
       return session;
     } else {
       throw Exception('无法启动MiAuth URL');
@@ -54,20 +72,30 @@ class AuthService extends _$AuthService {
   }
 
   /// 检查Misskey MiAuth认证状态
+
   ///
+
   /// [host] - Misskey实例的主机地址
+
   /// [session] - 认证会话ID
+
   ///
+
   /// 成功时保存账户信息并刷新状态，失败时抛出异常
+
   Future<void> checkMiAuth(String host, String session) async {
     // 稍微等待，确保服务器已经处理了授权
+
     await Future.delayed(const Duration(milliseconds: 500));
 
     final dio = Dio(
       BaseOptions(
         baseUrl: 'https://$host',
+
         connectTimeout: const Duration(seconds: 10),
+
         receiveTimeout: const Duration(seconds: 10),
+
         headers: {'User-Agent': 'CyaniTalk/1.0.0'},
       ),
     );
@@ -76,109 +104,265 @@ class AuthService extends _$AuthService {
       final response = await dio.post('/api/miauth/$session/check');
 
       final data = response.data;
+
       if (data is Map && data['ok'] == true) {
         final token = data['token'];
+
         final user = data['user'];
 
         if (token == null || user == null) {
           throw Exception('MiAuth响应缺少必要字段 (token或user)');
         }
 
+        final accountId = '${user['id']}@$host';
+
+        final repository = ref.read(authRepositoryProvider);
+
+        final accounts = await repository.getAccounts();
+
+        final existingAccount = accounts
+            .where((a) => a.id == accountId)
+            .firstOrNull;
+
+        if (existingAccount == null) {
+          final misskeyAccounts = accounts
+              .where((a) => a.platform == 'misskey')
+              .length;
+
+          if (misskeyAccounts >= 10) {
+            throw Exception(
+              'You have reached the limit of 10 Misskey accounts.',
+            );
+          }
+        }
+
         final account = Account(
-          id: '${user['id']}@$host', // 复合ID
+          id: accountId, // 复合ID
+
           platform: 'misskey',
+
           host: host,
+
           username: user['username'],
+
           avatarUrl: user['avatarUrl'],
+
           token: token,
         );
 
-        await ref.read(authRepositoryProvider).saveAccount(account);
+        await repository.saveAccount(account);
+
+        // Automatically select the new account
+
+        await ref.read(selectedMisskeyAccountProvider.notifier).select(account);
 
         // 刷新状态
+
         ref.invalidateSelf();
       } else {
         final errorMsg = data is Map ? data['error'] ?? '未授予令牌' : '响应格式错误';
+
         throw Exception('MiAuth检查失败: $errorMsg (Data: $data)');
       }
     } on DioException catch (e) {
       final statusCode = e.response?.statusCode;
+
       final responseData = e.response?.data;
+
       throw Exception(
         '检查MiAuth失败 (HTTP $statusCode): ${e.message} \nResponse: $responseData',
       );
     } catch (e) {
+      if (e.toString().contains('limit of 10')) rethrow;
+
       throw Exception('检查MiAuth时发生意外错误: $e');
     }
   }
 
   /// 登录 Flarum 账户
+
   ///
+
   /// [host] - Flarum 实例的主机地址
+
   /// [identification] - 用户名或电子邮箱
+
   /// [password] - 密码
+
   ///
+
   /// 验证成功后保存账户信息并刷新状态
+
   Future<void> loginToFlarum(
     String host,
+
     String identification,
+
     String password,
   ) async {
     final api = FlarumApi();
+
     final originalBaseUrl = api.baseUrl;
 
     try {
       // 临时设置 BaseUrl 进行登录验证
+
       api.setBaseUrl('https://$host');
+
       final loginData = await api.login(identification, password);
 
       final token = loginData['token'];
+
       final userId = loginData['userId'].toString();
 
       // 获取用户信息以填充头像和准确的用户名（可选，但推荐）
+
       // 这里暂时使用登录时提供的标识符，如果有 userId 可以后续通过 API 获取详细资料
 
+      final accountId = '$userId@$host';
+
+      final repository = ref.read(authRepositoryProvider);
+
+      final accounts = await repository.getAccounts();
+      final existingAccount = accounts
+          .where((a) => a.id == accountId)
+          .firstOrNull;
+
+      if (existingAccount == null) {
+        final flarumAccounts = accounts
+            .where((a) => a.platform == 'flarum')
+            .length;
+
+        if (flarumAccounts >= 10) {
+          throw Exception('You have reached the limit of 10 Flarum accounts.');
+        }
+      }
+
       final account = Account(
-        id: '$userId@$host',
+        id: accountId,
+
         platform: 'flarum',
+
         host: host,
+
         username: identification,
+
         avatarUrl: null, // 如果需要，可以进一步调用 API 获取
+
         token: token,
       );
 
-      await ref.read(authRepositoryProvider).saveAccount(account);
+      await repository.saveAccount(account);
+
+      // Automatically select the new account
+
+      await ref.read(selectedFlarumAccountProvider.notifier).select(account);
 
       // 保存到 FlarumApi 的持久化存储中
+
       await api.saveEndpoint('https://$host');
+
       await api.saveToken('https://$host', token);
 
       ref.invalidateSelf();
     } catch (e) {
       // 还原 BaseUrl
+
       if (originalBaseUrl != null) {
         api.setBaseUrl(originalBaseUrl);
       }
+
       throw Exception('Flarum 登录失败: $e');
     }
   }
 
   /// 删除指定ID的账户
+
   ///
+
   /// [id] - 要删除的账户ID
+
   ///
+
   /// 删除账户后刷新状态
+
   Future<void> removeAccount(String id) async {
     await ref.read(authRepositoryProvider).removeAccount(id);
+
     ref.invalidateSelf();
+
+    // Re-evaluate selected accounts (the providers watch authServiceProvider so they should update automatically)
+
+    ref.invalidate(selectedMisskeyAccountProvider);
+
+    ref.invalidate(selectedFlarumAccountProvider);
   }
 }
 
-/// 提供当前选中的账户，默认为第一个可用账户
+@Riverpod(keepAlive: true)
+class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
+  @override
+  FutureOr<Account?> build() async {
+    final accounts = await ref.watch(authServiceProvider.future);
+
+    final repository = ref.read(authRepositoryProvider);
+
+    final selectedId = await repository.getSelectedMisskeyId();
+
+    if (selectedId != null) {
+      try {
+        return accounts.firstWhere((a) => a.id == selectedId);
+      } catch (_) {}
+    }
+
+    return accounts.where((a) => a.platform == 'misskey').firstOrNull;
+  }
+
+  Future<void> select(Account account) async {
+    if (account.platform != 'misskey') return;
+
+    state = AsyncData(account);
+
+    await ref.read(authRepositoryProvider).saveSelectedMisskeyId(account.id);
+  }
+}
+
+@Riverpod(keepAlive: true)
+class SelectedFlarumAccount extends _$SelectedFlarumAccount {
+  @override
+  FutureOr<Account?> build() async {
+    final accounts = await ref.watch(authServiceProvider.future);
+
+    final repository = ref.read(authRepositoryProvider);
+
+    final selectedId = await repository.getSelectedFlarumId();
+
+    if (selectedId != null) {
+      try {
+        return accounts.firstWhere((a) => a.id == selectedId);
+      } catch (_) {}
+    }
+
+    return accounts.where((a) => a.platform == 'flarum').firstOrNull;
+  }
+
+  Future<void> select(Account account) async {
+    if (account.platform != 'flarum') return;
+
+    state = AsyncData(account);
+
+    await ref.read(authRepositoryProvider).saveSelectedFlarumId(account.id);
+  }
+}
+
+/// Deprecated: Use selectedMisskeyAccountProvider or selectedFlarumAccountProvider
+
 final selectedAccountProvider = StateProvider<Account?>((ref) {
   final accountsAsync = ref.watch(authServiceProvider);
+
   return accountsAsync.maybeWhen(
     data: (accounts) => accounts.isNotEmpty ? accounts.first : null,
+
     orElse: () => null,
   );
 });

@@ -25,12 +25,30 @@ class MisskeyRepository {
     final data = await api.getChannelTimeline(channelId, limit: limit, untilId: untilId);
     return data.map((e) => Note.fromJson(e)).toList();
   }
+
+  Future<void> renote(String noteId) async {
+    await api.createNote(renoteId: noteId);
+  }
+
+  Future<void> reply(String noteId, String text) async {
+    await api.createNote(replyId: noteId, text: text);
+  }
+
+  Future<void> addReaction(String noteId, String reaction) async {
+    await api.createReaction(noteId, reaction);
+  }
+
+  Future<void> removeReaction(String noteId) async {
+    await api.deleteReaction(noteId);
+  }
 }
 
 @riverpod
 MisskeyRepository misskeyRepository(Ref ref) {
-  final account = ref.watch(selectedAccountProvider);
-  if (account == null || account.platform != 'misskey') {
+  final accountAsync = ref.watch(selectedMisskeyAccountProvider);
+  final account = accountAsync.asData?.value;
+  
+  if (account == null) {
     throw Exception('No Misskey account selected');
   }
   final api = MisskeyApi(host: account.host, token: account.token);
