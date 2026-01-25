@@ -177,3 +177,7 @@ flutter:
 
   # 有关来自包依赖项的字体的详细信息，请查看
   # https://flutter.dev/to/font-from-package
+  fonts:
+    - family: MiSans
+      fonts:
+        - asset: assets/fonts/MiSans VF.ttf

@@ -24,6 +24,7 @@ class CyaniTalkApp extends ConsumerWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF39C5BB)),
         useMaterial3: true,
+        fontFamily: 'MiSans',
       ),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
