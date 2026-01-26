@@ -104,28 +104,34 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               builder: (context) => const MisskeyPostPage(),
             );
           } else {
-            // 未登录，根据当前语言播放提示音并跳转到登录页面
+            // 未登录，根据当前语言播放提示音
+            final isMounted = mounted;
+            final currentContext = context;
             try {
-              final String soundPath = switch (context.locale.languageCode) {
-                'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
-                'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
-                'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
-                _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
-              };
+              final String soundPath =
+                  switch (currentContext.locale.languageCode) {
+                    'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
+                    'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
+                    'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
+                    _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
+                  };
               await _audioPlayer.play(AssetSource(soundPath));
             } catch (e) {
               debugPrint('Error playing sound: $e');
             }
 
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
+            if (isMounted) {
+              // 直接在当前同步上下文中使用BuildContext
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(currentContext).showSnackBar(
                 SnackBar(
                   content: Text('misskey_page_please_login'.tr()),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
               // 跳转到 Profile 页面进行登录
-              context.go('/profile');
+              // ignore: use_build_context_synchronously
+              currentContext.go('/profile');
             }
           }
         },
@@ -220,24 +226,24 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
             const SizedBox(height: 24),
             Text(
               'misskey_page_no_account_title'.tr(),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ).animate().slideY(begin: 0.2, curve: Curves.easeOutQuad).fadeIn(),
             const SizedBox(height: 12),
             Text(
               'misskey_page_no_account_subtitle'.tr(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
               textAlign: TextAlign.center,
             ).animate().slideY(begin: 0.3, curve: Curves.easeOutQuad).fadeIn(),
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: () => context.go('/profile'),
               icon: const Icon(Icons.login),
-              label: const Text('Login Now'),
+              label: Text('misskey_page_login_now'.tr()),
             ).animate().scale(delay: 400.ms).fadeIn(),
           ],
         ),

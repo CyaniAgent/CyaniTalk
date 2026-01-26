@@ -53,7 +53,7 @@ class MisskeyChannelsPage extends ConsumerWidget {
                   fit: BoxFit.cover,
                 )
               : null,
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
         child: channel.bannerUrl == null
             ? const Icon(Icons.forum_outlined)

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// 应用程序的响应式布局外壳组件
 ///
@@ -36,31 +37,31 @@ class ResponsiveShell extends StatelessWidget {
           initialLocation: index == navigationShell.currentIndex,
         );
       },
-      destinations: const [
+      destinations: [
         NavigationDestination(
-          icon: Icon(Icons.public_outlined),
-          selectedIcon: Icon(Icons.public),
-          label: 'Misskey',
+          icon: const Icon(Icons.public_outlined),
+          selectedIcon: const Icon(Icons.public),
+          label: 'nav_misskey'.tr(),
         ),
         NavigationDestination(
-          icon: Icon(Icons.forum_outlined),
-          selectedIcon: Icon(Icons.forum),
-          label: 'Flarum',
+          icon: const Icon(Icons.forum_outlined),
+          selectedIcon: const Icon(Icons.forum),
+          label: 'nav_flarum'.tr(),
         ),
         NavigationDestination(
-          icon: Icon(Icons.cloud_queue_outlined),
-          selectedIcon: Icon(Icons.cloud_queue),
-          label: 'Drive',
+          icon: const Icon(Icons.cloud_queue_outlined),
+          selectedIcon: const Icon(Icons.cloud_queue),
+          label: 'nav_drive'.tr(),
         ),
         NavigationDestination(
-          icon: Icon(Icons.chat_bubble_outline),
-          selectedIcon: Icon(Icons.chat_bubble),
-          label: 'Messages',
+          icon: const Icon(Icons.chat_bubble_outline),
+          selectedIcon: const Icon(Icons.chat_bubble),
+          label: 'nav_messages'.tr(),
         ),
         NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'Me',
+          icon: const Icon(Icons.person_outline),
+          selectedIcon: const Icon(Icons.person),
+          label: 'nav_me'.tr(),
         ),
       ],
       body: (_) => navigationShell,

@@ -120,44 +120,40 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (context) {
         final currentLocale = context.locale;
-        
         return AlertDialog(
           title: Text('settings_language_select_title'.tr()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<Locale>(
+              ListTile(
                 title: Text('settings_language_chinese'.tr()),
-                value: const Locale('zh', 'CN'),
-                groupValue: currentLocale,
-                onChanged: (value) {
-                  if (value != null) {
-                    context.setLocale(value);
-                    Navigator.pop(context);
-                  }
+                onTap: () {
+                  context.setLocale(const Locale('zh', 'CN'));
+                  Navigator.pop(context);
                 },
+                trailing: currentLocale == const Locale('zh', 'CN')
+                    ? Icon(Icons.radio_button_checked, color: Theme.of(context).colorScheme.primary)
+                    : Icon(Icons.radio_button_off, color: Theme.of(context).colorScheme.outline),
               ),
-              RadioListTile<Locale>(
+              ListTile(
                 title: Text('settings_language_english'.tr()),
-                value: const Locale('en', 'US'),
-                groupValue: currentLocale,
-                onChanged: (value) {
-                  if (value != null) {
-                    context.setLocale(value);
-                    Navigator.pop(context);
-                  }
+                onTap: () {
+                  context.setLocale(const Locale('en', 'US'));
+                  Navigator.pop(context);
                 },
+                trailing: currentLocale == const Locale('en', 'US')
+                    ? Icon(Icons.radio_button_checked, color: Theme.of(context).colorScheme.primary)
+                    : Icon(Icons.radio_button_off, color: Theme.of(context).colorScheme.outline),
               ),
-              RadioListTile<Locale>(
+              ListTile(
                 title: Text('settings_language_japanese'.tr()),
-                value: const Locale('ja', 'JP'),
-                groupValue: currentLocale,
-                onChanged: (value) {
-                  if (value != null) {
-                    context.setLocale(value);
-                    Navigator.pop(context);
-                  }
+                onTap: () {
+                  context.setLocale(const Locale('ja', 'JP'));
+                  Navigator.pop(context);
                 },
+                trailing: currentLocale == const Locale('ja', 'JP')
+                    ? Icon(Icons.radio_button_checked, color: Theme.of(context).colorScheme.primary)
+                    : Icon(Icons.radio_button_off, color: Theme.of(context).colorScheme.outline),
               ),
             ],
           ),

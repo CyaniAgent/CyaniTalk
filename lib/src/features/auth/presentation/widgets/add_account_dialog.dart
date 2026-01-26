@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../application/auth_service.dart';
 import '../../../../core/api/flarum_api.dart';
 
@@ -70,16 +71,16 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     String title;
     switch (_step) {
       case _AddAccountStep.select:
-        title = 'Add Account or Endpoint';
+        title = 'auth_add_account_select_title'.tr();
         break;
       case _AddAccountStep.misskeyLogin:
-        title = 'Log in with Misskey';
+        title = 'auth_add_account_misskey_title'.tr();
         break;
       case _AddAccountStep.flarumLogin:
-        title = 'Log in with Flarum';
+        title = 'auth_add_account_flarum_title'.tr();
         break;
       case _AddAccountStep.flarumEndpoint:
-        title = 'Configure Flarum Endpoint';
+        title = 'auth_add_account_flarum_endpoint_title'.tr();
         break;
     }
 
@@ -94,7 +95,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleLarge,
-            textAlign: _step == _AddAccountStep.select ? TextAlign.center : TextAlign.start,
+            textAlign: _step == _AddAccountStep.select
+                ? TextAlign.center
+                : TextAlign.start,
           ),
         ),
       ],
@@ -121,24 +124,24 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       children: [
         _buildOptionCard(
           icon: Image.asset('assets/icons/misskey.png', width: 24, height: 24),
-          title: 'Log in with Misskey',
-          subtitle: 'Connect using MiAuth',
+          title: 'auth_add_account_misskey_option'.tr(),
+          subtitle: 'auth_add_account_misskey_subtitle'.tr(),
           color: Colors.green,
           onTap: () => setState(() => _step = _AddAccountStep.misskeyLogin),
         ),
         const SizedBox(height: 12),
         _buildOptionCard(
           icon: Image.asset('assets/icons/flarum.png', width: 24, height: 24),
-          title: 'Log in with Flarum',
-          subtitle: 'Connect using API Token',
+          title: 'auth_add_account_flarum_option'.tr(),
+          subtitle: 'auth_add_account_flarum_subtitle'.tr(),
           color: Colors.deepOrange,
           onTap: () => setState(() => _step = _AddAccountStep.flarumLogin),
         ),
         const SizedBox(height: 12),
         _buildOptionCard(
           icon: Icon(Icons.api, color: Colors.blue),
-          title: 'Configure Flarum Endpoint',
-          subtitle: 'Add a custom forum server',
+          title: 'auth_add_account_flarum_endpoint_option'.tr(),
+          subtitle: 'auth_add_account_flarum_endpoint_subtitle'.tr(),
           color: Colors.blue,
           onTap: () => setState(() => _step = _AddAccountStep.flarumEndpoint),
         ),
@@ -155,12 +158,12 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   }) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -172,7 +175,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: icon,
@@ -185,8 +188,8 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       subtitle,
@@ -210,9 +213,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       children: [
         TextField(
           controller: _misskeyHostController,
-          decoration: const InputDecoration(
-            labelText: 'Host (e.g. misskey.io)',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'auth_misskey_host'.tr(),
+            border: const OutlineInputBorder(),
             prefixText: 'https://',
           ),
           autofocus: true,
@@ -226,7 +229,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Next'),
+              : Text('auth_next'.tr()),
         ),
       ],
     );
@@ -239,26 +242,26 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       children: [
         TextField(
           controller: _flarumHostController,
-          decoration: const InputDecoration(
-            labelText: 'Host (e.g. discuss.flarum.org)',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'auth_flarum_host'.tr(),
+            border: const OutlineInputBorder(),
             prefixText: 'https://',
           ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _flarumUsernameController,
-          decoration: const InputDecoration(
-            labelText: 'Username or Email',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'auth_username_email'.tr(),
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _flarumPasswordController,
-          decoration: const InputDecoration(
-            labelText: 'Password',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'auth_password'.tr(),
+            border: const OutlineInputBorder(),
           ),
           obscureText: true,
         ),
@@ -271,7 +274,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Log in'),
+              : Text('auth_login'.tr()),
         ),
       ],
     );
@@ -284,16 +287,16 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       children: [
         TextField(
           controller: _flarumEndpointController,
-          decoration: const InputDecoration(
-            labelText: 'Server URL (e.g. https://flarum.org)',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: 'auth_flarum_server_url'.tr(),
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
         ),
         const SizedBox(height: 24),
         FilledButton(
           onPressed: _loading ? null : _addFlarumEndpoint,
-          child: const Text('Add Endpoint'),
+          child: Text('auth_add_endpoint'.tr()),
         ),
       ],
     );
@@ -305,7 +308,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
 
     setState(() => _loading = true);
     try {
-      final session = await ref.read(authServiceProvider.notifier).startMiAuth(host);
+      final session = await ref
+          .read(authServiceProvider.notifier)
+          .startMiAuth(host);
       if (mounted) {
         Navigator.pop(context);
         _showCheckAuthDialog(context, ref, host, session);
@@ -313,7 +318,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('auth_error'.tr(args: [e.toString()]))),
         );
       }
     } finally {
@@ -330,17 +335,19 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
 
     setState(() => _loading = true);
     try {
-      await ref.read(authServiceProvider.notifier).loginToFlarum(host, user, password);
+      await ref
+          .read(authServiceProvider.notifier)
+          .loginToFlarum(host, user, password);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Flarum account linked successfully!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('auth_flarum_linked'.tr())));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('auth_error'.tr(args: [e.toString()]))),
         );
       }
     } finally {
@@ -357,14 +364,14 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       await FlarumApi().saveEndpoint(url);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Flarum endpoint added successfully!')),
+          SnackBar(content: Text('auth_flarum_endpoint_added'.tr())),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('auth_error'.tr(args: [e.toString()]))),
         );
       }
     } finally {
@@ -381,10 +388,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _CheckAuthDialog(
-        host: host,
-        session: session,
-      ),
+      builder: (context) => _CheckAuthDialog(host: host, session: session),
     );
   }
 }
@@ -393,10 +397,7 @@ class _CheckAuthDialog extends ConsumerStatefulWidget {
   final String host;
   final String session;
 
-  const _CheckAuthDialog({
-    required this.host,
-    required this.session,
-  });
+  const _CheckAuthDialog({required this.host, required this.session});
 
   @override
   ConsumerState<_CheckAuthDialog> createState() => _CheckAuthDialogState();
@@ -408,41 +409,38 @@ class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Waiting for Authorization'),
-      content: const Text(
-        'Please authorize the app in your browser, then click "Done".',
-      ),
+      title: Text('auth_waiting_authorization'.tr()),
+      content: Text('auth_authorization_instructions'.tr()),
       actions: [
         TextButton(
           onPressed: _loading ? null : () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text('auth_cancel'.tr()),
         ),
         FilledButton(
           onPressed: _loading
               ? null
               : () async {
                   setState(() => _loading = true);
+                  final isMounted = mounted;
+                  final dialogContext = context;
                   try {
                     await ref
                         .read(authServiceProvider.notifier)
                         .checkMiAuth(widget.host, widget.session);
-                    if (mounted) {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Misskey account linked successfully!'),
-                        ),
-                      );
+                    if (isMounted) {
+                      // ignore: use_build_context_synchronously
+                      Navigator.pop(dialogContext);
                     }
                   } catch (e) {
-                    if (mounted) {
-                      setState(() => _loading = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    setState(() => _loading = false);
+                    if (isMounted) {
+                      // ignore: use_build_context_synchronously
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
                         SnackBar(
-                          content: Text('Failed: $e'),
+                          content: Text('auth_failed'.tr(args: [e.toString()])),
                           duration: const Duration(seconds: 5),
                           action: SnackBarAction(
-                            label: 'Retry',
+                            label: 'auth_retry'.tr(),
                             onPressed: () {}, // User can just click Done again
                           ),
                         ),
@@ -456,7 +454,7 @@ class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Done'),
+              : Text('auth_done'.tr()),
         ),
       ],
     );
