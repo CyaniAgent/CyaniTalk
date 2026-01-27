@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../core/utils/logger.dart';
 
 import '../features/misskey/presentation/misskey_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
@@ -27,12 +28,16 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 /// 返回配置好的GoRouter实例
 @riverpod
 GoRouter goRouter(Ref ref) {
+  logger.info('Router: Initializing GoRouter with initial location: /misskey');
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/misskey',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
+          logger.debug(
+            'Router: StatefulShellRoute builder called for path: ${state.path}',
+          );
           return ResponsiveShell(navigationShell: navigationShell);
         },
         branches: [

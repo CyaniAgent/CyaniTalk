@@ -8,8 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../core/utils/logger.dart';
 import '../../../core/services/search/global_search_delegate.dart';
 import '../../auth/application/auth_service.dart';
+import '../../../routing/router.dart';
 import 'widgets/misskey_drawer.dart';
 import 'pages/misskey_timeline_page.dart';
 import 'pages/misskey_notes_page.dart';
@@ -83,6 +85,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
       drawer: MisskeyDrawer(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
+          logger.info(
+            'MisskeyPage: Navigation drawer selected index: $index (${_titles[index]})',
+          );
           setState(() {
             _selectedIndex = index;
           });
@@ -90,6 +95,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          logger.info('MisskeyPage: Floating action button pressed');
           // 检查是否已登录 Misskey
           final authState = ref.read(authServiceProvider);
           final hasMisskeyAccount = authState.maybeWhen(
@@ -99,14 +105,19 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
 
           if (hasMisskeyAccount) {
             // 已登录，打开发布窗口
+            logger.info('MisskeyPage: Opening post dialog (user logged in)');
             showDialog(
               context: context,
               builder: (context) => const MisskeyPostPage(),
             );
           } else {
             // 未登录，根据当前语言播放提示音
+            logger.info(
+              'MisskeyPage: User not logged in, playing prompt sound',
+            );
             final isMounted = mounted;
             final currentContext = context;
+            final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
             try {
               final String soundPath =
                   switch (currentContext.locale.languageCode) {
@@ -116,22 +127,24 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                     _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
                   };
               await _audioPlayer.play(AssetSource(soundPath));
+              logger.info('MisskeyPage: Played login prompt sound: $soundPath');
             } catch (e) {
-              debugPrint('Error playing sound: $e');
+              logger.error('MisskeyPage: Error playing sound: $e');
             }
 
             if (isMounted) {
-              // 直接在当前同步上下文中使用BuildContext
-              // ignore: use_build_context_synchronously
-              ScaffoldMessenger.of(currentContext).showSnackBar(
+              // 使用提前获取的scaffoldMessenger实例，避免BuildContext警告
+              logger.info('MisskeyPage: Showing login prompt snackbar');
+              scaffoldMessenger.showSnackBar(
                 SnackBar(
                   content: Text('misskey_page_please_login'.tr()),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
               // 跳转到 Profile 页面进行登录
-              // ignore: use_build_context_synchronously
-              currentContext.go('/profile');
+              logger.info('MisskeyPage: Navigating to profile page for login');
+              final router = ref.read(goRouterProvider);
+              router.go('/profile');
             }
           }
         },
@@ -151,6 +164,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                   icon: const Icon(Icons.widgets_outlined),
                   tooltip: 'misskey_page_widgets'.tr(),
                   onPressed: () {
+                    logger.info('MisskeyPage: Widgets button pressed');
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
@@ -164,6 +178,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                   icon: const Icon(Icons.search),
                   tooltip: 'misskey_page_global_search'.tr(),
                   onPressed: () {
+                    logger.info(
+                      'MisskeyPage: Search button pressed, opening search delegate',
+                    );
                     showSearch(
                       context: context,
                       delegate: GlobalSearchDelegate(),

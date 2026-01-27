@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class MisskeyExplorePage extends StatelessWidget {
   const MisskeyExplorePage({super.key});
@@ -11,7 +12,7 @@ class MisskeyExplorePage extends StatelessWidget {
         children: [
           Icon(Icons.explore_outlined, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
           const SizedBox(height: 16),
-          Text('Explore content will appear here', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+          Text('misskey_explore_content'.tr(), style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
         ],
       ),
     );

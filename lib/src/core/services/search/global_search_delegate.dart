@@ -4,6 +4,7 @@
 // 负责构建搜索界面、处理搜索操作和显示搜索结果。
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../utils/utils.dart';
 import 'global_search_service.dart';
 
 /// 全局搜索代理
@@ -13,6 +14,11 @@ import 'global_search_service.dart';
 class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
   /// 全局搜索服务实例
   final GlobalSearchService _searchService = GlobalSearchService();
+
+  /// 构造函数
+  GlobalSearchDelegate() {
+    logger.info('GlobalSearchDelegate: 初始化全局搜索代理');
+  }
 
   /// 构建搜索界面的操作按钮
   ///
@@ -26,6 +32,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
         IconButton(
           icon: const Icon(Icons.clear),
           onPressed: () {
+            logger.debug('GlobalSearchDelegate: 清除搜索关键词');
             query = '';
             showSuggestions(context);
           },
@@ -43,6 +50,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
+        logger.debug('GlobalSearchDelegate: 关闭搜索界面');
         close(context, null);
       },
     );
@@ -55,18 +63,23 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
   /// 返回一个Widget，用于显示搜索结果列表
   @override
   Widget buildResults(BuildContext context) {
+    logger.info('GlobalSearchDelegate: 构建搜索结果，关键词: $query');
     return FutureBuilder<List<SearchResult>>(
       future: _searchService.search(query),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+          logger.debug('GlobalSearchDelegate: 搜索中...');
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
+          logger.error('GlobalSearchDelegate: 搜索错误: ${snapshot.error}');
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          logger.info('GlobalSearchDelegate: 无搜索结果');
           return Center(child: Text('search_no_results'.tr()));
         }
 
         final results = snapshot.data!;
+        logger.info('GlobalSearchDelegate: 显示 ${results.length} 个搜索结果');
         return ListView.builder(
           itemCount: results.length,
           itemBuilder: (context, index) {
@@ -81,6 +94,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
               subtitle: Text('$sourceText • ${result.type}\n${result.subtitle}'),
               isThreeLine: true,
               onTap: () {
+                logger.info('GlobalSearchDelegate: 选择搜索结果: ${result.title}');
                 close(context, result);
                 // Handle navigation based on result
               },
@@ -99,9 +113,11 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.isEmpty) {
+      logger.debug('GlobalSearchDelegate: 显示搜索提示');
       return Center(child: Text('search_enter_query'.tr()));
     }
     // 目前仅在搜索词为空时显示提示信息，未实现完整的搜索建议功能
+    logger.debug('GlobalSearchDelegate: 构建搜索建议，关键词: $query');
     return Container();
   }
 }

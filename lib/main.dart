@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'src/app.dart';
+import 'src/core/core.dart';
 
 /// 应用程序的入口点
 ///
@@ -13,7 +14,11 @@ import 'src/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  
+
+  // 初始化日志系统
+  await logger.initialize();
+  logger.info('CyaniTalk app started');
+
   runApp(
     EasyLocalization(
       supportedLocales: const [

@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../../../core/utils/logger.dart';
 
 /// 应用程序的关于页面组件
 ///
@@ -63,9 +64,11 @@ class _AboutPageState extends State<AboutPage> {
   /// 播放页面打开音效
   Future<void> _playSound() async {
     try {
+      logger.info('AboutPage: Playing entrance sound');
       await _audioPlayer.play(AssetSource('sounds/AboutPageEntrance.mp3'));
+      logger.info('AboutPage: Entrance sound played successfully');
     } catch (e) {
-      debugPrint('Error playing sound: $e');
+      logger.error('AboutPage: Error playing sound: $e');
     }
   }
 
@@ -73,11 +76,17 @@ class _AboutPageState extends State<AboutPage> {
   ///
   /// 获取应用程序的版本号和构建号。
   Future<void> _initPackageInfo() async {
-    final info = await PackageInfo.fromPlatform();
-    setState(() {
-      _appName = "CyaniTalk";
-      _version = '${info.version}+${info.buildNumber}';
-    });
+    try {
+      logger.info('AboutPage: Initializing package info');
+      final info = await PackageInfo.fromPlatform();
+      setState(() {
+        _appName = "CyaniTalk";
+        _version = '${info.version}+${info.buildNumber}';
+      });
+      logger.info('AboutPage: Package info initialized successfully: version=$_version');
+    } catch (e) {
+      logger.error('AboutPage: Error initializing package info: $e');
+    }
   }
 
   /// 获取GitHub贡献者列表
@@ -85,6 +94,7 @@ class _AboutPageState extends State<AboutPage> {
   /// 从GitHub API获取项目的贡献者数据。
   Future<void> _fetchContributors() async {
     try {
+      logger.info('AboutPage: Fetching GitHub contributors');
       final dio = Dio();
       final response = await dio.get(
         'https://api.github.com/repos/CyaniAgent/CyaniTalk/contributors',
@@ -94,6 +104,7 @@ class _AboutPageState extends State<AboutPage> {
           _contributors = response.data;
           _isLoadingContributors = false;
         });
+        logger.info('AboutPage: Successfully fetched ${_contributors.length} contributors');
       }
     } catch (e) {
       if (mounted) {
@@ -101,7 +112,7 @@ class _AboutPageState extends State<AboutPage> {
           _isLoadingContributors = false;
         });
       }
-      debugPrint('Error fetching contributors: $e');
+      logger.error('AboutPage: Error fetching contributors: $e');
     }
   }
 
@@ -109,8 +120,21 @@ class _AboutPageState extends State<AboutPage> {
   ///
   /// 在外部浏览器中打开项目的GitHub仓库页面。
   Future<void> _launchGitHub() async {
-    final url = Uri.parse('https://github.com/CyaniAgent/CyaniTalk');
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+    try {
+      logger.info('AboutPage: Launching GitHub project page');
+      final url = Uri.parse('https://github.com/CyaniAgent/CyaniTalk');
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        if (mounted) {
+          logger.warning('AboutPage: Failed to launch GitHub page');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('about_github_launch_error'.tr())),
+          );
+        }
+      } else {
+        logger.info('AboutPage: GitHub page launched successfully');
+      }
+    } catch (e) {
+      logger.error('AboutPage: Error launching GitHub page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('about_github_launch_error'.tr())),

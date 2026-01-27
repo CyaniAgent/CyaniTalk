@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -8,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/flarum_constants.dart';
 import '../utils/verification_window.dart';
+import '../utils/utils.dart';
 import '../../routing/router.dart';
 
 class FlarumApi {
@@ -30,7 +30,7 @@ class FlarumApi {
   }
 
   void _initDio() {
-    debugPrint('FlarumApi: Initializing Dio with baseUrl: $_baseUrl');
+    logger.info('FlarumApi: 初始化Dio，基础URL: $_baseUrl');
 
     final basicHeaders = {
       'Accept': 'application/vnd.api+json',
@@ -78,7 +78,7 @@ class FlarumApi {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          debugPrint('FlarumApi: Request - ${options.method} ${options.uri}');
+          logger.debug('FlarumApi: 请求 - ${options.method} ${options.uri}');
           if (_token != null) {
             options.headers['Authorization'] = 'Token $_token';
           }
@@ -115,8 +115,8 @@ class FlarumApi {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          debugPrint(
-            'FlarumApi: Response - ${response.statusCode} ${response.requestOptions.uri}',
+          logger.debug(
+            'FlarumApi: 响应 - ${response.statusCode} ${response.requestOptions.uri}',
           );
           return handler.next(response);
         },
@@ -127,14 +127,15 @@ class FlarumApi {
       QueuedInterceptorsWrapper(
         onError: (DioException e, ErrorInterceptorHandler handler) async {
           final statusCode = e.response?.statusCode;
-          final isWafError = statusCode == 403 ||
+          final isWafError =
+              statusCode == 403 ||
               statusCode == 405 ||
               statusCode == 400 ||
               statusCode == 429 ||
               statusCode == 503;
 
           if (isWafError) {
-            debugPrint('FlarumApi: WAF or related error detected ($statusCode)');
+            logger.warning('FlarumApi: 检测到WAF或相关错误 ($statusCode)');
             final requestOptions = e.requestOptions;
             final url = '${requestOptions.baseUrl}${requestOptions.path}';
 
@@ -144,7 +145,7 @@ class FlarumApi {
                 final cookieValue = await VerificationWindow.show(context, url);
 
                 if (cookieValue != null) {
-                  debugPrint('FlarumApi: WAF verification success, cookie retrieved');
+                  logger.info('FlarumApi: WAF验证成功，获取到Cookie');
 
                   final uri = Uri.parse(_baseUrl!);
                   final cookie = Cookie('acw_sc__v2', cookieValue)
@@ -154,16 +155,18 @@ class FlarumApi {
 
                   await _cookieJar.saveFromResponse(uri, [cookie]);
 
-                  debugPrint('FlarumApi: Retrying request...');
+                  logger.debug('FlarumApi: 重试请求...');
                   final response = await _dio.fetch(requestOptions);
                   return handler.resolve(response);
                 } else {
-                  debugPrint('FlarumApi: WAF verification cancelled');
+                  logger.info('FlarumApi: WAF验证被取消');
                 }
               }
             } catch (err) {
-              debugPrint('FlarumApi: WAF verification failed: $err');
+              logger.error('FlarumApi: WAF验证失败: $err');
             }
+          } else {
+            logger.error('FlarumApi: 请求错误: ${e.message}, 状态码: $statusCode');
           }
           return handler.next(e);
         },
@@ -172,6 +175,7 @@ class FlarumApi {
   }
 
   void setBaseUrl(String url) {
+    logger.info('FlarumApi: 设置基础URL: $url');
     _baseUrl = url;
     _dio.options.baseUrl = url;
     _dio.options.headers['Referer'] = url;
@@ -179,10 +183,12 @@ class FlarumApi {
   }
 
   void setToken(String token) {
+    logger.debug('FlarumApi: 设置令牌');
     _token = token;
   }
 
   void clearToken() {
+    logger.debug('FlarumApi: 清除令牌');
     _token = null;
   }
 
@@ -276,7 +282,9 @@ class FlarumApi {
     final prefs = await SharedPreferences.getInstance();
     final keys = prefs.getKeys().where((key) {
       final endpointHash = endpoint.hashCode.toString();
-      return key.startsWith('${FlarumConstants.endpointDataPrefix}$endpointHash');
+      return key.startsWith(
+        '${FlarumConstants.endpointDataPrefix}$endpointHash',
+      );
     }).toList();
 
     for (final key in keys) {
@@ -306,29 +314,31 @@ class FlarumApi {
     String identification,
     String password,
   ) async {
+    logger.info('FlarumApi: 开始登录，用户: $identification');
     try {
       final response = await post(
         '/api/token',
-        data: {
-          'identification': identification,
-          'password': password,
-        },
+        data: {'identification': identification, 'password': password},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         if (data is Map && data.containsKey('token')) {
           final token = data['token'];
+          logger.info('FlarumApi: 登录成功');
           setToken(token);
           return Map<String, dynamic>.from(data);
         }
       }
+      logger.error('FlarumApi: 登录失败，状态码: ${response.statusCode}');
       throw Exception('Login failed: ${response.statusCode}');
     } catch (e) {
       if (e is DioException) {
         final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
+        logger.error('FlarumApi: 登录错误: $msg');
         throw Exception('Flarum login error: $msg');
       }
+      logger.error('FlarumApi: 登录异常: $e');
       rethrow;
     }
   }
@@ -337,17 +347,22 @@ class FlarumApi {
   ///
   /// [userId] - 用户 ID
   Future<Map<String, dynamic>> getUserProfile(String userId) async {
+    logger.info('FlarumApi: 获取用户资料，用户ID: $userId');
     try {
       final response = await get('/api/users/$userId');
       if (response.statusCode == 200) {
+        logger.info('FlarumApi: 获取用户资料成功');
         return Map<String, dynamic>.from(response.data);
       }
+      logger.error('FlarumApi: 获取用户资料失败，状态码: ${response.statusCode}');
       throw Exception('Failed to fetch user profile: ${response.statusCode}');
     } catch (e) {
       if (e is DioException) {
         final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
+        logger.error('FlarumApi: 获取用户资料错误: $msg');
         throw Exception('Flarum fetch profile error: $msg');
       }
+      logger.error('FlarumApi: 获取用户资料异常: $e');
       rethrow;
     }
   }

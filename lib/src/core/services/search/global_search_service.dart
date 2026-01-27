@@ -4,6 +4,8 @@
 // 负责处理跨平台搜索请求并返回统一的搜索结果。
 import 'dart:async';
 
+import '../../utils/utils.dart';
+
 /// 搜索结果模型
 ///
 /// 表示一个搜索结果项，包含标题、副标题、来源和类型等信息。
@@ -56,15 +58,20 @@ class GlobalSearchService {
   ///
   /// 返回包含搜索结果的Future列表
   Future<List<SearchResult>> search(String query) async {
+    logger.info('GlobalSearchService: 开始搜索，关键词: $query');
     // 模拟网络延迟
     await Future.delayed(const Duration(milliseconds: 500));
 
-    if (query.isEmpty) return [];
+    if (query.isEmpty) {
+      logger.debug('GlobalSearchService: 搜索关键词为空，返回空结果');
+      return [];
+    }
 
     // 模拟搜索结果
     final results = <SearchResult>[];
 
     // Misskey平台模拟结果
+    logger.debug('GlobalSearchService: 添加Misskey平台搜索结果');
     results.add(SearchResult(
       title: 'Note containing "$query"',
       subtitle: '@user: This is a misskey note about $query...',
@@ -79,6 +86,7 @@ class GlobalSearchService {
     ));
 
     // Flarum平台模拟结果
+    logger.debug('GlobalSearchService: 添加Flarum平台搜索结果');
     results.add(SearchResult(
       title: 'Discussion about "$query"',
       subtitle: 'Latest reply in General tag',
@@ -92,6 +100,7 @@ class GlobalSearchService {
       type: 'Tag',
     ));
 
+    logger.info('GlobalSearchService: 搜索完成，找到 ${results.length} 个结果');
     return results;
   }
 }

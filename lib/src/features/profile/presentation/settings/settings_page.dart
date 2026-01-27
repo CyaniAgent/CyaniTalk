@@ -108,7 +108,7 @@ class SettingsPage extends StatelessWidget {
       onTap: onTap ??
           () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('settings_tapped'.tr(args: [title]))),
+              SnackBar(content: Text('settings_tapped'.tr(namedArgs: {'title': title}))),
             );
           },
     );

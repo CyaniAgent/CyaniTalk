@@ -2,6 +2,7 @@
 //
 // 该文件包含NotificationsPage组件，用于显示应用程序的通知列表。
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// 通知功能的主页面组件
 ///
@@ -20,8 +21,8 @@ class NotificationsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
-      body: const Center(child: Text('Notifications Page')),
+      appBar: AppBar(title: Text('notifications_title'.tr())),
+      body: Center(child: Text('notifications_page'.tr())),
     );
   }
 }

@@ -132,7 +132,7 @@ class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSe
             child: TextButton.icon(
               onPressed: () => _confirmDelete(context, ref, _focusedAccount!),
               icon: const Icon(Icons.delete_outline, color: Colors.red),
-              label: const Text('Remove this account',
+              label: Text('accounts_remove_button'.tr(),
                   style: TextStyle(color: Colors.red)),
             ),
           ),
@@ -196,7 +196,7 @@ class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSe
       context: context,
       builder: (context) => AlertDialog(
         title: Text('accounts_remove_title'.tr()),
-        content: Text('accounts_remove_confirm'.tr(args: [account.username ?? 'Unknown'])),
+        content: Text('accounts_remove_confirm'.tr(namedArgs: {'username': account.username ?? 'Unknown'})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

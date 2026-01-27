@@ -46,10 +46,6 @@ dependencies:
   flutter_riverpod: ^3.1.0
   # 声明式路由管理库，支持嵌套路由、重定向、守卫等
   go_router: ^17.0.1
-  # 轻量级状态管理和导航库，提供GetX框架的核心功能
-  get: ^4.6.6
-  # 跨平台网络连接状态检测，支持多种连接类型
-  connectivity_plus: ^6.0.5
   # 自适应脚手架组件，支持不同屏幕尺寸的响应式布局
   flutter_adaptive_scaffold: ^0.3.3+1
   # React风格的Hooks支持，允许在函数组件中使用状态和副作用
@@ -86,6 +82,10 @@ dependencies:
   webview_flutter: ^4.13.1
   # Windows平台的WebView实现，支持Windows应用中的网页显示
   webview_windows: ^0.4.0
+  # 强大的日志库，支持不同级别的日志输出和格式化
+  logger: ^2.3.0
+  # 路径提供者库，用于获取应用的文档目录和临时目录
+  path_provider: ^2.1.4
 
 dev_dependencies:
   flutter_test:
