@@ -35,10 +35,6 @@ class AppLogger {
 
   /// 初始化日志配置
   Future<void> initialize() async {
-    // Android 权限请求 - 移至后台或按需调用，避免阻塞启动
-    // if (Platform.isAndroid) {
-    //   await _requestPermissions();
-    // }
 
     // 创建控制台输出
     final consoleOutput = ConsoleOutput();
