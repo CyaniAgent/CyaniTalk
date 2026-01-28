@@ -54,4 +54,4 @@ final class MisskeyRepositoryProvider
   }
 }
 
-String _$misskeyRepositoryHash() => r'3753ce0be7bda0bb1bc9424419bb780713b9add2';
+String _$misskeyRepositoryHash() => r'77eaa842eeabae2a47450647255027b1731fef9d';

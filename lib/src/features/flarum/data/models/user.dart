@@ -1,3 +1,5 @@
+import 'group.dart';
+
 class User {
   final String id;
   final String username;
@@ -15,6 +17,7 @@ class User {
   final bool isEmailConfirmed;
   final bool isAdmin;
   final Map<String, dynamic> preferences;
+  final List<Group> groups;
 
   User({
     required this.id,
@@ -33,10 +36,30 @@ class User {
     required this.isEmailConfirmed,
     required this.isAdmin,
     required this.preferences,
+    this.groups = const [],
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(
+    Map<String, dynamic> json, {
+    List<dynamic> included = const [],
+  }) {
     final attrs = json['attributes'] ?? {};
+    final relationships = json['relationships'] ?? {};
+
+    // Parse Groups
+    List<Group> parsedGroups = [];
+    if (relationships['groups'] != null &&
+        relationships['groups']['data'] != null) {
+      final groupData = relationships['groups']['data'] as List;
+      final groupIds = groupData.map((g) => g['id']).toSet();
+
+      final includedGroups = included.where(
+        (item) => item['type'] == 'groups' && groupIds.contains(item['id']),
+      );
+
+      parsedGroups = includedGroups.map((g) => Group.fromJson(g)).toList();
+    }
+
     return User(
       id: json['id'] ?? '',
       username: attrs['username'] ?? 'unknown',
@@ -54,6 +77,7 @@ class User {
       isEmailConfirmed: attrs['isEmailConfirmed'] ?? false,
       isAdmin: attrs['isAdmin'] ?? false,
       preferences: attrs['preferences'] ?? {},
+      groups: parsedGroups,
     );
   }
 }
