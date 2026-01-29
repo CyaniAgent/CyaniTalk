@@ -19,16 +19,16 @@ FlarumRepository flarumRepository(Ref ref) {
   final api = ref.watch(flarumApiProvider);
 
   // Watch for account changes and configure the API singleton
-  final accountAsync = ref.watch(selectedFlarumAccountProvider);
+  final account = ref.watch(selectedFlarumAccountProvider).asData?.value;
 
-  accountAsync.whenData((account) {
-    if (account != null) {
-      api.setBaseUrl('https://${account.host}');
-      api.setToken(account.token);
-    } else {
-      api.clearToken();
-    }
-  });
+  if (account != null) {
+    api.setBaseUrl('https://${account.host}');
+    // Extract userId from account.id (format: userId@host)
+    final userId = account.id.split('@').first;
+    api.setToken(account.token, userId: userId);
+  } else {
+    api.clearToken();
+  }
 
   return FlarumRepository(api);
 }

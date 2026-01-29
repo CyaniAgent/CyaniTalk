@@ -22,6 +22,7 @@ class FlarumApi {
   late Dio _dio;
   late CookieJar _cookieJar;
   String? _token;
+  String? _userId;
   String? _baseUrl = 'https://flarum.imikufans.cn';
 
   String _getEndpointKey(String endpoint, String key) {
@@ -80,7 +81,11 @@ class FlarumApi {
         onRequest: (options, handler) async {
           logger.debug('FlarumApi: 请求 - ${options.method} ${options.uri}');
           if (_token != null) {
-            options.headers['Authorization'] = 'Token $_token';
+            String header = 'Token $_token';
+            if (_userId != null) {
+              header += '; userId=$_userId';
+            }
+            options.headers['Authorization'] = header;
           }
 
           final prefs = await SharedPreferences.getInstance();
@@ -182,9 +187,10 @@ class FlarumApi {
     _dio.options.headers['Origin'] = url;
   }
 
-  void setToken(String token) {
+  void setToken(String token, {String? userId}) {
     logger.debug('FlarumApi: 设置令牌');
     _token = token;
+    _userId = userId;
   }
 
   void clearToken() {
@@ -325,8 +331,9 @@ class FlarumApi {
         final data = response.data;
         if (data is Map && data.containsKey('token')) {
           final token = data['token'];
+          final userId = data['userId']?.toString();
           logger.info('FlarumApi: 登录成功');
-          setToken(token);
+          setToken(token, userId: userId);
           return Map<String, dynamic>.from(data);
         }
       }
