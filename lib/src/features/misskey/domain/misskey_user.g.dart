@@ -16,6 +16,8 @@ _MisskeyUser _$MisskeyUserFromJson(Map<String, dynamic> json) => _MisskeyUser(
   isModerator: json['isModerator'] as bool? ?? false,
   isBot: json['isBot'] as bool? ?? false,
   isCat: json['isCat'] as bool? ?? false,
+  driveCapacityMb: (json['driveCapacityMb'] as num?)?.toInt(),
+  driveUsage: (json['driveUsage'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
@@ -29,4 +31,6 @@ Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
       'isModerator': instance.isModerator,
       'isBot': instance.isBot,
       'isCat': instance.isCat,
+      'driveCapacityMb': instance.driveCapacityMb,
+      'driveUsage': instance.driveUsage,
     };

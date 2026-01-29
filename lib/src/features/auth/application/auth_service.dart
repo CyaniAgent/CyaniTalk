@@ -45,8 +45,10 @@ class AuthService extends _$AuthService {
 
   /// 返回会话ID，用于后续检查认证状态
 
+  /// 启动Misskey的MiAuth认证流程
   Future<String> startMiAuth(String host) async {
-    logger.info('开始Misskey MiAuth认证流程，主机: $host');
+    final sanitizedHost = _sanitizeHost(host);
+    logger.info('开始Misskey MiAuth认证流程，主机: $sanitizedHost (原始: $host)');
     final accounts = await ref.read(authRepositoryProvider).getAccounts();
 
     final misskeyAccounts = accounts
@@ -62,7 +64,7 @@ class AuthService extends _$AuthService {
     final session = const Uuid().v4();
     logger.debug('生成MiAuth会话ID: $session');
 
-    final uri = Uri.https(host, '/miauth/$session', {
+    final uri = Uri.https(sanitizedHost, '/miauth/$session', {
       'name': 'CyaniTalk',
 
       'permission':
@@ -95,14 +97,15 @@ class AuthService extends _$AuthService {
   /// 成功时保存账户信息并刷新状态，失败时抛出异常
 
   Future<void> checkMiAuth(String host, String session) async {
-    logger.info('检查Misskey MiAuth认证状态，主机: $host');
+    final sanitizedHost = _sanitizeHost(host);
+    logger.info('检查Misskey MiAuth认证状态，主机: $sanitizedHost');
     // 稍微等待，确保服务器已经处理了授权
     logger.debug('等待500毫秒确保服务器处理授权');
     await Future.delayed(const Duration(milliseconds: 500));
 
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'https://$host',
+        baseUrl: 'https://$sanitizedHost',
 
         connectTimeout: const Duration(seconds: 10),
 
@@ -113,8 +116,9 @@ class AuthService extends _$AuthService {
     );
 
     try {
-      logger.debug('发送MiAuth状态检查请求');
-      final response = await dio.post('/api/miauth/$session/check');
+      logger.debug('发送MiAuth状态检查请求: /api/miauth/$session/check');
+      // 显式传递空对象，确保某些严格的服务器不会报错
+      final response = await dio.post('/api/miauth/$session/check', data: {});
       logger.debug('收到MiAuth状态检查响应');
 
       final data = response.data;
@@ -129,7 +133,7 @@ class AuthService extends _$AuthService {
           throw Exception('MiAuth响应缺少必要字段 (token或user)');
         }
 
-        final accountId = '${user['id']}@$host';
+        final accountId = '${user['id']}@$sanitizedHost';
         logger.info('MiAuth认证成功，用户: ${user['username']}, 账户ID: $accountId');
 
         final repository = ref.read(authRepositoryProvider);
@@ -159,7 +163,7 @@ class AuthService extends _$AuthService {
         final account = Account(
           id: accountId, // 复合ID
           platform: 'misskey',
-          host: host,
+          host: sanitizedHost,
           username: user['username'],
           avatarUrl: user['avatarUrl'],
           token: token,
@@ -172,9 +176,11 @@ class AuthService extends _$AuthService {
         logger.debug('自动选择新账户');
         await ref.read(selectedMisskeyAccountProvider.notifier).select(account);
 
-        // 刷新状态
-        logger.debug('刷新认证服务状态');
-        ref.invalidateSelf();
+        // Upate state without re-initializing the whole Notifier
+        logger.debug('更新认证服务状态');
+        final updatedAccounts = await repository.getAccounts();
+        state = AsyncData(updatedAccounts);
+
         logger.info('Misskey MiAuth认证流程完成');
       } else {
         final errorMsg = data is Map ? data['error'] ?? '未授予令牌' : '响应格式错误';
@@ -287,8 +293,10 @@ class AuthService extends _$AuthService {
       await api.saveEndpoint('https://$host');
       await api.saveToken('https://$host', token);
 
-      logger.debug('刷新认证服务状态');
-      ref.invalidateSelf();
+      logger.debug('更新认证服务状态');
+      final updatedAccounts = await repository.getAccounts();
+      state = AsyncData(updatedAccounts);
+
       logger.info('Flarum登录流程完成');
     } catch (e) {
       // 还原 BaseUrl
@@ -317,14 +325,43 @@ class AuthService extends _$AuthService {
     await ref.read(authRepositoryProvider).removeAccount(id);
     logger.debug('账户删除成功');
 
-    logger.debug('刷新认证服务状态');
-    ref.invalidateSelf();
+    logger.debug('更新认证服务状态');
+    final updatedAccounts = await ref
+        .read(authRepositoryProvider)
+        .getAccounts();
+    state = AsyncData(updatedAccounts);
 
     // Re-evaluate selected accounts (the providers watch authServiceProvider so they should update automatically)
     logger.debug('重新评估选中的账户');
     ref.invalidate(selectedMisskeyAccountProvider);
     ref.invalidate(selectedFlarumAccountProvider);
     logger.info('账户删除流程完成');
+  }
+
+  /// 清理主机地址，提取出域名部分
+  String _sanitizeHost(String host) {
+    String sanitized = host.trim();
+    if (sanitized.startsWith('https://')) {
+      sanitized = sanitized.substring(8);
+    } else if (sanitized.startsWith('http://')) {
+      sanitized = sanitized.substring(7);
+    }
+
+    // 移除路径部分
+    if (sanitized.contains('/')) {
+      sanitized = sanitized.split('/').first;
+    }
+
+    // 移除可能的查询参数或锚点
+    if (sanitized.contains('?')) {
+      sanitized = sanitized.split('?').first;
+    }
+    if (sanitized.contains('#')) {
+      sanitized = sanitized.split('#').first;
+    }
+
+    logger.debug('Sanitized host: $host -> $sanitized');
+    return sanitized;
   }
 }
 

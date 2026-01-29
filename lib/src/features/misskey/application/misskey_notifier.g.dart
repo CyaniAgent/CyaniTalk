@@ -52,7 +52,7 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'6bf8c5e11fc8fe9f82103ac83f3037d33ae783ac';
+    r'6617cd0b5191ed1a0c7d1cd000f30cf197d8908c';
 
 final class MisskeyTimelineNotifierFamily extends $Family
     with
@@ -188,7 +188,7 @@ final class MisskeyChannelTimelineNotifierProvider
 }
 
 String _$misskeyChannelTimelineNotifierHash() =>
-    r'fea98bfabcdbf17f0c8038d6ef48e4a8230f4158';
+    r'c017a133f6747f1334b952738b14fb95918dca6a';
 
 final class MisskeyChannelTimelineNotifierFamily extends $Family
     with

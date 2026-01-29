@@ -307,8 +307,17 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     final host = _misskeyHostController.text.trim();
     if (host.isEmpty) return;
 
+    // Preliminary check for protocol
+    String displayHost = host;
+    if (host.contains('://')) {
+      displayHost = host.split('://').last;
+    }
+    if (displayHost.contains('/')) {
+      displayHost = displayHost.split('/').first;
+    }
+
     logger.info(
-      'AddAccountDialog: Starting Misskey authentication for host: $host',
+      'AddAccountDialog: Starting Misskey authentication for host: $displayHost',
     );
     setState(() => _loading = true);
     try {
@@ -488,10 +497,13 @@ class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
                         SnackBar(
                           content: Text(
                             'auth_failed'.tr(
-                              namedArgs: {'error': e.toString()},
+                              namedArgs: {
+                                'error':
+                                    'Please make sure you have approved the application in your browser before clicking Done.',
+                              },
                             ),
                           ),
-                          duration: const Duration(seconds: 5),
+                          duration: const Duration(seconds: 8),
                           action: SnackBarAction(
                             label: 'auth_retry'.tr(),
                             onPressed: () {}, // User can just click Done again

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MisskeyUser {
 
- String get id; String? get name; String get username; String? get host; String? get avatarUrl; bool get isAdmin; bool get isModerator; bool get isBot; bool get isCat;
+ String get id; String? get name; String get username; String? get host; String? get avatarUrl; bool get isAdmin; bool get isModerator; bool get isBot; bool get isCat; int? get driveCapacityMb; int? get driveUsage;
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $MisskeyUserCopyWith<MisskeyUser> get copyWith => _$MisskeyUserCopyWithImpl<Miss
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,username,host,avatarUrl,isAdmin,isModerator,isBot,isCat);
+int get hashCode => Object.hash(runtimeType,id,name,username,host,avatarUrl,isAdmin,isModerator,isBot,isCat,driveCapacityMb,driveUsage);
 
 @override
 String toString() {
-  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat)';
+  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $MisskeyUserCopyWith<$Res>  {
   factory $MisskeyUserCopyWith(MisskeyUser value, $Res Function(MisskeyUser) _then) = _$MisskeyUserCopyWithImpl;
 @useResult
 $Res call({
- String id, String? name, String username, String? host, String? avatarUrl, bool isAdmin, bool isModerator, bool isBot, bool isCat
+ String id, String? name, String username, String? host, String? avatarUrl, bool isAdmin, bool isModerator, bool isBot, bool isCat, int? driveCapacityMb, int? driveUsage
 });
 
 
@@ -65,7 +65,7 @@ class _$MisskeyUserCopyWithImpl<$Res>
 
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,9 @@ as String?,isAdmin: null == isAdmin ? _self.isAdmin : isAdmin // ignore: cast_nu
 as bool,isModerator: null == isModerator ? _self.isModerator : isModerator // ignore: cast_nullable_to_non_nullable
 as bool,isBot: null == isBot ? _self.isBot : isBot // ignore: cast_nullable_to_non_nullable
 as bool,isCat: null == isCat ? _self.isCat : isCat // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,driveCapacityMb: freezed == driveCapacityMb ? _self.driveCapacityMb : driveCapacityMb // ignore: cast_nullable_to_non_nullable
+as int?,driveUsage: freezed == driveUsage ? _self.driveUsage : driveUsage // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -161,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MisskeyUser() when $default != null:
-return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat);case _:
+return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage);case _:
   return orElse();
 
 }
@@ -182,10 +184,10 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage)  $default,) {final _that = this;
 switch (_that) {
 case _MisskeyUser():
-return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat);case _:
+return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +204,10 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage)?  $default,) {final _that = this;
 switch (_that) {
 case _MisskeyUser() when $default != null:
-return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat);case _:
+return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage);case _:
   return null;
 
 }
@@ -217,7 +219,7 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 @JsonSerializable()
 
 class _MisskeyUser implements MisskeyUser {
-  const _MisskeyUser({required this.id, this.name, required this.username, this.host, this.avatarUrl, this.isAdmin = false, this.isModerator = false, this.isBot = false, this.isCat = false});
+  const _MisskeyUser({required this.id, this.name, required this.username, this.host, this.avatarUrl, this.isAdmin = false, this.isModerator = false, this.isBot = false, this.isCat = false, this.driveCapacityMb, this.driveUsage});
   factory _MisskeyUser.fromJson(Map<String, dynamic> json) => _$MisskeyUserFromJson(json);
 
 @override final  String id;
@@ -229,6 +231,8 @@ class _MisskeyUser implements MisskeyUser {
 @override@JsonKey() final  bool isModerator;
 @override@JsonKey() final  bool isBot;
 @override@JsonKey() final  bool isCat;
+@override final  int? driveCapacityMb;
+@override final  int? driveUsage;
 
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
@@ -243,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,username,host,avatarUrl,isAdmin,isModerator,isBot,isCat);
+int get hashCode => Object.hash(runtimeType,id,name,username,host,avatarUrl,isAdmin,isModerator,isBot,isCat,driveCapacityMb,driveUsage);
 
 @override
 String toString() {
-  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat)';
+  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage)';
 }
 
 
@@ -263,7 +267,7 @@ abstract mixin class _$MisskeyUserCopyWith<$Res> implements $MisskeyUserCopyWith
   factory _$MisskeyUserCopyWith(_MisskeyUser value, $Res Function(_MisskeyUser) _then) = __$MisskeyUserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? name, String username, String? host, String? avatarUrl, bool isAdmin, bool isModerator, bool isBot, bool isCat
+ String id, String? name, String username, String? host, String? avatarUrl, bool isAdmin, bool isModerator, bool isBot, bool isCat, int? driveCapacityMb, int? driveUsage
 });
 
 
@@ -280,7 +284,7 @@ class __$MisskeyUserCopyWithImpl<$Res>
 
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,}) {
   return _then(_MisskeyUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -291,7 +295,9 @@ as String?,isAdmin: null == isAdmin ? _self.isAdmin : isAdmin // ignore: cast_nu
 as bool,isModerator: null == isModerator ? _self.isModerator : isModerator // ignore: cast_nullable_to_non_nullable
 as bool,isBot: null == isBot ? _self.isBot : isBot // ignore: cast_nullable_to_non_nullable
 as bool,isCat: null == isCat ? _self.isCat : isCat // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,driveCapacityMb: freezed == driveCapacityMb ? _self.driveCapacityMb : driveCapacityMb // ignore: cast_nullable_to_non_nullable
+as int?,driveUsage: freezed == driveUsage ? _self.driveUsage : driveUsage // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

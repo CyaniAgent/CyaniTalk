@@ -1,20 +1,105 @@
+import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/misskey_repository.dart';
 import '../domain/note.dart';
 import '../domain/channel.dart';
+import 'misskey_streaming_service.dart';
 import '../../../core/core.dart';
 
 part 'misskey_notifier.g.dart';
 
 @riverpod
 class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
+  Timer? _validationTimer;
+
   @override
   FutureOr<List<Note>> build(String type) async {
     logger.info('初始化Misskey时间线，类型: $type');
+
+    // Subscribe to this timeline via WebSocket
+    final streamingService = ref.watch(
+      misskeyStreamingServiceProvider.notifier,
+    );
+    streamingService.subscribeToTimeline(type);
+
+    // Initial fetch from REST API
     final repository = ref.watch(misskeyRepositoryProvider);
     final notes = await repository.getTimeline(type);
+
+    // Listening to the note stream from the streaming service
+    final subscription = streamingService.noteStream.listen((event) {
+      if (event.isDelete) {
+        _handleDeleteNote(event.noteId!);
+      } else if (event.timelineType == type) {
+        _handleNewNote(event.note!);
+      }
+    });
+
+    ref.onDispose(() {
+      subscription.cancel();
+      _validationTimer?.cancel();
+    });
+
+    // Start periodic validation to detect deleted notes
+    _startPeriodicValidation();
+
     logger.info('Misskey时间线初始化完成，加载了 ${notes.length} 条笔记');
     return notes;
+  }
+
+  void _startPeriodicValidation() {
+    _validationTimer?.cancel();
+    _validationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      _validateNotes();
+    });
+  }
+
+  Future<void> _validateNotes() async {
+    if (!ref.mounted) return;
+
+    final currentNotes = state.value ?? [];
+    if (currentNotes.isEmpty) return;
+
+    // Check the top 10 most recent notes
+    final notesToCheck = currentNotes.take(10).toList();
+
+    for (final note in notesToCheck) {
+      if (!ref.mounted) return;
+
+      try {
+        final exists = await ref
+            .read(misskeyRepositoryProvider)
+            .checkNoteExists(note.id);
+        if (!exists && ref.mounted) {
+          logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
+          _handleDeleteNote(note.id);
+        }
+      } catch (e) {
+        logger.error('Misskey时间线: 验证笔记失败: ${note.id}', e);
+      }
+    }
+  }
+
+  void _handleNewNote(Note note) {
+    if (!ref.mounted) return;
+
+    final currentNotes = state.value ?? [];
+
+    // Avoid duplicates
+    if (currentNotes.any((n) => n.id == note.id)) return;
+
+    logger.debug('Misskey时间线收到实时笔记: ${note.id}');
+    state = AsyncData([note, ...currentNotes]);
+  }
+
+  void _handleDeleteNote(String noteId) {
+    if (!ref.mounted) return;
+
+    final currentNotes = state.value ?? [];
+    if (!currentNotes.any((n) => n.id == noteId)) return;
+
+    logger.debug('Misskey时间线删除笔记: $noteId');
+    state = AsyncData(currentNotes.where((n) => n.id != noteId).toList());
   }
 
   Future<void> refresh() async {
@@ -33,7 +118,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       logger.debug('Misskey时间线正在加载中，跳过加载更多');
       return;
     }
-    
+
     final currentNotes = state.value ?? [];
     if (currentNotes.isEmpty) {
       logger.debug('Misskey时间线为空，跳过加载更多');
@@ -42,10 +127,13 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
     final lastId = currentNotes.last.id;
     logger.info('加载更多Misskey时间线内容，类型: $type, 最后笔记ID: $lastId');
-    
+
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
       final newNotes = await repository.getTimeline(type, untilId: lastId);
+
+      if (!ref.mounted) return currentNotes;
+
       logger.info('Misskey时间线加载更多完成，新增 ${newNotes.length} 条笔记');
       return [...currentNotes, ...newNotes];
     });
@@ -102,7 +190,7 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
       logger.debug('Misskey频道时间线正在加载中，跳过加载更多');
       return;
     }
-    
+
     final currentNotes = state.value ?? [];
     if (currentNotes.isEmpty) {
       logger.debug('Misskey频道时间线为空，跳过加载更多');
@@ -111,10 +199,16 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
 
     final lastId = currentNotes.last.id;
     logger.info('加载更多Misskey频道时间线内容，频道ID: $channelId, 最后笔记ID: $lastId');
-    
+
     state = await AsyncValue.guard(() async {
       final repository = ref.read(misskeyRepositoryProvider);
-      final newNotes = await repository.getChannelTimeline(channelId, untilId: lastId);
+      final newNotes = await repository.getChannelTimeline(
+        channelId,
+        untilId: lastId,
+      );
+
+      if (!ref.mounted) return currentNotes;
+
       logger.info('Misskey频道时间线加载更多完成，新增 ${newNotes.length} 条笔记');
       return [...currentNotes, ...newNotes];
     });

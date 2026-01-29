@@ -94,7 +94,7 @@ final class FlarumRepositoryProvider
   }
 }
 
-String _$flarumRepositoryHash() => r'4bf5ee3dbf6603ed63bcb4b53ed320df1fb27370';
+String _$flarumRepositoryHash() => r'eeaaaa107775358c8d6cfba5efe9015d65516f9a';
 
 @ProviderFor(forumInfo)
 final forumInfoProvider = ForumInfoProvider._();
