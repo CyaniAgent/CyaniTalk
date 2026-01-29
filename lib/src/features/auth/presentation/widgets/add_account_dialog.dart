@@ -307,22 +307,31 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     final host = _misskeyHostController.text.trim();
     if (host.isEmpty) return;
 
-    logger.info('AddAccountDialog: Starting Misskey authentication for host: $host');
+    logger.info(
+      'AddAccountDialog: Starting Misskey authentication for host: $host',
+    );
     setState(() => _loading = true);
     try {
       final session = await ref
           .read(authServiceProvider.notifier)
           .startMiAuth(host);
       if (mounted) {
-        logger.info('AddAccountDialog: Successfully started MiAuth for host: $host');
+        logger.info(
+          'AddAccountDialog: Successfully started MiAuth for host: $host',
+        );
         Navigator.pop(context);
         _showCheckAuthDialog(context, ref, host, session);
       }
     } catch (e) {
-      logger.error('AddAccountDialog: Error starting Misskey authentication for host: $host', e);
+      logger.error(
+        'AddAccountDialog: Error starting Misskey authentication for host: $host',
+        e,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth_error'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+            content: Text('auth_error'.tr(namedArgs: {'error': e.toString()})),
+          ),
         );
       }
     } finally {
@@ -337,24 +346,33 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
 
     if (host.isEmpty || user.isEmpty || password.isEmpty) return;
 
-    logger.info('AddAccountDialog: Starting Flarum login for host: $host, user: $user');
+    logger.info(
+      'AddAccountDialog: Starting Flarum login for host: $host, user: $user',
+    );
     setState(() => _loading = true);
     try {
       await ref
           .read(authServiceProvider.notifier)
           .loginToFlarum(host, user, password);
       if (mounted) {
-        logger.info('AddAccountDialog: Successfully logged in to Flarum for host: $host');
+        logger.info(
+          'AddAccountDialog: Successfully logged in to Flarum for host: $host',
+        );
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('auth_flarum_linked'.tr())));
         Navigator.pop(context);
       }
     } catch (e) {
-      logger.error('AddAccountDialog: Error logging in to Flarum for host: $host', e);
+      logger.error(
+        'AddAccountDialog: Error logging in to Flarum for host: $host',
+        e,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth_error'.tr(args: [e.toString()]))),
+          SnackBar(
+            content: Text('auth_error'.tr(namedArgs: {'error': e.toString()})),
+          ),
         );
       }
     } finally {
@@ -371,7 +389,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     try {
       await FlarumApi().saveEndpoint(url);
       if (mounted) {
-        logger.info('AddAccountDialog: Successfully added Flarum endpoint: $url');
+        logger.info(
+          'AddAccountDialog: Successfully added Flarum endpoint: $url',
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('auth_flarum_endpoint_added'.tr())),
         );
@@ -381,7 +401,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       logger.error('AddAccountDialog: Error adding Flarum endpoint: $url', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth_error'.tr(args: [e.toString()]))),
+          SnackBar(
+            content: Text('auth_error'.tr(namedArgs: {'error': e.toString()})),
+          ),
         );
       }
     } finally {
@@ -423,17 +445,23 @@ class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
       content: Text('auth_authorization_instructions'.tr()),
       actions: [
         TextButton(
-          onPressed: _loading ? null : () {
-            logger.info('CheckAuthDialog: Cancelling authentication process');
-            Navigator.pop(context);
-          },
+          onPressed: _loading
+              ? null
+              : () {
+                  logger.info(
+                    'CheckAuthDialog: Cancelling authentication process',
+                  );
+                  Navigator.pop(context);
+                },
           child: Text('auth_cancel'.tr()),
         ),
         FilledButton(
           onPressed: _loading
               ? null
               : () async {
-                  logger.info('CheckAuthDialog: Checking MiAuth status for host: ${widget.host}');
+                  logger.info(
+                    'CheckAuthDialog: Checking MiAuth status for host: ${widget.host}',
+                  );
                   setState(() => _loading = true);
                   final isMounted = mounted;
                   final dialogContext = context;
@@ -442,18 +470,27 @@ class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
                         .read(authServiceProvider.notifier)
                         .checkMiAuth(widget.host, widget.session);
                     if (isMounted) {
-                      logger.info('CheckAuthDialog: MiAuth successful for host: ${widget.host}');
+                      logger.info(
+                        'CheckAuthDialog: MiAuth successful for host: ${widget.host}',
+                      );
                       // ignore: use_build_context_synchronously
                       Navigator.pop(dialogContext);
                     }
                   } catch (e) {
-                    logger.error('CheckAuthDialog: MiAuth failed for host: ${widget.host}', e);
+                    logger.error(
+                      'CheckAuthDialog: MiAuth failed for host: ${widget.host}',
+                      e,
+                    );
                     setState(() => _loading = false);
                     if (isMounted) {
                       // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(dialogContext).showSnackBar(
                         SnackBar(
-                          content: Text('auth_failed'.tr(namedArgs: {'error': e.toString()})),
+                          content: Text(
+                            'auth_failed'.tr(
+                              namedArgs: {'error': e.toString()},
+                            ),
+                          ),
                           duration: const Duration(seconds: 5),
                           action: SnackBarAction(
                             label: 'auth_retry'.tr(),

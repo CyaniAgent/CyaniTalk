@@ -162,7 +162,7 @@
   "auth_login": "Log in",
   "auth_flarum_server_url": "Server URL (e.g. https://flarum.org)",
   "auth_add_endpoint": "Add Endpoint",
-  "auth_error": "Error: {0}",
+  "auth_error": "Error: {error}",
   "auth_flarum_linked": "Flarum account linked successfully!",
   "auth_flarum_endpoint_added": "Flarum endpoint added successfully!",
   "auth_waiting_authorization": "Waiting for Authorization",

@@ -14,121 +14,160 @@ class NoteCard extends ConsumerWidget {
     final text = note.text;
     final cw = note.cw;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundImage: user?.avatarUrl != null
-                      ? NetworkImage(user!.avatarUrl!)
-                      : null,
-                  child: user?.avatarUrl == null
-                      ? Text(user?.username[0].toUpperCase() ?? '?')
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user?.name ?? user?.username ?? 'Unknown',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  _formatTime(note.createdAt),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+    return RepaintBoundary(
+      child: Semantics(
+        label: 'Note by ${user?.username}',
+        value: text ?? cw,
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
             ),
-            const SizedBox(height: 12),
-            if (cw != null) ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded, size: 16),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(cw)),
-                    const Icon(Icons.keyboard_arrow_down, size: 16),
+                    Semantics(
+                      label: 'Avatar for ${user?.username}',
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundImage: user?.avatarUrl != null
+                            ? NetworkImage(user!.avatarUrl!)
+                            : null,
+                        child: user?.avatarUrl == null
+                            ? Text(user?.username[0].toUpperCase() ?? '?')
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Semantics(
+                            label: 'User name',
+                            child: Text(
+                              user?.name ?? user?.username ?? 'Unknown',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Semantics(
+                            label: 'User handle',
+                            child: Text(
+                              '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Post time',
+                      child: Text(
+                        _formatTime(note.createdAt),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 8),
-            ] else if (text != null)
-              Text(text),
-            
-            if (note.files.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    height: 200,
-                    width: double.infinity,
-                    child: const Center(child: Icon(Icons.image_outlined, size: 48)),
+                const SizedBox(height: 12),
+                if (cw != null) ...[
+                  Semantics(
+                    label: 'Content warning',
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(cw)),
+                          const Icon(Icons.keyboard_arrow_down, size: 16),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildAction(
-                  context,
-                  Icons.reply,
-                  note.repliesCount.toString(),
-                  () => _handleReply(context, ref),
-                ),
-                _buildAction(
-                  context,
-                  Icons.repeat,
-                  note.renoteCount.toString(),
-                  () => _handleRenote(context, ref),
-                ),
-                _buildAction(
-                  context,
-                  Icons.add_reaction_outlined,
-                  note.reactions.length.toString(),
-                  () => _handleReaction(context, ref),
-                ),
-                _buildAction(
-                  context,
-                  Icons.share_outlined,
-                  "",
-                  () => _handleShare(context),
+                  const SizedBox(height: 8),
+                ] else if (text != null)
+                  Semantics(
+                    label: 'Note content',
+                    child: Text(text),
+                  ),
+                
+                if (note.files.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: Semantics(
+                      label: 'Attached files',
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          height: 200,
+                          width: double.infinity,
+                          child: const Center(child: Icon(Icons.image_outlined, size: 48)),
+                        ),
+                      ),
+                    ),
+                  ),
+                
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Semantics(
+                      label: 'Reply button',
+                      child: _buildAction(
+                        context,
+                        Icons.reply,
+                        note.repliesCount.toString(),
+                        () => _handleReply(context, ref),
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Renote button',
+                      child: _buildAction(
+                        context,
+                        Icons.repeat,
+                        note.renoteCount.toString(),
+                        () => _handleRenote(context, ref),
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Reaction button',
+                      child: _buildAction(
+                        context,
+                        Icons.add_reaction_outlined,
+                        note.reactions.length.toString(),
+                        () => _handleReaction(context, ref),
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Share button',
+                      child: _buildAction(
+                        context,
+                        Icons.share_outlined,
+                        "",
+                        () => _handleShare(context),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
