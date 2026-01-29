@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../misskey/application/drive_notifier.dart';
 import '../../misskey/domain/drive_file.dart';
 import '../../misskey/domain/drive_folder.dart';
@@ -24,11 +24,11 @@ class CloudPage extends ConsumerWidget {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Cloud Storage'),
+          title: Text('cloud_storage_title'.tr()),
           actions: [
             IconButton(
               icon: const Icon(Icons.bug_report_outlined),
-              tooltip: 'Debug: Show Raw Info',
+              tooltip: 'cloud_debug_show_raw_info'.tr(),
               onPressed: () =>
                   _showRawDebugInfo(context, ref, driveState.value),
             ),
@@ -60,7 +60,7 @@ class CloudPage extends ConsumerWidget {
         bottomNavigationBar: driveState.when(
           data: (state) => _buildDriveSpace(context, state),
           loading: () => null,
-          error: (_, __) => null,
+          error: (_, _) => null,
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _showAddOptions(context, ref),
@@ -87,7 +87,7 @@ class CloudPage extends ConsumerWidget {
         itemBuilder: (context, index) {
           final isLast = index == state.breadcrumbs.length;
           final title = index == 0
-              ? 'Drive'
+              ? 'cloud_drive'.tr()
               : state.breadcrumbs[index - 1].name;
 
           return TextButton(
@@ -161,14 +161,14 @@ class CloudPage extends ConsumerWidget {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.cloud_off, size: 64, color: Colors.grey),
           SizedBox(height: 16),
           Text(
-            'No files or folders found',
+            'cloud_no_files_or_folders'.tr(),
             style: TextStyle(color: Colors.grey),
           ),
         ],
@@ -195,7 +195,7 @@ class CloudPage extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Drive Space',
+                'cloud_drive_space'.tr(),
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -241,7 +241,7 @@ class CloudPage extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.create_new_folder),
-              title: const Text('Create Folder'),
+              title: Text('cloud_create_folder'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 _showCreateFolderDialog(context, ref);
@@ -249,7 +249,7 @@ class CloudPage extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.upload_file),
-              title: const Text('Upload File'),
+              title: Text('cloud_upload_file'.tr()),
               onTap: () {
                 Navigator.pop(context);
                 // Implementation for picking and uploading file
@@ -266,16 +266,16 @@ class CloudPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('New Folder'),
+        title: Text('cloud_new_folder'.tr()),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: 'Folder name'),
+          decoration: InputDecoration(hintText: 'cloud_folder_name'.tr()),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('cloud_cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
@@ -286,7 +286,7 @@ class CloudPage extends ConsumerWidget {
               }
               Navigator.pop(context);
             },
-            child: const Text('Create'),
+            child: Text('cloud_create'.tr()),
           ),
         ],
       ),
@@ -302,7 +302,10 @@ class CloudPage extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete', style: TextStyle(color: Colors.red)),
+              title: Text(
+                'cloud_delete'.tr(),
+                style: TextStyle(color: Colors.red),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 if (item.isFolder) {
@@ -330,7 +333,7 @@ class CloudPage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Debug: Raw Drive Data'),
+        title: Text('cloud_debug_raw_data'.tr()),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,8 +342,8 @@ class CloudPage extends ConsumerWidget {
               Text('driveCapacityMb: ${state?.driveCapacityMb} MB'),
               Text('driveUsage: ${state?.driveUsage} bytes'),
               const Divider(),
-              const Text(
-                'Check console logs for raw JSON response from /api/i and /api/drive.',
+              Text(
+                'cloud_debug_check_console'.tr(),
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
@@ -349,7 +352,7 @@ class CloudPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text('cloud_close'.tr()),
           ),
         ],
       ),
@@ -368,7 +371,7 @@ class _DriveItem {
   String get name => isFolder ? folder!.name : file!.name;
   String get subtitle {
     if (isFolder) {
-      return 'Folder • ${DateFormat.yMd().format(folder!.createdAt)}';
+      return '${'cloud_folder'.tr()} • ${DateFormat.yMd().format(folder!.createdAt)}';
     }
     final sizeStr = _formatBytes(file!.size.toDouble());
     return '$sizeStr • ${DateFormat.yMd().format(file!.createdAt)}';

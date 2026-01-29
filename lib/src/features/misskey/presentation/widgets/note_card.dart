@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../domain/note.dart';
 import '../../data/misskey_repository.dart';
 import 'retryable_network_image.dart';
@@ -245,13 +246,13 @@ class NoteCard extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Renoted successfully!')));
+        ).showSnackBar(SnackBar(content: Text('note_renoted_successfully'.tr())));
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to renote: $e')));
+        ).showSnackBar(SnackBar(content: Text('note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}))));
       }
     }
   }
@@ -261,16 +262,16 @@ class NoteCard extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reply'),
+        title: Text('note_reply'.tr()),
         content: TextField(
           controller: textController,
-          decoration: const InputDecoration(hintText: 'What\'s on your mind?'),
+          decoration: InputDecoration(hintText: 'note_what_on_your_mind'.tr()),
           maxLines: 3,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('note_cancel'.tr()),
           ),
           FilledButton(
             onPressed: () async {
@@ -282,17 +283,17 @@ class NoteCard extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(
                     context,
-                  ).showSnackBar(const SnackBar(content: Text('Reply sent!')));
+                  ).showSnackBar(SnackBar(content: Text('note_reply_sent'.tr())));
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to reply: $e')),
+                    SnackBar(content: Text('note_failed_to_reply'.tr(namedArgs: {'error': e.toString()}))),
                   );
                 }
               }
             },
-            child: const Text('Reply'),
+            child: Text('note_reply'.tr()),
           ),
         ],
       ),
@@ -306,13 +307,13 @@ class NoteCard extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Reaction added!')));
+        ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr())));
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Failed to react: $e')));
+        ).showSnackBar(SnackBar(content: Text('note_failed_to_react'.tr(namedArgs: {'error': e.toString()}))));
       }
     }
   }
@@ -320,7 +321,7 @@ class NoteCard extends ConsumerWidget {
   void _handleShare(BuildContext context) {
     // Placeholder for share functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share functionality coming soon!')),
+      SnackBar(content: Text('note_share_coming_soon'.tr())),
     );
   }
 }
