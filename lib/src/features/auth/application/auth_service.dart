@@ -107,111 +107,127 @@ class AuthService extends _$AuthService {
 
   /// 成功时保存账户信息并刷新状态，失败时抛出异常
 
+  /// 检查Misskey MiAuth认证状态
+  ///
+  /// [host] - Misskey实例的主机地址
+  /// [session] - 认证会话ID
+  ///
+  /// 成功时保存账户信息并刷新状态，失败时抛出异常
   Future<void> checkMiAuth(String host, String session) async {
     final sanitizedHost = _sanitizeHost(host);
     logger.info('检查Misskey MiAuth认证状态，主机: $sanitizedHost');
-    // 稍微等待，确保服务器已经处理了授权
-    logger.debug('等待500毫秒确保服务器处理授权');
-    await Future.delayed(const Duration(milliseconds: 500));
 
     final dio = Dio(
       BaseOptions(
         baseUrl: 'https://$sanitizedHost',
-
         connectTimeout: const Duration(seconds: 10),
-
         receiveTimeout: const Duration(seconds: 10),
-
-        headers: {'User-Agent': 'CyaniTalk/1.0.0'},
+        headers: {
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+        },
       ),
     );
 
-    try {
-      logger.debug('发送MiAuth状态检查请求: /api/miauth/$session/check');
-      // 显式传递空对象，确保某些严格的服务器不会报错
-      final response = await dio.post('/api/miauth/$session/check', data: {});
-      logger.debug('收到MiAuth状态检查响应');
+    int retryCount = 0;
+    const maxRetries = 3;
 
-      final data = response.data;
-      logger.debug('MiAuth响应数据: $data');
-
-      if (data is Map && data['ok'] == true) {
-        final token = data['token'];
-        final user = data['user'];
-
-        if (token == null || user == null) {
-          logger.error('MiAuth响应缺少必要字段 (token或user)');
-          throw Exception('MiAuth响应缺少必要字段 (token或user)');
-        }
-
-        final accountId = '${user['id']}@$sanitizedHost';
-        logger.info('MiAuth认证成功，用户: ${user['username']}, 账户ID: $accountId');
-
-        final repository = ref.read(authRepositoryProvider);
-        final accounts = await repository.getAccounts();
-
-        final existingAccount = accounts
-            .where((a) => a.id == accountId)
-            .firstOrNull;
-
-        if (existingAccount == null) {
-          final misskeyAccounts = accounts
-              .where((a) => a.platform == 'misskey')
-              .length;
-
-          logger.info('当前Misskey账户数量: $misskeyAccounts');
-          if (misskeyAccounts >= 10) {
-            logger.warning('Misskey账户数量达到上限 (10个)');
-            throw Exception(
-              'You have reached the limit of 10 Misskey accounts.',
-            );
-          }
-          logger.info('创建新的Misskey账户');
+    while (retryCount < maxRetries) {
+      try {
+        if (retryCount > 0) {
+          logger.debug('重试检查MiAuth状态 (${retryCount + 1}/$maxRetries)...');
+          await Future.delayed(const Duration(seconds: 1));
         } else {
-          logger.info('更新现有Misskey账户');
+          // Initial wait
+          await Future.delayed(const Duration(milliseconds: 500));
         }
 
-        final account = Account(
-          id: accountId, // 复合ID
-          platform: 'misskey',
-          host: sanitizedHost,
-          username: user['username'],
-          avatarUrl: user['avatarUrl'],
-          token: token,
+        logger.debug('发送MiAuth状态检查请求: /api/miauth/$session/check');
+        final response = await dio.post('/api/miauth/$session/check', data: {});
+        logger.debug('收到MiAuth状态检查响应');
+
+        final data = response.data;
+        // Check for both 'ok' field and strict 'true' value
+        if (data is Map && data['ok'] == true) {
+          await _handleSuccessfulAuth(data, sanitizedHost);
+          return;
+        } else {
+          // If 'ok' is false, it might mean 'pending' or 'denied'.
+          // However, Misskey API usually returns ok: true if authorized, and separate error otherwise?
+          // Actually, if it's still pending, it might just return ok: false or error.
+          // We will retry if it's likely a timing issue, or throw if it's definitive.
+          logger.debug('MiAuth检查未通过: $data');
+        }
+      } on DioException catch (e) {
+        logger.warning(
+          '检查MiAuth HTTP错误 (Attempt ${retryCount + 1}): ${e.message}',
         );
-
-        logger.debug('保存账户信息');
-        await repository.saveAccount(account);
-
-        // Automatically select the new account
-        logger.debug('自动选择新账户');
-        await ref.read(selectedMisskeyAccountProvider.notifier).select(account);
-
-        // Upate state without re-initializing the whole Notifier
-        logger.debug('更新认证服务状态');
-        final updatedAccounts = await repository.getAccounts();
-        state = AsyncData(updatedAccounts);
-
-        logger.info('Misskey MiAuth认证流程完成');
-      } else {
-        final errorMsg = data is Map ? data['error'] ?? '未授予令牌' : '响应格式错误';
-        logger.error('MiAuth检查失败: $errorMsg');
-        throw Exception('MiAuth检查失败: $errorMsg (Data: $data)');
+        if (e.response != null) {
+          logger.warning('Response Body: ${e.response?.data}');
+        }
+        // Don't rethrow immediately on network glitches, try again
+      } catch (e) {
+        logger.error('检查MiAuth非预期错误: $e');
       }
-    } on DioException catch (e) {
-      final statusCode = e.response?.statusCode;
-      final responseData = e.response?.data;
-      logger.error('检查MiAuth失败 (HTTP $statusCode): ${e.message}', e);
-      throw Exception(
-        '检查MiAuth失败 (HTTP $statusCode): ${e.message} \nResponse: $responseData',
-      );
-    } catch (e) {
-      if (e.toString().contains('limit of 10')) {
-        rethrow;
-      }
-      logger.error('检查MiAuth时发生意外错误: $e', e);
-      throw Exception('检查MiAuth时发生意外错误: $e');
+
+      retryCount++;
     }
+
+    throw Exception('无法完成认证，请确认您已在浏览器中批准授权。');
+  }
+
+  Future<void> _handleSuccessfulAuth(
+    Map<dynamic, dynamic> data,
+    String sanitizedHost,
+  ) async {
+    final token = data['token'];
+    final user = data['user'];
+
+    if (token == null || user == null) {
+      logger.error('MiAuth响应缺少必要字段 (token或user)');
+      throw Exception('MiAuth响应缺少必要字段 (token或user)');
+    }
+
+    final accountId = '${user['id']}@$sanitizedHost';
+    logger.info('MiAuth认证成功，用户: ${user['username']}, 账户ID: $accountId');
+
+    final repository = ref.read(authRepositoryProvider);
+    final accounts = await repository.getAccounts();
+
+    final existingAccount = accounts
+        .where((a) => a.id == accountId)
+        .firstOrNull;
+
+    if (existingAccount == null) {
+      final misskeyAccounts = accounts
+          .where((a) => a.platform == 'misskey')
+          .length;
+
+      if (misskeyAccounts >= 10) {
+        logger.warning('Misskey账户数量达到上限 (10个)');
+        throw Exception('You have reached the limit of 10 Misskey accounts.');
+      }
+    }
+
+    final account = Account(
+      id: accountId, // 复合ID
+      platform: 'misskey',
+      host: sanitizedHost,
+      username: user['username'],
+      avatarUrl: user['avatarUrl'],
+      token: token,
+    );
+
+    await repository.saveAccount(account);
+
+    // Automatically select the new account
+    await ref.read(selectedMisskeyAccountProvider.notifier).select(account);
+
+    // Upate state without re-initializing the whole Notifier
+    final updatedAccounts = await repository.getAccounts();
+    state = AsyncData(updatedAccounts);
+
+    logger.info('Misskey MiAuth认证流程完成');
   }
 
   /// 登录 Flarum 账户

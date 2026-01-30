@@ -267,6 +267,17 @@ class MisskeyRepository {
       return true; // Assume exists to avoid false deletions
     }
   }
+
+  /// Get the number of online users
+  Future<int> getOnlineUsersCount() async {
+    logger.debug('MisskeyRepository: Getting online users count');
+    try {
+      return await api.getOnlineUsersCount();
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting online users count', e);
+      rethrow;
+    }
+  }
 }
 
 @riverpod

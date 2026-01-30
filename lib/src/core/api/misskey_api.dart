@@ -13,7 +13,10 @@ class MisskeyApi {
         baseUrl: 'https://$host',
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
-        headers: {'User-Agent': 'CyaniTalk/1.0.0'},
+        headers: {
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+        },
       ),
     );
     logger.info('MisskeyApi: Initialized successfully');
@@ -425,6 +428,25 @@ class MisskeyApi {
       throw Exception('Failed to upload drive file: ${response.statusCode}');
     } catch (e) {
       logger.error('MisskeyApi: Error uploading drive file', e);
+      rethrow;
+    }
+  }
+
+  Future<int> getOnlineUsersCount() async {
+    try {
+      logger.debug('MisskeyApi: Fetching online users count');
+      final response = await _dio.post('/api/get-online-users-count', data: {});
+
+      if (response.statusCode == 200) {
+        final count = response.data['count'] as int;
+        logger.debug('MisskeyApi: Online users count: $count');
+        return count;
+      }
+      throw Exception(
+        'Failed to fetch online users count: ${response.statusCode}',
+      );
+    } catch (e) {
+      logger.error('MisskeyApi: Error fetching online users count', e);
       rethrow;
     }
   }

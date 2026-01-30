@@ -13,6 +13,7 @@ import '../../../core/services/search/global_search_delegate.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../routing/router.dart';
 import 'widgets/misskey_drawer.dart';
+import '../application/misskey_notifier.dart';
 import 'pages/misskey_timeline_page.dart';
 import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_antennas_page.dart';
@@ -154,7 +155,33 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              title: Text(_titles[_selectedIndex]),
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_titles[_selectedIndex]),
+                  if (_selectedIndex == 0) ...[
+                    const SizedBox(width: 8),
+                    ref
+                        .watch(misskeyOnlineUsersProvider)
+                        .when(
+                          data: (count) => Text(
+                            '• $count users online',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ).animate().fadeIn().scale(),
+                          loading: () => const SizedBox(
+                            width: 12,
+                            height: 12,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          error: (error, stack) => const SizedBox.shrink(),
+                        ),
+                  ],
+                ],
+              ),
               centerTitle: true,
               floating: true,
               pinned: true,

@@ -236,3 +236,48 @@ abstract class _$MisskeyChannelTimelineNotifier
     element.handleCreate(ref, () => build(_$args));
   }
 }
+
+@ProviderFor(MisskeyOnlineUsersNotifier)
+final misskeyOnlineUsersProvider = MisskeyOnlineUsersNotifierProvider._();
+
+final class MisskeyOnlineUsersNotifierProvider
+    extends $AsyncNotifierProvider<MisskeyOnlineUsersNotifier, int> {
+  MisskeyOnlineUsersNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'misskeyOnlineUsersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$misskeyOnlineUsersNotifierHash();
+
+  @$internal
+  @override
+  MisskeyOnlineUsersNotifier create() => MisskeyOnlineUsersNotifier();
+}
+
+String _$misskeyOnlineUsersNotifierHash() =>
+    r'd5e8aca3275917a62fbd5ff783fbbcb70cff882c';
+
+abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
+  FutureOr<int> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<int>, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<int>, int>,
+              AsyncValue<int>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

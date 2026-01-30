@@ -214,3 +214,27 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     });
   }
 }
+
+@riverpod
+class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
+  Timer? _timer;
+
+  @override
+  FutureOr<int> build() async {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+      if (!ref.mounted) return;
+      state = await AsyncValue.guard(() async {
+        final repository = ref.read(misskeyRepositoryProvider);
+        return await repository.getOnlineUsersCount();
+      });
+    });
+
+    ref.onDispose(() {
+      _timer?.cancel();
+    });
+
+    final repository = ref.read(misskeyRepositoryProvider);
+    return await repository.getOnlineUsersCount();
+  }
+}
