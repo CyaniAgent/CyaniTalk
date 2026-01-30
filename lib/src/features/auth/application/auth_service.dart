@@ -220,8 +220,10 @@ class AuthService extends _$AuthService {
 
     await repository.saveAccount(account);
 
-    // Automatically select the new account
-    await ref.read(selectedMisskeyAccountProvider.notifier).select(account);
+    // Automatically select the new account by saving the ID to repository
+    // We avoid calling the provider directly to prevent CircularDependencyError
+    // as SelectedMisskeyAccount depends on AuthService.
+    await repository.saveSelectedMisskeyId(account.id);
 
     // Upate state without re-initializing the whole Notifier
     final updatedAccounts = await repository.getAccounts();
@@ -313,7 +315,7 @@ class AuthService extends _$AuthService {
 
       // Automatically select the new account
       logger.debug('自动选择新Flarum账户');
-      await ref.read(selectedFlarumAccountProvider.notifier).select(account);
+      await repository.saveSelectedFlarumId(account.id);
 
       // 保存到 FlarumApi 的持久化存储中
       logger.debug('保存Flarum端点和令牌');
