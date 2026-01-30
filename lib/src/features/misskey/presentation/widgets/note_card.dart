@@ -4,6 +4,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../domain/note.dart';
 import '../../data/misskey_repository.dart';
 import 'retryable_network_image.dart';
+import 'audio_player_widget.dart';
+import '../pages/image_viewer_page.dart';
+import '../pages/video_player_page.dart';
 
 class NoteCard extends ConsumerWidget {
   final Note note;
@@ -128,25 +131,116 @@ class NoteCard extends ConsumerWidget {
                             padding: const EdgeInsets.only(top: 12.0),
                             child: Semantics(
                               label: 'Attached files',
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Column(
-                                  children: note.files.map((file) {
-                                    final url = file['url'] as String?;
-                                    if (url == null) {
-                                      return const SizedBox.shrink();
-                                    }
+                              child: Column(
+                                children: note.files.map((file) {
+                                  final url = file['url'] as String?;
+                                  final type = file['type'] as String?;
+                                  final name = file['name'] as String?;
+
+                                  if (url == null) {
+                                    return const SizedBox.shrink();
+                                  }
+
+                                  // Detect media type
+                                  final isImage = _isImageFile(type, url);
+                                  final isVideo = _isVideoFile(type, url);
+                                  final isAudio = _isAudioFile(type, url);
+
+                                  if (isAudio) {
+                                    // Audio player
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 8.0,
+                                      ),
+                                      child: AudioPlayerWidget(
+                                        audioUrl: url,
+                                        fileName: name,
+                                      ),
+                                    );
+                                  } else if (isVideo) {
+                                    // Video thumbnail
+                                    final thumbnailUrl =
+                                        file['thumbnailUrl'] as String? ?? url;
                                     return Padding(
                                       padding: const EdgeInsets.only(
                                         bottom: 4.0,
                                       ),
-                                      child: RetryableNetworkImage(
-                                        url: url,
-                                        fit: BoxFit.cover,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    VideoPlayerPage(
+                                                      videoUrl: url,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              RetryableNetworkImage(
+                                                url: thumbnailUrl,
+                                                fit: BoxFit.cover,
+                                              ),
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  12,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withOpacity(0.6),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.play_arrow,
+                                                  color: Colors.white,
+                                                  size: 48,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     );
-                                  }).toList(),
-                                ),
+                                  } else if (isImage) {
+                                    // Image thumbnail
+                                    final thumbnailUrl =
+                                        file['thumbnailUrl'] as String? ?? url;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 4.0,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ImageViewerPage(
+                                                      imageUrl: url,
+                                                      heroTag: 'image_$url',
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          child: Hero(
+                                            tag: 'image_$url',
+                                            child: RetryableNetworkImage(
+                                              url: thumbnailUrl,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return const SizedBox.shrink();
+                                }).toList(),
                               ),
                             ),
                           ),
@@ -237,6 +331,39 @@ class NoteCard extends ConsumerWidget {
     if (diff.inMinutes < 60) return '${diff.inMinutes}m';
     if (diff.inHours < 24) return '${diff.inHours}h';
     return '${diff.inDays}d';
+  }
+
+  bool _isImageFile(String? mimeType, String url) {
+    if (mimeType != null) {
+      if (mimeType.startsWith('image/')) return true;
+      if (mimeType.startsWith('video/') || mimeType.startsWith('audio/')) {
+        return false;
+      }
+    }
+    final ext = url.toLowerCase().split('.').last.split('?').first;
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].contains(ext);
+  }
+
+  bool _isVideoFile(String? mimeType, String url) {
+    if (mimeType != null) {
+      if (mimeType.startsWith('video/')) return true;
+      if (mimeType.startsWith('image/') || mimeType.startsWith('audio/')) {
+        return false;
+      }
+    }
+    final ext = url.toLowerCase().split('.').last.split('?').first;
+    return ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v'].contains(ext);
+  }
+
+  bool _isAudioFile(String? mimeType, String url) {
+    if (mimeType != null) {
+      if (mimeType.startsWith('audio/')) return true;
+      if (mimeType.startsWith('image/') || mimeType.startsWith('video/')) {
+        return false;
+      }
+    }
+    final ext = url.toLowerCase().split('.').last.split('?').first;
+    return ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'].contains(ext);
   }
 
   Future<void> _handleRenote(BuildContext context, WidgetRef ref) async {

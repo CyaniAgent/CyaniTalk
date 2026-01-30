@@ -86,6 +86,10 @@ dependencies:
   logger: ^2.3.0
   # 路径提供者库，用于获取应用的文档目录和临时目录
   path_provider: ^2.1.4
+  # 视频播放器库，支持多种视频格式和播放控制
+  video_player: ^2.9.2
+  # Windows平台视频播放器实现
+  video_player_win: ^2.3.11
 
 dev_dependencies:
   flutter_test:

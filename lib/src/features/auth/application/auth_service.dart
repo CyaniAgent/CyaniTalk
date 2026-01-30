@@ -73,14 +73,25 @@ class AuthService extends _$AuthService {
     });
 
     logger.debug('生成MiAuth URL: ${uri.toString()}');
-    if (await canLaunchUrl(uri)) {
-      logger.info('启动浏览器进行MiAuth授权');
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-      logger.info('MiAuth授权页面已打开，返回会话ID');
-      return session;
-    } else {
-      logger.error('无法启动MiAuth URL: ${uri.toString()}');
-      throw Exception('无法启动MiAuth URL');
+
+    // On some Android versions, canLaunchUrl might return false even if it works.
+    // We attempt to launch and catch errors for better reliability.
+    try {
+      logger.info('尝试启动浏览器进行MiAuth授权');
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) {
+        logger.info('MiAuth授权页面已成功打开');
+        return session;
+      } else {
+        logger.error('launchUrl 返回 false: ${uri.toString()}');
+        throw Exception('无法打开浏览器进行授权');
+      }
+    } catch (e) {
+      logger.error('启动MiAuth URL时发生错误: $e', e);
+      throw Exception('授权流程启动失败: 请检查您的设备是否安装了浏览器');
     }
   }
 
