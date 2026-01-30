@@ -65,7 +65,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   /// 对应页面的标题列表
   final List<String> _titles = [
     'misskey_page_timeline'.tr(),
-    'misskey_page_notes'.tr(),
+    'misskey_page_clips'.tr(),
     'misskey_page_antennas'.tr(),
     'misskey_page_channels'.tr(),
     'misskey_page_explore'.tr(),

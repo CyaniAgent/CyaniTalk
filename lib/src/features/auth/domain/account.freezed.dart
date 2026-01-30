@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$Account {
 
  String get id; String get platform;// 'misskey' or 'flarum'
- String get host; String? get username; String? get avatarUrl; String get token;
+ String get host; String? get username; String? get name; String? get avatarUrl; String get token;
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,16 +29,16 @@ $AccountCopyWith<Account> get copyWith => _$AccountCopyWithImpl<Account>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Account&&(identical(other.id, id) || other.id == id)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.host, host) || other.host == host)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.token, token) || other.token == token));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Account&&(identical(other.id, id) || other.id == id)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.host, host) || other.host == host)&&(identical(other.username, username) || other.username == username)&&(identical(other.name, name) || other.name == name)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.token, token) || other.token == token));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,platform,host,username,avatarUrl,token);
+int get hashCode => Object.hash(runtimeType,id,platform,host,username,name,avatarUrl,token);
 
 @override
 String toString() {
-  return 'Account(id: $id, platform: $platform, host: $host, username: $username, avatarUrl: $avatarUrl, token: $token)';
+  return 'Account(id: $id, platform: $platform, host: $host, username: $username, name: $name, avatarUrl: $avatarUrl, token: $token)';
 }
 
 
@@ -49,7 +49,7 @@ abstract mixin class $AccountCopyWith<$Res>  {
   factory $AccountCopyWith(Account value, $Res Function(Account) _then) = _$AccountCopyWithImpl;
 @useResult
 $Res call({
- String id, String platform, String host, String? username, String? avatarUrl, String token
+ String id, String platform, String host, String? username, String? name, String? avatarUrl, String token
 });
 
 
@@ -66,12 +66,13 @@ class _$AccountCopyWithImpl<$Res>
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? platform = null,Object? host = null,Object? username = freezed,Object? avatarUrl = freezed,Object? token = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? platform = null,Object? host = null,Object? username = freezed,Object? name = freezed,Object? avatarUrl = freezed,Object? token = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
 as String,host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
 as String,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
 as String,
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String platform,  String host,  String? username,  String? avatarUrl,  String token)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String platform,  String host,  String? username,  String? name,  String? avatarUrl,  String token)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Account() when $default != null:
-return $default(_that.id,_that.platform,_that.host,_that.username,_that.avatarUrl,_that.token);case _:
+return $default(_that.id,_that.platform,_that.host,_that.username,_that.name,_that.avatarUrl,_that.token);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.id,_that.platform,_that.host,_that.username,_that.avatarUr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String platform,  String host,  String? username,  String? avatarUrl,  String token)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String platform,  String host,  String? username,  String? name,  String? avatarUrl,  String token)  $default,) {final _that = this;
 switch (_that) {
 case _Account():
-return $default(_that.id,_that.platform,_that.host,_that.username,_that.avatarUrl,_that.token);case _:
+return $default(_that.id,_that.platform,_that.host,_that.username,_that.name,_that.avatarUrl,_that.token);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.id,_that.platform,_that.host,_that.username,_that.avatarUr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String platform,  String host,  String? username,  String? avatarUrl,  String token)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String platform,  String host,  String? username,  String? name,  String? avatarUrl,  String token)?  $default,) {final _that = this;
 switch (_that) {
 case _Account() when $default != null:
-return $default(_that.id,_that.platform,_that.host,_that.username,_that.avatarUrl,_that.token);case _:
+return $default(_that.id,_that.platform,_that.host,_that.username,_that.name,_that.avatarUrl,_that.token);case _:
   return null;
 
 }
@@ -215,7 +216,7 @@ return $default(_that.id,_that.platform,_that.host,_that.username,_that.avatarUr
 @JsonSerializable()
 
 class _Account implements Account {
-  const _Account({required this.id, required this.platform, required this.host, required this.username, required this.avatarUrl, required this.token});
+  const _Account({required this.id, required this.platform, required this.host, required this.username, required this.name, required this.avatarUrl, required this.token});
   factory _Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
 
 @override final  String id;
@@ -223,6 +224,7 @@ class _Account implements Account {
 // 'misskey' or 'flarum'
 @override final  String host;
 @override final  String? username;
+@override final  String? name;
 @override final  String? avatarUrl;
 @override final  String token;
 
@@ -239,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Account&&(identical(other.id, id) || other.id == id)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.host, host) || other.host == host)&&(identical(other.username, username) || other.username == username)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.token, token) || other.token == token));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Account&&(identical(other.id, id) || other.id == id)&&(identical(other.platform, platform) || other.platform == platform)&&(identical(other.host, host) || other.host == host)&&(identical(other.username, username) || other.username == username)&&(identical(other.name, name) || other.name == name)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.token, token) || other.token == token));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,platform,host,username,avatarUrl,token);
+int get hashCode => Object.hash(runtimeType,id,platform,host,username,name,avatarUrl,token);
 
 @override
 String toString() {
-  return 'Account(id: $id, platform: $platform, host: $host, username: $username, avatarUrl: $avatarUrl, token: $token)';
+  return 'Account(id: $id, platform: $platform, host: $host, username: $username, name: $name, avatarUrl: $avatarUrl, token: $token)';
 }
 
 
@@ -259,7 +261,7 @@ abstract mixin class _$AccountCopyWith<$Res> implements $AccountCopyWith<$Res> {
   factory _$AccountCopyWith(_Account value, $Res Function(_Account) _then) = __$AccountCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String platform, String host, String? username, String? avatarUrl, String token
+ String id, String platform, String host, String? username, String? name, String? avatarUrl, String token
 });
 
 
@@ -276,12 +278,13 @@ class __$AccountCopyWithImpl<$Res>
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? platform = null,Object? host = null,Object? username = freezed,Object? avatarUrl = freezed,Object? token = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? platform = null,Object? host = null,Object? username = freezed,Object? name = freezed,Object? avatarUrl = freezed,Object? token = null,}) {
   return _then(_Account(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,platform: null == platform ? _self.platform : platform // ignore: cast_nullable_to_non_nullable
 as String,host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
 as String,username: freezed == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
+as String?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
 as String,

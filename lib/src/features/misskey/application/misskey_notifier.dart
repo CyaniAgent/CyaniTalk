@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/misskey_repository.dart';
 import '../domain/note.dart';
+import '../domain/clip.dart';
 import '../domain/channel.dart';
 import 'misskey_streaming_service.dart';
 import '../../../core/core.dart';
@@ -211,6 +212,55 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
 
       logger.info('Misskey频道时间线加载更多完成，新增 ${newNotes.length} 条笔记');
       return [...currentNotes, ...newNotes];
+    });
+  }
+}
+
+@riverpod
+class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
+  @override
+  FutureOr<List<Clip>> build() async {
+    logger.info('初始化Misskey片段(Clips)列表');
+    final repository = ref.watch(misskeyRepositoryProvider);
+    final clips = await repository.getClips();
+    logger.info('Misskey片段列表初始化完成，加载了 ${clips.length} 个片段');
+    return clips;
+  }
+
+  Future<void> refresh() async {
+    logger.info('刷新Misskey片段列表');
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(misskeyRepositoryProvider);
+      final clips = await repository.getClips();
+      logger.info('Misskey片段列表刷新完成，加载了 ${clips.length} 个片段');
+      return clips;
+    });
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoading || state.isRefreshing) {
+      logger.debug('Misskey片段正在加载中，跳过加载更多');
+      return;
+    }
+
+    final currentClips = state.value ?? [];
+    if (currentClips.isEmpty) {
+      logger.debug('Misskey片段为空，跳过加载更多');
+      return;
+    }
+
+    final lastId = currentClips.last.id;
+    logger.info('加载更多Misskey片段，最后ID: $lastId');
+
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(misskeyRepositoryProvider);
+      final newClips = await repository.getClips(untilId: lastId);
+
+      if (!ref.mounted) return currentClips;
+
+      logger.info('Misskey片段加载更多完成，新增 ${newClips.length} 个片段');
+      return [...currentClips, ...newClips];
     });
   }
 }

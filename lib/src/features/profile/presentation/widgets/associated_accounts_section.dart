@@ -5,14 +5,20 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
-import 'user_details_view.dart';
 
 /// 统一登录管理器组件
 ///
 /// 显示用户关联的账户列表，支持切换查看详细资料以及添加/删除账户。
 class AssociatedAccountsSection extends ConsumerStatefulWidget {
+  final bool showRemoveButton;
+  final bool showTitle;
+
   /// 创建一个新的AssociatedAccountsSection实例
-  const AssociatedAccountsSection({super.key});
+  const AssociatedAccountsSection({
+    super.key,
+    this.showRemoveButton = true,
+    this.showTitle = true,
+  });
 
   @override
   ConsumerState<AssociatedAccountsSection> createState() =>
@@ -46,9 +52,6 @@ class _AssociatedAccountsSectionState
           // Default to one of the active accounts or the first one
           _focusedAccount = selectedMisskey ?? selectedFlarum ?? accounts.first;
         }
-
-        // If the user just switched via some other means (unlikely here but good for consistency),
-        // we could sync _focusedAccount, but local tap priority is better.
 
         return _buildManagerLayout(
           context,
@@ -101,16 +104,17 @@ class _AssociatedAccountsSectionState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section Title: Accounts
-        Padding(
-          padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
-          child: Text(
-            'settings_section_account'.tr(),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
+        if (widget.showTitle)
+          Padding(
+            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
+            child: Text(
+              'settings_section_account'.tr(),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ),
-        ),
 
         // Horizontal Account List
         Container(
@@ -184,26 +188,32 @@ class _AssociatedAccountsSectionState
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
                     children: [
                       _buildSelectedHeader(context, _focusedAccount!),
-                      const Divider(height: 40),
-                      UserDetailsView(account: _focusedAccount!),
-                      const SizedBox(height: 24),
-                      OutlinedButton.icon(
-                        onPressed: () =>
-                            _confirmDelete(context, ref, _focusedAccount!),
-                        icon: const Icon(Icons.delete_outline),
-                        label: Text('accounts_remove_button'.tr()),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      if (widget.showRemoveButton) ...[
+                        const SizedBox(height: 24),
+                        const Divider(),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: () =>
+                              _confirmDelete(context, ref, _focusedAccount!),
+                          icon: const Icon(Icons.delete_outline),
+                          label: Text('accounts_remove_button'.tr()),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -218,41 +228,70 @@ class _AssociatedAccountsSectionState
 
   Widget _buildSelectedHeader(BuildContext context, Account account) {
     final isMisskey = account.platform == 'misskey';
+    final primaryName = (account.name != null && account.name!.isNotEmpty)
+        ? account.name!
+        : (account.username ?? 'Unknown');
+    final secondaryName = account.username != null ? '@${account.username}' : '';
+
     return Row(
       children: [
         CircleAvatar(
-          radius: 30,
+          radius: 36,
           backgroundImage: account.avatarUrl != null
               ? NetworkImage(account.avatarUrl!)
               : null,
           child: account.avatarUrl == null
-              ? const Icon(Icons.person, size: 30)
+              ? const Icon(Icons.person, size: 36)
               : null,
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 20),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                account.username ?? 'Unknown',
-                style: Theme.of(context).textTheme.headlineSmall,
+                primaryName,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              Row(
-                children: [
-                  Image.asset(
-                    isMisskey
-                        ? 'assets/icons/misskey.png'
-                        : 'assets/icons/flarum.png',
-                    width: 16,
-                    height: 16,
+              if (secondaryName.isNotEmpty)
+                Text(
+                  secondaryName,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${isMisskey ? "Misskey" : "Flarum"} @ ${account.host}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
+                ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      isMisskey
+                          ? 'assets/icons/misskey.png'
+                          : 'assets/icons/flarum.png',
+                      width: 16,
+                      height: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        account.host,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

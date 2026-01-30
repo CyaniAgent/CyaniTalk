@@ -12,11 +12,14 @@ class AudioPlayerWidget extends StatefulWidget {
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
 }
 
-class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKeepAliveClientMixin {
   late AudioPlayer _audioPlayer;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+
+  @override
+  bool get wantKeepAlive => _isPlaying;
 
   @override
   void initState() {
@@ -24,22 +27,29 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _audioPlayer = AudioPlayer();
 
     _audioPlayer.onDurationChanged.listen((duration) {
-      setState(() {
-        _duration = duration;
-      });
+      if (mounted) {
+        setState(() {
+          _duration = duration;
+        });
+      }
     });
 
     _audioPlayer.onPositionChanged.listen((position) {
-      setState(() {
-        _position = position;
-      });
+      if (mounted) {
+        setState(() {
+          _position = position;
+        });
+      }
     });
 
     _audioPlayer.onPlayerComplete.listen((_) {
-      setState(() {
-        _isPlaying = false;
-        _position = Duration.zero;
-      });
+      if (mounted) {
+        setState(() {
+          _isPlaying = false;
+          _position = Duration.zero;
+        });
+        updateKeepAlive();
+      }
     });
   }
 
@@ -55,9 +65,12 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     } else {
       await _audioPlayer.play(UrlSource(widget.audioUrl));
     }
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
+    if (mounted) {
+      setState(() {
+        _isPlaying = !_isPlaying;
+      });
+      updateKeepAlive();
+    }
   }
 
   void _seek(double value) {
@@ -67,6 +80,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = Theme.of(context);
 
     return Container(

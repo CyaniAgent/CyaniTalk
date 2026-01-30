@@ -64,77 +64,113 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final isDesktop = size.width > 600;
+    final padding = MediaQuery.of(context).padding;
 
     return Material(
       color: Colors.transparent,
       child: Stack(
         children: [
-          // Semi-transparent Top area (1/4)
+          // Semi-transparent Top area with Blur
           Positioned.fill(
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: ClipRRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Container(color: Colors.black.withValues(alpha: 0.3)),
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(color: Colors.black.withValues(alpha: 0.4)),
                 ),
               ),
             ),
           ),
 
-          // Bottom Content (3/4)
+          // Bottom Content
           Align(
             alignment: Alignment.bottomCenter,
-            child: Container(
-              height: size.height * 0.75,
-              width: isDesktop ? 500 : double.infinity,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(32),
+            child: GestureDetector(
+              onVerticalDragUpdate: (details) {
+                if (details.primaryDelta! > 10) {
+                  Navigator.pop(context);
+                }
+              },
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: size.height * 0.9,
+                  minHeight: size.height * 0.4,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, -5),
+                child: Container(
+                  width: isDesktop ? 550 : double.infinity,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(32),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 30,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Handle/Indicator
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 24),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.outlineVariant,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                  child: SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        24,
+                        12,
+                        24,
+                        24 + padding.bottom,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Handle/Indicator
+                          Center(
+                            child: Container(
+                              width: 50,
+                              height: 5,
+                              margin: const EdgeInsets.only(bottom: 20),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.outlineVariant,
+                                borderRadius: BorderRadius.circular(2.5),
+                              ),
+                            ),
+                          ),
+                          _buildHeader(),
+                          const SizedBox(height: 16),
+                          Flexible(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 400),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              transitionBuilder: (child, animation) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0, 0.05),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: _buildCurrentStep(),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    _buildHeader(),
-                    const SizedBox(height: 24),
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: _buildCurrentStep(),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ).animate().slideY(
             begin: 1,
             end: 0,
-            duration: 400.ms,
-            curve: Curves.easeOutCubic,
+            duration: 500.ms,
+            curve: Curves.easeOutBack,
           ),
         ],
       ),
@@ -145,8 +181,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     String title;
     switch (_step) {
       case _AddAccountStep.select:
-        title = 'auth_add_account_select_title'.tr();
-        break;
+        return const SizedBox.shrink();
       case _AddAccountStep.misskeyLogin:
         title = 'auth_add_account_misskey_title'.tr();
         break;
@@ -175,9 +210,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.primary,
             ),
-            textAlign: _step == _AddAccountStep.select
-                ? TextAlign.center
-                : TextAlign.start,
+            textAlign: TextAlign.start,
           ),
         ),
       ],
@@ -204,45 +237,91 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       key: const ValueKey('select'),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildOptionCard(
+          // Gradient Header
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            child: ShaderMask(
+              shaderCallback:
+                  (bounds) => const LinearGradient(
+                    colors: [Color(0xFF39C5BB), Color(0xFF66CCFF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ).createShader(bounds),
+              child: Text(
+                'auth_choose_platform'.tr(),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Misskey Button (Full Width)
+          _buildStyledCard(
             icon: Image.asset(
               'assets/icons/misskey.png',
               width: 32,
               height: 32,
             ),
-            title: 'auth_add_account_misskey_option'.tr(),
+            title: 'Misskey',
             subtitle: 'auth_add_account_misskey_subtitle'.tr(),
             color: const Color(0xFF39C5BB),
             onTap: () => setState(() => _step = _AddAccountStep.misskeyLogin),
+            isVertical: false,
           ),
           const SizedBox(height: 16),
-          _buildOptionCard(
-            icon: Image.asset('assets/icons/flarum.png', width: 32, height: 32),
-            title: 'auth_add_account_flarum_option'.tr(),
-            subtitle: 'auth_add_account_flarum_subtitle'.tr(),
-            color: Colors.deepOrange,
-            onTap: () => setState(() => _step = _AddAccountStep.flarumLogin),
-          ),
-          const SizedBox(height: 16),
-          _buildOptionCard(
-            icon: const Icon(Icons.api, color: Colors.blue, size: 32),
-            title: 'auth_add_account_flarum_endpoint_option'.tr(),
-            subtitle: 'auth_add_account_flarum_endpoint_subtitle'.tr(),
-            color: Colors.blue,
-            onTap: () => setState(() => _step = _AddAccountStep.flarumEndpoint),
+
+          // Flarum Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildStyledCard(
+                  icon: Image.asset(
+                    'assets/icons/flarum.png',
+                    width: 32,
+                    height: 32,
+                  ),
+                  title: 'Flarum',
+                  subtitle: 'Login',
+                  color: Colors.deepOrange,
+                  onTap:
+                      () => setState(() => _step = _AddAccountStep.flarumLogin),
+                  isVertical: true,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStyledCard(
+                  icon: const Icon(Icons.api, color: Colors.blue, size: 32),
+                  title: 'Flarum',
+                  subtitle: 'Endpoint',
+                  color: Colors.blue,
+                  onTap:
+                      () =>
+                          setState(() => _step = _AddAccountStep.flarumEndpoint),
+                  isVertical: true,
+                ),
+              ),
+            ],
           ),
         ],
       ).animate().fadeIn().slideY(begin: 0.1, end: 0),
     );
   }
 
-  Widget _buildOptionCard({
+  Widget _buildStyledCard({
     required Widget icon,
     required String title,
     required String subtitle,
     required Color color,
     required VoidCallback onTap,
+    required bool isVertical,
   }) {
     final theme = Theme.of(context);
     return Card(
@@ -258,151 +337,182 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(24),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: icon,
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.all(20),
+          child:
+              isVertical
+                  ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: icon,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      const SizedBox(height: 12),
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  )
+                  : Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: icon,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              subtitle,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
+                    ],
+                  ),
         ),
       ),
     );
   }
 
   Widget _buildMisskeyLoginStep() {
-    return Column(
+    return SingleChildScrollView(
       key: const ValueKey('misskey'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'auth_misskey_host_hint'.tr(),
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
-        const SizedBox(height: 20),
-        TextField(
-          controller: _misskeyHostController,
-          decoration: InputDecoration(
-            labelText: 'auth_misskey_host'.tr(),
-            hintText: 'misskey.io',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-            prefixIcon: const Icon(Icons.language),
-            prefixText: 'https://',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'auth_misskey_host_hint'.tr(),
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
-          autofocus: true,
-        ),
-        const Spacer(),
-        FilledButton.icon(
-          onPressed: _loading ? null : _startMisskeyAuth,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+          const SizedBox(height: 20),
+          TextField(
+            controller: _misskeyHostController,
+            decoration: InputDecoration(
+              labelText: 'auth_misskey_host'.tr(),
+              hintText: 'misskey.io',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              prefixIcon: const Icon(Icons.language),
+              prefixText: 'https://',
             ),
+            autofocus: true,
           ),
-          icon: _loading
-              ? const SizedBox.shrink()
-              : const Icon(Icons.arrow_forward),
-          label: _loading
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : Text('auth_next'.tr()),
-        ),
-        const SizedBox(height: 16),
-      ],
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: _loading ? null : _startMisskeyAuth,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: _loading
+                ? const SizedBox.shrink()
+                : const Icon(Icons.arrow_forward),
+            label: _loading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text('auth_next'.tr()),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     ).animate().fadeIn().slideX(begin: 0.1, end: 0);
   }
 
-  Widget _buildMisskeyCheckAuthStep() {
-    final theme = Theme.of(context);
-    return Column(
-      key: const ValueKey('misskey_check'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            children: [
-              const Icon(Icons.info_outline, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                'auth_authorization_instructions'.tr(),
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
+    Widget _buildMisskeyCheckAuthStep() {
+      final theme = Theme.of(context);
+      return SingleChildScrollView(
+        key: const ValueKey('misskey_check'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(24),
               ),
-            ],
-          ),
-        ),
-        const Spacer(),
-        FilledButton.icon(
-          onPressed: _loading ? null : _checkMisskeyAuth,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          icon: _loading
-              ? const SizedBox.shrink()
-              : const Icon(Icons.check_circle_outline),
-          label: _loading
-              ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
+              child: Column(
+                children: [
+                  const Icon(Icons.info_outline, size: 48),
+                  const SizedBox(height: 16),
+                  Text(
+                    'auth_authorization_instructions'.tr(),
+                    style: theme.textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
                   ),
-                )
-              : Text('auth_done'.tr()),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: _loading ? null : _checkMisskeyAuth,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              icon: _loading
+                  ? const SizedBox.shrink()
+                  : const Icon(Icons.check_circle_outline),
+              label: _loading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text('auth_done'.tr()),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
-        const SizedBox(height: 16),
-      ],
-    ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
-  }
-
-  Widget _buildFlarumLoginStep() {
+      ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
+    }
+    Widget _buildFlarumLoginStep() {
     return SingleChildScrollView(
       key: const ValueKey('flarum'),
       child: Column(
@@ -470,33 +580,36 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   }
 
   Widget _buildFlarumEndpointStep() {
-    return Column(
+    return SingleChildScrollView(
       key: const ValueKey('endpoint'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _flarumEndpointController,
-          decoration: InputDecoration(
-            labelText: 'auth_flarum_server_url'.tr(),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-            prefixIcon: const Icon(Icons.link),
-          ),
-          autofocus: true,
-        ),
-        const Spacer(),
-        FilledButton.icon(
-          onPressed: _loading ? null : _addFlarumEndpoint,
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _flarumEndpointController,
+            decoration: InputDecoration(
+              labelText: 'auth_flarum_server_url'.tr(),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              prefixIcon: const Icon(Icons.link),
             ),
+            autofocus: true,
           ),
-          icon: const Icon(Icons.add_link),
-          label: Text('auth_add_endpoint'.tr()),
-        ),
-        const SizedBox(height: 16),
-      ],
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: _loading ? null : _addFlarumEndpoint,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: const Icon(Icons.add_link),
+            label: Text('auth_add_endpoint'.tr()),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     ).animate().fadeIn().slideY(begin: 0.1, end: 0);
   }
 
