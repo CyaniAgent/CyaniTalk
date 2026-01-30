@@ -27,7 +27,7 @@ void main() async {
         Locale('ja', 'JP'),
       ],
       path: 'assets/translations',
-      fallbackLocale: const Locale('zh', 'CN'),
+      fallbackLocale: const Locale('ja', 'JP'),
       child: const ProviderScope(child: CyaniTalkApp()),
     ),
   );

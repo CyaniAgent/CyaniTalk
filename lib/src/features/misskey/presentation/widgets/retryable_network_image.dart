@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// A network image widget with automatic retry on failure
 class RetryableNetworkImage extends StatefulWidget {
@@ -83,8 +84,8 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
               const SizedBox(height: 8),
               Text(
                 _retryCount >= widget.maxRetries
-                    ? 'Image unavailable'
-                    : 'Retrying... ($_retryCount/${widget.maxRetries})',
+                    ? 'image_unavailable'.tr()
+                    : 'image_retrying'.tr(namedArgs: {'retryCount': _retryCount.toString(), 'maxRetries': widget.maxRetries.toString()}),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
