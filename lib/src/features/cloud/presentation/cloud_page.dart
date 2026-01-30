@@ -4,12 +4,27 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../misskey/application/drive_notifier.dart';
 import '../../misskey/domain/drive_file.dart';
 import '../../misskey/domain/drive_folder.dart';
+import '../../auth/application/auth_service.dart';
+import '../../../shared/widgets/login_reminder.dart';
 
 class CloudPage extends ConsumerWidget {
   const CloudPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final account = ref.watch(selectedMisskeyAccountProvider).asData?.value;
+
+    if (account == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('cloud_storage_title'.tr())),
+        body: LoginReminder(
+          title: 'misskey_page_no_account_title'.tr(),
+          message: 'misskey_page_please_login'.tr(),
+          icon: Icons.cloud_off_outlined,
+        ),
+      );
+    }
+
     final driveState = ref.watch(misskeyDriveProvider);
     final theme = Theme.of(context);
     final mikuColor = const Color(0xFF39C5BB);

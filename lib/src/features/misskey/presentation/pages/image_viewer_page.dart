@@ -11,7 +11,7 @@ class ImageViewerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.9),
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
       body: GestureDetector(
         onVerticalDragEnd: (details) {
           // Swipe down to dismiss

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
 import '../../../../core/utils/logger.dart';
 import '../../application/auth_service.dart';
 import '../../../../core/api/flarum_api.dart';
@@ -13,10 +15,20 @@ class AddAccountDialog extends ConsumerStatefulWidget {
   ConsumerState<AddAccountDialog> createState() => _AddAccountDialogState();
 }
 
-enum _AddAccountStep { select, misskeyLogin, flarumLogin, flarumEndpoint }
+enum _AddAccountStep {
+  select,
+  misskeyLogin,
+  flarumLogin,
+  flarumEndpoint,
+  misskeyCheckAuth,
+}
 
 class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   _AddAccountStep _step = _AddAccountStep.select;
+
+  // State for Misskey Auth
+  String? _misskeyHost;
+  String? _misskeySession;
 
   // Controllers
   final _misskeyHostController = TextEditingController();
@@ -39,31 +51,92 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
 
   void _back() {
     setState(() {
-      _step = _AddAccountStep.select;
+      if (_step == _AddAccountStep.misskeyCheckAuth) {
+        _step = _AddAccountStep.misskeyLogin;
+      } else {
+        _step = _AddAccountStep.select;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
-            Flexible(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _buildCurrentStep(),
+    final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width > 600;
+
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          // Semi-transparent Top area (1/4)
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(color: Colors.black.withValues(alpha: 0.3)),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+
+          // Bottom Content (3/4)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: size.height * 0.75,
+              width: isDesktop ? 500 : double.infinity,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Handle/Indicator
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.outlineVariant,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    _buildHeader(),
+                    const SizedBox(height: 24),
+                    Expanded(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: _buildCurrentStep(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ).animate().slideY(
+            begin: 1,
+            end: 0,
+            duration: 400.ms,
+            curve: Curves.easeOutCubic,
+          ),
+        ],
       ),
     );
   }
@@ -76,6 +149,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         break;
       case _AddAccountStep.misskeyLogin:
         title = 'auth_add_account_misskey_title'.tr();
+        break;
+      case _AddAccountStep.misskeyCheckAuth:
+        title = 'auth_waiting_authorization'.tr();
         break;
       case _AddAccountStep.flarumLogin:
         title = 'auth_add_account_flarum_title'.tr();
@@ -95,7 +171,10 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             textAlign: _step == _AddAccountStep.select
                 ? TextAlign.center
                 : TextAlign.start,
@@ -111,6 +190,8 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         return _buildSelectStep();
       case _AddAccountStep.misskeyLogin:
         return _buildMisskeyLoginStep();
+      case _AddAccountStep.misskeyCheckAuth:
+        return _buildMisskeyCheckAuthStep();
       case _AddAccountStep.flarumLogin:
         return _buildFlarumLoginStep();
       case _AddAccountStep.flarumEndpoint:
@@ -119,34 +200,40 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   }
 
   Widget _buildSelectStep() {
-    return Column(
+    return SingleChildScrollView(
       key: const ValueKey('select'),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildOptionCard(
-          icon: Image.asset('assets/icons/misskey.png', width: 24, height: 24),
-          title: 'auth_add_account_misskey_option'.tr(),
-          subtitle: 'auth_add_account_misskey_subtitle'.tr(),
-          color: Colors.green,
-          onTap: () => setState(() => _step = _AddAccountStep.misskeyLogin),
-        ),
-        const SizedBox(height: 12),
-        _buildOptionCard(
-          icon: Image.asset('assets/icons/flarum.png', width: 24, height: 24),
-          title: 'auth_add_account_flarum_option'.tr(),
-          subtitle: 'auth_add_account_flarum_subtitle'.tr(),
-          color: Colors.deepOrange,
-          onTap: () => setState(() => _step = _AddAccountStep.flarumLogin),
-        ),
-        const SizedBox(height: 12),
-        _buildOptionCard(
-          icon: Icon(Icons.api, color: Colors.blue),
-          title: 'auth_add_account_flarum_endpoint_option'.tr(),
-          subtitle: 'auth_add_account_flarum_endpoint_subtitle'.tr(),
-          color: Colors.blue,
-          onTap: () => setState(() => _step = _AddAccountStep.flarumEndpoint),
-        ),
-      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildOptionCard(
+            icon: Image.asset(
+              'assets/icons/misskey.png',
+              width: 32,
+              height: 32,
+            ),
+            title: 'auth_add_account_misskey_option'.tr(),
+            subtitle: 'auth_add_account_misskey_subtitle'.tr(),
+            color: const Color(0xFF39C5BB),
+            onTap: () => setState(() => _step = _AddAccountStep.misskeyLogin),
+          ),
+          const SizedBox(height: 16),
+          _buildOptionCard(
+            icon: Image.asset('assets/icons/flarum.png', width: 32, height: 32),
+            title: 'auth_add_account_flarum_option'.tr(),
+            subtitle: 'auth_add_account_flarum_subtitle'.tr(),
+            color: Colors.deepOrange,
+            onTap: () => setState(() => _step = _AddAccountStep.flarumLogin),
+          ),
+          const SizedBox(height: 16),
+          _buildOptionCard(
+            icon: const Icon(Icons.api, color: Colors.blue, size: 32),
+            title: 'auth_add_account_flarum_endpoint_option'.tr(),
+            subtitle: 'auth_add_account_flarum_endpoint_subtitle'.tr(),
+            color: Colors.blue,
+            onTap: () => setState(() => _step = _AddAccountStep.flarumEndpoint),
+          ),
+        ],
+      ).animate().fadeIn().slideY(begin: 0.1, end: 0),
     );
   }
 
@@ -157,49 +244,56 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     required Color color,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 0,
-      color: Theme.of(
-        context,
-      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      color: theme.colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: icon,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -210,104 +304,206 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   Widget _buildMisskeyLoginStep() {
     return Column(
       key: const ValueKey('misskey'),
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          'auth_misskey_host_hint'.tr(),
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        const SizedBox(height: 20),
         TextField(
           controller: _misskeyHostController,
           decoration: InputDecoration(
             labelText: 'auth_misskey_host'.tr(),
-            border: const OutlineInputBorder(),
+            hintText: 'misskey.io',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            prefixIcon: const Icon(Icons.language),
             prefixText: 'https://',
           ),
           autofocus: true,
         ),
-        const SizedBox(height: 24),
-        FilledButton(
+        const Spacer(),
+        FilledButton.icon(
           onPressed: _loading ? null : _startMisskeyAuth,
-          child: _loading
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          icon: _loading
+              ? const SizedBox.shrink()
+              : const Icon(Icons.arrow_forward),
+          label: _loading
               ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
               : Text('auth_next'.tr()),
         ),
+        const SizedBox(height: 16),
       ],
-    );
+    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
+  }
+
+  Widget _buildMisskeyCheckAuthStep() {
+    final theme = Theme.of(context);
+    return Column(
+      key: const ValueKey('misskey_check'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.info_outline, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                'auth_authorization_instructions'.tr(),
+                style: theme.textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+        const Spacer(),
+        FilledButton.icon(
+          onPressed: _loading ? null : _checkMisskeyAuth,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          icon: _loading
+              ? const SizedBox.shrink()
+              : const Icon(Icons.check_circle_outline),
+          label: _loading
+              ? const SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text('auth_done'.tr()),
+        ),
+        const SizedBox(height: 16),
+      ],
+    ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
   }
 
   Widget _buildFlarumLoginStep() {
-    return Column(
+    return SingleChildScrollView(
       key: const ValueKey('flarum'),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextField(
-          controller: _flarumHostController,
-          decoration: InputDecoration(
-            labelText: 'auth_flarum_host'.tr(),
-            border: const OutlineInputBorder(),
-            prefixText: 'https://',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _flarumHostController,
+            decoration: InputDecoration(
+              labelText: 'auth_flarum_host'.tr(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              prefixIcon: const Icon(Icons.language),
+              prefixText: 'https://',
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _flarumUsernameController,
-          decoration: InputDecoration(
-            labelText: 'auth_username_email'.tr(),
-            border: const OutlineInputBorder(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _flarumUsernameController,
+            decoration: InputDecoration(
+              labelText: 'auth_username_email'.tr(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              prefixIcon: const Icon(Icons.person_outline),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _flarumPasswordController,
-          decoration: InputDecoration(
-            labelText: 'auth_password'.tr(),
-            border: const OutlineInputBorder(),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _flarumPasswordController,
+            decoration: InputDecoration(
+              labelText: 'auth_password'.tr(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              prefixIcon: const Icon(Icons.lock_outline),
+            ),
+            obscureText: true,
           ),
-          obscureText: true,
-        ),
-        const SizedBox(height: 24),
-        FilledButton(
-          onPressed: _loading ? null : _loginToFlarum,
-          child: _loading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('auth_login'.tr()),
-        ),
-      ],
-    );
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: _loading ? null : _loginToFlarum,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: _loading ? const SizedBox.shrink() : const Icon(Icons.login),
+            label: _loading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text('auth_login'.tr()),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
   }
 
   Widget _buildFlarumEndpointStep() {
     return Column(
       key: const ValueKey('endpoint'),
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
           controller: _flarumEndpointController,
           decoration: InputDecoration(
             labelText: 'auth_flarum_server_url'.tr(),
-            border: const OutlineInputBorder(),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+            prefixIcon: const Icon(Icons.link),
           ),
           autofocus: true,
         ),
-        const SizedBox(height: 24),
-        FilledButton(
+        const Spacer(),
+        FilledButton.icon(
           onPressed: _loading ? null : _addFlarumEndpoint,
-          child: Text('auth_add_endpoint'.tr()),
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          icon: const Icon(Icons.add_link),
+          label: Text('auth_add_endpoint'.tr()),
         ),
+        const SizedBox(height: 16),
       ],
-    );
+    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
   }
 
   Future<void> _startMisskeyAuth() async {
     final host = _misskeyHostController.text.trim();
     if (host.isEmpty) return;
 
-    // Preliminary check for protocol
     String displayHost = host;
     if (host.contains('://')) {
       displayHost = host.split('://').last;
@@ -316,35 +512,59 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       displayHost = displayHost.split('/').first;
     }
 
-    logger.info(
-      'AddAccountDialog: Starting Misskey authentication for host: $displayHost',
-    );
+    logger.info('AddAccountDialog: Starting Misskey auth for $displayHost');
     setState(() => _loading = true);
     try {
       final session = await ref
           .read(authServiceProvider.notifier)
           .startMiAuth(host);
       if (mounted) {
-        logger.info(
-          'AddAccountDialog: Successfully started MiAuth for host: $host',
-        );
-        Navigator.pop(context);
-        _showCheckAuthDialog(context, ref, host, session);
+        setState(() {
+          _misskeyHost = host;
+          _misskeySession = session;
+          _step = _AddAccountStep.misskeyCheckAuth;
+          _loading = false;
+        });
       }
     } catch (e) {
-      logger.error(
-        'AddAccountDialog: Error starting Misskey authentication for host: $host',
-        e,
-      );
+      logger.error('AddAccountDialog: MiAuth error', e);
       if (mounted) {
+        setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('auth_error'.tr(namedArgs: {'error': e.toString()})),
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _checkMisskeyAuth() async {
+    if (_misskeyHost == null || _misskeySession == null) return;
+
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(authServiceProvider.notifier)
+          .checkMiAuth(_misskeyHost!, _misskeySession!);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      logger.error('AddAccountDialog: MiAuth check failed', e);
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'auth_failed'.tr(
+                namedArgs: {'error': 'Please ensure you approved the app.'},
+              ),
+            ),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
     }
   }
 
@@ -393,135 +613,25 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     final url = _flarumEndpointController.text.trim();
     if (url.isEmpty) return;
 
-    logger.info('AddAccountDialog: Adding Flarum endpoint: $url');
     setState(() => _loading = true);
     try {
       await FlarumApi().saveEndpoint(url);
       if (mounted) {
-        logger.info(
-          'AddAccountDialog: Successfully added Flarum endpoint: $url',
-        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('auth_flarum_endpoint_added'.tr())),
         );
         Navigator.pop(context);
       }
     } catch (e) {
-      logger.error('AddAccountDialog: Error adding Flarum endpoint: $url', e);
+      logger.error('AddAccountDialog: Flarum endpoint error', e);
       if (mounted) {
+        setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('auth_error'.tr(namedArgs: {'error': e.toString()})),
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
-  }
-
-  void _showCheckAuthDialog(
-    BuildContext context,
-    WidgetRef ref,
-    String host,
-    String session,
-  ) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => _CheckAuthDialog(host: host, session: session),
-    );
-  }
-}
-
-class _CheckAuthDialog extends ConsumerStatefulWidget {
-  final String host;
-  final String session;
-
-  const _CheckAuthDialog({required this.host, required this.session});
-
-  @override
-  ConsumerState<_CheckAuthDialog> createState() => _CheckAuthDialogState();
-}
-
-class _CheckAuthDialogState extends ConsumerState<_CheckAuthDialog> {
-  bool _loading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('auth_waiting_authorization'.tr()),
-      content: Text('auth_authorization_instructions'.tr()),
-      actions: [
-        TextButton(
-          onPressed: _loading
-              ? null
-              : () {
-                  logger.info(
-                    'CheckAuthDialog: Cancelling authentication process',
-                  );
-                  Navigator.pop(context);
-                },
-          child: Text('auth_cancel'.tr()),
-        ),
-        FilledButton(
-          onPressed: _loading
-              ? null
-              : () async {
-                  logger.info(
-                    'CheckAuthDialog: Checking MiAuth status for host: ${widget.host}',
-                  );
-                  setState(() => _loading = true);
-                  final isMounted = mounted;
-                  final dialogContext = context;
-                  try {
-                    await ref
-                        .read(authServiceProvider.notifier)
-                        .checkMiAuth(widget.host, widget.session);
-                    if (isMounted) {
-                      logger.info(
-                        'CheckAuthDialog: MiAuth successful for host: ${widget.host}',
-                      );
-                      // ignore: use_build_context_synchronously
-                      Navigator.pop(dialogContext);
-                    }
-                  } catch (e) {
-                    logger.error(
-                      'CheckAuthDialog: MiAuth failed for host: ${widget.host}',
-                      e,
-                    );
-                    setState(() => _loading = false);
-                    if (isMounted) {
-                      // ignore: use_build_context_synchronously
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'auth_failed'.tr(
-                              namedArgs: {
-                                'error':
-                                    'Please make sure you have approved the application in your browser before clicking Done.',
-                              },
-                            ),
-                          ),
-                          duration: const Duration(seconds: 8),
-                          action: SnackBarAction(
-                            label: 'auth_retry'.tr(),
-                            onPressed: () {}, // User can just click Done again
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                },
-          child: _loading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text('auth_done'.tr()),
-        ),
-      ],
-    );
   }
 }

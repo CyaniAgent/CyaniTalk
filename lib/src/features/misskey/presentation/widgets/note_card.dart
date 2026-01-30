@@ -192,7 +192,7 @@ class NoteCard extends ConsumerWidget {
                                                 ),
                                                 decoration: BoxDecoration(
                                                   color: Colors.black
-                                                      .withOpacity(0.6),
+                                                      .withValues(alpha: 0.6),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: const Icon(
@@ -371,15 +371,19 @@ class NoteCard extends ConsumerWidget {
     try {
       await ref.read(misskeyRepositoryProvider).renote(note.id);
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('note_renoted_successfully'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('note_renoted_successfully'.tr())),
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
       }
     }
   }
@@ -408,14 +412,20 @@ class NoteCard extends ConsumerWidget {
                     .read(misskeyRepositoryProvider)
                     .reply(note.id, textController.text);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('note_reply_sent'.tr())));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('note_reply_sent'.tr())),
+                  );
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('note_failed_to_reply'.tr(namedArgs: {'error': e.toString()}))),
+                    SnackBar(
+                      content: Text(
+                        'note_failed_to_reply'.tr(
+                          namedArgs: {'error': e.toString()},
+                        ),
+                      ),
+                    ),
                   );
                 }
               }
@@ -438,17 +448,21 @@ class NoteCard extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('note_failed_to_react'.tr(namedArgs: {'error': e.toString()}))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'note_failed_to_react'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
+        );
       }
     }
   }
 
   void _handleShare(BuildContext context) {
     // Placeholder for share functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('note_share_coming_soon'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr())));
   }
 }

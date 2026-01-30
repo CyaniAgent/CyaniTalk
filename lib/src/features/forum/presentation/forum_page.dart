@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../flarum/presentation/widgets/flarum_drawer.dart';
 import '../../flarum/presentation/pages/flarum_discussion_page.dart';
 import '../../flarum/presentation/pages/flarum_tags_page.dart';
 import '../../flarum/presentation/pages/flarum_notifications_page.dart';
+import '../../auth/application/auth_service.dart';
+import '../../../shared/widgets/login_reminder.dart';
 
-class ForumPage extends StatefulWidget {
+class ForumPage extends ConsumerStatefulWidget {
   const ForumPage({super.key});
 
   @override
-  State<ForumPage> createState() => _ForumPageState();
+  ConsumerState<ForumPage> createState() => _ForumPageState();
 }
 
-class _ForumPageState extends State<ForumPage> {
+class _ForumPageState extends ConsumerState<ForumPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
@@ -21,14 +24,23 @@ class _ForumPageState extends State<ForumPage> {
     FlarumNotificationsPage(key: ValueKey('notifications')),
   ];
 
-  final List<String> _titles = const [
-    'Discussions',
-    'Tags',
-    'Notifications',
-  ];
+  final List<String> _titles = const ['Discussions', 'Tags', 'Notifications'];
 
   @override
   Widget build(BuildContext context) {
+    final account = ref.watch(selectedFlarumAccountProvider).asData?.value;
+
+    if (account == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Forum'), centerTitle: true),
+        body: const LoginReminder(
+          title: 'Not Connected',
+          message: 'Please connect to a Flarum forum in your profile first!',
+          icon: Icons.forum_outlined,
+        ),
+      );
+    }
+
     return Scaffold(
       drawer: FlarumDrawer(
         selectedIndex: _selectedIndex,
@@ -63,7 +75,10 @@ class _ForumPageState extends State<ForumPage> {
                   end: Offset.zero,
                 ).animate(animation),
                 child: ScaleTransition(
-                  scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                  scale: Tween<double>(
+                    begin: 0.95,
+                    end: 1.0,
+                  ).animate(animation),
                   child: child,
                 ),
               ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../auth/domain/account.dart';
 import '../../../../core/api/misskey_api.dart';
@@ -77,100 +78,212 @@ class UserDetailsView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(context, 'user_details_basic_information'.tr()),
         _buildInfoCard(context, data),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         _buildSectionTitle(context, 'user_details_roles_permissions'.tr()),
         _buildRolesCard(context, data),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         _buildRawDataCard(context, data),
       ],
-    );
+    ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
   }
 
   Widget _buildInfoCard(BuildContext context, Map<String, dynamic> data) {
-    final items = <Widget>[];
+    final theme = Theme.of(context);
+
     if (account.platform == 'misskey') {
-      items.add(
-        _buildDetailItem('user_details_name'.tr(), data['name'] ?? 'N/A'),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_username'.tr(),
-          data['username'] ?? 'N/A',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_notes_count'.tr(),
-          data['notesCount']?.toString() ?? '0',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_following'.tr(),
-          data['followingCount']?.toString() ?? '0',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_followers'.tr(),
-          data['followersCount']?.toString() ?? '0',
-        ),
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'user_details_notes_count'.tr(),
+                  data['notesCount']?.toString() ?? '0',
+                  Icons.notes,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'user_details_following'.tr(),
+                  data['followingCount']?.toString() ?? '0',
+                  Icons.person_add_outlined,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'user_details_followers'.tr(),
+                  data['followersCount']?.toString() ?? '0',
+                  Icons.people_outline,
+                ),
+              ),
+            ],
+          ).animate().fadeIn(delay: 100.ms).slideX(begin: 0.1, end: 0),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            color: theme.colorScheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildDetailRow(
+                    context,
+                    'user_details_name'.tr(),
+                    data['name'] ?? 'N/A',
+                  ),
+                  const Divider(height: 24),
+                  _buildDetailRow(
+                    context,
+                    'user_details_username'.tr(),
+                    '@${data['username'] ?? 'N/A'}',
+                  ),
+                ],
+              ),
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
+        ],
       );
     } else {
       // Flarum
       final attributes = data['data']?['attributes'] ?? {};
-      items.add(
-        _buildDetailItem(
-          'user_details_username'.tr(),
-          attributes['username'] ?? 'N/A',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_display_name'.tr(),
-          attributes['displayName'] ?? 'N/A',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_email'.tr(),
-          attributes['email'] ?? 'Hidden',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_discussions'.tr(),
-          attributes['discussionCount']?.toString() ?? '0',
-        ),
-      );
-      items.add(
-        _buildDetailItem(
-          'user_details_comments'.tr(),
-          attributes['commentCount']?.toString() ?? '0',
-        ),
+      return Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'user_details_discussions'.tr(),
+                  attributes['discussionCount']?.toString() ?? '0',
+                  Icons.chat_bubble_outline,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  'user_details_comments'.tr(),
+                  attributes['commentCount']?.toString() ?? '0',
+                  Icons.comment_outlined,
+                ),
+              ),
+            ],
+          ).animate().fadeIn(delay: 100.ms).slideX(begin: 0.1, end: 0),
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            color: theme.colorScheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildDetailRow(
+                    context,
+                    'user_details_display_name'.tr(),
+                    attributes['displayName'] ?? 'N/A',
+                  ),
+                  const Divider(height: 24),
+                  _buildDetailRow(
+                    context,
+                    'user_details_username'.tr(),
+                    attributes['username'] ?? 'N/A',
+                  ),
+                  const Divider(height: 24),
+                  _buildDetailRow(
+                    context,
+                    'user_details_email'.tr(),
+                    attributes['email'] ?? 'Hidden',
+                  ),
+                ],
+              ),
+            ),
+          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
+        ],
       );
     }
+  }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(children: items),
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    final theme = Theme.of(context);
+    final mikuColor = const Color(0xFF39C5BB);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: mikuColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: mikuColor.withValues(alpha: 0.1)),
       ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20, color: mikuColor),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: mikuColor,
+            ),
+          ),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(BuildContext context, String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+        ),
+      ],
     );
   }
 
@@ -246,19 +359,6 @@ class UserDetailsView extends ConsumerWidget {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value),
         ],
       ),
     );

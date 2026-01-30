@@ -12,7 +12,7 @@ class Constants {
   static const String logDirectoryName = 'debug';
 
   /// 默认日志文件前缀
-  static const String logFilePrefix = 'cyanitalk';
+  static const String logFilePrefix = 'CyaniTalk';
 
   /// 默认日志级别
   static const String defaultLogLevel = 'error';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
@@ -14,38 +15,46 @@ class AssociatedAccountsSection extends ConsumerStatefulWidget {
   const AssociatedAccountsSection({super.key});
 
   @override
-  ConsumerState<AssociatedAccountsSection> createState() => _AssociatedAccountsSectionState();
+  ConsumerState<AssociatedAccountsSection> createState() =>
+      _AssociatedAccountsSectionState();
 }
 
-class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSection> {
+class _AssociatedAccountsSectionState
+    extends ConsumerState<AssociatedAccountsSection> {
   Account? _focusedAccount;
 
   @override
   Widget build(BuildContext context) {
     final accountsAsync = ref.watch(authServiceProvider);
-    final selectedMisskey = ref.watch(selectedMisskeyAccountProvider).asData?.value;
-    final selectedFlarum = ref.watch(selectedFlarumAccountProvider).asData?.value;
+    final selectedMisskey = ref
+        .watch(selectedMisskeyAccountProvider)
+        .asData
+        ?.value;
+    final selectedFlarum = ref
+        .watch(selectedFlarumAccountProvider)
+        .asData
+        ?.value;
 
     return accountsAsync.when(
       data: (accounts) {
         if (accounts.isEmpty) {
           return _buildEmptyState(context);
         }
-        
+
         // Ensure focused account is valid
         if (_focusedAccount == null || !accounts.contains(_focusedAccount)) {
-           // Default to one of the active accounts or the first one
-           _focusedAccount = selectedMisskey ?? selectedFlarum ?? accounts.first;
+          // Default to one of the active accounts or the first one
+          _focusedAccount = selectedMisskey ?? selectedFlarum ?? accounts.first;
         }
-        
-        // If the user just switched via some other means (unlikely here but good for consistency), 
+
+        // If the user just switched via some other means (unlikely here but good for consistency),
         // we could sync _focusedAccount, but local tap priority is better.
 
         return _buildManagerLayout(
-          context, 
-          ref, 
-          accounts, 
-          selectedMisskey, 
+          context,
+          ref,
+          accounts,
+          selectedMisskey,
           selectedFlarum,
         );
       },
@@ -85,60 +94,126 @@ class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSe
     Account? selectedMisskey,
     Account? selectedFlarum,
   ) {
+    final theme = Theme.of(context);
+    final mikuColor = const Color(0xFF39C5BB);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Top Horizontal Account List
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              ...accounts.map((account) {
-                 final isMisskeyActive = account.id == selectedMisskey?.id;
-                 final isFlarumActive = account.id == selectedFlarum?.id;
-                 final isActive = isMisskeyActive || isFlarumActive;
-                 final isFocused = account.id == _focusedAccount?.id;
-                 
-                 return _AccountAvatarItem(
-                    account: account,
-                    isActive: isActive,
-                    isFocused: isFocused,
-                    activeColor: isMisskeyActive 
-                        ? const Color(0xFF39C5BB) // Miku Green
-                        : (isFlarumActive ? Colors.orange : Colors.grey),
-                    onTap: () {
-                      setState(() {
-                        _focusedAccount = account;
-                      });
-                      if (account.platform == 'misskey') {
-                        ref.read(selectedMisskeyAccountProvider.notifier).select(account);
-                      } else if (account.platform == 'flarum') {
-                        ref.read(selectedFlarumAccountProvider.notifier).select(account);
-                      }
-                    },
-                  );
-              }),
-              _AddAccountButton(onTap: () => _showAddAccountDialog(context)),
-            ],
-          ),
-        ),
-        const Divider(height: 32),
-        if (_focusedAccount != null) ...[
-          _buildSelectedHeader(context, _focusedAccount!),
-          const SizedBox(height: 16),
-          UserDetailsView(account: _focusedAccount!),
-          const SizedBox(height: 24),
-          Center(
-            child: TextButton.icon(
-              onPressed: () => _confirmDelete(context, ref, _focusedAccount!),
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              label: Text('accounts_remove_button'.tr(),
-                  style: TextStyle(color: Colors.red)),
+        // Section Title: Accounts
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
+          child: Text(
+            'settings_section_account'.tr(),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
             ),
           ),
+        ),
+
+        // Horizontal Account List
+        Container(
+          height: 80,
+          margin: const EdgeInsets.only(bottom: 24.0),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: accounts.length + 1,
+            itemBuilder: (context, index) {
+              if (index == accounts.length) {
+                return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: _AddAccountButton(
+                        onTap: () => _showAddAccountDialog(context),
+                      ),
+                    )
+                    .animate()
+                    .fadeIn(delay: 400.ms)
+                    .scale(begin: const Offset(0.8, 0.8));
+              }
+
+              final account = accounts[index];
+              final isMisskeyActive = account.id == selectedMisskey?.id;
+              final isFlarumActive = account.id == selectedFlarum?.id;
+              final isActive = isMisskeyActive || isFlarumActive;
+              final isFocused = account.id == _focusedAccount?.id;
+
+              return Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: _AccountAvatarItem(
+                      account: account,
+                      isActive: isActive,
+                      isFocused: isFocused,
+                      activeColor: isMisskeyActive
+                          ? mikuColor
+                          : (isFlarumActive ? Colors.orange : Colors.grey),
+                      onTap: () {
+                        setState(() {
+                          _focusedAccount = account;
+                        });
+                        if (account.platform == 'misskey') {
+                          ref
+                              .read(selectedMisskeyAccountProvider.notifier)
+                              .select(account);
+                        } else if (account.platform == 'flarum') {
+                          ref
+                              .read(selectedFlarumAccountProvider.notifier)
+                              .select(account);
+                        }
+                      },
+                    ),
+                  )
+                  .animate()
+                  .fadeIn(delay: (index * 100).ms)
+                  .slideX(begin: 0.2, end: 0);
+            },
+          ),
+        ),
+
+        if (_focusedAccount != null) ...[
+          // Focused Account Card
+          Card(
+                elevation: 0,
+                color: theme.colorScheme.surfaceContainerLow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.5,
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      _buildSelectedHeader(context, _focusedAccount!),
+                      const Divider(height: 40),
+                      UserDetailsView(account: _focusedAccount!),
+                      const SizedBox(height: 24),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            _confirmDelete(context, ref, _focusedAccount!),
+                        icon: const Icon(Icons.delete_outline),
+                        label: Text('accounts_remove_button'.tr()),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+              .animate(key: ValueKey(_focusedAccount!.id))
+              .fadeIn(duration: 400.ms)
+              .slideY(begin: 0.05, end: 0),
         ],
       ],
-    );
+    ).animate().fadeIn(duration: 400.ms);
   }
 
   Widget _buildSelectedHeader(BuildContext context, Account account) {
@@ -166,7 +241,9 @@ class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSe
               Row(
                 children: [
                   Image.asset(
-                    isMisskey ? 'assets/icons/misskey.png' : 'assets/icons/flarum.png',
+                    isMisskey
+                        ? 'assets/icons/misskey.png'
+                        : 'assets/icons/flarum.png',
                     width: 16,
                     height: 16,
                   ),
@@ -196,7 +273,11 @@ class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSe
       context: context,
       builder: (context) => AlertDialog(
         title: Text('accounts_remove_title'.tr()),
-        content: Text('accounts_remove_confirm'.tr(namedArgs: {'username': account.username ?? 'Unknown'})),
+        content: Text(
+          'accounts_remove_confirm'.tr(
+            namedArgs: {'username': account.username ?? 'Unknown'},
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -210,7 +291,10 @@ class _AssociatedAccountsSectionState extends ConsumerState<AssociatedAccountsSe
                 _focusedAccount = null; // Reset focus
               });
             },
-            child: Text('accounts_remove_confirm_button'.tr(), style: const TextStyle(color: Colors.red)),
+            child: Text(
+              'accounts_remove_confirm_button'.tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -245,16 +329,22 @@ class _AccountAvatarItem extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: isActive ? activeColor : (isFocused ? Theme.of(context).colorScheme.primary : Colors.transparent),
+              color: isActive
+                  ? activeColor
+                  : (isFocused
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.transparent),
               width: 2,
             ),
-            boxShadow: isActive ? [
-              BoxShadow(
-                color: activeColor.withValues(alpha: 0.3),
-                blurRadius: 4,
-                spreadRadius: 1,
-              )
-            ] : null,
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ]
+                : null,
           ),
           child: CircleAvatar(
             radius: 24,

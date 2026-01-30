@@ -53,7 +53,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.9),
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
       body: GestureDetector(
         onTap: _toggleControls,
         child: Stack(
@@ -76,9 +76,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha: 0.7),
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha: 0.7),
                       ],
                     ),
                   ),

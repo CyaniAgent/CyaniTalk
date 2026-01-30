@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
     <application
-        android:label="cyanitalk"
+        android:label="CyaniTalk"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
