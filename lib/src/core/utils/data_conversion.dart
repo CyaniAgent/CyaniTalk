@@ -1,5 +1,6 @@
 /// 数据转换和验证工具
 /// 提供安全的类型转换和空值处理
+library;
 
 extension SafeConversion on Map<dynamic, dynamic> {
   /// 安全地将值转换为字符串

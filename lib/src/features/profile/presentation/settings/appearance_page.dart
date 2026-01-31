@@ -195,7 +195,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: settings.isDarkMode
-                    ? Theme.of(context).colorScheme.surfaceVariant
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
                     : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
