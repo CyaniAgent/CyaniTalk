@@ -138,94 +138,105 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                     child: Semantics(
                       label: 'Attached files',
                       child: Column(
-                        children: [
-                          // Group images together in a grid
-                          _buildImageGrid(note.files),
-                          // Handle other file types
-                          ...note.files
-                              .where((file) {
-                                final url = file['url'] as String?;
-                                final type = file['type'] as String?;
-                                if (url == null) return false;
-                                return !_isImageFile(type, url);
-                              })
-                              .map((file) {
-                                final url = file['url'] as String?;
-                                final type = file['type'] as String?;
-                                final name = file['name'] as String?;
+                        children: note.files.map((file) {
+                          final url = file['url'] as String?;
+                          final type = file['type'] as String?;
+                          final name = file['name'] as String?;
 
-                                if (url == null) {
-                                  return const SizedBox.shrink();
-                                }
+                          if (url == null) {
+                            return const SizedBox.shrink();
+                          }
 
-                                // Detect media type
-                                final isVideo = _isVideoFile(type, url);
-                                final isAudio = _isAudioFile(type, url);
+                          // Detect media type
+                          final isImage = _isImageFile(type, url);
+                          final isVideo = _isVideoFile(type, url);
+                          final isAudio = _isAudioFile(type, url);
 
-                                if (isAudio) {
-                                  // Audio player
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: AudioPlayerWidget(
-                                      audioUrl: url,
-                                      fileName: name,
-                                    ),
-                                  );
-                                } else if (isVideo) {
-                                  // Video thumbnail
-                                  final thumbnailUrl =
-                                      file['thumbnailUrl'] as String? ?? url;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  VideoPlayerPage(
-                                                    videoUrl: url,
-                                                  ),
-                                            ),
-                                          );
-                                        },
-                                        child: Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            Container(
-                                              constraints: const BoxConstraints(
-                                                maxHeight: 300,
-                                              ),
-                                              child: RetryableNetworkImage(
-                                                url: thumbnailUrl,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                            Container(
-                                              padding: const EdgeInsets.all(12),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.6,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                Icons.play_arrow,
-                                                color: Colors.white,
-                                                size: 48,
-                                              ),
-                                            ),
-                                          ],
+                          if (isAudio) {
+                            // Audio player
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: AudioPlayerWidget(
+                                audioUrl: url,
+                                fileName: name,
+                              ),
+                            );
+                          } else if (isVideo) {
+                            // Video thumbnail
+                            final thumbnailUrl =
+                                file['thumbnailUrl'] as String? ?? url;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 4.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            VideoPlayerPage(videoUrl: url),
+                                      ),
+                                    );
+                                  },
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      RetryableNetworkImage(
+                                        url: thumbnailUrl,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.6,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.play_arrow,
+                                          color: Colors.white,
+                                          size: 48,
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else if (isImage) {
+                            // Image thumbnail
+                            final thumbnailUrl =
+                                file['thumbnailUrl'] as String? ?? url;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 4.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => ImageViewerPage(
+                                          imageUrl: url,
+                                          heroTag: 'image_$url',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Hero(
+                                    tag: 'image_$url',
+                                    child: RetryableNetworkImage(
+                                      url: thumbnailUrl,
+                                      fit: BoxFit.cover,
                                     ),
-                                  );
-                                }
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
 
-                                return const SizedBox.shrink();
-                              }),
-                        ],
+                          return const SizedBox.shrink();
+                        }).toList(),
                       ),
                     ),
                   ),
@@ -346,81 +357,6 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     }
     final ext = url.toLowerCase().split('.').last.split('?').first;
     return ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'].contains(ext);
-  }
-
-  Widget _buildImageGrid(List<dynamic> files) {
-    // Filter only image files
-    final imageFiles = files.where((file) {
-      final url = file['url'] as String?;
-      final type = file['type'] as String?;
-      if (url == null) return false;
-      return _isImageFile(type, url);
-    }).toList();
-
-    if (imageFiles.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    // Determine grid layout based on number of images
-    int crossAxisCount;
-    if (imageFiles.length == 1) {
-      crossAxisCount = 1;
-    } else if (imageFiles.length == 2) {
-      crossAxisCount = 2;
-    } else if (imageFiles.length == 3) {
-      crossAxisCount = 3;
-    } else {
-      crossAxisCount = 2;
-    }
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 4.0,
-        mainAxisSpacing: 4.0,
-        childAspectRatio: 1.0, // Square images
-      ),
-      itemCount: imageFiles.length,
-      itemBuilder: (context, index) {
-        final file = imageFiles[index];
-        final url = file['url'] as String?;
-        final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
-
-        if (url == null || thumbnailUrl == null) {
-          return const SizedBox.shrink();
-        }
-
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ImageViewerPage(imageUrl: url, heroTag: 'image_$url'),
-                ),
-              );
-            },
-            child: Hero(
-              tag: 'image_$url',
-              child: Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                constraints: const BoxConstraints(
-                  maxHeight: 200, // Set a maximum height for images
-                ),
-                child: RetryableNetworkImage(
-                  url: thumbnailUrl,
-                  fit: BoxFit.cover,
-                  maxHeight: 200, // Set a maximum height for images
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _handleRenote() async {
