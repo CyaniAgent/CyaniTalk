@@ -360,10 +360,8 @@ class AuthService extends _$AuthService {
         .getAccounts();
     state = AsyncData(updatedAccounts);
 
-    // Re-evaluate selected accounts (the providers watch authServiceProvider so they should update automatically)
-    logger.debug('重新评估选中的账户');
-    ref.invalidate(selectedMisskeyAccountProvider);
-    ref.invalidate(selectedFlarumAccountProvider);
+    // Selected accounts will automatically re-evaluate since they watch authServiceProvider
+    logger.debug('选中的账户将自动重新评估');
     logger.info('账户删除流程完成');
   }
 
