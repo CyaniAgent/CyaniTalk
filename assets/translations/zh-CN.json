@@ -154,7 +154,7 @@
   "auth_add_account_flarum_subtitle": "使用 API Token 连接",
   "auth_add_account_flarum_endpoint_option": "配置 Flarum 端点",
   "auth_add_account_flarum_endpoint_subtitle": "添加自定义论坛服务器",
-  "auth_choose_platform": "选择一个平台登录！",
+  "auth_choose_platform": "选择平台来登录吧！",
   "auth_misskey_host": "实例 URL (例如 misskey.io)",
   "auth_misskey_host_hint": "请输入要连接的 Misskey 实例主机地址。",
   "auth_next": "下一步",

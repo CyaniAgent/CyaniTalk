@@ -234,6 +234,10 @@ class MisskeyApi {
     String? text,
     String? replyId,
     String? renoteId,
+    List<String>? fileIds,
+    String? visibility,
+    bool? localOnly,
+    String? cw,
   }) async {
     try {
       String action = 'Creating note';
@@ -247,6 +251,10 @@ class MisskeyApi {
           if (text != null) 'text': text,
           if (replyId != null) 'replyId': replyId,
           if (renoteId != null) 'renoteId': renoteId,
+          if (fileIds != null) 'fileIds': fileIds,
+          if (visibility != null) 'visibility': visibility,
+          if (localOnly != null) 'localOnly': localOnly,
+          if (cw != null) 'cw': cw,
         },
       );
       logger.info('MisskeyApi: Successfully $action');

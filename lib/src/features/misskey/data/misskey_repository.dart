@@ -121,6 +121,33 @@ class MisskeyRepository {
     }
   }
 
+  Future<void> createNote({
+    String? text,
+    String? replyId,
+    String? renoteId,
+    List<String>? fileIds,
+    String? visibility,
+    bool? localOnly,
+    String? cw,
+  }) async {
+    logger.info('MisskeyRepository: Creating note');
+    try {
+      await api.createNote(
+        text: text,
+        replyId: replyId,
+        renoteId: renoteId,
+        fileIds: fileIds,
+        visibility: visibility,
+        localOnly: localOnly,
+        cw: cw,
+      );
+      logger.info('MisskeyRepository: Successfully created note');
+    } catch (e) {
+      logger.error('MisskeyRepository: Error creating note', e);
+      rethrow;
+    }
+  }
+
   Future<void> renote(String noteId) async {
     logger.info('MisskeyRepository: Renoting note $noteId');
     try {

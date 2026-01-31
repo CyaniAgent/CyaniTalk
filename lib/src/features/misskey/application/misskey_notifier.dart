@@ -4,6 +4,7 @@ import '../data/misskey_repository.dart';
 import '../domain/note.dart';
 import '../domain/clip.dart';
 import '../domain/channel.dart';
+import '../domain/misskey_user.dart';
 import 'misskey_streaming_service.dart';
 import '../../../core/core.dart';
 
@@ -286,5 +287,22 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
 
     final repository = ref.read(misskeyRepositoryProvider);
     return await repository.getOnlineUsersCount();
+  }
+}
+
+@riverpod
+class MisskeyMeNotifier extends _$MisskeyMeNotifier {
+  @override
+  FutureOr<MisskeyUser> build() async {
+    final repository = ref.watch(misskeyRepositoryProvider);
+    return await repository.getMe();
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(misskeyRepositoryProvider);
+      return await repository.getMe();
+    });
   }
 }
