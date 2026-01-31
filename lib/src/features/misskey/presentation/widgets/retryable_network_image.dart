@@ -6,14 +6,12 @@ class RetryableNetworkImage extends StatefulWidget {
   final String url;
   final BoxFit fit;
   final int maxRetries;
-  final double? maxHeight;
 
   const RetryableNetworkImage({
     super.key,
     required this.url,
     this.fit = BoxFit.cover,
     this.maxRetries = 3,
-    this.maxHeight = 300,
   });
 
   @override
@@ -41,75 +39,70 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxHeight: widget.maxHeight ?? 300),
-      child: Image.network(
-        widget.url,
-        key: ValueKey(_imageKey),
-        fit: widget.fit,
-        width: double.infinity,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: CircularProgressIndicator(),
-              ),
+    return Image.network(
+      widget.url,
+      key: ValueKey(_imageKey),
+      fit: widget.fit,
+      width: double.infinity,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          height: 200,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                  : null,
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          // Auto-retry on first few failures
-          if (_retryCount < widget.maxRetries) {
-            Future.delayed(Duration(seconds: _retryCount + 1), _retry);
-          }
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        // Auto-retry on first few failures
+        if (_retryCount < widget.maxRetries) {
+          Future.delayed(Duration(seconds: _retryCount + 1), _retry);
+        }
 
-          return Container(
-            height: widget.maxHeight ?? 150,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _retryCount >= widget.maxRetries
-                      ? Icons.broken_image_outlined
-                      : Icons.refresh,
-                  size: 48,
+        return Container(
+          height: 150,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                _retryCount >= widget.maxRetries
+                    ? Icons.broken_image_outlined
+                    : Icons.refresh,
+                size: 48,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _retryCount >= widget.maxRetries
+                    ? 'image_unavailable'.tr()
+                    : 'image_retrying'.tr(namedArgs: {'retryCount': _retryCount.toString(), 'maxRetries': widget.maxRetries.toString()}),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  _retryCount >= widget.maxRetries
-                      ? 'image_unavailable'.tr()
-                      : 'image_retrying'.tr(
-                          namedArgs: {
-                            'retryCount': _retryCount.toString(),
-                            'maxRetries': widget.maxRetries.toString(),
-                          },
-                        ),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
+              ),
+              if (_retryCount < widget.maxRetries)
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
-                if (_retryCount < widget.maxRetries)
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: 8.0),
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

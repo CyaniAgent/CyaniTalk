@@ -158,27 +158,35 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               title: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(_titles[_selectedIndex]),
+                  Flexible(
+                    child: Text(
+                      _titles[_selectedIndex],
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   if (_selectedIndex == 0) ...[
                     const SizedBox(width: 8),
-                    ref
-                        .watch(misskeyOnlineUsersProvider)
-                        .when(
-                          data: (count) => Text(
-                            '• $count users online',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ).animate().fadeIn().scale(),
-                          loading: () => const SizedBox(
-                            width: 12,
-                            height: 12,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    Flexible(
+                      child: ref.watch(misskeyOnlineUsersProvider).when(
+                            data: (count) => Text(
+                              '• $count users online',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context).colorScheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                            ).animate().fadeIn().scale(),
+                            loading: () => const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            error: (error, stack) => const SizedBox.shrink(),
                           ),
-                          error: (error, stack) => const SizedBox.shrink(),
-                        ),
+                    ),
                   ],
                 ],
               ),

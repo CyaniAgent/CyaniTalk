@@ -13,7 +13,7 @@ class AudioPlayerWidget extends StatefulWidget {
 }
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKeepAliveClientMixin {
-  late AudioPlayer _audioPlayer;
+  AudioPlayer? _audioPlayer;
   bool _isPlaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
@@ -21,12 +21,12 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
   @override
   bool get wantKeepAlive => _isPlaying;
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _initializePlayer() async {
+    if (_audioPlayer != null) return;
+
     _audioPlayer = AudioPlayer();
 
-    _audioPlayer.onDurationChanged.listen((duration) {
+    _audioPlayer!.onDurationChanged.listen((duration) {
       if (mounted) {
         setState(() {
           _duration = duration;
@@ -34,7 +34,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
       }
     });
 
-    _audioPlayer.onPositionChanged.listen((position) {
+    _audioPlayer!.onPositionChanged.listen((position) {
       if (mounted) {
         setState(() {
           _position = position;
@@ -42,7 +42,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
       }
     });
 
-    _audioPlayer.onPlayerComplete.listen((_) {
+    _audioPlayer!.onPlayerComplete.listen((_) {
       if (mounted) {
         setState(() {
           _isPlaying = false;
@@ -55,15 +55,19 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _audioPlayer?.dispose();
     super.dispose();
   }
 
   Future<void> _togglePlayPause() async {
+    if (_audioPlayer == null) {
+      await _initializePlayer();
+    }
+
     if (_isPlaying) {
-      await _audioPlayer.pause();
+      await _audioPlayer!.pause();
     } else {
-      await _audioPlayer.play(UrlSource(widget.audioUrl));
+      await _audioPlayer!.play(UrlSource(widget.audioUrl));
     }
     if (mounted) {
       setState(() {
@@ -74,8 +78,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
   }
 
   void _seek(double value) {
+    if (_audioPlayer == null) return;
     final position = Duration(seconds: value.toInt());
-    _audioPlayer.seek(position);
+    _audioPlayer!.seek(position);
   }
 
   @override

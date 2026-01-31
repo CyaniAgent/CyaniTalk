@@ -326,3 +326,47 @@ abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(MisskeyMeNotifier)
+final misskeyMeProvider = MisskeyMeNotifierProvider._();
+
+final class MisskeyMeNotifierProvider
+    extends $AsyncNotifierProvider<MisskeyMeNotifier, MisskeyUser> {
+  MisskeyMeNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'misskeyMeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$misskeyMeNotifierHash();
+
+  @$internal
+  @override
+  MisskeyMeNotifier create() => MisskeyMeNotifier();
+}
+
+String _$misskeyMeNotifierHash() => r'7a3dc789078bdbb47298168d0c87726071264762';
+
+abstract class _$MisskeyMeNotifier extends $AsyncNotifier<MisskeyUser> {
+  FutureOr<MisskeyUser> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<MisskeyUser>, MisskeyUser>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<MisskeyUser>, MisskeyUser>,
+              AsyncValue<MisskeyUser>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

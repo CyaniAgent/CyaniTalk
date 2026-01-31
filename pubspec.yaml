@@ -90,6 +90,7 @@ dependencies:
   video_player: ^2.9.2
   # Windows平台视频播放器实现
   video_player_win: ^2.3.11
+  file_picker: ^10.3.10
 
 dev_dependencies:
   flutter_test:
