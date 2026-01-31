@@ -210,5 +210,19 @@
   "image_retrying": "Retrying... Retry count: {retryCount}/{maxRetries}",
   "forum_page_title": "Forum",
   "forum_page_not_connected": "Not Connected",
-  "forum_page_please_connect": "Please connect to a Flarum forum in your profile first!"
+  "forum_page_please_connect": "Please connect to a Flarum forum in your profile first!",
+  "settings_appearance_section_display": "Display",
+  "settings_appearance_dark_mode": "Dark Mode",
+  "settings_appearance_dark_mode_description": "Enable dark theme",
+  "settings_appearance_dynamic_color": "Dynamic Color",
+  "settings_appearance_dynamic_color_description": "Use system dynamic color",
+  "settings_appearance_section_preview": "Preview",
+  "settings_appearance_preview": "Appearance Preview",
+  "settings_appearance_preview_title": "Preview Title",
+  "settings_appearance_preview_text": "This is a preview text to demonstrate the current theme effect.",
+  "settings_appearance_preview_button": "Button",
+  "settings_appearance_preview_button_secondary": "Secondary Button",
+  "settings_appearance_preview_dark": "Currently in dark mode",
+  "settings_appearance_preview_light": "Currently in light mode",
+  "settings_appearance_preview_dynamic": "Dynamic color enabled"
 }

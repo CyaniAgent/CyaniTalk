@@ -37,6 +37,7 @@
   "timeline_your_timeline_is_empty": "你的时间线是空的。",
   "misskey_drawer_misskey_menu": "Misskey 菜单",
   "misskey_drawer_timeline": "时间线",
+  "misskey_drawer_clips": "剪辑",
   "misskey_drawer_notes": "笔记",
   "misskey_drawer_antennas": "天线",
   "misskey_drawer_channels": "频道",
@@ -209,5 +210,19 @@
   "image_retrying": "正在重试... 重试次数: {retryCount}/{maxRetries}",
   "forum_page_title": "论坛",
   "forum_page_not_connected": "未连接",
-  "forum_page_please_connect": "请先在个人资料中连接到 Flarum 论坛！"
+  "forum_page_please_connect": "请先在个人资料中连接到 Flarum 论坛！",
+  "settings_appearance_section_display": "显示",
+  "settings_appearance_dark_mode": "深色模式",
+  "settings_appearance_dark_mode_description": "启用深色主题",
+  "settings_appearance_dynamic_color": "动态色彩",
+  "settings_appearance_dynamic_color_description": "使用系统动态色彩",
+  "settings_appearance_section_preview": "预览",
+  "settings_appearance_preview": "外观预览",
+  "settings_appearance_preview_title": "预览标题",
+  "settings_appearance_preview_text": "这是一段预览文本，用于展示当前主题的效果。",
+  "settings_appearance_preview_button": "按钮",
+  "settings_appearance_preview_button_secondary": "次要按钮",
+  "settings_appearance_preview_dark": "当前为深色模式",
+  "settings_appearance_preview_light": "当前为浅色模式",
+  "settings_appearance_preview_dynamic": "启用了动态色彩"
 }

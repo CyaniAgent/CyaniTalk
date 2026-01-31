@@ -37,6 +37,7 @@
   "timeline_your_timeline_is_empty": "あなたのタイムラインは空です。",
   "misskey_drawer_misskey_menu": "Misskeyメニュー",
   "misskey_drawer_timeline": "タイムライン",
+  "misskey_drawer_clips": "クリップ",
   "misskey_drawer_notes": "ノート",
   "misskey_drawer_antennas": "アンテナ",
   "misskey_drawer_channels": "チャンネル",
@@ -209,5 +210,19 @@
   "image_retrying": "リトライ中... リトライ回数: {retryCount}/{maxRetries}",
   "forum_page_title": "フォーラム",
   "forum_page_not_connected": "接続されていません",
-  "forum_page_please_connect": "プロフィールで Flarum フォーラムに接続してください！"
+  "forum_page_please_connect": "プロフィールで Flarum フォーラムに接続してください！",
+  "settings_appearance_section_display": "表示",
+  "settings_appearance_dark_mode": "ダークモード",
+  "settings_appearance_dark_mode_description": "ダークテーマを有効にする",
+  "settings_appearance_dynamic_color": "動的カラー",
+  "settings_appearance_dynamic_color_description": "システムの動的カラーを使用する",
+  "settings_appearance_section_preview": "プレビュー",
+  "settings_appearance_preview": "外観プレビュー",
+  "settings_appearance_preview_title": "プレビュータイトル",
+  "settings_appearance_preview_text": "これは現在のテーマ効果を示すプレビューテキストです。",
+  "settings_appearance_preview_button": "ボタン",
+  "settings_appearance_preview_button_secondary": "セカンダリボタン",
+  "settings_appearance_preview_dark": "現在ダークモード",
+  "settings_appearance_preview_light": "現在ライトモード",
+  "settings_appearance_preview_dynamic": "動的カラーが有効"
 }

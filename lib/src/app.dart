@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'core/core.dart';
 import 'routing/router.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
+import 'features/profile/presentation/settings/appearance_page.dart';
 
 /// CyaniTalk应用程序的根组件
 class CyaniTalkApp extends ConsumerWidget {
@@ -15,27 +16,62 @@ class CyaniTalkApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     logger.info('CyaniTalkApp: 初始化应用程序');
-    
+
     final goRouter = ref.watch(goRouterProvider);
     logger.debug('CyaniTalkApp: 加载路由配置');
-    
+
+    // Get appearance settings
+    final appearanceSettings = ref.watch(appearanceSettingsProvider);
+    logger.debug(
+      'CyaniTalkApp: 加载外观设置 - 深色模式: ${appearanceSettings.isDarkMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
+    );
+
     // Initialize Misskey Streaming Service at app level
     logger.debug('CyaniTalkApp: 初始化Misskey流媒体服务');
     ref.watch(misskeyStreamingServiceProvider);
+
+    // Build theme based on settings
+    final theme = _buildTheme(appearanceSettings);
 
     logger.debug('CyaniTalkApp: 构建MaterialApp');
     return MaterialApp.router(
       routerConfig: goRouter,
       title: 'CyaniTalk',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF39C5BB)),
-        useMaterial3: true,
-        fontFamily: 'MiSans',
-      ),
+      theme: theme,
+      darkTheme: _buildTheme(appearanceSettings.copyWith(isDarkMode: true)),
+      themeMode: appearanceSettings.isDarkMode
+          ? ThemeMode.dark
+          : ThemeMode.light,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
+    );
+  }
+
+  /// 构建主题
+  ThemeData _buildTheme(AppearanceSettings settings) {
+    final seedColor = const Color(0xFF39C5BB);
+
+    return ThemeData(
+      colorScheme: settings.useDynamicColor
+          ? ColorScheme.fromSeed(
+              seedColor: seedColor,
+              brightness: settings.isDarkMode
+                  ? Brightness.dark
+                  : Brightness.light,
+            )
+          : ColorScheme.fromSeed(
+              seedColor: seedColor,
+              brightness: settings.isDarkMode
+                  ? Brightness.dark
+                  : Brightness.light,
+              // 固定色彩方案，不使用动态色彩
+              primary: seedColor,
+              secondary: const Color(0xFF6366F1),
+            ),
+      useMaterial3: true,
+      fontFamily: 'MiSans',
     );
   }
 }
