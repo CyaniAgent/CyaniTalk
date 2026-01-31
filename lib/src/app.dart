@@ -51,7 +51,10 @@ class CyaniTalkApp extends ConsumerWidget {
 
   /// 构建主题
   ThemeData _buildTheme(AppearanceSettings settings) {
-    final seedColor = const Color(0xFF39C5BB);
+    // 使用自定义颜色或默认颜色
+    final seedColor = settings.useCustomColor && settings.primaryColor != null
+        ? settings.primaryColor!
+        : const Color(0xFF39C5BB);
 
     return ThemeData(
       colorScheme: settings.useDynamicColor

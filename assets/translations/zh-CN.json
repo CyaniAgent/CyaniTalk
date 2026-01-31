@@ -224,5 +224,12 @@
   "settings_appearance_preview_button_secondary": "次要按钮",
   "settings_appearance_preview_dark": "当前为深色模式",
   "settings_appearance_preview_light": "当前为浅色模式",
-  "settings_appearance_preview_dynamic": "启用了动态色彩"
+  "settings_appearance_preview_dynamic": "启用了动态色彩",
+  "settings_appearance_custom_color": "自定义颜色",
+  "settings_appearance_custom_color_description": "使用自定义主题颜色",
+  "settings_appearance_primary_color": "主色调",
+  "settings_appearance_reset_color": "重置颜色",
+  "settings_appearance_select_color": "选择颜色",
+  "settings_appearance_cancel": "取消",
+  "settings_appearance_preview_custom": "使用了自定义颜色"
 }

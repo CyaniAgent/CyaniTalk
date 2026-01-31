@@ -17,17 +17,32 @@ class AppearanceSettings {
   /// 是否启用动态色彩
   final bool useDynamicColor;
 
+  /// 是否使用自定义颜色
+  final bool useCustomColor;
+
+  /// 自定义主色调
+  final Color? primaryColor;
+
   /// 创建外观设置实例
   const AppearanceSettings({
     required this.isDarkMode,
     required this.useDynamicColor,
+    this.useCustomColor = false,
+    this.primaryColor,
   });
 
   /// 复制并更新外观设置
-  AppearanceSettings copyWith({bool? isDarkMode, bool? useDynamicColor}) {
+  AppearanceSettings copyWith({
+    bool? isDarkMode,
+    bool? useDynamicColor,
+    bool? useCustomColor,
+    Color? primaryColor,
+  }) {
     return AppearanceSettings(
       isDarkMode: isDarkMode ?? this.isDarkMode,
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
+      useCustomColor: useCustomColor ?? this.useCustomColor,
+      primaryColor: primaryColor ?? this.primaryColor,
     );
   }
 }
@@ -40,7 +55,12 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
   AppearanceSettings build() {
     // 初始化时尝试从系统设置获取
     _initializeFromSystem();
-    return const AppearanceSettings(isDarkMode: false, useDynamicColor: true);
+    return const AppearanceSettings(
+      isDarkMode: false,
+      useDynamicColor: true,
+      useCustomColor: false,
+      primaryColor: null,
+    );
   }
 
   /// 从系统设置初始化
@@ -57,6 +77,24 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
   /// 切换动态色彩
   void toggleDynamicColor() {
     state = state.copyWith(useDynamicColor: !state.useDynamicColor);
+    // 这里可以添加保存设置到持久化存储的逻辑
+  }
+
+  /// 切换自定义颜色
+  void toggleCustomColor() {
+    state = state.copyWith(useCustomColor: !state.useCustomColor);
+    // 这里可以添加保存设置到持久化存储的逻辑
+  }
+
+  /// 更新自定义主色调
+  void updatePrimaryColor(Color color) {
+    state = state.copyWith(primaryColor: color, useCustomColor: true);
+    // 这里可以添加保存设置到持久化存储的逻辑
+  }
+
+  /// 重置为默认颜色
+  void resetToDefaultColor() {
+    state = state.copyWith(useCustomColor: false, primaryColor: null);
     // 这里可以添加保存设置到持久化存储的逻辑
   }
 }
@@ -114,6 +152,62 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             (value) => appearanceNotifier.toggleDynamicColor(),
           ),
 
+          // 自定义颜色设置
+          _buildSwitchTile(
+            context,
+            Icons.palette_outlined,
+            'settings_appearance_custom_color'.tr(),
+            'settings_appearance_custom_color_description'.tr(),
+            appearanceSettings.useCustomColor,
+            (value) => appearanceNotifier.toggleCustomColor(),
+          ),
+
+          // 颜色选择器
+          if (appearanceSettings.useCustomColor) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'settings_appearance_primary_color'.tr(),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color:
+                                appearanceSettings.primaryColor ??
+                                Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTap: () =>
+                                _showColorPicker(context, appearanceNotifier),
+                            child: const Center(child: Icon(Icons.color_lens)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () =>
+                            appearanceNotifier.resetToDefaultColor(),
+                        child: Text('settings_appearance_reset_color'.tr()),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           _buildSectionHeader(
             context,
             'settings_appearance_section_preview'.tr(),
@@ -167,6 +261,82 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: Switch(value: value, onChanged: onChanged),
+    );
+  }
+
+  /// 显示颜色选择器
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [notifier] - 外观设置状态管理器
+  Future<void> _showColorPicker(
+    BuildContext context,
+    AppearanceSettingsNotifier notifier,
+  ) async {
+    final currentColor =
+        ref.read(appearanceSettingsProvider).primaryColor ??
+        Theme.of(context).colorScheme.primary;
+
+    // 这里使用简单的颜色选择器，实际项目中可以使用更复杂的颜色选择库
+    final List<Color> presetColors = [
+      Colors.red,
+      Colors.pink,
+      Colors.purple,
+      Colors.deepPurple,
+      Colors.indigo,
+      Colors.blue,
+      Colors.lightBlue,
+      Colors.cyan,
+      Colors.teal,
+      Colors.green,
+      Colors.lightGreen,
+      Colors.lime,
+      Colors.yellow,
+      Colors.amber,
+      Colors.orange,
+      Colors.deepOrange,
+      Colors.brown,
+      Colors.grey,
+      Colors.blueGrey,
+      const Color(0xFF39C5BB), // 默认的mikuColor
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('settings_appearance_select_color'.tr()),
+        content: Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: presetColors.map((color) {
+            return GestureDetector(
+              onTap: () {
+                notifier.updatePrimaryColor(color);
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(
+                    color: currentColor == color
+                        ? Colors.black
+                        : Colors.transparent,
+                    width: 3,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('settings_appearance_cancel'.tr()),
+          ),
+        ],
+      ),
     );
   }
 
@@ -247,6 +417,15 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               const SizedBox(height: 4),
               Text(
                 'settings_appearance_preview_dynamic'.tr(),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ],
+            if (settings.useCustomColor) ...[
+              const SizedBox(height: 4),
+              Text(
+                'settings_appearance_preview_custom'.tr(),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),

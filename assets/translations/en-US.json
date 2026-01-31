@@ -224,5 +224,12 @@
   "settings_appearance_preview_button_secondary": "Secondary Button",
   "settings_appearance_preview_dark": "Currently in dark mode",
   "settings_appearance_preview_light": "Currently in light mode",
-  "settings_appearance_preview_dynamic": "Dynamic color enabled"
+  "settings_appearance_preview_dynamic": "Dynamic color enabled",
+  "settings_appearance_custom_color": "Custom Color",
+  "settings_appearance_custom_color_description": "Use custom theme color",
+  "settings_appearance_primary_color": "Primary Color",
+  "settings_appearance_reset_color": "Reset Color",
+  "settings_appearance_select_color": "Select Color",
+  "settings_appearance_cancel": "Cancel",
+  "settings_appearance_preview_custom": "Custom color enabled"
 }
