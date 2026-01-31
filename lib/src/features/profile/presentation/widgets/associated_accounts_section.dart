@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:convert';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
+import 'user_details_view.dart';
 
 /// 统一登录管理器组件
 ///
@@ -192,8 +194,10 @@ class _AssociatedAccountsSectionState
                   child: Column(
                     children: [
                       _buildSelectedHeader(context, _focusedAccount!),
+                      const SizedBox(height: 16),
+                      _buildRawDataSection(context, ref, _focusedAccount!),
                       if (widget.showRemoveButton) ...[
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         const Divider(),
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
@@ -297,6 +301,70 @@ class _AssociatedAccountsSectionState
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildRawDataSection(
+    BuildContext context,
+    WidgetRef ref,
+    Account account,
+  ) {
+    final detailsAsync = ref.watch(userDetailsProvider(account));
+
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ExpansionTile(
+        title: Text(
+          'user_details_raw_data'.tr(),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        leading: const Icon(Icons.code),
+        children: [
+          detailsAsync.when(
+            data:
+                (data) => Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest.withValues(
+                        alpha: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SelectableText(
+                        const JsonEncoder.withIndent('  ').convert(data),
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error:
+                (err, stack) => Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('Error: $err'),
+                ),
+          ),
+        ],
+      ),
     );
   }
 
