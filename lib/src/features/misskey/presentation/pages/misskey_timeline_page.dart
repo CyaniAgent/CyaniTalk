@@ -79,11 +79,6 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   label: Text('timeline_social'.tr()),
                   icon: const Icon(Icons.group_outlined),
                 ),
-                ButtonSegment<String>(
-                  value: 'Home',
-                  label: Text('timeline_home'.tr()),
-                  icon: const Icon(Icons.home_outlined),
-                ),
               ],
               selected: _selectedTimeline,
               onSelectionChanged: (Set<String> newSelection) {

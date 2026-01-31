@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'about_page.dart';
+import 'accounts_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -28,7 +29,17 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         children: [
           _buildSectionHeader(context, 'settings_section_account'.tr()),
-          _buildSettingsTile(context, Icons.person_outline, 'settings_account_title'.tr(), 'settings_account_description'.tr()),
+          _buildSettingsTile(
+            context,
+            Icons.person_outline,
+            'settings_account_title'.tr(),
+            'settings_account_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const AccountsPage()),
+              );
+            },
+          ),
           
           _buildSectionHeader(context, 'settings_section_connections'.tr()),
           _buildSettingsTile(context, Icons.api, 'settings_flarum_endpoint_title'.tr(), 'settings_flarum_endpoint_description'.tr()),

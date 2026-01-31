@@ -51,9 +51,9 @@ class MisskeyDrawer extends StatelessWidget {
           label: Text('misskey_drawer_timeline'.tr()),
         ),
         NavigationDrawerDestination(
-          icon: Icon(Icons.note_outlined),
-          selectedIcon: Icon(Icons.note),
-          label: Text('misskey_drawer_notes'.tr()),
+          icon: Icon(Icons.collections_bookmark_outlined),
+          selectedIcon: Icon(Icons.collections_bookmark),
+          label: Text('misskey_drawer_clips'.tr()),
         ),
         NavigationDrawerDestination(
           icon: Icon(Icons.satellite_alt_outlined),

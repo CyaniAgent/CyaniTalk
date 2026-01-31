@@ -200,6 +200,36 @@ class MisskeyApi {
     }
   }
 
+  Future<List<dynamic>> getClips({int limit = 20, String? untilId}) async {
+    try {
+      logger.info('MisskeyApi: Fetching clips, limit=$limit');
+      final response = await _dio.post(
+        '/api/clips/list',
+        data: {
+          'i': token,
+          'limit': limit,
+          if (untilId != null) 'untilId': untilId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final clips = response.data as List<dynamic>;
+        logger.info(
+          'MisskeyApi: Successfully fetched ${clips.length} clips',
+        );
+        return clips;
+      }
+      throw Exception('Failed to fetch clips: ${response.statusCode}');
+    } catch (e) {
+      if (e is DioException) {
+        logger.error('MisskeyApi: Error fetching clips', e);
+        throw Exception('Misskey API error: ${e.message}');
+      }
+      logger.error('MisskeyApi: Unexpected error fetching clips', e);
+      rethrow;
+    }
+  }
+
   Future<void> createNote({
     String? text,
     String? replyId,

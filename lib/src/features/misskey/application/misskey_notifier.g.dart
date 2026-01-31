@@ -237,6 +237,51 @@ abstract class _$MisskeyChannelTimelineNotifier
   }
 }
 
+@ProviderFor(MisskeyClipsNotifier)
+final misskeyClipsProvider = MisskeyClipsNotifierProvider._();
+
+final class MisskeyClipsNotifierProvider
+    extends $AsyncNotifierProvider<MisskeyClipsNotifier, List<Clip>> {
+  MisskeyClipsNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'misskeyClipsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$misskeyClipsNotifierHash();
+
+  @$internal
+  @override
+  MisskeyClipsNotifier create() => MisskeyClipsNotifier();
+}
+
+String _$misskeyClipsNotifierHash() =>
+    r'76249c10de5e85d3f5368db9137166d4b3213c18';
+
+abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
+  FutureOr<List<Clip>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<Clip>>, List<Clip>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Clip>>, List<Clip>>,
+              AsyncValue<List<Clip>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(MisskeyOnlineUsersNotifier)
 final misskeyOnlineUsersProvider = MisskeyOnlineUsersNotifierProvider._();
 

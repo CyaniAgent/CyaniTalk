@@ -11,6 +11,7 @@ _Account _$AccountFromJson(Map<String, dynamic> json) => _Account(
   platform: json['platform'] as String,
   host: json['host'] as String,
   username: json['username'] as String?,
+  name: json['name'] as String?,
   avatarUrl: json['avatarUrl'] as String?,
   token: json['token'] as String,
 );
@@ -20,6 +21,7 @@ Map<String, dynamic> _$AccountToJson(_Account instance) => <String, dynamic>{
   'platform': instance.platform,
   'host': instance.host,
   'username': instance.username,
+  'name': instance.name,
   'avatarUrl': instance.avatarUrl,
   'token': instance.token,
 };

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
-import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
 
 /// Misskey 笔记页面组件
 /// 
@@ -31,30 +30,53 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      ref.read(misskeyTimelineProvider('Global').notifier).loadMore();
+      ref.read(misskeyClipsProvider.notifier).loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final timelineAsync = ref.watch(misskeyTimelineProvider('Global'));
+    final clipsAsync = ref.watch(misskeyClipsProvider);
 
     return Scaffold(
-      body: timelineAsync.when(
-        data: (notes) {
-          if (notes.isEmpty) {
-            return Center(child: Text('notes_no_notes_found_in_global_timeline'.tr()));
+      body: clipsAsync.when(
+        data: (clips) {
+          if (clips.isEmpty) {
+            return Center(child: Text('${'misskey_page_clips'.tr()} ${'search_no_results'.tr()}'));
           }
           return RefreshIndicator(
             onRefresh: () => ref
-                .read(misskeyTimelineProvider('Global').notifier)
+                .read(misskeyClipsProvider.notifier)
                 .refresh(),
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: notes.length + 1,
+              itemCount: clips.length + 1,
               itemBuilder: (context, index) {
-                if (index < notes.length) {
-                  return NoteCard(note: notes[index]);
+                if (index < clips.length) {
+                  final clip = clips[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(clip.user.avatarUrl ?? ''),
+                        child: clip.user.avatarUrl == null ? const Icon(Icons.person) : null,
+                      ),
+                      title: Text(clip.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (clip.description != null && clip.description!.isNotEmpty)
+                            Text(clip.description!, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          const SizedBox(height: 4),
+                          Text('By ${clip.user.name ?? clip.user.username}', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () {
+                         // TODO: Open clip details
+                      },
+                    ),
+                  );
                 } else {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),

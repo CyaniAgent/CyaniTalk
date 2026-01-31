@@ -25,6 +25,7 @@ abstract class Account with _$Account {
     required String platform, // 'misskey' or 'flarum'
     required String host,
     required String? username,
+    required String? name,
     required String? avatarUrl,
     required String token, // Access Token for Misskey or Token for Flarum
   }) = _Account;

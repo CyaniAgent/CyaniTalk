@@ -3,6 +3,7 @@ import '../../../core/utils/logger.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../core/api/misskey_api.dart';
 import '../domain/note.dart';
+import '../domain/clip.dart';
 import '../domain/channel.dart';
 import '../domain/drive_file.dart';
 import '../domain/drive_folder.dart';
@@ -101,6 +102,21 @@ class MisskeyRepository {
         'MisskeyRepository: Error getting channel $channelId timeline',
         e,
       );
+      rethrow;
+    }
+  }
+
+  Future<List<Clip>> getClips({int limit = 20, String? untilId}) async {
+    logger.info('MisskeyRepository: Getting clips, limit=$limit');
+    try {
+      final data = await api.getClips(limit: limit, untilId: untilId);
+      final clips = data.map((e) => Clip.fromJson(e)).toList();
+      logger.info(
+        'MisskeyRepository: Successfully retrieved ${clips.length} clips',
+      );
+      return clips;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting clips', e);
       rethrow;
     }
   }

@@ -214,6 +214,7 @@ class AuthService extends _$AuthService {
       platform: 'misskey',
       host: sanitizedHost,
       username: user['username'],
+      name: user['name'],
       avatarUrl: user['avatarUrl'],
       token: token,
     );
@@ -274,8 +275,13 @@ class AuthService extends _$AuthService {
         throw Exception('Flarum登录响应缺少必要字段 (token)');
       }
 
-      // 获取用户信息以填充头像和准确的用户名（可选，但推荐）
-      // 这里暂时使用登录时提供的标识符，如果有 userId 可以后续通过 API 获取详细资料
+      // 获取用户信息以填充头像和准确的用户名
+      logger.info('正在获取Flarum用户详细资料');
+      final profileData = await api.getUserProfile(userId);
+      final attributes = profileData['data']?['attributes'] ?? {};
+      final displayName = attributes['displayName'];
+      final username = attributes['username'];
+      final avatarUrl = attributes['avatarUrl'];
 
       final accountId = '$userId@$host';
       logger.info('Flarum登录成功，用户ID: $userId, 账户ID: $accountId');
@@ -305,8 +311,9 @@ class AuthService extends _$AuthService {
         id: accountId,
         platform: 'flarum',
         host: host,
-        username: identification,
-        avatarUrl: null, // 如果需要，可以进一步调用 API 获取
+        username: username ?? identification,
+        name: displayName ?? username ?? identification,
+        avatarUrl: avatarUrl,
         token: token,
       );
 

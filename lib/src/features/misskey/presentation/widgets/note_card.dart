@@ -9,302 +9,298 @@ import 'audio_player_widget.dart';
 import '../pages/image_viewer_page.dart';
 import '../pages/video_player_page.dart';
 
-class NoteCard extends ConsumerWidget {
+class NoteCard extends ConsumerStatefulWidget {
   final Note note;
 
   const NoteCard({super.key, required this.note});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NoteCard> createState() => _NoteCardState();
+}
+
+class _NoteCardState extends ConsumerState<NoteCard> {
+  bool _shouldAnimate = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Only animate if the note is new (created within the last 15 seconds)
+    // This prevents animation on old posts when scrolling, which can cause
+    // issues with AudioPlayer state and "Bad Element" errors.
+    final diff =
+        DateTime.now().difference(widget.note.createdAt).inSeconds.abs();
+    _shouldAnimate = diff < 15;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final note = widget.note;
     final user = note.user;
     final text = note.text;
     final cw = note.cw;
 
-    return RepaintBoundary(
+    Widget card = RepaintBoundary(
       child: Semantics(
         label: 'Note by ${user?.username}',
         value: text ?? cw,
-        child:
-            Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Semantics(
+                      label: 'Avatar for ${user?.username}',
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundImage:
+                            user?.avatarUrl != null
+                                ? NetworkImage(user!.avatarUrl!)
+                                : null,
+                        child:
+                            user?.avatarUrl == null
+                                ? Text(user?.username[0].toUpperCase() ?? '?')
+                                : null,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Semantics(
-                              label: 'Avatar for ${user?.username}',
-                              child: CircleAvatar(
-                                radius: 20,
-                                backgroundImage: user?.avatarUrl != null
-                                    ? NetworkImage(user!.avatarUrl!)
-                                    : null,
-                                child: user?.avatarUrl == null
-                                    ? Text(
-                                        user?.username[0].toUpperCase() ?? '?',
-                                      )
-                                    : null,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Semantics(
-                                    label: 'User name',
-                                    child: Text(
-                                      user?.name ?? user?.username ?? 'Unknown',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  Semantics(
-                                    label: 'User handle',
-                                    child: Text(
-                                      '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Semantics(
-                              label: 'Post time',
-                              child: Text(
-                                _formatTime(note.createdAt),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        if (cw != null) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Semantics(
-                            label: 'Content warning',
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.secondaryContainer,
-                                borderRadius: BorderRadius.circular(8),
+                            label: 'User name',
+                            child: Text(
+                              user?.name ?? user?.username ?? 'Unknown',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.warning_amber_rounded,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(child: Text(cw)),
-                                  const Icon(
-                                    Icons.keyboard_arrow_down,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                        ] else if (text != null)
-                          Semantics(label: 'Note content', child: Text(text)),
+                          Semantics(
+                            label: 'User handle',
+                            child: Text(
+                              '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Post time',
+                      child: Text(
+                        _formatTime(note.createdAt),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (cw != null) ...[
+                  Semantics(
+                    label: 'Content warning',
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(cw)),
+                          const Icon(Icons.keyboard_arrow_down, size: 16),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ] else if (text != null)
+                  Semantics(label: 'Note content', child: Text(text)),
 
-                        if (note.files.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12.0),
-                            child: Semantics(
-                              label: 'Attached files',
-                              child: Column(
-                                children: note.files.map((file) {
-                                  final url = file['url'] as String?;
-                                  final type = file['type'] as String?;
-                                  final name = file['name'] as String?;
+                if (note.files.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: Semantics(
+                      label: 'Attached files',
+                      child: Column(
+                        children:
+                            note.files.map((file) {
+                              final url = file['url'] as String?;
+                              final type = file['type'] as String?;
+                              final name = file['name'] as String?;
 
-                                  if (url == null) {
-                                    return const SizedBox.shrink();
-                                  }
+                              if (url == null) {
+                                return const SizedBox.shrink();
+                              }
 
-                                  // Detect media type
-                                  final isImage = _isImageFile(type, url);
-                                  final isVideo = _isVideoFile(type, url);
-                                  final isAudio = _isAudioFile(type, url);
+                              // Detect media type
+                              final isImage = _isImageFile(type, url);
+                              final isVideo = _isVideoFile(type, url);
+                              final isAudio = _isAudioFile(type, url);
 
-                                  if (isAudio) {
-                                    // Audio player
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 8.0,
-                                      ),
-                                      child: AudioPlayerWidget(
-                                        audioUrl: url,
-                                        fileName: name,
-                                      ),
-                                    );
-                                  } else if (isVideo) {
-                                    // Video thumbnail
-                                    final thumbnailUrl =
-                                        file['thumbnailUrl'] as String? ?? url;
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 4.0,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    VideoPlayerPage(
-                                                      videoUrl: url,
-                                                    ),
-                                              ),
-                                            );
-                                          },
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              RetryableNetworkImage(
-                                                url: thumbnailUrl,
-                                                fit: BoxFit.cover,
-                                              ),
-                                              Container(
-                                                padding: const EdgeInsets.all(
-                                                  12,
+                              if (isAudio) {
+                                // Audio player
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: AudioPlayerWidget(
+                                    audioUrl: url,
+                                    fileName: name,
+                                  ),
+                                );
+                              } else if (isVideo) {
+                                // Video thumbnail
+                                final thumbnailUrl =
+                                    file['thumbnailUrl'] as String? ?? url;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) => VideoPlayerPage(
+                                                  videoUrl: url,
                                                 ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black
-                                                      .withValues(alpha: 0.6),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const Icon(
-                                                  Icons.play_arrow,
-                                                  color: Colors.white,
-                                                  size: 48,
-                                                ),
-                                              ),
-                                            ],
                                           ),
-                                        ),
-                                      ),
-                                    );
-                                  } else if (isImage) {
-                                    // Image thumbnail
-                                    final thumbnailUrl =
-                                        file['thumbnailUrl'] as String? ?? url;
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 4.0,
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ImageViewerPage(
-                                                      imageUrl: url,
-                                                      heroTag: 'image_$url',
-                                                    ),
+                                        );
+                                      },
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          RetryableNetworkImage(
+                                            url: thumbnailUrl,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.6,
                                               ),
-                                            );
-                                          },
-                                          child: Hero(
-                                            tag: 'image_$url',
-                                            child: RetryableNetworkImage(
-                                              url: thumbnailUrl,
-                                              fit: BoxFit.cover,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.play_arrow,
+                                              color: Colors.white,
+                                              size: 48,
                                             ),
                                           ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else if (isImage) {
+                                // Image thumbnail
+                                final thumbnailUrl =
+                                    file['thumbnailUrl'] as String? ?? url;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 4.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) => ImageViewerPage(
+                                                  imageUrl: url,
+                                                  heroTag: 'image_$url',
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                      child: Hero(
+                                        tag: 'image_$url',
+                                        child: RetryableNetworkImage(
+                                          url: thumbnailUrl,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                    );
-                                  }
+                                    ),
+                                  ),
+                                );
+                              }
 
-                                  return const SizedBox.shrink();
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Semantics(
-                              label: 'Reply button',
-                              child: _buildAction(
-                                context,
-                                Icons.reply,
-                                note.repliesCount.toString(),
-                                () => _handleReply(context, ref),
-                              ),
-                            ),
-                            Semantics(
-                              label: 'Renote button',
-                              child: _buildAction(
-                                context,
-                                Icons.repeat,
-                                note.renoteCount.toString(),
-                                () => _handleRenote(context, ref),
-                              ),
-                            ),
-                            Semantics(
-                              label: 'Reaction button',
-                              child: _buildAction(
-                                context,
-                                Icons.add_reaction_outlined,
-                                note.reactions.length.toString(),
-                                () => _handleReaction(context, ref),
-                              ),
-                            ),
-                            Semantics(
-                              label: 'Share button',
-                              child: _buildAction(
-                                context,
-                                Icons.share_outlined,
-                                "",
-                                () => _handleShare(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              return const SizedBox.shrink();
+                            }).toList(),
+                      ),
                     ),
                   ),
-                )
-                .animate()
-                .fadeIn(duration: 400.ms)
-                .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad),
+
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Semantics(
+                      label: 'Reply button',
+                      child: _buildAction(
+                        Icons.reply,
+                        note.repliesCount.toString(),
+                        _handleReply,
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Renote button',
+                      child: _buildAction(
+                        Icons.repeat,
+                        note.renoteCount.toString(),
+                        _handleRenote,
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Reaction button',
+                      child: _buildAction(
+                        Icons.add_reaction_outlined,
+                        note.reactions.length.toString(),
+                        _handleReaction,
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Share button',
+                      child: _buildAction(
+                        Icons.share_outlined,
+                        "",
+                        _handleShare,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+
+    if (_shouldAnimate) {
+      return card
+          .animate()
+          .fadeIn(duration: 400.ms)
+          .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
+    }
+
+    return card;
   }
 
-  Widget _buildAction(
-    BuildContext context,
-    IconData icon,
-    String label,
-    VoidCallback onTap,
-  ) {
+  Widget _buildAction(IconData icon, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -367,16 +363,16 @@ class NoteCard extends ConsumerWidget {
     return ['mp3', 'wav', 'ogg', 'aac', 'm4a', 'flac'].contains(ext);
   }
 
-  Future<void> _handleRenote(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleRenote() async {
     try {
-      await ref.read(misskeyRepositoryProvider).renote(note.id);
-      if (context.mounted) {
+      await ref.read(misskeyRepositoryProvider).renote(widget.note.id);
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('note_renoted_successfully'.tr())),
         );
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -388,66 +384,72 @@ class NoteCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleReply(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleReply() async {
     final textController = TextEditingController();
+    if (!mounted) return;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('note_reply'.tr()),
-        content: TextField(
-          controller: textController,
-          decoration: InputDecoration(hintText: 'note_what_on_your_mind'.tr()),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('note_cancel'.tr()),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              try {
-                await ref
-                    .read(misskeyRepositoryProvider)
-                    .reply(note.id, textController.text);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('note_reply_sent'.tr())),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'note_failed_to_reply'.tr(
-                          namedArgs: {'error': e.toString()},
+      builder:
+          (dialogContext) => AlertDialog(
+            title: Text('note_reply'.tr()),
+            content: TextField(
+              controller: textController,
+              decoration: InputDecoration(
+                hintText: 'note_what_on_your_mind'.tr(),
+              ),
+              maxLines: 3,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: Text('note_cancel'.tr()),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  try {
+                    await ref
+                        .read(misskeyRepositoryProvider)
+                        .reply(widget.note.id, textController.text);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('note_reply_sent'.tr())),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'note_failed_to_reply'.tr(
+                              namedArgs: {'error': e.toString()},
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }
-              }
-            },
-            child: Text('note_reply'.tr()),
+                      );
+                    }
+                  }
+                },
+                child: Text('note_reply'.tr()),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
-  Future<void> _handleReaction(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleReaction() async {
     try {
       // Default to heart for now
-      await ref.read(misskeyRepositoryProvider).addReaction(note.id, '❤️');
-      if (context.mounted) {
+      await ref
+          .read(misskeyRepositoryProvider)
+          .addReaction(widget.note.id, '❤️');
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr())));
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -459,7 +461,7 @@ class NoteCard extends ConsumerWidget {
     }
   }
 
-  void _handleShare(BuildContext context) {
+  void _handleShare() {
     // Placeholder for share functionality
     ScaffoldMessenger.of(
       context,
