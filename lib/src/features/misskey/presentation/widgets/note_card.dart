@@ -406,6 +406,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
               ),
               FilledButton(
                 onPressed: () async {
+                  if (textController.text.trim().isEmpty) return;
                   Navigator.pop(dialogContext);
                   try {
                     await ref

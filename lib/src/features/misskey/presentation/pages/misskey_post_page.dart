@@ -37,7 +37,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   /// 是否仅本地可见（不参与联邦）
   bool _localOnly = false;
 
-  /// 笔记可见性，可选值：'public', 'home', 'followers', 'direct'
+  /// 笔记可见性，可选值：'public', 'home', 'followers', 'specified'
   String _visibility = 'public';
 
   /// 选中的附件列表
@@ -222,7 +222,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
                             child: Text('post_visibility_followers'.tr()),
                           ),
                           PopupMenuItem(
-                            value: 'direct',
+                            value: 'specified',
                             child: Text('post_visibility_direct'.tr()),
                           ),
                         ],
@@ -497,7 +497,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
   /// 根据可见性值获取对应的图标
   ///
-  /// [visibility] - 可见性字符串，可选值：'public', 'home', 'followers', 'direct'
+  /// [visibility] - 可见性字符串，可选值：'public', 'home', 'followers', 'specified'
   ///
   /// 返回对应的图标Data
   IconData _getVisibilityIcon(String visibility) {
@@ -506,7 +506,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         return Icons.home;
       case 'followers':
         return Icons.lock_open;
-      case 'direct':
+      case 'specified':
         return Icons.mail;
       case 'public':
       default:

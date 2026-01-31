@@ -244,24 +244,27 @@ class MisskeyApi {
       if (replyId != null) action = 'Replying to note $replyId';
       if (renoteId != null) action = 'Renoting note $renoteId';
       logger.info('MisskeyApi: $action');
+      final requestData = {
+        'i': token,
+        if (text != null) 'text': text,
+        if (replyId != null) 'replyId': replyId,
+        if (renoteId != null) 'renoteId': renoteId,
+        if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
+        if (visibility != null) 'visibility': visibility,
+        if (localOnly != null) 'localOnly': localOnly,
+        if (cw != null) 'cw': cw,
+      };
+      logger.debug('MisskeyApi: Request data: $requestData');
       await _dio.post(
         '/api/notes/create',
-        data: {
-          'i': token,
-          if (text != null) 'text': text,
-          if (replyId != null) 'replyId': replyId,
-          if (renoteId != null) 'renoteId': renoteId,
-          if (fileIds != null) 'fileIds': fileIds,
-          if (visibility != null) 'visibility': visibility,
-          if (localOnly != null) 'localOnly': localOnly,
-          if (cw != null) 'cw': cw,
-        },
+        data: requestData,
       );
       logger.info('MisskeyApi: Successfully $action');
     } catch (e) {
       if (e is DioException) {
-        logger.error('MisskeyApi: Error creating note', e);
-        throw Exception('Misskey API error: ${e.message}');
+        final responseData = e.response?.data;
+        logger.error('MisskeyApi: Error creating note. Response: $responseData', e);
+        throw Exception('Misskey API error: ${e.message}. Response: $responseData');
       }
       logger.error('MisskeyApi: Unexpected error creating note', e);
       rethrow;
