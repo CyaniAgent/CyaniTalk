@@ -32,9 +32,14 @@ class ImageViewerPage extends StatelessWidget {
                         child: RetryableNetworkImage(
                           url: imageUrl,
                           fit: BoxFit.contain,
+                          maxHeight: null, // No height restriction in viewer
                         ),
                       )
-                    : RetryableNetworkImage(url: imageUrl, fit: BoxFit.contain),
+                    : RetryableNetworkImage(
+                        url: imageUrl, 
+                        fit: BoxFit.contain,
+                        maxHeight: null, // No height restriction in viewer
+                      ),
               ),
             ),
             // Close button

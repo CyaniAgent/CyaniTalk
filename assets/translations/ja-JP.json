@@ -205,5 +205,8 @@
   "note_failed_to_react": "リアクションの追加に失敗しました：{error}",
   "note_share_coming_soon": "共有機能は近日公開予定です！",
   "image_unavailable": "画像を利用できません",
-  "image_retrying": "リトライ中... リトライ回数: {retryCount}/{maxRetries}"
+  "image_retrying": "リトライ中... リトライ回数: {retryCount}/{maxRetries}",
+  "forum_page_title": "フォーラム",
+  "forum_page_not_connected": "接続されていません",
+  "forum_page_please_connect": "プロフィールで Flarum フォーラムに接続してください！"
 }
