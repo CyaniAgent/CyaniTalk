@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import '../utils/logger.dart';
+import 'base_api.dart';
+import '../config/constants.dart';
 
 class MisskeyApi extends BaseApi {
   final String host;
