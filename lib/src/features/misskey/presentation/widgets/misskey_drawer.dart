@@ -35,7 +35,7 @@ class MisskeyDrawer extends StatelessWidget {
       selectedIndex: selectedIndex,
       onDestinationSelected: (index) {
         onDestinationSelected(index);
-        Navigator.pop(context); // 关闭侧边栏
+        Navigator.of(context).maybePop(); // 安全地关闭侧边栏
       },
       children: [
         Padding(
@@ -79,6 +79,11 @@ class MisskeyDrawer extends StatelessWidget {
           icon: Icon(Icons.campaign_outlined),
           selectedIcon: Icon(Icons.campaign),
           label: Text('misskey_drawer_announcements'.tr()),
+        ),
+        NavigationDrawerDestination(
+          icon: Icon(Icons.terminal_outlined),
+          selectedIcon: Icon(Icons.terminal),
+          label: Text('misskey_drawer_aiscript_console'.tr()),
         ),
       ],
     );
