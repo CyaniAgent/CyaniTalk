@@ -9,8 +9,9 @@ import '../constants/flarum_constants.dart';
 import '../utils/verification_window.dart';
 import '../utils/utils.dart';
 import '../../routing/router.dart';
+import 'base_api.dart';
 
-class FlarumApi {
+class FlarumApi extends BaseApi {
   static final FlarumApi _instance = FlarumApi._internal();
 
   factory FlarumApi() => _instance;
@@ -353,26 +354,13 @@ class FlarumApi {
   /// 获取 Flarum 用户详细资料
   ///
   /// [userId] - 用户 ID
-  Future<Map<String, dynamic>> getUserProfile(String userId) async {
-    logger.info('FlarumApi: 获取用户资料，用户ID: $userId');
-    try {
-      final response = await get('/api/users/$userId');
-      if (response.statusCode == 200) {
-        logger.info('FlarumApi: 获取用户资料成功');
-        return Map<String, dynamic>.from(response.data);
-      }
-      logger.error('FlarumApi: 获取用户资料失败，状态码: ${response.statusCode}');
-      throw Exception('Failed to fetch user profile: ${response.statusCode}');
-    } catch (e) {
-      if (e is DioException) {
-        final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
-        logger.error('FlarumApi: 获取用户资料错误: $msg');
-        throw Exception('Flarum fetch profile error: $msg');
-      }
-      logger.error('FlarumApi: 获取用户资料异常: $e');
-      rethrow;
-    }
-  }
+  Future<Map<String, dynamic>> getUserProfile(String userId) => executeApiCall(
+    'FlarumApi.getUserProfile',
+    () => get('/api/users/$userId'),
+    (response) => Map<String, dynamic>.from(response.data),
+    dioErrorParser: (error) =>
+        error.response?.data?['errors']?[0]?['detail'] ?? error.message,
+  );
 
   Future<Response> get(
     String path, {
