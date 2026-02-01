@@ -15,11 +15,13 @@ final misskeyRepositoryProvider = MisskeyRepositoryProvider._();
 final class MisskeyRepositoryProvider
     extends
         $FunctionalProvider<
+          AsyncValue<MisskeyRepository>,
           MisskeyRepository,
-          MisskeyRepository,
-          MisskeyRepository
+          FutureOr<MisskeyRepository>
         >
-    with $Provider<MisskeyRepository> {
+    with
+        $FutureModifier<MisskeyRepository>,
+        $FutureProvider<MisskeyRepository> {
   MisskeyRepositoryProvider._()
     : super(
         from: null,
@@ -36,22 +38,14 @@ final class MisskeyRepositoryProvider
 
   @$internal
   @override
-  $ProviderElement<MisskeyRepository> $createElement(
+  $FutureProviderElement<MisskeyRepository> $createElement(
     $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
+  ) => $FutureProviderElement(pointer);
 
   @override
-  MisskeyRepository create(Ref ref) {
+  FutureOr<MisskeyRepository> create(Ref ref) {
     return misskeyRepository(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(MisskeyRepository value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<MisskeyRepository>(value),
-    );
   }
 }
 
-String _$misskeyRepositoryHash() => r'77eaa842eeabae2a47450647255027b1731fef9d';
+String _$misskeyRepositoryHash() => r'd2e4c81c240d424ef70d58b3cdcb9736a5ae898f';

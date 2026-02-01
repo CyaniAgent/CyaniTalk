@@ -427,7 +427,8 @@ class _NoteCardState extends ConsumerState<NoteCard> {
 
   Future<void> _handleRenote() async {
     try {
-      await ref.read(misskeyRepositoryProvider).renote(widget.note.id);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.renote(widget.note.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('note_renoted_successfully'.tr())),
@@ -467,9 +468,8 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             onPressed: () async {
               Navigator.pop(dialogContext);
               try {
-                await ref
-                    .read(misskeyRepositoryProvider)
-                    .reply(widget.note.id, textController.text);
+                final repository = await ref.read(misskeyRepositoryProvider.future);
+                await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('note_reply_sent'.tr())),
@@ -499,9 +499,8 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   Future<void> _handleReaction() async {
     try {
       // Default to heart for now
-      await ref
-          .read(misskeyRepositoryProvider)
-          .addReaction(widget.note.id, '❤️');
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.addReaction(widget.note.id, '❤️');
       if (mounted) {
         ScaffoldMessenger.of(
           context,

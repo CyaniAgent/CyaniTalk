@@ -25,7 +25,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     streamingService.subscribeToTimeline(type);
 
     // Initial fetch from REST API
-    final repository = ref.watch(misskeyRepositoryProvider);
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
     final notes = await repository.getTimeline(type);
 
     // Listening to the note stream from the streaming service
@@ -69,9 +69,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (!ref.mounted) return;
 
       try {
-        final exists = await ref
-            .read(misskeyRepositoryProvider)
-            .checkNoteExists(note.id);
+        final repository = await ref
+            .read(misskeyRepositoryProvider.future);
+        final exists = await repository.checkNoteExists(note.id);
         if (!exists && ref.mounted) {
           logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
           _handleDeleteNote(note.id);
@@ -108,7 +108,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     logger.info('刷新Misskey时间线，类型: $type');
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final notes = await repository.getTimeline(type);
       logger.info('Misskey时间线刷新完成，加载了 ${notes.length} 条笔记');
       return notes;
@@ -131,7 +131,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     logger.info('加载更多Misskey时间线内容，类型: $type, 最后笔记ID: $lastId');
 
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final newNotes = await repository.getTimeline(type, untilId: lastId);
 
       if (!ref.mounted) return currentNotes;
@@ -147,7 +147,7 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
   @override
   FutureOr<List<Channel>> build() async {
     logger.info('初始化Misskey频道列表');
-    final repository = ref.watch(misskeyRepositoryProvider);
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
     final channels = await repository.getChannels();
     logger.info('Misskey频道列表初始化完成，加载了 ${channels.length} 个频道');
     return channels;
@@ -157,7 +157,7 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
     logger.info('刷新Misskey频道列表');
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final channels = await repository.getChannels();
       logger.info('Misskey频道列表刷新完成，加载了 ${channels.length} 个频道');
       return channels;
@@ -170,7 +170,7 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
   @override
   FutureOr<List<Note>> build(String channelId) async {
     logger.info('初始化Misskey频道时间线，频道ID: $channelId');
-    final repository = ref.watch(misskeyRepositoryProvider);
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
     final notes = await repository.getChannelTimeline(channelId);
     logger.info('Misskey频道时间线初始化完成，加载了 ${notes.length} 条笔记');
     return notes;
@@ -180,7 +180,7 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     logger.info('刷新Misskey频道时间线，频道ID: $channelId');
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final notes = await repository.getChannelTimeline(channelId);
       logger.info('Misskey频道时间线刷新完成，加载了 ${notes.length} 条笔记');
       return notes;
@@ -203,7 +203,7 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     logger.info('加载更多Misskey频道时间线内容，频道ID: $channelId, 最后笔记ID: $lastId');
 
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final newNotes = await repository.getChannelTimeline(
         channelId,
         untilId: lastId,
@@ -222,7 +222,7 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
   @override
   FutureOr<List<Clip>> build() async {
     logger.info('初始化Misskey片段(Clips)列表');
-    final repository = ref.watch(misskeyRepositoryProvider);
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
     final clips = await repository.getClips();
     logger.info('Misskey片段列表初始化完成，加载了 ${clips.length} 个片段');
     return clips;
@@ -232,7 +232,7 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
     logger.info('刷新Misskey片段列表');
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final clips = await repository.getClips();
       logger.info('Misskey片段列表刷新完成，加载了 ${clips.length} 个片段');
       return clips;
@@ -255,7 +255,7 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
     logger.info('加载更多Misskey片段，最后ID: $lastId');
 
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final newClips = await repository.getClips(untilId: lastId);
 
       if (!ref.mounted) return currentClips;
@@ -276,7 +276,7 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
       if (!ref.mounted) return;
       state = await AsyncValue.guard(() async {
-        final repository = ref.read(misskeyRepositoryProvider);
+        final repository = await ref.read(misskeyRepositoryProvider.future);
         return await repository.getOnlineUsersCount();
       });
     });
@@ -285,7 +285,7 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
       _timer?.cancel();
     });
 
-    final repository = ref.read(misskeyRepositoryProvider);
+    final repository = await ref.read(misskeyRepositoryProvider.future);
     return await repository.getOnlineUsersCount();
   }
 }
@@ -294,14 +294,14 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
 class MisskeyMeNotifier extends _$MisskeyMeNotifier {
   @override
   FutureOr<MisskeyUser> build() async {
-    final repository = ref.watch(misskeyRepositoryProvider);
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
     return await repository.getMe();
   }
 
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       return await repository.getMe();
     });
   }

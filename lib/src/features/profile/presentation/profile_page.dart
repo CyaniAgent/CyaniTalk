@@ -8,6 +8,8 @@ import 'widgets/associated_accounts_section.dart';
 import 'settings/settings_page.dart';
 import 'settings/about_page.dart';
 import '../../auth/application/auth_service.dart';
+import '../../auth/domain/account.dart';
+import '../../auth/presentation/widgets/add_account_dialog.dart';
 import '../../misskey/domain/misskey_user.dart';
 import '../../misskey/application/misskey_notifier.dart';
 import '../../flarum/application/flarum_providers.dart';
@@ -112,39 +114,40 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedMisskey = ref
-        .watch(selectedMisskeyAccountProvider)
-        .asData
-        ?.value;
-    final selectedFlarum = ref
-        .watch(selectedFlarumAccountProvider)
-        .asData
-        ?.value;
+    final selectedMisskey = ref.watch(selectedMisskeyAccountProvider).asData?.value;
+    final selectedFlarum = ref.watch(selectedFlarumAccountProvider).asData?.value;
     final primaryAccount = selectedMisskey ?? selectedFlarum;
 
-    final misskeyUser = primaryAccount?.platform == 'misskey'
-        ? ref.watch(misskeyMeProvider).asData?.value
-        : null;
+    final misskeyUser =
+        primaryAccount?.platform == 'misskey'
+            ? ref.watch(misskeyMeProvider).asData?.value
+            : null;
 
-    final flarumUser = primaryAccount?.platform == 'flarum'
-        ? ref.watch(flarumCurrentUserProvider).asData?.value
-        : null;
+    final flarumUser =
+        primaryAccount?.platform == 'flarum'
+            ? ref.watch(flarumCurrentUserProvider).asData?.value
+            : null;
+
+    final bool isLoggedIn = primaryAccount != null;
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 340.0,
+            expandedHeight: isLoggedIn ? 340.0 : 280.0,
             floating: false,
             pinned: true,
             stretch: true,
-            backgroundColor: _appBarColor,
+            backgroundColor: isLoggedIn ? _appBarColor : mikuColor,
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.white),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
-                ),
+                onPressed:
+                    () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPage(),
+                      ),
+                    ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -158,19 +161,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Container(
                     decoration: BoxDecoration(
                       color: mikuColor,
-                      image: misskeyUser?.bannerUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(misskeyUser!.bannerUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                      gradient: misskeyUser?.bannerUrl == null
-                          ? const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xFF962832), Color(0xFF39C5BB)],
-                            )
-                          : null,
+                      image:
+                          misskeyUser?.bannerUrl != null
+                              ? DecorationImage(
+                                image: NetworkImage(misskeyUser!.bannerUrl!),
+                                fit: BoxFit.cover,
+                              )
+                              : null,
+                      gradient:
+                          misskeyUser?.bannerUrl == null
+                              ? const LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Color(0xFF962832), Color(0xFF39C5BB)],
+                              )
+                              : null,
                     ),
                     child: Container(
                       decoration: BoxDecoration(
@@ -186,172 +191,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Hero(
-                              tag: 'profile_avatar',
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 3,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      blurRadius: 10,
-                                      spreadRadius: 2,
-                                    ),
-                                  ],
-                                ),
-                                child: CircleAvatar(
-                                  radius: 45,
-                                  backgroundColor: Colors.white,
-                                  backgroundImage:
-                                      (misskeyUser?.avatarUrl ??
-                                              primaryAccount?.avatarUrl) !=
-                                          null
-                                      ? NetworkImage(
-                                          misskeyUser?.avatarUrl ??
-                                              primaryAccount!.avatarUrl!,
-                                        )
-                                      : null,
-                                  child:
-                                      (misskeyUser?.avatarUrl ??
-                                              primaryAccount?.avatarUrl) ==
-                                          null
-                                      ? Icon(
-                                          Icons.person,
-                                          size: 50,
-                                          color: mikuColor,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                            ).animate().scale(
-                              duration: 600.ms,
-                              curve: Curves.easeOutBack,
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Wrap(
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
-                                    spacing: 8,
-                                    children: [
-                                      Text(
-                                        misskeyUser?.name ??
-                                            primaryAccount?.name ??
-                                            primaryAccount?.username ??
-                                            'CyaniUser',
-                                        style: const TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          shadows: [
-                                            Shadow(
-                                              blurRadius: 4,
-                                              color: Colors.black26,
-                                              offset: Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (misskeyUser != null &&
-                                          misskeyUser.badgeRoles.isNotEmpty)
-                                        ...misskeyUser.badgeRoles.map((role) {
-                                          final name = role['name'] as String?;
-                                          if (name == null) {
-                                            return const SizedBox.shrink();
-                                          }
-                                          return Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.2,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              border: Border.all(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.3,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              name,
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                    ],
-                                  ),
-                                  Text(
-                                    '@${misskeyUser?.username ?? primaryAccount?.username}@${primaryAccount?.host}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1),
-                            ),
-                          ],
-                        ),
-                        if (misskeyUser?.description != null &&
-                            misskeyUser!.description!.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16, left: 4),
-                            child: Text(
-                              misskeyUser.description!,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.white.withValues(alpha: 0.85),
-                                shadows: const [
-                                  Shadow(
-                                    blurRadius: 2,
-                                    color: Colors.black26,
-                                    offset: Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ).animate().fadeIn(delay: 400.ms),
-
-                        const SizedBox(height: 20),
-                        _buildUserStats(
-                          context,
-                          misskeyUser,
-                          flarumUser,
-                        ).animate().fadeIn(delay: 500.ms),
-                      ],
-                    ),
-                  ),
+                  if (isLoggedIn)
+                    _buildLoggedInHeader(
+                      context,
+                      primaryAccount,
+                      misskeyUser,
+                      flarumUser,
+                    )
+                  else
+                    _buildLoggedOutHeader(context),
                 ],
               ),
             ),
@@ -362,11 +210,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const AssociatedAccountsSection(
-                    showRemoveButton: false,
-                    showTitle: true,
-                  ),
-                  const SizedBox(height: 24),
+                  if (isLoggedIn) ...[
+                    const AssociatedAccountsSection(
+                      showRemoveButton: false,
+                      showTitle: true,
+                    ),
+                    const SizedBox(height: 24),
+                  ] else ...[
+                    _buildAddAccountButton(context),
+                    const SizedBox(height: 24),
+                  ],
                   _buildQuickActions(context),
                   const SizedBox(height: 32),
                 ],
@@ -377,6 +230,258 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ),
     );
   }
+
+  Widget _buildLoggedInHeader(
+    BuildContext context,
+    Account primaryAccount,
+    MisskeyUser? misskeyUser,
+    flarum_model.User? flarumUser,
+  ) {
+    return Positioned(
+      bottom: 20,
+      left: 20,
+      right: 20,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Hero(
+                tag: 'profile_avatar',
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 45,
+                    backgroundColor: Colors.white,
+                    backgroundImage:
+                        (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) !=
+                                null
+                            ? NetworkImage(
+                              misskeyUser?.avatarUrl ??
+                                  primaryAccount.avatarUrl!,
+                            )
+                            : null,
+                    child:
+                        (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) ==
+                                null
+                            ? Icon(Icons.person, size: 50, color: mikuColor)
+                            : null,
+                  ),
+                ),
+              ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      children: [
+                        Text(
+                          misskeyUser?.name ??
+                              primaryAccount.name ??
+                              primaryAccount.username ??
+                              'CyaniUser',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 4,
+                                color: Colors.black26,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (misskeyUser != null &&
+                            misskeyUser.badgeRoles.isNotEmpty)
+                          ...misskeyUser.badgeRoles.map((role) {
+                            final name = role['name'] as String?;
+                            if (name == null) {
+                              return const SizedBox.shrink();
+                            }
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }),
+                      ],
+                    ),
+                    Text(
+                      '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1),
+              ),
+            ],
+          ),
+          if (misskeyUser?.description != null &&
+              misskeyUser!.description!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 16, left: 4),
+              child: Text(
+                misskeyUser.description!,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 2,
+                      color: Colors.black26,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ).animate().fadeIn(delay: 400.ms),
+
+          const SizedBox(height: 20),
+          _buildUserStats(
+            context,
+            misskeyUser,
+            flarumUser,
+          ).animate().fadeIn(delay: 500.ms),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoggedOutHeader(BuildContext context) {
+    return Positioned(
+      bottom: 40,
+      left: 20,
+      right: 20,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'misskey_page_no_account_title'.tr(),
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              shadows: [
+                Shadow(
+                  blurRadius: 4,
+                  color: Colors.black26,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0),
+          const SizedBox(height: 8),
+          Text(
+            'misskey_page_no_account_subtitle'.tr(),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withValues(alpha: 0.9),
+              shadows: const [
+                Shadow(
+                  blurRadius: 2,
+                  color: Colors.black26,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+          ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => _showAddAccountDialog(context),
+            icon: const Icon(Icons.login),
+            label: Text('misskey_page_login_now'.tr()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: mikuColor,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ).animate().fadeIn(delay: 400.ms, duration: 600.ms).scale(begin: const Offset(0.9, 0.9)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddAccountButton(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'settings_section_account'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+          ),
+          child: ListTile(
+            leading: const Icon(Icons.add_circle_outline),
+            title: Text('accounts_add_account'.tr()),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _showAddAccountDialog(context),
+          ),
+        ),
+      ],
+    ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1);
+  }
+
+  void _showAddAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const AddAccountDialog(),
+    );
+  }
+
 
   Widget _buildQuickActions(BuildContext context) {
     return Column(

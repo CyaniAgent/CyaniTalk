@@ -348,10 +348,9 @@ class MisskeyRepository {
 }
 
 @riverpod
-MisskeyRepository misskeyRepository(Ref ref) {
+Future<MisskeyRepository> misskeyRepository(Ref ref) async {
   logger.info('MisskeyRepository: Initializing repository');
-  final accountAsync = ref.watch(selectedMisskeyAccountProvider);
-  final account = accountAsync.asData?.value;
+  final account = await ref.watch(selectedMisskeyAccountProvider.future);
 
   if (account == null) {
     logger.error('MisskeyRepository: No Misskey account selected');

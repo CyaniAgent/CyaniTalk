@@ -52,7 +52,7 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'6617cd0b5191ed1a0c7d1cd000f30cf197d8908c';
+    r'80ef4e3db5bc91310141b8d72e6a744cc19774ab';
 
 final class MisskeyTimelineNotifierFamily extends $Family
     with
@@ -125,7 +125,7 @@ final class MisskeyChannelsNotifierProvider
 }
 
 String _$misskeyChannelsNotifierHash() =>
-    r'9cd1bbb5bfd6deb02dd2513614f3e64cfdacb057';
+    r'bae212a8afbdee79da4aba8a1747c981ca050c9f';
 
 abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
   FutureOr<List<Channel>> build();
@@ -188,7 +188,7 @@ final class MisskeyChannelTimelineNotifierProvider
 }
 
 String _$misskeyChannelTimelineNotifierHash() =>
-    r'c017a133f6747f1334b952738b14fb95918dca6a';
+    r'002dbe5a1d600d0bc8a425db533d3cd4d930b4db';
 
 final class MisskeyChannelTimelineNotifierFamily extends $Family
     with
@@ -262,7 +262,7 @@ final class MisskeyClipsNotifierProvider
 }
 
 String _$misskeyClipsNotifierHash() =>
-    r'76249c10de5e85d3f5368db9137166d4b3213c18';
+    r'99fe50cc700591f0f064a7f4afdf9f7e29218af0';
 
 abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
   FutureOr<List<Clip>> build();
@@ -307,7 +307,7 @@ final class MisskeyOnlineUsersNotifierProvider
 }
 
 String _$misskeyOnlineUsersNotifierHash() =>
-    r'd5e8aca3275917a62fbd5ff783fbbcb70cff882c';
+    r'f847694a24b3e7f0a993118f6285b03a4bb2b100';
 
 abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
   FutureOr<int> build();
@@ -351,7 +351,7 @@ final class MisskeyMeNotifierProvider
   MisskeyMeNotifier create() => MisskeyMeNotifier();
 }
 
-String _$misskeyMeNotifierHash() => r'7a3dc789078bdbb47298168d0c87726071264762';
+String _$misskeyMeNotifierHash() => r'd5aef511157075b2d3f6355ff395e643630d0157';
 
 abstract class _$MisskeyMeNotifier extends $AsyncNotifier<MisskeyUser> {
   FutureOr<MisskeyUser> build();

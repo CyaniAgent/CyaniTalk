@@ -96,6 +96,8 @@ dependencies:
   palette_generator: ^0.3.3+3
   # 跨平台设备信息获取库，用于获取设备型号、操作系统等信息
   device_info_plus: ^12.0.0
+  flutter_background_service: ^5.1.0
+  flutter_local_notifications: ^20.0.0
 
 dev_dependencies:
   flutter_test:

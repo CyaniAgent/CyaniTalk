@@ -34,7 +34,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     String? folderId,
     List<DriveFolder> breadcrumbs = const [],
   }) async {
-    final repository = ref.read(misskeyRepositoryProvider);
+    final repository = await ref.read(misskeyRepositoryProvider.future);
 
     // Fetch everything needed for the drive state
     final results = await Future.wait([
@@ -148,26 +148,26 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   }
 
   Future<void> deleteFile(String fileId) async {
-    final repository = ref.read(misskeyRepositoryProvider);
+    final repository = await ref.read(misskeyRepositoryProvider.future);
     await repository.deleteDriveFile(fileId);
     await refresh();
   }
 
   Future<void> deleteFolder(String folderId) async {
-    final repository = ref.read(misskeyRepositoryProvider);
+    final repository = await ref.read(misskeyRepositoryProvider.future);
     await repository.deleteDriveFolder(folderId);
     await refresh();
   }
 
   Future<void> createFolder(String name) async {
-    final repository = ref.read(misskeyRepositoryProvider);
+    final repository = await ref.read(misskeyRepositoryProvider.future);
     final currentFolderId = state.value?.currentFolderId;
     await repository.createDriveFolder(name, parentId: currentFolderId);
     await refresh();
   }
 
   Future<void> uploadFile(List<int> bytes, String filename) async {
-    final repository = ref.read(misskeyRepositoryProvider);
+    final repository = await ref.read(misskeyRepositoryProvider.future);
     final currentFolderId = state.value?.currentFolderId;
     await repository.uploadDriveFile(
       bytes,

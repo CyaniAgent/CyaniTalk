@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'src/app.dart';
 import 'src/core/core.dart';
+import 'src/core/services/background_service.dart';
 
 /// 应用程序的入口点
 ///
@@ -18,6 +19,14 @@ void main() async {
   // 初始化日志系统
   await logger.initialize();
   logger.info('CyaniTalk app started');
+
+  // 初始化后台服务
+  try {
+    await initializeBackgroundService();
+    logger.info('Background service initialized');
+  } catch (e) {
+    logger.error('Failed to initialize background service: $e');
+  }
 
   runApp(
     EasyLocalization(

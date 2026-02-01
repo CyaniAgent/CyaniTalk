@@ -49,7 +49,7 @@ class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptCons
     });
 
     try {
-      final repository = ref.read(misskeyRepositoryProvider);
+      final repository = await ref.read(misskeyRepositoryProvider.future);
       final interpreter = AiScriptInterpreter(repository);
       
       await interpreter.execute(code);
