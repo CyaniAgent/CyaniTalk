@@ -3,6 +3,7 @@
 // 该文件包含SettingsPage组件，用于显示应用程序的设置选项。
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'about_page.dart';
 import 'accounts_page.dart';
 import 'appearance_page.dart';
@@ -23,6 +24,38 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   /// 是否显示喵星语选项
   bool showMiaoLanguage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShowMiaoLanguage();
+  }
+
+  /// 加载是否显示喵星语选项的设置
+  Future<void> _loadShowMiaoLanguage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final value = prefs.getBool('show_miao_language') ?? false;
+      setState(() {
+        showMiaoLanguage = value;
+      });
+    } catch (e) {
+      // 加载失败时使用默认值
+      setState(() {
+        showMiaoLanguage = false;
+      });
+    }
+  }
+
+  /// 保存是否显示喵星语选项的设置
+  Future<void> _saveShowMiaoLanguage(bool value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('show_miao_language', value);
+    } catch (e) {
+      // 保存失败时忽略错误
+    }
+  }
 
   /// 构建设置页面的UI界面
   ///
@@ -76,13 +109,13 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           GestureDetector(
             onDoubleTap: () {
+              final newValue = !showMiaoLanguage;
               setState(() {
-                showMiaoLanguage = !showMiaoLanguage;
+                showMiaoLanguage = newValue;
               });
+              _saveShowMiaoLanguage(newValue);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(showMiaoLanguage ? '已解锁喵星语选项！' : '已隐藏喵星语选项'),
-                ),
+                SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项')),
               );
             },
             child: _buildSettingsTile(
@@ -313,7 +346,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Theme.of(context).colorScheme.outline,
                     ),
             ),
-
           ]);
         }
 
