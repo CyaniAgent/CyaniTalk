@@ -5,6 +5,9 @@ library;
 
 /// 应用常量类
 class Constants {
+  /// 应用版本号
+  static const String appVersion = '1.0.0';
+
   /// 默认最大日志文件大小（MB）
   static const int defaultMaxLogSize = 5;
 
