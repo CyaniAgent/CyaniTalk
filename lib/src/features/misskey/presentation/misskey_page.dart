@@ -171,14 +171,18 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                     if (_selectedIndex == 0) ...[
                       const SizedBox(width: 8),
                       Flexible(
-                        child: ref.watch(misskeyOnlineUsersProvider).when(
+                        child: ref
+                            .watch(misskeyOnlineUsersProvider)
+                            .when(
                               data: (count) => Text(
-                                '• $count users online',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                'misskey_online_users'.tr(
+                                  namedArgs: {'count': count.toString()},
+                                ),
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                 overflow: TextOverflow.ellipsis,
@@ -186,7 +190,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                               loading: () => const SizedBox(
                                 width: 12,
                                 height: 12,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                               error: (error, stack) => const SizedBox.shrink(),
                             ),
@@ -241,10 +247,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: child,
-                );
+                return FadeTransition(opacity: animation, child: child);
               },
               child: _pages[_selectedIndex],
             );

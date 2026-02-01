@@ -128,7 +128,7 @@ class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptCons
                 hintText: 'Enter AiScript code here...',
                 border: const OutlineInputBorder(),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               ),
             ),
           ),
