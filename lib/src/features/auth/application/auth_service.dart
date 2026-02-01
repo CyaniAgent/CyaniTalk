@@ -120,26 +120,28 @@ class AuthService extends _$AuthService {
     final dio = Dio(
       BaseOptions(
         baseUrl: 'https://$sanitizedHost',
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
         headers: {
           'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+              'CyaniTalk/${Constants.appVersion} (Android; Mobile; rv:1.0)',
         },
       ),
     );
 
     int retryCount = 0;
-    const maxRetries = 3;
+    const maxRetries = 10; // Increased retries for better UX on Android
 
     while (retryCount < maxRetries) {
       try {
         if (retryCount > 0) {
           logger.debug('重试检查MiAuth状态 (${retryCount + 1}/$maxRetries)...');
-          await Future.delayed(const Duration(seconds: 1));
+          // Adaptive delay: wait longer between retries later on
+          final delaySeconds = retryCount < 5 ? 2 : 4;
+          await Future.delayed(Duration(seconds: delaySeconds));
         } else {
           // Initial wait
-          await Future.delayed(const Duration(milliseconds: 500));
+          await Future.delayed(const Duration(seconds: 1));
         }
 
         logger.debug('发送MiAuth状态检查请求: /api/miauth/$session/check');

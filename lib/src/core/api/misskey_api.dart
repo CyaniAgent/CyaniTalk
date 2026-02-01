@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../utils/logger.dart';
 import 'base_api.dart';
+import '../config/constants.dart';
 
 class MisskeyApi extends BaseApi {
   final String host;
@@ -12,11 +13,11 @@ class MisskeyApi extends BaseApi {
     _dio = Dio(
       BaseOptions(
         baseUrl: 'https://$host',
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
         headers: {
           'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
+              'CyaniTalk/${Constants.appVersion} (Android; Mobile; rv:1.0)',
         },
       ),
     );

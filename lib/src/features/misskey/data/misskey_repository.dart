@@ -259,6 +259,27 @@ class MisskeyRepository {
     }
   }
 
+  Future<String?> getOrCreateAppFolder() async {
+    const folderName = 'CyaniTalk App Transfered';
+    try {
+      logger.info('MisskeyRepository: Looking for folder "$folderName"');
+      final folders = await getDriveFolders();
+      final appFolder = folders.where((f) => f.name == folderName).firstOrNull;
+
+      if (appFolder != null) {
+        logger.info('MisskeyRepository: Found existing folder: ${appFolder.id}');
+        return appFolder.id;
+      }
+
+      logger.info('MisskeyRepository: Folder not found, creating it');
+      final newFolder = await createDriveFolder(folderName);
+      return newFolder.id;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting/creating app folder', e);
+      return null; // Fallback to root on error
+    }
+  }
+
   Future<void> deleteDriveFile(String fileId) async {
     logger.info('MisskeyRepository: Deleting drive file $fileId');
     try {
@@ -288,10 +309,13 @@ class MisskeyRepository {
       'MisskeyRepository: Uploading drive file "$filename", folderId=$folderId',
     );
     try {
+      // If no folderId is specified, we try to use the CyaniTalk App Transfered folder
+      final targetFolderId = folderId ?? await getOrCreateAppFolder();
+
       final data = await api.uploadDriveFile(
         bytes,
         filename,
-        folderId: folderId,
+        folderId: targetFolderId,
       );
       return DriveFile.fromJson(data);
     } catch (e) {
