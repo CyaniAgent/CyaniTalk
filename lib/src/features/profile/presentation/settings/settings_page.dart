@@ -3,6 +3,7 @@
 // 该文件包含SettingsPage组件，用于显示应用程序的设置选项。
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'about_page.dart';
 import 'accounts_page.dart';
 import 'appearance_page.dart';
@@ -10,11 +11,51 @@ import 'appearance_page.dart';
 /// 应用程序设置页面组件
 ///
 /// 显示应用程序的各种设置选项，包括账户管理、连接配置、界面设置等。
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   /// 创建一个新的SettingsPage实例
   ///
   /// [key] - 组件的键，用于唯一标识组件
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  /// 是否显示喵星语选项
+  bool showMiaoLanguage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadShowMiaoLanguage();
+  }
+
+  /// 加载是否显示喵星语选项的设置
+  Future<void> _loadShowMiaoLanguage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final value = prefs.getBool('show_miao_language') ?? false;
+      setState(() {
+        showMiaoLanguage = value;
+      });
+    } catch (e) {
+      // 加载失败时使用默认值
+      setState(() {
+        showMiaoLanguage = false;
+      });
+    }
+  }
+
+  /// 保存是否显示喵星语选项的设置
+  Future<void> _saveShowMiaoLanguage(bool value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('show_miao_language', value);
+    } catch (e) {
+      // 保存失败时忽略错误
+    }
+  }
 
   /// 构建设置页面的UI界面
   ///
@@ -66,12 +107,24 @@ class SettingsPage extends StatelessWidget {
               );
             },
           ),
-          _buildSettingsTile(
-            context,
-            Icons.language_outlined,
-            'settings_language_title'.tr(),
-            'settings_language_description'.tr(),
-            onTap: () => _showLanguageDialog(context),
+          GestureDetector(
+            onDoubleTap: () {
+              final newValue = !showMiaoLanguage;
+              setState(() {
+                showMiaoLanguage = newValue;
+              });
+              _saveShowMiaoLanguage(newValue);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项')),
+              );
+            },
+            child: _buildSettingsTile(
+              context,
+              Icons.language_outlined,
+              'settings_language_title'.tr(),
+              'settings_language_description'.tr(),
+              onTap: () => _showLanguageDialog(context),
+            ),
           ),
           _buildSettingsTile(
             context,
@@ -175,60 +228,132 @@ class SettingsPage extends StatelessWidget {
       context: context,
       builder: (context) {
         final currentLocale = context.locale;
+        final List<Widget> languageOptions = [
+          ListTile(
+            title: Text('settings_language_chinese'.tr()),
+            onTap: () {
+              context.setLocale(const Locale('zh', 'CN'));
+              Navigator.pop(context);
+            },
+            trailing: currentLocale == const Locale('zh', 'CN')
+                ? Icon(
+                    Icons.radio_button_checked,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : Icon(
+                    Icons.radio_button_off,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+          ),
+          ListTile(
+            title: Text('settings_language_english'.tr()),
+            onTap: () {
+              context.setLocale(const Locale('en', 'US'));
+              Navigator.pop(context);
+            },
+            trailing: currentLocale == const Locale('en', 'US')
+                ? Icon(
+                    Icons.radio_button_checked,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : Icon(
+                    Icons.radio_button_off,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+          ),
+          ListTile(
+            title: Text('settings_language_japanese'.tr()),
+            onTap: () {
+              context.setLocale(const Locale('ja', 'JP'));
+              Navigator.pop(context);
+            },
+            trailing: currentLocale == const Locale('ja', 'JP')
+                ? Icon(
+                    Icons.radio_button_checked,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : Icon(
+                    Icons.radio_button_off,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+          ),
+        ];
+
+        // 如果启用了喵星语选项，添加喵星语相关选项
+        if (showMiaoLanguage) {
+          languageOptions.addAll([
+            ListTile(
+              title: Text('喵星语'),
+              onTap: () {
+                context.setLocale(const Locale('zh', 'Miao'));
+                Navigator.pop(context);
+              },
+              trailing: currentLocale == const Locale('zh', 'Miao')
+                  ? Icon(
+                      Icons.radio_button_checked,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  : Icon(
+                      Icons.radio_button_off,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+            ),
+            ListTile(
+              title: Text('にゃ語'),
+              onTap: () {
+                context.setLocale(const Locale('ja', 'Miao'));
+                Navigator.pop(context);
+              },
+              trailing: currentLocale == const Locale('ja', 'Miao')
+                  ? Icon(
+                      Icons.radio_button_checked,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  : Icon(
+                      Icons.radio_button_off,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+            ),
+            ListTile(
+              title: Text('Meow Language（英文）'),
+              onTap: () {
+                context.setLocale(const Locale('en', 'Miao'));
+                Navigator.pop(context);
+              },
+              trailing: currentLocale == const Locale('en', 'Miao')
+                  ? Icon(
+                      Icons.radio_button_checked,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  : Icon(
+                      Icons.radio_button_off,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+            ),
+            ListTile(
+              title: Text('Meow Meow Meow'),
+              onTap: () {
+                context.setLocale(const Locale('miao', 'Miao'));
+                Navigator.pop(context);
+              },
+              trailing: currentLocale == const Locale('miao', 'Miao')
+                  ? Icon(
+                      Icons.radio_button_checked,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  : Icon(
+                      Icons.radio_button_off,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+            ),
+          ]);
+        }
+
         return AlertDialog(
           title: Text('settings_language_select_title'.tr()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text('settings_language_chinese'.tr()),
-                onTap: () {
-                  context.setLocale(const Locale('zh', 'CN'));
-                  Navigator.pop(context);
-                },
-                trailing: currentLocale == const Locale('zh', 'CN')
-                    ? Icon(
-                        Icons.radio_button_checked,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : Icon(
-                        Icons.radio_button_off,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-              ),
-              ListTile(
-                title: Text('settings_language_english'.tr()),
-                onTap: () {
-                  context.setLocale(const Locale('en', 'US'));
-                  Navigator.pop(context);
-                },
-                trailing: currentLocale == const Locale('en', 'US')
-                    ? Icon(
-                        Icons.radio_button_checked,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : Icon(
-                        Icons.radio_button_off,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-              ),
-              ListTile(
-                title: Text('settings_language_japanese'.tr()),
-                onTap: () {
-                  context.setLocale(const Locale('ja', 'JP'));
-                  Navigator.pop(context);
-                },
-                trailing: currentLocale == const Locale('ja', 'JP')
-                    ? Icon(
-                        Icons.radio_button_checked,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : Icon(
-                        Icons.radio_button_off,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-              ),
-            ],
+            children: languageOptions,
           ),
         );
       },

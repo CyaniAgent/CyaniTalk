@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../utils/logger.dart';
 import 'base_api.dart';
@@ -15,12 +16,20 @@ class MisskeyApi extends BaseApi {
         baseUrl: 'https://$host',
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
-        headers: {
-          'User-Agent':
-              'CyaniTalk/${Constants.appVersion} (Android; Mobile; rv:1.0)',
-        },
+        headers: {'User-Agent': _generateUserAgent()},
       ),
     );
+  }
+
+  /// 生成自动适应设备的User-Agent字符串
+  String _generateUserAgent() {
+    final appName = 'CyaniTalk';
+    final appVersion = Constants.appVersion;
+    final platform = Platform.operatingSystem;
+    final platformVersion = Platform.operatingSystemVersion;
+
+    // 构建User-Agent字符串
+    return '$appName/$appVersion ($platform; $platformVersion)';
   }
 
   Future<Map<String, dynamic>> i() => executeApiCall(

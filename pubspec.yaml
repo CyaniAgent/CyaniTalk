@@ -90,7 +90,12 @@ dependencies:
   video_player: ^2.9.2
   # Windows平台视频播放器实现
   video_player_win: ^2.3.11
+  # 文件选择器库，用于选择本地文件
   file_picker: ^10.3.10
+  # 从图片中提取颜色的库，用于生成美观的颜色方案
+  palette_generator: ^0.3.3+3
+  # 跨平台设备信息获取库，用于获取设备型号、操作系统等信息
+  device_info_plus: ^12.0.0
 
 dev_dependencies:
   flutter_test:

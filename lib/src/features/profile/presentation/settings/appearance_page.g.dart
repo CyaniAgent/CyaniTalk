@@ -15,7 +15,8 @@ final appearanceSettingsProvider = AppearanceSettingsNotifierProvider._();
 
 /// 外观设置状态管理器
 final class AppearanceSettingsNotifierProvider
-    extends $NotifierProvider<AppearanceSettingsNotifier, AppearanceSettings> {
+    extends
+        $AsyncNotifierProvider<AppearanceSettingsNotifier, AppearanceSettings> {
   /// 外观设置状态管理器
   AppearanceSettingsNotifierProvider._()
     : super(
@@ -34,33 +35,26 @@ final class AppearanceSettingsNotifierProvider
   @$internal
   @override
   AppearanceSettingsNotifier create() => AppearanceSettingsNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(AppearanceSettings value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<AppearanceSettings>(value),
-    );
-  }
 }
 
 String _$appearanceSettingsNotifierHash() =>
-    r'17779e9c1f1168693c16368db2b1cd04de576f28';
+    r'2e74466bc7438eb88f9b691d6d28cb1be7ede5de';
 
 /// 外观设置状态管理器
 
 abstract class _$AppearanceSettingsNotifier
-    extends $Notifier<AppearanceSettings> {
-  AppearanceSettings build();
+    extends $AsyncNotifier<AppearanceSettings> {
+  FutureOr<AppearanceSettings> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AppearanceSettings, AppearanceSettings>;
+    final ref =
+        this.ref as $Ref<AsyncValue<AppearanceSettings>, AppearanceSettings>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AppearanceSettings, AppearanceSettings>,
-              AppearanceSettings,
+              AnyNotifier<AsyncValue<AppearanceSettings>, AppearanceSettings>,
+              AsyncValue<AppearanceSettings>,
               Object?,
               Object?
             >;

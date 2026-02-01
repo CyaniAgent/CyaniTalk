@@ -21,37 +21,68 @@ class CyaniTalkApp extends ConsumerWidget {
     logger.debug('CyaniTalkApp: 加载路由配置');
 
     // Get appearance settings
-    final appearanceSettings = ref.watch(appearanceSettingsProvider);
-    logger.debug(
-      'CyaniTalkApp: 加载外观设置 - 深色模式: ${appearanceSettings.isDarkMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
-    );
+    final appearanceSettingsAsync = ref.watch(appearanceSettingsProvider);
 
     // Initialize Misskey Streaming Service at app level
     logger.debug('CyaniTalkApp: 初始化Misskey流媒体服务');
     ref.watch(misskeyStreamingServiceProvider);
 
-    // Build theme based on settings
-    final theme = _buildTheme(appearanceSettings);
+    return appearanceSettingsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) {
+        logger.error('CyaniTalkApp: 加载外观设置失败', error);
+        // 使用默认设置
+        final defaultSettings = const AppearanceSettings(
+          isDarkMode: false,
+          useDynamicColor: true,
+          useCustomColor: false,
+          primaryColor: null,
+        );
+        final theme = _buildTheme(defaultSettings);
+        return MaterialApp.router(
+          routerConfig: goRouter,
+          title: 'CyaniTalk',
+          theme: theme,
+          darkTheme: _buildTheme(defaultSettings.copyWith(isDarkMode: true)),
+          themeMode: ThemeMode.light,
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+        );
+      },
+      data: (appearanceSettings) {
+        logger.debug(
+          'CyaniTalkApp: 加载外观设置 - 深色模式: ${appearanceSettings.isDarkMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
+        );
 
-    logger.debug('CyaniTalkApp: 构建MaterialApp');
-    return MaterialApp.router(
-      routerConfig: goRouter,
-      title: 'CyaniTalk',
-      theme: theme,
-      darkTheme: _buildTheme(appearanceSettings.copyWith(isDarkMode: true)),
-      themeMode: appearanceSettings.isDarkMode
-          ? ThemeMode.dark
-          : ThemeMode.light,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
+        // Build theme based on settings
+        final theme = _buildTheme(appearanceSettings);
+
+        logger.debug('CyaniTalkApp: 构建MaterialApp');
+        return MaterialApp.router(
+          routerConfig: goRouter,
+          title: 'CyaniTalk',
+          theme: theme,
+          darkTheme: _buildTheme(appearanceSettings.copyWith(isDarkMode: true)),
+          themeMode: appearanceSettings.isDarkMode
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+        );
+      },
     );
   }
 
   /// 构建主题
   ThemeData _buildTheme(AppearanceSettings settings) {
-    final seedColor = const Color(0xFF39C5BB);
+    // 使用自定义颜色或默认颜色
+    final seedColor = settings.useCustomColor && settings.primaryColor != null
+        ? settings.primaryColor!
+        : const Color(0xFF39C5BB);
 
     return ThemeData(
       colorScheme: settings.useDynamicColor
