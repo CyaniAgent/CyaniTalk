@@ -63,6 +63,7 @@
   "misskey_follow_requests_none": "No follow requests",
   "misskey_announcements_none": "No announcements",
   "misskey_antennas_none": "No antennas",
+  "misskey_online_users": "Online users: {count}",
   "notes_no_notes_found_in_global_timeline": "No notes found in Global timeline",
   "channels_no_description": "No description",
   "channels_no_joined_channels_found": "No joined channels found",

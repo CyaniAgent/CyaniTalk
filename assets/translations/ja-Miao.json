@@ -63,6 +63,7 @@
   "misskey_follow_requests_none": "フォローリクエストがありませんにゃ～",
   "misskey_announcements_none": "お知らせがありませんにゃ～",
   "misskey_antennas_none": "アンテナがありませんにゃ～",
+  "misskey_online_users": "オンラインユーザーが {count} 人にゃ～",
   "notes_no_notes_found_in_global_timeline": "グローバルタイムラインにノートが見つかりませんにゃ～",
   "channels_no_description": "説明がありませんにゃ～",
   "channels_no_joined_channels_found": "参加しているチャンネルが見つかりませんにゃ～",

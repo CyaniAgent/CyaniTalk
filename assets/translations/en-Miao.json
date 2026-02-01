@@ -63,6 +63,7 @@
   "misskey_follow_requests_none": "No follow requests Meow~",
   "misskey_announcements_none": "No announcements Meow~",
   "misskey_antennas_none": "No antennas Meow~",
+  "misskey_online_users": "Online users: {count} Meow~",
   "notes_no_notes_found_in_global_timeline": "No notes found in Global timeline Meow~",
   "channels_no_description": "No description Meow~",
   "channels_no_joined_channels_found": "No joined channels found Meow~",

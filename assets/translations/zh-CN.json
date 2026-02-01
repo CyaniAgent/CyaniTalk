@@ -63,6 +63,7 @@
   "misskey_follow_requests_none": "没有关注请求",
   "misskey_announcements_none": "没有公告",
   "misskey_antennas_none": "没有天线",
+  "misskey_online_users": "• {count} 用户在线",
   "notes_no_notes_found_in_global_timeline": "在全局时间线中没有找到笔记",
   "channels_no_description": "无描述",
   "channels_no_joined_channels_found": "没有找到已加入的频道",

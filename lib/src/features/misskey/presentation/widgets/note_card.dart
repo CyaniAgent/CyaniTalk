@@ -21,6 +21,75 @@ class NoteCard extends ConsumerStatefulWidget {
 class _NoteCardState extends ConsumerState<NoteCard> {
   bool _shouldAnimate = false;
 
+  /// 处理文本中的特殊格式
+  List<TextSpan> _processText(String text) {
+    final List<TextSpan> spans = [];
+    int currentIndex = 0;
+
+    // 处理加粗文本 (**text**)
+    final boldRegex = RegExp(r'\*\*(.*?)\*\*');
+    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
+    final hashtagRegex = RegExp(r'#([^\s]+)');
+
+    // 收集所有匹配项并按位置排序
+    final List<RegExpMatch> allMatches = [];
+    allMatches.addAll(boldRegex.allMatches(text));
+    allMatches.addAll(mentionRegex.allMatches(text));
+    allMatches.addAll(hashtagRegex.allMatches(text));
+
+    // 按匹配位置排序
+    allMatches.sort((a, b) => a.start.compareTo(b.start));
+
+    for (final match in allMatches) {
+      // 添加匹配前的文本
+      if (match.start > currentIndex) {
+        spans.add(TextSpan(text: text.substring(currentIndex, match.start)));
+      }
+
+      // 检查是哪种匹配
+      if (boldRegex.hasMatch(text.substring(match.start, match.end))) {
+        // 加粗文本
+        spans.add(
+          TextSpan(
+            text: match.group(1),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        );
+      } else if (mentionRegex.hasMatch(
+        text.substring(match.start, match.end),
+      )) {
+        // 提及用户
+        spans.add(
+          TextSpan(
+            text: text.substring(match.start, match.end),
+            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            recognizer: null, // 可以添加TapGestureRecognizer来处理点击
+          ),
+        );
+      } else if (hashtagRegex.hasMatch(
+        text.substring(match.start, match.end),
+      )) {
+        // 话题
+        spans.add(
+          TextSpan(
+            text: text.substring(match.start, match.end),
+            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+            recognizer: null, // 可以添加TapGestureRecognizer来处理点击
+          ),
+        );
+      }
+
+      currentIndex = match.end;
+    }
+
+    // 处理剩余文本
+    if (currentIndex < text.length) {
+      spans.add(TextSpan(text: text.substring(currentIndex)));
+    }
+
+    return spans;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -127,7 +196,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                   ),
                   const SizedBox(height: 8),
                 ] else if (text != null)
-                  SelectableText(text),
+                  SelectableText.rich(TextSpan(children: _processText(text))),
 
                 if (note.files.isNotEmpty)
                   Padding(
