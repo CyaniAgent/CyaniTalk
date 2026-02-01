@@ -6,6 +6,8 @@ import 'dart:ui';
 import '../../../../core/utils/logger.dart';
 import '../../application/auth_service.dart';
 import '../../../../core/api/flarum_api.dart';
+import '../../../../core/api/juhe_auth_api.dart';
+import '../juhe_auth_page.dart';
 
 /// 统一的添加账户或端点对话框
 class AddAccountDialog extends ConsumerStatefulWidget {
@@ -310,9 +312,92 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+
+          // Social Login Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildStyledCard(
+                  icon: const Icon(Icons.wechat, color: Color(0xFF07C160), size: 32),
+                  title: 'auth_login_wechat'.tr(),
+                  subtitle: 'auth_login'.tr(),
+                  color: const Color(0xFF07C160),
+                  onTap: () => _startSocialLogin('wx'),
+                  isVertical: true,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStyledCard(
+                  icon: const Icon(Icons.alternate_email, color: Color(0xFF12B7F5), size: 32),
+                  title: 'auth_login_qq'.tr(),
+                  subtitle: 'auth_login'.tr(),
+                  color: const Color(0xFF12B7F5),
+                  onTap: () => _startSocialLogin('qq'),
+                  isVertical: true,
+                ),
+              ),
+            ],
+          ),
         ],
       ).animate().fadeIn().slideY(begin: 0.1, end: 0),
     );
+  }
+
+  Future<void> _startSocialLogin(String type) async {
+    final host = _flarumHostController.text.trim().isNotEmpty 
+      ? _flarumHostController.text.trim() 
+      : 'flarum.imikufans.cn'; // Default host for social login if not specified
+
+    // We can also ask for host first if needed
+    
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => JuheAuthPage(
+          type: type,
+          api: JuheAuthApi(), // You might want to get this from a provider or config
+        ),
+      ),
+    );
+
+    if (result != null && result.containsKey('social_uid')) {
+      _loginWithSocial(host, result, type);
+    } else if (result != null && result.containsKey('error')) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login error: ${result['error']}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _loginWithSocial(String host, Map<String, dynamic> socialData, String type) async {
+    setState(() => _loading = true);
+    try {
+      await ref.read(authServiceProvider.notifier).loginToFlarumWithSocial(
+        host,
+        socialData['social_uid'],
+        type,
+        nickname: socialData['nickname'],
+        avatarUrl: socialData['faceimg'],
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('auth_flarum_linked'.tr())),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Social login failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   Widget _buildStyledCard({

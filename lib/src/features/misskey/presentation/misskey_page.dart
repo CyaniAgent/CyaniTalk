@@ -21,6 +21,7 @@ import 'pages/misskey_channels_page.dart';
 import 'pages/misskey_explore_page.dart';
 import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_announcements_page.dart';
+import 'pages/misskey_aiscript_console_page.dart';
 import 'pages/misskey_post_page.dart';
 
 /// Misskey功能模块的主页面组件
@@ -60,6 +61,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
     MisskeyExplorePage(key: ValueKey('explore')),
     MisskeyFollowRequestsPage(key: ValueKey('follow_requests')),
     MisskeyAnnouncementsPage(key: ValueKey('announcements')),
+    MisskeyAiScriptConsolePage(key: ValueKey('aiscript_console')),
   ];
 
   /// 对应页面的标题列表
@@ -71,6 +73,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
     'misskey_page_explore'.tr(),
     'misskey_page_follow_requests'.tr(),
     'misskey_page_announcements'.tr(),
+    'misskey_page_aiscript_console'.tr(),
   ];
 
   /// 构建Misskey主页面的UI界面
@@ -155,44 +158,42 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      _titles[_selectedIndex],
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (_selectedIndex == 0) ...[
-                    const SizedBox(width: 8),
+              title: ExcludeSemantics(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Flexible(
-                      child: ref
-                          .watch(misskeyOnlineUsersProvider)
-                          .when(
-                            data: (count) => Text(
-                              'misskey_online_users'.tr(
-                                namedArgs: {'count': count.toString()},
-                              ),
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                            ).animate().fadeIn().scale(),
-                            loading: () => const SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            error: (error, stack) => const SizedBox.shrink(),
-                          ),
+                      child: Text(
+                        _titles[_selectedIndex],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    if (_selectedIndex == 0) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: ref.watch(misskeyOnlineUsersProvider).when(
+                              data: (count) => Text(
+                                '• $count users online',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                              ).animate().fadeIn().scale(),
+                              loading: () => const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                              error: (error, stack) => const SizedBox.shrink(),
+                            ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
               centerTitle: true,
               floating: true,
@@ -242,19 +243,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               transitionBuilder: (Widget child, Animation<double> animation) {
                 return FadeTransition(
                   opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.05, 0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: ScaleTransition(
-                      scale: Tween<double>(
-                        begin: 0.95,
-                        end: 1.0,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  ),
+                  child: child,
                 );
               },
               child: _pages[_selectedIndex],

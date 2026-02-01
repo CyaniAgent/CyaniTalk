@@ -351,6 +351,46 @@ class FlarumApi extends BaseApi {
     }
   }
 
+  /// 使用聚合登录（WeChat/QQ）登录 Flarum
+  ///
+  /// [socialUid] - 聚合登录返回的 social_uid
+  /// [type] - 登录类型 (qq, wx 等)
+  Future<Map<String, dynamic>> loginWithJuhe(
+    String socialUid,
+    String type,
+  ) async {
+    logger.info('FlarumApi: 开始聚合登录，类型: $type, UID: $socialUid');
+    try {
+      // 注意：这里的路径是假设的，实际路径取决于 Flarum 插件的实现
+      // 常见的路径可能是 /api/auth/juhe 或 /api/juhe/login
+      final response = await post(
+        '/api/juhe/login',
+        data: {'social_uid': socialUid, 'type': type},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map && data.containsKey('token')) {
+          final token = data['token'];
+          final userId = data['userId']?.toString();
+          logger.info('FlarumApi: 聚合登录成功');
+          setToken(token, userId: userId);
+          return Map<String, dynamic>.from(data);
+        }
+      }
+      logger.error('FlarumApi: 聚合登录失败，状态码: ${response.statusCode}');
+      throw Exception('Juhe login failed: ${response.statusCode}');
+    } catch (e) {
+      if (e is DioException) {
+        final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
+        logger.error('FlarumApi: 聚合登录错误: $msg');
+        throw Exception('Flarum Juhe login error: $msg');
+      }
+      logger.error('FlarumApi: 聚合登录异常: $e');
+      rethrow;
+    }
+  }
+
   /// 获取 Flarum 用户详细资料
   ///
   /// [userId] - 用户 ID
