@@ -10,11 +10,21 @@ import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/profile/presentation/settings/appearance_page.dart';
 
 /// CyaniTalk应用程序的根组件
-class CyaniTalkApp extends ConsumerWidget {
+class CyaniTalkApp extends ConsumerStatefulWidget {
   const CyaniTalkApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CyaniTalkApp> createState() => _CyaniTalkAppState();
+}
+
+class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
+  // 缓存主题，避免每次构建时都重新计算
+  ThemeData? _cachedLightTheme;
+  ThemeData? _cachedDarkTheme;
+  AppearanceSettings? _cachedSettings;
+
+  @override
+  Widget build(BuildContext context) {
     logger.info('CyaniTalkApp: 初始化应用程序');
 
     final goRouter = ref.watch(goRouterProvider);
@@ -78,25 +88,36 @@ class CyaniTalkApp extends ConsumerWidget {
   }
 
   /// 构建主题
+  /// 
+  /// 根据用户的外观设置构建主题，支持深色模式、动态色彩和自定义颜色。
+  /// 会缓存构建结果，避免重复计算。
   ThemeData _buildTheme(AppearanceSettings settings) {
+    // 检查是否需要重新构建主题
+    final isDark = settings.isDarkMode;
+    final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
+    
+    // 如果设置没有变化且主题已缓存，直接返回缓存的主题
+    if (_cachedSettings == settings && themeCache != null) {
+      logger.debug('CyaniTalkApp: 使用缓存的主题');
+      return themeCache;
+    }
+
+    logger.debug('CyaniTalkApp: 构建新主题 - 深色模式: $isDark, 动态色彩: ${settings.useDynamicColor}, 自定义颜色: ${settings.useCustomColor}');
+
     // 使用自定义颜色或默认颜色
     final seedColor = settings.useCustomColor && settings.primaryColor != null
         ? settings.primaryColor!
         : const Color(0xFF39C5BB);
 
-    return ThemeData(
+    final theme = ThemeData(
       colorScheme: settings.useDynamicColor
           ? ColorScheme.fromSeed(
               seedColor: seedColor,
-              brightness: settings.isDarkMode
-                  ? Brightness.dark
-                  : Brightness.light,
+              brightness: isDark ? Brightness.dark : Brightness.light,
             )
           : ColorScheme.fromSeed(
               seedColor: seedColor,
-              brightness: settings.isDarkMode
-                  ? Brightness.dark
-                  : Brightness.light,
+              brightness: isDark ? Brightness.dark : Brightness.light,
               // 固定色彩方案，不使用动态色彩
               primary: seedColor,
               secondary: const Color(0xFF6366F1),
@@ -104,5 +125,15 @@ class CyaniTalkApp extends ConsumerWidget {
       useMaterial3: true,
       fontFamily: 'MiSans',
     );
+
+    // 缓存主题和设置
+    if (isDark) {
+      _cachedDarkTheme = theme;
+    } else {
+      _cachedLightTheme = theme;
+    }
+    _cachedSettings = settings;
+
+    return theme;
   }
 }

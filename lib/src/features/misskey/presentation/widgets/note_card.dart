@@ -9,9 +9,18 @@ import 'audio_player_widget.dart';
 import '../pages/image_viewer_page.dart';
 import '../pages/video_player_page.dart';
 
+/// NoteCard组件
+/// 
+/// 用于显示单个Misskey笔记的卡片组件，支持显示用户信息、文本内容、媒体文件和互动按钮。
+/// 
+/// @param note 要显示的笔记对象
 class NoteCard extends ConsumerStatefulWidget {
   final Note note;
 
+  /// 创建NoteCard组件
+  /// 
+  /// @param key 组件的键
+  /// @param note 要显示的笔记对象
   const NoteCard({super.key, required this.note});
 
   @override
@@ -21,8 +30,19 @@ class NoteCard extends ConsumerStatefulWidget {
 class _NoteCardState extends ConsumerState<NoteCard> {
   bool _shouldAnimate = false;
 
+  // 缓存文本处理结果，避免重复计算
+  final Map<String, List<TextSpan>> _textProcessingCache = {};
+
   /// 处理文本中的特殊格式
+  /// 
+  /// 处理文本中的加粗文本(**text**)、提及(@username)和话题(#hashtag)，
+  /// 并返回对应的TextSpan列表。会缓存处理结果，避免重复计算。
   List<TextSpan> _processText(String text) {
+    // 检查是否已缓存处理结果
+    if (_textProcessingCache.containsKey(text)) {
+      return _textProcessingCache[text]!;
+    }
+
     final List<TextSpan> spans = [];
     int currentIndex = 0;
 
@@ -85,6 +105,16 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     // 处理剩余文本
     if (currentIndex < text.length) {
       spans.add(TextSpan(text: text.substring(currentIndex)));
+    }
+
+    // 缓存处理结果
+    _textProcessingCache[text] = spans;
+    
+    // 限制缓存大小，避免内存泄漏
+    if (_textProcessingCache.length > 50) {
+      // 移除最早的缓存项
+      final firstKey = _textProcessingCache.keys.first;
+      _textProcessingCache.remove(firstKey);
     }
 
     return spans;

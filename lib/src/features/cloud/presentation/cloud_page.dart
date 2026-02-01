@@ -26,63 +26,51 @@ class CloudPage extends ConsumerWidget {
     }
 
     final driveState = ref.watch(misskeyDriveProvider);
-    final theme = Theme.of(context);
-    final mikuColor = const Color(0xFF39C5BB);
+    Theme.of(context);
 
-    return Theme(
-      data: theme.copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: mikuColor,
-          primary: mikuColor,
-          brightness: theme.brightness,
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('cloud_storage_title'.tr()),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report_outlined),
+            tooltip: 'cloud_debug_show_raw_info'.tr(),
+            onPressed: () => _showRawDebugInfo(context, ref, driveState.value),
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () => ref.read(misskeyDriveProvider.notifier).refresh(),
+          ),
+        ],
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('cloud_storage_title'.tr()),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.bug_report_outlined),
-              tooltip: 'cloud_debug_show_raw_info'.tr(),
-              onPressed: () =>
-                  _showRawDebugInfo(context, ref, driveState.value),
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () =>
-                  ref.read(misskeyDriveProvider.notifier).refresh(),
+      body: driveState.when(
+        data: (state) => Column(
+          children: [
+            _buildBreadcrumbs(context, ref, state),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(misskeyDriveProvider.notifier).refresh(),
+                child: state.files.isEmpty && state.folders.isEmpty
+                    ? _buildEmptyState()
+                    : _buildContentList(context, ref, state),
+              ),
             ),
           ],
         ),
-        body: driveState.when(
-          data: (state) => Column(
-            children: [
-              _buildBreadcrumbs(context, ref, state),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () =>
-                      ref.read(misskeyDriveProvider.notifier).refresh(),
-                  child: state.files.isEmpty && state.folders.isEmpty
-                      ? _buildEmptyState()
-                      : _buildContentList(context, ref, state),
-                ),
-              ),
-            ],
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(child: Text('Error: $err')),
-        ),
-        bottomNavigationBar: driveState.when(
-          data: (state) => _buildDriveSpace(context, state),
-          loading: () => null,
-          error: (_, _) => null,
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showAddOptions(context, ref),
-          child: const Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
+      bottomNavigationBar: driveState.when(
+        data: (state) => _buildDriveSpace(context, state),
+        loading: () => null,
+        error: (_, _) => null,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddOptions(context, ref),
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

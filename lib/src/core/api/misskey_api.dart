@@ -5,11 +5,21 @@ import '../utils/logger.dart';
 import 'base_api.dart';
 import '../config/constants.dart';
 
+/// Misskey API客户端
+/// 
+/// 提供与Misskey实例交互的API方法，包括获取时间线、用户信息、文件管理等功能。
+/// 
+/// @param host Misskey实例的主机名
+/// @param token 认证令牌
 class MisskeyApi extends BaseApi {
   final String host;
   final String token;
   late Dio _dio;
 
+  /// 初始化Misskey API客户端
+  /// 
+  /// @param host Misskey实例的主机名
+  /// @param token 认证令牌
   MisskeyApi({required this.host, required this.token}) {
     logger.info('MisskeyApi: Initializing for host: $host');
     _dio = Dio(
@@ -40,6 +50,11 @@ class MisskeyApi extends BaseApi {
     return 'Mozilla/5.0 ($platform; Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}';
   }
 
+/// 获取当前用户信息
+/// 
+/// 返回当前认证用户的详细信息，包括用户名、头像、个人简介等。
+/// 
+/// @return 用户信息的Map对象
   Future<Map<String, dynamic>> i() => executeApiCall(
     'MisskeyApi.i',
     () => _dio.post('/api/i', data: {'i': token}),
@@ -89,6 +104,14 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as List<dynamic>,
   );
 
+/// 获取时间线
+/// 
+/// 根据指定的类型获取不同的时间线内容，支持Home、Local、Social和Global四种类型。
+/// 
+/// @param type 时间线类型：Home(主页)、Local(本地)、Social(社交)、Global(全球)
+/// @param limit 返回的笔记数量限制，默认20
+/// @param untilId 分页标记，用于加载更多内容
+/// @return 笔记列表
   Future<List<dynamic>> getTimeline(
     String type, {
     int limit = 20,
