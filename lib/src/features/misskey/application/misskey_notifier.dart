@@ -145,22 +145,78 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 @riverpod
 class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
   @override
-  FutureOr<List<Channel>> build() async {
-    logger.info('初始化Misskey频道列表');
+  FutureOr<List<Channel>> build({
+    MisskeyChannelListType type = MisskeyChannelListType.featured,
+    String? query,
+  }) async {
+    logger.info('初始化Misskey频道列表，类型: $type, 查询: $query');
     final repository = await ref.watch(misskeyRepositoryProvider.future);
-    final channels = await repository.getChannels();
+
+    final channels = await switch (type) {
+      MisskeyChannelListType.featured => repository.getFeaturedChannels(),
+      MisskeyChannelListType.favorites => repository.getFavoriteChannels(),
+      MisskeyChannelListType.following => repository.getFollowingChannels(),
+      MisskeyChannelListType.managing => repository.getOwnedChannels(),
+      MisskeyChannelListType.search => repository.searchChannels(query ?? ''),
+    };
+
     logger.info('Misskey频道列表初始化完成，加载了 ${channels.length} 个频道');
     return channels;
   }
 
   Future<void> refresh() async {
-    logger.info('刷新Misskey频道列表');
+    logger.info('刷新Misskey频道列表，类型: $type');
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      final channels = await repository.getChannels();
+      final channels = await switch (type) {
+        MisskeyChannelListType.featured => repository.getFeaturedChannels(),
+        MisskeyChannelListType.favorites => repository.getFavoriteChannels(),
+        MisskeyChannelListType.following => repository.getFollowingChannels(),
+        MisskeyChannelListType.managing => repository.getOwnedChannels(),
+        MisskeyChannelListType.search => repository.searchChannels(query ?? ''),
+      };
       logger.info('Misskey频道列表刷新完成，加载了 ${channels.length} 个频道');
       return channels;
+    });
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoading || state.isRefreshing) {
+      logger.debug('Misskey频道列表正在加载中，跳过加载更多');
+      return;
+    }
+
+    final currentChannels = state.value ?? [];
+    if (currentChannels.isEmpty) {
+      logger.debug('Misskey频道列表为空，跳过加载更多');
+      return;
+    }
+
+    // featured doesn't support pagination usually in the same way
+    if (type == MisskeyChannelListType.featured) return;
+
+    final lastId = currentChannels.last.id;
+    logger.info('加载更多Misskey频道，类型: $type, 最后ID: $lastId');
+
+    state = await AsyncValue.guard(() async {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+
+      final newChannels = await switch (type) {
+        MisskeyChannelListType.favorites => repository.getFavoriteChannels(untilId: lastId),
+        MisskeyChannelListType.following => repository.getFollowingChannels(untilId: lastId),
+        MisskeyChannelListType.managing => repository.getOwnedChannels(untilId: lastId),
+        MisskeyChannelListType.search => repository.searchChannels(
+          query ?? '',
+          untilId: lastId,
+        ),
+        _ => Future.value(<Channel>[]),
+      };
+
+      if (!ref.mounted) return currentChannels;
+
+      logger.info('Misskey频道列表加载更多完成，新增 ${newChannels.length} 个频道');
+      return [...currentChannels, ...newChannels];
     });
   }
 }

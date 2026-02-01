@@ -10,7 +10,9 @@ import '../core/utils/logger.dart';
 import '../features/misskey/presentation/misskey_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
 import '../features/forum/presentation/forum_page.dart';
-import '../features/notifications/presentation/notifications_page.dart';
+import '../features/messaging/presentation/messaging_history_page.dart';
+import '../features/messaging/presentation/messaging_chat_page.dart';
+import '../features/misskey/domain/misskey_user.dart';
 import '../features/profile/presentation/profile_page.dart';
 import '../shared/widgets/responsive_shell.dart';
 
@@ -71,9 +73,22 @@ GoRouter goRouter(Ref ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/notifications',
+                path: '/messaging',
                 pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: NotificationsPage()),
+                    const NoTransitionPage(child: MessagingHistoryPage()),
+                routes: [
+                  GoRoute(
+                    path: 'chat/:userId',
+                    builder: (context, state) {
+                      final userId = state.pathParameters['userId']!;
+                      final user = state.extra as MisskeyUser?;
+                      return MessagingChatPage(
+                        userId: userId,
+                        initialUser: user,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

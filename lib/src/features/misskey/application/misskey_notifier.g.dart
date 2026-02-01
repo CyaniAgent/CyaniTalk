@@ -101,34 +101,90 @@ abstract class _$MisskeyTimelineNotifier extends $AsyncNotifier<List<Note>> {
 }
 
 @ProviderFor(MisskeyChannelsNotifier)
-final misskeyChannelsProvider = MisskeyChannelsNotifierProvider._();
+final misskeyChannelsProvider = MisskeyChannelsNotifierFamily._();
 
 final class MisskeyChannelsNotifierProvider
     extends $AsyncNotifierProvider<MisskeyChannelsNotifier, List<Channel>> {
-  MisskeyChannelsNotifierProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'misskeyChannelsProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  MisskeyChannelsNotifierProvider._({
+    required MisskeyChannelsNotifierFamily super.from,
+    required ({MisskeyChannelListType type, String? query}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'misskeyChannelsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$misskeyChannelsNotifierHash();
 
+  @override
+  String toString() {
+    return r'misskeyChannelsProvider'
+        ''
+        '$argument';
+  }
+
   @$internal
   @override
   MisskeyChannelsNotifier create() => MisskeyChannelsNotifier();
+
+  @override
+  bool operator ==(Object other) {
+    return other is MisskeyChannelsNotifierProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$misskeyChannelsNotifierHash() =>
-    r'bae212a8afbdee79da4aba8a1747c981ca050c9f';
+    r'a621181dd4a8b596fd73cb32d907e06c02737906';
+
+final class MisskeyChannelsNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          MisskeyChannelsNotifier,
+          AsyncValue<List<Channel>>,
+          List<Channel>,
+          FutureOr<List<Channel>>,
+          ({MisskeyChannelListType type, String? query})
+        > {
+  MisskeyChannelsNotifierFamily._()
+    : super(
+        retry: null,
+        name: r'misskeyChannelsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  MisskeyChannelsNotifierProvider call({
+    MisskeyChannelListType type = MisskeyChannelListType.featured,
+    String? query,
+  }) => MisskeyChannelsNotifierProvider._(
+    argument: (type: type, query: query),
+    from: this,
+  );
+
+  @override
+  String toString() => r'misskeyChannelsProvider';
+}
 
 abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
-  FutureOr<List<Channel>> build();
+  late final _$args =
+      ref.$arg as ({MisskeyChannelListType type, String? query});
+  MisskeyChannelListType get type => _$args.type;
+  String? get query => _$args.query;
+
+  FutureOr<List<Channel>> build({
+    MisskeyChannelListType type = MisskeyChannelListType.featured,
+    String? query,
+  });
   @$mustCallSuper
   @override
   void runBuild() {
@@ -141,7 +197,10 @@ abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleCreate(
+      ref,
+      () => build(type: _$args.type, query: _$args.query),
+    );
   }
 }
 

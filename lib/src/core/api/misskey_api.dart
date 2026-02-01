@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import '../utils/logger.dart';
 import 'base_api.dart';
 import '../config/constants.dart';
@@ -16,20 +17,27 @@ class MisskeyApi extends BaseApi {
         baseUrl: 'https://$host',
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
-        headers: {'User-Agent': _generateUserAgent()},
+        headers: {
+          'User-Agent': _generateUserAgent(),
+          'Accept': '*/*',
+        },
       ),
+    );
+
+    // 允许自定义证书校验，解决 HandshakeException
+    _dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        return client;
+      },
     );
   }
 
-  /// 生成自动适应设备的User-Agent字符串
+  /// 生成更加真实的User-Agent字符串
   String _generateUserAgent() {
-    final appName = 'CyaniTalk';
-    final appVersion = Constants.appVersion;
-    final platform = Platform.operatingSystem;
-    final platformVersion = Platform.operatingSystemVersion;
-
-    // 构建User-Agent字符串
-    return '$appName/$appVersion ($platform; $platformVersion)';
+    final platform = Platform.isAndroid ? 'Android' : (Platform.isIOS ? 'iOS' : 'Windows');
+    return 'Mozilla/5.0 ($platform; Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}';
   }
 
   Future<Map<String, dynamic>> i() => executeApiCall(
@@ -100,10 +108,50 @@ class MisskeyApi extends BaseApi {
     });
   }
 
-  Future<List<dynamic>> getChannels({int limit = 20}) => _fetchList(
-    'MisskeyApi.getChannels',
-    '/api/channels/joined',
-    {'limit': limit},
+  Future<List<dynamic>> getFeaturedChannels() => _fetchList(
+    'MisskeyApi.getFeaturedChannels',
+    '/api/channels/featured',
+    {},
+  );
+
+  Future<List<dynamic>> getFollowingChannels({
+    int limit = 20,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.getFollowingChannels', '/api/channels/followed', {
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
+
+  Future<List<dynamic>> getOwnedChannels({
+    int limit = 20,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.getOwnedChannels', '/api/channels/owned', {
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
+
+  Future<List<dynamic>> getFavoriteChannels({
+    int limit = 20,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.getFavoriteChannels', '/api/channels/my-favorites', {
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
+
+  Future<List<dynamic>> searchChannels(
+    String query, {
+    int limit = 20,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.searchChannels', '/api/channels/search', {
+    'query': query,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
+
+  Future<Map<String, dynamic>> showChannel(String channelId) => executeApiCall(
+    'MisskeyApi.showChannel',
+    () => _dio.post('/api/channels/show', data: {'i': token, 'channelId': channelId}),
+    (response) => Map<String, dynamic>.from(response.data),
   );
 
   Future<List<dynamic>> getChannelTimeline(
@@ -238,4 +286,89 @@ class MisskeyApi extends BaseApi {
     () => _dio.post('/api/get-online-users-count', data: {'i': token}),
     (response) => response.data['count'] as int,
   );
+
+  // --- Messaging (Chat) API ---
+
+  /// 这是一个高度兼容的方法，会尝试多个可能的端点
+  Future<List<dynamic>> getMessagingHistory({int limit = 10}) async {
+    // 优先尝试 /api/messaging/history (标准 Misskey)
+    try {
+      return await _fetchList(
+        'MisskeyApi.getMessagingHistory[messaging]',
+        '/api/messaging/history',
+        {'limit': limit},
+      );
+    } catch (e) {
+      logger.warning('MisskeyApi: /api/messaging/history failed, trying /api/chat/history...');
+      // 备选尝试 /api/chat/history (某些分叉或新版)
+      return await _fetchList(
+        'MisskeyApi.getMessagingHistory[chat]',
+        '/api/chat/history',
+        {'limit': limit},
+      );
+    }
+  }
+
+  Future<List<dynamic>> getMessagingMessages({
+    required String userId,
+    int limit = 10,
+    String? sinceId,
+    String? untilId,
+    bool markAsRead = true,
+  }) async {
+    final data = {
+      'userId': userId,
+      'limit': limit,
+      if (sinceId != null) 'sinceId': sinceId,
+      if (untilId != null) 'untilId': untilId,
+      'markAsRead': markAsRead,
+    };
+
+    try {
+      return await _fetchList(
+        'MisskeyApi.getMessagingMessages[messaging]',
+        '/api/messaging/messages',
+        data,
+      );
+    } catch (e) {
+      logger.warning('MisskeyApi: /api/messaging/messages failed, trying /api/chat/messages...');
+      return await _fetchList(
+        'MisskeyApi.getMessagingMessages[chat]',
+        '/api/chat/messages',
+        data,
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> createMessagingMessage({
+    required String userId,
+    String? text,
+    String? fileId,
+  }) async {
+    final data = {
+      'i': token,
+      'userId': userId,
+      if (text != null) 'text': text,
+      if (fileId != null) 'fileId': fileId,
+    };
+
+    try {
+      final response = await _dio.post('/api/messaging/messages/create', data: data);
+      return Map<String, dynamic>.from(response.data);
+    } catch (e) {
+      logger.warning('MisskeyApi: /api/messaging/messages/create failed, trying /api/chat/messages/create...');
+      final response = await _dio.post('/api/chat/messages/create', data: data);
+      return Map<String, dynamic>.from(response.data);
+    }
+  }
+
+  Future<void> readMessagingMessage(String messageId) async {
+    final data = {'i': token, 'messageId': messageId};
+    try {
+      await _dio.post('/api/messaging/messages/read', data: data);
+    } catch (e) {
+      logger.warning('MisskeyApi: /api/messaging/messages/read failed, trying /api/chat/messages/read...');
+      await _dio.post('/api/chat/messages/read', data: data);
+    }
+  }
 }

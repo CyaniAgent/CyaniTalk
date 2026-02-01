@@ -3,6 +3,14 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'channel.freezed.dart';
 part 'channel.g.dart';
 
+enum MisskeyChannelListType {
+  featured,
+  favorites,
+  following,
+  managing,
+  search,
+}
+
 @freezed
 abstract class Channel with _$Channel {
   const factory Channel({

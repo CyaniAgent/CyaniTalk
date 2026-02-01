@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 import '../domain/note.dart';
+import '../domain/messaging_message.dart';
 
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
 import '../../../core/utils/logger.dart';
+import '../../../core/config/constants.dart';
 
 part 'misskey_streaming_service.g.dart';
 
@@ -22,6 +26,10 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
   // Stream for broadcasting received notes
   final _noteStreamController = StreamController<NoteEvent>.broadcast();
   Stream<NoteEvent> get noteStream => _noteStreamController.stream;
+
+  // Stream for broadcasting received messages
+  final _messageStreamController = StreamController<MessagingMessage>.broadcast();
+  Stream<MessagingMessage> get messageStream => _messageStreamController.stream;
 
   // Track active timeline subscriptions to avoid duplicates
   final Set<String> _activeTimelineSubscriptions = {};
@@ -50,6 +58,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
     ref.onDispose(() {
       _disconnect();
       _noteStreamController.close();
+      _messageStreamController.close();
     });
   }
 
@@ -64,7 +73,17 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
     logger.info('MisskeyStreaming: Connecting to $uri');
 
     try {
-      _channel = WebSocketChannel.connect(uri);
+      // 使用自定义 HttpClient 以绕过证书校验问题
+      final client = HttpClient()
+        ..badCertificateCallback = (cert, host, port) => true;
+
+      _channel = IOWebSocketChannel.connect(
+        uri,
+        customClient: client,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}',
+        },
+      );
 
       _subscription = _channel!.stream.listen(
         (message) {
@@ -181,6 +200,11 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
               NoteEvent(note: note, timelineType: timelineType),
             );
           }
+        } else if (eventType == 'chatMessage' && eventBody != null) {
+          final message = MessagingMessage.fromJson(
+            eventBody as Map<String, dynamic>,
+          );
+          _messageStreamController.add(message);
         } else if (eventType == 'noteDeleted') {
           logger.info(
             'MisskeyStreaming: Received noteDeleted event: $eventBody',

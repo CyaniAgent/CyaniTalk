@@ -8,6 +8,7 @@ import '../domain/channel.dart';
 import '../domain/drive_file.dart';
 import '../domain/drive_folder.dart';
 import '../domain/misskey_user.dart';
+import '../domain/messaging_message.dart';
 
 part 'misskey_repository.g.dart';
 
@@ -63,17 +64,98 @@ class MisskeyRepository {
     }
   }
 
-  Future<List<Channel>> getChannels({int limit = 20}) async {
-    logger.info('MisskeyRepository: Getting channels, limit=$limit');
+  Future<List<Channel>> getFeaturedChannels() async {
+    logger.info('MisskeyRepository: Getting featured channels');
     try {
-      final data = await api.getChannels(limit: limit);
+      final data = await api.getFeaturedChannels();
       final channels = data.map((e) => Channel.fromJson(e)).toList();
       logger.info(
-        'MisskeyRepository: Successfully retrieved ${channels.length} channels',
+        'MisskeyRepository: Successfully retrieved ${channels.length} featured channels',
       );
       return channels;
     } catch (e) {
-      logger.error('MisskeyRepository: Error getting channels', e);
+      logger.error('MisskeyRepository: Error getting featured channels', e);
+      rethrow;
+    }
+  }
+
+  Future<List<Channel>> getFollowingChannels({
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting following channels');
+    try {
+      final data = await api.getFollowingChannels(limit: limit, untilId: untilId);
+      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      return channels;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting following channels', e);
+      rethrow;
+    }
+  }
+
+  Future<List<Channel>> getOwnedChannels({
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting owned channels');
+    try {
+      final data = await api.getOwnedChannels(limit: limit, untilId: untilId);
+      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      return channels;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting owned channels', e);
+      rethrow;
+    }
+  }
+
+  Future<List<Channel>> getFavoriteChannels({
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting favorite channels');
+    try {
+      final data = await api.getFavoriteChannels(limit: limit, untilId: untilId);
+      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      return channels;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting favorite channels', e);
+      rethrow;
+    }
+  }
+
+  Future<List<Channel>> searchChannels(
+    String query, {
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Searching channels with query "$query", limit=$limit',
+    );
+    try {
+      final data = await api.searchChannels(
+        query,
+        limit: limit,
+        untilId: untilId,
+      );
+      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      logger.info(
+        'MisskeyRepository: Successfully retrieved ${channels.length} channels for search query',
+      );
+      return channels;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error searching channels', e);
+      rethrow;
+    }
+  }
+
+  Future<Channel> showChannel(String channelId) async {
+    logger.info('MisskeyRepository: Showing channel $channelId');
+    try {
+      final data = await api.showChannel(channelId);
+      return Channel.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error showing channel $channelId', e);
       rethrow;
     }
   }
@@ -342,6 +424,104 @@ class MisskeyRepository {
       return await api.getOnlineUsersCount();
     } catch (e) {
       logger.error('MisskeyRepository: Error getting online users count', e);
+      rethrow;
+    }
+  }
+
+  // --- Messaging ---
+
+  Future<List<MessagingMessage>> getMessagingHistory({int limit = 10}) async {
+    logger.info('MisskeyRepository: Getting messaging history, limit=$limit');
+    try {
+      final data = await api.getMessagingHistory(limit: limit);
+      logger.debug('MisskeyRepository: Raw messaging history data: $data');
+      
+      final messages = <MessagingMessage>[];
+      for (final item in data) {
+        try {
+          final map = Map<String, dynamic>.from(item as Map);
+          // Handle aliases manually
+          if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
+          if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
+          
+          messages.add(MessagingMessage.fromJson(map));
+        } catch (e) {
+          logger.error('MisskeyRepository: Error decoding message item', e);
+        }
+      }
+      
+      logger.info('MisskeyRepository: Successfully retrieved ${messages.length} messages');
+      return messages;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting messaging history', e);
+      rethrow;
+    }
+  }
+
+  Future<List<MessagingMessage>> getMessagingMessages({
+    required String userId,
+    int limit = 10,
+    String? sinceId,
+    String? untilId,
+    bool markAsRead = true,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Getting messaging messages for user $userId, limit=$limit',
+    );
+    try {
+      final data = await api.getMessagingMessages(
+        userId: userId,
+        limit: limit,
+        sinceId: sinceId,
+        untilId: untilId,
+        markAsRead: markAsRead,
+      );
+      
+      final messages = <MessagingMessage>[];
+      for (final item in data) {
+        try {
+          final map = Map<String, dynamic>.from(item as Map);
+          // Handle aliases manually
+          if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
+          if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
+          
+          messages.add(MessagingMessage.fromJson(map));
+        } catch (e) {
+          logger.error('MisskeyRepository: Error decoding message item', e);
+        }
+      }
+      return messages;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting messaging messages', e);
+      rethrow;
+    }
+  }
+
+  Future<MessagingMessage> sendMessagingMessage({
+    required String userId,
+    String? text,
+    String? fileId,
+  }) async {
+    logger.info('MisskeyRepository: Sending messaging message to user $userId');
+    try {
+      final data = await api.createMessagingMessage(
+        userId: userId,
+        text: text,
+        fileId: fileId,
+      );
+      return MessagingMessage.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error sending messaging message', e);
+      rethrow;
+    }
+  }
+
+  Future<void> markMessagingMessageAsRead(String messageId) async {
+    logger.info('MisskeyRepository: Marking messaging message $messageId as read');
+    try {
+      await api.readMessagingMessage(messageId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error marking message as read', e);
       rethrow;
     }
   }
