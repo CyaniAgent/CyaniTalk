@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MessagingMessage {
 
- String get id; DateTime get createdAt; String? get text; String? get userId; MisskeyUser? get user; String? get recipientId; MisskeyUser? get recipient; bool get isRead; String? get fileId; DriveFile? get file;
+ String get id; DateTime get createdAt; String? get text; String? get userId; MisskeyUser? get user; String? get recipientId; MisskeyUser? get recipient; bool get isRead; String? get fileId; DriveFile? get file;// Support for Chat API grouping and rooms
+ Map<String, dynamic>? get group; String? get roomId;
 /// Create a copy of MessagingMessage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $MessagingMessageCopyWith<MessagingMessage> get copyWith => _$MessagingMessageCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessagingMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.text, text) || other.text == text)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.user, user) || other.user == user)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.file, file) || other.file == file));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MessagingMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.text, text) || other.text == text)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.user, user) || other.user == user)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.file, file) || other.file == file)&&const DeepCollectionEquality().equals(other.group, group)&&(identical(other.roomId, roomId) || other.roomId == roomId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,createdAt,text,userId,user,recipientId,recipient,isRead,fileId,file);
+int get hashCode => Object.hash(runtimeType,id,createdAt,text,userId,user,recipientId,recipient,isRead,fileId,file,const DeepCollectionEquality().hash(group),roomId);
 
 @override
 String toString() {
-  return 'MessagingMessage(id: $id, createdAt: $createdAt, text: $text, userId: $userId, user: $user, recipientId: $recipientId, recipient: $recipient, isRead: $isRead, fileId: $fileId, file: $file)';
+  return 'MessagingMessage(id: $id, createdAt: $createdAt, text: $text, userId: $userId, user: $user, recipientId: $recipientId, recipient: $recipient, isRead: $isRead, fileId: $fileId, file: $file, group: $group, roomId: $roomId)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $MessagingMessageCopyWith<$Res>  {
   factory $MessagingMessageCopyWith(MessagingMessage value, $Res Function(MessagingMessage) _then) = _$MessagingMessageCopyWithImpl;
 @useResult
 $Res call({
- String id, DateTime createdAt, String? text, String? userId, MisskeyUser? user, String? recipientId, MisskeyUser? recipient, bool isRead, String? fileId, DriveFile? file
+ String id, DateTime createdAt, String? text, String? userId, MisskeyUser? user, String? recipientId, MisskeyUser? recipient, bool isRead, String? fileId, DriveFile? file, Map<String, dynamic>? group, String? roomId
 });
 
 
@@ -65,7 +66,7 @@ class _$MessagingMessageCopyWithImpl<$Res>
 
 /// Create a copy of MessagingMessage
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? text = freezed,Object? userId = freezed,Object? user = freezed,Object? recipientId = freezed,Object? recipient = freezed,Object? isRead = null,Object? fileId = freezed,Object? file = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? text = freezed,Object? userId = freezed,Object? user = freezed,Object? recipientId = freezed,Object? recipient = freezed,Object? isRead = null,Object? fileId = freezed,Object? file = freezed,Object? group = freezed,Object? roomId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -77,7 +78,9 @@ as String?,recipient: freezed == recipient ? _self.recipient : recipient // igno
 as MisskeyUser?,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
 as bool,fileId: freezed == fileId ? _self.fileId : fileId // ignore: cast_nullable_to_non_nullable
 as String?,file: freezed == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
-as DriveFile?,
+as DriveFile?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of MessagingMessage
@@ -198,10 +201,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String? text,  String? userId,  MisskeyUser? user,  String? recipientId,  MisskeyUser? recipient,  bool isRead,  String? fileId,  DriveFile? file)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String? text,  String? userId,  MisskeyUser? user,  String? recipientId,  MisskeyUser? recipient,  bool isRead,  String? fileId,  DriveFile? file,  Map<String, dynamic>? group,  String? roomId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MessagingMessage() when $default != null:
-return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_that.recipientId,_that.recipient,_that.isRead,_that.fileId,_that.file);case _:
+return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_that.recipientId,_that.recipient,_that.isRead,_that.fileId,_that.file,_that.group,_that.roomId);case _:
   return orElse();
 
 }
@@ -219,10 +222,10 @@ return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String? text,  String? userId,  MisskeyUser? user,  String? recipientId,  MisskeyUser? recipient,  bool isRead,  String? fileId,  DriveFile? file)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String? text,  String? userId,  MisskeyUser? user,  String? recipientId,  MisskeyUser? recipient,  bool isRead,  String? fileId,  DriveFile? file,  Map<String, dynamic>? group,  String? roomId)  $default,) {final _that = this;
 switch (_that) {
 case _MessagingMessage():
-return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_that.recipientId,_that.recipient,_that.isRead,_that.fileId,_that.file);case _:
+return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_that.recipientId,_that.recipient,_that.isRead,_that.fileId,_that.file,_that.group,_that.roomId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -239,10 +242,10 @@ return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime createdAt,  String? text,  String? userId,  MisskeyUser? user,  String? recipientId,  MisskeyUser? recipient,  bool isRead,  String? fileId,  DriveFile? file)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime createdAt,  String? text,  String? userId,  MisskeyUser? user,  String? recipientId,  MisskeyUser? recipient,  bool isRead,  String? fileId,  DriveFile? file,  Map<String, dynamic>? group,  String? roomId)?  $default,) {final _that = this;
 switch (_that) {
 case _MessagingMessage() when $default != null:
-return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_that.recipientId,_that.recipient,_that.isRead,_that.fileId,_that.file);case _:
+return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_that.recipientId,_that.recipient,_that.isRead,_that.fileId,_that.file,_that.group,_that.roomId);case _:
   return null;
 
 }
@@ -254,7 +257,7 @@ return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_tha
 @JsonSerializable()
 
 class _MessagingMessage implements MessagingMessage {
-  const _MessagingMessage({required this.id, required this.createdAt, this.text, this.userId, this.user, this.recipientId, this.recipient, this.isRead = false, this.fileId, this.file});
+  const _MessagingMessage({required this.id, required this.createdAt, this.text, this.userId, this.user, this.recipientId, this.recipient, this.isRead = false, this.fileId, this.file, final  Map<String, dynamic>? group, this.roomId}): _group = group;
   factory _MessagingMessage.fromJson(Map<String, dynamic> json) => _$MessagingMessageFromJson(json);
 
 @override final  String id;
@@ -267,6 +270,18 @@ class _MessagingMessage implements MessagingMessage {
 @override@JsonKey() final  bool isRead;
 @override final  String? fileId;
 @override final  DriveFile? file;
+// Support for Chat API grouping and rooms
+ final  Map<String, dynamic>? _group;
+// Support for Chat API grouping and rooms
+@override Map<String, dynamic>? get group {
+  final value = _group;
+  if (value == null) return null;
+  if (_group is EqualUnmodifiableMapView) return _group;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+@override final  String? roomId;
 
 /// Create a copy of MessagingMessage
 /// with the given fields replaced by the non-null parameter values.
@@ -281,16 +296,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessagingMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.text, text) || other.text == text)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.user, user) || other.user == user)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.file, file) || other.file == file));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MessagingMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.text, text) || other.text == text)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.user, user) || other.user == user)&&(identical(other.recipientId, recipientId) || other.recipientId == recipientId)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.fileId, fileId) || other.fileId == fileId)&&(identical(other.file, file) || other.file == file)&&const DeepCollectionEquality().equals(other._group, _group)&&(identical(other.roomId, roomId) || other.roomId == roomId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,createdAt,text,userId,user,recipientId,recipient,isRead,fileId,file);
+int get hashCode => Object.hash(runtimeType,id,createdAt,text,userId,user,recipientId,recipient,isRead,fileId,file,const DeepCollectionEquality().hash(_group),roomId);
 
 @override
 String toString() {
-  return 'MessagingMessage(id: $id, createdAt: $createdAt, text: $text, userId: $userId, user: $user, recipientId: $recipientId, recipient: $recipient, isRead: $isRead, fileId: $fileId, file: $file)';
+  return 'MessagingMessage(id: $id, createdAt: $createdAt, text: $text, userId: $userId, user: $user, recipientId: $recipientId, recipient: $recipient, isRead: $isRead, fileId: $fileId, file: $file, group: $group, roomId: $roomId)';
 }
 
 
@@ -301,7 +316,7 @@ abstract mixin class _$MessagingMessageCopyWith<$Res> implements $MessagingMessa
   factory _$MessagingMessageCopyWith(_MessagingMessage value, $Res Function(_MessagingMessage) _then) = __$MessagingMessageCopyWithImpl;
 @override @useResult
 $Res call({
- String id, DateTime createdAt, String? text, String? userId, MisskeyUser? user, String? recipientId, MisskeyUser? recipient, bool isRead, String? fileId, DriveFile? file
+ String id, DateTime createdAt, String? text, String? userId, MisskeyUser? user, String? recipientId, MisskeyUser? recipient, bool isRead, String? fileId, DriveFile? file, Map<String, dynamic>? group, String? roomId
 });
 
 
@@ -318,7 +333,7 @@ class __$MessagingMessageCopyWithImpl<$Res>
 
 /// Create a copy of MessagingMessage
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? createdAt = null,Object? text = freezed,Object? userId = freezed,Object? user = freezed,Object? recipientId = freezed,Object? recipient = freezed,Object? isRead = null,Object? fileId = freezed,Object? file = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? createdAt = null,Object? text = freezed,Object? userId = freezed,Object? user = freezed,Object? recipientId = freezed,Object? recipient = freezed,Object? isRead = null,Object? fileId = freezed,Object? file = freezed,Object? group = freezed,Object? roomId = freezed,}) {
   return _then(_MessagingMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -330,7 +345,9 @@ as String?,recipient: freezed == recipient ? _self.recipient : recipient // igno
 as MisskeyUser?,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
 as bool,fileId: freezed == fileId ? _self.fileId : fileId // ignore: cast_nullable_to_non_nullable
 as String?,file: freezed == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
-as DriveFile?,
+as DriveFile?,group: freezed == group ? _self._group : group // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,roomId: freezed == roomId ? _self.roomId : roomId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

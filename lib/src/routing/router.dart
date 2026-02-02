@@ -8,9 +8,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../core/utils/logger.dart';
 
 import '../features/misskey/presentation/misskey_page.dart';
+import '../features/misskey/presentation/pages/misskey_user_profile_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
 import '../features/forum/presentation/forum_page.dart';
-import '../features/messaging/presentation/messaging_history_page.dart';
+import '../features/inbox/presentation/pages/inbox_page.dart';
 import '../features/messaging/presentation/messaging_chat_page.dart';
 import '../features/misskey/domain/misskey_user.dart';
 import '../features/profile/presentation/profile_page.dart';
@@ -49,6 +50,19 @@ GoRouter goRouter(Ref ref) {
                 path: '/misskey',
                 pageBuilder: (context, state) =>
                     const NoTransitionPage(child: MisskeyPage()),
+                routes: [
+                  GoRoute(
+                    path: 'user/:userId',
+                    builder: (context, state) {
+                      final userId = state.pathParameters['userId']!;
+                      final user = state.extra as MisskeyUser?;
+                      return MisskeyUserProfilePage(
+                        userId: userId,
+                        initialUser: user,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -75,7 +89,7 @@ GoRouter goRouter(Ref ref) {
               GoRoute(
                 path: '/messaging',
                 pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: MessagingHistoryPage()),
+                    const NoTransitionPage(child: InboxPage()),
                 routes: [
                   GoRoute(
                     path: 'chat/:userId',

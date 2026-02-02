@@ -18,6 +18,9 @@ abstract class MessagingMessage with _$MessagingMessage {
     @Default(false) bool isRead,
     String? fileId,
     DriveFile? file,
+    // Support for Chat API grouping and rooms
+    Map<String, dynamic>? group, 
+    String? roomId,
   }) = _MessagingMessage;
 
   factory MessagingMessage.fromJson(Map<String, dynamic> json) =>

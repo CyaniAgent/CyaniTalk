@@ -160,6 +160,17 @@ class MisskeyRepository {
     }
   }
 
+  Future<MisskeyUser> showUser(String userId) async {
+    logger.info('MisskeyRepository: Showing user $userId');
+    try {
+      final data = await api.showUser(userId);
+      return MisskeyUser.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error showing user $userId', e);
+      rethrow;
+    }
+  }
+
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -434,19 +445,30 @@ class MisskeyRepository {
     logger.info('MisskeyRepository: Getting messaging history, limit=$limit');
     try {
       final data = await api.getMessagingHistory(limit: limit);
-      logger.debug('MisskeyRepository: Raw messaging history data: $data');
+      logger.debug('MisskeyRepository: Raw messaging history data type: ${data.runtimeType}');
+      if (data.isNotEmpty) {
+         logger.debug('MisskeyRepository: First item in history: ${data.first}');
+      }
       
       final messages = <MessagingMessage>[];
       for (final item in data) {
         try {
-          final map = Map<String, dynamic>.from(item as Map);
+          var map = Map<String, dynamic>.from(item as Map);
+          
+          // Check for wrapped message (common in some history endpoints)
+          if (map.containsKey('message') && map['message'] is Map) {
+            final wrappedMessage = Map<String, dynamic>.from(map['message'] as Map);
+            // We might want to preserve some root fields if needed, but usually the message has what we need
+            map = wrappedMessage;
+          }
+
           // Handle aliases manually
           if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
           if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
           
           messages.add(MessagingMessage.fromJson(map));
         } catch (e) {
-          logger.error('MisskeyRepository: Error decoding message item', e);
+          logger.error('MisskeyRepository: Error decoding message item: $item', e);
         }
       }
       
@@ -480,7 +502,13 @@ class MisskeyRepository {
       final messages = <MessagingMessage>[];
       for (final item in data) {
         try {
-          final map = Map<String, dynamic>.from(item as Map);
+          var map = Map<String, dynamic>.from(item as Map);
+
+          // Check for wrapped message
+          if (map.containsKey('message') && map['message'] is Map) {
+            map = Map<String, dynamic>.from(map['message'] as Map);
+          }
+
           // Handle aliases manually
           if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
           if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
@@ -522,6 +550,64 @@ class MisskeyRepository {
       await api.readMessagingMessage(messageId);
     } catch (e) {
       logger.error('MisskeyRepository: Error marking message as read', e);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteMessagingMessage(String messageId) async {
+    logger.info('MisskeyRepository: Deleting messaging message $messageId');
+    try {
+      await api.deleteMessagingMessage(messageId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error deleting message', e);
+      rethrow;
+    }
+  }
+
+  // --- Actions ---
+
+  Future<void> bookmark(String noteId) async {
+    logger.info('MisskeyRepository: Bookmarking note $noteId');
+    try {
+      // 1. Check if "Bookmarks" clip exists
+      final clips = await getClips();
+      String? clipId;
+      
+      for (final clip in clips) {
+        if (clip.name == 'Bookmarks') {
+          clipId = clip.id;
+          break;
+        }
+      }
+
+      // 2. If not, create it
+      if (clipId == null) {
+        logger.info('MisskeyRepository: "Bookmarks" clip not found, creating it');
+        final newClip = await api.createClip('Bookmarks', description: 'Created by CyaniTalk');
+        clipId = newClip['id'];
+      }
+
+      // 3. Add note to clip
+      if (clipId != null) {
+        await api.addNoteToClip(clipId, noteId);
+        logger.info('MisskeyRepository: Successfully added note to clip $clipId');
+      } else {
+         throw Exception('Failed to get or create Bookmarks clip');
+      }
+    } catch (e) {
+      logger.error('MisskeyRepository: Error bookmarking note', e);
+      rethrow;
+    }
+  }
+
+  Future<void> report(String noteId, String userId, String reason) async {
+    logger.info('MisskeyRepository: Reporting note $noteId by user $userId');
+    try {
+      final comment = 'Report for note $noteId: $reason';
+      await api.reportUser(userId, comment);
+      logger.info('MisskeyRepository: Successfully reported user/note');
+    } catch (e) {
+      logger.error('MisskeyRepository: Error reporting note', e);
       rethrow;
     }
   }
