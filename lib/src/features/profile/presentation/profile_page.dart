@@ -476,10 +476,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showAddAccountDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const AddAccountDialog(),
-    );
+    AddAccountBottomSheet.show(context);
   }
 
 

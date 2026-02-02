@@ -1,20 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:ui';
 import '../../../../core/utils/logger.dart';
 import '../../application/auth_service.dart';
 import '../../../../core/api/flarum_api.dart';
 import '../../../../core/api/juhe_auth_api.dart';
 import '../juhe_auth_page.dart';
 
-/// 统一的添加账户或端点对话框
-class AddAccountDialog extends ConsumerStatefulWidget {
-  const AddAccountDialog({super.key});
+/// 统一的添加账户或端点底部表单
+class AddAccountBottomSheet {
+  /// 显示添加账户底部表单
+  static Future<void> show(BuildContext context) {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _AddAccountBottomSheetContent(),
+    );
+  }
+}
+
+/// 添加账户底部表单内容
+class _AddAccountBottomSheetContent extends ConsumerStatefulWidget {
+  const _AddAccountBottomSheetContent();
 
   @override
-  ConsumerState<AddAccountDialog> createState() => _AddAccountDialogState();
+  ConsumerState<_AddAccountBottomSheetContent> createState() =>
+      _AddAccountBottomSheetContentState();
 }
 
 enum _AddAccountStep {
@@ -25,7 +37,8 @@ enum _AddAccountStep {
   misskeyCheckAuth,
 }
 
-class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
+class _AddAccountBottomSheetContentState
+    extends ConsumerState<_AddAccountBottomSheetContent> {
   _AddAccountStep _step = _AddAccountStep.select;
 
   // State for Misskey Auth
@@ -65,116 +78,47 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 600;
     final padding = MediaQuery.of(context).padding;
 
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        children: [
-          // Semi-transparent Top area with Blur
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: ClipRRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                  child: Container(color: Colors.black.withValues(alpha: 0.4)),
-                ),
-              ),
-            ),
-          ),
-
-          // Bottom Content
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: GestureDetector(
-              onVerticalDragUpdate: (details) {
-                if (details.primaryDelta! > 10) {
-                  Navigator.pop(context);
-                }
-              },
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: size.height * 0.9,
-                  minHeight: size.height * 0.4,
-                ),
-                child: Container(
-                  width: isDesktop ? 550 : double.infinity,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(32),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 30,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        24,
-                        12,
-                        24,
-                        24 + padding.bottom,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Handle/Indicator
-                          Center(
-                            child: Container(
-                              width: 50,
-                              height: 5,
-                              margin: const EdgeInsets.only(bottom: 20),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.outlineVariant,
-                                borderRadius: BorderRadius.circular(2.5),
-                              ),
-                            ),
-                          ),
-                          _buildHeader(),
-                          const SizedBox(height: 16),
-                          Flexible(
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 400),
-                              switchInCurve: Curves.easeOutCubic,
-                              switchOutCurve: Curves.easeInCubic,
-                              transitionBuilder: (child, animation) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: const Offset(0, 0.05),
-                                      end: Offset.zero,
-                                    ).animate(animation),
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: _buildCurrentStep(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ).animate().slideY(
-            begin: 1,
-            end: 0,
-            duration: 500.ms,
-            curve: Curves.easeOutBack,
+    return Container(
+      height: size.height * 0.9,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 30,
+            offset: const Offset(0, -5),
           ),
         ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(24, 12, 24, 24 + padding.bottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Handle/Indicator
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2.5),
+                  ),
+                ),
+              ),
+              _buildHeader(),
+              const SizedBox(height: 16),
+              Flexible(child: _buildCurrentStep()),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -245,12 +189,11 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: ShaderMask(
-              shaderCallback:
-                  (bounds) => const LinearGradient(
-                    colors: [Color(0xFF39C5BB), Color(0xFF66CCFF)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ).createShader(bounds),
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [Color(0xFF39C5BB), Color(0xFF66CCFF)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(bounds),
               child: Text(
                 'auth_choose_platform'.tr(),
                 style: const TextStyle(
@@ -292,8 +235,8 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                   title: 'Flarum',
                   subtitle: 'Login',
                   color: Colors.deepOrange,
-                  onTap:
-                      () => setState(() => _step = _AddAccountStep.flarumLogin),
+                  onTap: () =>
+                      setState(() => _step = _AddAccountStep.flarumLogin),
                   isVertical: true,
                 ),
               ),
@@ -304,9 +247,8 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
                   title: 'Flarum',
                   subtitle: 'Endpoint',
                   color: Colors.blue,
-                  onTap:
-                      () =>
-                          setState(() => _step = _AddAccountStep.flarumEndpoint),
+                  onTap: () =>
+                      setState(() => _step = _AddAccountStep.flarumEndpoint),
                   isVertical: true,
                 ),
               ),
@@ -319,7 +261,11 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             children: [
               Expanded(
                 child: _buildStyledCard(
-                  icon: const Icon(Icons.wechat, color: Color(0xFF07C160), size: 32),
+                  icon: const Icon(
+                    Icons.wechat,
+                    color: Color(0xFF07C160),
+                    size: 32,
+                  ),
                   title: 'auth_login_wechat'.tr(),
                   subtitle: 'auth_login'.tr(),
                   color: const Color(0xFF07C160),
@@ -330,7 +276,11 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
               const SizedBox(width: 16),
               Expanded(
                 child: _buildStyledCard(
-                  icon: const Icon(Icons.alternate_email, color: Color(0xFF12B7F5), size: 32),
+                  icon: const Icon(
+                    Icons.alternate_email,
+                    color: Color(0xFF12B7F5),
+                    size: 32,
+                  ),
                   title: 'auth_login_qq'.tr(),
                   subtitle: 'auth_login'.tr(),
                   color: const Color(0xFF12B7F5),
@@ -341,23 +291,24 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             ],
           ),
         ],
-      ).animate().fadeIn().slideY(begin: 0.1, end: 0),
+      ),
     );
   }
 
   Future<void> _startSocialLogin(String type) async {
-    final host = _flarumHostController.text.trim().isNotEmpty 
-      ? _flarumHostController.text.trim() 
-      : 'flarum.imikufans.cn'; // Default host for social login if not specified
+    final host = _flarumHostController.text.trim().isNotEmpty
+        ? _flarumHostController.text.trim()
+        : 'flarum.imikufans.cn'; // Default host for social login if not specified
 
     // We can also ask for host first if needed
-    
+
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
         builder: (context) => JuheAuthPage(
           type: type,
-          api: JuheAuthApi(), // You might want to get this from a provider or config
+          api:
+              JuheAuthApi(), // You might want to get this from a provider or config
         ),
       ),
     );
@@ -373,27 +324,33 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     }
   }
 
-  Future<void> _loginWithSocial(String host, Map<String, dynamic> socialData, String type) async {
+  Future<void> _loginWithSocial(
+    String host,
+    Map<String, dynamic> socialData,
+    String type,
+  ) async {
     setState(() => _loading = true);
     try {
-      await ref.read(authServiceProvider.notifier).loginToFlarumWithSocial(
-        host,
-        socialData['social_uid'],
-        type,
-        nickname: socialData['nickname'],
-        avatarUrl: socialData['faceimg'],
-      );
+      await ref
+          .read(authServiceProvider.notifier)
+          .loginToFlarumWithSocial(
+            host,
+            socialData['social_uid'],
+            type,
+            nickname: socialData['nickname'],
+            avatarUrl: socialData['faceimg'],
+          );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('auth_flarum_linked'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('auth_flarum_linked'.tr())));
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Social login failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Social login failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -423,71 +380,70 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         borderRadius: BorderRadius.circular(24),
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child:
-              isVertical
-                  ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: icon,
+          child: isVertical
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: icon,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                      Text(
-                        subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
-                  : Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: icon,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              subtitle,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
+                    ),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
-                    ],
-                  ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: icon,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            subtitle,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
         ),
       ),
     );
@@ -509,7 +465,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             decoration: InputDecoration(
               labelText: 'auth_misskey_host'.tr(),
               hintText: 'misskey.io',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               prefixIcon: const Icon(Icons.language),
               prefixText: 'https://',
             ),
@@ -541,63 +499,64 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           const SizedBox(height: 16),
         ],
       ),
-    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
+    );
   }
 
-    Widget _buildMisskeyCheckAuthStep() {
-      final theme = Theme.of(context);
-      return SingleChildScrollView(
-        key: const ValueKey('misskey_check'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                children: [
-                  const Icon(Icons.info_outline, size: 48),
-                  const SizedBox(height: 16),
-                  Text(
-                    'auth_authorization_instructions'.tr(),
-                    style: theme.textTheme.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+  Widget _buildMisskeyCheckAuthStep() {
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      key: const ValueKey('misskey_check'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(24),
             ),
-            const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: _loading ? null : _checkMisskeyAuth,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+            child: Column(
+              children: [
+                const Icon(Icons.info_outline, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'auth_authorization_instructions'.tr(),
+                  style: theme.textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              icon: _loading
-                  ? const SizedBox.shrink()
-                  : const Icon(Icons.check_circle_outline),
-              label: _loading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Text('auth_done'.tr()),
+              ],
             ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9));
-    }
-    Widget _buildFlarumLoginStep() {
+          ),
+          const SizedBox(height: 32),
+          FilledButton.icon(
+            onPressed: _loading ? null : _checkMisskeyAuth,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: _loading
+                ? const SizedBox.shrink()
+                : const Icon(Icons.check_circle_outline),
+            label: _loading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text('auth_done'.tr()),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlarumLoginStep() {
     return SingleChildScrollView(
       key: const ValueKey('flarum'),
       child: Column(
@@ -661,7 +620,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           const SizedBox(height: 16),
         ],
       ),
-    ).animate().fadeIn().slideX(begin: 0.1, end: 0);
+    );
   }
 
   Widget _buildFlarumEndpointStep() {
@@ -674,8 +633,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
             controller: _flarumEndpointController,
             decoration: InputDecoration(
               labelText: 'auth_flarum_server_url'.tr(),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               prefixIcon: const Icon(Icons.link),
             ),
             autofocus: true,
@@ -695,7 +655,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           const SizedBox(height: 16),
         ],
       ),
-    ).animate().fadeIn().slideY(begin: 0.1, end: 0);
+    );
   }
 
   Future<void> _startMisskeyAuth() async {
@@ -710,7 +670,9 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       displayHost = displayHost.split('/').first;
     }
 
-    logger.info('AddAccountDialog: Starting Misskey auth for $displayHost');
+    logger.info(
+      'AddAccountBottomSheet: Starting Misskey auth for $displayHost',
+    );
     setState(() => _loading = true);
     try {
       final session = await ref
@@ -725,7 +687,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         });
       }
     } catch (e) {
-      logger.error('AddAccountDialog: MiAuth error', e);
+      logger.error('AddAccountBottomSheet: MiAuth error', e);
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -749,7 +711,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         Navigator.pop(context);
       }
     } catch (e) {
-      logger.error('AddAccountDialog: MiAuth check failed', e);
+      logger.error('AddAccountBottomSheet: MiAuth check failed', e);
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -774,7 +736,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
     if (host.isEmpty || user.isEmpty || password.isEmpty) return;
 
     logger.info(
-      'AddAccountDialog: Starting Flarum login for host: $host, user: $user',
+      'AddAccountBottomSheet: Starting Flarum login for host: $host, user: $user',
     );
     setState(() => _loading = true);
     try {
@@ -783,7 +745,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
           .loginToFlarum(host, user, password);
       if (mounted) {
         logger.info(
-          'AddAccountDialog: Successfully logged in to Flarum for host: $host',
+          'AddAccountBottomSheet: Successfully logged in to Flarum for host: $host',
         );
         ScaffoldMessenger.of(
           context,
@@ -792,7 +754,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
       }
     } catch (e) {
       logger.error(
-        'AddAccountDialog: Error logging in to Flarum for host: $host',
+        'AddAccountBottomSheet: Error logging in to Flarum for host: $host',
         e,
       );
       if (mounted) {
@@ -821,7 +783,7 @@ class _AddAccountDialogState extends ConsumerState<AddAccountDialog> {
         Navigator.pop(context);
       }
     } catch (e) {
-      logger.error('AddAccountDialog: Flarum endpoint error', e);
+      logger.error('AddAccountBottomSheet: Flarum endpoint error', e);
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
