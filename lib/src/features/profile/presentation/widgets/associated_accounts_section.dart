@@ -235,7 +235,9 @@ class _AssociatedAccountsSectionState
     final primaryName = (account.name != null && account.name!.isNotEmpty)
         ? account.name!
         : (account.username ?? 'Unknown');
-    final secondaryName = account.username != null ? '@${account.username}' : '';
+    final secondaryName = account.username != null
+        ? '@${account.username}'
+        : '';
 
     return Row(
       children: [
@@ -269,7 +271,10 @@ class _AssociatedAccountsSectionState
                 ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
@@ -327,41 +332,37 @@ class _AssociatedAccountsSectionState
         leading: const Icon(Icons.code),
         children: [
           detailsAsync.when(
-            data:
-                (data) => Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SelectableText(
-                        const JsonEncoder.withIndent('  ').convert(data),
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 12,
-                        ),
-                      ),
+            data: (data) => Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SelectableText(
+                    const JsonEncoder.withIndent('  ').convert(data),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
                     ),
                   ),
                 ),
+              ),
+            ),
             loading: () => const Padding(
               padding: EdgeInsets.all(16.0),
               child: Center(child: CircularProgressIndicator()),
             ),
-            error:
-                (err, stack) => Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text('Error: $err'),
-                ),
+            error: (err, stack) => Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('Error: $err'),
+            ),
           ),
         ],
       ),
@@ -369,10 +370,7 @@ class _AssociatedAccountsSectionState
   }
 
   void _showAddAccountDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const AddAccountDialog(),
-    );
+    AddAccountBottomSheet.show(context);
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref, Account account) {

@@ -61,11 +61,7 @@ class CloudPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Error: $err')),
       ),
-      bottomNavigationBar: driveState.when(
-        data: (state) => _buildDriveSpace(context, state),
-        loading: () => null,
-        error: (_, _) => null,
-      ),
+      bottomNavigationBar: _buildDriveSpace(context, driveState),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddOptions(context, ref),
         child: const Icon(Icons.add),
@@ -179,12 +175,10 @@ class CloudPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildDriveSpace(BuildContext context, DriveState state) {
-    if (state.driveCapacityMb == 0) return const SizedBox.shrink();
-
-    final usedBytes = state.driveUsage.toDouble();
-    final totalBytes = state.driveCapacityMb * 1024 * 1024.0;
-    final percent = (usedBytes / totalBytes).clamp(0.0, 1.0);
+  Widget _buildDriveSpace(
+    BuildContext context,
+    AsyncValue<DriveState> driveState,
+  ) {
     final theme = Theme.of(context);
 
     return BottomAppBar(
@@ -203,21 +197,60 @@ class CloudPage extends ConsumerWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
-                '${_formatBytes(usedBytes)} / ${_formatBytes(totalBytes)}',
-                style: theme.textTheme.bodySmall,
+              driveState.when(
+                data: (state) => Text(
+                  '${_formatBytes(state.driveUsage.toDouble())} / ${_formatBytes(state.driveCapacityMb * 1024 * 1024.0)}',
+                  style: theme.textTheme.bodySmall,
+                ),
+                loading: () => const SizedBox(
+                  width: 120,
+                  child: LinearProgressIndicator(
+                    minHeight: 16,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                ),
+                error: (_, _) => Text(
+                  'cloud_error'.tr(),
+                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: percent,
-              minHeight: 8,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                percent > 0.9 ? Colors.red : theme.colorScheme.primary,
+          driveState.when(
+            data: (state) {
+              if (state.driveCapacityMb == 0) {
+                return const SizedBox.shrink();
+              }
+              final usedBytes = state.driveUsage.toDouble();
+              final totalBytes = state.driveCapacityMb * 1024 * 1024.0;
+              final percent = (usedBytes / totalBytes).clamp(0.0, 1.0);
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: percent,
+                  minHeight: 8,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    percent > 0.9 ? Colors.red : theme.colorScheme.primary,
+                  ),
+                ),
+              );
+            },
+            loading: () => ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                minHeight: 8,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              ),
+            ),
+            error: (_, _) => ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: 0,
+                minHeight: 8,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
               ),
             ),
           ),
