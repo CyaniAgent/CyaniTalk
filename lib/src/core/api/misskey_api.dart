@@ -46,8 +46,13 @@ class MisskeyApi extends BaseApi {
 
   /// 生成更加真实的User-Agent字符串
   String _generateUserAgent() {
-    final platform = Platform.isAndroid ? 'Android' : (Platform.isIOS ? 'iOS' : 'Windows');
-    return 'Mozilla/5.0 ($platform; Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}';
+    if (Platform.isAndroid) {
+      return 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36 CyaniTalk/${Constants.appVersion}';
+    } else if (Platform.isIOS) {
+      return 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1 CyaniTalk/${Constants.appVersion}';
+    } else {
+      return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 CyaniTalk/${Constants.appVersion}';
+    }
   }
 
 /// 获取当前用户信息

@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'base_api.dart';
 
 class JuheAuthApi extends BaseApi {
@@ -19,8 +21,30 @@ class JuheAuthApi extends BaseApi {
         baseUrl: apiurl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
+        headers: {
+          'User-Agent': _generateUserAgent(),
+        },
       ),
     );
+
+    // 允许自定义证书校验
+    _dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        return client;
+      },
+    );
+  }
+
+  String _generateUserAgent() {
+    if (Platform.isAndroid) {
+      return 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36';
+    } else if (Platform.isIOS) {
+      return 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+    } else {
+      return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+    }
   }
 
   /// 获取登录跳转url

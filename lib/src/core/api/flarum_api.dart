@@ -39,21 +39,20 @@ class FlarumApi extends BaseApi {
       'Content-Type': 'application/vnd.api+json',
     };
 
-    String userAgent =
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    String userAgent;
     if (Platform.isAndroid) {
-      userAgent =
-          'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+      userAgent = 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36';
     } else if (Platform.isIOS) {
-      userAgent =
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+      userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+    } else {
+      userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
     }
 
     final browserHeaders = {
       'User-Agent': userAgent,
       'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-      'Referer': _baseUrl!,
-      'Origin': _baseUrl!,
+      'Referer': _baseUrl ?? '',
+      'Origin': _baseUrl ?? '',
     };
 
     final headers = {...basicHeaders, ...browserHeaders};
