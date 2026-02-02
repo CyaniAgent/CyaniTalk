@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import '../../domain/note.dart';
 import '../../data/misskey_repository.dart';
 import 'retryable_network_image.dart';
@@ -144,238 +146,249 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       child: Semantics(
         label: 'Note by ${user?.username}',
         value: text ?? cw,
-        child: Card(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
+        child: GestureDetector(
+          onSecondaryTapDown: (details) => _showContextMenu(details.globalPosition),
+          onLongPressStart: (details) => _showContextMenu(details.globalPosition),
+          child: Card(
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Semantics(
-                      label: 'Avatar for ${user?.username}',
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: user?.avatarUrl != null
-                            ? NetworkImage(user!.avatarUrl!)
-                            : null,
-                        child: user?.avatarUrl == null
-                            ? Text(user?.username[0].toUpperCase() ?? '?')
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Semantics(
-                            label: 'User name',
-                            child: Text(
-                              user?.name ?? user?.username ?? 'Unknown',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Semantics(
-                            label: 'User handle',
-                            child: Text(
-                              '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Semantics(
-                      label: 'Post time',
-                      child: Text(
-                        _formatTime(note.createdAt),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (cw != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (user?.id != null) {
+                        context.push('/misskey/user/${user!.id}', extra: user);
+                      }
+                    },
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(child: SelectableText(cw)),
-                        const Icon(Icons.keyboard_arrow_down, size: 16),
+                        Semantics(
+                          label: 'Avatar for ${user?.username}',
+                          child: CircleAvatar(
+                            radius: 20,
+                            backgroundImage: user?.avatarUrl != null
+                                ? NetworkImage(user!.avatarUrl!)
+                                : null,
+                            child: user?.avatarUrl == null
+                                ? Text(user?.username[0].toUpperCase() ?? '?')
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Semantics(
+                                label: 'User name',
+                                child: Text(
+                                  user?.name ?? user?.username ?? 'Unknown',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Semantics(
+                                label: 'User handle',
+                                child: Text(
+                                  '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Semantics(
+                          label: 'Post time',
+                          child: Text(
+                            _formatTime(note.createdAt),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                ] else if (text != null)
-                  SelectableText.rich(TextSpan(children: _processText(text))),
-
-                if (note.files.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12.0),
-                    child: Semantics(
-                      label: 'Attached files',
-                      child: Column(
-                        children: note.files.map((file) {
-                          final url = file['url'] as String?;
-                          final type = file['type'] as String?;
-                          final name = file['name'] as String?;
-
-                          if (url == null) {
-                            return const SizedBox.shrink();
-                          }
-
-                          // Detect media type
-                          final isImage = _isImageFile(type, url);
-                          final isVideo = _isVideoFile(type, url);
-                          final isAudio = _isAudioFile(type, url);
-
-                          if (isAudio) {
-                            // Audio player
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: AudioPlayerWidget(
-                                audioUrl: url,
-                                fileName: name,
-                              ),
-                            );
-                          } else if (isVideo) {
-                            // Video thumbnail
-                            final thumbnailUrl =
-                                file['thumbnailUrl'] as String? ?? url;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 4.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            VideoPlayerPage(videoUrl: url),
-                                      ),
-                                    );
-                                  },
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      RetryableNetworkImage(
-                                        url: thumbnailUrl,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withValues(
-                                            alpha: 0.6,
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.play_arrow,
-                                          color: Colors.white,
-                                          size: 48,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                  const SizedBox(height: 12),
+                  if (cw != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(child: SelectableText(cw)),
+                          const Icon(Icons.keyboard_arrow_down, size: 16),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ] else if (text != null)
+                    SelectableText.rich(TextSpan(children: _processText(text))),
+          
+                  if (note.files.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0),
+                      child: Semantics(
+                        label: 'Attached files',
+                        child: Column(
+                          children: note.files.map((file) {
+                            final url = file['url'] as String?;
+                            final type = file['type'] as String?;
+                            final name = file['name'] as String?;
+          
+                            if (url == null) {
+                              return const SizedBox.shrink();
+                            }
+          
+                            // Detect media type
+                            final isImage = _isImageFile(type, url);
+                            final isVideo = _isVideoFile(type, url);
+                            final isAudio = _isAudioFile(type, url);
+          
+                            if (isAudio) {
+                              // Audio player
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: AudioPlayerWidget(
+                                  audioUrl: url,
+                                  fileName: name,
                                 ),
-                              ),
-                            );
-                          } else if (isImage) {
-                            // Image thumbnail
-                            final thumbnailUrl =
-                                file['thumbnailUrl'] as String? ?? url;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 4.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => ImageViewerPage(
-                                          imageUrl: url,
-                                          heroTag: 'image_$url',
+                              );
+                            } else if (isVideo) {
+                              // Video thumbnail
+                              final thumbnailUrl =
+                                  file['thumbnailUrl'] as String? ?? url;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              VideoPlayerPage(videoUrl: url),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  child: Hero(
-                                    tag: 'image_$url',
-                                    child: RetryableNetworkImage(
-                                      url: thumbnailUrl,
-                                      fit: BoxFit.cover,
+                                      );
+                                    },
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        RetryableNetworkImage(
+                                          url: thumbnailUrl,
+                                          fit: BoxFit.cover,
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.play_arrow,
+                                            color: Colors.white,
+                                            size: 48,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }
-
-                          return const SizedBox.shrink();
-                        }).toList(),
+                              );
+                            } else if (isImage) {
+                              // Image thumbnail
+                              final thumbnailUrl =
+                                  file['thumbnailUrl'] as String? ?? url;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 4.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => ImageViewerPage(
+                                            imageUrl: url,
+                                            heroTag: 'image_$url',
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Hero(
+                                      tag: 'image_$url',
+                                      child: RetryableNetworkImage(
+                                        url: thumbnailUrl,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+          
+                            return const SizedBox.shrink();
+                          }).toList(),
+                        ),
                       ),
                     ),
+          
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Semantics(
+                        label: 'Reply button',
+                        child: _buildAction(
+                          Icons.reply,
+                          note.repliesCount.toString(),
+                          _handleReply,
+                        ),
+                      ),
+                      Semantics(
+                        label: 'Renote button',
+                        child: _buildAction(
+                          Icons.repeat,
+                          note.renoteCount.toString(),
+                          _handleRenote,
+                        ),
+                      ),
+                      Semantics(
+                        label: 'Reaction button',
+                        child: _buildAction(
+                          Icons.add_reaction_outlined,
+                          note.reactions.length.toString(),
+                          _handleReaction,
+                        ),
+                      ),
+                      Semantics(
+                        label: 'Share button',
+                        child: _buildAction(
+                          Icons.share_outlined,
+                          "",
+                          _handleShare,
+                        ),
+                      ),
+                    ],
                   ),
-
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Semantics(
-                      label: 'Reply button',
-                      child: _buildAction(
-                        Icons.reply,
-                        note.repliesCount.toString(),
-                        _handleReply,
-                      ),
-                    ),
-                    Semantics(
-                      label: 'Renote button',
-                      child: _buildAction(
-                        Icons.repeat,
-                        note.renoteCount.toString(),
-                        _handleRenote,
-                      ),
-                    ),
-                    Semantics(
-                      label: 'Reaction button',
-                      child: _buildAction(
-                        Icons.add_reaction_outlined,
-                        note.reactions.length.toString(),
-                        _handleReaction,
-                      ),
-                    ),
-                    Semantics(
-                      label: 'Share button',
-                      child: _buildAction(
-                        Icons.share_outlined,
-                        "",
-                        _handleShare,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -390,6 +403,276 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     }
 
     return card;
+  }
+
+  void _showContextMenu(Offset position) {
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    
+    showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & const Size(40, 40),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        PopupMenuItem(
+          value: 'details',
+          child: Row(
+            children: [
+              const Icon(Icons.info_outline, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_details'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'copy_content',
+          child: Row(
+            children: [
+              const Icon(Icons.copy, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_copy_content'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'copy_link',
+          child: Row(
+            children: [
+              const Icon(Icons.link, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_copy_link'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          enabled: false,
+          value: 'embed',
+          child: Row(
+            children: [
+              const Icon(Icons.code, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_embed'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'share',
+          child: Row(
+            children: [
+              const Icon(Icons.share, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_share'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'bookmark',
+          child: Row(
+            children: [
+              const Icon(Icons.bookmark_border, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_bookmark'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'add_note',
+          child: Row(
+            children: [
+              const Icon(Icons.reply, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_add_note'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'report',
+          child: Row(
+            children: [
+              const Icon(Icons.flag_outlined, size: 20, color: Colors.red),
+              const SizedBox(width: 12),
+              Text('post_menu_report'.tr(), style: const TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'copy_id',
+          child: Row(
+            children: [
+              const Icon(Icons.copy_all, size: 20),
+              const SizedBox(width: 12),
+              Text('post_menu_copy_id'.tr()),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) {
+      if (value != null) {
+        _handleMenuAction(value);
+      }
+    });
+  }
+
+  void _handleMenuAction(String value) {
+    switch (value) {
+      case 'details':
+        _showDetails();
+        break;
+      case 'copy_content':
+        if (widget.note.text != null) {
+          Clipboard.setData(ClipboardData(text: widget.note.text!));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('post_copied'.tr())),
+          );
+        }
+        break;
+      case 'copy_link':
+        _copyLink();
+        break;
+      case 'share':
+        _handleShare();
+        break;
+      case 'bookmark':
+        _handleBookmark();
+        break;
+      case 'add_note':
+        _handleReply();
+        break;
+      case 'report':
+        _handleReport();
+        break;
+      case 'copy_id':
+        Clipboard.setData(ClipboardData(text: widget.note.id));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('post_id_copied'.tr())),
+        );
+        break;
+    }
+  }
+
+  void _showDetails() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('post_details'.tr()),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SelectableText('ID: ${widget.note.id}'),
+              const SizedBox(height: 8),
+              SelectableText('Created: ${widget.note.createdAt}'),
+              const SizedBox(height: 8),
+              SelectableText('User: ${widget.note.user?.username}'),
+              const SizedBox(height: 8),
+              const Text('Raw Data (Debug):'),
+              SelectableText(widget.note.toString()), // Simple dump for now
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('close'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _copyLink() async {
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      final host = repository.api.host;
+      final url = 'https://$host/notes/${widget.note.id}';
+      await Clipboard.setData(ClipboardData(text: url));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('post_link_copied'.tr())),
+        );
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  Future<void> _handleBookmark() async {
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.bookmark(widget.note.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('post_bookmarked'.tr())),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}))),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleReport() async {
+    final textController = TextEditingController();
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('post_report'.tr()),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('post_report_description'.tr()),
+            const SizedBox(height: 8),
+            TextField(
+              controller: textController,
+              decoration: InputDecoration(
+                hintText: 'post_report_reason'.tr(),
+                border: const OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final reason = textController.text;
+              if (reason.isEmpty) return;
+              
+              Navigator.pop(dialogContext);
+              try {
+                final repository = await ref.read(misskeyRepositoryProvider.future);
+                if (widget.note.user != null) {
+                   await repository.report(widget.note.id, widget.note.user!.id, reason);
+                   if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('post_reported'.tr())),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('post_report_failed'.tr())),
+                  );
+                }
+              }
+            },
+            child: Text('report'.tr()),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildAction(IconData icon, String label, VoidCallback onTap) {

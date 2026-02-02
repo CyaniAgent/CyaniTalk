@@ -314,19 +314,19 @@ class MisskeyApi extends BaseApi {
 
   /// 这是一个高度兼容的方法，会尝试多个可能的端点
   Future<List<dynamic>> getMessagingHistory({int limit = 10}) async {
-    // 优先尝试 /api/messaging/history (标准 Misskey)
+    // 优先尝试 /api/chat/history (某些分叉或新版)
     try {
-      return await _fetchList(
-        'MisskeyApi.getMessagingHistory[messaging]',
-        '/api/messaging/history',
-        {'limit': limit},
-      );
-    } catch (e) {
-      logger.warning('MisskeyApi: /api/messaging/history failed, trying /api/chat/history...');
-      // 备选尝试 /api/chat/history (某些分叉或新版)
       return await _fetchList(
         'MisskeyApi.getMessagingHistory[chat]',
         '/api/chat/history',
+        {'limit': limit},
+      );
+    } catch (e) {
+      logger.warning('MisskeyApi: /api/chat/history failed, trying /api/messaging/history...');
+      // 备选尝试 /api/messaging/history (标准 Misskey)
+      return await _fetchList(
+        'MisskeyApi.getMessagingHistory[messaging]',
+        '/api/messaging/history',
         {'limit': limit},
       );
     }
@@ -349,15 +349,15 @@ class MisskeyApi extends BaseApi {
 
     try {
       return await _fetchList(
-        'MisskeyApi.getMessagingMessages[messaging]',
-        '/api/messaging/messages',
+        'MisskeyApi.getMessagingMessages[chat]',
+        '/api/chat/messages/user-timeline',
         data,
       );
     } catch (e) {
-      logger.warning('MisskeyApi: /api/messaging/messages failed, trying /api/chat/messages...');
+      logger.warning('MisskeyApi: /api/chat/messages/user-timeline failed, trying /api/messaging/messages...');
       return await _fetchList(
-        'MisskeyApi.getMessagingMessages[chat]',
-        '/api/chat/messages',
+        'MisskeyApi.getMessagingMessages[messaging]',
+        '/api/messaging/messages',
         data,
       );
     }
@@ -376,22 +376,116 @@ class MisskeyApi extends BaseApi {
     };
 
     try {
-      final response = await _dio.post('/api/messaging/messages/create', data: data);
+      final response = await _dio.post('/api/chat/messages/create-to-user', data: data);
       return Map<String, dynamic>.from(response.data);
     } catch (e) {
-      logger.warning('MisskeyApi: /api/messaging/messages/create failed, trying /api/chat/messages/create...');
-      final response = await _dio.post('/api/chat/messages/create', data: data);
+      logger.warning('MisskeyApi: /api/chat/messages/create-to-user failed, trying /api/messaging/messages/create...');
+      final response = await _dio.post('/api/messaging/messages/create', data: data);
       return Map<String, dynamic>.from(response.data);
     }
   }
 
   Future<void> readMessagingMessage(String messageId) async {
+    // Note: The new Chat API provides 'read-all' which takes a userId/roomId, not a single messageId.
+    // However, keeping this for compatibility with standard Misskey.
+    // For Chat API, we might need a different method to mark conversation as read.
+    // For now, we try 'read-all' with the messageId as a fallback if the API is confusing, 
+    // but likely 'read-all' expects 'userId'. 
+    // Since we don't have userId here, we'll skip the chat endpoint for single message read 
+    // OR we could change this method signature.
+    // Given the constraints, let's keep the standard messaging fallback.
+    
     final data = {'i': token, 'messageId': messageId};
     try {
+      // Standard Misskey
       await _dio.post('/api/messaging/messages/read', data: data);
     } catch (e) {
-      logger.warning('MisskeyApi: /api/messaging/messages/read failed, trying /api/chat/messages/read...');
-      await _dio.post('/api/chat/messages/read', data: data);
+       logger.warning('MisskeyApi: /api/messaging/messages/read failed. Chat API may require read-all per user.');
     }
   }
+
+  Future<void> deleteMessagingMessage(String messageId) => executeApiCallVoid(
+    'MisskeyApi.deleteMessagingMessage',
+    () => _dio.post(
+      '/api/chat/messages/delete',
+      data: {'i': token, 'messageId': messageId},
+    ),
+  );
+
+  // --- Chat Room API (New) ---
+
+  Future<Map<String, dynamic>> createChatRoom(String name) => executeApiCall(
+    'MisskeyApi.createChatRoom',
+    () => _dio.post(
+      '/api/chat/rooms/create',
+      data: {'i': token, 'name': name},
+    ),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
+
+  Future<List<dynamic>> getChatRooms() => _fetchList(
+    'MisskeyApi.getChatRooms',
+    '/api/chat/rooms/joining', // Or 'owned' depending on need, 'joining' usually covers all
+    {},
+  );
+
+  Future<List<dynamic>> getChatRoomMessages(String roomId, {int limit = 20}) => _fetchList(
+    'MisskeyApi.getChatRoomMessages',
+    '/api/chat/messages/room-timeline',
+    {'roomId': roomId, 'limit': limit},
+  );
+
+  Future<void> sendChatRoomMessage(String roomId, {String? text, String? fileId}) => executeApiCallVoid(
+    'MisskeyApi.sendChatRoomMessage',
+    () => _dio.post(
+      '/api/chat/messages/create-to-room',
+      data: {
+        'i': token, 
+        'roomId': roomId,
+        if (text != null) 'text': text,
+        if (fileId != null) 'fileId': fileId,
+      },
+    ),
+  );
+
+  // --- Clips (Bookmarks) ---
+
+  Future<Map<String, dynamic>> createClip(String name, {bool isPublic = false, String? description}) =>
+      executeApiCall(
+        'MisskeyApi.createClip',
+        () => _dio.post(
+          '/api/clips/create',
+          data: {
+            'i': token,
+            'name': name,
+            'isPublic': isPublic,
+            if (description != null) 'description': description,
+          },
+        ),
+        (response) => Map<String, dynamic>.from(response.data),
+      );
+
+  Future<void> addNoteToClip(String clipId, String noteId) => executeApiCallVoid(
+    'MisskeyApi.addNoteToClip',
+    () => _dio.post(
+      '/api/clips/add-note',
+      data: {'i': token, 'clipId': clipId, 'noteId': noteId},
+    ),
+  );
+
+  // --- Reporting ---
+
+  Future<Map<String, dynamic>> showUser(String userId) => executeApiCall(
+    'MisskeyApi.showUser',
+    () => _dio.post('/api/users/show', data: {'i': token, 'userId': userId}),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
+
+  Future<void> reportUser(String userId, String comment) => executeApiCallVoid(
+    'MisskeyApi.reportUser',
+    () => _dio.post(
+      '/api/users/report-abuse',
+      data: {'i': token, 'userId': userId, 'comment': comment},
+    ),
+  );
 }

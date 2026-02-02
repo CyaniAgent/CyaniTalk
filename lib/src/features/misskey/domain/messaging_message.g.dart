@@ -24,6 +24,8 @@ _MessagingMessage _$MessagingMessageFromJson(Map<String, dynamic> json) =>
       file: json['file'] == null
           ? null
           : DriveFile.fromJson(json['file'] as Map<String, dynamic>),
+      group: json['group'] as Map<String, dynamic>?,
+      roomId: json['roomId'] as String?,
     );
 
 Map<String, dynamic> _$MessagingMessageToJson(_MessagingMessage instance) =>
@@ -38,4 +40,6 @@ Map<String, dynamic> _$MessagingMessageToJson(_MessagingMessage instance) =>
       'isRead': instance.isRead,
       'fileId': instance.fileId,
       'file': instance.file,
+      'group': instance.group,
+      'roomId': instance.roomId,
     };

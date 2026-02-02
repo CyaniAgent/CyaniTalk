@@ -22,7 +22,16 @@ class NotificationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('notifications_title'.tr())),
-      body: Center(child: Text('notifications_page'.tr())),
+      body: const NotificationsList(),
     );
+  }
+}
+
+class NotificationsList extends StatelessWidget {
+  const NotificationsList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('notifications_page'.tr()));
   }
 }
