@@ -41,11 +41,14 @@ class FlarumApi extends BaseApi {
 
     String userAgent;
     if (Platform.isAndroid) {
-      userAgent = 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36';
+      userAgent =
+          'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36';
     } else if (Platform.isIOS) {
-      userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+      userAgent =
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
     } else {
-      userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+      userAgent =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
     }
 
     final browserHeaders = {
@@ -465,5 +468,60 @@ class FlarumApi extends BaseApi {
       queryParameters: queryParameters,
       options: options,
     );
+  }
+
+  /// Check for Clogin OAuth configuration
+  /// Returns a Map with keys: api_url, app_id, app_key if found.
+  Future<Map<String, String>?> getCloginConfig() async {
+    logger.info('FlarumApi: Checking for Clogin OAuth config');
+    try {
+      final response = await get('/api/forum');
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        final attributes = data['attributes'];
+        // Note: The specific keys depend on the plugin implementation.
+        // Based on user description, we need to find them.
+        // They might be in 'beichen-clogin-oauth' namespace or similar.
+        // Or exposed as 'clogin_app_id', etc.
+        // Assuming standard plugin patterns or the keys mentioned.
+        // IF the plugin follows the "clogin-oauth" convention:
+        // 'clogin-oauth.app_id', 'clogin-oauth.app_key', 'clogin-oauth.api_url'
+
+        // Let's print attributes to debug if we were running, but for code:
+        // We look for them.
+
+        // Using "clogin-oauth" prefix based on plugin name
+        if (attributes is Map) {
+          // Try to find the keys.
+          // IMPORTANT: API Keys should generally NOT be public.
+          // But the user says "application automatically checks... and retrieves".
+          // So they MUST be in the public /api/forum attributes.
+
+          final apiUrl =
+              attributes['clogin-oauth.api_url'] ??
+              attributes['beichen-auth.api_url'];
+          final appId =
+              attributes['clogin-oauth.app_id'] ??
+              attributes['beichen-auth.app_id'];
+          final appKey =
+              attributes['clogin-oauth.app_key'] ??
+              attributes['beichen-auth.app_key'];
+
+          if (apiUrl != null && appId != null && appKey != null) {
+            logger.info('FlarumApi: Found Clogin config via attributes');
+            return {
+              'api_url': apiUrl.toString(),
+              'app_id': appId.toString(),
+              'app_key': appKey.toString(),
+            };
+          }
+        }
+      }
+      logger.info('FlarumApi: Clogin config not found in forum attributes');
+      return null;
+    } catch (e) {
+      logger.error('FlarumApi: Error checking Clogin config', e);
+      return null;
+    }
   }
 }

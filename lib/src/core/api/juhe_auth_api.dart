@@ -21,9 +21,7 @@ class JuheAuthApi extends BaseApi {
         baseUrl: apiurl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
-        headers: {
-          'User-Agent': _generateUserAgent(),
-        },
+        headers: {'User-Agent': _generateUserAgent()},
       ),
     );
 
@@ -31,7 +29,8 @@ class JuheAuthApi extends BaseApi {
     _dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
         return client;
       },
     );
