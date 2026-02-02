@@ -183,6 +183,8 @@
   "auth_error": "错误: {error}",
   "auth_flarum_linked": "Flarum 账户已成功关联!",
   "auth_flarum_endpoint_added": "Flarum 端点已成功添加!",
+  "auth_wechat_config_not_found": "未找到微信登录配置，请确保Flarum实例已安装并配置了聚合登录插件",
+  "auth_wechat_config_error": "获取微信登录配置时出错，请检查网络连接或Flarum实例状态",
   "auth_waiting_authorization": "等待授权",
   "auth_authorization_instructions": "请在浏览器中授权应用，然后点击 “完成”。",
   "auth_cancel": "取消",

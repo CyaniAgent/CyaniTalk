@@ -340,25 +340,66 @@ class _AddAccountBottomSheetContentState
     }
 
     setState(() => _loading = true);
-
-    if (mounted) {
-      setState(() => _loading = false);
-
-      final result = await Navigator.push<Map<String, dynamic>>(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JuheAuthPage(type: 'wx', api: JuheAuthApi()),
-        ),
-      );
-
-      if (result != null && result.containsKey('social_uid')) {
-        _loginWithSocial(fullUrl, result, 'wx');
-      } else if (result != null && result.containsKey('error')) {
+    try {
+      // 创建FlarumApi实例并设置基础URL
+      final flarumApi = FlarumApi();
+      flarumApi.setBaseUrl(fullUrl);
+      
+      // 获取Clogin OAuth配置
+      final cloginConfig = await flarumApi.getCloginConfig();
+      
+      if (cloginConfig == null ||
+          cloginConfig['app_id'] == null ||
+          cloginConfig['app_key'] == null) {
         if (mounted) {
+          setState(() => _loading = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login error: ${result['error']}')),
+            SnackBar(
+              content: Text('auth_wechat_config_not_found'.tr()),
+              duration: const Duration(seconds: 3),
+            ),
           );
         }
+        return;
+      }
+
+      // 使用动态配置创建JuheAuthApi
+      final juheApi = JuheAuthApi(
+        appid: cloginConfig['app_id']!,
+        appkey: cloginConfig['app_key']!,
+        apiurl: cloginConfig['api_url'] ?? 'https://u.cccyun.cc/',
+      );
+
+      if (mounted) {
+        setState(() => _loading = false);
+
+        final result = await Navigator.push<Map<String, dynamic>>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => JuheAuthPage(type: 'wx', api: juheApi),
+          ),
+        );
+
+        if (result != null && result.containsKey('social_uid')) {
+          _loginWithSocial(fullUrl, result, 'wx');
+        } else if (result != null && result.containsKey('error')) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Login error: ${result['error']}')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      logger.error('AddAccountBottomSheet: Error getting Clogin config', e);
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('auth_wechat_config_error'.tr()),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     }
   }

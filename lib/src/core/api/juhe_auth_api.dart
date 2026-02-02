@@ -11,9 +11,9 @@ class JuheAuthApi extends BaseApi {
   late Dio _dio;
 
   JuheAuthApi({
+    required this.appid,
+    required this.appkey,
     this.apiurl = 'https://u.cccyun.cc/',
-    this.appid = '1000',
-    this.appkey = '1111111111111111111111111111',
     this.callback = 'http://127.0.0.1/SDK/connect.php',
   }) {
     _dio = Dio(
