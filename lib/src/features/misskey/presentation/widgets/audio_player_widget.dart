@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../../../../core/utils/cache_manager.dart';
 
 /// Inline audio player widget for Misskey posts
 class AudioPlayerWidget extends StatefulWidget {
@@ -15,11 +17,13 @@ class AudioPlayerWidget extends StatefulWidget {
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKeepAliveClientMixin {
   AudioPlayer? _audioPlayer;
   bool _isPlaying = false;
+  bool _isLoading = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
+  String? _cachedFilePath;
 
   @override
-  bool get wantKeepAlive => _isPlaying;
+  bool get wantKeepAlive => _isPlaying || _isLoading;
 
   Future<void> _initializePlayer() async {
     if (_audioPlayer != null) return;
@@ -51,10 +55,24 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
         updateKeepAlive();
       }
     });
+    
+    // 注意：某些版本的audioplayers可能不支持onPlayerError
+    // 如果遇到错误，请检查audioplayers版本
+    // _audioPlayer!.onPlayerError.listen((error) {
+    //   print('Audio player error: $error');
+    //   if (mounted) {
+    //     setState(() {
+    //       _isPlaying = false;
+    //       _isLoading = false;
+    //     });
+    //     updateKeepAlive();
+    //   }
+    // });
   }
 
   @override
   void dispose() {
+    _audioPlayer?.stop(); // 在销毁前停止播放
     _audioPlayer?.dispose();
     super.dispose();
   }
@@ -66,14 +84,63 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
 
     if (_isPlaying) {
       await _audioPlayer!.pause();
+      if (mounted) {
+        setState(() {
+          _isPlaying = false;
+        });
+        updateKeepAlive();
+      }
     } else {
-      await _audioPlayer!.play(UrlSource(widget.audioUrl));
-    }
-    if (mounted) {
-      setState(() {
-        _isPlaying = !_isPlaying;
-      });
-      updateKeepAlive();
+      // 检查是否已有缓存文件，如果没有则先缓存
+      if (_cachedFilePath == null) {
+        setState(() {
+          _isLoading = true;
+        });
+        updateKeepAlive();
+        try {
+          _cachedFilePath = await cacheManager.cacheFile(widget.audioUrl);
+        } catch (e) {
+          // 使用logger替代print
+          debugPrint('Error caching audio file: $e');
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            updateKeepAlive();
+          }
+          return;
+        }
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          updateKeepAlive();
+        }
+      }
+
+      // 播放缓存的文件
+      if (_cachedFilePath != null) {
+        final file = File(_cachedFilePath!);
+        if (await file.exists()) {
+          await _audioPlayer!.play(DeviceFileSource(_cachedFilePath!));
+        } else {
+          // 使用logger替代print
+          debugPrint('缓存文件不存在: $_cachedFilePath');
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+            updateKeepAlive();
+          }
+          return;
+        }
+      }
+      if (mounted) {
+        setState(() {
+          _isPlaying = true;
+        });
+        updateKeepAlive();
+      }
     }
   }
 
@@ -121,15 +188,25 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
           // Controls
           Row(
             children: [
-              // Play/Pause button
-              IconButton(
-                icon: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: const Color(0xFF39C5BB),
+              // 播放/暂停按钮和加载指示器
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.only(right: 12),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              else
+                IconButton(
+                  icon: Icon(
+                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: const Color(0xFF39C5BB),
+                  ),
+                  onPressed: _togglePlayPause,
                 ),
-                onPressed: _togglePlayPause,
-              ),
-              // Progress slider
+              // 进度滑块
               Expanded(
                 child: Slider(
                   value: _position.inSeconds.toDouble(),
@@ -141,7 +218,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
                   activeColor: const Color(0xFF39C5BB),
                 ),
               ),
-              // Time display
+              // 时间显示
               Text(
                 '${_formatDuration(_position)} / ${_formatDuration(_duration)}',
                 style: theme.textTheme.bodySmall,

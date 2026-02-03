@@ -54,6 +54,7 @@ class _AddAccountBottomSheetContentState
   final _flarumEndpointController = TextEditingController();
 
   bool _loading = false;
+  bool _isQuickLogin = false; // 标记是否为快速登录模式
 
   @override
   void dispose() {
@@ -71,6 +72,7 @@ class _AddAccountBottomSheetContentState
         _step = _AddAccountStep.misskeyLogin;
       } else {
         _step = _AddAccountStep.select;
+        _isQuickLogin = false; // 返回选择页面时重置快速登录标志
       }
     });
   }
@@ -270,6 +272,21 @@ class _AddAccountBottomSheetContentState
             color: const Color(0xFF07C160),
             onTap: () =>
                 setState(() => _step = _AddAccountStep.flarumSocialLogin),
+            isVertical: false,
+          ),
+          const SizedBox(height: 16),
+
+          // 快速登录到iMikufans社区
+          _buildStyledCard(
+            icon: Image.asset(
+              'assets/icons/flarum.png',
+              width: 32,
+              height: 32,
+            ),
+            title: '快速登录到iMikufans 论坛',
+            subtitle: '域名: flarum.imikufans.cn',
+            color: Colors.deepOrange,
+            onTap: () => _quickLoginToIMikufans(),
             isVertical: false,
           ),
         ],
@@ -644,14 +661,19 @@ class _AddAccountBottomSheetContentState
         children: [
           TextField(
             controller: _flarumHostController,
+            enabled: !_isQuickLogin, // 快速登录时禁用编辑
             decoration: InputDecoration(
-              labelText: 'auth_flarum_host'.tr(),
+              labelText: _isQuickLogin ? 'iMikufans 论坛 (已锁定)' : 'auth_flarum_host'.tr(),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              prefixIcon: const Icon(Icons.language),
+              prefixIcon: _isQuickLogin ? const Icon(Icons.lock, color: Colors.orange) : const Icon(Icons.language),
               prefixText: 'https://',
+              hintText: 'flarum.imikufans.cn',
+              filled: _isQuickLogin,
+              fillColor: _isQuickLogin ? Colors.orange.withOpacity(0.1) : null,
             ),
+            readOnly: _isQuickLogin, // 快速登录时只读
           ),
           const SizedBox(height: 16),
           TextField(
@@ -662,6 +684,7 @@ class _AddAccountBottomSheetContentState
                 borderRadius: BorderRadius.circular(16),
               ),
               prefixIcon: const Icon(Icons.person_outline),
+              hintText: '用户名或邮箱',
             ),
           ),
           const SizedBox(height: 16),
@@ -873,5 +896,21 @@ class _AddAccountBottomSheetContentState
         );
       }
     }
+  }
+
+  Future<void> _quickLoginToIMikufans() async {
+    const host = 'flarum.imikufans.cn';
+    
+    logger.info('AddAccountBottomSheet: Starting quick login to iMikufans community');
+    
+    // 设置host控制器为固定域名
+    _flarumHostController.text = host;
+    
+    // 直接跳转到Flarum登录步骤，并自动填充域名
+    setState(() {
+      _step = _AddAccountStep.flarumLogin;
+      _flarumHostController.text = host; // 确保控制器被正确设置
+      _isQuickLogin = true; // 标记为快速登录模式
+    });
   }
 }

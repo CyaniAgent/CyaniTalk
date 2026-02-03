@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 import '../../misskey/application/drive_notifier.dart';
 import '../../misskey/domain/drive_file.dart';
 import '../../misskey/domain/drive_folder.dart';
+import '../../misskey/presentation/pages/video_player_page.dart';
+import '../../misskey/presentation/widgets/audio_player_widget.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../shared/widgets/login_reminder.dart';
+import 'image_viewer_page.dart';
 
 class CloudPage extends ConsumerWidget {
   const CloudPage({super.key});
@@ -134,7 +138,7 @@ class CloudPage extends ConsumerWidget {
             if (item.isFolder) {
               ref.read(misskeyDriveProvider.notifier).cd(item.folder!);
             } else {
-              // Open file URL or preview
+              _openFilePreview(context, item.file!);
             }
           },
         );
@@ -359,6 +363,82 @@ class CloudPage extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  void _openFilePreview(BuildContext context, DriveFile file) {
+    final mimeType = file.type.toLowerCase();
+    
+    if (mimeType.startsWith('image/')) {
+      // 图片文件 - 打开图片查看器
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageViewerPage(
+            imageUrls: [file.url],
+            heroTag: 'cloud_image_${file.id}',
+          ),
+        ),
+      );
+    } else if (mimeType.startsWith('video/')) {
+      // 视频文件 - 打开视频播放器
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoPlayerPage(videoUrl: file.url),
+        ),
+      );
+    } else if (mimeType.startsWith('audio/')) {
+      // 音频文件 - 显示音频播放器对话框
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(file.name),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: AudioPlayerWidget(
+              audioUrl: file.url,
+              fileName: file.name,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('cloud_close'.tr()),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // 其他文件类型 - 显示文件信息
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(file.name),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('类型: ${file.type}'),
+              Text('大小: ${_formatBytes(file.size.toDouble())}'),
+              Text('创建时间: ${DateFormat.yMd().add_Hm().format(file.createdAt)}'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // TODO: 实现文件下载
+                },
+                child: const Text('下载文件'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('cloud_close'.tr()),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _showRawDebugInfo(

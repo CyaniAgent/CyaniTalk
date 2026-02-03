@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'about_page.dart';
 import 'accounts_page.dart';
 import 'appearance_page.dart';
+import 'cache_settings_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -151,6 +152,11 @@ class _SettingsPageState extends State<SettingsPage> {
             Icons.storage_outlined,
             'settings_storage_title'.tr(),
             'settings_storage_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const CacheSettingsPage()),
+              );
+            },
           ),
 
           _buildSectionHeader(context, 'settings_section_about'.tr()),
