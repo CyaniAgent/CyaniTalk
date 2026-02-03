@@ -130,3 +130,7 @@ app.*.symbols
 # Rust related
 rust/target/
 rust/*.rs.bk
+
+# AI Agent related
+AGENTS.md
+GEMINI.md
