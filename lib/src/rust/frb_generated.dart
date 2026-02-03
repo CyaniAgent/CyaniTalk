@@ -6,11 +6,13 @@
 import 'api/auth.dart';
 import 'api/flarum.dart';
 import 'api/misskey.dart';
+import 'api/streaming.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
 import 'frb_generated.io.dart'
     if (dart.library.js_interop) 'frb_generated.web.dart';
+import 'lib.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Main entrypoint of the Rust API
@@ -66,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 237017943;
+  int get rustContentHash => -1668039939;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -124,6 +126,10 @@ abstract class RustLibApi extends BaseApi {
     required String socialUid,
   });
 
+  Future<void> crateApiMisskeyMisskeyRustClientConnectStreaming({
+    required MisskeyRustClient that,
+  });
+
   Future<String> crateApiMisskeyMisskeyRustClientCreateNote({
     required MisskeyRustClient that,
     String? text,
@@ -138,6 +144,14 @@ abstract class RustLibApi extends BaseApi {
     required String reaction,
   });
 
+  Future<void> crateApiMisskeyMisskeyRustClientDisconnectStreaming({
+    required MisskeyRustClient that,
+  });
+
+  Future<int> crateApiMisskeyMisskeyRustClientGetOnlineUsersCount({
+    required MisskeyRustClient that,
+  });
+
   Future<String> crateApiMisskeyMisskeyRustClientGetTimeline({
     required MisskeyRustClient that,
     required String timelineType,
@@ -149,9 +163,94 @@ abstract class RustLibApi extends BaseApi {
     required MisskeyRustClient that,
   });
 
+  bool crateApiMisskeyMisskeyRustClientIsStreamingConnected({
+    required MisskeyRustClient that,
+  });
+
   MisskeyRustClient crateApiMisskeyMisskeyRustClientNew({
     required String host,
     required String token,
+  });
+
+  StreamEvent? crateApiMisskeyMisskeyRustClientPollStreamingEvent({
+    required MisskeyRustClient that,
+  });
+
+  Future<void> crateApiMisskeyMisskeyRustClientSendStreamingMessage({
+    required MisskeyRustClient that,
+    required String message,
+  });
+
+  Future<void> crateApiMisskeyMisskeyRustClientSubscribeToMain({
+    required MisskeyRustClient that,
+  });
+
+  Future<void> crateApiMisskeyMisskeyRustClientSubscribeToTimeline({
+    required MisskeyRustClient that,
+    required String timelineType,
+  });
+
+  Value crateApiStreamingStreamEventAutoAccessorGetBody({
+    required StreamEvent that,
+  });
+
+  String crateApiStreamingStreamEventAutoAccessorGetChannelId({
+    required StreamEvent that,
+  });
+
+  String crateApiStreamingStreamEventAutoAccessorGetEventType({
+    required StreamEvent that,
+  });
+
+  void crateApiStreamingStreamEventAutoAccessorSetBody({
+    required StreamEvent that,
+    required Value body,
+  });
+
+  void crateApiStreamingStreamEventAutoAccessorSetChannelId({
+    required StreamEvent that,
+    required String channelId,
+  });
+
+  void crateApiStreamingStreamEventAutoAccessorSetEventType({
+    required StreamEvent that,
+    required String eventType,
+  });
+
+  Future<void> crateApiStreamingStreamingClientConnect({
+    required StreamingClient that,
+    required String url,
+    required String token,
+  });
+
+  Future<void> crateApiStreamingStreamingClientDisconnect({
+    required StreamingClient that,
+  });
+
+  bool crateApiStreamingStreamingClientIsCurrentlyConnected({
+    required StreamingClient that,
+  });
+
+  StreamingClient crateApiStreamingStreamingClientNew();
+
+  StreamEvent? crateApiStreamingStreamingClientPollEvent({
+    required StreamingClient that,
+  });
+
+  Future<void> crateApiStreamingStreamingClientSendMessage({
+    required StreamingClient that,
+    required String message,
+  });
+
+  Future<void> crateApiStreamingStreamingClientSubscribeToChannel({
+    required StreamingClient that,
+    required String channelName,
+    required String channelId,
+  });
+
+  Future<void> crateApiStreamingStreamingClientUnsubscribeFromChannel({
+    required StreamingClient that,
+    required String channelId,
   });
 
   RustArcIncrementStrongCountFnType
@@ -180,6 +279,29 @@ abstract class RustLibApi extends BaseApi {
 
   CrossPlatformFinalizerArg
   get rust_arc_decrement_strong_count_MisskeyRustClientPtr;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_StreamEvent;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_StreamEvent;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_StreamEventPtr;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_StreamingClient;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_StreamingClient;
+
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_StreamingClientPtr;
+
+  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_Value;
+
+  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_Value;
+
+  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ValuePtr;
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -527,6 +649,43 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiMisskeyMisskeyRustClientConnectStreaming({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 10,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientConnectStreamingConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientConnectStreamingConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_connect_streaming",
+        argNames: ["that"],
+      );
+
+  @override
   Future<String> crateApiMisskeyMisskeyRustClientCreateNote({
     required MisskeyRustClient that,
     String? text,
@@ -549,7 +708,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 11,
             port: port_,
           );
         },
@@ -589,7 +748,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 12,
             port: port_,
           );
         },
@@ -608,6 +767,82 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "MisskeyRustClient_create_reaction",
         argNames: ["that", "noteId", "reaction"],
+      );
+
+  @override
+  Future<void> crateApiMisskeyMisskeyRustClientDisconnectStreaming({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiMisskeyMisskeyRustClientDisconnectStreamingConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientDisconnectStreamingConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_disconnect_streaming",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<int> crateApiMisskeyMisskeyRustClientGetOnlineUsersCount({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 14,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_i_32,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiMisskeyMisskeyRustClientGetOnlineUsersCountConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientGetOnlineUsersCountConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_get_online_users_count",
+        argNames: ["that"],
       );
 
   @override
@@ -631,7 +866,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 15,
             port: port_,
           );
         },
@@ -667,7 +902,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 16,
             port: port_,
           );
         },
@@ -686,6 +921,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "MisskeyRustClient_i", argNames: ["that"]);
 
   @override
+  bool crateApiMisskeyMisskeyRustClientIsStreamingConnected({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta:
+            kCrateApiMisskeyMisskeyRustClientIsStreamingConnectedConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientIsStreamingConnectedConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_is_streaming_connected",
+        argNames: ["that"],
+      );
+
+  @override
   MisskeyRustClient crateApiMisskeyMisskeyRustClientNew({
     required String host,
     required String token,
@@ -696,7 +964,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(host, serializer);
           sse_encode_String(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -714,6 +982,642 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "MisskeyRustClient_new",
         argNames: ["host", "token"],
+      );
+
+  @override
+  StreamEvent? crateApiMisskeyMisskeyRustClientPollStreamingEvent({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientPollStreamingEventConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientPollStreamingEventConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_poll_streaming_event",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<void> crateApiMisskeyMisskeyRustClientSendStreamingMessage({
+    required MisskeyRustClient that,
+    required String message,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(message, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 20,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiMisskeyMisskeyRustClientSendStreamingMessageConstMeta,
+        argValues: [that, message],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientSendStreamingMessageConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_send_streaming_message",
+        argNames: ["that", "message"],
+      );
+
+  @override
+  Future<void> crateApiMisskeyMisskeyRustClientSubscribeToMain({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientSubscribeToMainConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiMisskeyMisskeyRustClientSubscribeToMainConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_subscribe_to_main",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<void> crateApiMisskeyMisskeyRustClientSubscribeToTimeline({
+    required MisskeyRustClient that,
+    required String timelineType,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(timelineType, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiMisskeyMisskeyRustClientSubscribeToTimelineConstMeta,
+        argValues: [that, timelineType],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientSubscribeToTimelineConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_subscribe_to_timeline",
+        argNames: ["that", "timelineType"],
+      );
+
+  @override
+  Value crateApiStreamingStreamEventAutoAccessorGetBody({
+    required StreamEvent that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiStreamingStreamEventAutoAccessorGetBodyConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamEventAutoAccessorGetBodyConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamEvent_auto_accessor_get_body",
+        argNames: ["that"],
+      );
+
+  @override
+  String crateApiStreamingStreamEventAutoAccessorGetChannelId({
+    required StreamEvent that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: null,
+        ),
+        constMeta:
+            kCrateApiStreamingStreamEventAutoAccessorGetChannelIdConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamEventAutoAccessorGetChannelIdConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamEvent_auto_accessor_get_channel_id",
+        argNames: ["that"],
+      );
+
+  @override
+  String crateApiStreamingStreamEventAutoAccessorGetEventType({
+    required StreamEvent that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: null,
+        ),
+        constMeta:
+            kCrateApiStreamingStreamEventAutoAccessorGetEventTypeConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamEventAutoAccessorGetEventTypeConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamEvent_auto_accessor_get_event_type",
+        argNames: ["that"],
+      );
+
+  @override
+  void crateApiStreamingStreamEventAutoAccessorSetBody({
+    required StreamEvent that,
+    required Value body,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            that,
+            serializer,
+          );
+          sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+            body,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 26)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiStreamingStreamEventAutoAccessorSetBodyConstMeta,
+        argValues: [that, body],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamEventAutoAccessorSetBodyConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamEvent_auto_accessor_set_body",
+        argNames: ["that", "body"],
+      );
+
+  @override
+  void crateApiStreamingStreamEventAutoAccessorSetChannelId({
+    required StreamEvent that,
+    required String channelId,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            that,
+            serializer,
+          );
+          sse_encode_String(channelId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta:
+            kCrateApiStreamingStreamEventAutoAccessorSetChannelIdConstMeta,
+        argValues: [that, channelId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamEventAutoAccessorSetChannelIdConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamEvent_auto_accessor_set_channel_id",
+        argNames: ["that", "channelId"],
+      );
+
+  @override
+  void crateApiStreamingStreamEventAutoAccessorSetEventType({
+    required StreamEvent that,
+    required String eventType,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            that,
+            serializer,
+          );
+          sse_encode_String(eventType, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 28)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta:
+            kCrateApiStreamingStreamEventAutoAccessorSetEventTypeConstMeta,
+        argValues: [that, eventType],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamEventAutoAccessorSetEventTypeConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamEvent_auto_accessor_set_event_type",
+        argNames: ["that", "eventType"],
+      );
+
+  @override
+  Future<void> crateApiStreamingStreamingClientConnect({
+    required StreamingClient that,
+    required String url,
+    required String token,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(url, serializer);
+          sse_encode_String(token, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 29,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiStreamingStreamingClientConnectConstMeta,
+        argValues: [that, url, token],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamingClientConnectConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_connect",
+        argNames: ["that", "url", "token"],
+      );
+
+  @override
+  Future<void> crateApiStreamingStreamingClientDisconnect({
+    required StreamingClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 30,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiStreamingStreamingClientDisconnectConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamingClientDisconnectConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_disconnect",
+        argNames: ["that"],
+      );
+
+  @override
+  bool crateApiStreamingStreamingClientIsCurrentlyConnected({
+    required StreamingClient that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 31)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_bool,
+          decodeErrorData: null,
+        ),
+        constMeta:
+            kCrateApiStreamingStreamingClientIsCurrentlyConnectedConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamingClientIsCurrentlyConnectedConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_is_currently_connected",
+        argNames: ["that"],
+      );
+
+  @override
+  StreamingClient crateApiStreamingStreamingClientNew() {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 32)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiStreamingStreamingClientNewConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamingClientNewConstMeta =>
+      const TaskConstMeta(debugName: "StreamingClient_new", argNames: []);
+
+  @override
+  StreamEvent? crateApiStreamingStreamingClientPollEvent({
+    required StreamingClient that,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 33)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData:
+              sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiStreamingStreamingClientPollEventConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamingClientPollEventConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_poll_event",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<void> crateApiStreamingStreamingClientSendMessage({
+    required StreamingClient that,
+    required String message,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(message, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 34,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiStreamingStreamingClientSendMessageConstMeta,
+        argValues: [that, message],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiStreamingStreamingClientSendMessageConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_send_message",
+        argNames: ["that", "message"],
+      );
+
+  @override
+  Future<void> crateApiStreamingStreamingClientSubscribeToChannel({
+    required StreamingClient that,
+    required String channelName,
+    required String channelId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(channelName, serializer);
+          sse_encode_String(channelId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 35,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiStreamingStreamingClientSubscribeToChannelConstMeta,
+        argValues: [that, channelName, channelId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamingClientSubscribeToChannelConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_subscribe_to_channel",
+        argNames: ["that", "channelName", "channelId"],
+      );
+
+  @override
+  Future<void> crateApiStreamingStreamingClientUnsubscribeFromChannel({
+    required StreamingClient that,
+    required String channelId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(channelId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 36,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta:
+            kCrateApiStreamingStreamingClientUnsubscribeFromChannelConstMeta,
+        argValues: [that, channelId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiStreamingStreamingClientUnsubscribeFromChannelConstMeta =>
+      const TaskConstMeta(
+        debugName: "StreamingClient_unsubscribe_from_channel",
+        argNames: ["that", "channelId"],
       );
 
   RustArcIncrementStrongCountFnType
@@ -739,6 +1643,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   RustArcDecrementStrongCountFnType
   get rust_arc_decrement_strong_count_MisskeyRustClient => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_StreamEvent => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_StreamEvent => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_StreamingClient => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_StreamingClient => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient;
+
+  RustArcIncrementStrongCountFnType
+  get rust_arc_increment_strong_count_Value => wire
+      .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue;
+
+  RustArcDecrementStrongCountFnType
+  get rust_arc_decrement_strong_count_Value => wire
+      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue;
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
@@ -774,12 +1702,48 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  StreamEvent
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  StreamingClient
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamingClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  Value
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ValueImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   FlarumRustClient
   dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFlarumRustClient(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return FlarumRustClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  StreamEvent
+  dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -810,6 +1774,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  StreamEvent
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  StreamingClient
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamingClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   FlarumRustClient
   dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFlarumRustClient(
     dynamic raw,
@@ -837,9 +1819,59 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  StreamEvent
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamEventImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  StreamingClient
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return StreamingClientImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  Value
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ValueImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as String;
+  }
+
+  @protected
+  bool dco_decode_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
+  }
+
+  @protected
+  StreamEvent
+  dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+      raw,
+    );
+  }
+
+  @protected
+  int dco_decode_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -852,6 +1884,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String? dco_decode_opt_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_String(raw);
+  }
+
+  @protected
+  StreamEvent?
+  dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null
+        ? null
+        : dco_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+            raw,
+          );
   }
 
   @protected
@@ -922,12 +1967,60 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  StreamEvent
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamEventImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  StreamingClient
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamingClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  Value
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ValueImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   FlarumRustClient
   sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFlarumRustClient(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return FlarumRustClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  StreamEvent
+  sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamEventImpl.frbInternalSseDecode(
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
@@ -970,6 +2063,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  StreamEvent
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamEventImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  StreamingClient
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamingClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   FlarumRustClient
   sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFlarumRustClient(
     SseDeserializer deserializer,
@@ -1006,10 +2123,69 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  StreamEvent
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamEventImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  StreamingClient
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return StreamingClientImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
+  Value
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return ValueImpl.frbInternalSseDecode(
+      sse_decode_usize(deserializer),
+      sse_decode_i_32(deserializer),
+    );
+  }
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_list_prim_u_8_strict(deserializer);
     return utf8.decoder.convert(inner);
+  }
+
+  @protected
+  bool sse_decode_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint8() != 0;
+  }
+
+  @protected
+  StreamEvent
+  sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+      deserializer,
+    ));
+  }
+
+  @protected
+  int sse_decode_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt32();
   }
 
   @protected
@@ -1025,6 +2201,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  StreamEvent?
+  sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+        deserializer,
+      ));
     } else {
       return null;
     }
@@ -1051,18 +2243,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt sse_decode_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getBigUint64();
-  }
-
-  @protected
-  int sse_decode_i_32(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt32();
-  }
-
-  @protected
-  bool sse_decode_bool(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getUint8() != 0;
   }
 
   @protected
@@ -1115,6 +2295,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    StreamEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamEventImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    StreamingClient self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamingClientImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    Value self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ValueImpl).frbInternalSseEncode(move: true),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFlarumRustClient(
     FlarumRustClient self,
     SseSerializer serializer,
@@ -1122,6 +2341,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as FlarumRustClientImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    StreamEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamEventImpl).frbInternalSseEncode(move: false),
       serializer,
     );
   }
@@ -1167,6 +2399,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    StreamEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamEventImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    StreamingClient self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamingClientImpl).frbInternalSseEncode(move: false),
+      serializer,
+    );
+  }
+
+  @protected
+  void
   sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerFlarumRustClient(
     FlarumRustClient self,
     SseSerializer serializer,
@@ -1205,9 +2463,73 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    StreamEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamEventImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamingClient(
+    StreamingClient self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as StreamingClientImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerValue(
+    Value self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+      (self as ValueImpl).frbInternalSseEncode(move: null),
+      serializer,
+    );
+  }
+
+  @protected
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
+  }
+
+  @protected
+  void sse_encode_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint8(self ? 1 : 0);
+  }
+
+  @protected
+  void
+  sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    StreamEvent self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+      self,
+      serializer,
+    );
+  }
+
+  @protected
+  void sse_encode_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt32(self);
   }
 
   @protected
@@ -1227,6 +2549,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_String(self, serializer);
+    }
+  }
+
+  @protected
+  void
+  sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+    StreamEvent? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerStreamEvent(
+        self,
+        serializer,
+      );
     }
   }
 
@@ -1251,18 +2590,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
-  }
-
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt32(self);
-  }
-
-  @protected
-  void sse_encode_bool(bool self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putUint8(self ? 1 : 0);
   }
 }
 
@@ -1370,6 +2697,9 @@ class MisskeyRustClientImpl extends RustOpaque implements MisskeyRustClient {
         .rust_arc_decrement_strong_count_MisskeyRustClientPtr,
   );
 
+  Future<void> connectStreaming() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientConnectStreaming(that: this);
+
   Future<String> createNote({
     String? text,
     String? replyId,
@@ -1392,6 +2722,12 @@ class MisskeyRustClientImpl extends RustOpaque implements MisskeyRustClient {
     reaction: reaction,
   );
 
+  Future<void> disconnectStreaming() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientDisconnectStreaming(that: this);
+
+  Future<int> getOnlineUsersCount() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientGetOnlineUsersCount(that: this);
+
   Future<String> getTimeline({
     required String timelineType,
     required int limit,
@@ -1405,4 +2741,148 @@ class MisskeyRustClientImpl extends RustOpaque implements MisskeyRustClient {
 
   Future<String> i() =>
       RustLib.instance.api.crateApiMisskeyMisskeyRustClientI(that: this);
+
+  bool isStreamingConnected() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientIsStreamingConnected(that: this);
+
+  StreamEvent? pollStreamingEvent() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientPollStreamingEvent(that: this);
+
+  Future<void> sendStreamingMessage({required String message}) =>
+      RustLib.instance.api.crateApiMisskeyMisskeyRustClientSendStreamingMessage(
+        that: this,
+        message: message,
+      );
+
+  Future<void> subscribeToMain() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientSubscribeToMain(that: this);
+
+  Future<void> subscribeToTimeline({required String timelineType}) =>
+      RustLib.instance.api.crateApiMisskeyMisskeyRustClientSubscribeToTimeline(
+        that: this,
+        timelineType: timelineType,
+      );
+}
+
+@sealed
+class StreamEventImpl extends RustOpaque implements StreamEvent {
+  // Not to be used by end users
+  StreamEventImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  StreamEventImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_StreamEvent,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_StreamEvent,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_StreamEventPtr,
+  );
+
+  Value get body => RustLib.instance.api
+      .crateApiStreamingStreamEventAutoAccessorGetBody(that: this);
+
+  String get channelId => RustLib.instance.api
+      .crateApiStreamingStreamEventAutoAccessorGetChannelId(that: this);
+
+  String get eventType => RustLib.instance.api
+      .crateApiStreamingStreamEventAutoAccessorGetEventType(that: this);
+
+  set body(Value body) => RustLib.instance.api
+      .crateApiStreamingStreamEventAutoAccessorSetBody(that: this, body: body);
+
+  set channelId(String channelId) =>
+      RustLib.instance.api.crateApiStreamingStreamEventAutoAccessorSetChannelId(
+        that: this,
+        channelId: channelId,
+      );
+
+  set eventType(String eventType) =>
+      RustLib.instance.api.crateApiStreamingStreamEventAutoAccessorSetEventType(
+        that: this,
+        eventType: eventType,
+      );
+}
+
+@sealed
+class StreamingClientImpl extends RustOpaque implements StreamingClient {
+  // Not to be used by end users
+  StreamingClientImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  StreamingClientImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_StreamingClient,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_StreamingClient,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_StreamingClientPtr,
+  );
+
+  Future<void> connect({required String url, required String token}) =>
+      RustLib.instance.api.crateApiStreamingStreamingClientConnect(
+        that: this,
+        url: url,
+        token: token,
+      );
+
+  Future<void> disconnect() => RustLib.instance.api
+      .crateApiStreamingStreamingClientDisconnect(that: this);
+
+  bool isCurrentlyConnected() => RustLib.instance.api
+      .crateApiStreamingStreamingClientIsCurrentlyConnected(that: this);
+
+  StreamEvent? pollEvent() => RustLib.instance.api
+      .crateApiStreamingStreamingClientPollEvent(that: this);
+
+  Future<void> sendMessage({required String message}) =>
+      RustLib.instance.api.crateApiStreamingStreamingClientSendMessage(
+        that: this,
+        message: message,
+      );
+
+  Future<void> subscribeToChannel({
+    required String channelName,
+    required String channelId,
+  }) => RustLib.instance.api.crateApiStreamingStreamingClientSubscribeToChannel(
+    that: this,
+    channelName: channelName,
+    channelId: channelId,
+  );
+
+  Future<void> unsubscribeFromChannel({required String channelId}) => RustLib
+      .instance
+      .api
+      .crateApiStreamingStreamingClientUnsubscribeFromChannel(
+        that: this,
+        channelId: channelId,
+      );
+}
+
+@sealed
+class ValueImpl extends RustOpaque implements Value {
+  // Not to be used by end users
+  ValueImpl.frbInternalDcoDecode(List<dynamic> wire)
+    : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  ValueImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+    : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_Value,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_Value,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_ValuePtr,
+  );
 }

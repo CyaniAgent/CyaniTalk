@@ -38,7 +38,7 @@ final class AppearanceSettingsNotifierProvider
 }
 
 String _$appearanceSettingsNotifierHash() =>
-    r'8dda75be5c772100265aad2868271d07a17a2161';
+    r'48e01e7bc621e71c0f6157095f588fc3c5d050c1';
 
 /// 外观设置状态管理器
 

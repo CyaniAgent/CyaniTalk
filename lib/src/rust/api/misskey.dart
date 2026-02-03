@@ -5,12 +5,16 @@
 
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'streaming.dart';
 
+// These functions are ignored because they are not marked as `pub`: `generate_channel_id`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `MisskeyUser`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `fmt`
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MisskeyRustClient>>
 abstract class MisskeyRustClient implements RustOpaqueInterface {
+  Future<void> connectStreaming();
+
   Future<String> createNote({
     String? text,
     String? replyId,
@@ -23,6 +27,10 @@ abstract class MisskeyRustClient implements RustOpaqueInterface {
     required String reaction,
   });
 
+  Future<void> disconnectStreaming();
+
+  Future<int> getOnlineUsersCount();
+
   Future<String> getTimeline({
     required String timelineType,
     required int limit,
@@ -31,9 +39,19 @@ abstract class MisskeyRustClient implements RustOpaqueInterface {
 
   Future<String> i();
 
+  bool isStreamingConnected();
+
   factory MisskeyRustClient({required String host, required String token}) =>
       RustLib.instance.api.crateApiMisskeyMisskeyRustClientNew(
         host: host,
         token: token,
       );
+
+  StreamEvent? pollStreamingEvent();
+
+  Future<void> sendStreamingMessage({required String message});
+
+  Future<void> subscribeToMain();
+
+  Future<void> subscribeToTimeline({required String timelineType});
 }

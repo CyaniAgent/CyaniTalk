@@ -336,11 +336,21 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as Map<String, dynamic>,
   );
 
-  Future<int> getOnlineUsersCount() => executeApiCall(
-    'MisskeyApi.getOnlineUsersCount',
-    () => _dio.post('/api/get-online-users-count', data: {'i': token}),
-    (response) => response.data['count'] as int,
-  );
+  Future<int> getOnlineUsersCount() async {
+    try {
+      return await _rustClient.getOnlineUsersCount();
+    } catch (e) {
+      logger.error('MisskeyApi.getOnlineUsersCount error', e);
+      // Fallback to the original implementation if Rust fails
+      try {
+        final response = await _dio.post('/api/get-online-users-count', data: {'i': token});
+        return response.data['count'] as int;
+      } catch (fallbackError) {
+        logger.error('MisskeyApi.getOnlineUsersCount fallback error', fallbackError);
+        throw Exception('MisskeyApi.getOnlineUsersCount error: $e, fallback error: $fallbackError');
+      }
+    }
+  }
 
   // --- Messaging (Chat) API ---
 
