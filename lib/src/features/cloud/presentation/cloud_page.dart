@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:intl/intl.dart';
 import '../../misskey/application/drive_notifier.dart';
 import '../../misskey/domain/drive_file.dart';
 import '../../misskey/domain/drive_folder.dart';

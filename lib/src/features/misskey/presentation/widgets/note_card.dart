@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/note.dart';
 import '../../data/misskey_repository.dart';
+import '../../application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
 import '../pages/image_viewer_page.dart';
@@ -166,7 +167,13 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                   GestureDetector(
                     onTap: () {
                       if (user?.id != null) {
-                        context.push('/misskey/user/${user!.id}', extra: user);
+                        final me = ref.read(misskeyMeProvider).value;
+                        if (me != null && me.id == user!.id) {
+                          // Redirect to own profile tab
+                          context.go('/profile');
+                        } else {
+                          context.push('/misskey/user/${user!.id}', extra: user);
+                        }
                       }
                     },
                     child: Row(
@@ -316,6 +323,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                               // Image thumbnail
                               final thumbnailUrl =
                                   file['thumbnailUrl'] as String? ?? url;
+                              final heroTag = 'image_${url}_${note.id}';
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 4.0),
                                 child: ClipRRect(
@@ -326,13 +334,13 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                                         MaterialPageRoute(
                                           builder: (context) => ImageViewerPage(
                                             imageUrl: url,
-                                            heroTag: 'image_$url',
+                                            heroTag: heroTag,
                                           ),
                                         ),
                                       );
                                     },
                                     child: Hero(
-                                      tag: 'image_$url',
+                                      tag: heroTag,
                                       child: RetryableNetworkImage(
                                         url: thumbnailUrl,
                                         fit: BoxFit.cover,

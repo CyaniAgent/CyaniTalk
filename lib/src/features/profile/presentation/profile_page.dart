@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'package:palette_generator/palette_generator.dart';
 import 'widgets/associated_accounts_section.dart';
-import 'settings/settings_page.dart';
-import 'settings/about_page.dart';
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
 import '../../auth/presentation/widgets/add_account_dialog.dart';
@@ -142,12 +141,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.settings, color: Colors.white),
-                onPressed:
-                    () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SettingsPage(),
-                      ),
-                    ),
+                onPressed: () => context.push('/settings'),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -247,7 +241,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           Row(
             children: [
               Hero(
-                tag: 'profile_avatar',
+                tag: 'profile_avatar_${misskeyUser?.id ?? primaryAccount.id}',
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
@@ -509,18 +503,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 leading: const Icon(Icons.settings_outlined),
                 title: Text('settings_title'.tr()),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
-                ),
+                onTap: () => context.push('/settings'),
               ),
               const Divider(indent: 56, endIndent: 16, height: 1),
               ListTile(
                 leading: const Icon(Icons.info_outline),
                 title: Text('settings_about_title'.tr()),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
-                ),
+                onTap: () => context.push('/about'),
               ),
             ],
           ),

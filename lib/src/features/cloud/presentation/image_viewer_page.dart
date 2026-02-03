@@ -74,7 +74,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                 );
               },
               loadingBuilder: (context, event) => Center(
-                child: Container(
+                child: SizedBox(
                   width: 40,
                   height: 40,
                   child: CircularProgressIndicator(
@@ -84,7 +84,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                   ),
                 ),
               ),
-              backgroundDecoration: BoxDecoration(color: Colors.black),
+              backgroundDecoration: const BoxDecoration(color: Colors.black),
             ),
             // 控制层
             if (_showControls)
@@ -95,10 +95,10 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha: 0.7),
                         Colors.transparent,
                         Colors.transparent,
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withValues(alpha: 0.7),
                       ],
                     ),
                   ),
@@ -126,7 +126,7 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.5),
+                                  color: Colors.black.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -154,20 +154,20 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                                 children: [
                                   Icon(
                                     Icons.chevron_left,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '滑动切换图片',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
+                                      color: Colors.white.withValues(alpha: 0.7),
                                       fontSize: 14,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
                                     Icons.chevron_right,
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                   ),
                                 ],
                               ),
@@ -176,13 +176,13 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                               children: [
                                 Icon(
                                   Icons.zoom_in,
-                                  color: Colors.white.withOpacity(0.7),
+                                  color: Colors.white.withValues(alpha: 0.7),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '双指缩放',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 14,
                                   ),
                                 ),

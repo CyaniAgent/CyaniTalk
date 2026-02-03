@@ -42,19 +42,19 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
       error: (error, stack) {
         logger.error('CyaniTalkApp: 加载外观设置失败', error);
         // 使用默认设置
-        final defaultSettings = const AppearanceSettings(
-          isDarkMode: false,
+        const defaultSettings = AppearanceSettings(
+          displayMode: ThemeMode.system,
           useDynamicColor: true,
           useCustomColor: false,
           primaryColor: null,
         );
-        final theme = _buildTheme(defaultSettings);
+        final theme = _buildTheme(defaultSettings, Brightness.light);
         return MaterialApp.router(
           routerConfig: goRouter,
           title: 'CyaniTalk',
           theme: theme,
-          darkTheme: _buildTheme(defaultSettings.copyWith(isDarkMode: true)),
-          themeMode: ThemeMode.light,
+          darkTheme: _buildTheme(defaultSettings, Brightness.dark),
+          themeMode: defaultSettings.displayMode,
           debugShowCheckedModeBanner: false,
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
@@ -63,21 +63,20 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
       },
       data: (appearanceSettings) {
         logger.debug(
-          'CyaniTalkApp: 加载外观设置 - 深色模式: ${appearanceSettings.isDarkMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
+          'CyaniTalkApp: 加载外观设置 - 显示模式: ${appearanceSettings.displayMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
         );
 
         // Build theme based on settings
-        final theme = _buildTheme(appearanceSettings);
+        final theme = _buildTheme(appearanceSettings, Brightness.light);
+        final darkTheme = _buildTheme(appearanceSettings, Brightness.dark);
 
         logger.debug('CyaniTalkApp: 构建MaterialApp');
         return MaterialApp.router(
           routerConfig: goRouter,
           title: 'CyaniTalk',
           theme: theme,
-          darkTheme: _buildTheme(appearanceSettings.copyWith(isDarkMode: true)),
-          themeMode: appearanceSettings.isDarkMode
-              ? ThemeMode.dark
-              : ThemeMode.light,
+          darkTheme: darkTheme,
+          themeMode: appearanceSettings.displayMode,
           debugShowCheckedModeBanner: false,
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
@@ -91,18 +90,15 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
   /// 
   /// 根据用户的外观设置构建主题，支持深色模式、动态色彩和自定义颜色。
   /// 会缓存构建结果，避免重复计算。
-  ThemeData _buildTheme(AppearanceSettings settings) {
+  ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness) {
     // 检查是否需要重新构建主题
-    final isDark = settings.isDarkMode;
+    final isDark = brightness == Brightness.dark;
     final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
     
     // 如果设置没有变化且主题已缓存，直接返回缓存的主题
     if (_cachedSettings == settings && themeCache != null) {
-      logger.debug('CyaniTalkApp: 使用缓存的主题');
       return themeCache;
     }
-
-    logger.debug('CyaniTalkApp: 构建新主题 - 深色模式: $isDark, 动态色彩: ${settings.useDynamicColor}, 自定义颜色: ${settings.useCustomColor}');
 
     // 使用自定义颜色或默认颜色
     final seedColor = settings.useCustomColor && settings.primaryColor != null
@@ -113,11 +109,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
       colorScheme: settings.useDynamicColor
           ? ColorScheme.fromSeed(
               seedColor: seedColor,
-              brightness: isDark ? Brightness.dark : Brightness.light,
+              brightness: brightness,
             )
           : ColorScheme.fromSeed(
               seedColor: seedColor,
-              brightness: isDark ? Brightness.dark : Brightness.light,
+              brightness: brightness,
               // 固定色彩方案，不使用动态色彩
               primary: seedColor,
               secondary: const Color(0xFF6366F1),

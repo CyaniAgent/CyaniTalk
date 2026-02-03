@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/utils/logger.dart';
-import '../../../core/services/search/global_search_delegate.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../routing/router.dart';
 import 'widgets/misskey_drawer.dart';
@@ -225,12 +224,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                   tooltip: 'misskey_page_global_search'.tr(),
                   onPressed: () {
                     logger.info(
-                      'MisskeyPage: Search button pressed, opening search delegate',
+                      'MisskeyPage: Search button pressed, navigating to /search',
                     );
-                    showSearch(
-                      context: context,
-                      delegate: GlobalSearchDelegate(),
-                    );
+                    context.push('/search');
                   },
                 ),
               ],

@@ -91,12 +91,12 @@ class MessagingHistoryList extends ConsumerWidget {
           children: [
             Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: 16),
-            Text('Error: $err'),
+            Text('${'common_error'.tr()}: $err'),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => ref.read(misskeyMessagingHistoryProvider.notifier).refresh(),
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text('common_retry'.tr()),
             ),
           ],
         ),
@@ -114,7 +114,7 @@ class MessagingHistoryList extends ConsumerWidget {
       ),
       title: Row(
         children: [
-          const Expanded(child: Text('System / Unknown', style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(child: Text('messaging_system_unknown'.tr(), style: const TextStyle(fontWeight: FontWeight.bold))),
           Text(timeago.format(message.createdAt), style: theme.textTheme.bodySmall),
         ],
       ),
@@ -159,7 +159,7 @@ class MessagingHistoryList extends ConsumerWidget {
         children: [
           Expanded(
             child: Text(
-              message.text ?? (message.file != null ? '[File]' : ''),
+              message.text ?? (message.file != null ? 'messaging_file'.tr() : ''),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: message.isRead ? null : const TextStyle(fontWeight: FontWeight.bold),
@@ -198,7 +198,7 @@ class MessagingHistoryList extends ConsumerWidget {
           TextButton.icon(
             onPressed: () => ref.read(misskeyMessagingHistoryProvider.notifier).refresh(),
             icon: const Icon(Icons.refresh),
-            label: const Text('Refresh Stage'),
+            label: Text('common_refresh_stage'.tr()),
           ),
         ],
       ),

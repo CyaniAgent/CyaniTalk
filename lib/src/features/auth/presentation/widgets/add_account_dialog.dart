@@ -663,15 +663,14 @@ class _AddAccountBottomSheetContentState
             controller: _flarumHostController,
             enabled: !_isQuickLogin, // 快速登录时禁用编辑
             decoration: InputDecoration(
-              labelText: _isQuickLogin ? 'iMikufans 论坛 (已锁定)' : 'auth_flarum_host'.tr(),
+              labelText: 'auth_flarum_host'.tr(),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              prefixIcon: _isQuickLogin ? const Icon(Icons.lock, color: Colors.orange) : const Icon(Icons.language),
-              prefixText: 'https://',
-              hintText: 'flarum.imikufans.cn',
+              prefixIcon: const Icon(Icons.language_outlined),
+              hintText: 'discuss.flarum.org',
               filled: _isQuickLogin,
-              fillColor: _isQuickLogin ? Colors.orange.withOpacity(0.1) : null,
+              fillColor: _isQuickLogin ? Colors.orange.withValues(alpha: 0.1) : null,
             ),
             readOnly: _isQuickLogin, // 快速登录时只读
           ),

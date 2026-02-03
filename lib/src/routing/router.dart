@@ -15,6 +15,9 @@ import '../features/inbox/presentation/pages/inbox_page.dart';
 import '../features/messaging/presentation/messaging_chat_page.dart';
 import '../features/misskey/domain/misskey_user.dart';
 import '../features/profile/presentation/profile_page.dart';
+import '../features/profile/presentation/settings/about_page.dart';
+import '../features/profile/presentation/settings/settings_page.dart';
+import '../features/search/presentation/search_page.dart';
 import '../shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
@@ -50,19 +53,6 @@ GoRouter goRouter(Ref ref) {
                 path: '/misskey',
                 pageBuilder: (context, state) =>
                     const NoTransitionPage(child: MisskeyPage()),
-                routes: [
-                  GoRoute(
-                    path: 'user/:userId',
-                    builder: (context, state) {
-                      final userId = state.pathParameters['userId']!;
-                      final user = state.extra as MisskeyUser?;
-                      return MisskeyUserProfilePage(
-                        userId: userId,
-                        initialUser: user,
-                      );
-                    },
-                  ),
-                ],
               ),
             ],
           ),
@@ -90,19 +80,6 @@ GoRouter goRouter(Ref ref) {
                 path: '/messaging',
                 pageBuilder: (context, state) =>
                     const NoTransitionPage(child: InboxPage()),
-                routes: [
-                  GoRoute(
-                    path: 'chat/:userId',
-                    builder: (context, state) {
-                      final userId = state.pathParameters['userId']!;
-                      final user = state.extra as MisskeyUser?;
-                      return MessagingChatPage(
-                        userId: userId,
-                        initialUser: user,
-                      );
-                    },
-                  ),
-                ],
               ),
             ],
           ),
@@ -116,6 +93,46 @@ GoRouter goRouter(Ref ref) {
             ],
           ),
         ],
+      ),
+      // Top-level routes that don't have the navigation shell
+      GoRoute(
+        path: '/search',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SearchPage(),
+      ),
+      GoRoute(
+        path: '/settings',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/about',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AboutPage(),
+      ),
+      GoRoute(
+        path: '/misskey/user/:userId',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          final user = state.extra as MisskeyUser?;
+          return MisskeyUserProfilePage(
+            userId: userId,
+            initialUser: user,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/messaging/chat/:userId',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          final user = state.extra as MisskeyUser?;
+          return MessagingChatPage(
+            userId: userId,
+            initialUser: user,
+          );
+        },
       ),
     ],
   );

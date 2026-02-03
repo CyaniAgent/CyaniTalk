@@ -67,7 +67,7 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                widget.initialUser?.name ?? widget.initialUser?.username ?? 'Chat',
+                widget.initialUser?.name ?? widget.initialUser?.username ?? 'messaging_chat_title'.tr(),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -112,14 +112,14 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('Error: $err')),
+                error: (err, stack) => Center(child: Text('${'common_error'.tr()}: $err')),
               ),
             ),
             _buildInputArea(context),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error loading user info: $err')),
+        error: (err, stack) => Center(child: Text('${'messaging_error_loading_user'.tr()}: $err')),
       ),
     );
   }
@@ -206,7 +206,7 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
             child: TextField(
               controller: _textController,
               decoration: InputDecoration(
-                hintText: 'post_what_are_you_thinking'.tr(),
+                hintText: 'messaging_type_message'.tr(),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28),
                   borderSide: BorderSide.none,
