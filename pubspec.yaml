@@ -101,6 +101,7 @@ dependencies:
   flutter_background_service: ^5.1.0
   flutter_local_notifications: ^20.0.0
   timeago: ^3.7.1
+  flutter_rust_bridge: ^2.11.1
 
 dev_dependencies:
   flutter_test:

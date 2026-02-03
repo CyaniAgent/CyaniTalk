@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cyanitalk/src/rust/frb_generated.dart';
 import 'src/app.dart';
 import 'src/core/core.dart';
 import 'src/core/services/background_service.dart';
@@ -14,6 +15,7 @@ import 'src/core/services/background_service.dart';
 /// 这是应用程序的根组件。
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await RustLib.init();
   await EasyLocalization.ensureInitialized();
 
   // 初始化日志系统

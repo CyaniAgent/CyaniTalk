@@ -1,0 +1,2 @@
+rust_input: rust/src/api
+dart_output: lib/src/rust
