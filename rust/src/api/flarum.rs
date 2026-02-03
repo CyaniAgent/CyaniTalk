@@ -1,7 +1,6 @@
 use anyhow::Result;
 use flutter_rust_bridge::frb;
 use reqwest::{Client, header};
-use serde::{Deserialize, Serialize};
 
 #[frb(opaque)]
 pub struct FlarumRustClient {

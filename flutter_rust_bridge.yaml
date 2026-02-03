@@ -1,2 +1,2 @@
-rust_input: rust/src/api
+rust_input: "crate::api"
 dart_output: lib/src/rust
