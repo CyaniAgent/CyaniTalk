@@ -4,6 +4,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cyanitalk/src/rust/api/flarum.dart';
 
 import '../constants/flarum_constants.dart';
 import '../utils/verification_window.dart';
@@ -18,9 +19,11 @@ class FlarumApi extends BaseApi {
 
   FlarumApi._internal() {
     _initDio();
+    _rustClient = FlarumRustClient(baseUrl: _baseUrl!);
   }
 
   late Dio _dio;
+  late FlarumRustClient _rustClient;
   late CookieJar _cookieJar;
   String? _token;
   String? _userId;
@@ -188,17 +191,23 @@ class FlarumApi extends BaseApi {
     _dio.options.baseUrl = url;
     _dio.options.headers['Referer'] = url;
     _dio.options.headers['Origin'] = url;
+    _rustClient = FlarumRustClient(baseUrl: url);
+    if (_token != null) {
+      _rustClient.setToken(token: _token!, userId: _userId);
+    }
   }
 
   void setToken(String token, {String? userId}) {
     logger.debug('FlarumApi: 设置令牌');
     _token = token;
     _userId = userId;
+    _rustClient.setToken(token: token, userId: userId);
   }
 
   void clearToken() {
     logger.debug('FlarumApi: 清除令牌');
     _token = null;
+    _rustClient.clearToken();
   }
 
   String? get token => _token;

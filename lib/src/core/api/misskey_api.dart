@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:cyanitalk/src/rust/api/misskey.dart';
 import '../utils/logger.dart';
 import 'base_api.dart';
 import '../config/constants.dart';
@@ -15,6 +17,7 @@ class MisskeyApi extends BaseApi {
   final String host;
   final String token;
   late Dio _dio;
+  late MisskeyRustClient _rustClient;
 
   /// 初始化Misskey API客户端
   /// 
@@ -22,6 +25,10 @@ class MisskeyApi extends BaseApi {
   /// @param token 认证令牌
   MisskeyApi({required this.host, required this.token}) {
     logger.info('MisskeyApi: Initializing for host: $host');
+    
+    // 初始化 Rust 客户端
+    _rustClient = MisskeyRustClient(host: host, token: token);
+
     _dio = Dio(
       BaseOptions(
         baseUrl: 'https://$host',
@@ -60,11 +67,15 @@ class MisskeyApi extends BaseApi {
 /// 返回当前认证用户的详细信息，包括用户名、头像、个人简介等。
 /// 
 /// @return 用户信息的Map对象
-  Future<Map<String, dynamic>> i() => executeApiCall(
-    'MisskeyApi.i',
-    () => _dio.post('/api/i', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
-  );
+  Future<Map<String, dynamic>> i() async {
+    try {
+      final jsonString = await _rustClient.i();
+      return Map<String, dynamic>.from(jsonDecode(jsonString));
+    } catch (e) {
+      logger.error('MisskeyApi.i error', e);
+      throw Exception('MisskeyApi.i error: $e');
+    }
+  }
 
   /// Check if a note still exists on the server
   /// Returns true if the note exists, false if it was deleted (404)
@@ -121,19 +132,18 @@ class MisskeyApi extends BaseApi {
     String type, {
     int limit = 20,
     String? untilId,
-  }) {
-    final endpoint = switch (type) {
-      'Home' => '/api/notes/timeline',
-      'Local' => '/api/notes/local-timeline',
-      'Social' => '/api/notes/hybrid-timeline',
-      'Global' => '/api/notes/global-timeline',
-      _ => '/api/notes/timeline',
-    };
-
-    return _fetchList('MisskeyApi.getTimeline[$type]', endpoint, {
-      'limit': limit,
-      if (untilId != null) 'untilId': untilId,
-    });
+  }) async {
+    try {
+      final jsonString = await _rustClient.getTimeline(
+        timelineType: type,
+        limit: limit,
+        untilId: untilId,
+      );
+      return jsonDecode(jsonString) as List<dynamic>;
+    } catch (e) {
+      logger.error('MisskeyApi.getTimeline error', e);
+      throw Exception('MisskeyApi.getTimeline error: $e');
+    }
   }
 
   Future<List<dynamic>> getFeaturedChannels() => _fetchList(
@@ -206,31 +216,48 @@ class MisskeyApi extends BaseApi {
     String? visibility,
     bool? localOnly,
     String? cw,
-  }) => executeApiCallVoid(
-    'MisskeyApi.createNote',
-    () => _dio.post(
-      '/api/notes/create',
-      data: {
-        'i': token,
-        if (text != null) 'text': text,
-        if (replyId != null) 'replyId': replyId,
-        if (renoteId != null) 'renoteId': renoteId,
-        if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
-        if (visibility != null) 'visibility': visibility,
-        if (localOnly != null) 'localOnly': localOnly,
-        if (cw != null) 'cw': cw,
-      },
-    ),
-  );
-
-  Future<void> createReaction(String noteId, String reaction) =>
-      executeApiCallVoid(
-        'MisskeyApi.createReaction',
+  }) async {
+    // Note: fileIds and localOnly are still being ported, using Rust for basic notes
+    if (fileIds != null || localOnly != null || cw != null) {
+      return executeApiCallVoid(
+        'MisskeyApi.createNote (Legacy)',
         () => _dio.post(
-          '/api/notes/reactions/create',
-          data: {'i': token, 'noteId': noteId, 'reaction': reaction},
+          '/api/notes/create',
+          data: {
+            'i': token,
+            if (text != null) 'text': text,
+            if (replyId != null) 'replyId': replyId,
+            if (renoteId != null) 'renoteId': renoteId,
+            if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
+            if (visibility != null) 'visibility': visibility,
+            if (localOnly != null) 'localOnly': localOnly,
+            if (cw != null) 'cw': cw,
+          },
         ),
       );
+    }
+
+    try {
+      await _rustClient.createNote(
+        text: text,
+        replyId: replyId,
+        renoteId: renoteId,
+        visibility: visibility,
+      );
+    } catch (e) {
+      logger.error('MisskeyApi.createNote error', e);
+      throw Exception('MisskeyApi.createNote error: $e');
+    }
+  }
+
+  Future<void> createReaction(String noteId, String reaction) async {
+    try {
+      await _rustClient.createReaction(noteId: noteId, reaction: reaction);
+    } catch (e) {
+      logger.error('MisskeyApi.createReaction error', e);
+      throw Exception('MisskeyApi.createReaction error: $e');
+    }
+  }
 
   Future<void> deleteReaction(String noteId) => executeApiCallVoid(
     'MisskeyApi.deleteReaction',
