@@ -9,7 +9,7 @@ import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/config/constants.dart';
-import '../../rust/frb_generated.dart';
+import '../../../rust/frb_generated.dart';
 
 part 'rust_misskey_streaming_service.g.dart';
 
@@ -27,7 +27,8 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
   Stream<NoteEvent> get noteStream => _noteStreamController.stream;
 
   // Stream for broadcasting received messages
-  final _messageStreamController = StreamController<MessagingMessage>.broadcast();
+  final _messageStreamController =
+      StreamController<MessagingMessage>.broadcast();
   Stream<MessagingMessage> get messageStream => _messageStreamController.stream;
 
   // Track active timeline subscriptions to avoid duplicates
@@ -72,10 +73,7 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
       logger.info('RustMisskeyStreaming: Connecting to ${account.host}');
 
       // Create Rust client instance
-      _rustClient = RustMisskeyClient(
-        host: account.host,
-        token: account.token,
-      );
+      _rustClient = RustMisskeyClient(host: account.host, token: account.token);
 
       // Connect to streaming
       await _rustClient.connectStreaming();
@@ -96,7 +94,7 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
   void _disconnect() async {
     _reconnectTimer?.cancel();
     _eventPollingTimer?.cancel();
-    
+
     try {
       if (_rustClient != null) {
         await _rustClient.disconnectStreaming();
@@ -105,16 +103,18 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
     } catch (e) {
       logger.error('RustMisskeyStreaming Disconnection error: $e');
     }
-    
+
     _connectedAccountId = null;
     logger.info('RustMisskeyStreaming: Disconnected');
   }
 
   void _startEventPolling() {
     _eventPollingTimer?.cancel();
-    
+
     // Poll for events every 50ms
-    _eventPollingTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    _eventPollingTimer = Timer.periodic(const Duration(milliseconds: 50), (
+      timer,
+    ) {
       _pollForEvents();
     });
   }
@@ -139,7 +139,9 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
     final body = event['body'] ?? {};
     final channelId = event['channelId'] ?? '';
 
-    logger.debug('RustMisskeyStreaming: Received event: $eventType from channel: $channelId');
+    logger.debug(
+      'RustMisskeyStreaming: Received event: $eventType from channel: $channelId',
+    );
 
     if (eventType == 'note' && body != null) {
       try {
@@ -167,26 +169,27 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
       }
     } else if (eventType == 'chatMessage' && body != null) {
       try {
-        final message = MessagingMessage.fromJson(
-          body as Map<String, dynamic>,
-        );
+        final message = MessagingMessage.fromJson(body as Map<String, dynamic>);
         _messageStreamController.add(message);
       } catch (e) {
-        logger.error('RustMisskeyStreaming: Error processing chatMessage event: $e');
+        logger.error(
+          'RustMisskeyStreaming: Error processing chatMessage event: $e',
+        );
       }
     } else if (eventType == 'noteDeleted') {
       logger.info('RustMisskeyStreaming: Received noteDeleted event: $body');
 
       // Try different possible field names for the note ID
-      final noteId = body['deletedId'] as String? ??
+      final noteId =
+          body['deletedId'] as String? ??
           body['id'] as String? ??
           body['noteId'] as String?;
 
       if (noteId != null) {
-        _noteStreamController.add(
-          NoteEvent(noteId: noteId, isDelete: true),
+        _noteStreamController.add(NoteEvent(noteId: noteId, isDelete: true));
+        logger.info(
+          'RustMisskeyStreaming: Emitted deletion event for note: $noteId',
         );
-        logger.info('RustMisskeyStreaming: Emitted deletion event for note: $noteId');
       } else {
         logger.warning(
           'RustMisskeyStreaming: noteDeleted event missing ID field. Event body: $body',
@@ -223,7 +226,9 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
       _activeTimelineSubscriptions.add(channelName);
       logger.info('RustMisskeyStreaming: Subscribed to $channelName channel');
     } catch (e) {
-      logger.error('RustMisskeyStreaming: Error subscribing to $channelName: $e');
+      logger.error(
+        'RustMisskeyStreaming: Error subscribing to $channelName: $e',
+      );
     }
   }
 
