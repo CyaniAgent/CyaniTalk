@@ -22,35 +22,70 @@ class MisskeyPostPage extends StatefulWidget {
 
 /// MisskeyPostPage的状态管理类
 class _MisskeyPostPageState extends State<MisskeyPostPage> {
-  /// 文本编辑控制器，用于管理笔记内容
   final TextEditingController _controller = TextEditingController();
-
-  /// 是否显示预览
   bool _showPreview = false;
-
-  /// 是否仅本地可见（不参与联邦）
   bool _localOnly = false;
-
-  /// 笔记可见性，可选值：'public', 'home', 'followers', 'direct'
   String _visibility = 'public';
 
-  /// 释放资源
-  ///
-  ///  dispose文本编辑控制器资源。
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
-  /// 构建发布笔记页面的UI界面
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  ///
-  /// 返回一个居中的发布笔记对话框组件
   @override
   Widget build(BuildContext context) {
-    // 用作对话框/模态框内容
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+
+        if (isMobile) {
+          return _buildMobileLayout(context);
+        } else {
+          return _buildDesktopLayout(context);
+        }
+      },
+    );
+  }
+
+  /// 构建移动端全屏布局
+  Widget _buildMobileLayout(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'post_close'.tr(),
+        ),
+        title: Text('post_publish'.tr()),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: FilledButton(
+              onPressed: _handlePublish,
+              child: Text('post_publish'.tr()),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildToolBar(context),
+          const Divider(height: 1),
+          Expanded(
+            child: SingleChildScrollView(
+              child: _buildInputArea(context),
+            ),
+          ),
+          const Divider(height: 1),
+          _buildAttachmentBar(context),
+        ],
+      ),
+    );
+  }
+
+  /// 构建桌面端卡片布局
+  Widget _buildDesktopLayout(BuildContext context) {
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
@@ -58,284 +93,241 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
         child: Card(
           elevation: 4,
           clipBehavior: Clip.antiAlias,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // --- 顶部区域 ---
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => Navigator.of(context).pop(),
-                        tooltip: 'post_close'.tr(),
-                      ),
-                      const SizedBox(width: 8),
-                      // 账户菜单
-                      PopupMenuButton<String>(
-                        tooltip: 'post_account'.tr(),
-                        icon: const CircleAvatar(
-                          radius: 16,
-                          child: Icon(Icons.person, size: 20),
-                        ),
-                        onSelected: (value) {
-                          // 处理选择
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Selected: $value')),
-                          );
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'drafts',
-                            child: Text('post_drafts'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'scheduled',
-                            child: Text('post_scheduled_posts'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'switch',
-                            child: Text('post_switch_account'.tr()),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 8),
-                      // 可见性设置
-                      PopupMenuButton<String>(
-                        tooltip: 'post_visibility'.tr(),
-                        icon: Icon(_getVisibilityIcon(_visibility)),
-                        onSelected: (value) =>
-                            setState(() => _visibility = value),
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'public',
-                            child: Text('post_visibility_public'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'home',
-                            child: Text('post_visibility_home'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'followers',
-                            child: Text('post_visibility_followers'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'direct',
-                            child: Text('post_visibility_direct'.tr()),
-                          ),
-                        ],
-                      ),
-                      // 仅本地可见
-                      IconButton(
-                        tooltip: 'post_local_only'.tr(),
-                        icon: Icon(
-                          _localOnly
-                              ? Icons.rocket_launch
-                              : Icons.rocket_launch_outlined,
-                        ),
-                        color: _localOnly
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                        onPressed: () =>
-                            setState(() => _localOnly = !_localOnly),
-                      ),
-                      const Spacer(),
-                      // 其他选项菜单
-                      PopupMenuButton<String>(
-                        tooltip: 'post_other'.tr(),
-                        icon: const Icon(Icons.more_horiz),
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'reaction',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.check_box_outline_blank,
-                                  size: 18,
-                                ), // 模拟复选框
-                                SizedBox(width: 8),
-                                Text('post_accept_reactions'.tr()),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'draft',
-                            child: Text('post_save_to_drafts'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'schedule',
-                            child: Text('post_schedule_post'.tr()),
-                          ),
-                          PopupMenuItem(
-                            value: 'preview',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  _showPreview
-                                      ? Icons.check_box
-                                      : Icons.check_box_outline_blank,
-                                  size: 18,
-                                  color: _showPreview
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                ),
-                                const SizedBox(width: 8),
-                                Text('post_preview'.tr()),
-                              ],
-                            ),
-                            onTap: () {
-                              setState(() => _showPreview = !_showPreview);
-                            },
-                          ),
-                          PopupMenuItem(
-                            value: 'reset',
-                            child: Text('post_reset'.tr()),
-                            onTap: () {
-                              setState(() {
-                                _controller.clear();
-                                _showPreview = false;
-                                _localOnly = false;
-                                _visibility = 'public';
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 8),
-                      // 发布按钮
-                      FilledButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('post_post_created'.tr())),
-                          );
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('post_publish'.tr()),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-
-                  // --- 中间区域 ---
-                  TextField(
-                    controller: _controller,
-                    maxLines: 8,
-                    minLines: 4,
-                    maxLength: 3000,
-                    decoration: InputDecoration(
-                      hintText: 'post_what_are_you_thinking'.tr(),
-                      border: InputBorder.none,
-                    ),
-                  ),
-
-                  // 预览区域
-                  if (_showPreview) ...[
-                    const Divider(),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'post_preview'.tr(),
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _controller.text.isEmpty
-                                ? 'post_preview_will_show_here'.tr()
-                                : _controller.text,
-                          ),
-                        ],
-                      ),
-                    ).animate().fadeIn(),
-                  ],
-
-                  const Divider(),
-
-                  // --- 底部区域 ---
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    alignment: WrapAlignment.start,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.image_outlined),
-                        tooltip: 'post_insert_attachment_from_local'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.cloud_queue),
-                        tooltip: 'post_insert_attachment_from_cloud'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.poll_outlined),
-                        tooltip: 'post_poll'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.visibility_off_outlined),
-                        tooltip: 'post_hide_content'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.tag),
-                        tooltip: 'post_tags'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.alternate_email),
-                        tooltip: 'post_mention'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.emoji_emotions_outlined),
-                        tooltip: 'post_emoji'.tr(),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.code),
-                        tooltip: 'post_mfm_format'.tr(),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDesktopHeader(context),
+              const Divider(height: 1),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: _buildInputArea(context),
+                ),
               ),
-            ),
+              const Divider(height: 1),
+              _buildAttachmentBar(context),
+            ],
           ),
         ),
       ).animate().scale(duration: 200.ms, curve: Curves.easeOutBack),
     );
   }
 
-  /// 根据可见性值获取对应的图标
-  ///
-  /// [visibility] - 可见性字符串，可选值：'public', 'home', 'followers', 'direct'
-  ///
-  /// 返回对应的图标Data
+  /// 桌面端特定的头部
+  Widget _buildDesktopHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: 'post_close'.tr(),
+          ),
+          const Spacer(),
+          _buildToolBar(context),
+          const SizedBox(width: 8),
+          FilledButton(
+            onPressed: _handlePublish,
+            child: Text('post_publish'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 通用工具栏 (账户、可见性、本地可见、更多)
+  Widget _buildToolBar(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 账户菜单
+        PopupMenuButton<String>(
+          tooltip: 'post_account'.tr(),
+          icon: const CircleAvatar(
+            radius: 14,
+            child: Icon(Icons.person, size: 18),
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'drafts', child: Text('post_drafts'.tr())),
+            PopupMenuItem(value: 'scheduled', child: Text('post_scheduled_posts'.tr())),
+            PopupMenuItem(value: 'switch', child: Text('post_switch_account'.tr())),
+          ],
+        ),
+        // 可见性设置
+        PopupMenuButton<String>(
+          tooltip: 'post_visibility'.tr(),
+          icon: Icon(_getVisibilityIcon(_visibility), size: 20),
+          onSelected: (value) => setState(() => _visibility = value),
+          itemBuilder: (context) => [
+            PopupMenuItem(value: 'public', child: Text('post_visibility_public'.tr())),
+            PopupMenuItem(value: 'home', child: Text('post_visibility_home'.tr())),
+            PopupMenuItem(value: 'followers', child: Text('post_visibility_followers'.tr())),
+            PopupMenuItem(value: 'direct', child: Text('post_visibility_direct'.tr())),
+          ],
+        ),
+        // 仅本地可见
+        IconButton(
+          tooltip: 'post_local_only'.tr(),
+          icon: Icon(
+            _localOnly ? Icons.rocket_launch : Icons.rocket_launch_outlined,
+            size: 20,
+          ),
+          color: _localOnly ? Theme.of(context).colorScheme.primary : null,
+          onPressed: () => setState(() => _localOnly = !_localOnly),
+        ),
+        // 更多选项
+        PopupMenuButton<String>(
+          tooltip: 'post_other'.tr(),
+          icon: const Icon(Icons.more_horiz, size: 20),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'preview',
+              child: Row(
+                children: [
+                  Icon(
+                    _showPreview ? Icons.check_box : Icons.check_box_outline_blank,
+                    size: 18,
+                    color: _showPreview ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('post_preview'.tr()),
+                ],
+              ),
+              onTap: () => setState(() => _showPreview = !_showPreview),
+            ),
+            PopupMenuItem(
+              value: 'reset',
+              child: Text('post_reset'.tr()),
+              onTap: () {
+                setState(() {
+                  _controller.clear();
+                  _showPreview = false;
+                  _localOnly = false;
+                  _visibility = 'public';
+                });
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// 输入区域 (文本框 + 预览)
+  Widget _buildInputArea(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _controller,
+            maxLines: null,
+            minLines: 5,
+            maxLength: 3000,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: 'post_what_are_you_thinking'.tr(),
+              border: InputBorder.none,
+              counterText: '',
+            ),
+            onChanged: (text) {
+              if (_showPreview) setState(() {});
+            },
+          ),
+          if (_showPreview) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            _buildPreviewArea(context),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// 预览区域
+  Widget _buildPreviewArea(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.visibility_outlined, 
+                   size: 14, 
+                   color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 6),
+              Text(
+                'post_preview'.tr(),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _controller.text.isEmpty
+                ? 'post_preview_will_show_here'.tr()
+                : _controller.text,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    ).animate().fadeIn();
+  }
+
+  /// 底部附件栏
+  Widget _buildAttachmentBar(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          _buildAttachIcon(Icons.image_outlined, 'post_insert_attachment_from_local'.tr()),
+          _buildAttachIcon(Icons.cloud_queue, 'post_insert_attachment_from_cloud'.tr()),
+          _buildAttachIcon(Icons.poll_outlined, 'post_poll'.tr()),
+          _buildAttachIcon(Icons.visibility_off_outlined, 'post_hide_content'.tr()),
+          _buildAttachIcon(Icons.tag, 'post_tags'.tr()),
+          _buildAttachIcon(Icons.alternate_email, 'post_mention'.tr()),
+          _buildAttachIcon(Icons.emoji_emotions_outlined, 'post_emoji'.tr()),
+          _buildAttachIcon(Icons.code, 'post_mfm_format'.tr()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttachIcon(IconData icon, String tooltip) {
+    return IconButton(
+      icon: Icon(icon, size: 22),
+      tooltip: tooltip,
+      onPressed: () {},
+    );
+  }
+
+  void _handlePublish() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('post_post_created'.tr())),
+    );
+    Navigator.of(context).pop();
+  }
+
   IconData _getVisibilityIcon(String visibility) {
     switch (visibility) {
-      case 'home':
-        return Icons.home;
-      case 'followers':
-        return Icons.lock_open;
-      case 'direct':
-        return Icons.mail;
+      case 'home': return Icons.home;
+      case 'followers': return Icons.lock_open;
+      case 'direct': return Icons.mail;
       case 'public':
-      default:
-        return Icons.public;
+      default: return Icons.public;
     }
   }
 }

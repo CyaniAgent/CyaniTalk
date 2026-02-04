@@ -1,21 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 
 import '../domain/note.dart';
 import '../domain/messaging_message.dart';
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
 import '../../../core/utils/logger.dart';
-import '../../../core/config/constants.dart';
-import '../../../rust/frb_generated.dart';
+import '../../../rust/api/misskey.dart';
 
 part 'rust_misskey_streaming_service.g.dart';
 
 @Riverpod(keepAlive: true)
 class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
-  RustMisskeyClient? _rustClient;
+  MisskeyRustClient? _rustClient;
   Timer? _reconnectTimer;
   Timer? _eventPollingTimer;
 
@@ -73,13 +71,13 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
       logger.info('RustMisskeyStreaming: Connecting to ${account.host}');
 
       // Create Rust client instance
-      _rustClient = RustMisskeyClient(host: account.host, token: account.token);
+      _rustClient = MisskeyRustClient(host: account.host, token: account.token);
 
       // Connect to streaming
-      await _rustClient.connectStreaming();
+      await _rustClient!.connectStreaming();
 
       // Subscribe to main channel
-      await _rustClient.subscribeToMain();
+      await _rustClient!.subscribeToMain();
 
       // Start polling for events
       _startEventPolling();
@@ -97,7 +95,7 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
 
     try {
       if (_rustClient != null) {
-        await _rustClient.disconnectStreaming();
+        await _rustClient!.disconnectStreaming();
         _rustClient = null;
       }
     } catch (e) {
@@ -222,7 +220,7 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
     if (_activeTimelineSubscriptions.contains(channelName)) return;
 
     try {
-      await _rustClient.subscribeToTimeline(timelineType);
+      await _rustClient!.subscribeToTimeline(timelineType: timelineType);
       _activeTimelineSubscriptions.add(channelName);
       logger.info('RustMisskeyStreaming: Subscribed to $channelName channel');
     } catch (e) {
@@ -235,7 +233,7 @@ class RustMisskeyStreamingService extends _$RustMisskeyStreamingService {
   void sendMessage(Map<String, dynamic> data) async {
     if (_rustClient != null) {
       try {
-        await _rustClient.sendStreamingMessage(jsonEncode(data));
+        await _rustClient!.sendStreamingMessage(message: jsonEncode(data));
       } catch (e) {
         logger.error('RustMisskeyStreaming: Error sending message: $e');
       }

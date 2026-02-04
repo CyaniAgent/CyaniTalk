@@ -154,12 +154,12 @@ impl MisskeyRustClient {
             _ => "main",
         };
         
-        let channel_id = format!("timeline-{}", channel_name);
+        let channel_id = self.generate_channel_id(&format!("timeline-{}", channel_name));
         self.streaming_client.subscribe_to_channel(channel_name.to_string(), channel_id).await
     }
 
     pub async fn subscribe_to_main(&self) -> Result<()> {
-        let channel_id = format!("main-channel-{}", chrono::offset::Utc::now().timestamp_millis());
+        let channel_id = self.generate_channel_id("main-channel");
         self.streaming_client.subscribe_to_channel("main".to_string(), channel_id).await
     }
     

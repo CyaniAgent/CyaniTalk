@@ -43,7 +43,7 @@ final class RustMisskeyStreamingServiceProvider
 }
 
 String _$rustMisskeyStreamingServiceHash() =>
-    r'6cb7ac517bdfb5f7779ce53de8960a60029c8f41';
+    r'1c9de3daa0181f479f27891635b87950d9a8c72f';
 
 abstract class _$RustMisskeyStreamingService extends $Notifier<void> {
   void build();

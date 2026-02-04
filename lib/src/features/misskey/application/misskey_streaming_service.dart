@@ -31,6 +31,10 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
   final _messageStreamController = StreamController<MessagingMessage>.broadcast();
   Stream<MessagingMessage> get messageStream => _messageStreamController.stream;
 
+  // Stream for broadcasting received notifications
+  final _notificationStreamController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get notificationStream => _notificationStreamController.stream;
+
   // Track active timeline subscriptions to avoid duplicates
   final Set<String> _activeTimelineSubscriptions = {};
 
@@ -59,6 +63,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
       _disconnect();
       _noteStreamController.close();
       _messageStreamController.close();
+      _notificationStreamController.close();
     });
   }
 
@@ -200,6 +205,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
               NoteEvent(note: note, timelineType: timelineType),
             );
           }
+        } else if (eventType == 'notification' && eventBody != null) {
+          _notificationStreamController.add(eventBody as Map<String, dynamic>);
         } else if (eventType == 'chatMessage' && eventBody != null) {
           final message = MessagingMessage.fromJson(
             eventBody as Map<String, dynamic>,

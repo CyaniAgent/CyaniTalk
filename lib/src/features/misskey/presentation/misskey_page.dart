@@ -97,6 +97,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'misskey_fab',
         onPressed: () async {
           logger.info('MisskeyPage: Floating action button pressed');
           // 检查是否已登录 Misskey

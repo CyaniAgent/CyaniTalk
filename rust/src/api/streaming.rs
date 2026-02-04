@@ -49,7 +49,7 @@ impl StreamingClient {
         let ws_url = format!("wss://{}/streaming?i={}", url, token);
 
         let (ws_stream, _) = connect_async(ws_url).await?;
-        let (mut ws_write, ws_read) = ws_stream.split();
+        let (ws_write, ws_read) = ws_stream.split();
 
         let (tx, mut rx) = mpsc::unbounded();
         {
@@ -265,7 +265,7 @@ impl StreamingClient {
         // Use a blocking approach to try to receive an event
         // Since we can't directly access the receiver from a sync context,
         // we'll temporarily replace it with a new one and return the old one
-        let mut rx_option = self.poll_rx.lock().unwrap().take();
+        let rx_option = self.poll_rx.lock().unwrap().take();
         if let Some(mut rx) = rx_option {
             // Try to receive an event without blocking
             match rx.try_recv() {

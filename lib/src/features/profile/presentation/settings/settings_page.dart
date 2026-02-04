@@ -8,6 +8,8 @@ import 'about_page.dart';
 import 'accounts_page.dart';
 import 'appearance_page.dart';
 import 'cache_settings_page.dart';
+import 'notification_settings_page.dart';
+import 'sound_settings_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -132,12 +134,22 @@ class _SettingsPageState extends State<SettingsPage> {
             Icons.notifications_outlined,
             'settings_notifications_title'.tr(),
             'settings_notifications_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
+              );
+            },
           ),
           _buildSettingsTile(
             context,
             Icons.volume_up_outlined,
             'settings_sound_title'.tr(),
             'settings_sound_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SoundSettingsPage()),
+              );
+            },
           ),
 
           _buildSectionHeader(context, 'settings_section_system'.tr()),

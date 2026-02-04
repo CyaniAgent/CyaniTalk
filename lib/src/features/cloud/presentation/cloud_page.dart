@@ -66,6 +66,7 @@ class CloudPage extends ConsumerWidget {
       ),
       bottomNavigationBar: _buildDriveSpace(context, driveState),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'cloud_fab',
         onPressed: () => _showAddOptions(context, ref),
         child: const Icon(Icons.add),
       ),

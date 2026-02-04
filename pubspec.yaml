@@ -161,6 +161,11 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/sounds/
+    - assets/sounds/Chat/
+    - assets/sounds/Emoji-Responses/
+    - assets/sounds/Notifications/
+    - assets/sounds/PostReceived/
+    - assets/sounds/PostSend/
     - assets/sounds/SpeechNoti/
     - assets/icons/logo/desktop/
     - assets/translations/
