@@ -15,7 +15,7 @@ impl JuheAuthClient {
     #[frb(sync)]
     pub fn new(appid: String, appkey: String, apiurl: String, callback: String) -> JuheAuthClient {
         let client = Client::builder()
-            .user_agent("CyaniTalk/1.0 (Rust)")
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 CyaniTalk/1.0")
             .danger_accept_invalid_certs(true) // Matching Dart's badCertificateCallback
             .build()
             .unwrap_or_default();

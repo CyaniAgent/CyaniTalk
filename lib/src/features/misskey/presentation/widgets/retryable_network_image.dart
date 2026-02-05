@@ -6,12 +6,16 @@ class RetryableNetworkImage extends StatefulWidget {
   final String url;
   final BoxFit fit;
   final int maxRetries;
+  final double? width;
+  final double? height;
 
   const RetryableNetworkImage({
     super.key,
     required this.url,
     this.fit = BoxFit.cover,
     this.maxRetries = 3,
+    this.width,
+    this.height,
   });
 
   @override
@@ -43,11 +47,13 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
       widget.url,
       key: ValueKey(_imageKey),
       fit: widget.fit,
-      width: double.infinity,
+      width: widget.width,
+      height: widget.height,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(
-          height: 200,
+          width: widget.width,
+          height: widget.height ?? 200,
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Center(
             child: CircularProgressIndicator(
@@ -66,7 +72,8 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
         }
 
         return Container(
-          height: 150,
+          width: widget.width,
+          height: widget.height ?? 150,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),

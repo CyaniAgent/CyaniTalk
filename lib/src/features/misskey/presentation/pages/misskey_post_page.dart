@@ -1,15 +1,14 @@
-// Misskey发布笔记页面
-//
-// 该文件包含MisskeyPostPage组件，用于创建和发布Misskey笔记。
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/misskey_repository.dart';
 
 /// Misskey发布笔记页面组件
 ///
 /// 用于创建和发布Misskey笔记，支持设置可见性、本地仅可见等选项，
 /// 并提供预览功能。
-class MisskeyPostPage extends StatefulWidget {
+class MisskeyPostPage extends ConsumerStatefulWidget {
   /// 创建一个新的MisskeyPostPage实例
   ///
   /// [key] - 组件的键，用于唯一标识组件
@@ -17,15 +16,16 @@ class MisskeyPostPage extends StatefulWidget {
 
   /// 创建MisskeyPostPage的状态管理对象
   @override
-  State<MisskeyPostPage> createState() => _MisskeyPostPageState();
+  ConsumerState<MisskeyPostPage> createState() => _MisskeyPostPageState();
 }
 
 /// MisskeyPostPage的状态管理类
-class _MisskeyPostPageState extends State<MisskeyPostPage> {
+class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   final TextEditingController _controller = TextEditingController();
   bool _showPreview = false;
   bool _localOnly = false;
   String _visibility = 'public';
+  bool _isPosting = false;
 
   @override
   void dispose() {
@@ -59,13 +59,23 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
         ),
         title: Text('post_publish'.tr()),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: FilledButton(
-              onPressed: _handlePublish,
-              child: Text('post_publish'.tr()),
+          if (_isPosting)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: FilledButton(
+                onPressed: _handlePublish,
+                child: Text('post_publish'.tr()),
+              ),
             ),
-          ),
         ],
       ),
       body: Column(
@@ -126,10 +136,17 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
           const Spacer(),
           _buildToolBar(context),
           const SizedBox(width: 8),
-          FilledButton(
-            onPressed: _handlePublish,
-            child: Text('post_publish'.tr()),
-          ),
+          if (_isPosting)
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            FilledButton(
+              onPressed: _handlePublish,
+              child: Text('post_publish'.tr()),
+            ),
         ],
       ),
     );
@@ -226,6 +243,7 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
             minLines: 5,
             maxLength: 3000,
             autofocus: true,
+            enabled: !_isPosting,
             decoration: InputDecoration(
               hintText: 'post_what_are_you_thinking'.tr(),
               border: InputBorder.none,
@@ -310,15 +328,41 @@ class _MisskeyPostPageState extends State<MisskeyPostPage> {
     return IconButton(
       icon: Icon(icon, size: 22),
       tooltip: tooltip,
-      onPressed: () {},
+      onPressed: _isPosting ? null : () {},
     );
   }
 
-  void _handlePublish() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('post_post_created'.tr())),
-    );
-    Navigator.of(context).pop();
+  Future<void> _handlePublish() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() => _isPosting = true);
+
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.createNote(
+        text: text,
+        visibility: _visibility,
+        localOnly: _localOnly,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('post_post_created'.tr())),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPosting = false);
+      }
+    }
   }
 
   IconData _getVisibilityIcon(String visibility) {
