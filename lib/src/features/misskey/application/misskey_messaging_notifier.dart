@@ -147,3 +147,64 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
     }
   }
 }
+
+@riverpod
+class MisskeyChatRoomNotifier extends _$MisskeyChatRoomNotifier {
+  @override
+  FutureOr<List<MessagingMessage>> build(String roomId) async {
+    logger.info('初始化Misskey聊天室，房间ID: $roomId');
+    try {
+      final repository = await ref.watch(misskeyRepositoryProvider.future);
+      
+      // 获取聊天室消息
+      final messages = await repository.getChatRoomMessages(roomId: roomId);
+
+      // 监听实时消息 (聊天室消息通常也在同样的流中，或者需要特定的流)
+      final streamingService = ref.watch(misskeyStreamingServiceProvider.notifier);
+      final subscription = streamingService.messageStream.listen((message) {
+        if (message.roomId == roomId) {
+          logger.debug('聊天室Notifier收到实时消息: ${message.id}');
+          _handleNewMessage(message);
+        }
+      });
+
+      ref.onDispose(() {
+        subscription.cancel();
+      });
+
+      // 同样按时间正序排列
+      final sortedMessages = messages.reversed.toList();
+      logger.info('Misskey聊天室初始化完成，加载了 ${sortedMessages.length} 条消息');
+      return sortedMessages;
+    } catch (e, stack) {
+      logger.error('Misskey聊天室初始化失败，房间ID: $roomId', e, stack);
+      rethrow;
+    }
+  }
+
+  void _handleNewMessage(MessagingMessage message) {
+    if (!ref.mounted) return;
+    
+    final currentMessages = state.value ?? [];
+    if (currentMessages.any((m) => m.id == message.id)) return;
+
+    state = AsyncData([...currentMessages, message]);
+  }
+
+  Future<void> sendMessage(String text, {String? fileId}) async {
+    if (text.isEmpty && fileId == null) return;
+
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.sendChatRoomMessage(
+        roomId: roomId,
+        text: text,
+        fileId: fileId,
+      );
+      // 注意：某些API不直接返回发送的消息，依赖流更新
+    } catch (e) {
+      logger.error('发送Misskey聊天室消息失败', e);
+      rethrow;
+    }
+  }
+}

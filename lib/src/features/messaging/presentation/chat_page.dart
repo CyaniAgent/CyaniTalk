@@ -4,20 +4,29 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../misskey/application/misskey_messaging_notifier.dart';
 import '../../misskey/domain/messaging_message.dart';
 import '../../misskey/domain/misskey_user.dart';
+import '../../misskey/domain/chat_room.dart';
 import '../../misskey/application/misskey_notifier.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-class MessagingChatPage extends ConsumerStatefulWidget {
-  final String userId;
-  final MisskeyUser? initialUser;
+enum ChatType { direct, room }
 
-  const MessagingChatPage({super.key, required this.userId, this.initialUser});
+class ChatPage extends ConsumerStatefulWidget {
+  final String id;
+  final ChatType type;
+  final dynamic initialData; // MisskeyUser for direct, ChatRoom for room
+
+  const ChatPage({
+    super.key,
+    required this.id,
+    required this.type,
+    this.initialData,
+  });
 
   @override
-  ConsumerState<MessagingChatPage> createState() => _MessagingChatPageState();
+  ConsumerState<ChatPage> createState() => _ChatPageState();
 }
 
-class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
+class _ChatPageState extends ConsumerState<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -32,10 +41,14 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
-    ref.read(misskeyMessagingProvider(widget.userId).notifier).sendMessage(text);
+    if (widget.type == ChatType.direct) {
+      ref.read(misskeyMessagingProvider(widget.id).notifier).sendMessage(text);
+    } else {
+      ref.read(misskeyChatRoomProvider(widget.id).notifier).sendMessage(text);
+    }
+    
     _textController.clear();
     
-    // Scroll to bottom after sending
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -49,28 +62,41 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final messagesAsync = ref.watch(misskeyMessagingProvider(widget.userId));
     final meAsync = ref.watch(misskeyMeProvider);
     final theme = Theme.of(context);
+
+    final messagesAsync = widget.type == ChatType.direct
+        ? ref.watch(misskeyMessagingProvider(widget.id))
+        : ref.watch(misskeyChatRoomProvider(widget.id));
+
+    String title = 'messaging_chat_title'.tr();
+    Widget? leadingAvatar;
+
+    if (widget.type == ChatType.direct) {
+      final user = widget.initialData as MisskeyUser?;
+      title = user?.name ?? user?.username ?? title;
+      leadingAvatar = CircleAvatar(
+        radius: 16,
+        backgroundImage: user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
+        child: user?.avatarUrl == null ? const Icon(Icons.person, size: 20) : null,
+      );
+    } else {
+      final room = widget.initialData as ChatRoom?;
+      title = room?.name ?? 'messaging_room_chat_title'.tr();
+      leadingAvatar = CircleAvatar(
+        radius: 16,
+        backgroundColor: theme.colorScheme.primaryContainer,
+        child: const Icon(Icons.groups, size: 20),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: widget.initialUser?.avatarUrl != null 
-                ? NetworkImage(widget.initialUser!.avatarUrl!) 
-                : null,
-              child: widget.initialUser?.avatarUrl == null ? const Icon(Icons.person, size: 20) : null,
-            ),
+            leadingAvatar,
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                widget.initialUser?.name ?? widget.initialUser?.username ?? 'messaging_chat_title'.tr(),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
           ],
         ),
       ),
@@ -99,15 +125,13 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      // Use flexible senderId to check if it's from me
                       final isMe = message.senderId == me.id;
                       
-                      // Mark as read when it appears and it's not from me
-                      if (!message.isRead && !isMe) {
-                        Future.microtask(() => ref.read(misskeyMessagingProvider(widget.userId).notifier).markAsRead(message.id));
+                      if (widget.type == ChatType.direct && !message.isRead && !isMe) {
+                        Future.microtask(() => ref.read(misskeyMessagingProvider(widget.id).notifier).markAsRead(message.id));
                       }
                       
-                      return _buildMessageBubble(context, message, isMe);
+                      return _buildMessageBubble(context, message, isMe, me.id);
                     },
                   );
                 },
@@ -124,7 +148,7 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
     );
   }
 
-  Widget _buildMessageBubble(BuildContext context, MessagingMessage message, bool isMe) {
+  Widget _buildMessageBubble(BuildContext context, MessagingMessage message, bool isMe, String myId) {
     final theme = Theme.of(context);
     final mikuGreen = const Color(0xFF39C5BB);
 
@@ -135,6 +159,14 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
         child: Column(
           crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
+            if (!isMe && widget.type == ChatType.room)
+              Padding(
+                padding: const EdgeInsets.only(left: 8, bottom: 2),
+                child: Text(
+                  message.sender?.name ?? message.sender?.username ?? '?',
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary),
+                ),
+              ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
@@ -197,9 +229,7 @@ class _MessagingChatPageState extends ConsumerState<MessagingChatPage> {
         children: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
-            onPressed: () {
-              // TODO: Attachment support
-            },
+            onPressed: () {},
             color: theme.colorScheme.primary,
           ),
           Expanded(

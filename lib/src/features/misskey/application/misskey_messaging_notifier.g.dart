@@ -165,3 +165,104 @@ abstract class _$MisskeyMessagingNotifier
     element.handleCreate(ref, () => build(_$args));
   }
 }
+
+@ProviderFor(MisskeyChatRoomNotifier)
+final misskeyChatRoomProvider = MisskeyChatRoomNotifierFamily._();
+
+final class MisskeyChatRoomNotifierProvider
+    extends
+        $AsyncNotifierProvider<
+          MisskeyChatRoomNotifier,
+          List<MessagingMessage>
+        > {
+  MisskeyChatRoomNotifierProvider._({
+    required MisskeyChatRoomNotifierFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'misskeyChatRoomProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$misskeyChatRoomNotifierHash();
+
+  @override
+  String toString() {
+    return r'misskeyChatRoomProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  MisskeyChatRoomNotifier create() => MisskeyChatRoomNotifier();
+
+  @override
+  bool operator ==(Object other) {
+    return other is MisskeyChatRoomNotifierProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$misskeyChatRoomNotifierHash() =>
+    r'29b672f2a64dea784d95a2350b10a8a9b77b00f0';
+
+final class MisskeyChatRoomNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          MisskeyChatRoomNotifier,
+          AsyncValue<List<MessagingMessage>>,
+          List<MessagingMessage>,
+          FutureOr<List<MessagingMessage>>,
+          String
+        > {
+  MisskeyChatRoomNotifierFamily._()
+    : super(
+        retry: null,
+        name: r'misskeyChatRoomProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  MisskeyChatRoomNotifierProvider call(String roomId) =>
+      MisskeyChatRoomNotifierProvider._(argument: roomId, from: this);
+
+  @override
+  String toString() => r'misskeyChatRoomProvider';
+}
+
+abstract class _$MisskeyChatRoomNotifier
+    extends $AsyncNotifier<List<MessagingMessage>> {
+  late final _$args = ref.$arg as String;
+  String get roomId => _$args;
+
+  FutureOr<List<MessagingMessage>> build(String roomId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref
+            as $Ref<AsyncValue<List<MessagingMessage>>, List<MessagingMessage>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                AsyncValue<List<MessagingMessage>>,
+                List<MessagingMessage>
+              >,
+              AsyncValue<List<MessagingMessage>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
+  }
+}

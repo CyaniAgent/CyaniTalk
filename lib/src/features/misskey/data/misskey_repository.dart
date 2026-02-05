@@ -9,6 +9,7 @@ import '../domain/drive_file.dart';
 import '../domain/drive_folder.dart';
 import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
+import '../domain/misskey_notification.dart';
 
 part 'misskey_repository.g.dart';
 
@@ -441,34 +442,72 @@ class MisskeyRepository {
 
   // --- Messaging ---
 
-  Future<List<MessagingMessage>> getMessagingHistory({int limit = 10}) async {
+  Future<List<MessagingMessage>> getMessagingHistory({int limit = 20}) async {
     logger.info('MisskeyRepository: Getting messaging history, limit=$limit');
     try {
       final data = await api.getMessagingHistory(limit: limit);
-      logger.debug('MisskeyRepository: Raw messaging history data type: ${data.runtimeType}');
-      if (data.isNotEmpty) {
-         logger.debug('MisskeyRepository: First item in history: ${data.first}');
-      }
       
       final messages = <MessagingMessage>[];
+      final missingUserIds = <String>{};
+      
       for (final item in data) {
         try {
           var map = Map<String, dynamic>.from(item as Map);
           
-          // Check for wrapped message (common in some history endpoints)
           if (map.containsKey('message') && map['message'] is Map) {
-            final wrappedMessage = Map<String, dynamic>.from(map['message'] as Map);
-            // We might want to preserve some root fields if needed, but usually the message has what we need
-            map = wrappedMessage;
+            map = Map<String, dynamic>.from(map['message'] as Map);
           }
 
-          // Handle aliases manually
           if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
           if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
           
-          messages.add(MessagingMessage.fromJson(map));
+          // Handle room data in group field
+          if (map['group'] != null && map['room'] == null) {
+            final group = map['group'];
+            if (group is Map && group['room'] != null) {
+               map['room'] = group['room'];
+            }
+          }
+
+          final message = MessagingMessage.fromJson(map);
+          messages.add(message);
+
+          if (message.userId != null && message.user == null) {
+            missingUserIds.add(message.userId!);
+          }
+          if (message.recipientId != null && message.recipient == null) {
+            missingUserIds.add(message.recipientId!);
+          }
         } catch (e) {
-          logger.error('MisskeyRepository: Error decoding message item: $item', e);
+          logger.error('MisskeyRepository: Error decoding message item', e);
+        }
+      }
+
+      // Fetch missing users
+      if (missingUserIds.isNotEmpty) {
+        logger.info('MisskeyRepository: Fetching ${missingUserIds.length} missing users');
+        final users = <String, MisskeyUser>{};
+        await Future.wait(missingUserIds.map((id) async {
+          try {
+            final user = await showUser(id);
+            users[id] = user;
+          } catch (e) {
+            logger.error('MisskeyRepository: Error fetching missing user $id', e);
+          }
+        }));
+
+        // Update messages with fetched users
+        for (var i = 0; i < messages.length; i++) {
+          final m = messages[i];
+          MisskeyUser? updatedUser = m.user ?? users[m.userId];
+          MisskeyUser? updatedRecipient = m.recipient ?? users[m.recipientId];
+          
+          if (updatedUser != m.user || updatedRecipient != m.recipient) {
+            messages[i] = m.copyWith(
+              user: updatedUser,
+              recipient: updatedRecipient,
+            );
+          }
         }
       }
       
@@ -476,6 +515,48 @@ class MisskeyRepository {
       return messages;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting messaging history', e);
+      rethrow;
+    }
+  }
+
+  Future<List<MessagingMessage>> getChatRoomMessages({
+    required String roomId,
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting chat room messages for room $roomId');
+    try {
+      final data = await api.getChatRoomMessages(roomId, limit: limit);
+      final messages = <MessagingMessage>[];
+      
+      for (final item in data) {
+        try {
+          var map = Map<String, dynamic>.from(item as Map);
+          if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
+          if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
+          
+          messages.add(MessagingMessage.fromJson(map));
+        } catch (e) {
+          logger.error('MisskeyRepository: Error decoding chat room message', e);
+        }
+      }
+      return messages;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting chat room messages', e);
+      rethrow;
+    }
+  }
+
+  Future<void> sendChatRoomMessage({
+    required String roomId,
+    String? text,
+    String? fileId,
+  }) async {
+    logger.info('MisskeyRepository: Sending chat room message to $roomId');
+    try {
+      await api.sendChatRoomMessage(roomId, text: text, fileId: fileId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error sending chat room message', e);
       rethrow;
     }
   }
@@ -608,6 +689,22 @@ class MisskeyRepository {
       logger.info('MisskeyRepository: Successfully reported user/note');
     } catch (e) {
       logger.error('MisskeyRepository: Error reporting note', e);
+      rethrow;
+    }
+  }
+
+  // --- Notifications ---
+
+  Future<List<MisskeyNotification>> getNotifications({
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting notifications, limit=$limit');
+    try {
+      final data = await api.getNotifications(limit: limit, untilId: untilId);
+      return data.map((e) => MisskeyNotification.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+    } catch (e, stack) {
+      logger.error('MisskeyRepository: Error getting notifications', e, stack);
       rethrow;
     }
   }

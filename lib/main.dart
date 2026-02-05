@@ -4,9 +4,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cyanitalk/src/rust/frb_generated.dart';
 import 'src/app.dart';
 import 'src/core/core.dart';
+import 'src/features/auth/data/auth_repository.dart';
 import 'src/core/services/background_service.dart';
 import 'src/core/services/notification_service.dart';
 import 'src/core/services/notification_manager.dart';
@@ -19,6 +21,9 @@ import 'dart:io';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 初始化持久化存储
+  final sharedPrefs = await SharedPreferences.getInstance();
+
   // 初始化日志系统
   await logger.initialize();
   logger.info('CyaniTalk app started');
@@ -27,7 +32,11 @@ void main() async {
   await EasyLocalization.ensureInitialized();
 
   // 创建 ProviderContainer 以便在非 Widget 环境中使用 Provider
-  final container = ProviderContainer();
+  final container = ProviderContainer(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+    ],
+  );
 
   // 初始化通知服务
   final notificationService = NotificationService();

@@ -207,7 +207,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
           }
         } else if (eventType == 'notification' && eventBody != null) {
           _notificationStreamController.add(eventBody as Map<String, dynamic>);
-        } else if (eventType == 'chatMessage' && eventBody != null) {
+        } else if ((eventType == 'chatMessage' || eventType == 'messagingMessage') && eventBody != null) {
           final message = MessagingMessage.fromJson(
             eventBody as Map<String, dynamic>,
           );

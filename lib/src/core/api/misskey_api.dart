@@ -531,4 +531,20 @@ class MisskeyApi extends BaseApi {
       data: {'i': token, 'userId': userId, 'comment': comment},
     ),
   );
+
+  // --- Notifications ---
+
+  Future<List<dynamic>> getNotifications({
+    int limit = 20,
+    String? sinceId,
+    String? untilId,
+    List<String>? includeTypes,
+    List<String>? excludeTypes,
+  }) => _fetchList('MisskeyApi.getNotifications', '/api/i/notifications', {
+    'limit': limit,
+    if (sinceId != null) 'sinceId': sinceId,
+    if (untilId != null) 'untilId': untilId,
+    if (includeTypes != null) 'includeTypes': includeTypes,
+    if (excludeTypes != null) 'excludeTypes': excludeTypes,
+  });
 }

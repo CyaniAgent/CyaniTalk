@@ -1,9 +1,10 @@
 // 认证相关的数据仓库
 //
 // 该文件包含AuthRepository类，负责处理账户信息的持久化存储和检索，
-// 使用flutter_secure_storage进行安全存储。
+// 使用shared_preferences进行存储以确保在所有平台（特别是Linux）上的可靠性。
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/utils/logger.dart';
 import '../domain/account.dart';
@@ -14,8 +15,8 @@ part 'auth_repository.g.dart';
 ///
 /// 负责处理账户信息的持久化存储和检索，支持添加、获取和删除账户。
 class AuthRepository {
-  /// FlutterSecureStorage实例，用于安全存储账户信息
-  final FlutterSecureStorage _storage;
+  /// SharedPreferences实例，用于持久化存储账户信息
+  final SharedPreferences _prefs;
   
   /// 存储账户信息的密钥
   static const _kAccountsKey = 'cyani_accounts';
@@ -24,15 +25,15 @@ class AuthRepository {
 
   /// 创建一个新的AuthRepository实例
   ///
-  /// [_storage] - FlutterSecureStorage实例，用于安全存储
-  AuthRepository(this._storage);
+  /// [_prefs] - SharedPreferences实例
+  AuthRepository(this._prefs);
 
   /// 获取所有已保存的账户
   ///
   /// 返回包含所有账户的Future列表
   Future<List<Account>> getAccounts() async {
     logger.info('AuthRepository: Getting all accounts');
-    final jsonString = await _storage.read(key: _kAccountsKey);
+    final jsonString = _prefs.getString(_kAccountsKey);
     if (jsonString == null) {
       logger.info('AuthRepository: No accounts found');
       return [];
@@ -52,27 +53,27 @@ class AuthRepository {
 
   Future<String?> getSelectedMisskeyId() async {
     logger.info('AuthRepository: Getting selected Misskey account ID');
-    final id = await _storage.read(key: _kSelectedMisskeyIdKey);
+    final id = _prefs.getString(_kSelectedMisskeyIdKey);
     logger.info('AuthRepository: Selected Misskey account ID: $id');
     return id;
   }
 
   Future<void> saveSelectedMisskeyId(String id) async {
     logger.info('AuthRepository: Saving selected Misskey account ID: $id');
-    await _storage.write(key: _kSelectedMisskeyIdKey, value: id);
+    await _prefs.setString(_kSelectedMisskeyIdKey, id);
     logger.info('AuthRepository: Successfully saved selected Misskey account ID');
   }
 
   Future<String?> getSelectedFlarumId() async {
     logger.info('AuthRepository: Getting selected Flarum account ID');
-    final id = await _storage.read(key: _kSelectedFlarumIdKey);
+    final id = _prefs.getString(_kSelectedFlarumIdKey);
     logger.info('AuthRepository: Selected Flarum account ID: $id');
     return id;
   }
 
   Future<void> saveSelectedFlarumId(String id) async {
     logger.info('AuthRepository: Saving selected Flarum account ID: $id');
-    await _storage.write(key: _kSelectedFlarumIdKey, value: id);
+    await _prefs.setString(_kSelectedFlarumIdKey, id);
     logger.info('AuthRepository: Successfully saved selected Flarum account ID');
   }
 
@@ -86,9 +87,9 @@ class AuthRepository {
     final newAccounts = [...accounts.where((a) => a.id != account.id), account];
 
     try {
-      await _storage.write(
-        key: _kAccountsKey,
-        value: jsonEncode(newAccounts.map((e) => e.toJson()).toList()),
+      await _prefs.setString(
+        _kAccountsKey,
+        jsonEncode(newAccounts.map((e) => e.toJson()).toList()),
       );
       logger.info('AuthRepository: Successfully saved account: ${account.id}');
     } catch (e) {
@@ -106,9 +107,9 @@ class AuthRepository {
     final newAccounts = accounts.where((a) => a.id != id).toList();
 
     try {
-      await _storage.write(
-        key: _kAccountsKey,
-        value: jsonEncode(newAccounts.map((e) => e.toJson()).toList()),
+      await _prefs.setString(
+        _kAccountsKey,
+        jsonEncode(newAccounts.map((e) => e.toJson()).toList()),
       );
       logger.info('AuthRepository: Successfully removed account: $id');
       logger.info('AuthRepository: Remaining accounts: ${newAccounts.length}');
@@ -120,18 +121,21 @@ class AuthRepository {
 }
 
 /// 提供FlutterSecureStorage实例的Riverpod提供者
-///
-/// 该提供者创建并返回一个FlutterSecureStorage实例，用于安全存储数据。
 @Riverpod(keepAlive: true)
 FlutterSecureStorage secureStorage(Ref ref) {
   return const FlutterSecureStorage();
 }
 
+/// 提供SharedPreferences实例的Riverpod提供者
+/// 必须在 main() 中初始化并覆盖
+@Riverpod(keepAlive: true)
+SharedPreferences sharedPreferences(Ref ref) {
+  throw UnimplementedError();
+}
+
 /// 提供AuthRepository实例的Riverpod提供者
-///
-/// 该提供者创建并返回一个AuthRepository实例，用于处理账户信息的存储和检索。
 @Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
-  final storage = ref.watch(secureStorageProvider);
-  return AuthRepository(storage);
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return AuthRepository(prefs);
 }
