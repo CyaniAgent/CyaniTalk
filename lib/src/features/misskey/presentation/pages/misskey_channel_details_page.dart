@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/domain/channel.dart';
-import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 class MisskeyChannelDetailsPage extends ConsumerStatefulWidget {
   final Channel channel;
@@ -57,7 +57,7 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
               itemCount: notes.length + 1,
               itemBuilder: (context, index) {
                 if (index < notes.length) {
-                  return NoteCard(note: notes[index]);
+                  return ModernNoteCard(note: notes[index]);
                 } else {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
-import 'package:cyanitalk/src/features/misskey/presentation/widgets/note_card.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 /// Misskey时间线页面组件
 ///
@@ -104,7 +104,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   itemCount: notes.length + 1,
                   itemBuilder: (context, index) {
                     if (index < notes.length) {
-                      return NoteCard(
+                      return ModernNoteCard(
                         key: ValueKey(notes[index].id),
                         note: notes[index],
                       );

@@ -12,25 +12,26 @@ import 'audio_player_widget.dart';
 import '../pages/image_viewer_page.dart';
 import '../pages/video_player_page.dart';
 
-/// NoteCard组件
+/// Modern NoteCard组件
 /// 
-/// 用于显示单个Misskey笔记的卡片组件，支持显示用户信息、文本内容、媒体文件和互动按钮。
+/// 用于显示单个Misskey笔记的现代化卡片组件，采用卡片式布局，
+/// 支持显示用户信息、文本内容、媒体文件和互动按钮。
 /// 
 /// @param note 要显示的笔记对象
-class NoteCard extends ConsumerStatefulWidget {
+class ModernNoteCard extends ConsumerStatefulWidget {
   final Note note;
 
-  /// 创建NoteCard组件
+  /// 创建ModernNoteCard组件
   /// 
   /// @param key 组件的键
   /// @param note 要显示的笔记对象
-  const NoteCard({super.key, required this.note});
+  const ModernNoteCard({super.key, required this.note});
 
   @override
-  ConsumerState<NoteCard> createState() => _NoteCardState();
+  ConsumerState<ModernNoteCard> createState() => _ModernNoteCardState();
 }
 
-class _NoteCardState extends ConsumerState<NoteCard> {
+class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   bool _shouldAnimate = false;
 
   // 缓存文本处理结果，避免重复计算
@@ -150,20 +151,25 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         child: GestureDetector(
           onSecondaryTapDown: (details) => _showContextMenu(details.globalPosition),
           onLongPressStart: (details) => _showContextMenu(details.globalPosition),
-          child: Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 用户信息行
                   GestureDetector(
                     onTap: () {
                       if (user?.id != null) {
@@ -199,8 +205,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                                 label: 'User name',
                                 child: Text(
                                   user?.name ?? user?.username ?? 'Unknown',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.primary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -209,7 +217,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                                 label: 'User handle',
                                 child: Text(
                                   '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -220,18 +231,24 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                           label: 'Post time',
                           child: Text(
                             _formatTime(note.createdAt),
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  
                   const SizedBox(height: 12),
+                  
+                  // CW (Content Warning) 或正文内容
                   if (cw != null) ...[
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -244,9 +261,21 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                  ] else if (text != null)
-                    SelectableText.rich(TextSpan(children: _processText(text))),
-          
+                  ] else if (text != null) ...[
+                    SelectableText.rich(
+                      TextSpan(
+                        children: _processText(text),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.onSurface,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  
+                  // 附件内容
                   if (note.files.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -256,41 +285,42 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                       ),
                     ),
           
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  
+                  // 交互按钮行
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Semantics(
-                        label: 'Reply button',
-                        child: _buildAction(
-                          Icons.reply,
-                          note.repliesCount.toString(),
-                          _handleReply,
-                        ),
+                      // 回复按钮
+                      _buildAction(
+                        Icons.reply,
+                        note.repliesCount.toString(),
+                        _handleReply,
+                        tooltip: 'Reply',
                       ),
-                      Semantics(
-                        label: 'Renote button',
-                        child: _buildAction(
-                          Icons.repeat,
-                          note.renoteCount.toString(),
-                          _handleRenote,
-                        ),
+                      
+                      // 转发按钮
+                      _buildAction(
+                        Icons.repeat,
+                        note.renoteCount.toString(),
+                        _handleRenote,
+                        tooltip: 'Renote',
                       ),
-                      Semantics(
-                        label: 'Reaction button',
-                        child: _buildAction(
-                          Icons.add_reaction_outlined,
-                          note.reactions.length.toString(),
-                          _handleReaction,
-                        ),
+                      
+                      // 反应按钮
+                      _buildAction(
+                        Icons.add_reaction_outlined,
+                        note.reactions.length.toString(),
+                        _handleReaction,
+                        tooltip: 'Reaction',
                       ),
-                      Semantics(
-                        label: 'Share button',
-                        child: _buildAction(
-                          Icons.share_outlined,
-                          "",
-                          _handleShare,
-                        ),
+                      
+                      // 更多按钮
+                      _buildAction(
+                        Icons.more_vert,
+                        "",
+                        _showContextMenuFromButton,
+                        tooltip: 'More',
                       ),
                     ],
                   ),
@@ -310,6 +340,16 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     }
 
     return card;
+  }
+
+  void _showContextMenuFromButton() {
+    RenderBox button = context.findRenderObject() as RenderBox;
+    Offset position = Offset(
+      button.localToGlobal(Offset.zero).dx + button.size.width,
+      button.localToGlobal(Offset.zero).dy + button.size.height / 2,
+    );
+    
+    _showContextMenu(position);
   }
 
   void _showContextMenu(Offset position) {
@@ -582,23 +622,29 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     );
   }
 
-  Widget _buildAction(IconData icon, String label, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: Colors.grey),
-            if (label.isNotEmpty) ...[
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
+  Widget _buildAction(IconData icon, String label, VoidCallback onTap, {String? tooltip}) {
+    return Tooltip(
+      message: tooltip ?? '',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              if (label.isNotEmpty) ...[
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -830,7 +876,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       return Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           child: GestureDetector(
             onTap: () {
               Navigator.of(context).push(
@@ -870,7 +916,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       return Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           child: GestureDetector(
             onTap: () {
               Navigator.of(context).push(
@@ -1005,7 +1051,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     
     if (isVideo) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: GestureDetector(
           onTap: () {
             Navigator.of(context).push(
@@ -1042,7 +1088,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     } else if (isImage) {
       final heroTag = 'image_${url}_${widget.note.id}';
       return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         child: GestureDetector(
           onTap: () {
             Navigator.of(context).push(

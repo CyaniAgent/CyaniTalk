@@ -218,7 +218,8 @@ class MisskeyApi extends BaseApi {
     String? cw,
   }) async {
     // Note: fileIds and localOnly are still being ported, using Rust for basic notes
-    if (fileIds != null || localOnly != null || cw != null) {
+    // Only use legacy Dio path if we actually have parameters that Rust doesn't support yet
+    if ((fileIds != null && fileIds.isNotEmpty) || (localOnly != null && localOnly == true) || cw != null) {
       return executeApiCallVoid(
         'MisskeyApi.createNote (Legacy)',
         () => _dio.post(

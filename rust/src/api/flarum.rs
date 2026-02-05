@@ -18,7 +18,7 @@ impl FlarumRustClient {
         headers.insert("Content-Type", header::HeaderValue::from_static("application/vnd.api+json"));
 
         let client = Client::builder()
-            .user_agent("CyaniTalk/1.0 (Rust)")
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 CyaniTalk/1.0")
             .default_headers(headers)
             .cookie_store(true) // Enable cookie support
             .danger_accept_invalid_certs(true)
