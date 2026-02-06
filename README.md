@@ -72,6 +72,7 @@ CyaniTalk uses Rust for its network and business logic layer to ensure maximum p
 3.  **Generate Bindings:**
     Whenever you modify Rust code in `rust/src/api/`, run:
     ```bash
+    flutter run -d windows
     flutter_rust_bridge_codegen generate
     ```
 
