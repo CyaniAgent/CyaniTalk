@@ -1,3 +1,8 @@
+/**
+ * Misskey API模块
+ * 
+ * 提供与Misskey平台通信的功能，包括用户信息、时间线、笔记操作和聊天等。
+ */
 use anyhow::Result;
 use flutter_rust_bridge::frb;
 use reqwest::Client;
@@ -5,14 +10,27 @@ use serde::{Deserialize, Serialize};
 
 use super::streaming::{StreamingClient, StreamEvent};
 
+/**
+ * Misskey用户信息
+ * 
+ * 表示Misskey平台上的用户信息。
+ */
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MisskeyUser {
+    /// 用户ID
     pub id: String,
+    /// 用户名称
     pub name: Option<String>,
+    /// 用户用户名
     pub username: String,
     // Add more fields as needed, using Option for nullable fields
 }
 
+/**
+ * Misskey Rust客户端
+ * 
+ * 提供与Misskey平台通信的客户端，支持REST API和WebSocket流式传输。
+ */
 #[frb(opaque)]
 pub struct MisskeyRustClient {
     host: String,
@@ -22,6 +40,13 @@ pub struct MisskeyRustClient {
 }
 
 impl MisskeyRustClient {
+    /**
+     * 创建新的Misskey Rust客户端
+     * 
+     * @param host Misskey实例的主机地址
+     * @param token 用户认证令牌
+     * @return 返回新创建的客户端实例
+     */
     #[frb(sync)]
     pub fn new(host: String, token: String) -> MisskeyRustClient {
         let client = Client::builder()

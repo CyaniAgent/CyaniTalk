@@ -10,6 +10,15 @@ import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/profile/presentation/settings/appearance_page.dart';
 
 /// CyaniTalk应用程序的根组件
+///
+/// 负责配置应用程序的主题、路由和整体结构，
+/// 是整个应用程序的入口组件。
+///
+/// 主要功能：
+/// - 管理应用程序的主题（支持亮色/暗色模式）
+/// - 处理路由配置
+/// - 初始化Misskey流媒体服务
+/// - 响应外观设置的变化
 class CyaniTalkApp extends ConsumerStatefulWidget {
   const CyaniTalkApp({super.key});
 
@@ -17,12 +26,23 @@ class CyaniTalkApp extends ConsumerStatefulWidget {
   ConsumerState<CyaniTalkApp> createState() => _CyaniTalkAppState();
 }
 
+/// CyaniTalkApp的状态管理类
+///
+/// 负责管理应用程序的状态，包括主题缓存和外观设置。
 class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
-  // 缓存主题，避免每次构建时都重新计算
+  /// 缓存的亮色主题
   ThemeData? _cachedLightTheme;
+  /// 缓存的暗色主题
   ThemeData? _cachedDarkTheme;
+  /// 缓存的外观设置
   AppearanceSettings? _cachedSettings;
 
+  /// 构建应用程序的UI
+  ///
+  /// 加载外观设置，初始化服务，并根据设置构建应用程序界面。
+  ///
+  /// @param context 构建上下文
+  /// @return 返回MaterialApp.router组件，作为应用程序的根组件
   @override
   Widget build(BuildContext context) {
     logger.info('CyaniTalkApp: 初始化应用程序');
@@ -90,6 +110,10 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
   /// 
   /// 根据用户的外观设置构建主题，支持深色模式、动态色彩和自定义颜色。
   /// 会缓存构建结果，避免重复计算。
+  ///
+  /// @param settings 用户的外观设置，包含显示模式、动态色彩和自定义颜色选项
+  /// @param brightness 主题亮度，Brightness.light或Brightness.dark
+  /// @return 返回构建的ThemeData对象
   ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness) {
     // 检查是否需要重新构建主题
     final isDark = brightness == Brightness.dark;

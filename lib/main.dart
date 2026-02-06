@@ -16,8 +16,20 @@ import 'dart:io';
 
 /// 应用程序的入口点
 ///
-/// 初始化Riverpod的ProviderScope并运行CyaniTalkApp组件，
-/// 这是应用程序的根组件。
+/// 初始化应用程序的各种服务和配置，包括：
+/// - 初始化Flutter绑定
+/// - 初始化持久化存储
+/// - 初始化日志系统
+/// - 初始化Rust库
+/// - 初始化国际化支持
+/// - 创建Riverpod的ProviderContainer
+/// - 初始化通知服务
+/// - 启动后台服务
+/// - 运行CyaniTalkApp组件
+///
+/// 这是应用程序的启动点，负责所有必要的初始化工作。
+///
+/// @return 无返回值，应用程序启动后会持续运行
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -33,15 +45,13 @@ void main() async {
 
   // 创建 ProviderContainer 以便在非 Widget 环境中使用 Provider
   final container = ProviderContainer(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(sharedPrefs),
-    ],
+    overrides: [sharedPreferencesProvider.overrideWithValue(sharedPrefs)],
   );
 
   // 初始化通知服务
   final notificationService = NotificationService();
   await notificationService.initialize();
-  
+
   // 启动全局通知管理器
   container.read(notificationManagerProvider).start();
 
@@ -49,7 +59,7 @@ void main() async {
   try {
     await initializeBackgroundService();
     logger.info('Background service initialized');
-    
+
     // 在移动端请求通知权限
     if (Platform.isAndroid || Platform.isIOS) {
       await notificationService.requestPermissions();

@@ -4,7 +4,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// 通知服务类
 /// 
-/// 负责处理通知权限请求和通知显示
+/// 负责处理通知权限请求和通知显示，支持多平台通知管理。
+/// 使用单例模式，确保应用中只有一个通知服务实例。
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -14,6 +15,10 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   /// 初始化通知服务
+  ///
+  /// 配置各平台的通知设置，包括图标、权限请求等。
+  ///
+  /// @return 无返回值，初始化完成后通知服务即可使用
   Future<void> initialize() async {
     const initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -52,6 +57,8 @@ class NotificationService {
   /// 
   /// 在移动设备上会弹出权限请求对话框
   /// 在桌面设备上通常自动授予
+  ///
+  /// @return 返回权限请求的结果，true表示权限已授予，false表示权限被拒绝
   Future<bool> requestPermissions() async {
     if (kIsWeb) return true;
 
@@ -79,6 +86,10 @@ class NotificationService {
   }
 
   /// 检查权限状态
+  ///
+  /// 检查应用是否已获得通知权限，不同平台的检查方式不同。
+  ///
+  /// @return 返回权限状态，true表示已获得权限，false表示未获得权限
   Future<bool> checkPermissionStatus() async {
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
@@ -93,10 +104,14 @@ class NotificationService {
 
   /// 显示通知
   /// 
-  /// [id] 通知的唯一标识符
-  /// [title] 通知标题
-  /// [body] 通知内容
-  /// [payload] 可选的附加数据，点击通知时会传回
+  /// 在设备上显示本地通知，支持自定义标题、内容和附加数据。
+  ///
+  /// @param id 通知的唯一标识符
+  /// @param title 通知标题
+  /// @param body 通知内容
+  /// @param payload 可选的附加数据，点击通知时会传回
+  /// @param groupKey 可选的通知分组键，用于将相关通知分组显示
+  /// @return 无返回值，通知显示后完成
   Future<void> showNotification({
     required int id,
     required String title,

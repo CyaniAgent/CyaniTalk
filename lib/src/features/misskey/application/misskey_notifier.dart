@@ -10,10 +10,22 @@ import '../../../core/core.dart';
 
 part 'misskey_notifier.g.dart';
 
+/// Misskey时间线状态管理类
+///
+/// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+/// 支持实时更新、加载更多和刷新功能。
 @riverpod
 class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
+  /// 验证定时器，用于定期检测已删除的笔记
   Timer? _validationTimer;
 
+  /// 初始化Misskey时间线
+  ///
+  /// 根据指定的时间线类型初始化时间线，订阅WebSocket实时更新，
+  /// 并从REST API获取初始数据。
+  ///
+  /// @param type 时间线类型，如'local'、'global'、'social'等
+  /// @return 返回时间线笔记列表
   @override
   FutureOr<List<Note>> build(String type) async {
     logger.info('初始化Misskey时间线，类型: $type');
@@ -49,6 +61,11 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     return notes;
   }
 
+  /// 启动定期验证
+  ///
+  /// 启动定期验证定时器，每3秒检测一次已删除的笔记。
+  ///
+  /// @return 无返回值
   void _startPeriodicValidation() {
     _validationTimer?.cancel();
     _validationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
@@ -56,6 +73,12 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     });
   }
 
+  /// 验证笔记
+  ///
+  /// 验证时间线中的笔记是否存在，检测已删除的笔记。
+  /// 只检查最近的10条笔记，避免过多的API调用。
+  ///
+  /// @return 无返回值
   Future<void> _validateNotes() async {
     if (!ref.mounted) return;
 
@@ -82,6 +105,13 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     }
   }
 
+  /// 处理新笔记
+  ///
+  /// 处理从WebSocket接收到的新笔记，将其添加到时间线顶部。
+  /// 会检查是否有重复笔记，避免重复添加。
+  ///
+  /// @param note 新收到的笔记
+  /// @return 无返回值
   void _handleNewNote(Note note) {
     if (!ref.mounted) return;
 
@@ -94,6 +124,12 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     state = AsyncData([note, ...currentNotes]);
   }
 
+  /// 处理笔记删除
+  ///
+  /// 处理笔记删除事件，从时间线中移除指定ID的笔记。
+  ///
+  /// @param noteId 要删除的笔记ID
+  /// @return 无返回值
   void _handleDeleteNote(String noteId) {
     if (!ref.mounted) return;
 
@@ -104,6 +140,11 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     state = AsyncData(currentNotes.where((n) => n.id != noteId).toList());
   }
 
+  /// 刷新时间线
+  ///
+  /// 重新从服务器获取时间线数据，替换当前的时间线内容。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     logger.info('刷新Misskey时间线，类型: $type');
     state = const AsyncValue.loading();
@@ -115,6 +156,11 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     });
   }
 
+  /// 加载更多
+  ///
+  /// 加载时间线的更多内容，从当前时间线的最后一条笔记开始获取。
+  ///
+  /// @return 无返回值
   Future<void> loadMore() async {
     if (state.isLoading || state.isRefreshing) {
       logger.debug('Misskey时间线正在加载中，跳过加载更多');
@@ -142,8 +188,18 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   }
 }
 
+/// Misskey频道列表状态管理类
+///
+/// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
 @riverpod
 class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
+  /// 初始化Misskey频道列表
+  ///
+  /// 根据指定的频道列表类型初始化频道列表，支持不同类型的频道和搜索功能。
+  ///
+  /// @param type 频道列表类型，默认为推荐频道
+  /// @param query 搜索查询，仅在type为search时有效
+  /// @return 返回频道列表
   @override
   FutureOr<List<Channel>> build({
     MisskeyChannelListType type = MisskeyChannelListType.featured,
@@ -164,6 +220,11 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
     return channels;
   }
 
+  /// 刷新频道列表
+  ///
+  /// 重新从服务器获取频道列表数据，替换当前的频道列表内容。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     logger.info('刷新Misskey频道列表，类型: $type');
     state = const AsyncValue.loading();
@@ -181,6 +242,12 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
     });
   }
 
+  /// 加载更多频道
+  ///
+  /// 加载频道列表的更多内容，从当前列表的最后一个频道开始获取。
+  /// 注意：推荐频道列表不支持分页。
+  ///
+  /// @return 无返回值
   Future<void> loadMore() async {
     if (state.isLoading || state.isRefreshing) {
       logger.debug('Misskey频道列表正在加载中，跳过加载更多');
@@ -221,8 +288,17 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
   }
 }
 
+/// Misskey频道时间线状态管理类
+///
+/// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
 @riverpod
 class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
+  /// 初始化Misskey频道时间线
+  ///
+  /// 根据指定的频道ID初始化频道时间线，加载该频道的笔记列表。
+  ///
+  /// @param channelId 频道ID
+  /// @return 返回频道时间线的笔记列表
   @override
   FutureOr<List<Note>> build(String channelId) async {
     logger.info('初始化Misskey频道时间线，频道ID: $channelId');
@@ -232,6 +308,11 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     return notes;
   }
 
+  /// 刷新频道时间线
+  ///
+  /// 重新从服务器获取频道时间线数据，替换当前的时间线内容。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     logger.info('刷新Misskey频道时间线，频道ID: $channelId');
     state = const AsyncValue.loading();
@@ -243,6 +324,11 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
     });
   }
 
+  /// 加载更多频道时间线内容
+  ///
+  /// 加载频道时间线的更多内容，从当前时间线的最后一条笔记开始获取。
+  ///
+  /// @return 无返回值
   Future<void> loadMore() async {
     if (state.isLoading || state.isRefreshing) {
       logger.debug('Misskey频道时间线正在加载中，跳过加载更多');
@@ -273,8 +359,16 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
   }
 }
 
+/// Misskey片段(Clips)列表状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)列表，支持片段的刷新和加载更多功能。
 @riverpod
 class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
+  /// 初始化Misskey片段列表
+  ///
+  /// 初始化Misskey平台的片段(Clips)列表，加载用户的片段数据。
+  ///
+  /// @return 返回片段列表
   @override
   FutureOr<List<Clip>> build() async {
     logger.info('初始化Misskey片段(Clips)列表');
@@ -284,6 +378,11 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
     return clips;
   }
 
+  /// 刷新片段列表
+  ///
+  /// 重新从服务器获取片段列表数据，替换当前的片段列表内容。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     logger.info('刷新Misskey片段列表');
     state = const AsyncValue.loading();
@@ -295,6 +394,11 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
     });
   }
 
+  /// 加载更多片段
+  ///
+  /// 加载片段列表的更多内容，从当前列表的最后一个片段开始获取。
+  ///
+  /// @return 无返回值
   Future<void> loadMore() async {
     if (state.isLoading || state.isRefreshing) {
       logger.debug('Misskey片段正在加载中，跳过加载更多');
@@ -322,10 +426,19 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
   }
 }
 
+/// Misskey在线用户数状态管理类
+///
+/// 负责管理Misskey平台的在线用户数，定期更新以保持数据最新。
 @riverpod
 class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
+  /// 定时器，用于定期更新在线用户数
   Timer? _timer;
 
+  /// 初始化Misskey在线用户数
+  ///
+  /// 初始化Misskey平台的在线用户数，并设置每30秒自动更新一次。
+  ///
+  /// @return 返回当前在线用户数
   @override
   FutureOr<int> build() async {
     _timer?.cancel();
@@ -346,14 +459,27 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
   }
 }
 
+/// 当前Misskey用户状态管理类
+///
+/// 负责管理当前登录的Misskey用户信息，支持用户信息的刷新功能。
 @riverpod
 class MisskeyMeNotifier extends _$MisskeyMeNotifier {
+  /// 初始化当前Misskey用户信息
+  ///
+  /// 初始化当前登录的Misskey用户信息，加载用户的详细数据。
+  ///
+  /// @return 返回当前用户信息
   @override
   FutureOr<MisskeyUser> build() async {
     final repository = await ref.watch(misskeyRepositoryProvider.future);
     return await repository.getMe();
   }
 
+  /// 刷新当前用户信息
+  ///
+  /// 重新从服务器获取当前用户的最新信息，替换当前的用户数据。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
@@ -363,14 +489,28 @@ class MisskeyMeNotifier extends _$MisskeyMeNotifier {
   }
 }
 
+/// Misskey用户信息状态管理类
+///
+/// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
 @riverpod
 class MisskeyUserNotifier extends _$MisskeyUserNotifier {
+  /// 初始化Misskey用户信息
+  ///
+  /// 初始化指定ID的Misskey用户信息，加载用户的详细数据。
+  ///
+  /// @param userId 用户ID
+  /// @return 返回用户信息
   @override
   FutureOr<MisskeyUser> build(String userId) async {
     final repository = await ref.watch(misskeyRepositoryProvider.future);
     return await repository.showUser(userId);
   }
 
+  /// 刷新用户信息
+  ///
+  /// 重新从服务器获取指定用户的最新信息，替换当前的用户数据。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
