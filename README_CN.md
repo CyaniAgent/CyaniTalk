@@ -72,6 +72,7 @@ CyaniTalk 使用 Rust 处理所有网络请求和复杂业务逻辑，以确保�
 3.  **生成绑定：**
     每当你修改了 `rust/src/api/` 中的 Rust 代码后，运行：
     ```bash
+    flutter run -d windows
     flutter_rust_bridge_codegen generate
     ```
 
