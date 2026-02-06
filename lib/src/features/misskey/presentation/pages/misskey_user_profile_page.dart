@@ -58,9 +58,9 @@ class MisskeyUserProfilePage extends ConsumerWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withValues(alpha: 0.3),
+                        theme.colorScheme.shadow.withValues(alpha: 0.3),
                         Colors.transparent,
-                        Colors.black.withValues(alpha: 0.5),
+                        theme.colorScheme.shadow.withValues(alpha: 0.5),
                       ],
                     ),
                   ),
@@ -69,7 +69,7 @@ class MisskeyUserProfilePage extends ConsumerWidget {
             ),
             title: Text(
               user.name ?? user.username,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
             ),
           ),
         ),

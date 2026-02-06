@@ -55,7 +55,7 @@ class LoginReminder extends StatelessWidget {
               onPressed: () => context.go('/profile'),
               style: FilledButton.styleFrom(
                 backgroundColor: mikuColor,
-                foregroundColor: Colors.white,
+                foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,

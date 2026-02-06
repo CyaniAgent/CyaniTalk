@@ -65,7 +65,6 @@ class ResponsiveShell extends StatelessWidget {
         ),
       ],
       body: (_) => navigationShell,
-      smallBody: (_) => navigationShell,
       // 断点定义（可选），默认值通常已经足够
       // < 600: 底部导航栏
       // >= 600: 侧边导航栏

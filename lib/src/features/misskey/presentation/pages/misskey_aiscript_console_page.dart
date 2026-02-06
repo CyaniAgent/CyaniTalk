@@ -139,10 +139,10 @@ class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptCons
                 child: FilledButton.icon(
                   onPressed: _isRunning ? null : _runScript,
                   icon: _isRunning 
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18, 
                         height: 18, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).colorScheme.onPrimary)
                       )
                     : const Icon(Icons.play_arrow),
                   label: const Text('Run Script'),
