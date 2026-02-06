@@ -229,7 +229,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               child: Text(
                 message.text ?? '',
                 style: TextStyle(
-                  color: isMe ? Colors.white : theme.colorScheme.onSurfaceVariant,
+                  color: isMe ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -296,7 +296,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             shape: const CircleBorder(),
             elevation: isLocked ? 0 : 2,
             child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
+              icon: Icon(Icons.send, color: theme.colorScheme.onPrimary),
               onPressed: isLocked ? null : _sendMessage,
             ),
           ),

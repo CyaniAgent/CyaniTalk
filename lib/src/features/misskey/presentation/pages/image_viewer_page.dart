@@ -27,8 +27,8 @@ class ImageViewerPage extends StatelessWidget {
                   loadingBuilder: (context, event) => const Center(
                     child: CircularProgressIndicator(),
                   ),
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(Icons.error_outline, size: 50, color: Colors.white),
+                  errorBuilder: (context, error, stackTrace) => Center(
+                    child: Icon(Icons.error_outline, size: 50, color: Theme.of(context).colorScheme.surface),
                   ),
                 )
               : PhotoView(
@@ -41,8 +41,8 @@ class ImageViewerPage extends StatelessWidget {
                   loadingBuilder: (context, event) => const Center(
                     child: CircularProgressIndicator(),
                   ),
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(Icons.error_outline, size: 50, color: Colors.white),
+                  errorBuilder: (context, error, stackTrace) => Center(
+                    child: Icon(Icons.error_outline, size: 50, color: Theme.of(context).colorScheme.surface),
                   ),
                 ),
           // Close button
@@ -50,7 +50,7 @@ class ImageViewerPage extends StatelessWidget {
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
             child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 32),
+              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.surface, size: 32),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
@@ -66,10 +66,10 @@ class ImageViewerPage extends StatelessWidget {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
+                child: Text(
                   '双击可放大图片',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     fontSize: 14,
                   ),
                 ),

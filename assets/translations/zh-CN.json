@@ -208,6 +208,7 @@
   "auth_waiting_authorization": "等待授权",
   "auth_authorization_instructions": "请在浏览器中授权应用，然后点击 “完成”。",
   "auth_cancel": "取消",
+  "auth_or": "或者",
   "auth_failed": "失败: {error}",
   "auth_retry": "重试",
   "auth_done": "完成",

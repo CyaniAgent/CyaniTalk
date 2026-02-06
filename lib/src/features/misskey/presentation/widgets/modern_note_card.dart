@@ -918,38 +918,40 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      replyNote.user?.name ?? replyNote.user?.username ?? 'Unknown',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    if (replyNote.user?.host != null)
-                                      Text(
-                                        replyNote.user!.host!,
-                                        style: const TextStyle(
-                                          fontSize: 9,
-                                          color: Colors.grey,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                
-            const SizedBox(height: 4),
-            Text(
-              replyNote.text ?? replyNote.cw ?? '',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style:
-                  const TextStyle(fontSize: 12, color: Colors.grey, height: 1.4),
-            ),
+                                                    Text(
+                                                      replyNote.user?.name ?? replyNote.user?.username ?? 'Unknown',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                    if (replyNote.user?.host != null)
+                                                      Text(
+                                                        replyNote.user!.host!,
+                                                        style: TextStyle(
+                                                          fontSize: 9,
+                                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            replyNote.text ?? replyNote.cw ?? '',
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                                height: 1.4),
+                                          ),
+                                    
           ],
         ),
       ),
@@ -1051,9 +1053,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                     color: Colors.black.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.play_arrow,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     size: 48,
                   ),
                 ),

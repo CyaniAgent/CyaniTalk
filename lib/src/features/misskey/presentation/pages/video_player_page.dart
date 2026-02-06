@@ -91,9 +91,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.close,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 size: 32,
                               ),
                               onPressed: () => Navigator.of(context).pop(),
@@ -108,7 +108,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             _controller.value.isPlaying
                                 ? Icons.pause_circle_filled
                                 : Icons.play_circle_filled,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             size: 64,
                           ),
                           onPressed: _togglePlayPause,
@@ -124,10 +124,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               VideoProgressIndicator(
                                 _controller,
                                 allowScrubbing: true,
-                                colors: const VideoProgressColors(
-                                  playedColor: Color(0xFF39C5BB),
-                                  bufferedColor: Colors.white30,
-                                  backgroundColor: Colors.white12,
+                                colors: VideoProgressColors(
+                                  playedColor: const Color(0xFF39C5BB),
+                                  bufferedColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
+                                  backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.12),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -138,11 +138,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 children: [
                                   Text(
                                     _formatDuration(_controller.value.position),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.surface),
                                   ),
                                   Text(
                                     _formatDuration(_controller.value.duration),
-                                    style: const TextStyle(color: Colors.white),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.surface),
                                   ),
                                 ],
                               ),

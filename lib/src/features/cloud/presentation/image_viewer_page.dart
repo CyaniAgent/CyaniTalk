@@ -111,9 +111,9 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.close,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 size: 32,
                               ),
                               onPressed: () => Navigator.of(context).pop(),
@@ -126,13 +126,13 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.5),
+                                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   '${_currentIndex + 1} / ${widget.imageUrls.length}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.surface,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -154,20 +154,20 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                                 children: [
                                   Icon(
                                     Icons.chevron_left,
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '滑动切换图片',
                                     style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.7),
+                                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
                                       fontSize: 14,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
                                     Icons.chevron_right,
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
                                   ),
                                 ],
                               ),
@@ -176,13 +176,13 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                               children: [
                                 Icon(
                                   Icons.zoom_in,
-                                  color: Colors.white.withValues(alpha: 0.7),
+                                  color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '双指缩放',
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7),
+                                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
                                     fontSize: 14,
                                   ),
                                 ),

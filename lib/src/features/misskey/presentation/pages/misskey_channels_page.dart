@@ -266,7 +266,7 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
                     child: Text(
                       channel.name,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,

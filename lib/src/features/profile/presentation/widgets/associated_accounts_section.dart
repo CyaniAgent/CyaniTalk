@@ -152,7 +152,7 @@ class _AssociatedAccountsSectionState
                       isFocused: isFocused,
                       activeColor: isMisskeyActive
                           ? mikuColor
-                          : (isFlarumActive ? Colors.orange : Colors.grey),
+                          : (isFlarumActive ? Colors.orange : theme.colorScheme.onSurfaceVariant),
                       onTap: () {
                         setState(() {
                           _focusedAccount = account;

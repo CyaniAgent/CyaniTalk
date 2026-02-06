@@ -14,7 +14,12 @@ class AddAccountBottomSheet {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (context) => const _AddAccountBottomSheetContent(),
     );
   }
@@ -79,49 +84,18 @@ class _AddAccountBottomSheetContentState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
     final padding = MediaQuery.of(context).padding;
 
-    return Container(
-      height: size.height * 0.9,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 30,
-            offset: const Offset(0, -5),
-          ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + padding.bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 16),
+          Flexible(child: _buildCurrentStep()),
         ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24, 12, 24, 24 + padding.bottom),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Handle/Indicator
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outlineVariant,
-                    borderRadius: BorderRadius.circular(2.5),
-                  ),
-                ),
-              ),
-              _buildHeader(),
-              const SizedBox(height: 16),
-              Flexible(child: _buildCurrentStep()),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -158,7 +132,7 @@ class _AddAccountBottomSheetContentState
         Expanded(
           child: Text(
             title,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -204,10 +178,10 @@ class _AddAccountBottomSheetContentState
               ).createShader(bounds),
               child: Text(
                 'auth_choose_platform'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -230,67 +204,81 @@ class _AddAccountBottomSheetContentState
           ),
           const SizedBox(height: 16),
 
-          // Flarum Row
-          Row(
-            children: [
-              Expanded(
-                child: _buildStyledCard(
-                  icon: Image.asset(
-                    'assets/icons/flarum.png',
-                    width: 32,
-                    height: 32,
-                  ),
-                  title: 'Flarum',
-                  subtitle: 'Login',
-                  color: Colors.deepOrange,
-                  onTap: () =>
-                      setState(() => _step = _AddAccountStep.flarumLogin),
-                  isVertical: true,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStyledCard(
-                  icon: const Icon(Icons.api, color: Colors.blue, size: 32),
-                  title: 'Flarum',
-                  subtitle: 'Endpoint',
-                  color: Colors.blue,
-                  onTap: () =>
-                      setState(() => _step = _AddAccountStep.flarumEndpoint),
-                  isVertical: true,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+                    // Flarum Row
 
-          // Social Login (WeChat Only)
-          _buildStyledCard(
-            icon: const Icon(Icons.wechat, color: Color(0xFF07C160), size: 32),
-            title: 'auth_login_wechat'.tr(),
-            subtitle: 'auth_login'.tr(),
-            color: const Color(0xFF07C160),
-            onTap: () =>
-                setState(() => _step = _AddAccountStep.flarumSocialLogin),
-            isVertical: false,
-          ),
-          const SizedBox(height: 16),
+                    Row(
 
-          // 快速登录到iMikufans社区
-          _buildStyledCard(
-            icon: Image.asset(
-              'assets/icons/flarum.png',
-              width: 32,
-              height: 32,
-            ),
-            title: '快速登录到iMikufans 论坛',
-            subtitle: '域名: flarum.imikufans.cn',
-            color: Colors.deepOrange,
-            onTap: () => _quickLoginToIMikufans(),
-            isVertical: false,
-          ),
-        ],
-      ), // .animate().fadeIn().slideY(...) removed to simplify for now, can add back if needed
+                      children: [
+
+                        Expanded(
+
+                          child: _buildStyledCard(
+
+                            icon: Image.asset(
+
+                              'assets/icons/flarum.png',
+
+                              width: 32,
+
+                              height: 32,
+
+                            ),
+
+                            title: 'Flarum',
+
+                            subtitle: 'Login',
+
+                            color: Colors.deepOrange,
+
+                            onTap: () {
+
+                              _flarumHostController.clear();
+
+                              _isQuickLogin = false;
+
+                              setState(() => _step = _AddAccountStep.flarumLogin);
+
+                            },
+
+                            isVertical: true,
+
+                          ),
+
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        Expanded(
+
+                          child: _buildStyledCard(
+
+                            icon: const Icon(Icons.api, color: Colors.blue, size: 32),
+
+                            title: 'Flarum',
+
+                            subtitle: 'Endpoint',
+
+                            color: Colors.blue,
+
+                            onTap: () =>
+
+                                setState(() => _step = _AddAccountStep.flarumEndpoint),
+
+                            isVertical: true,
+
+                          ),
+
+                        ),
+
+                      ],
+
+                    ),
+
+                  ],
+
+                ),
+
+           // .animate().fadeIn().slideY(...) removed to simplify for now, can add back if needed
     );
   }
 
@@ -331,15 +319,33 @@ class _AddAccountBottomSheetContentState
                 ? const SizedBox.shrink()
                 : const Icon(Icons.arrow_forward),
             label: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   )
                 : Text('auth_next'.tr()),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: _loading ? null : () {
+              // 重置为非快速登录模式，以便返回Flarum登录界面时显示正确的选项
+              setState(() {
+                _isQuickLogin = false;
+                _step = _AddAccountStep.flarumLogin;
+              });
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            icon: const Icon(Icons.arrow_back),
+            label: Text('auth_cancel'.tr()),
           ),
         ],
       ),
@@ -583,12 +589,12 @@ class _AddAccountBottomSheetContentState
                 ? const SizedBox.shrink()
                 : const Icon(Icons.arrow_forward),
             label: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   )
                 : Text('auth_next'.tr()),
@@ -637,12 +643,12 @@ class _AddAccountBottomSheetContentState
                 ? const SizedBox.shrink()
                 : const Icon(Icons.check_circle_outline),
             label: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   )
                 : Text('auth_done'.tr()),
@@ -654,6 +660,7 @@ class _AddAccountBottomSheetContentState
   }
 
   Widget _buildFlarumLoginStep() {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       key: const ValueKey('flarum'),
       child: Column(
@@ -661,7 +668,6 @@ class _AddAccountBottomSheetContentState
         children: [
           TextField(
             controller: _flarumHostController,
-            enabled: !_isQuickLogin, // 快速登录时禁用编辑
             decoration: InputDecoration(
               labelText: 'auth_flarum_host'.tr(),
               border: OutlineInputBorder(
@@ -669,10 +675,19 @@ class _AddAccountBottomSheetContentState
               ),
               prefixIcon: const Icon(Icons.language_outlined),
               hintText: 'discuss.flarum.org',
-              filled: _isQuickLogin,
-              fillColor: _isQuickLogin ? Colors.orange.withValues(alpha: 0.1) : null,
+              suffixIcon: _isQuickLogin
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        setState(() {
+                          _isQuickLogin = false;
+                          _flarumHostController.clear();
+                        });
+                      },
+                    )
+                  : null,
             ),
-            readOnly: _isQuickLogin, // 快速登录时只读
+            readOnly: _isQuickLogin,
           ),
           const SizedBox(height: 16),
           TextField(
@@ -698,7 +713,7 @@ class _AddAccountBottomSheetContentState
             ),
             obscureText: true,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           FilledButton.icon(
             onPressed: _loading ? null : _loginToFlarum,
             style: FilledButton.styleFrom(
@@ -709,17 +724,69 @@ class _AddAccountBottomSheetContentState
             ),
             icon: _loading ? const SizedBox.shrink() : const Icon(Icons.login),
             label: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 24,
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   )
                 : Text('auth_login'.tr()),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              const Expanded(child: Divider()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'auth_or'.tr(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ),
+              const Expanded(child: Divider()),
+            ],
+          ),
+          const SizedBox(height: 24),
+          
+          // WeChat Login Button
+          OutlinedButton.icon(
+            onPressed: _loading ? null : () => setState(() => _step = _AddAccountStep.flarumSocialLogin),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              side: BorderSide(color: const Color(0xFF07C160).withValues(alpha: 0.5)),
+              foregroundColor: const Color(0xFF07C160),
+            ),
+            icon: const Icon(Icons.wechat),
+            label: Text('auth_login_wechat'.tr()),
+          ),
+          const SizedBox(height: 12),
+          
+          // Quick Login to iMikufans Button
+          OutlinedButton.icon(
+            onPressed: _loading ? null : () {
+              setState(() {
+                _flarumHostController.text = 'flarum.imikufans.cn';
+                _isQuickLogin = true;
+              });
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              side: BorderSide(color: Colors.deepOrange.withValues(alpha: 0.5)),
+              foregroundColor: Colors.deepOrange,
+            ),
+            icon: Image.asset('assets/icons/flarum.png', width: 20, height: 20),
+            label: const Text('快速填充 iMikufans 域名'),
+          ),
         ],
       ),
     );
@@ -895,21 +962,5 @@ class _AddAccountBottomSheetContentState
         );
       }
     }
-  }
-
-  Future<void> _quickLoginToIMikufans() async {
-    const host = 'flarum.imikufans.cn';
-    
-    logger.info('AddAccountBottomSheet: Starting quick login to iMikufans community');
-    
-    // 设置host控制器为固定域名
-    _flarumHostController.text = host;
-    
-    // 直接跳转到Flarum登录步骤，并自动填充域名
-    setState(() {
-      _step = _AddAccountStep.flarumLogin;
-      _flarumHostController.text = host; // 确保控制器被正确设置
-      _isQuickLogin = true; // 标记为快速登录模式
-    });
   }
 }

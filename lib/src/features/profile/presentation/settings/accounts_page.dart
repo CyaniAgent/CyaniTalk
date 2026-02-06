@@ -22,14 +22,14 @@ class AccountsPage extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'profile_unified_login_manager'.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
                   shadows: [
                     Shadow(
-                      color: Colors.black26,
+                      color: theme.colorScheme.shadow.withValues(alpha: 0.2),
                       blurRadius: 10,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -48,11 +48,11 @@ class AccountsPage extends StatelessWidget {
                 ),
                 child: Opacity(
                   opacity: 0.1,
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       Icons.manage_accounts,
                       size: 150,
-                      color: Colors.white,
+                      color: theme.colorScheme.onPrimary,
                     ),
                   ),
                 ),

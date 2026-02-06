@@ -318,7 +318,10 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
         children: [
           Icon(Icons.inbox, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
           const SizedBox(height: 16),
-          Text('search_no_results'.tr()),
+          Text(
+            'search_no_results'.tr(),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
         ],
       ),
     );

@@ -583,6 +583,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   }
 
   Widget _buildAction(IconData icon, String label, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -590,12 +591,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: Colors.grey),
+            Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
             if (label.isNotEmpty) ...[
               const SizedBox(width: 4),
               Text(
                 label,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
               ),
             ],
           ],

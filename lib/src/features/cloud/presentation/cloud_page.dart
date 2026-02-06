@@ -55,7 +55,7 @@ class CloudPage extends ConsumerWidget {
                 onRefresh: () =>
                     ref.read(misskeyDriveProvider.notifier).refresh(),
                 child: state.files.isEmpty && state.folders.isEmpty
-                    ? _buildEmptyState()
+                    ? _buildEmptyState(context)
                     : _buildContentList(context, ref, state),
               ),
             ),
@@ -163,16 +163,16 @@ class CloudPage extends ConsumerWidget {
     return const Icon(Icons.insert_drive_file);
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud_off, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
+          Icon(Icons.cloud_off, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(height: 16),
           Text(
             'cloud_no_files_or_folders'.tr(),
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -460,7 +460,7 @@ class CloudPage extends ConsumerWidget {
               const Divider(),
               Text(
                 'cloud_debug_check_console'.tr(),
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),

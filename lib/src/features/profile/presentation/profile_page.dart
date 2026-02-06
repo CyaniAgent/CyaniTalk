@@ -113,6 +113,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final selectedMisskey = ref.watch(selectedMisskeyAccountProvider).asData?.value;
     final selectedFlarum = ref.watch(selectedFlarumAccountProvider).asData?.value;
     final primaryAccount = selectedMisskey ?? selectedFlarum;
@@ -140,7 +141,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             backgroundColor: isLoggedIn ? _appBarColor : mikuColor,
             actions: [
               IconButton(
-                icon: const Icon(Icons.settings, color: Colors.white),
+                icon: Icon(Icons.settings, color: theme.colorScheme.onPrimary),
                 onPressed: () => context.push('/settings'),
               ),
             ],
@@ -178,7 +179,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.5),
+                            theme.colorScheme.shadow.withValues(alpha: 0.5),
                           ],
                           stops: const [0.6, 1.0],
                         ),
@@ -245,10 +246,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
+                    border: Border.all(color: Theme.of(context).colorScheme.onPrimary, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -256,7 +257,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   child: CircleAvatar(
                     radius: 45,
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
                     backgroundImage:
                         (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) !=
                                 null
@@ -288,15 +289,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               primaryAccount.name ??
                               primaryAccount.username ??
                               'CyaniUser',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                             shadows: [
                               Shadow(
                                 blurRadius: 4,
-                                color: Colors.black26,
-                                offset: Offset(0, 2),
+                                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                                offset: const Offset(0, 2),
                               ),
                             ],
                           ),
@@ -314,17 +315,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
+                                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.3),
+                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
                                 name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.onPrimary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -336,7 +337,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -352,12 +353,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 misskeyUser.description!,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.85),
-                  shadows: const [
+                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.85),
+                  shadows: [
                     Shadow(
                       blurRadius: 2,
-                      color: Colors.black26,
-                      offset: Offset(0, 1),
+                      color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                      offset: const Offset(0, 1),
                     ),
                   ],
                 ),
@@ -387,15 +388,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         children: [
           Text(
             'misskey_page_no_account_title'.tr(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
               shadows: [
                 Shadow(
                   blurRadius: 4,
-                  color: Colors.black26,
-                  offset: Offset(0, 2),
+                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -405,12 +406,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             'misskey_page_no_account_subtitle'.tr(),
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.9),
-              shadows: const [
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+              shadows: [
                 Shadow(
                   blurRadius: 2,
-                  color: Colors.black26,
-                  offset: Offset(0, 1),
+                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
@@ -421,7 +422,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             icon: const Icon(Icons.login),
             label: Text('misskey_page_login_now'.tr()),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               foregroundColor: mikuColor,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -616,15 +617,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.onPrimary,
             shadows: [
               Shadow(
                 blurRadius: 4,
-                color: Colors.black26,
-                offset: Offset(0, 1),
+                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -633,12 +634,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.white.withValues(alpha: 0.8),
-            shadows: const [
+            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
+            shadows: [
               Shadow(
                 blurRadius: 2,
-                color: Colors.black26,
-                offset: Offset(0, 1),
+                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                offset: const Offset(0, 1),
               ),
             ],
           ),

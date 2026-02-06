@@ -133,7 +133,7 @@ class _VerificationWindowState extends State<VerificationWindow> {
   Widget build(BuildContext context) {
     return Center(
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         elevation: 8,
         child: Container(
@@ -146,7 +146,7 @@ class _VerificationWindowState extends State<VerificationWindow> {
             children: [
               Container(
                 height: 48,
-                color: Colors.grey[200],
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

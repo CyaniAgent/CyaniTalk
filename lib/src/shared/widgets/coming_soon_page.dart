@@ -31,7 +31,7 @@ class ComingSoonPage extends StatelessWidget {
                 Text(
                   'Coming Soon',
                   style: theme.textTheme.displayLarge?.copyWith(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
                   ),
@@ -40,7 +40,7 @@ class ComingSoonPage extends StatelessWidget {
                 Text(
                   'feature_under_development'.tr(),
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: theme.colorScheme.surface.withValues(alpha: 0.9),
                   ),
                   textAlign: TextAlign.center,
                 ),
