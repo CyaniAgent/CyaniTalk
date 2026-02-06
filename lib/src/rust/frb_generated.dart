@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1668039939;
+  int get rustContentHash => -1963797400;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -130,6 +130,14 @@ abstract class RustLibApi extends BaseApi {
     required MisskeyRustClient that,
   });
 
+  Future<String> crateApiMisskeyMisskeyRustClientCreateChatMessage({
+    required MisskeyRustClient that,
+    String? userId,
+    String? roomId,
+    String? text,
+    String? fileId,
+  });
+
   Future<String> crateApiMisskeyMisskeyRustClientCreateNote({
     required MisskeyRustClient that,
     String? text,
@@ -145,6 +153,23 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<void> crateApiMisskeyMisskeyRustClientDisconnectStreaming({
+    required MisskeyRustClient that,
+  });
+
+  Future<String> crateApiMisskeyMisskeyRustClientGetChatHistory({
+    required MisskeyRustClient that,
+    required int limit,
+  });
+
+  Future<String> crateApiMisskeyMisskeyRustClientGetChatMessages({
+    required MisskeyRustClient that,
+    String? userId,
+    String? roomId,
+    required int limit,
+    String? untilId,
+  });
+
+  Future<String> crateApiMisskeyMisskeyRustClientGetChatRooms({
     required MisskeyRustClient that,
   });
 
@@ -179,6 +204,11 @@ abstract class RustLibApi extends BaseApi {
   Future<void> crateApiMisskeyMisskeyRustClientSendStreamingMessage({
     required MisskeyRustClient that,
     required String message,
+  });
+
+  Future<String> crateApiMisskeyMisskeyRustClientShowUser({
+    required MisskeyRustClient that,
+    required String userId,
   });
 
   Future<void> crateApiMisskeyMisskeyRustClientSubscribeToMain({
@@ -686,6 +716,51 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiMisskeyMisskeyRustClientCreateChatMessage({
+    required MisskeyRustClient that,
+    String? userId,
+    String? roomId,
+    String? text,
+    String? fileId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          sse_encode_opt_String(userId, serializer);
+          sse_encode_opt_String(roomId, serializer);
+          sse_encode_opt_String(text, serializer);
+          sse_encode_opt_String(fileId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 11,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientCreateChatMessageConstMeta,
+        argValues: [that, userId, roomId, text, fileId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateApiMisskeyMisskeyRustClientCreateChatMessageConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_create_chat_message",
+        argNames: ["that", "userId", "roomId", "text", "fileId"],
+      );
+
+  @override
   Future<String> crateApiMisskeyMisskeyRustClientCreateNote({
     required MisskeyRustClient that,
     String? text,
@@ -708,7 +783,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 12,
             port: port_,
           );
         },
@@ -748,7 +823,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 13,
             port: port_,
           );
         },
@@ -784,7 +859,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 14,
             port: port_,
           );
         },
@@ -808,6 +883,124 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiMisskeyMisskeyRustClientGetChatHistory({
+    required MisskeyRustClient that,
+    required int limit,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          sse_encode_u_32(limit, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientGetChatHistoryConstMeta,
+        argValues: [that, limit],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiMisskeyMisskeyRustClientGetChatHistoryConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_get_chat_history",
+        argNames: ["that", "limit"],
+      );
+
+  @override
+  Future<String> crateApiMisskeyMisskeyRustClientGetChatMessages({
+    required MisskeyRustClient that,
+    String? userId,
+    String? roomId,
+    required int limit,
+    String? untilId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          sse_encode_opt_String(userId, serializer);
+          sse_encode_opt_String(roomId, serializer);
+          sse_encode_u_32(limit, serializer);
+          sse_encode_opt_String(untilId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 16,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientGetChatMessagesConstMeta,
+        argValues: [that, userId, roomId, limit, untilId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiMisskeyMisskeyRustClientGetChatMessagesConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_get_chat_messages",
+        argNames: ["that", "userId", "roomId", "limit", "untilId"],
+      );
+
+  @override
+  Future<String> crateApiMisskeyMisskeyRustClientGetChatRooms({
+    required MisskeyRustClient that,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 17,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientGetChatRoomsConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiMisskeyMisskeyRustClientGetChatRoomsConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_get_chat_rooms",
+        argNames: ["that"],
+      );
+
+  @override
   Future<int> crateApiMisskeyMisskeyRustClientGetOnlineUsersCount({
     required MisskeyRustClient that,
   }) {
@@ -822,7 +1015,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 18,
             port: port_,
           );
         },
@@ -866,7 +1059,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 19,
             port: port_,
           );
         },
@@ -902,7 +1095,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 20,
             port: port_,
           );
         },
@@ -932,7 +1125,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_bool,
@@ -964,7 +1157,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(host, serializer);
           sse_encode_String(token, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 18)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -996,7 +1189,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1034,7 +1227,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1058,6 +1251,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<String> crateApiMisskeyMisskeyRustClientShowUser({
+    required MisskeyRustClient that,
+    required String userId,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMisskeyRustClient(
+            that,
+            serializer,
+          );
+          sse_encode_String(userId, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 25,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateApiMisskeyMisskeyRustClientShowUserConstMeta,
+        argValues: [that, userId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiMisskeyMisskeyRustClientShowUserConstMeta =>
+      const TaskConstMeta(
+        debugName: "MisskeyRustClient_show_user",
+        argNames: ["that", "userId"],
+      );
+
+  @override
   Future<void> crateApiMisskeyMisskeyRustClientSubscribeToMain({
     required MisskeyRustClient that,
   }) {
@@ -1072,7 +1303,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 26,
             port: port_,
           );
         },
@@ -1110,7 +1341,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 27,
             port: port_,
           );
         },
@@ -1145,7 +1376,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 28)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1177,7 +1408,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 29)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -1210,7 +1441,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 30)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -1248,7 +1479,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             body,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 26)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 31)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1281,7 +1512,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_String(channelId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 27)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 32)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1316,7 +1547,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             serializer,
           );
           sse_encode_String(eventType, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 28)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 33)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -1356,7 +1587,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 34,
             port: port_,
           );
         },
@@ -1392,7 +1623,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 30,
+            funcId: 35,
             port: port_,
           );
         },
@@ -1425,7 +1656,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 31)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 36)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_bool,
@@ -1452,7 +1683,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 32)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 37)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1481,7 +1712,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that,
             serializer,
           );
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 33)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 38)!;
         },
         codec: SseCodec(
           decodeSuccessData:
@@ -1518,7 +1749,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 34,
+            funcId: 39,
             port: port_,
           );
         },
@@ -1558,7 +1789,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 35,
+            funcId: 40,
             port: port_,
           );
         },
@@ -1597,7 +1828,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 36,
+            funcId: 41,
             port: port_,
           );
         },
@@ -2700,6 +2931,19 @@ class MisskeyRustClientImpl extends RustOpaque implements MisskeyRustClient {
   Future<void> connectStreaming() => RustLib.instance.api
       .crateApiMisskeyMisskeyRustClientConnectStreaming(that: this);
 
+  Future<String> createChatMessage({
+    String? userId,
+    String? roomId,
+    String? text,
+    String? fileId,
+  }) => RustLib.instance.api.crateApiMisskeyMisskeyRustClientCreateChatMessage(
+    that: this,
+    userId: userId,
+    roomId: roomId,
+    text: text,
+    fileId: fileId,
+  );
+
   Future<String> createNote({
     String? text,
     String? replyId,
@@ -2724,6 +2968,25 @@ class MisskeyRustClientImpl extends RustOpaque implements MisskeyRustClient {
 
   Future<void> disconnectStreaming() => RustLib.instance.api
       .crateApiMisskeyMisskeyRustClientDisconnectStreaming(that: this);
+
+  Future<String> getChatHistory({required int limit}) => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientGetChatHistory(that: this, limit: limit);
+
+  Future<String> getChatMessages({
+    String? userId,
+    String? roomId,
+    required int limit,
+    String? untilId,
+  }) => RustLib.instance.api.crateApiMisskeyMisskeyRustClientGetChatMessages(
+    that: this,
+    userId: userId,
+    roomId: roomId,
+    limit: limit,
+    untilId: untilId,
+  );
+
+  Future<String> getChatRooms() => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientGetChatRooms(that: this);
 
   Future<int> getOnlineUsersCount() => RustLib.instance.api
       .crateApiMisskeyMisskeyRustClientGetOnlineUsersCount(that: this);
@@ -2753,6 +3016,9 @@ class MisskeyRustClientImpl extends RustOpaque implements MisskeyRustClient {
         that: this,
         message: message,
       );
+
+  Future<String> showUser({required String userId}) => RustLib.instance.api
+      .crateApiMisskeyMisskeyRustClientShowUser(that: this, userId: userId);
 
   Future<void> subscribeToMain() => RustLib.instance.api
       .crateApiMisskeyMisskeyRustClientSubscribeToMain(that: this);

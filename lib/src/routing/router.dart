@@ -9,10 +9,11 @@ import '../core/utils/logger.dart';
 
 import '../features/misskey/presentation/misskey_page.dart';
 import '../features/misskey/presentation/pages/misskey_user_profile_page.dart';
+import '../features/misskey/presentation/pages/misskey_notifications_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
 import '../features/forum/presentation/forum_page.dart';
-import '../features/messaging/presentation/messaging_page.dart';
 import '../features/messaging/presentation/chat_page.dart';
+import '../shared/widgets/coming_soon_page.dart';
 import '../features/misskey/domain/misskey_user.dart';
 import '../features/misskey/domain/chat_room.dart';
 import '../features/profile/presentation/profile_page.dart';
@@ -80,7 +81,7 @@ GoRouter goRouter(Ref ref) {
               GoRoute(
                 path: '/messaging',
                 pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: MessagingPage()),
+                    const NoTransitionPage(child: ComingSoonPage()),
               ),
             ],
           ),
@@ -110,6 +111,11 @@ GoRouter goRouter(Ref ref) {
         path: '/about',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AboutPage(),
+      ),
+      GoRoute(
+        path: '/misskey/notifications',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const MisskeyNotificationsPage(),
       ),
       GoRoute(
         path: '/misskey/user/:userId',

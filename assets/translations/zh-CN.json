@@ -292,5 +292,6 @@
   "messaging_file": "[文件]",
   "common_retry": "重试",
   "common_error": "错误",
-  "common_refresh_stage": "刷新舞台"
+  "common_refresh_stage": "刷新舞台",
+  "feature_under_development": "功能正在开发中，敬请期待"
 }

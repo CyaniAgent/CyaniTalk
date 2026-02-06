@@ -15,6 +15,13 @@ import 'streaming.dart';
 abstract class MisskeyRustClient implements RustOpaqueInterface {
   Future<void> connectStreaming();
 
+  Future<String> createChatMessage({
+    String? userId,
+    String? roomId,
+    String? text,
+    String? fileId,
+  });
+
   Future<String> createNote({
     String? text,
     String? replyId,
@@ -28,6 +35,17 @@ abstract class MisskeyRustClient implements RustOpaqueInterface {
   });
 
   Future<void> disconnectStreaming();
+
+  Future<String> getChatHistory({required int limit});
+
+  Future<String> getChatMessages({
+    String? userId,
+    String? roomId,
+    required int limit,
+    String? untilId,
+  });
+
+  Future<String> getChatRooms();
 
   Future<int> getOnlineUsersCount();
 
@@ -50,6 +68,8 @@ abstract class MisskeyRustClient implements RustOpaqueInterface {
   StreamEvent? pollStreamingEvent();
 
   Future<void> sendStreamingMessage({required String message});
+
+  Future<String> showUser({required String userId});
 
   Future<void> subscribeToMain();
 

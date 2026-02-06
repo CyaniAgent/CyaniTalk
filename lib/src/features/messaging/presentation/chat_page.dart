@@ -63,25 +63,57 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final meAsync = ref.watch(misskeyMeProvider);
-    final theme = Theme.of(context);
 
     final messagesAsync = widget.type == ChatType.direct
         ? ref.watch(misskeyMessagingProvider(widget.id))
         : ref.watch(misskeyChatRoomProvider(widget.id));
 
+    return meAsync.when(
+      data: (me) {
+        if (widget.type == ChatType.direct) {
+          final userAsync = ref.watch(misskeyUserProvider(widget.id));
+          return userAsync.when(
+            data: (user) => _buildScaffold(context, me, messagesAsync, user: user),
+            loading: () => _buildScaffold(context, me, messagesAsync, user: widget.initialData as MisskeyUser?, isLoadingUser: true),
+            error: (err, stack) => _buildScaffold(context, me, messagesAsync, user: widget.initialData as MisskeyUser?, userError: err),
+          );
+        } else {
+          final room = widget.initialData as ChatRoom?;
+          return _buildScaffold(context, me, messagesAsync, room: room);
+        }
+      },
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, stack) => Scaffold(body: Center(child: Text('${'messaging_error_loading_user'.tr()}: $err'))),
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context, 
+    MisskeyUser me, 
+    AsyncValue<List<MessagingMessage>> messagesAsync, 
+    {MisskeyUser? user, ChatRoom? room, bool isLoadingUser = false, Object? userError}
+  ) {
+    final theme = Theme.of(context);
+    
     String title = 'messaging_chat_title'.tr();
     Widget? leadingAvatar;
+    bool isInputLocked = isLoadingUser;
 
     if (widget.type == ChatType.direct) {
-      final user = widget.initialData as MisskeyUser?;
-      title = user?.name ?? user?.username ?? title;
+      final displayUser = user ?? widget.initialData as MisskeyUser?;
+      title = displayUser?.name ?? displayUser?.username ?? title;
       leadingAvatar = CircleAvatar(
         radius: 16,
-        backgroundImage: user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
-        child: user?.avatarUrl == null ? const Icon(Icons.person, size: 20) : null,
+        backgroundImage: displayUser?.avatarUrl != null ? NetworkImage(displayUser!.avatarUrl!) : null,
+        child: displayUser?.avatarUrl == null ? const Icon(Icons.person, size: 20) : null,
       );
+      
+      // Verification: Check if widget.id matches displayUser.id if available
+      if (displayUser != null && displayUser.id != widget.id) {
+        title = 'messaging_error_id_mismatch'.tr();
+        isInputLocked = true;
+      }
     } else {
-      final room = widget.initialData as ChatRoom?;
       title = room?.name ?? 'messaging_room_chat_title'.tr();
       leadingAvatar = CircleAvatar(
         radius: 16,
@@ -96,54 +128,62 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           children: [
             leadingAvatar,
             const SizedBox(width: 8),
-            Expanded(child: Text(title, overflow: TextOverflow.ellipsis)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                  if (isLoadingUser)
+                    Text('common_loading'.tr(), style: theme.textTheme.labelSmall)
+                  else if (user != null)
+                    Text('@${user.username}', style: theme.textTheme.labelSmall),
+                ],
+              ),
+            ),
           ],
         ),
       ),
-      body: meAsync.when(
-        data: (me) => Column(
-          children: [
-            Expanded(
-              child: messagesAsync.when(
-                data: (messages) {
-                  if (messages.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.chat_bubble_outline, size: 48, color: theme.colorScheme.outlineVariant),
-                          const SizedBox(height: 16),
-                          Text('search_no_results'.tr()),
-                        ],
-                      ),
-                    );
-                  }
-                  
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      final isMe = message.senderId == me.id;
-                      
-                      if (widget.type == ChatType.direct && !message.isRead && !isMe) {
-                        Future.microtask(() => ref.read(misskeyMessagingProvider(widget.id).notifier).markAsRead(message.id));
-                      }
-                      
-                      return _buildMessageBubble(context, message, isMe, me.id);
-                    },
+      body: Column(
+        children: [
+          Expanded(
+            child: messagesAsync.when(
+              data: (messages) {
+                if (messages.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 48, color: theme.colorScheme.outlineVariant),
+                        const SizedBox(height: 16),
+                        Text('search_no_results'.tr()),
+                      ],
+                    ),
                   );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('${'common_error'.tr()}: $err')),
-              ),
+                }
+                
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final isMe = message.senderId == me.id;
+                    
+                    if (widget.type == ChatType.direct && !message.isRead && !isMe) {
+                      Future.microtask(() => ref.read(misskeyMessagingProvider(widget.id).notifier).markAsRead(message.id));
+                    }
+                    
+                    return _buildMessageBubble(context, message, isMe, me.id);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('${'common_error'.tr()}: $err')),
             ),
-            _buildInputArea(context),
-          ],
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('${'messaging_error_loading_user'.tr()}: $err')),
+          ),
+          _buildInputArea(context, isLocked: isInputLocked),
+        ],
       ),
     );
   }
@@ -210,7 +250,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     );
   }
 
-  Widget _buildInputArea(BuildContext context) {
+  Widget _buildInputArea(BuildContext context, {bool isLocked = false}) {
     final theme = Theme.of(context);
     final mikuGreen = const Color(0xFF39C5BB);
 
@@ -229,20 +269,21 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         children: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
-            onPressed: () {},
+            onPressed: isLocked ? null : () {},
             color: theme.colorScheme.primary,
           ),
           Expanded(
             child: TextField(
               controller: _textController,
+              enabled: !isLocked,
               decoration: InputDecoration(
-                hintText: 'messaging_type_message'.tr(),
+                hintText: isLocked ? 'messaging_chat_locked'.tr() : 'messaging_type_message'.tr(),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHigh,
+                fillColor: isLocked ? theme.colorScheme.surfaceContainer : theme.colorScheme.surfaceContainerHigh,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
               onSubmitted: (_) => _sendMessage(),
@@ -251,12 +292,12 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ),
           const SizedBox(width: 8),
           Material(
-            color: mikuGreen,
+            color: isLocked ? theme.colorScheme.outlineVariant : mikuGreen,
             shape: const CircleBorder(),
-            elevation: 2,
+            elevation: isLocked ? 0 : 2,
             child: IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: _sendMessage,
+              onPressed: isLocked ? null : _sendMessage,
             ),
           ),
         ],

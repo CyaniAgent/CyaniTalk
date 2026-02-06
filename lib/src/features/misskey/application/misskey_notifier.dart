@@ -362,3 +362,20 @@ class MisskeyMeNotifier extends _$MisskeyMeNotifier {
     });
   }
 }
+
+@riverpod
+class MisskeyUserNotifier extends _$MisskeyUserNotifier {
+  @override
+  FutureOr<MisskeyUser> build(String userId) async {
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
+    return await repository.showUser(userId);
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      return await repository.showUser(userId);
+    });
+  }
+}

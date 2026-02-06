@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../data/misskey_repository.dart';
 import '../domain/messaging_message.dart';
+import '../domain/chat_room.dart';
 import 'misskey_streaming_service.dart';
 import '../../../core/core.dart';
 
@@ -14,7 +15,65 @@ class MisskeyMessagingHistoryNotifier extends _$MisskeyMessagingHistoryNotifier 
     logger.info('初始化Misskey消息历史');
     try {
       final repository = await ref.watch(misskeyRepositoryProvider.future);
-      final history = await repository.getMessagingHistory();
+      
+      // 并行获取 DM 历史和已加入的群聊
+      final results = await Future.wait([
+        repository.getMessagingHistory(),
+        repository.getJoinedChatRooms(),
+      ]);
+
+      final history = results[0] as List<MessagingMessage>;
+      final rooms = results[1] as List<ChatRoom>;
+
+      // 将房间（群聊或私聊）转换为消息格式以显示在列表中
+      final roomMessages = rooms.map((room) {
+        if (room.type == 'user' && room.user != null) {
+          // 如果是私聊房间，优先使用其中的用户信息
+          final lastMsg = room.lastMessage;
+          return MessagingMessage(
+            id: lastMsg?.id ?? 'room-${room.id}',
+            createdAt: lastMsg?.createdAt ?? room.createdAt,
+            text: lastMsg?.text ?? '',
+            userId: room.user?.id,
+            user: room.user,
+            recipientId: room.userId,
+            isRead: room.unreadCount == 0,
+            roomId: room.id,
+            room: room,
+          );
+        }
+        
+        return MessagingMessage(
+          id: room.lastMessage?.id ?? 'room-${room.id}',
+          createdAt: room.lastMessage?.createdAt ?? room.createdAt,
+          text: room.lastMessage?.text ?? room.topic ?? 'Group Chat',
+          roomId: room.id,
+          room: room,
+        );
+      }).toList();
+
+      // 合并历史记录和房间记录。注意：某些旧版 API 可能导致重复，这里简单按 ID 去重
+      final allMessages = <String, MessagingMessage>{};
+      for (final m in history) {
+        allMessages[m.id] = m;
+      }
+      for (final m in roomMessages) {
+        // 如果房间关联了最后一条消息且已在 history 中，则合并信息
+        if (allMessages.containsKey(m.id)) {
+          final existing = allMessages[m.id]!;
+          allMessages[m.id] = existing.copyWith(
+            roomId: m.roomId,
+            room: m.room,
+          );
+        } else {
+          allMessages[m.id] = m;
+        }
+      }
+
+      final combined = allMessages.values.toList();
+      
+      // 按时间倒序排列
+      combined.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       // 监听实时消息以更新历史记录
       final streamingService = ref.watch(misskeyStreamingServiceProvider.notifier);
@@ -48,7 +107,59 @@ class MisskeyMessagingHistoryNotifier extends _$MisskeyMessagingHistoryNotifier 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      return await repository.getMessagingHistory();
+      
+      final results = await Future.wait([
+        repository.getMessagingHistory(),
+        repository.getJoinedChatRooms(),
+      ]);
+
+      final history = results[0] as List<MessagingMessage>;
+      final rooms = results[1] as List<ChatRoom>;
+
+      final roomMessages = rooms.map((room) {
+        if (room.type == 'user' && room.user != null) {
+          final lastMsg = room.lastMessage;
+          return MessagingMessage(
+            id: lastMsg?.id ?? 'room-${room.id}',
+            createdAt: lastMsg?.createdAt ?? room.createdAt,
+            text: lastMsg?.text ?? '',
+            userId: room.user?.id,
+            user: room.user,
+            recipientId: room.userId,
+            isRead: room.unreadCount == 0,
+            roomId: room.id,
+            room: room,
+          );
+        }
+        
+        return MessagingMessage(
+          id: room.lastMessage?.id ?? 'room-${room.id}',
+          createdAt: room.lastMessage?.createdAt ?? room.createdAt,
+          text: room.lastMessage?.text ?? room.topic ?? 'Group Chat',
+          roomId: room.id,
+          room: room,
+        );
+      }).toList();
+
+      final allMessages = <String, MessagingMessage>{};
+      for (final m in history) {
+        allMessages[m.id] = m;
+      }
+      for (final m in roomMessages) {
+        if (allMessages.containsKey(m.id)) {
+          final existing = allMessages[m.id]!;
+          allMessages[m.id] = existing.copyWith(
+            roomId: m.roomId,
+            room: m.room,
+          );
+        } else {
+          allMessages[m.id] = m;
+        }
+      }
+
+      final combined = allMessages.values.toList();
+      combined.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return combined;
     });
   }
 }

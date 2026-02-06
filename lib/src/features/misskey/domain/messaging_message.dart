@@ -33,6 +33,18 @@ abstract class MessagingMessage with _$MessagingMessage {
     // Handle aliases
     if (newJson['user'] == null && newJson['from'] != null) newJson['user'] = newJson['from'];
     if (newJson['userId'] == null && newJson['fromId'] != null) newJson['userId'] = newJson['fromId'];
+    if (newJson['recipient'] == null && newJson['to'] != null) newJson['recipient'] = newJson['to'];
+    if (newJson['recipientId'] == null && newJson['toId'] != null) newJson['recipientId'] = newJson['toId'];
+    
+    // Additional aliases that might be used by different Misskey versions/instances
+    if (newJson['user'] == null && newJson['sender'] != null) newJson['user'] = newJson['sender'];
+    if (newJson['userId'] == null && newJson['senderId'] != null) newJson['userId'] = newJson['senderId'];
+    if (newJson['recipient'] == null && newJson['recipientUser'] != null) newJson['recipient'] = newJson['recipientUser'];
+    if (newJson['recipientId'] == null && newJson['recipientId'] != null) newJson['recipientId'] = newJson['recipientId'];
+    
+    // Handle sender/recipient aliases (for cases where sender is the user and recipient is the other party)
+    if (newJson['user'] == null && newJson['senderUser'] != null) newJson['user'] = newJson['senderUser'];
+    if (newJson['userId'] == null && newJson['senderUserId'] != null) newJson['userId'] = newJson['senderUserId'];
     
     // Handle room data in group field
     if (newJson['group'] != null && newJson['room'] == null) {

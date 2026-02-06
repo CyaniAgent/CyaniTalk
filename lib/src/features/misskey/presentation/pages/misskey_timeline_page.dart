@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
+import 'package:cyanitalk/src/features/misskey/application/timeline_jump_provider.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 /// Misskey时间线页面组件
@@ -55,6 +56,25 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   Widget build(BuildContext context) {
     final timelineType = _selectedTimeline.first;
     final timelineAsync = ref.watch(misskeyTimelineProvider(timelineType));
+
+    // 监听跳转信号
+    ref.listen(timelineJumpProvider(timelineType), (previous, next) {
+      if (next != null) {
+        final notes = timelineAsync.value ?? [];
+        final index = notes.indexWhere((n) => n.id == next);
+        if (index != -1) {
+          // 找到笔记，尝试滚动到该位置
+          // 由于是动态高度，这里使用估算值或简单的动画
+          _scrollController.animateTo(
+            index * 250.0, // 估算每个卡片平均高度
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+          // 清除跳转信号
+          ref.read(timelineJumpProvider(timelineType).notifier).state = null;
+        }
+      }
+    });
 
     return Column(
       children: [
@@ -107,6 +127,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                       return ModernNoteCard(
                         key: ValueKey(notes[index].id),
                         note: notes[index],
+                        timelineType: timelineType,
                       );
                     } else {
                       return _buildLoadMoreIndicator();

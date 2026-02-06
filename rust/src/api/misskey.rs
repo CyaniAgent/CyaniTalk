@@ -193,6 +193,117 @@ impl MisskeyRustClient {
         
         Ok(count)
     }
+
+    pub async fn get_chat_history(&self, limit: u32) -> Result<String> {
+        let url = format!("https://{}/api/chat/history", self.host);
+        let body = serde_json::json!({
+            "i": self.token,
+            "limit": limit,
+        });
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
+
+    pub async fn get_chat_messages(
+        &self, 
+        user_id: Option<String>, 
+        room_id: Option<String>, 
+        limit: u32,
+        until_id: Option<String>,
+    ) -> Result<String> {
+        let endpoint = if room_id.is_some() {
+            "/api/chat/messages/room-timeline"
+        } else {
+            "/api/chat/messages/user-timeline"
+        };
+
+        let url = format!("https://{}{}", self.host, endpoint);
+        let mut body = serde_json::json!({
+            "i": self.token,
+            "limit": limit,
+        });
+
+        if let Some(uid) = user_id {
+            body.as_object_mut().unwrap().insert("userId".to_string(), serde_json::Value::String(uid));
+        }
+        if let Some(rid) = room_id {
+            body.as_object_mut().unwrap().insert("roomId".to_string(), serde_json::Value::String(rid));
+        }
+        if let Some(id) = until_id {
+            body.as_object_mut().unwrap().insert("untilId".to_string(), serde_json::Value::String(id));
+        }
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
+
+    pub async fn create_chat_message(
+        &self, 
+        user_id: Option<String>, 
+        room_id: Option<String>, 
+        text: Option<String>,
+        file_id: Option<String>,
+    ) -> Result<String> {
+        let endpoint = if room_id.is_some() {
+            "/api/chat/messages/create-to-room"
+        } else {
+            "/api/chat/messages/create-to-user"
+        };
+
+        let url = format!("https://{}{}", self.host, endpoint);
+        let mut body = serde_json::json!({ "i": self.token });
+        
+        let obj = body.as_object_mut().unwrap();
+        if let Some(uid) = user_id { obj.insert("userId".to_string(), serde_json::Value::String(uid)); }
+        if let Some(rid) = room_id { obj.insert("roomId".to_string(), serde_json::Value::String(rid)); }
+        if let Some(t) = text { obj.insert("text".to_string(), serde_json::Value::String(t)); }
+        if let Some(f) = file_id { obj.insert("fileId".to_string(), serde_json::Value::String(f)); }
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
+
+    pub async fn get_chat_rooms(&self) -> Result<String> {
+        let url = format!("https://{}/api/chat/rooms/joining", self.host);
+        let body = serde_json::json!({ "i": self.token });
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
+
+    pub async fn show_user(&self, user_id: String) -> Result<String> {
+        let url = format!("https://{}/api/users/show", self.host);
+        let body = serde_json::json!({ "i": self.token, "userId": user_id });
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
 }
 
 // Add a simple function to get the current timestamp for channel IDs

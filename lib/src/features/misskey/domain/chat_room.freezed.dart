@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatRoom {
 
- String get id; DateTime get createdAt; String get name; String? get description; String? get userId; List<String> get userIds;
+ String get id; DateTime get createdAt; String? get name; String? get topic; bool get isPublic; List<String> get userIds; String? get userId;// For direct message rooms
+ MisskeyUser? get user; String? get type;// 'room' or 'user'
+ MessagingMessage? get lastMessage; int get unreadCount; bool get isMuted; bool get isPinned;
 /// Create a copy of ChatRoom
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $ChatRoomCopyWith<ChatRoom> get copyWith => _$ChatRoomCopyWithImpl<ChatRoom>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatRoom&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.userId, userId) || other.userId == userId)&&const DeepCollectionEquality().equals(other.userIds, userIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatRoom&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.topic, topic) || other.topic == topic)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&const DeepCollectionEquality().equals(other.userIds, userIds)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.user, user) || other.user == user)&&(identical(other.type, type) || other.type == type)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.isMuted, isMuted) || other.isMuted == isMuted)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,createdAt,name,description,userId,const DeepCollectionEquality().hash(userIds));
+int get hashCode => Object.hash(runtimeType,id,createdAt,name,topic,isPublic,const DeepCollectionEquality().hash(userIds),userId,user,type,lastMessage,unreadCount,isMuted,isPinned);
 
 @override
 String toString() {
-  return 'ChatRoom(id: $id, createdAt: $createdAt, name: $name, description: $description, userId: $userId, userIds: $userIds)';
+  return 'ChatRoom(id: $id, createdAt: $createdAt, name: $name, topic: $topic, isPublic: $isPublic, userIds: $userIds, userId: $userId, user: $user, type: $type, lastMessage: $lastMessage, unreadCount: $unreadCount, isMuted: $isMuted, isPinned: $isPinned)';
 }
 
 
@@ -48,11 +50,11 @@ abstract mixin class $ChatRoomCopyWith<$Res>  {
   factory $ChatRoomCopyWith(ChatRoom value, $Res Function(ChatRoom) _then) = _$ChatRoomCopyWithImpl;
 @useResult
 $Res call({
- String id, DateTime createdAt, String name, String? description, String? userId, List<String> userIds
+ String id, DateTime createdAt, String? name, String? topic, bool isPublic, List<String> userIds, String? userId, MisskeyUser? user, String? type, MessagingMessage? lastMessage, int unreadCount, bool isMuted, bool isPinned
 });
 
 
-
+$MisskeyUserCopyWith<$Res>? get user;$MessagingMessageCopyWith<$Res>? get lastMessage;
 
 }
 /// @nodoc
@@ -65,18 +67,49 @@ class _$ChatRoomCopyWithImpl<$Res>
 
 /// Create a copy of ChatRoom
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? name = null,Object? description = freezed,Object? userId = freezed,Object? userIds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? name = freezed,Object? topic = freezed,Object? isPublic = null,Object? userIds = null,Object? userId = freezed,Object? user = freezed,Object? type = freezed,Object? lastMessage = freezed,Object? unreadCount = null,Object? isMuted = null,Object? isPinned = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String?,userIds: null == userIds ? _self.userIds : userIds // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as DateTime,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,topic: freezed == topic ? _self.topic : topic // ignore: cast_nullable_to_non_nullable
+as String?,isPublic: null == isPublic ? _self.isPublic : isPublic // ignore: cast_nullable_to_non_nullable
+as bool,userIds: null == userIds ? _self.userIds : userIds // ignore: cast_nullable_to_non_nullable
+as List<String>,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as String?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as MisskeyUser?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
+as MessagingMessage?,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
+as int,isMuted: null == isMuted ? _self.isMuted : isMuted // ignore: cast_nullable_to_non_nullable
+as bool,isPinned: null == isPinned ? _self.isPinned : isPinned // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
+/// Create a copy of ChatRoom
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MisskeyUserCopyWith<$Res>? get user {
+    if (_self.user == null) {
+    return null;
+  }
 
+  return $MisskeyUserCopyWith<$Res>(_self.user!, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}/// Create a copy of ChatRoom
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MessagingMessageCopyWith<$Res>? get lastMessage {
+    if (_self.lastMessage == null) {
+    return null;
+  }
+
+  return $MessagingMessageCopyWith<$Res>(_self.lastMessage!, (value) {
+    return _then(_self.copyWith(lastMessage: value));
+  });
+}
 }
 
 
@@ -158,10 +191,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String name,  String? description,  String? userId,  List<String> userIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String? name,  String? topic,  bool isPublic,  List<String> userIds,  String? userId,  MisskeyUser? user,  String? type,  MessagingMessage? lastMessage,  int unreadCount,  bool isMuted,  bool isPinned)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatRoom() when $default != null:
-return $default(_that.id,_that.createdAt,_that.name,_that.description,_that.userId,_that.userIds);case _:
+return $default(_that.id,_that.createdAt,_that.name,_that.topic,_that.isPublic,_that.userIds,_that.userId,_that.user,_that.type,_that.lastMessage,_that.unreadCount,_that.isMuted,_that.isPinned);case _:
   return orElse();
 
 }
@@ -179,10 +212,10 @@ return $default(_that.id,_that.createdAt,_that.name,_that.description,_that.user
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String name,  String? description,  String? userId,  List<String> userIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  String? name,  String? topic,  bool isPublic,  List<String> userIds,  String? userId,  MisskeyUser? user,  String? type,  MessagingMessage? lastMessage,  int unreadCount,  bool isMuted,  bool isPinned)  $default,) {final _that = this;
 switch (_that) {
 case _ChatRoom():
-return $default(_that.id,_that.createdAt,_that.name,_that.description,_that.userId,_that.userIds);case _:
+return $default(_that.id,_that.createdAt,_that.name,_that.topic,_that.isPublic,_that.userIds,_that.userId,_that.user,_that.type,_that.lastMessage,_that.unreadCount,_that.isMuted,_that.isPinned);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +232,10 @@ return $default(_that.id,_that.createdAt,_that.name,_that.description,_that.user
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime createdAt,  String name,  String? description,  String? userId,  List<String> userIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime createdAt,  String? name,  String? topic,  bool isPublic,  List<String> userIds,  String? userId,  MisskeyUser? user,  String? type,  MessagingMessage? lastMessage,  int unreadCount,  bool isMuted,  bool isPinned)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatRoom() when $default != null:
-return $default(_that.id,_that.createdAt,_that.name,_that.description,_that.userId,_that.userIds);case _:
+return $default(_that.id,_that.createdAt,_that.name,_that.topic,_that.isPublic,_that.userIds,_that.userId,_that.user,_that.type,_that.lastMessage,_that.unreadCount,_that.isMuted,_that.isPinned);case _:
   return null;
 
 }
@@ -214,14 +247,14 @@ return $default(_that.id,_that.createdAt,_that.name,_that.description,_that.user
 @JsonSerializable()
 
 class _ChatRoom implements ChatRoom {
-  const _ChatRoom({required this.id, required this.createdAt, required this.name, this.description, this.userId, final  List<String> userIds = const []}): _userIds = userIds;
+  const _ChatRoom({required this.id, required this.createdAt, this.name, this.topic, this.isPublic = false, final  List<String> userIds = const [], this.userId, this.user, this.type, this.lastMessage, this.unreadCount = 0, this.isMuted = false, this.isPinned = false}): _userIds = userIds;
   factory _ChatRoom.fromJson(Map<String, dynamic> json) => _$ChatRoomFromJson(json);
 
 @override final  String id;
 @override final  DateTime createdAt;
-@override final  String name;
-@override final  String? description;
-@override final  String? userId;
+@override final  String? name;
+@override final  String? topic;
+@override@JsonKey() final  bool isPublic;
  final  List<String> _userIds;
 @override@JsonKey() List<String> get userIds {
   if (_userIds is EqualUnmodifiableListView) return _userIds;
@@ -229,6 +262,15 @@ class _ChatRoom implements ChatRoom {
   return EqualUnmodifiableListView(_userIds);
 }
 
+@override final  String? userId;
+// For direct message rooms
+@override final  MisskeyUser? user;
+@override final  String? type;
+// 'room' or 'user'
+@override final  MessagingMessage? lastMessage;
+@override@JsonKey() final  int unreadCount;
+@override@JsonKey() final  bool isMuted;
+@override@JsonKey() final  bool isPinned;
 
 /// Create a copy of ChatRoom
 /// with the given fields replaced by the non-null parameter values.
@@ -243,16 +285,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatRoom&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.userId, userId) || other.userId == userId)&&const DeepCollectionEquality().equals(other._userIds, _userIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatRoom&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.topic, topic) || other.topic == topic)&&(identical(other.isPublic, isPublic) || other.isPublic == isPublic)&&const DeepCollectionEquality().equals(other._userIds, _userIds)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.user, user) || other.user == user)&&(identical(other.type, type) || other.type == type)&&(identical(other.lastMessage, lastMessage) || other.lastMessage == lastMessage)&&(identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount)&&(identical(other.isMuted, isMuted) || other.isMuted == isMuted)&&(identical(other.isPinned, isPinned) || other.isPinned == isPinned));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,createdAt,name,description,userId,const DeepCollectionEquality().hash(_userIds));
+int get hashCode => Object.hash(runtimeType,id,createdAt,name,topic,isPublic,const DeepCollectionEquality().hash(_userIds),userId,user,type,lastMessage,unreadCount,isMuted,isPinned);
 
 @override
 String toString() {
-  return 'ChatRoom(id: $id, createdAt: $createdAt, name: $name, description: $description, userId: $userId, userIds: $userIds)';
+  return 'ChatRoom(id: $id, createdAt: $createdAt, name: $name, topic: $topic, isPublic: $isPublic, userIds: $userIds, userId: $userId, user: $user, type: $type, lastMessage: $lastMessage, unreadCount: $unreadCount, isMuted: $isMuted, isPinned: $isPinned)';
 }
 
 
@@ -263,11 +305,11 @@ abstract mixin class _$ChatRoomCopyWith<$Res> implements $ChatRoomCopyWith<$Res>
   factory _$ChatRoomCopyWith(_ChatRoom value, $Res Function(_ChatRoom) _then) = __$ChatRoomCopyWithImpl;
 @override @useResult
 $Res call({
- String id, DateTime createdAt, String name, String? description, String? userId, List<String> userIds
+ String id, DateTime createdAt, String? name, String? topic, bool isPublic, List<String> userIds, String? userId, MisskeyUser? user, String? type, MessagingMessage? lastMessage, int unreadCount, bool isMuted, bool isPinned
 });
 
 
-
+@override $MisskeyUserCopyWith<$Res>? get user;@override $MessagingMessageCopyWith<$Res>? get lastMessage;
 
 }
 /// @nodoc
@@ -280,19 +322,50 @@ class __$ChatRoomCopyWithImpl<$Res>
 
 /// Create a copy of ChatRoom
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? createdAt = null,Object? name = null,Object? description = freezed,Object? userId = freezed,Object? userIds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? createdAt = null,Object? name = freezed,Object? topic = freezed,Object? isPublic = null,Object? userIds = null,Object? userId = freezed,Object? user = freezed,Object? type = freezed,Object? lastMessage = freezed,Object? unreadCount = null,Object? isMuted = null,Object? isPinned = null,}) {
   return _then(_ChatRoom(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as String?,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
-as String?,userIds: null == userIds ? _self._userIds : userIds // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as DateTime,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,topic: freezed == topic ? _self.topic : topic // ignore: cast_nullable_to_non_nullable
+as String?,isPublic: null == isPublic ? _self.isPublic : isPublic // ignore: cast_nullable_to_non_nullable
+as bool,userIds: null == userIds ? _self._userIds : userIds // ignore: cast_nullable_to_non_nullable
+as List<String>,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as String?,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as MisskeyUser?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String?,lastMessage: freezed == lastMessage ? _self.lastMessage : lastMessage // ignore: cast_nullable_to_non_nullable
+as MessagingMessage?,unreadCount: null == unreadCount ? _self.unreadCount : unreadCount // ignore: cast_nullable_to_non_nullable
+as int,isMuted: null == isMuted ? _self.isMuted : isMuted // ignore: cast_nullable_to_non_nullable
+as bool,isPinned: null == isPinned ? _self.isPinned : isPinned // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
+/// Create a copy of ChatRoom
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MisskeyUserCopyWith<$Res>? get user {
+    if (_self.user == null) {
+    return null;
+  }
 
+  return $MisskeyUserCopyWith<$Res>(_self.user!, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}/// Create a copy of ChatRoom
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MessagingMessageCopyWith<$Res>? get lastMessage {
+    if (_self.lastMessage == null) {
+    return null;
+  }
+
+  return $MessagingMessageCopyWith<$Res>(_self.lastMessage!, (value) {
+    return _then(_self.copyWith(lastMessage: value));
+  });
+}
 }
 
 // dart format on

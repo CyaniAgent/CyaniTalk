@@ -98,7 +98,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
               data: (notifications) {
                 final combinedList = _getFilteredAndSortedList(history, notifications, me.id);
                 
-                if (combinedList.isEmpty) {
+                if (combinedList.isEmpty && notifications.isEmpty) {
                   return _buildEmptyState();
                 }
 
@@ -109,20 +109,54 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
                   },
                   child: ListView.separated(
                     padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: combinedList.length,
+                    itemCount: combinedList.length + (notifications.isNotEmpty && (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.notifications) ? 1 : 0),
                     separatorBuilder: (context, index) => const Divider(indent: 72, height: 1, thickness: 0.5),
                     itemBuilder: (context, index) {
-                      final item = combinedList[index];
+                      // Show aggregate notifications tile at the top if there are notifications
+                      final showAggregate = notifications.isNotEmpty && (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.notifications);
+                      
+                      if (showAggregate && index == 0) {
+                        return _buildAggregateNotificationsTile(notifications.first);
+                      }
+
+                      final itemIndex = showAggregate ? index - 1 : index;
+                      final item = combinedList[itemIndex];
+                      final String id = (item is MessagingMessage) ? item.id : (item as MisskeyNotification).id;
+                      
                       if (item is MessagingMessage) {
                         if (item.room != null) {
-                          return _buildRoomTile(item, item.room!, me.id);
+                          return _buildRoomTile(item, item.room!, me.id, key: ValueKey('room_$id'));
                         } else {
+                          // 获取对方用户
                           final otherUser = (item.senderId == me.id) ? item.recipient : item.sender;
-                          if (otherUser == null) return _buildSystemTile(item);
-                          return _buildDirectTile(item, otherUser, me.id);
+                          
+                          // 如果用户对象存在，直接使用
+                          if (otherUser != null) {
+                            return _buildDirectTile(item, otherUser, me.id, key: ValueKey('direct_$id'));
+                          }
+                          
+                          // 如果用户对象缺失，但有用户ID，创建临时用户对象
+                          String? counterpartId;
+                          if (item.senderId == me.id) {
+                            // 我发的消息，对方是接收者
+                            counterpartId = item.recipientId;
+                          } else {
+                            // 别人发给我的消息，对方是发送者
+                            counterpartId = item.senderId;
+                          }
+                          
+                          if (counterpartId != null) {
+                            final tempUser = MisskeyUser(
+                              id: counterpartId,
+                              username: 'User_$counterpartId',
+                              name: 'User $counterpartId',
+                            );
+                            return _buildDirectTile(item, tempUser, me.id, key: ValueKey('direct_$id'));
+                          }
+                          
+                          // 最后才显示系统未知
+                          return _buildSystemTile(item, key: ValueKey('system_$id'));
                         }
-                      } else if (item is MisskeyNotification) {
-                        return _buildNotificationTile(item);
                       }
                       return const SizedBox.shrink();
                     },
@@ -157,9 +191,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
       list.addAll(history.where((m) => m.room != null));
     }
     
-    if (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.notifications) {
-      list.addAll(notifications);
-    }
+    // Notifications are now aggregated separately, so we don't add them to the main list here
 
     // Sort by createdAt descending
     list.sort((a, b) {
@@ -171,9 +203,10 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     return list;
   }
 
-  Widget _buildDirectTile(MessagingMessage message, MisskeyUser otherUser, String myId) {
+  Widget _buildDirectTile(MessagingMessage message, MisskeyUser otherUser, String myId, {Key? key}) {
     final mikuGreen = const Color(0xFF39C5BB);
     return ListTile(
+      key: key,
       leading: _buildAvatar(otherUser.avatarUrl, Icons.person),
       title: Row(
         children: [
@@ -192,14 +225,15 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     );
   }
 
-  Widget _buildRoomTile(MessagingMessage message, ChatRoom room, String myId) {
+  Widget _buildRoomTile(MessagingMessage message, ChatRoom room, String myId, {Key? key}) {
     final theme = Theme.of(context);
     final mikuGreen = const Color(0xFF39C5BB);
     return ListTile(
+      key: key,
       leading: _buildAvatar(null, Icons.groups, isRoom: true),
       title: Row(
         children: [
-          Expanded(child: Text(room.name, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(child: Text(room.name ?? 'Group Chat', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
           Text(timeago.format(message.createdAt), style: theme.textTheme.bodySmall),
         ],
       ),
@@ -214,42 +248,35 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     );
   }
 
-  Widget _buildNotificationTile(MisskeyNotification notification) {
+  Widget _buildAggregateNotificationsTile(MisskeyNotification latest) {
     final theme = Theme.of(context);
-    IconData iconData = Icons.notifications;
-    Color iconColor = theme.colorScheme.primary;
-
-    switch (notification.type) {
-      case 'follow': iconData = Icons.person_add; iconColor = Colors.blue; break;
-      case 'mention': iconData = Icons.alternate_email; iconColor = Colors.orange; break;
-      case 'reply': iconData = Icons.reply; iconColor = Colors.green; break;
-      case 'renote': iconData = Icons.repeat; iconColor = Colors.teal; break;
-      case 'reaction': iconData = Icons.add_reaction; iconColor = Colors.pink; break;
-    }
-
+    final mikuGreen = const Color(0xFF39C5BB);
+    
     return ListTile(
-      leading: Stack(
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: mikuGreen.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.notifications_active, color: mikuGreen),
+      ),
+      title: Text('notifications_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Text(
+        _getNotificationText(latest),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _buildAvatar(notification.user?.avatarUrl, Icons.person),
-          Positioned(
-            right: 0, bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(color: theme.colorScheme.surface, shape: BoxShape.circle),
-              child: Icon(iconData, size: 12, color: iconColor),
-            ),
-          ),
+          Text(timeago.format(latest.createdAt), style: theme.textTheme.bodySmall),
+          const Icon(Icons.chevron_right, size: 16),
         ],
       ),
-      title: Text(
-        _getNotificationText(notification),
-        maxLines: 2, overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14),
-      ),
-      subtitle: Text(timeago.format(notification.createdAt), style: theme.textTheme.bodySmall),
-      onTap: () {
-        // Handle notification tap (e.g. show note)
-      },
+      onTap: () => context.push('/misskey/notifications'),
     );
   }
 
@@ -265,8 +292,9 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     };
   }
 
-  Widget _buildSystemTile(MessagingMessage message) {
+  Widget _buildSystemTile(MessagingMessage message, {Key? key}) {
     return ListTile(
+      key: key,
       leading: _buildAvatar(null, Icons.settings),
       title: Text('messaging_system_unknown'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(message.text ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),

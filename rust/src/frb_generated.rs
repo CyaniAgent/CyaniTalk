@@ -42,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1668039939;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1963797400;
 
 // Section: executor
 
@@ -589,6 +589,73 @@ fn wire__crate__api__misskey__MisskeyRustClient_connect_streaming_impl(
         },
     )
 }
+fn wire__crate__api__misskey__MisskeyRustClient_create_chat_message_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "MisskeyRustClient_create_chat_message",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MisskeyRustClient>,
+            >>::sse_decode(&mut deserializer);
+            let api_user_id = <Option<String>>::sse_decode(&mut deserializer);
+            let api_room_id = <Option<String>>::sse_decode(&mut deserializer);
+            let api_text = <Option<String>>::sse_decode(&mut deserializer);
+            let api_file_id = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let mut api_that_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_that, 0, false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_that_guard =
+                                        Some(api_that.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_that_guard = api_that_guard.unwrap();
+                        let output_ok =
+                            crate::api::misskey::MisskeyRustClient::create_chat_message(
+                                &*api_that_guard,
+                                api_user_id,
+                                api_room_id,
+                                api_text,
+                                api_file_id,
+                            )
+                            .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__misskey__MisskeyRustClient_create_note_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -768,6 +835,190 @@ fn wire__crate__api__misskey__MisskeyRustClient_disconnect_streaming_impl(
                                 &*api_that_guard,
                             )
                             .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__misskey__MisskeyRustClient_get_chat_history_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "MisskeyRustClient_get_chat_history",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MisskeyRustClient>,
+            >>::sse_decode(&mut deserializer);
+            let api_limit = <u32>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let mut api_that_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_that, 0, false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_that_guard =
+                                        Some(api_that.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_that_guard = api_that_guard.unwrap();
+                        let output_ok = crate::api::misskey::MisskeyRustClient::get_chat_history(
+                            &*api_that_guard,
+                            api_limit,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__misskey__MisskeyRustClient_get_chat_messages_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "MisskeyRustClient_get_chat_messages",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MisskeyRustClient>,
+            >>::sse_decode(&mut deserializer);
+            let api_user_id = <Option<String>>::sse_decode(&mut deserializer);
+            let api_room_id = <Option<String>>::sse_decode(&mut deserializer);
+            let api_limit = <u32>::sse_decode(&mut deserializer);
+            let api_until_id = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let mut api_that_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_that, 0, false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_that_guard =
+                                        Some(api_that.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_that_guard = api_that_guard.unwrap();
+                        let output_ok = crate::api::misskey::MisskeyRustClient::get_chat_messages(
+                            &*api_that_guard,
+                            api_user_id,
+                            api_room_id,
+                            api_limit,
+                            api_until_id,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__misskey__MisskeyRustClient_get_chat_rooms_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "MisskeyRustClient_get_chat_rooms",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MisskeyRustClient>,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let mut api_that_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_that, 0, false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_that_guard =
+                                        Some(api_that.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_that_guard = api_that_guard.unwrap();
+                        let output_ok = crate::api::misskey::MisskeyRustClient::get_chat_rooms(
+                            &*api_that_guard,
+                        )
+                        .await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -1139,6 +1390,66 @@ fn wire__crate__api__misskey__MisskeyRustClient_send_streaming_message_impl(
                                 api_message,
                             )
                             .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__misskey__MisskeyRustClient_show_user_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "MisskeyRustClient_show_user",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MisskeyRustClient>,
+            >>::sse_decode(&mut deserializer);
+            let api_user_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let mut api_that_guard = None;
+                        let decode_indices_ =
+                            flutter_rust_bridge::for_generated::lockable_compute_decode_order(
+                                vec![flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                    &api_that, 0, false,
+                                )],
+                            );
+                        for i in decode_indices_ {
+                            match i {
+                                0 => {
+                                    api_that_guard =
+                                        Some(api_that.lockable_decode_async_ref().await)
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        let api_that_guard = api_that_guard.unwrap();
+                        let output_ok = crate::api::misskey::MisskeyRustClient::show_user(
+                            &*api_that_guard,
+                            api_user_id,
+                        )
+                        .await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -2268,82 +2579,112 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        11 => wire__crate__api__misskey__MisskeyRustClient_create_note_impl(
+        11 => wire__crate__api__misskey__MisskeyRustClient_create_chat_message_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        12 => wire__crate__api__misskey__MisskeyRustClient_create_reaction_impl(
+        12 => wire__crate__api__misskey__MisskeyRustClient_create_note_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        13 => wire__crate__api__misskey__MisskeyRustClient_disconnect_streaming_impl(
+        13 => wire__crate__api__misskey__MisskeyRustClient_create_reaction_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        14 => wire__crate__api__misskey__MisskeyRustClient_get_online_users_count_impl(
+        14 => wire__crate__api__misskey__MisskeyRustClient_disconnect_streaming_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        15 => wire__crate__api__misskey__MisskeyRustClient_get_timeline_impl(
+        15 => wire__crate__api__misskey__MisskeyRustClient_get_chat_history_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        16 => {
+        16 => wire__crate__api__misskey__MisskeyRustClient_get_chat_messages_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        17 => wire__crate__api__misskey__MisskeyRustClient_get_chat_rooms_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        18 => wire__crate__api__misskey__MisskeyRustClient_get_online_users_count_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        19 => wire__crate__api__misskey__MisskeyRustClient_get_timeline_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        20 => {
             wire__crate__api__misskey__MisskeyRustClient_i_impl(port, ptr, rust_vec_len, data_len)
         }
-        20 => wire__crate__api__misskey__MisskeyRustClient_send_streaming_message_impl(
+        24 => wire__crate__api__misskey__MisskeyRustClient_send_streaming_message_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        21 => wire__crate__api__misskey__MisskeyRustClient_subscribe_to_main_impl(
+        25 => wire__crate__api__misskey__MisskeyRustClient_show_user_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        22 => wire__crate__api__misskey__MisskeyRustClient_subscribe_to_timeline_impl(
+        26 => wire__crate__api__misskey__MisskeyRustClient_subscribe_to_main_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        29 => wire__crate__api__streaming__StreamingClient_connect_impl(
+        27 => wire__crate__api__misskey__MisskeyRustClient_subscribe_to_timeline_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        30 => wire__crate__api__streaming__StreamingClient_disconnect_impl(
+        34 => wire__crate__api__streaming__StreamingClient_connect_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        34 => wire__crate__api__streaming__StreamingClient_send_message_impl(
+        35 => wire__crate__api__streaming__StreamingClient_disconnect_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        35 => wire__crate__api__streaming__StreamingClient_subscribe_to_channel_impl(
+        39 => wire__crate__api__streaming__StreamingClient_send_message_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        36 => wire__crate__api__streaming__StreamingClient_unsubscribe_from_channel_impl(
+        40 => wire__crate__api__streaming__StreamingClient_subscribe_to_channel_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        41 => wire__crate__api__streaming__StreamingClient_unsubscribe_from_channel_impl(
             port,
             ptr,
             rust_vec_len,
@@ -2363,54 +2704,54 @@ fn pde_ffi_dispatcher_sync_impl(
     match func_id {
         3 => wire__crate__api__flarum__FlarumRustClient_new_impl(ptr, rust_vec_len, data_len),
         8 => wire__crate__api__auth__JuheAuthClient_new_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__misskey__MisskeyRustClient_is_streaming_connected_impl(
+        21 => wire__crate__api__misskey__MisskeyRustClient_is_streaming_connected_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        18 => wire__crate__api__misskey__MisskeyRustClient_new_impl(ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__misskey__MisskeyRustClient_poll_streaming_event_impl(
+        22 => wire__crate__api__misskey__MisskeyRustClient_new_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__misskey__MisskeyRustClient_poll_streaming_event_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        23 => wire__crate__api__streaming__StreamEvent_auto_accessor_get_body_impl(
+        28 => wire__crate__api__streaming__StreamEvent_auto_accessor_get_body_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        24 => wire__crate__api__streaming__StreamEvent_auto_accessor_get_channel_id_impl(
+        29 => wire__crate__api__streaming__StreamEvent_auto_accessor_get_channel_id_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        25 => wire__crate__api__streaming__StreamEvent_auto_accessor_get_event_type_impl(
+        30 => wire__crate__api__streaming__StreamEvent_auto_accessor_get_event_type_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        26 => wire__crate__api__streaming__StreamEvent_auto_accessor_set_body_impl(
+        31 => wire__crate__api__streaming__StreamEvent_auto_accessor_set_body_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        27 => wire__crate__api__streaming__StreamEvent_auto_accessor_set_channel_id_impl(
+        32 => wire__crate__api__streaming__StreamEvent_auto_accessor_set_channel_id_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        28 => wire__crate__api__streaming__StreamEvent_auto_accessor_set_event_type_impl(
+        33 => wire__crate__api__streaming__StreamEvent_auto_accessor_set_event_type_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        31 => wire__crate__api__streaming__StreamingClient_is_currently_connected_impl(
+        36 => wire__crate__api__streaming__StreamingClient_is_currently_connected_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        32 => wire__crate__api__streaming__StreamingClient_new_impl(ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__streaming__StreamingClient_poll_event_impl(
+        37 => wire__crate__api__streaming__StreamingClient_new_impl(ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__streaming__StreamingClient_poll_event_impl(
             ptr,
             rust_vec_len,
             data_len,

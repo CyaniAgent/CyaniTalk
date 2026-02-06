@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -7,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/note.dart';
 import '../../data/misskey_repository.dart';
 import '../../application/misskey_notifier.dart';
+import '../../application/timeline_jump_provider.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
 import '../pages/image_viewer_page.dart';
@@ -20,12 +23,14 @@ import '../pages/video_player_page.dart';
 /// @param note 要显示的笔记对象
 class ModernNoteCard extends ConsumerStatefulWidget {
   final Note note;
+  final String? timelineType;
 
   /// 创建ModernNoteCard组件
   /// 
   /// @param key 组件的键
   /// @param note 要显示的笔记对象
-  const ModernNoteCard({super.key, required this.note});
+  /// @param timelineType 可选的时间线类型，用于跳转功能
+  const ModernNoteCard({super.key, required this.note, this.timelineType});
 
   @override
   ConsumerState<ModernNoteCard> createState() => _ModernNoteCardState();
@@ -36,10 +41,20 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
   // 缓存文本处理结果，避免重复计算
   final Map<String, List<TextSpan>> _textProcessingCache = {};
+  final List<TapGestureRecognizer> _recognizers = [];
+
+  @override
+  void dispose() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+    super.dispose();
+  }
 
   /// 处理文本中的特殊格式
   /// 
-  /// 处理文本中的加粗文本(**text**)、提及(@username)和话题(#hashtag)，
+  /// 处理文本中的加粗文本(**text**)、提及(@username)、话题(#hashtag)和链接(http/https)，
   /// 并返回对应的TextSpan列表。会缓存处理结果，避免重复计算。
   List<TextSpan> _processText(String text) {
     // 检查是否已缓存处理结果
@@ -54,12 +69,14 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     final boldRegex = RegExp(r'\*\*(.*?)\*\*');
     final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
     final hashtagRegex = RegExp(r'#([^\s]+)');
+    final urlRegex = RegExp(r'https?:\/\/[^\s]+');
 
     // 收集所有匹配项并按位置排序
     final List<RegExpMatch> allMatches = [];
     allMatches.addAll(boldRegex.allMatches(text));
     allMatches.addAll(mentionRegex.allMatches(text));
     allMatches.addAll(hashtagRegex.allMatches(text));
+    allMatches.addAll(urlRegex.allMatches(text));
 
     // 按匹配位置排序
     allMatches.sort((a, b) => a.start.compareTo(b.start));
@@ -70,8 +87,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         spans.add(TextSpan(text: text.substring(currentIndex, match.start)));
       }
 
+      final matchText = text.substring(match.start, match.end);
+
       // 检查是哪种匹配
-      if (boldRegex.hasMatch(text.substring(match.start, match.end))) {
+      if (boldRegex.hasMatch(matchText)) {
         // 加粗文本
         spans.add(
           TextSpan(
@@ -79,26 +98,42 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         );
-      } else if (mentionRegex.hasMatch(
-        text.substring(match.start, match.end),
-      )) {
+      } else if (mentionRegex.hasMatch(matchText)) {
         // 提及用户
         spans.add(
           TextSpan(
-            text: text.substring(match.start, match.end),
+            text: matchText,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
             recognizer: null, // 可以添加TapGestureRecognizer来处理点击
           ),
         );
-      } else if (hashtagRegex.hasMatch(
-        text.substring(match.start, match.end),
-      )) {
+      } else if (hashtagRegex.hasMatch(matchText)) {
         // 话题
         spans.add(
           TextSpan(
-            text: text.substring(match.start, match.end),
+            text: matchText,
             style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-            recognizer: null, // 可以添加TapGestureRecognizer来处理点击
+          ),
+        );
+      } else if (urlRegex.hasMatch(matchText)) {
+        // 链接
+        final recognizer = TapGestureRecognizer()
+          ..onTap = () async {
+            final uri = Uri.parse(matchText);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          };
+        _recognizers.add(recognizer);
+        
+        spans.add(
+          TextSpan(
+            text: matchText,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.tertiary,
+              decoration: TextDecoration.underline,
+            ),
+            recognizer: recognizer,
           ),
         );
       }
@@ -213,6 +248,32 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              if (user?.host != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 1.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.public,
+                                        size: 10,
+                                        color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        child: Text(
+                                          user!.host!,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               Semantics(
                                 label: 'User handle',
                                 child: Text(
@@ -243,6 +304,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   
                   const SizedBox(height: 12),
                   
+                  // 如果是回复，显示原帖预览
+                  if (note.reply != null) ...[
+                    _buildReplyPreview(note.reply!),
+                    const SizedBox(height: 12),
+                  ],
+
                   // CW (Content Warning) 或正文内容
                   if (cw != null) ...[
                     Container(
@@ -805,6 +872,90 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr())));
   }
   
+  /// 构建回复原帖预览
+  Widget _buildReplyPreview(Note replyNote) {
+    return GestureDetector(
+      onTap: () {
+        if (widget.timelineType != null && widget.note.replyId != null) {
+          ref
+              .read(timelineJumpProvider(widget.timelineType!).notifier)
+              .state = widget.note.replyId;
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerHighest
+              .withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+          border: Border(
+            left: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 4,
+            ),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 8,
+                  backgroundImage: replyNote.user?.avatarUrl != null
+                      ? NetworkImage(replyNote.user!.avatarUrl!)
+                      : null,
+                  child: replyNote.user?.avatarUrl == null
+                      ? const Icon(Icons.person, size: 10)
+                      : null,
+                ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      replyNote.user?.name ?? replyNote.user?.username ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (replyNote.user?.host != null)
+                                      Text(
+                                        replyNote.user!.host!,
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.grey,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                
+            const SizedBox(height: 4),
+            Text(
+              replyNote.text ?? replyNote.cw ?? '',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style:
+                  const TextStyle(fontSize: 12, color: Colors.grey, height: 1.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// 构建媒体网格，根据媒体文件数量调整布局
   Widget _buildMediaGrid(List<Map<String, dynamic>> files) {
     // 过滤出图片和视频文件
@@ -987,36 +1138,39 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   
   /// 构建四个媒体文件的显示（2x2网格）
   Widget _buildFourMedia(List<Map<String, dynamic>> files) {
-    return Column(
-      children: [
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildMediaThumbnail(files[0], width: 0, height: 100),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: _buildMediaThumbnail(files[1], width: 0, height: 100),
-              ),
-            ],
+    return SizedBox(
+      height: 204, // 100 * 2 + 4 gap
+      child: Column(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildMediaThumbnail(files[0], width: 0, height: 100),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: _buildMediaThumbnail(files[1], width: 0, height: 100),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildMediaThumbnail(files[2], width: 0, height: 100),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: _buildMediaThumbnail(files[3], width: 0, height: 100),
-              ),
-            ],
+          const SizedBox(height: 4),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildMediaThumbnail(files[2], width: 0, height: 100),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: _buildMediaThumbnail(files[3], width: 0, height: 100),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
   

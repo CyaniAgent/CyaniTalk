@@ -10,6 +10,7 @@ import '../domain/drive_folder.dart';
 import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
 import '../domain/misskey_notification.dart';
+import '../domain/chat_room.dart';
 
 part 'misskey_repository.g.dart';
 
@@ -455,7 +456,14 @@ class MisskeyRepository {
           var map = Map<String, dynamic>.from(item as Map);
           
           if (map.containsKey('message') && map['message'] is Map) {
+            final outer = map;
             map = Map<String, dynamic>.from(map['message'] as Map);
+            
+            // 重要：从外层对象复制用户信息，防止内层 message 对象缺少这些字段
+            if (map['user'] == null && outer['user'] != null) map['user'] = outer['user'];
+            if (map['recipient'] == null && outer['recipient'] != null) map['recipient'] = outer['recipient'];
+            if (map['userId'] == null && outer['userId'] != null) map['userId'] = outer['userId'];
+            if (map['recipientId'] == null && outer['recipientId'] != null) map['recipientId'] = outer['recipientId'];
           }
 
           if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
@@ -472,11 +480,34 @@ class MisskeyRepository {
           final message = MessagingMessage.fromJson(map);
           messages.add(message);
 
+          // Check if we have user info but user object is null, add to missing IDs
+          // Check for various possible field names that could contain user IDs
           if (message.userId != null && message.user == null) {
             missingUserIds.add(message.userId!);
           }
           if (message.recipientId != null && message.recipient == null) {
             missingUserIds.add(message.recipientId!);
+          }
+          
+          // Additional check for possible field aliases that might have been processed but still missing user objects
+          // In case the ID exists in raw JSON but didn't map properly to the model
+          if (map['userId'] != null && message.user == null) {
+            missingUserIds.add(map['userId'] as String);
+          }
+          if (map['recipientId'] != null && message.recipient == null) {
+            missingUserIds.add(map['recipientId'] as String);
+          }
+          if (map['fromId'] != null && message.user == null) {
+            missingUserIds.add(map['fromId'] as String);
+          }
+          if (map['toId'] != null && message.recipient == null) {
+            missingUserIds.add(map['toId'] as String);
+          }
+          if (map['senderId'] != null && message.user == null) {
+            missingUserIds.add(map['senderId'] as String);
+          }
+          if (map['recipientUserId'] != null && message.recipient == null) {
+            missingUserIds.add(map['recipientUserId'] as String);
           }
         } catch (e) {
           logger.error('MisskeyRepository: Error decoding message item', e);
@@ -547,6 +578,17 @@ class MisskeyRepository {
     }
   }
 
+  Future<List<ChatRoom>> getJoinedChatRooms() async {
+    logger.info('MisskeyRepository: Getting joined chat rooms');
+    try {
+      final data = await api.getChatRooms();
+      return data.map((e) => ChatRoom.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting chat rooms', e);
+      rethrow;
+    }
+  }
+
   Future<void> sendChatRoomMessage({
     required String roomId,
     String? text,
@@ -581,24 +623,91 @@ class MisskeyRepository {
       );
       
       final messages = <MessagingMessage>[];
+      final missingUserIds = <String>{};
       for (final item in data) {
         try {
           var map = Map<String, dynamic>.from(item as Map);
 
           // Check for wrapped message
           if (map.containsKey('message') && map['message'] is Map) {
+            final outer = map;
             map = Map<String, dynamic>.from(map['message'] as Map);
+            
+            // 重要：从外层对象复制用户信息，防止内层 message 对象缺少这些字段
+            if (map['user'] == null && outer['user'] != null) map['user'] = outer['user'];
+            if (map['recipient'] == null && outer['recipient'] != null) map['recipient'] = outer['recipient'];
+            if (map['userId'] == null && outer['userId'] != null) map['userId'] = outer['userId'];
+            if (map['recipientId'] == null && outer['recipientId'] != null) map['recipientId'] = outer['recipientId'];
           }
 
           // Handle aliases manually
           if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
           if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
           
-          messages.add(MessagingMessage.fromJson(map));
+          final message = MessagingMessage.fromJson(map);
+          messages.add(message);
+          
+          // Check if we have user info but user object is null, add to missing IDs
+          // Check for various possible field names that could contain user IDs
+          if (message.userId != null && message.user == null) {
+            missingUserIds.add(message.userId!);
+          }
+          if (message.recipientId != null && message.recipient == null) {
+            missingUserIds.add(message.recipientId!);
+          }
+          
+          // Additional check for possible field aliases that might have been processed but still missing user objects
+          if (map['userId'] != null && message.user == null) {
+            missingUserIds.add(map['userId'] as String);
+          }
+          if (map['recipientId'] != null && message.recipient == null) {
+            missingUserIds.add(map['recipientId'] as String);
+          }
+          if (map['fromId'] != null && message.user == null) {
+            missingUserIds.add(map['fromId'] as String);
+          }
+          if (map['toId'] != null && message.recipient == null) {
+            missingUserIds.add(map['toId'] as String);
+          }
+          if (map['senderId'] != null && message.user == null) {
+            missingUserIds.add(map['senderId'] as String);
+          }
+          if (map['recipientUserId'] != null && message.recipient == null) {
+            missingUserIds.add(map['recipientUserId'] as String);
+          }
         } catch (e) {
           logger.error('MisskeyRepository: Error decoding message item', e);
         }
       }
+
+      // Fetch missing users (similar to getMessagingHistory)
+      if (missingUserIds.isNotEmpty) {
+        logger.info('MisskeyRepository: Fetching ${missingUserIds.length} missing users for direct messages');
+        final users = <String, MisskeyUser>{};
+        await Future.wait(missingUserIds.map((id) async {
+          try {
+            final user = await showUser(id);
+            users[id] = user;
+          } catch (e) {
+            logger.error('MisskeyRepository: Error fetching missing user $id for direct messages', e);
+          }
+        }));
+
+        // Update messages with fetched users
+        for (var i = 0; i < messages.length; i++) {
+          final m = messages[i];
+          MisskeyUser? updatedUser = m.user ?? users[m.userId];
+          MisskeyUser? updatedRecipient = m.recipient ?? users[m.recipientId];
+          
+          if (updatedUser != m.user || updatedRecipient != m.recipient) {
+            messages[i] = m.copyWith(
+              user: updatedUser,
+              recipient: updatedRecipient,
+            );
+          }
+        }
+      }
+      
       return messages;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting messaging messages', e);
