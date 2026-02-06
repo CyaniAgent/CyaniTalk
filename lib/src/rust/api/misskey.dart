@@ -59,6 +59,12 @@ abstract class MisskeyRustClient implements RustOpaqueInterface {
 
   bool isStreamingConnected();
 
+  ///     * 创建新的Misskey Rust客户端
+  ///     *
+  ///     * @param host Misskey实例的主机地址
+  ///     * @param token 用户认证令牌
+  ///     * @return 返回新创建的客户端实例
+  ///
   factory MisskeyRustClient({required String host, required String token}) =>
       RustLib.instance.api.crateApiMisskeyMisskeyRustClientNew(
         host: host,
