@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -8,16 +7,6 @@ import '../../../../core/core.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
-=======
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'dart:convert';
-import '../../../auth/application/auth_service.dart';
-import '../../../auth/domain/account.dart';
-import '../../../auth/presentation/widgets/add_account_dialog.dart';
->>>>>>> 32cc0bf37a11305993b98f2b88a045612d53851c
 import 'user_details_view.dart';
 
 /// 统一登录管理器组件
@@ -104,90 +93,6 @@ class _AssociatedAccountsSectionState
     );
   }
 
-<<<<<<< HEAD
-  Widget _buildManagerLayout(
-    BuildContext context,
-    WidgetRef ref,
-    List<Account> accounts,
-    Account? selectedMisskey,
-    Account? selectedFlarum,
-  ) {
-    final theme = Theme.of(context);
-    const mikuColor = SaucePalette.mikuGreen;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section Title: Accounts
-        if (widget.showTitle)
-          Padding(
-            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
-            child: Text(
-              'settings_section_account'.tr(),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-
-        // Horizontal Account List
-        Container(
-          height: 80,
-          margin: const EdgeInsets.only(bottom: 24.0),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: accounts.length + 1,
-            itemBuilder: (context, index) {
-              if (index == accounts.length) {
-                return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: _AddAccountButton(
-                        onTap: () => _showAddAccountDialog(context),
-                      ),
-                    )
-                    .animate()
-                    .fadeIn(delay: 400.ms)
-                    .scale(begin: const Offset(0.8, 0.8));
-              }
-
-              final account = accounts[index];
-              final isMisskeyActive = account.id == selectedMisskey?.id;
-              final isFlarumActive = account.id == selectedFlarum?.id;
-              final isActive = isMisskeyActive || isFlarumActive;
-              final isFocused = account.id == _focusedAccount?.id;
-
-              return Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: _AccountAvatarItem(
-                      account: account,
-                      isActive: isActive,
-                      isFocused: isFocused,
-                      activeColor: isMisskeyActive
-                          ? mikuColor
-                          : (isFlarumActive ? Colors.orange : theme.colorScheme.onSurfaceVariant),
-                      onTap: () {
-                        setState(() {
-                          _focusedAccount = account;
-                        });
-                        if (account.platform == 'misskey') {
-                          ref
-                              .read(selectedMisskeyAccountProvider.notifier)
-                              .select(account);
-                        } else if (account.platform == 'flarum') {
-                          ref
-                              .read(selectedFlarumAccountProvider.notifier)
-                              .select(account);
-                        }
-                      },
-                    ),
-                  )
-                  .animate()
-                  .fadeIn(delay: (index * 100).ms)
-                  .slideX(begin: 0.2, end: 0);
-            },
-          ),
-=======
   Widget _buildManagerLayout(
     BuildContext context,
     WidgetRef ref,
@@ -247,7 +152,9 @@ class _AssociatedAccountsSectionState
                       isFocused: isFocused,
                       activeColor: isMisskeyActive
                           ? theme.colorScheme.primary
-                          : (isFlarumActive ? Colors.orange : theme.colorScheme.onSurfaceVariant),
+                          : (isFlarumActive
+                                ? Colors.orange
+                                : theme.colorScheme.onSurfaceVariant),
                       onTap: () {
                         setState(() {
                           _focusedAccount = account;
@@ -269,7 +176,6 @@ class _AssociatedAccountsSectionState
                   .slideX(begin: 0.2, end: 0);
             },
           ),
->>>>>>> 32cc0bf37a11305993b98f2b88a045612d53851c
         ),
 
         if (_focusedAccount != null) ...[
