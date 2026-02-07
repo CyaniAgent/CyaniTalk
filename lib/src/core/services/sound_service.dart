@@ -1,11 +1,9 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/profile/application/sound_settings_provider.dart';
-import '../core.dart';
+import 'audio_engine.dart';
 
 class SoundService {
   final Ref ref;
-  final AudioPlayer _player = AudioPlayer();
 
   SoundService(this.ref);
 
@@ -45,12 +43,7 @@ class SoundService {
   }
 
   Future<void> _play(String assetPath) async {
-    try {
-      // audioplayers 6.x AssetSource doesn't need 'assets/' prefix if configured correctly
-      await _player.play(AssetSource(assetPath));
-    } catch (e) {
-      logger.error('SoundService: Failed to play sound $assetPath', e);
-    }
+    await ref.read(audioEngineProvider).playAsset(assetPath);
   }
 }
 

@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/utils/logger.dart';
+import '../../../core/services/audio_engine.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../routing/router.dart';
 import 'widgets/misskey_drawer.dart';
@@ -42,12 +42,8 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   /// 当前选中的页面索引
   int _selectedIndex = 0;
 
-  /// 音频播放器实例
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
   @override
   void dispose() {
-    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -130,7 +126,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                     'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
                     _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
                   };
-              await _audioPlayer.play(AssetSource(soundPath));
+              await ref.read(audioEngineProvider).playAsset(soundPath);
               logger.info('MisskeyPage: Played login prompt sound: $soundPath');
             } catch (e) {
               logger.error('MisskeyPage: Error playing sound: $e');
