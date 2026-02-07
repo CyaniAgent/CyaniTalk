@@ -9,3 +9,6 @@ export 'config/config.dart';
 
 /// 导出工具类
 export 'utils/utils.dart';
+
+/// 导出主题
+export 'theme/theme.dart';

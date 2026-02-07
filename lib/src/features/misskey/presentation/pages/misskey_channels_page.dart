@@ -200,13 +200,6 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      color: theme.colorScheme.surfaceContainerLow,
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(

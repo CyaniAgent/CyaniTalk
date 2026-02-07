@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/core.dart';
 
 part 'appearance_page.g.dart';
 
@@ -86,18 +87,23 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
       final prefs = await SharedPreferences.getInstance();
 
       // 加载设置
-      final themeModeIndex = prefs.getInt('appearance_display_mode') ?? 0; // Default to system
+      final themeModeIndex =
+          prefs.getInt('appearance_display_mode') ?? 0; // Default to system
       final displayMode = ThemeMode.values[themeModeIndex];
-      
+
       final isAndroid = defaultTargetPlatform == TargetPlatform.android;
       // If not android, dynamic color should be false
-      final useDynamicColor = isAndroid ? (prefs.getBool('appearance_dynamic_color') ?? true) : false;
-      final useCustomColor = prefs.getBool('appearance_custom_color') ?? (!isAndroid); // Default to custom on non-android
-      
+      final useDynamicColor = isAndroid
+          ? (prefs.getBool('appearance_dynamic_color') ?? true)
+          : false;
+      final useCustomColor =
+          prefs.getBool('appearance_custom_color') ??
+          (!isAndroid); // Default to custom on non-android
+
       final primaryColorValue = prefs.getInt('appearance_primary_color');
       final primaryColor = primaryColorValue != null
           ? Color(primaryColorValue)
-          : const Color(0xFF39C5BB);
+          : SaucePalette.mikuGreen;
 
       return AppearanceSettings(
         displayMode: displayMode,
@@ -112,7 +118,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         displayMode: ThemeMode.system,
         useDynamicColor: isAndroid,
         useCustomColor: !isAndroid,
-        primaryColor: const Color(0xFF39C5BB),
+        primaryColor: SaucePalette.mikuGreen,
       );
     }
   }
@@ -147,7 +153,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
   /// 切换动态色彩
   Future<void> toggleDynamicColor(bool value) async {
     if (defaultTargetPlatform != TargetPlatform.android) return;
-    
+
     final newState = state.value!.copyWith(
       useDynamicColor: value,
       // 如果启用动态色彩，禁用自定义颜色
@@ -183,23 +189,23 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
   Future<void> resetSettings() async {
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final AppearanceSettings newState;
-    
+
     if (isAndroid) {
       newState = const AppearanceSettings(
         displayMode: ThemeMode.system,
         useDynamicColor: true,
         useCustomColor: false,
-        primaryColor: Color(0xFF39C5BB),
+        primaryColor: SaucePalette.mikuGreen,
       );
     } else {
       newState = const AppearanceSettings(
         displayMode: ThemeMode.system,
         useDynamicColor: false,
         useCustomColor: true,
-        primaryColor: Color(0xFF39C5BB),
+        primaryColor: SaucePalette.mikuGreen,
       );
     }
-    
+
     state = AsyncData(newState);
     await _saveToStorage(newState);
   }
@@ -247,7 +253,10 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
 
               // 显示模式设置
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -276,7 +285,9 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                       ],
                       selected: {appearanceSettings.displayMode},
                       onSelectionChanged: (Set<ThemeMode> newSelection) {
-                        appearanceNotifier.updateDisplayMode(newSelection.first);
+                        appearanceNotifier.updateDisplayMode(
+                          newSelection.first,
+                        );
                       },
                     ),
                   ],
@@ -292,19 +303,22 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                 'settings_appearance_dynamic_color'.tr(),
                 'settings_appearance_dynamic_color_description'.tr(),
                 appearanceSettings.useDynamicColor,
-                isAndroid 
+                isAndroid
                     ? (value) => appearanceNotifier.toggleDynamicColor(value)
                     : null, // Disable if not Android
               ),
               if (!isAndroid)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 72,
+                    vertical: 4,
+                  ),
                   child: Text(
                     'settings_appearance_dynamic_color_android_only'.tr(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber[800],
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: Colors.amber[800],
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
 
@@ -360,8 +374,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                           ),
                           const SizedBox(width: 16),
                           ElevatedButton(
-                            onPressed: () =>
-                                appearanceNotifier.resetSettings(),
+                            onPressed: () => appearanceNotifier.resetSettings(),
                             child: Text('settings_appearance_reset_color'.tr()),
                           ),
                         ],
@@ -384,7 +397,8 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: FilledButton.tonalIcon(
-                  onPressed: () => _showResetConfirmation(context, appearanceNotifier),
+                  onPressed: () =>
+                      _showResetConfirmation(context, appearanceNotifier),
                   icon: const Icon(Icons.restart_alt),
                   label: Text('settings_appearance_reset_config'.tr()),
                   style: FilledButton.styleFrom(
@@ -400,7 +414,10 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
     );
   }
 
-  void _showResetConfirmation(BuildContext context, AppearanceSettingsNotifier notifier) {
+  void _showResetConfirmation(
+    BuildContext context,
+    AppearanceSettingsNotifier notifier,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -463,14 +480,21 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
     ValueChanged<bool>? onChanged,
   ) {
     return ListTile(
-      leading: Icon(icon, color: onChanged == null ? Theme.of(context).disabledColor : null),
+      leading: Icon(
+        icon,
+        color: onChanged == null ? Theme.of(context).disabledColor : null,
+      ),
       title: Text(
         title,
-        style: TextStyle(color: onChanged == null ? Theme.of(context).disabledColor : null),
+        style: TextStyle(
+          color: onChanged == null ? Theme.of(context).disabledColor : null,
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(color: onChanged == null ? Theme.of(context).disabledColor : null),
+        style: TextStyle(
+          color: onChanged == null ? Theme.of(context).disabledColor : null,
+        ),
       ),
       trailing: Switch(value: value, onChanged: onChanged),
       enabled: onChanged != null,
@@ -511,7 +535,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
       Colors.brown,
       Colors.grey,
       Colors.blueGrey,
-      const Color(0xFF39C5BB), // 默认的mikuColor
+      SaucePalette.mikuGreen, // 默认的mikuColor
     ];
 
     showDialog(
@@ -598,162 +622,167 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             const SizedBox(height: 20),
 
             // Mock UI Stage
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: colorScheme.outlineVariant),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Mock App Bar
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: colorScheme.primary,
-                        child: const Text(
-                          "01",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        width: 100,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: colorScheme.outlineVariant,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const Spacer(),
-                      Icon(Icons.notifications_none, size: 18, color: colorScheme.primary),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Mock Message Bubble
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                          bottomRight: Radius.circular(16),
-                          bottomLeft: Radius.circular(4),
-                        ),
-                      ),
-                      child: Text(
-                        "Producer-san, let's make the best stage! (≧▽≦)",
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  // Mock Post Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorScheme.outlineVariant),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            Card(
+              elevation: 0,
+              color: colorScheme.surfaceContainerLow,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Mock App Bar
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: colorScheme.secondaryContainer,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.person, size: 16, color: colorScheme.onSecondaryContainer),
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: colorScheme.primary,
+                          child: const Text(
+                            "01",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(width: 8),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.onSurface,
-                                    borderRadius: BorderRadius.circular(3),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  width: 40,
-                                  height: 4,
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.outline,
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(width: 10),
                         Container(
-                          width: double.infinity,
-                          height: 60,
+                          width: 100,
+                          height: 8,
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(8),
-                            image: const DecorationImage(
-                              image: NetworkImage('https://api.dicebear.com/7.x/shapes/png?seed=miku&backgroundColor=39c5bb'),
-                              fit: BoxFit.cover,
-                              opacity: 0.3,
-                            ),
+                            color: colorScheme.outlineVariant,
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Center(
-                            child: Icon(Icons.play_circle_outline, color: colorScheme.primary, size: 32),
-                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.notifications_none,
+                          size: 18,
+                          color: colorScheme.primary,
                         ),
                       ],
                     ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Mock Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildMockButton(colorScheme.primary, Icons.favorite),
-                      _buildMockButton(colorScheme.secondary, Icons.share),
-                      _buildMockButton(colorScheme.tertiary, Icons.bookmark),
-                    ],
-                  ),
-                ],
+                    const SizedBox(height: 20),
+
+                    // Mock Message Bubble
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                            bottomRight: Radius.circular(16),
+                            bottomLeft: Radius.circular(4),
+                          ),
+                        ),
+                        child: Text(
+                          "Producer-san, let's make the best stage! (≧▽≦)",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Mock Post Card
+                    Card(
+                      elevation: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.secondaryContainer,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 16,
+                                    color: colorScheme.onSecondaryContainer,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 60,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.onSurface,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      width: 40,
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.outline,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(8),
+                                image: const DecorationImage(
+                                  image: NetworkImage(
+                                    'https://api.dicebear.com/7.x/shapes/png?seed=miku&backgroundColor=39c5bb',
+                                  ),
+                                  fit: BoxFit.cover,
+                                  opacity: 0.3,
+                                ),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  Icons.play_circle_outline,
+                                  color: colorScheme.primary,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Mock Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildMockButton(colorScheme.primary, Icons.favorite),
+                        _buildMockButton(colorScheme.secondary, Icons.share),
+                        _buildMockButton(colorScheme.tertiary, Icons.bookmark),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
             const SizedBox(height: 20),
-            
+
             // Status Info
             Wrap(
               spacing: 8,

@@ -16,17 +16,17 @@ import '../pages/image_viewer_page.dart';
 import '../pages/video_player_page.dart';
 
 /// Modern NoteCard组件
-/// 
+///
 /// 用于显示单个Misskey笔记的现代化卡片组件，采用卡片式布局，
 /// 支持显示用户信息、文本内容、媒体文件和互动按钮。
-/// 
+///
 /// @param note 要显示的笔记对象
 class ModernNoteCard extends ConsumerStatefulWidget {
   final Note note;
   final String? timelineType;
 
   /// 创建ModernNoteCard组件
-  /// 
+  ///
   /// @param key 组件的键
   /// @param note 要显示的笔记对象
   /// @param timelineType 可选的时间线类型，用于跳转功能
@@ -53,7 +53,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   }
 
   /// 处理文本中的特殊格式
-  /// 
+  ///
   /// 处理文本中的加粗文本(**text**)、提及(@username)、话题(#hashtag)和链接(http/https)，
   /// 并返回对应的TextSpan列表。会缓存处理结果，避免重复计算。
   List<TextSpan> _processText(String text) {
@@ -125,7 +125,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             }
           };
         _recognizers.add(recognizer);
-        
+
         spans.add(
           TextSpan(
             text: matchText,
@@ -148,7 +148,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
     // 缓存处理结果
     _textProcessingCache[text] = spans;
-    
+
     // 限制缓存大小，避免内存泄漏
     if (_textProcessingCache.length > 50) {
       // 移除最早的缓存项
@@ -184,21 +184,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         label: 'Note by ${user?.username}',
         value: text ?? cw,
         child: GestureDetector(
-          onSecondaryTapDown: (details) => _showContextMenu(details.globalPosition),
-          onLongPressStart: (details) => _showContextMenu(details.globalPosition),
-          child: Container(
+          onSecondaryTapDown: (details) =>
+              _showContextMenu(details.globalPosition),
+          onLongPressStart: (details) =>
+              _showContextMenu(details.globalPosition),
+          child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -213,7 +204,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                           // Redirect to own profile tab
                           context.go('/profile');
                         } else {
-                          context.push('/misskey/user/${user!.id}', extra: user);
+                          context.push(
+                            '/misskey/user/${user!.id}',
+                            extra: user,
+                          );
                         }
                       }
                     },
@@ -243,7 +237,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -257,7 +253,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                       Icon(
                                         Icons.public,
                                         size: 10,
-                                        color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary
+                                            .withValues(alpha: 0.7),
                                       ),
                                       const SizedBox(width: 4),
                                       Flexible(
@@ -266,7 +265,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w500,
-                                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary
+                                                .withValues(alpha: 0.8),
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -280,7 +282,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                   '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -294,16 +298,18 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                             _formatTime(note.createdAt),
                             style: TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   // 如果是回复，显示原帖预览
                   if (note.reply != null) ...[
                     _buildReplyPreview(note.reply!),
@@ -312,19 +318,21 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
                   // CW (Content Warning) 或正文内容
                   if (cw != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.warning_amber_rounded, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(child: SelectableText(cw)),
-                          const Icon(Icons.keyboard_arrow_down, size: 16),
-                        ],
+                    Card(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      elevation: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(child: SelectableText(cw)),
+                            const Icon(Icons.keyboard_arrow_down, size: 16),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -341,7 +349,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  
+
                   // 附件内容
                   if (note.files.isNotEmpty)
                     Padding(
@@ -351,9 +359,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         child: _buildMediaGrid(note.files),
                       ),
                     ),
-          
+
                   const SizedBox(height: 16),
-                  
+
                   // 交互按钮行
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -365,7 +373,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         _handleReply,
                         tooltip: 'Reply',
                       ),
-                      
+
                       // 转发按钮
                       _buildAction(
                         Icons.repeat,
@@ -373,7 +381,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         _handleRenote,
                         tooltip: 'Renote',
                       ),
-                      
+
                       // 反应按钮
                       _buildAction(
                         Icons.add_reaction_outlined,
@@ -381,7 +389,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         _handleReaction,
                         tooltip: 'Reaction',
                       ),
-                      
+
                       // 更多按钮
                       _buildAction(
                         Icons.more_vert,
@@ -415,13 +423,14 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       button.localToGlobal(Offset.zero).dx + button.size.width,
       button.localToGlobal(Offset.zero).dy + button.size.height / 2,
     );
-    
+
     _showContextMenu(position);
   }
 
   void _showContextMenu(Offset position) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
     showMenu(
       context: context,
       position: RelativeRect.fromRect(
@@ -506,7 +515,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             children: [
               const Icon(Icons.flag_outlined, size: 20, color: Colors.red),
               const SizedBox(width: 12),
-              Text('post_menu_report'.tr(), style: const TextStyle(color: Colors.red)),
+              Text(
+                'post_menu_report'.tr(),
+                style: const TextStyle(color: Colors.red),
+              ),
             ],
           ),
         ),
@@ -536,9 +548,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('post_copied'.tr())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('post_copied'.tr())));
         }
         break;
       case 'copy_link':
@@ -558,9 +570,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_id_copied'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr())));
         break;
     }
   }
@@ -603,9 +615,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_link_copied'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_link_copied'.tr())));
       }
     } catch (e) {
       // Ignore
@@ -617,14 +629,18 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_bookmarked'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_bookmarked'.tr())));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+            content: Text(
+              'post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     }
@@ -633,7 +649,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   Future<void> _handleReport() async {
     final textController = TextEditingController();
     if (!mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -662,13 +678,19 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             onPressed: () async {
               final reason = textController.text;
               if (reason.isEmpty) return;
-              
+
               Navigator.pop(dialogContext);
               try {
-                final repository = await ref.read(misskeyRepositoryProvider.future);
+                final repository = await ref.read(
+                  misskeyRepositoryProvider.future,
+                );
                 if (widget.note.user != null) {
-                   await repository.report(widget.note.id, widget.note.user!.id, reason);
-                   if (mounted) {
+                  await repository.report(
+                    widget.note.id,
+                    widget.note.user!.id,
+                    reason,
+                  );
+                  if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('post_reported'.tr())),
                     );
@@ -689,30 +711,32 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     );
   }
 
-  Widget _buildAction(IconData icon, String label, VoidCallback onTap, {String? tooltip}) {
-    return Tooltip(
-      message: tooltip ?? '',
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              if (label.isNotEmpty) ...[
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+  Widget _buildAction(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    String? tooltip,
+  }) {
+    return TextButton.icon(
+      onPressed: onTap,
+      icon: Icon(
+        icon,
+        size: 18,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      label: label.isNotEmpty
+          ? Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            )
+          : const SizedBox.shrink(),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }
@@ -720,7 +744,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
-    
+
     if (diff.inSeconds < 60) {
       return '刚刚';
     } else if (diff.inMinutes < 60) {
@@ -814,7 +838,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             onPressed: () async {
               Navigator.pop(dialogContext);
               try {
-                final repository = await ref.read(misskeyRepositoryProvider.future);
+                final repository = await ref.read(
+                  misskeyRepositoryProvider.future,
+                );
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -871,88 +897,136 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       context,
     ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr())));
   }
-  
+
   /// 构建回复原帖预览
+
   Widget _buildReplyPreview(Note replyNote) {
-    return GestureDetector(
-      onTap: () {
-        if (widget.timelineType != null && widget.note.replyId != null) {
-          ref
-              .read(timelineJumpProvider(widget.timelineType!).notifier)
-              .state = widget.note.replyId;
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerHighest
-              .withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(8),
-          border: Border(
-            left: BorderSide(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 4,
+    return Card(
+      elevation: 0,
+
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+
+      clipBehavior: Clip.antiAlias,
+
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant,
+
+          width: 1,
+        ),
+      ),
+
+      child: InkWell(
+        onTap: () {
+          if (widget.timelineType != null && widget.note.replyId != null) {
+            ref
+                    .read(timelineJumpProvider(widget.timelineType!).notifier)
+                    .state =
+                widget.note.replyId;
+          }
+        },
+
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: Theme.of(context).colorScheme.outlineVariant,
+
+                width: 4,
+              ),
             ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 8,
-                  backgroundImage: replyNote.user?.avatarUrl != null
-                      ? NetworkImage(replyNote.user!.avatarUrl!)
-                      : null,
-                  child: replyNote.user?.avatarUrl == null
-                      ? const Icon(Icons.person, size: 10)
-                      : null,
+
+          padding: const EdgeInsets.all(12),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 8,
+
+                    backgroundImage: replyNote.user?.avatarUrl != null
+                        ? NetworkImage(replyNote.user!.avatarUrl!)
+                        : null,
+
+                    child: replyNote.user?.avatarUrl == null
+                        ? const Icon(Icons.person, size: 10)
+                        : null,
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                      mainAxisSize: MainAxisSize.min,
+
+                      children: [
+                        Text(
+                          replyNote.user?.name ??
+                              replyNote.user?.username ??
+                              'Unknown',
+
+                          style: TextStyle(
+                            fontSize: 12,
+
+                            fontWeight: FontWeight.bold,
+
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        if (replyNote.user?.host != null)
+                          Text(
+                            replyNote.user!.host!,
+
+                            style: TextStyle(
+                              fontSize: 9,
+
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                replyNote.text ?? replyNote.cw ?? '',
+
+                maxLines: 3,
+
+                overflow: TextOverflow.ellipsis,
+
+                style: TextStyle(
+                  fontSize: 12,
+
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+
+                  height: 1.4,
                 ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                                    Text(
-                                                      replyNote.user?.name ?? replyNote.user?.username ?? 'Unknown',
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.bold,
-                                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                      ),
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    if (replyNote.user?.host != null)
-                                                      Text(
-                                                        replyNote.user!.host!,
-                                                        style: TextStyle(
-                                                          fontSize: 9,
-                                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                        ),
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            replyNote.text ?? replyNote.cw ?? '',
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                                height: 1.4),
-                                          ),
-                                    
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -967,7 +1041,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       if (url == null) return false;
       return _isImageFile(type, url) || _isVideoFile(type, url);
     }).toList();
-    
+
     // 如果没有图片或视频，只显示音频
     if (mediaFiles.isEmpty) {
       return Column(
@@ -975,25 +1049,22 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
           final url = file['url'] as String?;
           final type = file['type'] as String?;
           final name = file['name'] as String?;
-          
+
           if (url == null) return const SizedBox.shrink();
-          
+
           final isAudio = _isAudioFile(type, url);
           if (isAudio) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: AudioPlayerWidget(
-                audioUrl: url,
-                fileName: name,
-              ),
+              child: AudioPlayerWidget(audioUrl: url, fileName: name),
             );
           }
-          
+
           return const SizedBox.shrink();
         }).toList(),
       );
     }
-    
+
     // 根据媒体文件数量选择不同的布局
     if (mediaFiles.length == 1) {
       // 单个媒体文件
@@ -1013,18 +1084,18 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       return _buildMultipleMedia(mediaFiles);
     }
   }
-  
+
   /// 构建单个媒体文件的显示
   Widget _buildSingleMedia(Map<String, dynamic> file) {
     final url = file['url'] as String?;
     final type = file['type'] as String?;
-    
+
     if (url == null) return const SizedBox.shrink();
-    
+
     final isImage = _isImageFile(type, url);
     final isVideo = _isVideoFile(type, url);
     final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
-    
+
     if (isVideo) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
@@ -1043,7 +1114,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               children: [
                 RetryableNetworkImage(
                   url: thumbnailUrl,
-                  width: 160,  // 增加单个图片的宽度
+                  width: 160, // 增加单个图片的宽度
                   height: 160, // 增加单个图片的高度
                   fit: BoxFit.cover,
                 ),
@@ -1074,10 +1145,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => ImageViewerPage(
-                    imageUrl: url,
-                    heroTag: heroTag,
-                  ),
+                  builder: (context) =>
+                      ImageViewerPage(imageUrl: url, heroTag: heroTag),
                 ),
               );
             },
@@ -1085,7 +1154,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               tag: heroTag,
               child: RetryableNetworkImage(
                 url: thumbnailUrl,
-                width: 160,  // 增加单个图片的宽度
+                width: 160, // 增加单个图片的宽度
                 height: 160, // 增加单个图片的高度
                 fit: BoxFit.cover,
               ),
@@ -1094,10 +1163,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
-  
+
   /// 构建两个媒体文件的显示（水平排列）
   Widget _buildTwoMedia(List<Map<String, dynamic>> files) {
     return SizedBox(
@@ -1115,7 +1184,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       ),
     );
   }
-  
+
   /// 构建三个媒体文件的显示（一个大图加两个小图）
   Widget _buildThreeMedia(List<Map<String, dynamic>> files) {
     return Column(
@@ -1137,7 +1206,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       ],
     );
   }
-  
+
   /// 构建四个媒体文件的显示（2x2网格）
   Widget _buildFourMedia(List<Map<String, dynamic>> files) {
     return SizedBox(
@@ -1175,7 +1244,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       ),
     );
   }
-  
+
   /// 构建多个媒体文件的显示（2列网格）
   Widget _buildMultipleMedia(List<Map<String, dynamic>> files) {
     return GridView.builder(
@@ -1193,18 +1262,22 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       },
     );
   }
-  
+
   /// 构建单个媒体缩略图
-  Widget _buildMediaThumbnail(Map<String, dynamic> file, {double width = 100, double height = 100}) {
+  Widget _buildMediaThumbnail(
+    Map<String, dynamic> file, {
+    double width = 100,
+    double height = 100,
+  }) {
     final url = file['url'] as String?;
     final type = file['type'] as String?;
-    
+
     if (url == null) return const SizedBox.shrink();
-    
+
     final isImage = _isImageFile(type, url);
     final isVideo = _isVideoFile(type, url);
     final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
-    
+
     if (isVideo) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -1249,10 +1322,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => ImageViewerPage(
-                  imageUrl: url,
-                  heroTag: heroTag,
-                ),
+                builder: (context) =>
+                    ImageViewerPage(imageUrl: url, heroTag: heroTag),
               ),
             );
           },
@@ -1268,7 +1339,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 }

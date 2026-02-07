@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:convert';
+import '../../../../core/core.dart';
 import '../../../auth/application/auth_service.dart';
 import '../../../auth/domain/account.dart';
 import '../../../auth/presentation/widgets/add_account_dialog.dart';
@@ -151,7 +152,9 @@ class _AssociatedAccountsSectionState
                       isFocused: isFocused,
                       activeColor: isMisskeyActive
                           ? theme.colorScheme.primary
-                          : (isFlarumActive ? Colors.orange : theme.colorScheme.onSurfaceVariant),
+                          : (isFlarumActive
+                                ? Colors.orange
+                                : theme.colorScheme.onSurfaceVariant),
                       onTap: () {
                         setState(() {
                           _focusedAccount = account;

@@ -32,8 +32,10 @@ class CyaniTalkApp extends ConsumerStatefulWidget {
 class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
   /// 缓存的亮色主题
   ThemeData? _cachedLightTheme;
+
   /// 缓存的暗色主题
   ThemeData? _cachedDarkTheme;
+
   /// 缓存的外观设置
   AppearanceSettings? _cachedSettings;
 
@@ -107,7 +109,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
   }
 
   /// 构建主题
-  /// 
+  ///
   /// 根据用户的外观设置构建主题，支持深色模式、动态色彩和自定义颜色。
   /// 会缓存构建结果，避免重复计算。
   ///
@@ -118,7 +120,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
     // 检查是否需要重新构建主题
     final isDark = brightness == Brightness.dark;
     final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
-    
+
     // 如果设置没有变化且主题已缓存，直接返回缓存的主题
     if (_cachedSettings == settings && themeCache != null) {
       return themeCache;
@@ -131,10 +133,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
 
     final theme = ThemeData(
       colorScheme: settings.useDynamicColor
-          ? ColorScheme.fromSeed(
-              seedColor: seedColor,
-              brightness: brightness,
-            )
+          ? ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness)
           : ColorScheme.fromSeed(
               seedColor: seedColor,
               brightness: brightness,
@@ -147,11 +146,13 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
     );
 
     // 缓存主题和设置
+
     if (isDark) {
       _cachedDarkTheme = theme;
     } else {
       _cachedLightTheme = theme;
     }
+
     _cachedSettings = settings;
 
     return theme;

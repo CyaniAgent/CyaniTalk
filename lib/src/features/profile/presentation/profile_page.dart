@@ -83,7 +83,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Future<Color> _getImageDominantColor(String imageUrl) async {
     // 先获取主题颜色，避免在异步间隙中使用BuildContext
     final primaryColor = Theme.of(context).colorScheme.primary;
-    
     try {
       // 使用palette_generator库从图片中提取颜色
       final paletteGenerator = await PaletteGenerator.fromImageProvider(
@@ -116,19 +115,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final selectedMisskey = ref.watch(selectedMisskeyAccountProvider).asData?.value;
-    final selectedFlarum = ref.watch(selectedFlarumAccountProvider).asData?.value;
+    final selectedMisskey = ref
+        .watch(selectedMisskeyAccountProvider)
+        .asData
+        ?.value;
+    final selectedFlarum = ref
+        .watch(selectedFlarumAccountProvider)
+        .asData
+        ?.value;
     final primaryAccount = selectedMisskey ?? selectedFlarum;
 
-    final misskeyUser =
-        primaryAccount?.platform == 'misskey'
-            ? ref.watch(misskeyMeProvider).asData?.value
-            : null;
+    final misskeyUser = primaryAccount?.platform == 'misskey'
+        ? ref.watch(misskeyMeProvider).asData?.value
+        : null;
 
-    final flarumUser =
-        primaryAccount?.platform == 'flarum'
-            ? ref.watch(flarumCurrentUserProvider).asData?.value
-            : null;
+    final flarumUser = primaryAccount?.platform == 'flarum'
+        ? ref.watch(flarumCurrentUserProvider).asData?.value
+        : null;
 
     final bool isLoggedIn = primaryAccount != null;
 
@@ -140,7 +143,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             floating: false,
             pinned: true,
             stretch: true,
-            backgroundColor: isLoggedIn ? _appBarColor : theme.colorScheme.primary,
+            backgroundColor: isLoggedIn
+                ? _appBarColor
+                : theme.colorScheme.primary,
             actions: [
               IconButton(
                 icon: Icon(Icons.settings, color: theme.colorScheme.onPrimary),
@@ -158,21 +163,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
-                      image:
-                          misskeyUser?.bannerUrl != null
-                              ? DecorationImage(
-                                image: NetworkImage(misskeyUser!.bannerUrl!),
-                                fit: BoxFit.cover,
-                              )
-                              : null,
-                      gradient:
-                          misskeyUser?.bannerUrl == null
-                              ? LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [Color(0xFF962832), theme.colorScheme.primary],
-                              )
-                              : null,
+                      image: misskeyUser?.bannerUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(misskeyUser!.bannerUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      gradient: misskeyUser?.bannerUrl == null
+                          ? LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF962832),
+                                theme.colorScheme.primary,
+                              ],
+                            )
+                          : null,
                     ),
                     child: Container(
                       decoration: BoxDecoration(
@@ -248,32 +254,40 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).colorScheme.onPrimary, width: 3),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      width: 3,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.shadow.withValues(alpha: 0.1),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
                     ],
                   ),
                   child: CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      backgroundImage:
-                          (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) !=
-                                  null
-                              ? NetworkImage(
-                                misskeyUser?.avatarUrl ??
-                                    primaryAccount.avatarUrl!,
-                              )
-                              : null,
-                      child:
-                          (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) ==
-                                  null
-                              ? Icon(Icons.person, size: 50, color: Theme.of(context).colorScheme.primary)
-                              : null,
-                    ),
+                    radius: 45,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    backgroundImage:
+                        (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) !=
+                            null
+                        ? NetworkImage(
+                            misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl!,
+                          )
+                        : null,
+                    child:
+                        (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) ==
+                            null
+                        ? Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
+                        : null,
+                  ),
                 ),
               ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
               const SizedBox(width: 20),
@@ -298,7 +312,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             shadows: [
                               Shadow(
                                 blurRadius: 4,
-                                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.shadow.withValues(alpha: 0.2),
                                 offset: const Offset(0, 2),
                               ),
                             ],
@@ -317,17 +333,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimary.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.3),
+                                  color: Theme.of(context).colorScheme.onPrimary
+                                      .withValues(alpha: 0.3),
                                 ),
                               ),
                               child: Text(
                                 name,
                                 style: TextStyle(
                                   fontSize: 10,
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -339,7 +360,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -355,11 +378,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 misskeyUser.description!,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.85),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onPrimary.withValues(alpha: 0.85),
                   shadows: [
                     Shadow(
                       blurRadius: 2,
-                      color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.shadow.withValues(alpha: 0.2),
                       offset: const Offset(0, 1),
                     ),
                   ],
@@ -397,7 +424,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               shadows: [
                 Shadow(
                   blurRadius: 4,
-                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.shadow.withValues(alpha: 0.2),
                   offset: const Offset(0, 2),
                 ),
               ],
@@ -408,11 +437,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             'misskey_page_no_account_subtitle'.tr(),
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+              color: Theme.of(
+                context,
+              ).colorScheme.onPrimary.withValues(alpha: 0.9),
               shadows: [
                 Shadow(
                   blurRadius: 2,
-                  color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.shadow.withValues(alpha: 0.2),
                   offset: const Offset(0, 1),
                 ),
               ],
@@ -420,19 +453,25 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => _showAddAccountDialog(context),
-            icon: const Icon(Icons.login),
-            label: Text('misskey_page_login_now'.tr()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ).animate().fadeIn(delay: 400.ms, duration: 600.ms).scale(begin: const Offset(0.9, 0.9)),
+                onPressed: () => _showAddAccountDialog(context),
+                icon: const Icon(Icons.login),
+                label: Text('misskey_page_login_now'.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              )
+              .animate()
+              .fadeIn(delay: 400.ms, duration: 600.ms)
+              .scale(begin: const Offset(0.9, 0.9)),
         ],
       ),
     );
@@ -453,14 +492,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         Card(
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
           child: ListTile(
             leading: const Icon(Icons.add_circle_outline),
             title: Text('accounts_add_account'.tr()),
@@ -475,7 +506,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void _showAddAccountDialog(BuildContext context) {
     AddAccountBottomSheet.show(context);
   }
-
 
   Widget _buildQuickActions(BuildContext context) {
     return Column(
@@ -492,14 +522,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         Card(
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
           child: Column(
             children: [
               ListTile(
@@ -626,7 +648,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             shadows: [
               Shadow(
                 blurRadius: 4,
-                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.shadow.withValues(alpha: 0.2),
                 offset: const Offset(0, 1),
               ),
             ],
@@ -636,11 +660,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
+            color: Theme.of(
+              context,
+            ).colorScheme.onPrimary.withValues(alpha: 0.8),
             shadows: [
               Shadow(
                 blurRadius: 2,
-                color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.shadow.withValues(alpha: 0.2),
                 offset: const Offset(0, 1),
               ),
             ],
