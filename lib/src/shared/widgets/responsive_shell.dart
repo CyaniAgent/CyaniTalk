@@ -23,29 +23,54 @@ class ResponsiveShell extends ConsumerWidget {
   /// [key] - 组件的键，用于唯一标识组件
   const ResponsiveShell({required this.navigationShell, super.key});
 
-  /// 导航项配置，包含分支索引和显示条件
-  static final List<Map<String, dynamic>> _navigationItems = [
-    {
+  /// 导航项配置，包含分支索引、显示条件和对应的NavigationItemType
+  static final Map<NavigationItemType, Map<String, dynamic>> _navigationItems = {
+    NavigationItemType.misskey: {
       'branchIndex': 0,
       'showCondition': (NavigationSettings settings) => settings.showMisskey,
+      'destination': NavigationDestination(
+        icon: const Icon(Icons.public_outlined),
+        selectedIcon: const Icon(Icons.public),
+        label: 'nav_misskey'.tr(),
+      ),
     },
-    {
+    NavigationItemType.flarum: {
       'branchIndex': 1,
       'showCondition': (NavigationSettings settings) => settings.showFlarum,
+      'destination': NavigationDestination(
+        icon: const Icon(Icons.forum_outlined),
+        selectedIcon: const Icon(Icons.forum),
+        label: 'nav_flarum'.tr(),
+      ),
     },
-    {
+    NavigationItemType.drive: {
       'branchIndex': 2,
       'showCondition': (NavigationSettings settings) => settings.showDrive,
+      'destination': NavigationDestination(
+        icon: const Icon(Icons.cloud_queue_outlined),
+        selectedIcon: const Icon(Icons.cloud_queue),
+        label: 'nav_drive'.tr(),
+      ),
     },
-    {
+    NavigationItemType.messages: {
       'branchIndex': 3,
       'showCondition': (NavigationSettings settings) => settings.showMessages,
+      'destination': NavigationDestination(
+        icon: const Icon(Icons.chat_bubble_outline),
+        selectedIcon: const Icon(Icons.chat_bubble),
+        label: 'nav_messages'.tr(),
+      ),
     },
-    {
+    NavigationItemType.me: {
       'branchIndex': 4,
       'showCondition': (NavigationSettings settings) => settings.showMe,
+      'destination': NavigationDestination(
+        icon: const Icon(Icons.person_outline),
+        selectedIcon: const Icon(Icons.person),
+        label: 'nav_me'.tr(),
+      ),
     },
-  ];
+  };
 
   /// 将显示索引映射到分支索引
   ///
@@ -59,15 +84,17 @@ class ResponsiveShell extends ConsumerWidget {
   ) {
     int currentDisplayIndex = 0;
 
-    // 遍历导航项配置，查找匹配的分支索引
-    for (final item in _navigationItems) {
-      final showCondition =
-          item['showCondition'] as bool Function(NavigationSettings);
-      if (showCondition(navigationSettings)) {
-        if (currentDisplayIndex == displayIndex) {
-          return item['branchIndex'] as int;
+    // 根据排序顺序遍历导航项
+    for (final itemType in navigationSettings.itemOrder) {
+      final item = _navigationItems[itemType];
+      if (item != null) {
+        final showCondition = item['showCondition'] as bool Function(NavigationSettings);
+        if (showCondition(navigationSettings)) {
+          if (currentDisplayIndex == displayIndex) {
+            return item['branchIndex'] as int;
+          }
+          currentDisplayIndex++;
         }
-        currentDisplayIndex++;
       }
     }
 
@@ -86,15 +113,17 @@ class ResponsiveShell extends ConsumerWidget {
   ) {
     int currentDisplayIndex = 0;
 
-    // 遍历导航项配置，查找匹配的显示索引
-    for (final item in _navigationItems) {
-      final showCondition =
-          item['showCondition'] as bool Function(NavigationSettings);
-      if (showCondition(navigationSettings)) {
-        if (item['branchIndex'] as int == branchIndex) {
-          return currentDisplayIndex;
+    // 根据排序顺序遍历导航项
+    for (final itemType in navigationSettings.itemOrder) {
+      final item = _navigationItems[itemType];
+      if (item != null) {
+        final showCondition = item['showCondition'] as bool Function(NavigationSettings);
+        if (showCondition(navigationSettings)) {
+          if (item['branchIndex'] as int == branchIndex) {
+            return currentDisplayIndex;
+          }
+          currentDisplayIndex++;
         }
-        currentDisplayIndex++;
       }
     }
 
@@ -116,63 +145,17 @@ class ResponsiveShell extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Container(),
       data: (navigationSettings) {
-        // 导航目标配置，包含图标、标签和显示条件
-        final navigationDestinations = [
-          {
-            'showCondition': (NavigationSettings settings) =>
-                settings.showMisskey,
-            'destination': NavigationDestination(
-              icon: const Icon(Icons.public_outlined),
-              selectedIcon: const Icon(Icons.public),
-              label: 'nav_misskey'.tr(),
-            ),
-          },
-          {
-            'showCondition': (NavigationSettings settings) =>
-                settings.showFlarum,
-            'destination': NavigationDestination(
-              icon: const Icon(Icons.forum_outlined),
-              selectedIcon: const Icon(Icons.forum),
-              label: 'nav_flarum'.tr(),
-            ),
-          },
-          {
-            'showCondition': (NavigationSettings settings) =>
-                settings.showDrive,
-            'destination': NavigationDestination(
-              icon: const Icon(Icons.cloud_queue_outlined),
-              selectedIcon: const Icon(Icons.cloud_queue),
-              label: 'nav_drive'.tr(),
-            ),
-          },
-          {
-            'showCondition': (NavigationSettings settings) =>
-                settings.showMessages,
-            'destination': NavigationDestination(
-              icon: const Icon(Icons.chat_bubble_outline),
-              selectedIcon: const Icon(Icons.chat_bubble),
-              label: 'nav_messages'.tr(),
-            ),
-          },
-          {
-            'showCondition': (NavigationSettings settings) => settings.showMe,
-            'destination': NavigationDestination(
-              icon: const Icon(Icons.person_outline),
-              selectedIcon: const Icon(Icons.person),
-              label: 'nav_me'.tr(),
-            ),
-          },
-        ];
-
-        // 根据设置构建目标列表
-        final destinations = navigationDestinations
-            .where((item) {
-              final showCondition =
-                  item['showCondition'] as bool Function(NavigationSettings)?;
-              return showCondition != null && showCondition(navigationSettings);
-            })
-            .map((item) => item['destination'] as NavigationDestination)
-            .toList();
+        // 根据排序顺序构建目标列表
+        final destinations = <NavigationDestination>[];
+        for (final itemType in navigationSettings.itemOrder) {
+          final item = _navigationItems[itemType];
+          if (item != null) {
+            final showCondition = item['showCondition'] as bool Function(NavigationSettings);
+            if (showCondition(navigationSettings)) {
+              destinations.add(item['destination'] as NavigationDestination);
+            }
+          }
+        }
 
         // 确保至少有一个目标
         if (destinations.isEmpty) {
