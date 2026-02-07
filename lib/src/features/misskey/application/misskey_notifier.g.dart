@@ -8,12 +8,24 @@ part of 'misskey_notifier.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Misskey时间线状态管理类
+///
+/// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+/// 支持实时更新、加载更多和刷新功能。
 
 @ProviderFor(MisskeyTimelineNotifier)
 final misskeyTimelineProvider = MisskeyTimelineNotifierFamily._();
 
+/// Misskey时间线状态管理类
+///
+/// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+/// 支持实时更新、加载更多和刷新功能。
 final class MisskeyTimelineNotifierProvider
     extends $AsyncNotifierProvider<MisskeyTimelineNotifier, List<Note>> {
+  /// Misskey时间线状态管理类
+  ///
+  /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+  /// 支持实时更新、加载更多和刷新功能。
   MisskeyTimelineNotifierProvider._({
     required MisskeyTimelineNotifierFamily super.from,
     required String super.argument,
@@ -54,6 +66,11 @@ final class MisskeyTimelineNotifierProvider
 String _$misskeyTimelineNotifierHash() =>
     r'80ef4e3db5bc91310141b8d72e6a744cc19774ab';
 
+/// Misskey时间线状态管理类
+///
+/// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+/// 支持实时更新、加载更多和刷新功能。
+
 final class MisskeyTimelineNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
@@ -72,12 +89,22 @@ final class MisskeyTimelineNotifierFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Misskey时间线状态管理类
+  ///
+  /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+  /// 支持实时更新、加载更多和刷新功能。
+
   MisskeyTimelineNotifierProvider call(String type) =>
       MisskeyTimelineNotifierProvider._(argument: type, from: this);
 
   @override
   String toString() => r'misskeyTimelineProvider';
 }
+
+/// Misskey时间线状态管理类
+///
+/// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
+/// 支持实时更新、加载更多和刷新功能。
 
 abstract class _$MisskeyTimelineNotifier extends $AsyncNotifier<List<Note>> {
   late final _$args = ref.$arg as String;
@@ -100,11 +127,21 @@ abstract class _$MisskeyTimelineNotifier extends $AsyncNotifier<List<Note>> {
   }
 }
 
+/// Misskey频道列表状态管理类
+///
+/// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
+
 @ProviderFor(MisskeyChannelsNotifier)
 final misskeyChannelsProvider = MisskeyChannelsNotifierFamily._();
 
+/// Misskey频道列表状态管理类
+///
+/// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
 final class MisskeyChannelsNotifierProvider
     extends $AsyncNotifierProvider<MisskeyChannelsNotifier, List<Channel>> {
+  /// Misskey频道列表状态管理类
+  ///
+  /// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
   MisskeyChannelsNotifierProvider._({
     required MisskeyChannelsNotifierFamily super.from,
     required ({MisskeyChannelListType type, String? query}) super.argument,
@@ -145,6 +182,10 @@ final class MisskeyChannelsNotifierProvider
 String _$misskeyChannelsNotifierHash() =>
     r'a621181dd4a8b596fd73cb32d907e06c02737906';
 
+/// Misskey频道列表状态管理类
+///
+/// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
+
 final class MisskeyChannelsNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
@@ -163,6 +204,10 @@ final class MisskeyChannelsNotifierFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Misskey频道列表状态管理类
+  ///
+  /// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
+
   MisskeyChannelsNotifierProvider call({
     MisskeyChannelListType type = MisskeyChannelListType.featured,
     String? query,
@@ -174,6 +219,10 @@ final class MisskeyChannelsNotifierFamily extends $Family
   @override
   String toString() => r'misskeyChannelsProvider';
 }
+
+/// Misskey频道列表状态管理类
+///
+/// 负责管理Misskey平台的频道列表，支持不同类型的频道列表和搜索功能。
 
 abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
   late final _$args =
@@ -204,11 +253,21 @@ abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
   }
 }
 
+/// Misskey频道时间线状态管理类
+///
+/// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
+
 @ProviderFor(MisskeyChannelTimelineNotifier)
 final misskeyChannelTimelineProvider = MisskeyChannelTimelineNotifierFamily._();
 
+/// Misskey频道时间线状态管理类
+///
+/// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
 final class MisskeyChannelTimelineNotifierProvider
     extends $AsyncNotifierProvider<MisskeyChannelTimelineNotifier, List<Note>> {
+  /// Misskey频道时间线状态管理类
+  ///
+  /// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
   MisskeyChannelTimelineNotifierProvider._({
     required MisskeyChannelTimelineNotifierFamily super.from,
     required String super.argument,
@@ -249,6 +308,10 @@ final class MisskeyChannelTimelineNotifierProvider
 String _$misskeyChannelTimelineNotifierHash() =>
     r'002dbe5a1d600d0bc8a425db533d3cd4d930b4db';
 
+/// Misskey频道时间线状态管理类
+///
+/// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
+
 final class MisskeyChannelTimelineNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
@@ -267,12 +330,20 @@ final class MisskeyChannelTimelineNotifierFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Misskey频道时间线状态管理类
+  ///
+  /// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
+
   MisskeyChannelTimelineNotifierProvider call(String channelId) =>
       MisskeyChannelTimelineNotifierProvider._(argument: channelId, from: this);
 
   @override
   String toString() => r'misskeyChannelTimelineProvider';
 }
+
+/// Misskey频道时间线状态管理类
+///
+/// 负责管理Misskey平台的频道时间线，显示指定频道的笔记列表。
 
 abstract class _$MisskeyChannelTimelineNotifier
     extends $AsyncNotifier<List<Note>> {
@@ -296,11 +367,21 @@ abstract class _$MisskeyChannelTimelineNotifier
   }
 }
 
+/// Misskey片段(Clips)列表状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)列表，支持片段的刷新和加载更多功能。
+
 @ProviderFor(MisskeyClipsNotifier)
 final misskeyClipsProvider = MisskeyClipsNotifierProvider._();
 
+/// Misskey片段(Clips)列表状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)列表，支持片段的刷新和加载更多功能。
 final class MisskeyClipsNotifierProvider
     extends $AsyncNotifierProvider<MisskeyClipsNotifier, List<Clip>> {
+  /// Misskey片段(Clips)列表状态管理类
+  ///
+  /// 负责管理Misskey平台的片段(Clips)列表，支持片段的刷新和加载更多功能。
   MisskeyClipsNotifierProvider._()
     : super(
         from: null,
@@ -323,6 +404,10 @@ final class MisskeyClipsNotifierProvider
 String _$misskeyClipsNotifierHash() =>
     r'99fe50cc700591f0f064a7f4afdf9f7e29218af0';
 
+/// Misskey片段(Clips)列表状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)列表，支持片段的刷新和加载更多功能。
+
 abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
   FutureOr<List<Clip>> build();
   @$mustCallSuper
@@ -341,11 +426,21 @@ abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
   }
 }
 
+/// Misskey在线用户数状态管理类
+///
+/// 负责管理Misskey平台的在线用户数，定期更新以保持数据最新。
+
 @ProviderFor(MisskeyOnlineUsersNotifier)
 final misskeyOnlineUsersProvider = MisskeyOnlineUsersNotifierProvider._();
 
+/// Misskey在线用户数状态管理类
+///
+/// 负责管理Misskey平台的在线用户数，定期更新以保持数据最新。
 final class MisskeyOnlineUsersNotifierProvider
     extends $AsyncNotifierProvider<MisskeyOnlineUsersNotifier, int> {
+  /// Misskey在线用户数状态管理类
+  ///
+  /// 负责管理Misskey平台的在线用户数，定期更新以保持数据最新。
   MisskeyOnlineUsersNotifierProvider._()
     : super(
         from: null,
@@ -368,6 +463,10 @@ final class MisskeyOnlineUsersNotifierProvider
 String _$misskeyOnlineUsersNotifierHash() =>
     r'f847694a24b3e7f0a993118f6285b03a4bb2b100';
 
+/// Misskey在线用户数状态管理类
+///
+/// 负责管理Misskey平台的在线用户数，定期更新以保持数据最新。
+
 abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
   FutureOr<int> build();
   @$mustCallSuper
@@ -386,11 +485,21 @@ abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
   }
 }
 
+/// 当前Misskey用户状态管理类
+///
+/// 负责管理当前登录的Misskey用户信息，支持用户信息的刷新功能。
+
 @ProviderFor(MisskeyMeNotifier)
 final misskeyMeProvider = MisskeyMeNotifierProvider._();
 
+/// 当前Misskey用户状态管理类
+///
+/// 负责管理当前登录的Misskey用户信息，支持用户信息的刷新功能。
 final class MisskeyMeNotifierProvider
     extends $AsyncNotifierProvider<MisskeyMeNotifier, MisskeyUser> {
+  /// 当前Misskey用户状态管理类
+  ///
+  /// 负责管理当前登录的Misskey用户信息，支持用户信息的刷新功能。
   MisskeyMeNotifierProvider._()
     : super(
         from: null,
@@ -412,6 +521,10 @@ final class MisskeyMeNotifierProvider
 
 String _$misskeyMeNotifierHash() => r'd5aef511157075b2d3f6355ff395e643630d0157';
 
+/// 当前Misskey用户状态管理类
+///
+/// 负责管理当前登录的Misskey用户信息，支持用户信息的刷新功能。
+
 abstract class _$MisskeyMeNotifier extends $AsyncNotifier<MisskeyUser> {
   FutureOr<MisskeyUser> build();
   @$mustCallSuper
@@ -430,11 +543,21 @@ abstract class _$MisskeyMeNotifier extends $AsyncNotifier<MisskeyUser> {
   }
 }
 
+/// Misskey用户信息状态管理类
+///
+/// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
+
 @ProviderFor(MisskeyUserNotifier)
 final misskeyUserProvider = MisskeyUserNotifierFamily._();
 
+/// Misskey用户信息状态管理类
+///
+/// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
 final class MisskeyUserNotifierProvider
     extends $AsyncNotifierProvider<MisskeyUserNotifier, MisskeyUser> {
+  /// Misskey用户信息状态管理类
+  ///
+  /// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
   MisskeyUserNotifierProvider._({
     required MisskeyUserNotifierFamily super.from,
     required String super.argument,
@@ -474,6 +597,10 @@ final class MisskeyUserNotifierProvider
 String _$misskeyUserNotifierHash() =>
     r'ab4bd544200f1edfb51d0e691c57ff5d24831975';
 
+/// Misskey用户信息状态管理类
+///
+/// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
+
 final class MisskeyUserNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
@@ -492,12 +619,20 @@ final class MisskeyUserNotifierFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Misskey用户信息状态管理类
+  ///
+  /// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
+
   MisskeyUserNotifierProvider call(String userId) =>
       MisskeyUserNotifierProvider._(argument: userId, from: this);
 
   @override
   String toString() => r'misskeyUserProvider';
 }
+
+/// Misskey用户信息状态管理类
+///
+/// 负责管理指定ID的Misskey用户信息，支持用户信息的刷新功能。
 
 abstract class _$MisskeyUserNotifier extends $AsyncNotifier<MisskeyUser> {
   late final _$args = ref.$arg as String;

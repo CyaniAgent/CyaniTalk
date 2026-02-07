@@ -70,11 +70,21 @@ abstract class _$AuthService extends $AsyncNotifier<List<Account>> {
   }
 }
 
+/// 选中的Misskey账户提供者
+///
+/// 管理当前选中的Misskey账户，支持账户切换和自动选择逻辑。
+
 @ProviderFor(SelectedMisskeyAccount)
 final selectedMisskeyAccountProvider = SelectedMisskeyAccountProvider._();
 
+/// 选中的Misskey账户提供者
+///
+/// 管理当前选中的Misskey账户，支持账户切换和自动选择逻辑。
 final class SelectedMisskeyAccountProvider
     extends $AsyncNotifierProvider<SelectedMisskeyAccount, Account?> {
+  /// 选中的Misskey账户提供者
+  ///
+  /// 管理当前选中的Misskey账户，支持账户切换和自动选择逻辑。
   SelectedMisskeyAccountProvider._()
     : super(
         from: null,
@@ -97,6 +107,10 @@ final class SelectedMisskeyAccountProvider
 String _$selectedMisskeyAccountHash() =>
     r'9148219d173f5c19bf18c3327a427fe61325958c';
 
+/// 选中的Misskey账户提供者
+///
+/// 管理当前选中的Misskey账户，支持账户切换和自动选择逻辑。
+
 abstract class _$SelectedMisskeyAccount extends $AsyncNotifier<Account?> {
   FutureOr<Account?> build();
   @$mustCallSuper
@@ -115,11 +129,21 @@ abstract class _$SelectedMisskeyAccount extends $AsyncNotifier<Account?> {
   }
 }
 
+/// 选中的Flarum账户提供者
+///
+/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
+
 @ProviderFor(SelectedFlarumAccount)
 final selectedFlarumAccountProvider = SelectedFlarumAccountProvider._();
 
+/// 选中的Flarum账户提供者
+///
+/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
 final class SelectedFlarumAccountProvider
     extends $AsyncNotifierProvider<SelectedFlarumAccount, Account?> {
+  /// 选中的Flarum账户提供者
+  ///
+  /// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
   SelectedFlarumAccountProvider._()
     : super(
         from: null,
@@ -141,6 +165,10 @@ final class SelectedFlarumAccountProvider
 
 String _$selectedFlarumAccountHash() =>
     r'0c24a685adc24bd9fccbfd47780ee196a3a2f3e9';
+
+/// 选中的Flarum账户提供者
+///
+/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
 
 abstract class _$SelectedFlarumAccount extends $AsyncNotifier<Account?> {
   FutureOr<Account?> build();

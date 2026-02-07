@@ -27,7 +27,10 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('nav_messages'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'nav_messages'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -41,9 +44,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
       body: Column(
         children: [
           _buildFilterBar(),
-          Expanded(
-            child: _buildUnifiedList(),
-          ),
+          Expanded(child: _buildUnifiedList()),
         ],
       ),
     );
@@ -64,9 +65,13 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
               onSelected: (selected) {
                 if (selected) setState(() => _currentFilter = filter);
               },
-              selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+              selectedColor: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.2),
               labelStyle: TextStyle(
-                color: isSelected ? Theme.of(context).colorScheme.primary : null,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
                 fontWeight: isSelected ? FontWeight.bold : null,
               ),
             ),
@@ -96,45 +101,79 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
           data: (history) {
             return notificationsAsync.when(
               data: (notifications) {
-                final combinedList = _getFilteredAndSortedList(history, notifications, me.id);
-                
+                final combinedList = _getFilteredAndSortedList(
+                  history,
+                  notifications,
+                  me.id,
+                );
+
                 if (combinedList.isEmpty && notifications.isEmpty) {
                   return _buildEmptyState();
                 }
 
                 return RefreshIndicator(
                   onRefresh: () async {
-                    await ref.read(misskeyMessagingHistoryProvider.notifier).refresh();
-                    await ref.read(misskeyNotificationsProvider.notifier).refresh();
+                    await ref
+                        .read(misskeyMessagingHistoryProvider.notifier)
+                        .refresh();
+                    await ref
+                        .read(misskeyNotificationsProvider.notifier)
+                        .refresh();
                   },
                   child: ListView.separated(
                     padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: combinedList.length + (notifications.isNotEmpty && (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.notifications) ? 1 : 0),
-                    separatorBuilder: (context, index) => const Divider(indent: 72, height: 1, thickness: 0.5),
+                    itemCount:
+                        combinedList.length +
+                        (notifications.isNotEmpty &&
+                                (_currentFilter == InboxFilter.all ||
+                                    _currentFilter == InboxFilter.notifications)
+                            ? 1
+                            : 0),
+                    separatorBuilder: (context, index) =>
+                        const Divider(indent: 72, height: 1, thickness: 0.5),
                     itemBuilder: (context, index) {
                       // Show aggregate notifications tile at the top if there are notifications
-                      final showAggregate = notifications.isNotEmpty && (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.notifications);
-                      
+                      final showAggregate =
+                          notifications.isNotEmpty &&
+                          (_currentFilter == InboxFilter.all ||
+                              _currentFilter == InboxFilter.notifications);
+
                       if (showAggregate && index == 0) {
-                        return _buildAggregateNotificationsTile(notifications.first);
+                        return _buildAggregateNotificationsTile(
+                          notifications.first,
+                        );
                       }
 
                       final itemIndex = showAggregate ? index - 1 : index;
                       final item = combinedList[itemIndex];
-                      final String id = (item is MessagingMessage) ? item.id : (item as MisskeyNotification).id;
-                      
+                      final String id = (item is MessagingMessage)
+                          ? item.id
+                          : (item as MisskeyNotification).id;
+
                       if (item is MessagingMessage) {
                         if (item.room != null) {
-                          return _buildRoomTile(item, item.room!, me.id, key: ValueKey('room_$id'));
+                          return _buildRoomTile(
+                            item,
+                            item.room!,
+                            me.id,
+                            key: ValueKey('room_$id'),
+                          );
                         } else {
                           // 获取对方用户
-                          final otherUser = (item.senderId == me.id) ? item.recipient : item.sender;
-                          
+                          final otherUser = (item.senderId == me.id)
+                              ? item.recipient
+                              : item.sender;
+
                           // 如果用户对象存在，直接使用
                           if (otherUser != null) {
-                            return _buildDirectTile(item, otherUser, me.id, key: ValueKey('direct_$id'));
+                            return _buildDirectTile(
+                              item,
+                              otherUser,
+                              me.id,
+                              key: ValueKey('direct_$id'),
+                            );
                           }
-                          
+
                           // 如果用户对象缺失，但有用户ID，创建临时用户对象
                           String? counterpartId;
                           if (item.senderId == me.id) {
@@ -144,18 +183,26 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
                             // 别人发给我的消息，对方是发送者
                             counterpartId = item.senderId;
                           }
-                          
+
                           if (counterpartId != null) {
                             final tempUser = MisskeyUser(
                               id: counterpartId,
                               username: 'User_$counterpartId',
                               name: 'User $counterpartId',
                             );
-                            return _buildDirectTile(item, tempUser, me.id, key: ValueKey('direct_$id'));
+                            return _buildDirectTile(
+                              item,
+                              tempUser,
+                              me.id,
+                              key: ValueKey('direct_$id'),
+                            );
                           }
-                          
+
                           // 最后才显示系统未知
-                          return _buildSystemTile(item, key: ValueKey('system_$id'));
+                          return _buildSystemTile(
+                            item,
+                            key: ValueKey('system_$id'),
+                          );
                         }
                       }
                       return const SizedBox.shrink();
@@ -182,64 +229,127 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     String myId,
   ) {
     List<dynamic> list = [];
-    
-    if (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.direct) {
+
+    if (_currentFilter == InboxFilter.all ||
+        _currentFilter == InboxFilter.direct) {
       list.addAll(history.where((m) => m.room == null));
     }
-    
-    if (_currentFilter == InboxFilter.all || _currentFilter == InboxFilter.groups) {
+
+    if (_currentFilter == InboxFilter.all ||
+        _currentFilter == InboxFilter.groups) {
       list.addAll(history.where((m) => m.room != null));
     }
-    
+
     // Notifications are now aggregated separately, so we don't add them to the main list here
 
     // Sort by createdAt descending
     list.sort((a, b) {
-      final dateA = (a is MessagingMessage) ? a.createdAt : (a as MisskeyNotification).createdAt;
-      final dateB = (b is MessagingMessage) ? b.createdAt : (b as MisskeyNotification).createdAt;
+      final dateA = (a is MessagingMessage)
+          ? a.createdAt
+          : (a as MisskeyNotification).createdAt;
+      final dateB = (b is MessagingMessage)
+          ? b.createdAt
+          : (b as MisskeyNotification).createdAt;
       return dateB.compareTo(dateA);
     });
 
     return list;
   }
 
-  Widget _buildDirectTile(MessagingMessage message, MisskeyUser otherUser, String myId, {Key? key}) {
+  Widget _buildDirectTile(
+    MessagingMessage message,
+    MisskeyUser otherUser,
+    String myId, {
+    Key? key,
+  }) {
     return ListTile(
       key: key,
       leading: _buildAvatar(otherUser.avatarUrl, Icons.person),
       title: Row(
         children: [
-          Expanded(child: Text(otherUser.name ?? otherUser.username, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
-          Text(timeago.format(message.createdAt), style: Theme.of(context).textTheme.bodySmall),
+          Expanded(
+            child: Text(
+              otherUser.name ?? otherUser.username,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            timeago.format(message.createdAt),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
       subtitle: Row(
         children: [
-          Expanded(child: Text(message.text ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(
+            child: Text(
+              message.text ?? '',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           if (!message.isRead && message.senderId != myId)
-            Container(width: 8, height: 8, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle)),
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
         ],
       ),
-      onTap: () => context.push('/messaging/chat/${otherUser.id}', extra: otherUser),
+      onTap: () =>
+          context.push('/messaging/chat/${otherUser.id}', extra: otherUser),
     );
   }
 
-  Widget _buildRoomTile(MessagingMessage message, ChatRoom room, String myId, {Key? key}) {
+  Widget _buildRoomTile(
+    MessagingMessage message,
+    ChatRoom room,
+    String myId, {
+    Key? key,
+  }) {
     final theme = Theme.of(context);
     return ListTile(
       key: key,
       leading: _buildAvatar(null, Icons.groups, isRoom: true),
       title: Row(
         children: [
-          Expanded(child: Text(room.name ?? 'Group Chat', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)),
-          Text(timeago.format(message.createdAt), style: theme.textTheme.bodySmall),
+          Expanded(
+            child: Text(
+              room.name ?? 'Group Chat',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            timeago.format(message.createdAt),
+            style: theme.textTheme.bodySmall,
+          ),
         ],
       ),
       subtitle: Row(
         children: [
-          Expanded(child: Text('${message.sender?.name ?? '?'}: ${message.text ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(
+            child: Text(
+              '${message.sender?.name ?? '?'}: ${message.text ?? ''}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           if (!message.isRead && message.senderId != myId)
-            Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
         ],
       ),
       onTap: () => context.push('/messaging/chat/room/${room.id}', extra: room),
@@ -249,7 +359,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
   Widget _buildAggregateNotificationsTile(MisskeyNotification latest) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    
+
     return ListTile(
       leading: Container(
         width: 48,
@@ -260,7 +370,10 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
         ),
         child: Icon(Icons.notifications_active, color: primaryColor),
       ),
-      title: Text('notifications_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(
+        'notifications_title'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
       subtitle: Text(
         _getNotificationText(latest),
         maxLines: 1,
@@ -270,7 +383,10 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(timeago.format(latest.createdAt), style: theme.textTheme.bodySmall),
+          Text(
+            timeago.format(latest.createdAt),
+            style: theme.textTheme.bodySmall,
+          ),
           const Icon(Icons.chevron_right, size: 16),
         ],
       ),
@@ -294,8 +410,15 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     return ListTile(
       key: key,
       leading: _buildAvatar(null, Icons.settings),
-      title: Text('messaging_system_unknown'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(message.text ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
+      title: Text(
+        'messaging_system_unknown'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      subtitle: Text(
+        message.text ?? '',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 
@@ -303,29 +426,152 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
     final theme = Theme.of(context);
     return CircleAvatar(
       radius: 24,
-      backgroundColor: isRoom ? theme.colorScheme.primaryContainer : theme.colorScheme.surfaceContainerHighest,
+      backgroundColor: isRoom
+          ? theme.colorScheme.primaryContainer
+          : theme.colorScheme.surfaceContainerHighest,
       backgroundImage: url != null ? NetworkImage(url) : null,
-      child: url == null ? Icon(fallback, color: isRoom ? theme.colorScheme.onPrimaryContainer : null) : null,
+      child: url == null
+          ? Icon(
+              fallback,
+              color: isRoom ? theme.colorScheme.onPrimaryContainer : null,
+            )
+          : null,
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.inbox, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
-          const SizedBox(height: 16),
-          Text(
-            'search_no_results'.tr(),
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.inbox_outlined,
+                size: 50,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'messaging_empty_title'.tr(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'messaging_empty_description'.tr(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            OutlinedButton.icon(
+              onPressed: () {
+                // 这里可以添加一个操作，比如打开新消息页面
+              },
+              icon: const Icon(Icons.add),
+              label: Text('messaging_empty_action'.tr()),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildErrorState(Object err) {
-    return Center(child: Text('${'common_error'.tr()}: $err'));
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.errorContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 50,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'messaging_error_title'.tr(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'messaging_error_description'.tr(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              err.toString(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              onPressed: () {
+                ref.read(misskeyMessagingHistoryProvider.notifier).refresh();
+                ref.read(misskeyNotificationsProvider.notifier).refresh();
+              },
+              icon: const Icon(Icons.refresh),
+              label: Text('messaging_error_retry'.tr()),
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -10,6 +10,7 @@ import 'appearance_page.dart';
 import 'cache_settings_page.dart';
 import 'notification_settings_page.dart';
 import 'sound_settings_page.dart';
+import 'navigation_settings_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -148,6 +149,17 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const SoundSettingsPage()),
+              );
+            },
+          ),
+          _buildSettingsTile(
+            context,
+            Icons.navigation_outlined,
+            'settings_navigation_title'.tr(),
+            'settings_navigation_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const NavigationSettingsPage()),
               );
             },
           ),
