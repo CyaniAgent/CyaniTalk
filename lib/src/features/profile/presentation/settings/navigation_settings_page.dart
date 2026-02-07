@@ -10,62 +10,196 @@ import 'package:easy_localization/easy_localization.dart';
 
 part 'navigation_settings_page.g.dart';
 
-/// 导航项类型枚举
-enum NavigationItemType { misskey, flarum, drive, messages, me }
+/// 导航项配置类
+class NavigationItem {
+  /// 导航项唯一标识
+  final String id;
+
+  /// 导航项标题
+  final String title;
+
+  /// 导航项图标
+  final IconData icon;
+
+  /// 是否启用
+  final bool isEnabled;
+
+  /// 是否可移除
+  final bool isRemovable;
+
+  /// 创建导航项实例
+  const NavigationItem({
+    required this.id,
+    required this.title,
+    required this.icon,
+    this.isEnabled = true,
+    this.isRemovable = true,
+  });
+
+  /// 复制并更新导航项
+  NavigationItem copyWith({
+    String? id,
+    String? title,
+    IconData? icon,
+    bool? isEnabled,
+    bool? isRemovable,
+  }) {
+    return NavigationItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      icon: icon ?? this.icon,
+      isEnabled: isEnabled ?? this.isEnabled,
+      isRemovable: isRemovable ?? this.isRemovable,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NavigationItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          title == other.title &&
+          icon == other.icon &&
+          isEnabled == other.isEnabled &&
+          isRemovable == other.isRemovable;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      title.hashCode ^
+      icon.hashCode ^
+      isEnabled.hashCode ^
+      isRemovable.hashCode;
+
+  /// 转换为JSON格式
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'isEnabled': isEnabled,
+      'isRemovable': isRemovable,
+    };
+  }
+
+  /// 从JSON格式创建
+  factory NavigationItem.fromJson(Map<String, dynamic> json) {
+    return NavigationItem(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      icon: _getIconFromId(json['id'] as String),
+      isEnabled: json['isEnabled'] as bool? ?? true,
+      isRemovable: json['isRemovable'] as bool? ?? true,
+    );
+  }
+
+  /// 根据ID获取图标
+  static IconData _getIconFromId(String id) {
+    switch (id) {
+      case 'misskey':
+        return Icons.public_outlined;
+      case 'flarum':
+        return Icons.forum_outlined;
+      case 'drive':
+        return Icons.cloud_queue_outlined;
+      case 'messages':
+        return Icons.chat_bubble_outline;
+      case 'me':
+        return Icons.person_outline;
+      default:
+        return Icons.star_outline;
+    }
+  }
+}
 
 /// 导航设置状态
 class NavigationSettings {
-  /// 是否显示Misskey选项
-  final bool showMisskey;
-
-  /// 是否显示Flarum选项
-  final bool showFlarum;
-
-  /// 是否显示Drive选项
-  final bool showDrive;
-
-  /// 是否显示Messages选项
-  final bool showMessages;
-
-  /// 是否显示Me选项
-  final bool showMe;
-
-  /// 导航项排序顺序
-  final List<NavigationItemType> itemOrder;
+  /// 导航项列表
+  final List<NavigationItem> items;
 
   /// 创建导航设置实例
-  const NavigationSettings({
-    this.showMisskey = true,
-    this.showFlarum = true,
-    this.showDrive = true,
-    this.showMessages = true,
-    this.showMe = true,
-    this.itemOrder = const [
-      NavigationItemType.misskey,
-      NavigationItemType.flarum,
-      NavigationItemType.drive,
-      NavigationItemType.messages,
-      NavigationItemType.me,
-    ],
-  });
+  const NavigationSettings({this.items = const []});
+
+  /// 获取默认导航设置
+  factory NavigationSettings.defaultSettings([BuildContext? context]) {
+    return NavigationSettings(
+      items: [
+        NavigationItem(
+          id: 'misskey',
+          title: 'nav_misskey'.tr(),
+          icon: Icons.public_outlined,
+          isEnabled: true,
+          isRemovable: true,
+        ),
+        NavigationItem(
+          id: 'flarum',
+          title: 'nav_flarum'.tr(),
+          icon: Icons.forum_outlined,
+          isEnabled: true,
+          isRemovable: true,
+        ),
+        NavigationItem(
+          id: 'drive',
+          title: 'nav_drive'.tr(),
+          icon: Icons.cloud_queue_outlined,
+          isEnabled: true,
+          isRemovable: true,
+        ),
+        NavigationItem(
+          id: 'messages',
+          title: 'nav_messages'.tr(),
+          icon: Icons.chat_bubble_outline,
+          isEnabled: true,
+          isRemovable: true,
+        ),
+        NavigationItem(
+          id: 'me',
+          title: 'nav_me'.tr(),
+          icon: Icons.person_outline,
+          isEnabled: true,
+          isRemovable: false, // 个人页面不可移除
+        ),
+      ],
+    );
+  }
 
   /// 复制并更新导航设置
-  NavigationSettings copyWith({
-    bool? showMisskey,
-    bool? showFlarum,
-    bool? showDrive,
-    bool? showMessages,
-    bool? showMe,
-    List<NavigationItemType>? itemOrder,
-  }) {
-    return NavigationSettings(
-      showMisskey: showMisskey ?? this.showMisskey,
-      showFlarum: showFlarum ?? this.showFlarum,
-      showDrive: showDrive ?? this.showDrive,
-      showMessages: showMessages ?? this.showMessages,
-      showMe: true, // 强制保持个人页面为启用状态
-      itemOrder: itemOrder ?? this.itemOrder,
+  NavigationSettings copyWith({List<NavigationItem>? items}) {
+    return NavigationSettings(items: items ?? this.items);
+  }
+
+  /// 获取启用的导航项数量
+  int getEnabledCount() {
+    return items.where((item) => item.isEnabled).length;
+  }
+
+  /// 获取可移除的导航项数量
+  int getRemovableCount() {
+    return items.where((item) => item.isRemovable).length;
+  }
+
+  /// 根据ID查找导航项
+  NavigationItem? findItemById(String id) {
+    return items.firstWhere(
+      (item) => item.id == id,
+      orElse: () => NavigationItem(id: '', title: '', icon: Icons.star_outline),
     );
+  }
+
+  /// 更新指定ID的导航项启用状态
+  NavigationSettings updateItemEnabled(String id, bool isEnabled) {
+    final updatedItems = items.map((item) {
+      if (item.id == id) {
+        return item.copyWith(isEnabled: isEnabled);
+      }
+      return item;
+    }).toList();
+    return copyWith(items: updatedItems);
+  }
+
+  /// 更新导航项排序
+  NavigationSettings updateItemOrder(List<NavigationItem> newOrder) {
+    return copyWith(items: newOrder);
   }
 
   @override
@@ -73,26 +207,13 @@ class NavigationSettings {
       identical(this, other) ||
       other is NavigationSettings &&
           runtimeType == other.runtimeType &&
-          showMisskey == other.showMisskey &&
-          showFlarum == other.showFlarum &&
-          showDrive == other.showDrive &&
-          showMessages == other.showMessages &&
-          showMe == other.showMe &&
-          ListEquality<NavigationItemType>().equals(itemOrder, other.itemOrder);
+          _listEquals(items, other.items);
 
   @override
-  int get hashCode =>
-      showMisskey.hashCode ^
-      showFlarum.hashCode ^
-      showDrive.hashCode ^
-      showMessages.hashCode ^
-      showMe.hashCode ^
-      itemOrder.hashCode;
-}
+  int get hashCode => items.hashCode;
 
-/// 列表相等性比较器
-class ListEquality<T> {
-  bool equals(List<T>? a, List<T>? b) {
+  /// 列表相等性检查
+  bool _listEquals<T>(List<T>? a, List<T>? b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
     if (a.length != b.length) return false;
@@ -119,66 +240,91 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // 加载设置
-      final showMisskey = prefs.getBool('navigation_show_misskey') ?? true;
-      final showFlarum = prefs.getBool('navigation_show_flarum') ?? true;
-      final showDrive = prefs.getBool('navigation_show_drive') ?? true;
-      final showMessages = prefs.getBool('navigation_show_messages') ?? true;
-      // 强制启用个人页面，不允许禁用
-      const showMe = true;
+      // 加载导航项配置
+      final navigationItemsString = prefs.getString('navigation_items');
+      final navigationOrderString = prefs.getString('navigation_order');
 
-      // 加载排序顺序
-      final itemOrderString = prefs.getString('navigation_item_order');
-      List<NavigationItemType> itemOrder;
-      if (itemOrderString != null) {
+      NavigationSettings settings;
+
+      if (navigationItemsString != null && navigationOrderString != null) {
         try {
-          final List<String> itemOrderList = itemOrderString.split(',');
-          itemOrder = itemOrderList
-              .map(
-                (item) => NavigationItemType.values.firstWhere(
-                  (e) => e.toString().split('.').last == item,
-                  orElse: () => NavigationItemType.misskey,
-                ),
-              )
-              .toList();
-          // 确保排序列表包含所有导航项类型
-          for (final type in NavigationItemType.values) {
-            if (!itemOrder.contains(type)) {
-              itemOrder.add(type);
+          // 解析导航项配置
+          final List<dynamic> itemsJson = navigationItemsString.split(';');
+          final List<NavigationItem> items = [];
+
+          for (final itemJson in itemsJson) {
+            if (itemJson.isNotEmpty) {
+              try {
+                final Map<String, dynamic> itemMap = _parseJsonString(itemJson);
+                final item = NavigationItem(
+                  id: itemMap['id'] as String,
+                  title: itemMap['title'] as String,
+                  icon: NavigationItem._getIconFromId(itemMap['id'] as String),
+                  isEnabled: itemMap['isEnabled'] as bool,
+                  isRemovable: itemMap['isRemovable'] as bool,
+                );
+                items.add(item);
+              } catch (e) {
+                // 解析失败，跳过该项
+              }
             }
           }
+
+          // 解析排序顺序
+          final List<String> orderList = navigationOrderString.split(',');
+          final List<NavigationItem> orderedItems = [];
+
+          // 按照存储的顺序排列导航项
+          for (final id in orderList) {
+            final item = items.firstWhere(
+              (item) => item.id == id,
+              orElse: () =>
+                  NavigationItem(id: '', title: '', icon: Icons.star_outline),
+            );
+            if (item.id.isNotEmpty) {
+              orderedItems.add(item);
+            }
+          }
+
+          // 添加未在排序中的导航项
+          for (final item in items) {
+            if (!orderedItems.any((orderedItem) => orderedItem.id == item.id)) {
+              orderedItems.add(item);
+            }
+          }
+
+          settings = NavigationSettings(items: orderedItems);
         } catch (e) {
-          // 解析失败时使用默认排序
-          itemOrder = const [
-            NavigationItemType.misskey,
-            NavigationItemType.flarum,
-            NavigationItemType.drive,
-            NavigationItemType.messages,
-            NavigationItemType.me,
-          ];
+          // 解析失败，使用默认设置
+          settings = NavigationSettings.defaultSettings();
         }
       } else {
-        // 使用默认排序
-        itemOrder = const [
-          NavigationItemType.misskey,
-          NavigationItemType.flarum,
-          NavigationItemType.drive,
-          NavigationItemType.messages,
-          NavigationItemType.me,
-        ];
+        // 没有存储的设置，使用默认设置
+        settings = NavigationSettings.defaultSettings();
       }
 
-      return NavigationSettings(
-        showMisskey: showMisskey,
-        showFlarum: showFlarum,
-        showDrive: showDrive,
-        showMessages: showMessages,
-        showMe: showMe,
-        itemOrder: itemOrder,
-      );
+      // 检查并确保至少有两个导航项启用
+      if (settings.getEnabledCount() < 2) {
+        // 按照顺序尝试启用导航项
+        final List<NavigationItem> updatedItems = List.from(settings.items);
+        int enabledCount = settings.getEnabledCount();
+
+        for (int i = 0; i < updatedItems.length && enabledCount < 2; i++) {
+          final item = updatedItems[i];
+          if (!item.isEnabled && item.isRemovable) {
+            updatedItems[i] = item.copyWith(isEnabled: true);
+            enabledCount++;
+          }
+        }
+
+        settings = NavigationSettings(items: updatedItems);
+        await _saveToStorage(settings);
+      }
+
+      return settings;
     } catch (e) {
       // 加载失败时返回默认设置
-      return const NavigationSettings();
+      return NavigationSettings.defaultSettings();
     }
   }
 
@@ -187,76 +333,130 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      // 保存设置
-      await prefs.setBool('navigation_show_misskey', settings.showMisskey);
-      await prefs.setBool('navigation_show_flarum', settings.showFlarum);
-      await prefs.setBool('navigation_show_drive', settings.showDrive);
-      await prefs.setBool('navigation_show_messages', settings.showMessages);
-      // 强制保存个人页面为启用状态
-      await prefs.setBool('navigation_show_me', true);
+      // 保存导航项配置
+      final itemsJson = settings.items
+          .map((item) => _jsonToString(item.toJson()))
+          .join(';');
+      await prefs.setString('navigation_items', itemsJson);
 
       // 保存排序顺序
-      final itemOrderString = settings.itemOrder
-          .map((item) => item.toString().split('.').last)
-          .join(',');
-      await prefs.setString('navigation_item_order', itemOrderString);
+      final orderList = settings.items.map((item) => item.id).join(',');
+      await prefs.setString('navigation_order', orderList);
     } catch (e) {
       // 保存失败时忽略错误
     }
   }
 
-  /// 更新Misskey选项的显示状态
-  Future<void> updateShowMisskey(bool value) async {
-    final newState = state.value!.copyWith(showMisskey: value);
-    state = AsyncData(newState);
-    await _saveToStorage(newState);
-  }
+  /// 解析JSON字符串
+  Map<String, dynamic> _parseJsonString(String jsonString) {
+    // 简单的JSON字符串解析
+    final Map<String, dynamic> result = {};
+    final cleanString = jsonString.replaceAll('{', '').replaceAll('}', '');
+    final pairs = cleanString.split(',');
 
-  /// 更新Flarum选项的显示状态
-  Future<void> updateShowFlarum(bool value) async {
-    final newState = state.value!.copyWith(showFlarum: value);
-    state = AsyncData(newState);
-    await _saveToStorage(newState);
-  }
+    for (final pair in pairs) {
+      final parts = pair.split(':');
+      if (parts.length == 2) {
+        final key = parts[0].trim().replaceAll('"', '');
+        final value = parts[1].trim();
 
-  /// 更新Drive选项的显示状态
-  Future<void> updateShowDrive(bool value) async {
-    final newState = state.value!.copyWith(showDrive: value);
-    state = AsyncData(newState);
-    await _saveToStorage(newState);
-  }
-
-  /// 更新Messages选项的显示状态
-  Future<void> updateShowMessages(bool value) async {
-    final newState = state.value!.copyWith(showMessages: value);
-    state = AsyncData(newState);
-    await _saveToStorage(newState);
-  }
-
-  /// 更新Me选项的显示状态
-  /// 注意：个人页面不允许被禁用，此方法会忽略传入的value，始终保持启用状态
-  Future<void> updateShowMe(bool value) async {
-    // 强制启用个人页面，忽略传入的value
-    final newState = state.value!.copyWith(showMe: true);
-    state = AsyncData(newState);
-    await _saveToStorage(newState);
-  }
-
-  /// 更新排序顺序
-  Future<void> updateItemOrder(List<NavigationItemType> newOrder) async {
-    // 确保个人页面始终在排序列表中
-    final updatedOrder = List<NavigationItemType>.from(newOrder);
-    if (!updatedOrder.contains(NavigationItemType.me)) {
-      updatedOrder.add(NavigationItemType.me);
+        if (value == 'true') {
+          result[key] = true;
+        } else if (value == 'false') {
+          result[key] = false;
+        } else if (value.startsWith('"') && value.endsWith('"')) {
+          result[key] = value.replaceAll('"', '');
+        } else {
+          result[key] = value;
+        }
+      }
     }
-    final newState = state.value!.copyWith(itemOrder: updatedOrder);
+
+    return result;
+  }
+
+  /// 将JSON对象转换为字符串
+  String _jsonToString(Map<String, dynamic> json) {
+    final pairs = json.entries
+        .map((entry) => '"${entry.key}":${_valueToString(entry.value)}')
+        .join(',');
+    return '{$pairs}';
+  }
+
+  /// 将值转换为字符串
+  String _valueToString(dynamic value) {
+    if (value is String) {
+      return '"$value"';
+    }
+    return value.toString();
+  }
+
+  /// 更新导航项启用状态
+  Future<void> updateItemEnabled(
+    String itemId,
+    bool isEnabled,
+    BuildContext context,
+  ) async {
+    // 查找要更新的导航项
+    final item = state.value!.items.firstWhere(
+      (item) => item.id == itemId,
+      orElse: () => NavigationItem(id: '', title: '', icon: Icons.star_outline),
+    );
+
+    if (item.id.isEmpty) {
+      return;
+    }
+
+    // 如果是不可移除的导航项（如个人页面），强制保持启用状态
+    if (!item.isRemovable) {
+      final newState = state.value!.updateItemEnabled(itemId, true);
+      state = AsyncData(newState);
+      await _saveToStorage(newState);
+      return;
+    }
+
+    // 检查如果禁用该项后，是否还有至少两个导航项启用
+    if (!isEnabled) {
+      final tempState = state.value!.updateItemEnabled(itemId, false);
+      if (tempState.getEnabledCount() < 2) {
+        // 至少需要两个导航项启用，显示提示并取消禁用操作
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('至少需要启用两个导航项'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+    }
+
+    // 更新导航项启用状态
+    final newState = state.value!.updateItemEnabled(itemId, isEnabled);
+    state = AsyncData(newState);
+    await _saveToStorage(newState);
+  }
+
+  /// 更新导航项排序
+  Future<void> updateItemOrder(List<NavigationItem> newOrder) async {
+    // 确保所有原始导航项都在新排序中
+    final originalItems = state.value!.items;
+    final updatedOrder = List<NavigationItem>.from(newOrder);
+
+    // 添加未在新排序中的导航项
+    for (final item in originalItems) {
+      if (!updatedOrder.any((updatedItem) => updatedItem.id == item.id)) {
+        updatedOrder.add(item);
+      }
+    }
+
+    final newState = state.value!.updateItemOrder(updatedOrder);
     state = AsyncData(newState);
     await _saveToStorage(newState);
   }
 
   /// 重置配置
   Future<void> resetSettings() async {
-    final newState = const NavigationSettings();
+    final newState = NavigationSettings.defaultSettings();
     state = AsyncData(newState);
     await _saveToStorage(newState);
   }
@@ -339,74 +539,41 @@ class _NavigationSettingsPageState
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  children: navigationSettings.itemOrder.map((itemType) {
-                    IconData icon;
-                    String title;
-                    bool isEnabled;
+                  children: navigationSettings.items.map((item) {
                     ValueChanged<bool>? onChanged;
-
-                    switch (itemType) {
-                      case NavigationItemType.misskey:
-                        icon = Icons.public_outlined;
-                        title = 'nav_misskey'.tr();
-                        isEnabled = navigationSettings.showMisskey;
-                        onChanged = (value) =>
-                            navigationNotifier.updateShowMisskey(value);
-                        break;
-                      case NavigationItemType.flarum:
-                        icon = Icons.forum_outlined;
-                        title = 'nav_flarum'.tr();
-                        isEnabled = navigationSettings.showFlarum;
-                        onChanged = (value) =>
-                            navigationNotifier.updateShowFlarum(value);
-                        break;
-                      case NavigationItemType.drive:
-                        icon = Icons.cloud_queue_outlined;
-                        title = 'nav_drive'.tr();
-                        isEnabled = navigationSettings.showDrive;
-                        onChanged = (value) =>
-                            navigationNotifier.updateShowDrive(value);
-                        break;
-                      case NavigationItemType.messages:
-                        icon = Icons.chat_bubble_outline;
-                        title = 'nav_messages'.tr();
-                        isEnabled = navigationSettings.showMessages;
-                        onChanged = (value) =>
-                            navigationNotifier.updateShowMessages(value);
-                        break;
-                      case NavigationItemType.me:
-                        icon = Icons.person_outline;
-                        title = 'nav_me'.tr();
-                        isEnabled = true; // 强制启用个人页面
-                        onChanged = null; // 禁用开关，不允许用户修改
-                        break;
+                    if (item.isRemovable) {
+                      onChanged = (value) => navigationNotifier
+                          .updateItemEnabled(item.id, value, context);
                     }
 
                     return Container(
-                      key: ValueKey(itemType),
+                      key: ValueKey(item.id),
                       child: Column(
                         children: [
                           ListTile(
-                            leading: Icon(icon),
-                            title: Text(title),
+                            leading: Icon(item.icon),
+                            title: Text(item.title),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Switch(value: isEnabled, onChanged: onChanged),
+                                Switch(
+                                  value: item.isEnabled,
+                                  onChanged: onChanged,
+                                ),
                                 const SizedBox(width: 8),
                               ],
                             ),
                             enabled: onChanged != null,
                           ),
-                          if (itemType != navigationSettings.itemOrder.last)
+                          if (item != navigationSettings.items.last)
                             Divider(indent: 72, height: 1, thickness: 0.5),
                         ],
                       ),
                     );
                   }).toList(),
                   onReorder: (oldIndex, newIndex) {
-                    final newOrder = List<NavigationItemType>.from(
-                      navigationSettings.itemOrder,
+                    final newOrder = List<NavigationItem>.from(
+                      navigationSettings.items,
                     );
                     if (oldIndex < newIndex) {
                       newIndex -= 1;

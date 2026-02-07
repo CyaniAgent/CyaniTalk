@@ -23,54 +23,19 @@ class ResponsiveShell extends ConsumerWidget {
   /// [key] - 组件的键，用于唯一标识组件
   const ResponsiveShell({required this.navigationShell, super.key});
 
-  /// 导航项配置，包含分支索引、显示条件和对应的NavigationItemType
-  static final Map<NavigationItemType, Map<String, dynamic>> _navigationItems = {
-    NavigationItemType.misskey: {
-      'branchIndex': 0,
-      'showCondition': (NavigationSettings settings) => settings.showMisskey,
-      'destination': NavigationDestination(
-        icon: const Icon(Icons.public_outlined),
-        selectedIcon: const Icon(Icons.public),
-        label: 'nav_misskey'.tr(),
-      ),
-    },
-    NavigationItemType.flarum: {
-      'branchIndex': 1,
-      'showCondition': (NavigationSettings settings) => settings.showFlarum,
-      'destination': NavigationDestination(
-        icon: const Icon(Icons.forum_outlined),
-        selectedIcon: const Icon(Icons.forum),
-        label: 'nav_flarum'.tr(),
-      ),
-    },
-    NavigationItemType.drive: {
-      'branchIndex': 2,
-      'showCondition': (NavigationSettings settings) => settings.showDrive,
-      'destination': NavigationDestination(
-        icon: const Icon(Icons.cloud_queue_outlined),
-        selectedIcon: const Icon(Icons.cloud_queue),
-        label: 'nav_drive'.tr(),
-      ),
-    },
-    NavigationItemType.messages: {
-      'branchIndex': 3,
-      'showCondition': (NavigationSettings settings) => settings.showMessages,
-      'destination': NavigationDestination(
-        icon: const Icon(Icons.chat_bubble_outline),
-        selectedIcon: const Icon(Icons.chat_bubble),
-        label: 'nav_messages'.tr(),
-      ),
-    },
-    NavigationItemType.me: {
-      'branchIndex': 4,
-      'showCondition': (NavigationSettings settings) => settings.showMe,
-      'destination': NavigationDestination(
-        icon: const Icon(Icons.person_outline),
-        selectedIcon: const Icon(Icons.person),
-        label: 'nav_me'.tr(),
-      ),
-    },
+  /// 导航项分支索引映射
+  static final Map<String, int> _itemBranchIndexMap = {
+    'misskey': 0,
+    'flarum': 1,
+    'drive': 2,
+    'messages': 3,
+    'me': 4,
   };
+
+  /// 获取导航项对应的分支索引
+  int _getBranchIndexForItem(String itemId) {
+    return _itemBranchIndexMap[itemId] ?? 0;
+  }
 
   /// 将显示索引映射到分支索引
   ///
@@ -84,17 +49,13 @@ class ResponsiveShell extends ConsumerWidget {
   ) {
     int currentDisplayIndex = 0;
 
-    // 根据排序顺序遍历导航项
-    for (final itemType in navigationSettings.itemOrder) {
-      final item = _navigationItems[itemType];
-      if (item != null) {
-        final showCondition = item['showCondition'] as bool Function(NavigationSettings);
-        if (showCondition(navigationSettings)) {
-          if (currentDisplayIndex == displayIndex) {
-            return item['branchIndex'] as int;
-          }
-          currentDisplayIndex++;
+    // 遍历启用的导航项
+    for (final item in navigationSettings.items) {
+      if (item.isEnabled) {
+        if (currentDisplayIndex == displayIndex) {
+          return _getBranchIndexForItem(item.id);
         }
+        currentDisplayIndex++;
       }
     }
 
@@ -113,21 +74,37 @@ class ResponsiveShell extends ConsumerWidget {
   ) {
     int currentDisplayIndex = 0;
 
-    // 根据排序顺序遍历导航项
-    for (final itemType in navigationSettings.itemOrder) {
-      final item = _navigationItems[itemType];
-      if (item != null) {
-        final showCondition = item['showCondition'] as bool Function(NavigationSettings);
-        if (showCondition(navigationSettings)) {
-          if (item['branchIndex'] as int == branchIndex) {
-            return currentDisplayIndex;
-          }
-          currentDisplayIndex++;
+    // 遍历启用的导航项
+    for (final item in navigationSettings.items) {
+      if (item.isEnabled) {
+        if (_getBranchIndexForItem(item.id) == branchIndex) {
+          return currentDisplayIndex;
         }
+        currentDisplayIndex++;
       }
     }
 
     return 0; // 默认返回第一个显示索引
+  }
+
+  /// 构建导航目标
+  NavigationDestination _buildNavigationDestination(NavigationItem item) {
+    return NavigationDestination(
+      icon: Icon(item.icon),
+      selectedIcon: Icon(_getSelectedIcon(item.icon)),
+      label: item.title,
+    );
+  }
+
+  /// 获取选中状态的图标
+  IconData _getSelectedIcon(IconData icon) {
+    // 简单的图标映射，将outline图标转换为非outline图标
+    if (icon == Icons.public_outlined) return Icons.public;
+    if (icon == Icons.forum_outlined) return Icons.forum;
+    if (icon == Icons.cloud_queue_outlined) return Icons.cloud_queue;
+    if (icon == Icons.chat_bubble_outline) return Icons.chat_bubble;
+    if (icon == Icons.person_outline) return Icons.person;
+    return icon;
   }
 
   /// 构建响应式布局外壳
@@ -145,17 +122,11 @@ class ResponsiveShell extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Container(),
       data: (navigationSettings) {
-        // 根据排序顺序构建目标列表
-        final destinations = <NavigationDestination>[];
-        for (final itemType in navigationSettings.itemOrder) {
-          final item = _navigationItems[itemType];
-          if (item != null) {
-            final showCondition = item['showCondition'] as bool Function(NavigationSettings);
-            if (showCondition(navigationSettings)) {
-              destinations.add(item['destination'] as NavigationDestination);
-            }
-          }
-        }
+        // 构建启用的导航目标列表
+        final destinations = navigationSettings.items
+            .where((item) => item.isEnabled)
+            .map(_buildNavigationDestination)
+            .toList();
 
         // 确保至少有一个目标
         if (destinations.isEmpty) {
