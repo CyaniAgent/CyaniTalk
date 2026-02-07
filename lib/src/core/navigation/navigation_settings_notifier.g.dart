@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'navigation_settings_page.dart';
+part of 'navigation_settings_notifier.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -38,7 +38,7 @@ final class NavigationSettingsNotifierProvider
 }
 
 String _$navigationSettingsNotifierHash() =>
-    r'5d33263d5df3a66ecda6f374d5c7b7d04162820d';
+    r'84006d61342b4305a8f8d17905665b63bfe71df8';
 
 /// 导航设置状态管理器
 

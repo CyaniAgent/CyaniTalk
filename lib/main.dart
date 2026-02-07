@@ -55,7 +55,7 @@ void main() async {
 
   // 初始化音频引擎
   await container.read(audioEngineProvider).initialize();
-  
+
   // 启动全局通知管理器
   container.read(notificationManagerProvider).start();
 
