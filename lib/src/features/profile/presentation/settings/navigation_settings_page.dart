@@ -21,6 +21,9 @@ class NavigationItem {
   /// 导航项图标
   final IconData icon;
 
+  /// 导航项选中状态图标
+  final IconData selectedIcon;
+
   /// 是否启用
   final bool isEnabled;
 
@@ -32,6 +35,7 @@ class NavigationItem {
     required this.id,
     required this.title,
     required this.icon,
+    required this.selectedIcon,
     this.isEnabled = true,
     this.isRemovable = true,
   });
@@ -41,6 +45,7 @@ class NavigationItem {
     String? id,
     String? title,
     IconData? icon,
+    IconData? selectedIcon,
     bool? isEnabled,
     bool? isRemovable,
   }) {
@@ -48,6 +53,7 @@ class NavigationItem {
       id: id ?? this.id,
       title: title ?? this.title,
       icon: icon ?? this.icon,
+      selectedIcon: selectedIcon ?? this.selectedIcon,
       isEnabled: isEnabled ?? this.isEnabled,
       isRemovable: isRemovable ?? this.isRemovable,
     );
@@ -61,6 +67,7 @@ class NavigationItem {
           id == other.id &&
           title == other.title &&
           icon == other.icon &&
+          selectedIcon == other.selectedIcon &&
           isEnabled == other.isEnabled &&
           isRemovable == other.isRemovable;
 
@@ -69,6 +76,7 @@ class NavigationItem {
       id.hashCode ^
       title.hashCode ^
       icon.hashCode ^
+      selectedIcon.hashCode ^
       isEnabled.hashCode ^
       isRemovable.hashCode;
 
@@ -88,6 +96,7 @@ class NavigationItem {
       id: json['id'] as String,
       title: json['title'] as String,
       icon: _getIconFromId(json['id'] as String),
+      selectedIcon: _getSelectedIconFromId(json['id'] as String),
       isEnabled: json['isEnabled'] as bool? ?? true,
       isRemovable: json['isRemovable'] as bool? ?? true,
     );
@@ -110,6 +119,24 @@ class NavigationItem {
         return Icons.star_outline;
     }
   }
+
+  /// 根据ID获取选中状态的图标
+  static IconData _getSelectedIconFromId(String id) {
+    switch (id) {
+      case 'misskey':
+        return Icons.public;
+      case 'flarum':
+        return Icons.forum;
+      case 'drive':
+        return Icons.cloud_queue;
+      case 'messages':
+        return Icons.chat_bubble;
+      case 'me':
+        return Icons.person;
+      default:
+        return Icons.star;
+    }
+  }
 }
 
 /// 导航设置状态
@@ -128,6 +155,7 @@ class NavigationSettings {
           id: 'misskey',
           title: 'nav_misskey'.tr(),
           icon: Icons.public_outlined,
+          selectedIcon: Icons.public,
           isEnabled: true,
           isRemovable: true,
         ),
@@ -135,6 +163,7 @@ class NavigationSettings {
           id: 'flarum',
           title: 'nav_flarum'.tr(),
           icon: Icons.forum_outlined,
+          selectedIcon: Icons.forum,
           isEnabled: true,
           isRemovable: true,
         ),
@@ -142,6 +171,7 @@ class NavigationSettings {
           id: 'drive',
           title: 'nav_drive'.tr(),
           icon: Icons.cloud_queue_outlined,
+          selectedIcon: Icons.cloud_queue,
           isEnabled: true,
           isRemovable: true,
         ),
@@ -149,6 +179,7 @@ class NavigationSettings {
           id: 'messages',
           title: 'nav_messages'.tr(),
           icon: Icons.chat_bubble_outline,
+          selectedIcon: Icons.chat_bubble,
           isEnabled: true,
           isRemovable: true,
         ),
@@ -156,6 +187,7 @@ class NavigationSettings {
           id: 'me',
           title: 'nav_me'.tr(),
           icon: Icons.person_outline,
+          selectedIcon: Icons.person,
           isEnabled: true,
           isRemovable: false, // 个人页面不可移除
         ),
@@ -182,7 +214,12 @@ class NavigationSettings {
   NavigationItem? findItemById(String id) {
     return items.firstWhere(
       (item) => item.id == id,
-      orElse: () => NavigationItem(id: '', title: '', icon: Icons.star_outline),
+      orElse: () => NavigationItem(
+        id: '',
+        title: '',
+        icon: Icons.star_outline,
+        selectedIcon: Icons.star,
+      ),
     );
   }
 
@@ -260,6 +297,9 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
                   id: itemMap['id'] as String,
                   title: itemMap['title'] as String,
                   icon: NavigationItem._getIconFromId(itemMap['id'] as String),
+                  selectedIcon: NavigationItem._getSelectedIconFromId(
+                    itemMap['id'] as String,
+                  ),
                   isEnabled: itemMap['isEnabled'] as bool,
                   isRemovable: itemMap['isRemovable'] as bool,
                 );
@@ -278,8 +318,12 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
           for (final id in orderList) {
             final item = items.firstWhere(
               (item) => item.id == id,
-              orElse: () =>
-                  NavigationItem(id: '', title: '', icon: Icons.star_outline),
+              orElse: () => NavigationItem(
+                id: '',
+                title: '',
+                icon: Icons.star_outline,
+                selectedIcon: Icons.star,
+              ),
             );
             if (item.id.isNotEmpty) {
               orderedItems.add(item);
@@ -400,7 +444,12 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
     // 查找要更新的导航项
     final item = state.value!.items.firstWhere(
       (item) => item.id == itemId,
-      orElse: () => NavigationItem(id: '', title: '', icon: Icons.star_outline),
+      orElse: () => NavigationItem(
+        id: '',
+        title: '',
+        icon: Icons.star_outline,
+        selectedIcon: Icons.star,
+      ),
     );
 
     if (item.id.isEmpty) {

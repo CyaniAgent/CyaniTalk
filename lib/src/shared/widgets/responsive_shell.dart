@@ -91,20 +91,9 @@ class ResponsiveShell extends ConsumerWidget {
   NavigationDestination _buildNavigationDestination(NavigationItem item) {
     return NavigationDestination(
       icon: Icon(item.icon),
-      selectedIcon: Icon(_getSelectedIcon(item.icon)),
+      selectedIcon: Icon(item.selectedIcon),
       label: item.title,
     );
-  }
-
-  /// 获取选中状态的图标
-  IconData _getSelectedIcon(IconData icon) {
-    // 简单的图标映射，将outline图标转换为非outline图标
-    if (icon == Icons.public_outlined) return Icons.public;
-    if (icon == Icons.forum_outlined) return Icons.forum;
-    if (icon == Icons.cloud_queue_outlined) return Icons.cloud_queue;
-    if (icon == Icons.chat_bubble_outline) return Icons.chat_bubble;
-    if (icon == Icons.person_outline) return Icons.person;
-    return icon;
   }
 
   /// 构建响应式布局外壳
