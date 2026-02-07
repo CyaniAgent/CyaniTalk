@@ -49,7 +49,7 @@ class NavigationSettings {
       showFlarum: showFlarum ?? this.showFlarum,
       showDrive: showDrive ?? this.showDrive,
       showMessages: showMessages ?? this.showMessages,
-      showMe: showMe ?? this.showMe,
+      showMe: true, // 强制保持个人页面为启用状态
     );
   }
 
@@ -94,7 +94,8 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
       final showFlarum = prefs.getBool('navigation_show_flarum') ?? true;
       final showDrive = prefs.getBool('navigation_show_drive') ?? true;
       final showMessages = prefs.getBool('navigation_show_messages') ?? true;
-      final showMe = prefs.getBool('navigation_show_me') ?? true;
+      // 强制启用个人页面，不允许禁用
+      const showMe = true;
 
       return NavigationSettings(
         showMisskey: showMisskey,
@@ -119,7 +120,8 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
       await prefs.setBool('navigation_show_flarum', settings.showFlarum);
       await prefs.setBool('navigation_show_drive', settings.showDrive);
       await prefs.setBool('navigation_show_messages', settings.showMessages);
-      await prefs.setBool('navigation_show_me', settings.showMe);
+      // 强制保存个人页面为启用状态
+      await prefs.setBool('navigation_show_me', true);
     } catch (e) {
       // 保存失败时忽略错误
     }
@@ -154,8 +156,10 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
   }
 
   /// 更新Me选项的显示状态
+  /// 注意：个人页面不允许被禁用，此方法会忽略传入的value，始终保持启用状态
   Future<void> updateShowMe(bool value) async {
-    final newState = state.value!.copyWith(showMe: value);
+    // 强制启用个人页面，忽略传入的value
+    final newState = state.value!.copyWith(showMe: true);
     state = AsyncData(newState);
     await _saveToStorage(newState);
   }
@@ -258,8 +262,8 @@ class _NavigationSettingsPageState
                 Icons.person_outline,
                 'nav_me'.tr(),
                 'settings_navigation_show_me'.tr(),
-                navigationSettings.showMe,
-                (value) => navigationNotifier.updateShowMe(value),
+                true, // 强制显示为开启状态
+                null, // 禁用开关，不允许用户修改
               ),
 
               const SizedBox(height: 24),
