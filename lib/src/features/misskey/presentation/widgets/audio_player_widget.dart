@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import '../../../../core/utils/cache_manager.dart';
 
-/// Inline audio player widget for Misskey posts
+/// Inline audio player widget for Misskey posts using flutter_soloud
 class AudioPlayerWidget extends StatefulWidget {
   final String audioUrl;
   final String? fileName;
@@ -15,93 +16,78 @@ class AudioPlayerWidget extends StatefulWidget {
 }
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKeepAliveClientMixin {
-  AudioPlayer? _audioPlayer;
+  AudioSource? _audioSource;
+  SoundHandle? _soundHandle;
   bool _isPlaying = false;
   bool _isLoading = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   String? _cachedFilePath;
+  Timer? _positionTimer;
 
   @override
   bool get wantKeepAlive => _isPlaying || _isLoading;
 
-  Future<void> _initializePlayer() async {
-    if (_audioPlayer != null) return;
-
-    _audioPlayer = AudioPlayer();
-
-    _audioPlayer!.onDurationChanged.listen((duration) {
-      if (mounted) {
-        setState(() {
-          _duration = duration;
-        });
-      }
-    });
-
-    _audioPlayer!.onPositionChanged.listen((position) {
-      if (mounted) {
-        setState(() {
-          _position = position;
-        });
-      }
-    });
-
-    _audioPlayer!.onPlayerComplete.listen((_) {
-      if (mounted) {
-        setState(() {
-          _isPlaying = false;
-          _position = Duration.zero;
-        });
-        updateKeepAlive();
-      }
-    });
-    
-    // 注意：某些版本的audioplayers可能不支持onPlayerError
-    // 如果遇到错误，请检查audioplayers版本
-    // _audioPlayer!.onPlayerError.listen((error) {
-    //   print('Audio player error: $error');
-    //   if (mounted) {
-    //     setState(() {
-    //       _isPlaying = false;
-    //       _isLoading = false;
-    //     });
-    //     updateKeepAlive();
-    //   }
-    // });
-  }
-
   @override
   void dispose() {
-    _audioPlayer?.stop(); // 在销毁前停止播放
-    _audioPlayer?.dispose();
+    _positionTimer?.cancel();
+    _stopAndDispose();
     super.dispose();
   }
 
-  Future<void> _togglePlayPause() async {
-    if (_audioPlayer == null) {
-      await _initializePlayer();
+  Future<void> _stopAndDispose() async {
+    if (_soundHandle != null) {
+      await SoLoud.instance.stop(_soundHandle!);
     }
+    if (_audioSource != null) {
+      SoLoud.instance.disposeSource(_audioSource!);
+    }
+  }
 
+  void _startPositionPolling() {
+    _positionTimer?.cancel();
+    _positionTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      if (_soundHandle != null && _isPlaying) {
+        final pos = SoLoud.instance.getPosition(_soundHandle!);
+        if (mounted) {
+          setState(() {
+            _position = pos;
+          });
+        }
+      }
+    });
+  }
+
+  Future<void> _togglePlayPause() async {
     if (_isPlaying) {
-      await _audioPlayer!.pause();
-      if (mounted) {
+      if (_soundHandle != null) {
+        SoLoud.instance.setPause(_soundHandle!, true);
         setState(() {
           _isPlaying = false;
         });
+        _positionTimer?.cancel();
         updateKeepAlive();
       }
     } else {
-      // 检查是否已有缓存文件，如果没有则先缓存
-      if (_cachedFilePath == null) {
+      if (_audioSource == null) {
         setState(() {
           _isLoading = true;
         });
         updateKeepAlive();
+
         try {
-          _cachedFilePath = await cacheManager.cacheFile(widget.audioUrl);
+          // 确保文件已缓存
+          _cachedFilePath ??= await cacheManager.cacheFile(widget.audioUrl);
+          final file = File(_cachedFilePath!);
+          
+          if (await file.exists()) {
+            _audioSource = await SoLoud.instance.loadFile(_cachedFilePath!);
+            _duration = SoLoud.instance.getLength(_audioSource!);
+          } else {
+            throw Exception('Cache file not found');
+          }
         } catch (e) {
-          // 使用logger替代print
-          debugPrint('Error caching audio file: $e');
+          debugPrint('AudioPlayerWidget: Error loading audio: $e');
           if (mounted) {
             setState(() {
               _isLoading = false;
@@ -110,6 +96,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
           }
           return;
         }
+
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -118,42 +105,50 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
         }
       }
 
-      // 播放缓存的文件
-      if (_cachedFilePath != null) {
-        final file = File(_cachedFilePath!);
-        if (await file.exists()) {
-          await _audioPlayer!.play(DeviceFileSource(_cachedFilePath!));
+      if (_audioSource != null) {
+        if (_soundHandle != null && SoLoud.instance.getPause(_soundHandle!)) {
+          SoLoud.instance.setPause(_soundHandle!, false); // toggle pause
         } else {
-          // 使用logger替代print
-          debugPrint('缓存文件不存在: $_cachedFilePath');
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-            updateKeepAlive();
-          }
-          return;
+          _soundHandle = await SoLoud.instance.play(_audioSource!);
+          
+          // Listen for completion (SoLoud doesn't have a direct completion stream easily, 
+          // but we can check position vs duration in polling)
         }
-      }
-      if (mounted) {
+        
         setState(() {
           _isPlaying = true;
         });
+        _startPositionPolling();
         updateKeepAlive();
       }
     }
   }
 
   void _seek(double value) {
-    if (_audioPlayer == null) return;
+    if (_soundHandle == null) return;
     final position = Duration(seconds: value.toInt());
-    _audioPlayer!.seek(position);
+    SoLoud.instance.seek(_soundHandle!, position);
+    setState(() {
+      _position = position;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
+
+    // Auto-reset when finished
+    if (_isPlaying && _position >= _duration && _duration > Duration.zero) {
+      Future.microtask(() {
+        setState(() {
+          _isPlaying = false;
+          _position = Duration.zero;
+        });
+        _positionTimer?.cancel();
+        updateKeepAlive();
+      });
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -209,9 +204,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
                 // 进度滑块
                 Expanded(
                   child: Slider(
-                    value: _position.inSeconds.toDouble(),
+                    value: _position.inSeconds.toDouble().clamp(0, _duration.inSeconds.toDouble()),
                     max: _duration.inSeconds.toDouble().clamp(
-                      1.0,
+                      0.001, // 避免 max 为 0
                       double.infinity,
                     ),
                     onChanged: _seek,

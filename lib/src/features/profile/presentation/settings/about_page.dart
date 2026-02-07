@@ -6,14 +6,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
-import 'package:audioplayers/audioplayers.dart';
-import '../../../../core/utils/logger.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/core.dart';
+import '../../../../core/services/audio_engine.dart';
 
 /// 应用程序的关于页面组件
 ///
 /// 显示应用程序的版本信息、贡献者列表和GitHub链接，
 /// 并在页面打开时播放音效。
-class AboutPage extends StatefulWidget {
+class AboutPage extends ConsumerStatefulWidget {
   /// 创建一个新的AboutPage实例
   ///
   /// [key] - 组件的键，用于唯一标识组件
@@ -21,11 +22,11 @@ class AboutPage extends StatefulWidget {
 
   /// 创建AboutPage的状态管理对象
   @override
-  State<AboutPage> createState() => _AboutPageState();
+  ConsumerState<AboutPage> createState() => _AboutPageState();
 }
 
 /// AboutPage的状态管理类
-class _AboutPageState extends State<AboutPage> {
+class _AboutPageState extends ConsumerState<AboutPage> {
   /// 应用程序名称
   String _appName = 'CyaniTalk';
   
@@ -37,9 +38,6 @@ class _AboutPageState extends State<AboutPage> {
   
   /// 是否正在加载贡献者数据
   bool _isLoadingContributors = true;
-  
-  /// 音频播放器实例，用于播放页面打开音效
-  final AudioPlayer _audioPlayer = AudioPlayer();
 
   /// 初始化页面状态
   ///
@@ -57,7 +55,6 @@ class _AboutPageState extends State<AboutPage> {
   ///  dispose音频播放器资源。
   @override
   void dispose() {
-    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -65,7 +62,7 @@ class _AboutPageState extends State<AboutPage> {
   Future<void> _playSound() async {
     try {
       logger.info('AboutPage: Playing entrance sound');
-      await _audioPlayer.play(AssetSource('sounds/AboutPageEntrance.mp3'));
+      await ref.read(audioEngineProvider).playAsset('sounds/AboutPageEntrance.mp3');
       logger.info('AboutPage: Entrance sound played successfully');
     } catch (e) {
       logger.error('AboutPage: Error playing sound: $e');

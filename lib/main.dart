@@ -12,6 +12,7 @@ import 'src/features/auth/data/auth_repository.dart';
 import 'src/core/services/background_service.dart';
 import 'src/core/services/notification_service.dart';
 import 'src/core/services/notification_manager.dart';
+import 'src/core/services/audio_engine.dart';
 import 'dart:io';
 
 /// 应用程序的入口点
@@ -52,6 +53,9 @@ void main() async {
   final notificationService = NotificationService();
   await notificationService.initialize();
 
+  // 初始化音频引擎
+  await container.read(audioEngineProvider).initialize();
+  
   // 启动全局通知管理器
   container.read(notificationManagerProvider).start();
 

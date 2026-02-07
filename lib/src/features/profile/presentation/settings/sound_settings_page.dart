@@ -1,32 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '../../application/sound_settings_provider.dart';
+import '../../../../core/services/audio_engine.dart';
 
-class SoundSettingsPage extends ConsumerStatefulWidget {
+class SoundSettingsPage extends ConsumerWidget {
   const SoundSettingsPage({super.key});
 
-  @override
-  ConsumerState<SoundSettingsPage> createState() => _SoundSettingsPageState();
-}
-
-class _SoundSettingsPageState extends ConsumerState<SoundSettingsPage> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  Future<void> _playSound(String assetPath) async {
-    await _audioPlayer.stop();
-    await _audioPlayer.play(AssetSource(assetPath.replaceFirst('assets/', '')));
+  Future<void> _playSound(WidgetRef ref, String assetPath) async {
+    // 移除 assets/ 前缀，因为 AudioEngine 会自动添加
+    final path = assetPath.replaceFirst('assets/', '');
+    await ref.read(audioEngineProvider).playAsset(path);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(soundSettingsProvider);
 
     return Scaffold(
@@ -43,7 +31,7 @@ class _SoundSettingsPageState extends ConsumerState<SoundSettingsPage> {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyRealtimePost(value),
-              onPreview: () => _playSound('assets/sounds/PostReceived/n-aec.mp3'),
+              onPreview: () => _playSound(ref, 'assets/sounds/PostReceived/n-aec.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -53,7 +41,7 @@ class _SoundSettingsPageState extends ConsumerState<SoundSettingsPage> {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyPosting(value),
-              onPreview: () => _playSound('assets/sounds/PostSend/n-cea-4va.mp3'),
+              onPreview: () => _playSound(ref, 'assets/sounds/PostSend/n-cea-4va.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -63,7 +51,7 @@ class _SoundSettingsPageState extends ConsumerState<SoundSettingsPage> {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyNotifications(value),
-              onPreview: () => _playSound('assets/sounds/Notifications/n-ea.mp3'),
+              onPreview: () => _playSound(ref, 'assets/sounds/Notifications/n-ea.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -73,7 +61,7 @@ class _SoundSettingsPageState extends ConsumerState<SoundSettingsPage> {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyEmojiReactions(value),
-              onPreview: () => _playSound('assets/sounds/Emoji-Responses/bubble2.mp3'),
+              onPreview: () => _playSound(ref, 'assets/sounds/Emoji-Responses/bubble2.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -83,7 +71,7 @@ class _SoundSettingsPageState extends ConsumerState<SoundSettingsPage> {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyMessages(value),
-              onPreview: () => _playSound('assets/sounds/Chat/waon.mp3'),
+              onPreview: () => _playSound(ref, 'assets/sounds/Chat/waon.mp3'),
             ),
           ],
         ),
