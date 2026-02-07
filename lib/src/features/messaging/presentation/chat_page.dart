@@ -190,7 +190,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   Widget _buildMessageBubble(BuildContext context, MessagingMessage message, bool isMe, String myId) {
     final theme = Theme.of(context);
-    final mikuGreen = const Color(0xFF39C5BB);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -211,7 +210,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
               decoration: BoxDecoration(
-                color: isMe ? mikuGreen : theme.colorScheme.surfaceContainerHighest,
+                color: isMe ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(20),
                   topRight: const Radius.circular(20),
@@ -252,7 +251,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
 
   Widget _buildInputArea(BuildContext context, {bool isLocked = false}) {
     final theme = Theme.of(context);
-    final mikuGreen = const Color(0xFF39C5BB);
 
     return Container(
       padding: EdgeInsets.only(
@@ -292,7 +290,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           ),
           const SizedBox(width: 8),
           Material(
-            color: isLocked ? theme.colorScheme.outlineVariant : mikuGreen,
+            color: isLocked ? theme.colorScheme.outlineVariant : theme.colorScheme.primary,
             shape: const CircleBorder(),
             elevation: isLocked ? 0 : 2,
             child: IconButton(

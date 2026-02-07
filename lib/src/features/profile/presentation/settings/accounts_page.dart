@@ -7,8 +7,8 @@ class AccountsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mikuColor = const Color(0xFF39C5BB);
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
     return Scaffold(
       body: CustomScrollView(
@@ -18,7 +18,7 @@ class AccountsPage extends StatelessWidget {
             floating: false,
             pinned: true,
             stretch: true,
-            backgroundColor: mikuColor,
+            backgroundColor: primaryColor,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 'profile_unified_login_manager'.tr(),
@@ -40,8 +40,8 @@ class AccountsPage extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      mikuColor,
-                      mikuColor.withValues(alpha: 0.8),
+                      primaryColor,
+                      primaryColor.withValues(alpha: 0.8),
                       theme.colorScheme.secondary,
                     ],
                   ),

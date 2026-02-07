@@ -22,8 +22,7 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  final mikuColor = const Color(0xFF39C5BB);
-  Color _appBarColor = const Color(0xFF39C5BB);
+  Color _appBarColor = Colors.transparent;
   bool _isColorExtracted = false;
 
   @override
@@ -82,6 +81,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Future<Color> _getImageDominantColor(String imageUrl) async {
+    // 先获取主题颜色，避免在异步间隙中使用BuildContext
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    
     try {
       // 使用palette_generator库从图片中提取颜色
       final paletteGenerator = await PaletteGenerator.fromImageProvider(
@@ -90,7 +92,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       );
 
       // 获取主色调
-      Color dominantColor = mikuColor;
+      Color dominantColor = primaryColor;
       if (paletteGenerator.dominantColor != null) {
         dominantColor = paletteGenerator.dominantColor!.color;
       } else if (paletteGenerator.lightVibrantColor != null) {
@@ -107,7 +109,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
       return adjustedColor;
     } catch (e) {
-      return mikuColor;
+      return primaryColor;
     }
   }
 
@@ -138,7 +140,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             floating: false,
             pinned: true,
             stretch: true,
-            backgroundColor: isLoggedIn ? _appBarColor : mikuColor,
+            backgroundColor: isLoggedIn ? _appBarColor : theme.colorScheme.primary,
             actions: [
               IconButton(
                 icon: Icon(Icons.settings, color: theme.colorScheme.onPrimary),
@@ -155,7 +157,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: mikuColor,
+                      color: theme.colorScheme.primary,
                       image:
                           misskeyUser?.bannerUrl != null
                               ? DecorationImage(
@@ -165,10 +167,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               : null,
                       gradient:
                           misskeyUser?.bannerUrl == null
-                              ? const LinearGradient(
+                              ? LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [Color(0xFF962832), Color(0xFF39C5BB)],
+                                colors: [Color(0xFF962832), theme.colorScheme.primary],
                               )
                               : null,
                     ),
@@ -256,22 +258,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ],
                   ),
                   child: CircleAvatar(
-                    radius: 45,
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    backgroundImage:
-                        (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) !=
-                                null
-                            ? NetworkImage(
-                              misskeyUser?.avatarUrl ??
-                                  primaryAccount.avatarUrl!,
-                            )
-                            : null,
-                    child:
-                        (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) ==
-                                null
-                            ? Icon(Icons.person, size: 50, color: mikuColor)
-                            : null,
-                  ),
+                      radius: 45,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      backgroundImage:
+                          (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) !=
+                                  null
+                              ? NetworkImage(
+                                misskeyUser?.avatarUrl ??
+                                    primaryAccount.avatarUrl!,
+                              )
+                              : null,
+                      child:
+                          (misskeyUser?.avatarUrl ?? primaryAccount.avatarUrl) ==
+                                  null
+                              ? Icon(Icons.person, size: 50, color: Theme.of(context).colorScheme.primary)
+                              : null,
+                    ),
                 ),
               ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
               const SizedBox(width: 20),
@@ -423,7 +425,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             label: Text('misskey_page_login_now'.tr()),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: mikuColor,
+              foregroundColor: Theme.of(context).colorScheme.primary,
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(

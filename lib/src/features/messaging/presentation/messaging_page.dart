@@ -64,9 +64,9 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
               onSelected: (selected) {
                 if (selected) setState(() => _currentFilter = filter);
               },
-              selectedColor: const Color(0xFF39C5BB).withValues(alpha: 0.2),
+              selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
               labelStyle: TextStyle(
-                color: isSelected ? const Color(0xFF39C5BB) : null,
+                color: isSelected ? Theme.of(context).colorScheme.primary : null,
                 fontWeight: isSelected ? FontWeight.bold : null,
               ),
             ),
@@ -204,7 +204,6 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
   }
 
   Widget _buildDirectTile(MessagingMessage message, MisskeyUser otherUser, String myId, {Key? key}) {
-    final mikuGreen = const Color(0xFF39C5BB);
     return ListTile(
       key: key,
       leading: _buildAvatar(otherUser.avatarUrl, Icons.person),
@@ -218,7 +217,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
         children: [
           Expanded(child: Text(message.text ?? '', maxLines: 1, overflow: TextOverflow.ellipsis)),
           if (!message.isRead && message.senderId != myId)
-            Container(width: 8, height: 8, decoration: BoxDecoration(color: mikuGreen, shape: BoxShape.circle)),
+            Container(width: 8, height: 8, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, shape: BoxShape.circle)),
         ],
       ),
       onTap: () => context.push('/messaging/chat/${otherUser.id}', extra: otherUser),
@@ -227,7 +226,6 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
 
   Widget _buildRoomTile(MessagingMessage message, ChatRoom room, String myId, {Key? key}) {
     final theme = Theme.of(context);
-    final mikuGreen = const Color(0xFF39C5BB);
     return ListTile(
       key: key,
       leading: _buildAvatar(null, Icons.groups, isRoom: true),
@@ -241,7 +239,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
         children: [
           Expanded(child: Text('${message.sender?.name ?? '?'}: ${message.text ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis)),
           if (!message.isRead && message.senderId != myId)
-            Container(width: 8, height: 8, decoration: BoxDecoration(color: mikuGreen, shape: BoxShape.circle)),
+            Container(width: 8, height: 8, decoration: BoxDecoration(color: theme.colorScheme.primary, shape: BoxShape.circle)),
         ],
       ),
       onTap: () => context.push('/messaging/chat/room/${room.id}', extra: room),
@@ -250,17 +248,17 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
 
   Widget _buildAggregateNotificationsTile(MisskeyNotification latest) {
     final theme = Theme.of(context);
-    final mikuGreen = const Color(0xFF39C5BB);
+    final primaryColor = theme.colorScheme.primary;
     
     return ListTile(
       leading: Container(
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: mikuGreen.withValues(alpha: 0.1),
+          color: primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.notifications_active, color: mikuGreen),
+        child: Icon(Icons.notifications_active, color: primaryColor),
       ),
       title: Text('notifications_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(

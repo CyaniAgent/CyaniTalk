@@ -100,7 +100,6 @@ class _AssociatedAccountsSectionState
     Account? selectedFlarum,
   ) {
     final theme = Theme.of(context);
-    final mikuColor = const Color(0xFF39C5BB);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +150,7 @@ class _AssociatedAccountsSectionState
                       isActive: isActive,
                       isFocused: isFocused,
                       activeColor: isMisskeyActive
-                          ? mikuColor
+                          ? theme.colorScheme.primary
                           : (isFlarumActive ? Colors.orange : theme.colorScheme.onSurfaceVariant),
                       onTap: () {
                         setState(() {

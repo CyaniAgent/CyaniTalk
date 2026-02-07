@@ -19,13 +19,12 @@ class MisskeyUserProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(misskeyUserProvider(userId));
     final theme = Theme.of(context);
-    final mikuGreen = const Color(0xFF39C5BB);
 
     return Scaffold(
       body: userAsync.when(
-        data: (user) => _buildProfile(context, user, theme, mikuGreen),
+        data: (user) => _buildProfile(context, user, theme),
         loading: () => initialUser != null 
-            ? _buildProfile(context, initialUser!, theme, mikuGreen, isLoading: true)
+            ? _buildProfile(context, initialUser!, theme, isLoading: true)
             : const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Scaffold(
           appBar: AppBar(title: const Text('Error')),
@@ -35,7 +34,7 @@ class MisskeyUserProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfile(BuildContext context, MisskeyUser user, ThemeData theme, Color mikuGreen, {bool isLoading = false}) {
+  Widget _buildProfile(BuildContext context, MisskeyUser user, ThemeData theme, {bool isLoading = false}) {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -51,7 +50,7 @@ class MisskeyUserProfilePage extends ConsumerWidget {
                     fit: BoxFit.cover,
                   )
                 else
-                  Container(color: mikuGreen.withValues(alpha: 0.2)),
+                  Container(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

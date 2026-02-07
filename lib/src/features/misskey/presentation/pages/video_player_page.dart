@@ -125,7 +125,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 _controller,
                                 allowScrubbing: true,
                                 colors: VideoProgressColors(
-                                  playedColor: const Color(0xFF39C5BB),
+                                  playedColor: Theme.of(context).colorScheme.primary,
                                   bufferedColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
                                   backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.12),
                                 ),

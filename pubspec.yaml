@@ -98,9 +98,13 @@ dependencies:
   palette_generator: ^0.3.3+3
   # 跨平台设备信息获取库，用于获取设备型号、操作系统等信息
   device_info_plus: ^12.0.0
+  # 后台任务服务库，支持在应用后台持续运行任务
   flutter_background_service: ^5.1.0
+  # 本地通知库，用于发送系统级通知
   flutter_local_notifications: ^20.0.0
+  # 时间格式化库，将时间戳转换为“几分钟前”等友好格式
   timeago: ^3.7.1
+  # Flutter 与 Rust 的桥接库，用于调用 Rust 编写的原生高性能代码
   flutter_rust_bridge: ^2.11.1
 
 dev_dependencies:

@@ -202,22 +202,22 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
                 IconButton(
                   icon: Icon(
                     _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: const Color(0xFF39C5BB),
+                    color: theme.colorScheme.primary,
                   ),
                   onPressed: _togglePlayPause,
                 ),
-              // 进度滑块
-              Expanded(
-                child: Slider(
-                  value: _position.inSeconds.toDouble(),
-                  max: _duration.inSeconds.toDouble().clamp(
-                    1.0,
-                    double.infinity,
+                // 进度滑块
+                Expanded(
+                  child: Slider(
+                    value: _position.inSeconds.toDouble(),
+                    max: _duration.inSeconds.toDouble().clamp(
+                      1.0,
+                      double.infinity,
+                    ),
+                    onChanged: _seek,
+                    activeColor: theme.colorScheme.primary,
                   ),
-                  onChanged: _seek,
-                  activeColor: const Color(0xFF39C5BB),
                 ),
-              ),
               // 时间显示
               Text(
                 '${_formatDuration(_position)} / ${_formatDuration(_duration)}',
