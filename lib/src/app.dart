@@ -4,10 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'core/core.dart';
-import 'routing/router.dart';
-import 'features/misskey/application/misskey_streaming_service.dart';
-import 'features/profile/presentation/settings/appearance_page.dart';
+import '/src/core/core.dart';
+import '/src/routing/router.dart';
+import '/src/features/misskey/application/misskey_streaming_service.dart';
+import '/src/features/profile/presentation/settings/appearance_page.dart';
 
 /// CyaniTalk应用程序的根组件
 ///

@@ -119,10 +119,31 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         // 链接
         final recognizer = TapGestureRecognizer()
           ..onTap = () async {
-            final uri = Uri.parse(matchText);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            }
+            if (!mounted) return;
+            
+            showDialog(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                title: Text('打开链接'),
+                content: Text('确定要打开以下链接吗？\n$matchText'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text('取消'),
+                  ),
+                  FilledButton(
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
+                      final uri = Uri.parse(matchText);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Text('确定'),
+                  ),
+                ],
+              ),
+            );
           };
         _recognizers.add(recognizer);
 
@@ -796,25 +817,46 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   }
 
   Future<void> _handleRenote() async {
-    try {
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      await repository.renote(widget.note.id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('note_renoted_successfully'.tr())),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}),
-            ),
+    if (!mounted) return;
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('转发确认'),
+        content: Text('确定要转发这条消息吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('取消'),
           ),
-        );
-      }
-    }
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              try {
+                final repository = await ref.read(misskeyRepositoryProvider.future);
+                await repository.renote(widget.note.id);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('note_renoted_successfully'.tr())),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}),
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
+            child: Text('确定'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleReply() async {
