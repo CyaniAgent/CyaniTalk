@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/core.dart';
 
 class LoginReminder extends StatelessWidget {
   final String title;
@@ -17,7 +18,7 @@ class LoginReminder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const mikuColor = Color(0xFF39C5BB);
+    const mikuColor = SaucePalette.mikuGreen;
 
     return Center(
       child: Padding(

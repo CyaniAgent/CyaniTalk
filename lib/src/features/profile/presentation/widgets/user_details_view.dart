@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/utils/logger.dart';
+import '../../../../core/core.dart';
 import '../../../auth/domain/account.dart';
 import '../../../../core/api/misskey_api.dart';
 import '../../../../core/api/flarum_api.dart';
@@ -235,7 +235,7 @@ class UserDetailsView extends ConsumerWidget {
     IconData icon,
   ) {
     final theme = Theme.of(context);
-    final mikuColor = const Color(0xFF39C5BB);
+    const mikuColor = SaucePalette.mikuGreen;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),

@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'package:palette_generator/palette_generator.dart';
+import '../../../core/core.dart';
 import 'widgets/associated_accounts_section.dart';
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
@@ -22,8 +23,8 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  final mikuColor = const Color(0xFF39C5BB);
-  Color _appBarColor = const Color(0xFF39C5BB);
+  static const mikuColor = SaucePalette.mikuGreen;
+  Color _appBarColor = SaucePalette.mikuGreen;
   bool _isColorExtracted = false;
 
   @override
@@ -107,7 +108,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
       return adjustedColor;
     } catch (e) {
-      return mikuColor;
+      return SaucePalette.mikuGreen;
     }
   }
 
@@ -451,14 +452,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         Card(
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
           child: ListTile(
             leading: const Icon(Icons.add_circle_outline),
             title: Text('accounts_add_account'.tr()),
@@ -490,14 +483,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         Card(
           elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: Theme.of(
-                context,
-              ).colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
           child: Column(
             children: [
               ListTile(

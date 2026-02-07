@@ -86,50 +86,94 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
     );
   }
 
-  /// 构建主题
-  /// 
-  /// 根据用户的外观设置构建主题，支持深色模式、动态色彩和自定义颜色。
-  /// 会缓存构建结果，避免重复计算。
-  ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness) {
-    // 检查是否需要重新构建主题
-    final isDark = brightness == Brightness.dark;
-    final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
-    
-    // 如果设置没有变化且主题已缓存，直接返回缓存的主题
-    if (_cachedSettings == settings && themeCache != null) {
-      return themeCache;
+    /// 构建主题
+
+    /// 
+
+    /// 根据用户的外观设置构建主题，支持深色模式、动态色彩和自定义颜色。
+
+    /// 会缓存构建结果，避免重复计算。
+
+    ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness) {
+
+      // 检查是否需要重新构建主题
+
+      final isDark = brightness == Brightness.dark;
+
+      final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
+
+      
+
+      // 如果设置没有变化且主题已缓存，直接返回缓存的主题
+
+      if (_cachedSettings == settings && themeCache != null) {
+
+        return themeCache;
+
+      }
+
+  
+
+      final materialTheme = MaterialTheme(Theme.of(context).textTheme);
+
+      
+
+      ColorScheme? scheme;
+
+      
+
+      if (settings.useCustomColor && settings.primaryColor != null) {
+
+        // 使用自定义颜色作为种子生成 Scheme
+
+        scheme = ColorScheme.fromSeed(
+
+          seedColor: settings.primaryColor!,
+
+          brightness: brightness,
+
+        );
+
+      } else if (!settings.useDynamicColor) {
+
+        // 如果不使用动态色彩也不使用自定义，使用 SaucePalette 的预设
+
+        scheme = isDark ? SaucePalette.darkScheme() : SaucePalette.lightScheme();
+
+      }
+
+      // 如果 settings.useDynamicColor 为 true，则 scheme 为 null，让 MaterialTheme 处理 (通常外部会传入动态 Scheme，但这里我们先保持原样，由 build 方法控制)
+
+  
+
+      final theme = isDark 
+
+          ? materialTheme.dark(scheme) 
+
+          : materialTheme.light(scheme);
+
+  
+
+      // 缓存主题和设置
+
+      if (isDark) {
+
+        _cachedDarkTheme = theme;
+
+      } else {
+
+        _cachedLightTheme = theme;
+
+      }
+
+      _cachedSettings = settings;
+
+  
+
+      return theme;
+
     }
 
-    // 使用自定义颜色或默认颜色
-    final seedColor = settings.useCustomColor && settings.primaryColor != null
-        ? settings.primaryColor!
-        : const Color(0xFF39C5BB);
-
-    final theme = ThemeData(
-      colorScheme: settings.useDynamicColor
-          ? ColorScheme.fromSeed(
-              seedColor: seedColor,
-              brightness: brightness,
-            )
-          : ColorScheme.fromSeed(
-              seedColor: seedColor,
-              brightness: brightness,
-              // 固定色彩方案，不使用动态色彩
-              primary: seedColor,
-              secondary: const Color(0xFF6366F1),
-            ),
-      useMaterial3: true,
-      fontFamily: 'MiSans',
-    );
-
-    // 缓存主题和设置
-    if (isDark) {
-      _cachedDarkTheme = theme;
-    } else {
-      _cachedLightTheme = theme;
-    }
-    _cachedSettings = settings;
-
-    return theme;
   }
-}
+
+  

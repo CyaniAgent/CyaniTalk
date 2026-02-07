@@ -8,6 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/core.dart';
 
 part 'appearance_page.g.dart';
 
@@ -97,7 +98,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
       final primaryColorValue = prefs.getInt('appearance_primary_color');
       final primaryColor = primaryColorValue != null
           ? Color(primaryColorValue)
-          : const Color(0xFF39C5BB);
+          : SaucePalette.mikuGreen;
 
       return AppearanceSettings(
         displayMode: displayMode,
@@ -112,7 +113,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         displayMode: ThemeMode.system,
         useDynamicColor: isAndroid,
         useCustomColor: !isAndroid,
-        primaryColor: const Color(0xFF39C5BB),
+        primaryColor: SaucePalette.mikuGreen,
       );
     }
   }
@@ -189,14 +190,14 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         displayMode: ThemeMode.system,
         useDynamicColor: true,
         useCustomColor: false,
-        primaryColor: Color(0xFF39C5BB),
+        primaryColor: SaucePalette.mikuGreen,
       );
     } else {
       newState = const AppearanceSettings(
         displayMode: ThemeMode.system,
         useDynamicColor: false,
         useCustomColor: true,
-        primaryColor: Color(0xFF39C5BB),
+        primaryColor: SaucePalette.mikuGreen,
       );
     }
     
@@ -511,7 +512,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
       Colors.brown,
       Colors.grey,
       Colors.blueGrey,
-      const Color(0xFF39C5BB), // 默认的mikuColor
+      SaucePalette.mikuGreen, // 默认的mikuColor
     ];
 
     showDialog(
@@ -563,7 +564,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
   Widget _buildPreviewCard(BuildContext context, AppearanceSettings settings) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final mikuColor = const Color(0xFF39C5BB);
+    const mikuColor = SaucePalette.mikuGreen;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -599,22 +600,13 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             const SizedBox(height: 20),
 
             // Mock UI Stage
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: colorScheme.outlineVariant),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
+            Card(
+              elevation: 0,
+              color: colorScheme.surfaceContainerLow,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
                   // Mock App Bar
                   Row(
                     children: [
@@ -670,17 +662,13 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   const SizedBox(height: 8),
                   
                   // Mock Post Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorScheme.outlineVariant),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  Card(
+                    elevation: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                         Row(
                           children: [
                             Container(
@@ -725,19 +713,24 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                             color: colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(8),
                             image: const DecorationImage(
-                              image: NetworkImage('https://api.dicebear.com/7.x/shapes/png?seed=miku&backgroundColor=39c5bb'),
+                              image: NetworkImage(
+                                'https://api.dicebear.com/7.x/shapes/png?seed=miku&backgroundColor=39c5bb',
+                              ),
                               fit: BoxFit.cover,
                               opacity: 0.3,
                             ),
                           ),
                           child: Center(
-                            child: Icon(Icons.play_circle_outline, color: colorScheme.primary, size: 32),
+                            child: Icon(
+                              Icons.play_circle_outline,
+                              color: colorScheme.primary,
+                              size: 32,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
                   const SizedBox(height: 16),
                   
                   // Mock Action Buttons
