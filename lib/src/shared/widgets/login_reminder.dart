@@ -18,7 +18,7 @@ class LoginReminder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const mikuColor = SaucePalette.mikuGreen;
+    final primaryColor = theme.colorScheme.primary;
 
     return Center(
       child: Padding(
@@ -29,17 +29,17 @@ class LoginReminder extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: mikuColor.withValues(alpha: 0.1),
+                color: primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 80, color: mikuColor),
+              child: Icon(icon, size: 80, color: primaryColor),
             ),
             const SizedBox(height: 24),
             Text(
               title,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: mikuColor,
+                color: primaryColor,
               ),
               textAlign: TextAlign.center,
             ),
@@ -55,7 +55,7 @@ class LoginReminder extends StatelessWidget {
             FilledButton.icon(
               onPressed: () => context.go('/profile'),
               style: FilledButton.styleFrom(
-                backgroundColor: mikuColor,
+                backgroundColor: primaryColor,
                 foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,

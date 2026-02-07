@@ -196,7 +196,6 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
 
   Widget _buildChannelCard(BuildContext context, Channel channel) {
     final theme = Theme.of(context);
-    final mikuGreen = const Color(0xFF39C5BB);
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -290,7 +289,7 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
                           context,
                           Icons.people_outline,
                           '${channel.usersCount}',
-                          mikuGreen,
+                          theme.colorScheme.primary,
                         ),
                         const SizedBox(width: 12),
                         _buildStat(

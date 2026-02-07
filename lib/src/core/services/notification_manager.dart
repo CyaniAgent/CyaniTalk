@@ -11,17 +11,28 @@ import '../core.dart';
 /// 全局通知管理器
 /// 
 /// 监听各个平台的实时事件并根据用户设置触发系统通知和声音
+/// 支持Misskey的实时流事件和Flarum的轮询通知。
 class NotificationManager {
+  /// Riverpod的引用，用于获取其他Provider
   final Ref ref;
+  /// Misskey笔记事件订阅
   StreamSubscription? _misskeyNoteSubscription;
+  /// Misskey消息事件订阅
   StreamSubscription? _misskeyMessageSubscription;
+  /// Misskey通知事件订阅
   StreamSubscription? _misskeyNotificationSubscription;
+  /// Flarum轮询定时器
   Timer? _flarumTimer;
+  /// 上次检查Flarum通知的时间
   DateTime? _lastFlarumCheck;
 
   NotificationManager(this.ref);
 
   /// 启动监听
+  ///
+  /// 启动所有平台的通知监听，包括Misskey的实时流监听和Flarum的轮询检查。
+  ///
+  /// @return 无返回值
   void start() {
     _setupMisskeyListeners();
     _setupFlarumPolling();
@@ -29,6 +40,10 @@ class NotificationManager {
   }
 
   /// 停止监听
+  ///
+  /// 停止所有平台的通知监听，取消所有订阅和定时器。
+  ///
+  /// @return 无返回值
   void stop() {
     _misskeyNoteSubscription?.cancel();
     _misskeyMessageSubscription?.cancel();
@@ -37,6 +52,12 @@ class NotificationManager {
     logger.info('NotificationManager: Stopped real-time listeners');
   }
 
+  /// 设置Misskey监听
+  ///
+  /// 设置Misskey平台的实时事件监听，包括笔记事件、消息事件和通知事件。
+  /// 根据事件类型播放不同的声音并显示系统通知。
+  ///
+  /// @return 无返回值
   void _setupMisskeyListeners() {
     final streamingService = ref.read(misskeyStreamingServiceProvider.notifier);
     final soundService = ref.read(soundServiceProvider);
@@ -100,6 +121,12 @@ class NotificationManager {
     });
   }
 
+  /// 设置Flarum轮询
+  ///
+  /// 设置Flarum平台的通知轮询检查，每2分钟检查一次新通知。
+  /// 如果有新通知，根据用户设置显示系统通知。
+  ///
+  /// @return 无返回值
   void _setupFlarumPolling() {
     _lastFlarumCheck = DateTime.now();
     

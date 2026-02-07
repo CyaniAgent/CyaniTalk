@@ -235,24 +235,24 @@ class UserDetailsView extends ConsumerWidget {
     IconData icon,
   ) {
     final theme = Theme.of(context);
-    const mikuColor = SaucePalette.mikuGreen;
+    final primaryColor = theme.colorScheme.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: mikuColor.withValues(alpha: 0.05),
+        color: primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: mikuColor.withValues(alpha: 0.1)),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 20, color: mikuColor),
+          Icon(icon, size: 20, color: primaryColor),
           const SizedBox(height: 8),
           Text(
             value,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: mikuColor,
+              color: primaryColor,
             ),
           ),
           Text(

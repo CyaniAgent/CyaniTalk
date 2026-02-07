@@ -171,8 +171,8 @@ class _AddAccountBottomSheetContentState
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
-                colors: [Color(0xFF39C5BB), Color(0xFF66CCFF)],
+              shaderCallback: (bounds) => LinearGradient(
+                colors: [Theme.of(context).colorScheme.primary, Color(0xFF66CCFF)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ).createShader(bounds),
@@ -198,7 +198,7 @@ class _AddAccountBottomSheetContentState
             ),
             title: 'Misskey',
             subtitle: 'auth_add_account_misskey_subtitle'.tr(),
-            color: const Color(0xFF39C5BB),
+            color: Theme.of(context).colorScheme.primary,
             onTap: () => setState(() => _step = _AddAccountStep.misskeyLogin),
             isVertical: false,
           ),

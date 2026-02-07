@@ -564,7 +564,6 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
   Widget _buildPreviewCard(BuildContext context, AppearanceSettings settings) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    const mikuColor = SaucePalette.mikuGreen;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -612,7 +611,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                     children: [
                       CircleAvatar(
                         radius: 14,
-                        backgroundColor: mikuColor,
+                        backgroundColor: colorScheme.primary,
                         child: const Text(
                           "01",
                           style: TextStyle(

@@ -15,6 +15,9 @@ import 'package:path_provider/path_provider.dart';
 import '../config/constants.dart';
 
 /// 日志工具类，管理应用中的所有日志输出
+///
+/// 提供多级别日志输出、文件和控制台双输出、日志文件管理等功能。
+/// 使用单例模式，确保应用中只有一个日志实例。
 class AppLogger {
   /// 单例实例
   static final AppLogger _instance = AppLogger._internal();
@@ -34,8 +37,12 @@ class AppLogger {
   String? _logFilePath;
 
   /// 初始化日志配置
+  ///
+  /// 配置日志输出方式，包括控制台输出和文件输出。
+  /// 会根据平台选择合适的日志文件存储位置。
+  ///
+  /// @return 无返回值，初始化完成后日志系统即可使用
   Future<void> initialize() async {
-
     // 创建控制台输出
     final consoleOutput = ConsoleOutput();
 
@@ -51,6 +58,10 @@ class AppLogger {
   }
 
   /// 创建文件输出
+  ///
+  /// 根据平台创建合适的日志文件输出实例，处理不同平台的文件路径差异。
+  ///
+  /// @return 返回创建的AppFileOutput实例
   Future<AppFileOutput> _createFileOutput() async {
     try {
       String path;
@@ -121,6 +132,11 @@ class AppLogger {
   }
 
   /// 检查并清理日志文件
+  ///
+  /// 检查日志文件大小，超过限制则清理部分内容，保留最新的日志。
+  ///
+  /// @param file 要检查的日志文件
+  /// @return 无返回值
   Future<void> _checkAndCleanLogFile(File file) async {
     try {
       final stat = await file.stat();
@@ -139,6 +155,11 @@ class AppLogger {
   }
 
   /// 设置日志级别
+  ///
+  /// 动态调整日志输出级别，支持的级别包括：debug、info、warning、error。
+  ///
+  /// @param level 要设置的日志级别字符串
+  /// @return 无返回值
   void setLogLevel(String level) {
     switch (level.toLowerCase()) {
       case 'debug':
@@ -173,6 +194,10 @@ class AppLogger {
   String? get logFilePath => _logFilePath;
 
   /// 查看日志内容
+  ///
+  /// 读取并返回当前日志文件的内容，按行分割。
+  ///
+  /// @return 返回日志文件的内容列表，每行一条日志
   Future<List<String>> viewLogs() async {
     try {
       if (_logFilePath == null) await initialize();
@@ -187,6 +212,11 @@ class AppLogger {
   }
 
   /// 导出日志
+  ///
+  /// 将当前日志文件复制到指定位置，生成导出文件。
+  /// 会根据平台选择合适的导出路径。
+  ///
+  /// @return 返回导出的日志文件，失败则返回null
   Future<File?> exportLogs() async {
     try {
       if (_logFilePath == null) await initialize();
@@ -236,6 +266,11 @@ class AppLogger {
   }
 
   /// 删除日志
+  ///
+  /// 删除当前的日志文件，Android平台会删除debug目录下的所有文件，
+  /// 其他平台会删除当前日志文件并重新初始化。
+  ///
+  /// @return 无返回值
   Future<void> deleteLogs() async {
     try {
       if (_logFilePath == null) await initialize();
@@ -280,6 +315,11 @@ class AppLogger {
   }
 
   /// 设置最大日志大小
+  ///
+  /// 设置日志文件的最大大小，超过此大小会自动清理部分内容。
+  ///
+  /// @param maxSizeMB 最大日志文件大小，单位为MB
+  /// @return 无返回值
   Future<void> setMaxLogSize(int maxSizeMB) async {
     try {
       if (_logFilePath == null) await initialize();
@@ -297,21 +337,49 @@ class AppLogger {
   }
 
   /// 输出DEBUG级别的日志
+  ///
+  /// 输出调试级别的日志，通常用于开发和调试过程中的详细信息。
+  ///
+  /// @param message 日志消息内容
+  /// @param error 可选的错误对象
+  /// @param stackTrace 可选的堆栈跟踪信息
+  /// @return 无返回值
   void debug(String message, [dynamic error, StackTrace? stackTrace]) {
     _logger.d(message, error: error, stackTrace: stackTrace);
   }
 
   /// 输出INFO级别的日志
+  ///
+  /// 输出信息级别的日志，通常用于记录应用程序的正常运行状态和重要事件。
+  ///
+  /// @param message 日志消息内容
+  /// @param error 可选的错误对象
+  /// @param stackTrace 可选的堆栈跟踪信息
+  /// @return 无返回值
   void info(String message, [dynamic error, StackTrace? stackTrace]) {
     _logger.i(message, error: error, stackTrace: stackTrace);
   }
 
   /// 输出WARNING级别的日志
+  ///
+  /// 输出警告级别的日志，通常用于记录可能导致问题但不会立即影响应用程序运行的情况。
+  ///
+  /// @param message 日志消息内容
+  /// @param error 可选的错误对象
+  /// @param stackTrace 可选的堆栈跟踪信息
+  /// @return 无返回值
   void warning(String message, [dynamic error, StackTrace? stackTrace]) {
     _logger.w(message, error: error, stackTrace: stackTrace);
   }
 
   /// 输出ERROR级别的日志
+  ///
+  /// 输出错误级别的日志，通常用于记录应用程序中的错误和异常情况。
+  ///
+  /// @param message 日志消息内容
+  /// @param error 可选的错误对象
+  /// @param stackTrace 可选的堆栈跟踪信息
+  /// @return 无返回值
   void error(String message, [dynamic error, StackTrace? stackTrace]) {
     _logger.e(message, error: error, stackTrace: stackTrace);
   }
@@ -321,6 +389,8 @@ class AppLogger {
 final logger = AppLogger();
 
 /// 文件输出类
+///
+/// 负责将日志输出到文件，支持文件创建、写入和管理。
 class AppFileOutput extends LogOutput {
   final File file;
   final bool overrideExisting;
@@ -333,6 +403,11 @@ class AppFileOutput extends LogOutput {
     this.mode = FileMode.write,
   });
 
+  /// 初始化文件输出
+  ///
+  /// 打开文件写入流，准备日志输出。
+  ///
+  /// @return 无返回值
   @override
   Future<void> init() async {
     if (_sink != null) return;
@@ -350,6 +425,12 @@ class AppFileOutput extends LogOutput {
     }
   }
 
+  /// 输出日志到文件
+  ///
+  /// 将日志事件的每一行写入到文件中。
+  ///
+  /// @param event 日志输出事件，包含要输出的日志行
+  /// @return 无返回值
   @override
   void output(OutputEvent event) {
     for (var line in event.lines) {
@@ -357,6 +438,11 @@ class AppFileOutput extends LogOutput {
     }
   }
 
+  /// 销毁文件输出
+  ///
+  /// 关闭文件写入流，释放资源。
+  ///
+  /// @return 无返回值
   @override
   Future<void> destroy() async {
     await _sink?.close();
@@ -364,11 +450,18 @@ class AppFileOutput extends LogOutput {
 }
 
 /// 多输出类
+///
+/// 支持将日志输出到多个目标，如同时输出到控制台和文件。
 class AppMultiOutput extends LogOutput {
   final List<LogOutput> outputs;
 
   AppMultiOutput(this.outputs);
 
+  /// 初始化多个输出
+  ///
+  /// 初始化所有子输出目标。
+  ///
+  /// @return 无返回值
   @override
   Future<void> init() async {
     for (var output in outputs) {
@@ -376,6 +469,12 @@ class AppMultiOutput extends LogOutput {
     }
   }
 
+  /// 输出日志到多个目标
+  ///
+  /// 将日志事件输出到所有子输出目标。
+  ///
+  /// @param event 日志输出事件，包含要输出的日志行
+  /// @return 无返回值
   @override
   void output(OutputEvent event) {
     for (var output in outputs) {
@@ -383,6 +482,11 @@ class AppMultiOutput extends LogOutput {
     }
   }
 
+  /// 销毁多个输出
+  ///
+  /// 销毁所有子输出目标，释放资源。
+  ///
+  /// @return 无返回值
   @override
   Future<void> destroy() async {
     for (var output in outputs) {

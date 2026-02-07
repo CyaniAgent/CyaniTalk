@@ -36,16 +36,12 @@ class AuthService extends _$AuthService {
   }
 
   /// 启动Misskey的MiAuth认证流程
-
   ///
-
-  /// [host] - Misskey实例的主机地址
-
+  /// 开始Misskey平台的MiAuth认证流程，生成会话ID并打开浏览器进行授权。
+  /// 会检查账户数量限制，最多支持10个Misskey账户。
   ///
-
-  /// 返回会话ID，用于后续检查认证状态
-
-  /// 启动Misskey的MiAuth认证流程
+  /// @param host Misskey实例的主机地址
+  /// @return 返回会话ID，用于后续检查认证状态
   Future<String> startMiAuth(String host) async {
     final sanitizedHost = _sanitizeHost(host);
     logger.info('开始Misskey MiAuth认证流程，主机: $sanitizedHost (原始: $host)');
@@ -236,19 +232,14 @@ class AuthService extends _$AuthService {
   }
 
   /// 登录 Flarum 账户
-
   ///
-
-  /// [host] - Flarum 实例的主机地址
-
-  /// [identification] - 用户名或电子邮箱
-
-  /// [password] - 密码
-
+  /// 使用用户名/邮箱和密码登录Flarum论坛实例，验证成功后保存账户信息并刷新状态。
+  /// 会检查账户数量限制，最多支持10个Flarum账户。
   ///
-
-  /// 验证成功后保存账户信息并刷新状态
-
+  /// @param host Flarum实例的主机地址
+  /// @param identification 用户名或电子邮箱
+  /// @param password 密码
+  /// @return 无返回值，成功时保存账户信息，失败时抛出异常
   Future<void> loginToFlarum(
     String host,
     String identification,
@@ -349,6 +340,15 @@ class AuthService extends _$AuthService {
   }
 
   /// 使用社交账户登录 Flarum
+  ///
+  /// 使用社交账户登录Flarum论坛实例，验证成功后保存账户信息并刷新状态。
+  ///
+  /// @param host Flarum实例的主机地址
+  /// @param socialUid 社交账户的唯一标识符
+  /// @param type 社交账户类型
+  /// @param nickname 可选的昵称
+  /// @param avatarUrl 可选的头像URL
+  /// @return 无返回值，成功时保存账户信息，失败时抛出异常
   Future<void> loginToFlarumWithSocial(
     String host,
     String socialUid,
@@ -415,15 +415,11 @@ class AuthService extends _$AuthService {
   }
 
   /// 删除指定ID的账户
-
   ///
-
-  /// [id] - 要删除的账户ID
-
+  /// 删除指定ID的账户信息，删除后会刷新认证服务的状态。
   ///
-
-  /// 删除账户后刷新状态
-
+  /// @param id 要删除的账户ID
+  /// @return 无返回值，删除后刷新状态
   Future<void> removeAccount(String id) async {
     logger.info('删除账户，账户ID: $id');
     await ref.read(authRepositoryProvider).removeAccount(id);
@@ -467,8 +463,17 @@ class AuthService extends _$AuthService {
   }
 }
 
+/// 选中的Misskey账户提供者
+///
+/// 管理当前选中的Misskey账户，支持账户切换和自动选择逻辑。
 @Riverpod(keepAlive: true)
 class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
+  /// 初始化选中的Misskey账户
+  ///
+  /// 从存储中获取上次选中的Misskey账户ID，如果存在则返回对应的账户，
+  /// 否则返回第一个可用的Misskey账户。
+  ///
+  /// @return 返回选中的Misskey账户，如果没有则返回null
   @override
   FutureOr<Account?> build() async {
     final accounts = await ref.watch(authServiceProvider.future);
@@ -486,6 +491,12 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
     return accounts.where((a) => a.platform == 'misskey').firstOrNull;
   }
 
+  /// 选择Misskey账户
+  ///
+  /// 选择指定的Misskey账户作为当前活动账户，并保存选择状态。
+  ///
+  /// @param account 要选择的账户，必须是Misskey平台的账户
+  /// @return 无返回值
   Future<void> select(Account account) async {
     if (account.platform != 'misskey') return;
 
@@ -495,8 +506,17 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
   }
 }
 
+/// 选中的Flarum账户提供者
+///
+/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
 @Riverpod(keepAlive: true)
 class SelectedFlarumAccount extends _$SelectedFlarumAccount {
+  /// 初始化选中的Flarum账户
+  ///
+  /// 从存储中获取上次选中的Flarum账户ID，如果存在则返回对应的账户，
+  /// 否则返回第一个可用的Flarum账户。
+  ///
+  /// @return 返回选中的Flarum账户，如果没有则返回null
   @override
   FutureOr<Account?> build() async {
     final accounts = await ref.watch(authServiceProvider.future);
@@ -514,6 +534,12 @@ class SelectedFlarumAccount extends _$SelectedFlarumAccount {
     return accounts.where((a) => a.platform == 'flarum').firstOrNull;
   }
 
+  /// 选择Flarum账户
+  ///
+  /// 选择指定的Flarum账户作为当前活动账户，并保存选择状态。
+  ///
+  /// @param account 要选择的账户，必须是Flarum平台的账户
+  /// @return 无返回值
   Future<void> select(Account account) async {
     if (account.platform != 'flarum') return;
 
