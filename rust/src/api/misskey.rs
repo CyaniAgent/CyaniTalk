@@ -329,6 +329,47 @@ impl MisskeyRustClient {
         
         Ok(response.text().await?)
     }
+
+    pub async fn get_clips(&self, limit: u32, until_id: Option<String>) -> Result<String> {
+        let url = format!("https://{}/api/clips/list", self.host);
+        let mut body = serde_json::json!({
+            "i": self.token,
+            "limit": limit,
+        });
+
+        if let Some(id) = until_id {
+            body.as_object_mut().unwrap().insert("untilId".to_string(), serde_json::Value::String(id));
+        }
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
+
+    pub async fn get_clip_notes(&self, clip_id: String, limit: u32, until_id: Option<String>) -> Result<String> {
+        let url = format!("https://{}/api/clips/notes", self.host);
+        let mut body = serde_json::json!({
+            "i": self.token,
+            "clipId": clip_id,
+            "limit": limit,
+        });
+
+        if let Some(id) = until_id {
+            body.as_object_mut().unwrap().insert("untilId".to_string(), serde_json::Value::String(id));
+        }
+
+        let response = self.client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await?;
+        
+        Ok(response.text().await?)
+    }
 }
 
 // Add a simple function to get the current timestamp for channel IDs

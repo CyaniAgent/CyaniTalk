@@ -216,6 +216,29 @@ class MisskeyRepository {
     }
   }
 
+  Future<List<Note>> getClipNotes({
+    required String clipId,
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting notes for clip $clipId');
+    try {
+      final data = await api.getClipNotes(
+        clipId: clipId,
+        limit: limit,
+        untilId: untilId,
+      );
+      final notes = data.map((e) => Note.fromJson(e)).toList();
+      logger.info(
+        'MisskeyRepository: Successfully retrieved ${notes.length} notes for clip $clipId',
+      );
+      return notes;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting clip notes', e);
+      rethrow;
+    }
+  }
+
   Future<void> createNote({
     String? text,
     String? replyId,

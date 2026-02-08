@@ -402,7 +402,7 @@ final class MisskeyClipsNotifierProvider
 }
 
 String _$misskeyClipsNotifierHash() =>
-    r'99fe50cc700591f0f064a7f4afdf9f7e29218af0';
+    r'5f1d6a6a8c5c3e537f450b2362d25d51a1f8d1bf';
 
 /// Misskey片段(Clips)列表状态管理类
 ///
@@ -423,6 +423,107 @@ abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
               Object?
             >;
     element.handleCreate(ref, build);
+  }
+}
+
+/// Misskey片段笔记状态管理类
+
+@ProviderFor(MisskeyClipNotesNotifier)
+final misskeyClipNotesProvider = MisskeyClipNotesNotifierFamily._();
+
+/// Misskey片段笔记状态管理类
+final class MisskeyClipNotesNotifierProvider
+    extends $AsyncNotifierProvider<MisskeyClipNotesNotifier, List<Note>> {
+  /// Misskey片段笔记状态管理类
+  MisskeyClipNotesNotifierProvider._({
+    required MisskeyClipNotesNotifierFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'misskeyClipNotesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$misskeyClipNotesNotifierHash();
+
+  @override
+  String toString() {
+    return r'misskeyClipNotesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  MisskeyClipNotesNotifier create() => MisskeyClipNotesNotifier();
+
+  @override
+  bool operator ==(Object other) {
+    return other is MisskeyClipNotesNotifierProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$misskeyClipNotesNotifierHash() =>
+    r'388bacd0f378b7a67ea9f9b6f942aceb32e78d65';
+
+/// Misskey片段笔记状态管理类
+
+final class MisskeyClipNotesNotifierFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          MisskeyClipNotesNotifier,
+          AsyncValue<List<Note>>,
+          List<Note>,
+          FutureOr<List<Note>>,
+          String
+        > {
+  MisskeyClipNotesNotifierFamily._()
+    : super(
+        retry: null,
+        name: r'misskeyClipNotesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Misskey片段笔记状态管理类
+
+  MisskeyClipNotesNotifierProvider call(String clipId) =>
+      MisskeyClipNotesNotifierProvider._(argument: clipId, from: this);
+
+  @override
+  String toString() => r'misskeyClipNotesProvider';
+}
+
+/// Misskey片段笔记状态管理类
+
+abstract class _$MisskeyClipNotesNotifier extends $AsyncNotifier<List<Note>> {
+  late final _$args = ref.$arg as String;
+  String get clipId => _$args;
+
+  FutureOr<List<Note>> build(String clipId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<Note>>, List<Note>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Note>>, List<Note>>,
+              AsyncValue<List<Note>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
   }
 }
 

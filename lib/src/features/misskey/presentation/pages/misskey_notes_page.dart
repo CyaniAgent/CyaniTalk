@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
+import 'misskey_clip_notes_page.dart';
 
 /// Misskey 笔记页面组件
 /// 
@@ -37,6 +38,7 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
   @override
   Widget build(BuildContext context) {
     final clipsAsync = ref.watch(misskeyClipsProvider);
+    final hasMore = ref.watch(misskeyClipsProvider.notifier).hasMore;
 
     return Scaffold(
       body: clipsAsync.when(
@@ -50,7 +52,7 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                 .refresh(),
             child: ListView.builder(
               controller: _scrollController,
-              itemCount: clips.length + 1,
+              itemCount: clips.length + (hasMore ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index < clips.length) {
                   final clip = clips[index];
@@ -73,7 +75,11 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                         // TODO: Open clip details
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MisskeyClipNotesPage(clip: clip),
+                          ),
+                        );
                       },
                     ),
                   );

@@ -364,44 +364,43 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
 /// 负责管理Misskey平台的片段(Clips)列表，支持片段的刷新和加载更多功能。
 @riverpod
 class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
+
   /// 初始化Misskey片段列表
-  ///
-  /// 初始化Misskey平台的片段(Clips)列表，加载用户的片段数据。
-  ///
-  /// @return 返回片段列表
   @override
   FutureOr<List<Clip>> build() async {
     logger.info('初始化Misskey片段(Clips)列表');
+    _hasMore = true;
     final repository = await ref.watch(misskeyRepositoryProvider.future);
     final clips = await repository.getClips();
+    if (clips.length < 20) {
+      _hasMore = false;
+    }
     logger.info('Misskey片段列表初始化完成，加载了 ${clips.length} 个片段');
     return clips;
   }
 
   /// 刷新片段列表
-  ///
-  /// 重新从服务器获取片段列表数据，替换当前的片段列表内容。
-  ///
-  /// @return 无返回值
   Future<void> refresh() async {
     logger.info('刷新Misskey片段列表');
+    _hasMore = true;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final clips = await repository.getClips();
+      if (clips.length < 20) {
+        _hasMore = false;
+      }
       logger.info('Misskey片段列表刷新完成，加载了 ${clips.length} 个片段');
       return clips;
     });
   }
 
   /// 加载更多片段
-  ///
-  /// 加载片段列表的更多内容，从当前列表的最后一个片段开始获取。
-  ///
-  /// @return 无返回值
   Future<void> loadMore() async {
-    if (state.isLoading || state.isRefreshing) {
-      logger.debug('Misskey片段正在加载中，跳过加载更多');
+    if (state.isLoading || state.isRefreshing || !_hasMore) {
+      logger.debug('Misskey片段跳过加载更多: isLoading=${state.isLoading}, hasMore=$_hasMore');
       return;
     }
 
@@ -418,10 +417,66 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final newClips = await repository.getClips(untilId: lastId);
 
+      if (newClips.isEmpty || newClips.length < 20) {
+        _hasMore = false;
+      }
+
       if (!ref.mounted) return currentClips;
 
       logger.info('Misskey片段加载更多完成，新增 ${newClips.length} 个片段');
       return [...currentClips, ...newClips];
+    });
+  }
+}
+
+/// Misskey片段笔记状态管理类
+@riverpod
+class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
+  bool _hasMore = true;
+  bool get hasMore => _hasMore;
+
+  @override
+  FutureOr<List<Note>> build(String clipId) async {
+    logger.info('初始化Misskey片段笔记，片段ID: $clipId');
+    _hasMore = true;
+    final repository = await ref.watch(misskeyRepositoryProvider.future);
+    final notes = await repository.getClipNotes(clipId: clipId);
+    if (notes.length < 20) {
+      _hasMore = false;
+    }
+    return notes;
+  }
+
+  Future<void> refresh() async {
+    _hasMore = true;
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      final notes = await repository.getClipNotes(clipId: clipId);
+      if (notes.length < 20) {
+        _hasMore = false;
+      }
+      return notes;
+    });
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoading || state.isRefreshing || !_hasMore) return;
+
+    final currentNotes = state.value ?? [];
+    if (currentNotes.isEmpty) return;
+
+    final lastId = currentNotes.last.id;
+    state = await AsyncValue.guard(() async {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      final newNotes = await repository.getClipNotes(clipId: clipId, untilId: lastId);
+
+      if (newNotes.isEmpty || newNotes.length < 20) {
+        _hasMore = false;
+      }
+
+      if (!ref.mounted) return currentNotes;
+      return [...currentNotes, ...newNotes];
     });
   }
 }

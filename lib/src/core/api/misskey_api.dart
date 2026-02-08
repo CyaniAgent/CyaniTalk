@@ -202,11 +202,43 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
-  Future<List<dynamic>> getClips({int limit = 20, String? untilId}) =>
-      _fetchList('MisskeyApi.getClips', '/api/clips/list', {
+  Future<List<dynamic>> getClips({int limit = 20, String? untilId}) async {
+    try {
+      final jsonString = await _rustClient.getClips(
+        limit: limit,
+        untilId: untilId,
+      );
+      return jsonDecode(jsonString) as List<dynamic>;
+    } catch (e) {
+      logger.error('MisskeyApi.getClips error', e);
+      return _fetchList('MisskeyApi.getClips (Legacy)', '/api/clips/list', {
         'limit': limit,
         if (untilId != null) 'untilId': untilId,
       });
+    }
+  }
+
+  Future<List<dynamic>> getClipNotes({
+    required String clipId,
+    int limit = 20,
+    String? untilId,
+  }) async {
+    try {
+      final jsonString = await _rustClient.getClipNotes(
+        clipId: clipId,
+        limit: limit,
+        untilId: untilId,
+      );
+      return jsonDecode(jsonString) as List<dynamic>;
+    } catch (e) {
+      logger.error('MisskeyApi.getClipNotes error', e);
+      return _fetchList('MisskeyApi.getClipNotes (Legacy)', '/api/clips/notes', {
+        'clipId': clipId,
+        'limit': limit,
+        if (untilId != null) 'untilId': untilId,
+      });
+    }
+  }
 
   Future<void> createNote({
     String? text,

@@ -47,6 +47,14 @@ abstract class MisskeyRustClient implements RustOpaqueInterface {
 
   Future<String> getChatRooms();
 
+  Future<String> getClipNotes({
+    required String clipId,
+    required int limit,
+    String? untilId,
+  });
+
+  Future<String> getClips({required int limit, String? untilId});
+
   Future<int> getOnlineUsersCount();
 
   Future<String> getTimeline({
