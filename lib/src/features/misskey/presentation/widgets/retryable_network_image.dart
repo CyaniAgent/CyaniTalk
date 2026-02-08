@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:async';
 
 /// A network image widget with automatic retry on failure
 class RetryableNetworkImage extends StatefulWidget {
@@ -25,6 +26,7 @@ class RetryableNetworkImage extends StatefulWidget {
 class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
   int _retryCount = 0;
   String? _imageKey;
+  Timer? _retryTimer;
 
   @override
   void initState() {
@@ -33,12 +35,18 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
   }
 
   void _retry() {
-    if (_retryCount < widget.maxRetries) {
+    if (mounted && _retryCount < widget.maxRetries) {
       setState(() {
         _retryCount++;
         _imageKey = '${widget.url}_$_retryCount';
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _retryTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -68,7 +76,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
       errorBuilder: (context, error, stackTrace) {
         // Auto-retry on first few failures
         if (_retryCount < widget.maxRetries) {
-          Future.delayed(Duration(seconds: _retryCount + 1), _retry);
+          _retryTimer = Timer(Duration(seconds: _retryCount + 1), _retry);
         }
 
         return Container(
@@ -92,7 +100,12 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
               Text(
                 _retryCount >= widget.maxRetries
                     ? 'image_unavailable'.tr()
-                    : 'image_retrying'.tr(namedArgs: {'retryCount': _retryCount.toString(), 'maxRetries': widget.maxRetries.toString()}),
+                    : 'image_retrying'.tr(
+                        namedArgs: {
+                          'retryCount': _retryCount.toString(),
+                          'maxRetries': widget.maxRetries.toString(),
+                        },
+                      ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
                 ),

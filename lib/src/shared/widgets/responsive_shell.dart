@@ -7,7 +7,7 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/profile/presentation/settings/navigation_settings_page.dart';
+import '../../core/navigation/navigation.dart';
 
 /// 应用程序的响应式布局外壳组件
 ///
@@ -22,70 +22,6 @@ class ResponsiveShell extends ConsumerWidget {
   /// [navigationShell] - 导航外壳，用于管理底部导航栏的状态和页面切换
   /// [key] - 组件的键，用于唯一标识组件
   const ResponsiveShell({required this.navigationShell, super.key});
-
-  /// 导航项分支索引映射
-  static final Map<String, int> _itemBranchIndexMap = {
-    'misskey': 0,
-    'flarum': 1,
-    'drive': 2,
-    'messages': 3,
-    'me': 4,
-  };
-
-  /// 获取导航项对应的分支索引
-  int _getBranchIndexForItem(String itemId) {
-    return _itemBranchIndexMap[itemId] ?? 0;
-  }
-
-  /// 将显示索引映射到分支索引
-  ///
-  /// [displayIndex] - 显示索引
-  /// [navigationSettings] - 导航设置
-  ///
-  /// 返回对应的分支索引
-  int _mapDisplayIndexToBranchIndex(
-    int displayIndex,
-    NavigationSettings navigationSettings,
-  ) {
-    int currentDisplayIndex = 0;
-
-    // 遍历启用的导航项
-    for (final item in navigationSettings.items) {
-      if (item.isEnabled) {
-        if (currentDisplayIndex == displayIndex) {
-          return _getBranchIndexForItem(item.id);
-        }
-        currentDisplayIndex++;
-      }
-    }
-
-    return 0; // 默认返回第一个分支
-  }
-
-  /// 将分支索引映射到显示索引
-  ///
-  /// [branchIndex] - 分支索引
-  /// [navigationSettings] - 导航设置
-  ///
-  /// 返回对应的显示索引
-  int _mapBranchIndexToDisplayIndex(
-    int branchIndex,
-    NavigationSettings navigationSettings,
-  ) {
-    int currentDisplayIndex = 0;
-
-    // 遍历启用的导航项
-    for (final item in navigationSettings.items) {
-      if (item.isEnabled) {
-        if (_getBranchIndexForItem(item.id) == branchIndex) {
-          return currentDisplayIndex;
-        }
-        currentDisplayIndex++;
-      }
-    }
-
-    return 0; // 默认返回第一个显示索引
-  }
 
   /// 构建导航目标
   NavigationDestination _buildNavigationDestination(NavigationItem item) {
@@ -122,8 +58,8 @@ class ResponsiveShell extends ConsumerWidget {
           return Center(child: Text('navigation_no_items'.tr()));
         }
 
-        // 计算当前索引 - 使用辅助方法将原始分支索引映射到显示索引
-        int selectedIndex = _mapBranchIndexToDisplayIndex(
+        // 计算当前索引 - 使用NavigationService将原始分支索引映射到显示索引
+        int selectedIndex = NavigationService.mapBranchIndexToDisplayIndex(
           navigationShell.currentIndex,
           navigationSettings,
         );
@@ -138,7 +74,7 @@ class ResponsiveShell extends ConsumerWidget {
           selectedIndex: selectedIndex,
           onSelectedIndexChange: (index) {
             // 由于目标可能被隐藏，需要映射到实际的分支索引
-            int branchIndex = _mapDisplayIndexToBranchIndex(
+            int branchIndex = NavigationService.mapDisplayIndexToBranchIndex(
               index,
               navigationSettings,
             );
