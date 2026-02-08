@@ -191,6 +191,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # 构建rust组件
+      - name: Building Rust Components
+        run: |
+          cd rust
+          cargo build
+          cd ..
+          flutter_rust_bridge_codegen generate
+
       # 根据矩阵配置，为不同平台执行构建命令
       - name: Build Android APK
         if: matrix.name == 'android'
