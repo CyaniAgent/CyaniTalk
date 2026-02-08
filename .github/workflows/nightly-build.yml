@@ -183,6 +183,10 @@ jobs:
         with:
           channel: stable # 使用Flutter的稳定版
 
+      # 设置Rust环境
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
       # 显示Flutter版本信息
       - name: Check Flutter version
         run: flutter --version
