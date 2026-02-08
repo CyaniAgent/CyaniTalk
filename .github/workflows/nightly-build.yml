@@ -194,6 +194,7 @@ jobs:
       # 构建rust组件
       - name: Building Rust Components
         run: |
+          cargo install flutter_rust_bridge_codegen
           cd rust
           cargo build
           cd ..
