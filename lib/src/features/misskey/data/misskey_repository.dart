@@ -514,6 +514,23 @@ class MisskeyRepository implements IMisskeyRepository {
     }
   }
 
+  /// Get a single note by ID
+  @override
+  Future<Note> getNote(String noteId) async {
+    logger.debug('MisskeyRepository: Getting note: $noteId');
+    try {
+      final data = await api.getNote(noteId);
+      final note = await compute((Map<String, dynamic> json) {
+        return Note.fromJson(json);
+      }, data);
+      logger.debug('MisskeyRepository: Successfully retrieved note: $noteId');
+      return note;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting note: $noteId', e);
+      rethrow;
+    }
+  }
+
   /// Get the number of online users
   @override
   Future<int> getOnlineUsersCount() async {

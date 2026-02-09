@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '/src/core/core.dart';
 import '/src/routing/router.dart';
 import '/src/features/misskey/application/misskey_streaming_service.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/profile/presentation/settings/appearance_page.dart';
 import '/src/core/services/notification_manager.dart';
 
@@ -60,9 +61,30 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     super.didChangeAppLifecycleState(state);
     logger.debug('CyaniTalkApp: 应用生命周期状态变化: $state');
 
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // 应用进入后台时保存缓存
+      logger.info('CyaniTalkApp: 应用进入后台，保存缓存...');
+      try {
+        MisskeyTimelineNotifier.cacheManager.saveAllToStorage();
+        logger.info('CyaniTalkApp: 缓存已保存到持久化存储');
+      } catch (e) {
+        logger.warning('CyaniTalkApp: 保存缓存失败: $e');
+      }
+    }
+
     if (state == AppLifecycleState.detached) {
       // 应用完全退出时清理资源
       logger.info('CyaniTalkApp: 应用正在退出，清理资源...');
+
+      // 保存所有缓存到持久化存储
+      try {
+        MisskeyTimelineNotifier.cacheManager.saveAllToStorage();
+        logger.info('CyaniTalkApp: 缓存已保存到持久化存储');
+      } catch (e) {
+        logger.warning('CyaniTalkApp: 保存缓存失败: $e');
+      }
+
       // 清理Misskey流媒体服务
       ref.read(misskeyStreamingServiceProvider.notifier).dispose();
       // 清理通知管理器

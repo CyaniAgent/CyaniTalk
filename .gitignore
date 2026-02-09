@@ -134,3 +134,6 @@ rust/*.rs.bk
 # AI Agent related
 AGENTS.md
 GEMINI.md
+
+# Internal documentation
+Int_Doc/*

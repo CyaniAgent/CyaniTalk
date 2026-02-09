@@ -77,6 +77,16 @@ class MisskeyApi extends BaseApi {
     }
   }
 
+  /// Get a single note by ID
+  Future<Map<String, dynamic>> getNote(String noteId) async {
+    logger.debug('MisskeyApi: Getting note: $noteId');
+    return executeApiCall(
+      'MisskeyApi.getNote',
+      () => _dio.post('/api/notes/show', data: {'i': token, 'noteId': noteId}),
+      (response) => Map<String, dynamic>.from(response.data),
+    );
+  }
+
   /// Get drive usage information
   Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
     'MisskeyApi.getDriveInfo',
@@ -308,11 +318,23 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as Map<String, dynamic>,
   );
 
-  Future<int> getOnlineUsersCount() => executeApiCall(
-    'MisskeyApi.getOnlineUsersCount',
-    () => _dio.post('/api/get-online-users-count', data: {'i': token}),
-    (response) => response.data['count'] as int,
-  );
+  Future<int> getOnlineUsersCount() async {
+    try {
+      logger.debug('MisskeyApi: Getting online users count');
+      final response = await _dio.post(
+        '/api/get-online-users-count',
+        data: {'i': token},
+        options: Options(
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+      );
+      return response.data['count'] as int;
+    } catch (e) {
+      logger.warning('MisskeyApi: Error getting online users count: $e');
+      rethrow;
+    }
+  }
 
   // --- Messaging (Chat) API ---
 

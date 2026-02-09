@@ -58,16 +58,16 @@ class AudioPlayerState {
 class AudioPlayerController {
   /// 音频URL
   final String audioUrl;
-  
+
   /// 文件名
   final String? fileName;
-  
+
   /// 位置轮询定时器
   Timer? _positionTimer;
-  
+
   /// 状态
   AudioPlayerState _state = const AudioPlayerState();
-  
+
   /// 状态变化回调
   Function(AudioPlayerState)? onStateChanged;
 
@@ -99,31 +99,37 @@ class AudioPlayerController {
       if (currentState.audioSource == null) {
         // 加载音频
         _setState(_state.copyWith(isLoading: true, error: ''));
-        
+
         try {
           // 确保文件已缓存
-          final cachedFilePath = currentState.cachedFilePath ?? await cacheManager.cacheFile(audioUrl);
+          final cachedFilePath =
+              currentState.cachedFilePath ??
+              await cacheManager.cacheFile(audioUrl);
           final file = File(cachedFilePath);
-          
+
           if (await file.exists()) {
             final audioSource = await SoLoud.instance.loadFile(cachedFilePath);
             final duration = SoLoud.instance.getLength(audioSource);
-            
-            _setState(_state.copyWith(
-              cachedFilePath: cachedFilePath,
-              audioSource: audioSource,
-              duration: duration,
-              isLoading: false,
-            ));
+
+            _setState(
+              _state.copyWith(
+                cachedFilePath: cachedFilePath,
+                audioSource: audioSource,
+                duration: duration,
+                isLoading: false,
+              ),
+            );
           } else {
             throw Exception('Cache file not found');
           }
         } catch (e) {
           logger.error('AudioPlayerController: Error loading audio: $e');
-          _setState(_state.copyWith(
-            isLoading: false,
-            error: 'Failed to load audio: $e',
-          ));
+          _setState(
+            _state.copyWith(
+              isLoading: false,
+              error: 'Failed to load audio: $e',
+            ),
+          );
           return;
         }
       }
@@ -132,8 +138,9 @@ class AudioPlayerController {
       final updatedState = _state;
       if (updatedState.audioSource != null) {
         SoundHandle soundHandle;
-        
-        if (updatedState.soundHandle != null && SoLoud.instance.getPause(updatedState.soundHandle!)) {
+
+        if (updatedState.soundHandle != null &&
+            SoLoud.instance.getPause(updatedState.soundHandle!)) {
           // 恢复播放
           SoLoud.instance.setPause(updatedState.soundHandle!, false);
           soundHandle = updatedState.soundHandle!;
@@ -141,12 +148,9 @@ class AudioPlayerController {
           // 开始新的播放
           soundHandle = await SoLoud.instance.play(updatedState.audioSource!);
         }
-        
-        _setState(_state.copyWith(
-          isPlaying: true,
-          soundHandle: soundHandle,
-        ));
-        
+
+        _setState(_state.copyWith(isPlaying: true, soundHandle: soundHandle));
+
         _startPositionPolling();
       }
     }
@@ -159,13 +163,14 @@ class AudioPlayerController {
       final currentState = _state;
       if (currentState.soundHandle != null && currentState.isPlaying) {
         final pos = SoLoud.instance.getPosition(currentState.soundHandle!);
-        
+
         // 检查是否播放完成
-        if (pos >= currentState.duration && currentState.duration > Duration.zero) {
+        if (pos >= currentState.duration &&
+            currentState.duration > Duration.zero) {
           _stopAndReset();
           return;
         }
-        
+
         _setState(_state.copyWith(position: pos));
       }
     });
@@ -180,31 +185,33 @@ class AudioPlayerController {
   /// 停止并重置播放器
   Future<void> _stopAndReset() async {
     final currentState = _state;
-    
+
     _stopPositionPolling();
-    
+
     if (currentState.soundHandle != null) {
       await SoLoud.instance.stop(currentState.soundHandle!);
     }
-    
+
     if (currentState.audioSource != null) {
       SoLoud.instance.disposeSource(currentState.audioSource!);
     }
-    
-    _setState(_state.copyWith(
-      isPlaying: false,
-      isLoading: false,
-      position: Duration.zero,
-      audioSource: null,
-      soundHandle: null,
-    ));
+
+    _setState(
+      _state.copyWith(
+        isPlaying: false,
+        isLoading: false,
+        position: Duration.zero,
+        audioSource: null,
+        soundHandle: null,
+      ),
+    );
   }
 
   /// 跳转播放位置
   void seek(double value) {
     final currentState = _state;
     if (currentState.soundHandle == null) return;
-    
+
     final position = Duration(seconds: value.toInt());
     SoLoud.instance.seek(currentState.soundHandle!, position);
     _setState(_state.copyWith(position: position));
@@ -212,6 +219,7 @@ class AudioPlayerController {
 
   /// 清理资源
   Future<void> dispose() async {
+    onStateChanged = null;
     await _stopAndReset();
   }
 }

@@ -101,6 +101,8 @@ abstract interface class IMisskeyRepository {
 
   Future<bool> checkNoteExists(String noteId);
 
+  Future<Note> getNote(String noteId);
+
   Future<int> getOnlineUsersCount();
 
   // Messaging

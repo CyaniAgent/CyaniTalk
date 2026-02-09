@@ -32,6 +32,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   void dispose() {
+    _controller.onStateChanged = null;
     _controller.dispose();
     super.dispose();
   }
@@ -56,7 +57,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
             Expanded(
               child: Text(
                 _state.error,
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             ),
           ],
@@ -115,18 +118,21 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                   ),
                   onPressed: () => _controller.togglePlayPause(),
                 ),
-                // 进度滑块
-                Expanded(
-                  child: Slider(
-                    value: _state.position.inSeconds.toDouble().clamp(0, _state.duration.inSeconds.toDouble()),
-                    max: _state.duration.inSeconds.toDouble().clamp(
-                      0.001, // 避免 max 为 0
-                      double.infinity,
-                    ),
-                    onChanged: _controller.seek,
-                    activeColor: theme.colorScheme.primary,
+              // 进度滑块
+              Expanded(
+                child: Slider(
+                  value: _state.position.inSeconds.toDouble().clamp(
+                    0,
+                    _state.duration.inSeconds.toDouble(),
                   ),
+                  max: _state.duration.inSeconds.toDouble().clamp(
+                    0.001, // 避免 max 为 0
+                    double.infinity,
+                  ),
+                  onChanged: _controller.seek,
+                  activeColor: theme.colorScheme.primary,
                 ),
+              ),
               // 时间显示
               Text(
                 '${_formatDuration(_state.position)} / ${_formatDuration(_state.duration)}',
