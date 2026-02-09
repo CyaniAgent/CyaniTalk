@@ -1,53 +1,32 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
-import 'package:cyanitalk/src/rust/api/misskey.dart';
 import '../utils/logger.dart';
 import 'base_api.dart';
+import 'network_client.dart';
 import '../config/constants.dart';
 
 /// Misskey API客户端
-/// 
+///
 /// 提供与Misskey实例交互的API方法，包括获取时间线、用户信息、文件管理等功能。
-/// 
+///
 /// @param host Misskey实例的主机名
 /// @param token 认证令牌
 class MisskeyApi extends BaseApi {
   final String host;
   final String token;
   late Dio _dio;
-  late MisskeyRustClient _rustClient;
 
   /// 初始化Misskey API客户端
-  /// 
+  ///
   /// @param host Misskey实例的主机名
   /// @param token 认证令牌
   MisskeyApi({required this.host, required this.token}) {
     logger.info('MisskeyApi: Initializing for host: $host');
-    
-    // 初始化 Rust 客户端
-    _rustClient = MisskeyRustClient(host: host, token: token);
 
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: 'https://$host',
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
-        headers: {
-          'User-Agent': _generateUserAgent(),
-          'Accept': '*/*',
-        },
-      ),
-    );
-
-    // 允许自定义证书校验，解决 HandshakeException
-    _dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        final client = HttpClient();
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-        return client;
-      },
+    _dio = NetworkClient().createDio(
+      host: host,
+      token: token,
+      userAgent: _generateUserAgent(),
     );
   }
 
@@ -62,20 +41,16 @@ class MisskeyApi extends BaseApi {
     }
   }
 
-/// 获取当前用户信息
-/// 
-/// 返回当前认证用户的详细信息，包括用户名、头像、个人简介等。
-/// 
-/// @return 用户信息的Map对象
-  Future<Map<String, dynamic>> i() async {
-    try {
-      final jsonString = await _rustClient.i();
-      return Map<String, dynamic>.from(jsonDecode(jsonString));
-    } catch (e) {
-      logger.error('MisskeyApi.i error', e);
-      throw Exception('MisskeyApi.i error: $e');
-    }
-  }
+  /// 获取当前用户信息
+  ///
+  /// 返回当前认证用户的详细信息，包括用户名、头像、个人简介等。
+  ///
+  /// @return 用户信息的Map对象
+  Future<Map<String, dynamic>> i() => executeApiCall(
+    'MisskeyApi.i',
+    () => _dio.post('/api/i', data: {'i': token}),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
 
   /// Check if a note still exists on the server
   /// Returns true if the note exists, false if it was deleted (404)
@@ -120,30 +95,31 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as List<dynamic>,
   );
 
-/// 获取时间线
-/// 
-/// 根据指定的类型获取不同的时间线内容，支持Home、Local、Social和Global四种类型。
-/// 
-/// @param type 时间线类型：Home(主页)、Local(本地)、Social(社交)、Global(全球)
-/// @param limit 返回的笔记数量限制，默认20
-/// @param untilId 分页标记，用于加载更多内容
-/// @return 笔记列表
+  /// 获取时间线
+  ///
+  /// 根据指定的类型获取不同的时间线内容，支持Home、Local、Social和Global四种类型。
+  ///
+  /// @param type 时间线类型：Home(主页)、Local(本地)、Social(社交)、Global(全球)
+  /// @param limit 返回的笔记数量限制，默认20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 笔记列表
   Future<List<dynamic>> getTimeline(
     String type, {
     int limit = 20,
     String? untilId,
-  }) async {
-    try {
-      final jsonString = await _rustClient.getTimeline(
-        timelineType: type,
-        limit: limit,
-        untilId: untilId,
-      );
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getTimeline error', e);
-      throw Exception('MisskeyApi.getTimeline error: $e');
-    }
+  }) {
+    final endpoint = switch (type) {
+      'Home' => '/api/notes/timeline',
+      'Local' => '/api/notes/local-timeline',
+      'Social' => '/api/notes/hybrid-timeline',
+      'Global' => '/api/notes/global-timeline',
+      _ => '/api/notes/timeline',
+    };
+
+    return _fetchList('MisskeyApi.getTimeline', endpoint, {
+      'limit': limit,
+      if (untilId != null) 'untilId': untilId,
+    });
   }
 
   Future<List<dynamic>> getFeaturedChannels() => _fetchList(
@@ -155,26 +131,26 @@ class MisskeyApi extends BaseApi {
   Future<List<dynamic>> getFollowingChannels({
     int limit = 20,
     String? untilId,
-  }) => _fetchList('MisskeyApi.getFollowingChannels', '/api/channels/followed', {
-    'limit': limit,
-    if (untilId != null) 'untilId': untilId,
-  });
+  }) => _fetchList(
+    'MisskeyApi.getFollowingChannels',
+    '/api/channels/followed',
+    {'limit': limit, if (untilId != null) 'untilId': untilId},
+  );
 
-  Future<List<dynamic>> getOwnedChannels({
-    int limit = 20,
-    String? untilId,
-  }) => _fetchList('MisskeyApi.getOwnedChannels', '/api/channels/owned', {
-    'limit': limit,
-    if (untilId != null) 'untilId': untilId,
-  });
+  Future<List<dynamic>> getOwnedChannels({int limit = 20, String? untilId}) =>
+      _fetchList('MisskeyApi.getOwnedChannels', '/api/channels/owned', {
+        'limit': limit,
+        if (untilId != null) 'untilId': untilId,
+      });
 
   Future<List<dynamic>> getFavoriteChannels({
     int limit = 20,
     String? untilId,
-  }) => _fetchList('MisskeyApi.getFavoriteChannels', '/api/channels/my-favorites', {
-    'limit': limit,
-    if (untilId != null) 'untilId': untilId,
-  });
+  }) => _fetchList(
+    'MisskeyApi.getFavoriteChannels',
+    '/api/channels/my-favorites',
+    {'limit': limit, if (untilId != null) 'untilId': untilId},
+  );
 
   Future<List<dynamic>> searchChannels(
     String query, {
@@ -188,7 +164,10 @@ class MisskeyApi extends BaseApi {
 
   Future<Map<String, dynamic>> showChannel(String channelId) => executeApiCall(
     'MisskeyApi.showChannel',
-    () => _dio.post('/api/channels/show', data: {'i': token, 'channelId': channelId}),
+    () => _dio.post(
+      '/api/channels/show',
+      data: {'i': token, 'channelId': channelId},
+    ),
     (response) => Map<String, dynamic>.from(response.data),
   );
 
@@ -202,43 +181,21 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
-  Future<List<dynamic>> getClips({int limit = 20, String? untilId}) async {
-    try {
-      final jsonString = await _rustClient.getClips(
-        limit: limit,
-        untilId: untilId,
-      );
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getClips error', e);
-      return _fetchList('MisskeyApi.getClips (Legacy)', '/api/clips/list', {
+  Future<List<dynamic>> getClips({int limit = 20, String? untilId}) =>
+      _fetchList('MisskeyApi.getClips', '/api/clips/list', {
         'limit': limit,
         if (untilId != null) 'untilId': untilId,
       });
-    }
-  }
 
   Future<List<dynamic>> getClipNotes({
     required String clipId,
     int limit = 20,
     String? untilId,
-  }) async {
-    try {
-      final jsonString = await _rustClient.getClipNotes(
-        clipId: clipId,
-        limit: limit,
-        untilId: untilId,
-      );
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getClipNotes error', e);
-      return _fetchList('MisskeyApi.getClipNotes (Legacy)', '/api/clips/notes', {
-        'clipId': clipId,
-        'limit': limit,
-        if (untilId != null) 'untilId': untilId,
-      });
-    }
-  }
+  }) => _fetchList('MisskeyApi.getClipNotes', '/api/clips/notes', {
+    'clipId': clipId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
 
   Future<void> createNote({
     String? text,
@@ -248,49 +205,31 @@ class MisskeyApi extends BaseApi {
     String? visibility,
     bool? localOnly,
     String? cw,
-  }) async {
-    // Note: fileIds and localOnly are still being ported, using Rust for basic notes
-    // Only use legacy Dio path if we actually have parameters that Rust doesn't support yet
-    if ((fileIds != null && fileIds.isNotEmpty) || (localOnly != null && localOnly == true) || cw != null) {
-      return executeApiCallVoid(
-        'MisskeyApi.createNote (Legacy)',
+  }) => executeApiCallVoid(
+    'MisskeyApi.createNote',
+    () => _dio.post(
+      '/api/notes/create',
+      data: {
+        'i': token,
+        if (text != null) 'text': text,
+        if (replyId != null) 'replyId': replyId,
+        if (renoteId != null) 'renoteId': renoteId,
+        if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
+        if (visibility != null) 'visibility': visibility,
+        if (localOnly != null) 'localOnly': localOnly,
+        if (cw != null) 'cw': cw,
+      },
+    ),
+  );
+
+  Future<void> createReaction(String noteId, String reaction) =>
+      executeApiCallVoid(
+        'MisskeyApi.createReaction',
         () => _dio.post(
-          '/api/notes/create',
-          data: {
-            'i': token,
-            if (text != null) 'text': text,
-            if (replyId != null) 'replyId': replyId,
-            if (renoteId != null) 'renoteId': renoteId,
-            if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
-            if (visibility != null) 'visibility': visibility,
-            if (localOnly != null) 'localOnly': localOnly,
-            if (cw != null) 'cw': cw,
-          },
+          '/api/notes/reactions/create',
+          data: {'i': token, 'noteId': noteId, 'reaction': reaction},
         ),
       );
-    }
-
-    try {
-      await _rustClient.createNote(
-        text: text,
-        replyId: replyId,
-        renoteId: renoteId,
-        visibility: visibility,
-      );
-    } catch (e) {
-      logger.error('MisskeyApi.createNote error', e);
-      throw Exception('MisskeyApi.createNote error: $e');
-    }
-  }
-
-  Future<void> createReaction(String noteId, String reaction) async {
-    try {
-      await _rustClient.createReaction(noteId: noteId, reaction: reaction);
-    } catch (e) {
-      logger.error('MisskeyApi.createReaction error', e);
-      throw Exception('MisskeyApi.createReaction error: $e');
-    }
-  }
 
   Future<void> deleteReaction(String noteId) => executeApiCallVoid(
     'MisskeyApi.deleteReaction',
@@ -369,47 +308,29 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as Map<String, dynamic>,
   );
 
-  Future<int> getOnlineUsersCount() async {
-    try {
-      return await _rustClient.getOnlineUsersCount();
-    } catch (e) {
-      logger.error('MisskeyApi.getOnlineUsersCount error', e);
-      // Fallback to the original implementation if Rust fails
-      try {
-        final response = await _dio.post('/api/get-online-users-count', data: {'i': token});
-        return response.data['count'] as int;
-      } catch (fallbackError) {
-        logger.error('MisskeyApi.getOnlineUsersCount fallback error', fallbackError);
-        throw Exception('MisskeyApi.getOnlineUsersCount error: $e, fallback error: $fallbackError');
-      }
-    }
-  }
+  Future<int> getOnlineUsersCount() => executeApiCall(
+    'MisskeyApi.getOnlineUsersCount',
+    () => _dio.post('/api/get-online-users-count', data: {'i': token}),
+    (response) => response.data['count'] as int,
+  );
 
   // --- Messaging (Chat) API ---
 
   /// 这是一个高度兼容的方法，会尝试多个可能的端点
-  Future<List<dynamic>> getMessagingHistory({int limit = 10}) async {
-    try {
-      final jsonString = await _rustClient.getChatHistory(limit: limit);
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getMessagingHistory error', e);
-      // Fallback to original Dio if Rust fails or for older instances
-      try {
-        return await _fetchList(
-          'MisskeyApi.getMessagingHistory[chat]',
-          '/api/chat/history',
-          {'limit': limit},
-        );
-      } catch (e2) {
-        return await _fetchList(
-          'MisskeyApi.getMessagingHistory[messaging]',
-          '/api/messaging/history',
-          {'limit': limit},
-        );
-      }
-    }
-  }
+  Future<List<dynamic>> getMessagingHistory({int limit = 10}) =>
+      executeApiCall('MisskeyApi.getMessagingHistory', () async {
+        try {
+          return await _dio.post(
+            '/api/chat/history',
+            data: {'i': token, 'limit': limit},
+          );
+        } catch (e) {
+          return await _dio.post(
+            '/api/messaging/history',
+            data: {'i': token, 'limit': limit},
+          );
+        }
+      }, (response) => response.data as List<dynamic>);
 
   Future<List<dynamic>> getMessagingMessages({
     required String userId,
@@ -417,87 +338,78 @@ class MisskeyApi extends BaseApi {
     String? sinceId,
     String? untilId,
     bool markAsRead = true,
-  }) async {
-    try {
-      final jsonString = await _rustClient.getChatMessages(
-        userId: userId,
-        limit: limit,
-        untilId: untilId,
-      );
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getMessagingMessages error', e);
-      final data = {
-        'userId': userId,
-        'limit': limit,
-        if (sinceId != null) 'sinceId': sinceId,
-        if (untilId != null) 'untilId': untilId,
-        'markAsRead': markAsRead,
-      };
+  }) {
+    final data = {
+      'i': token,
+      'userId': userId,
+      'limit': limit,
+      if (sinceId != null) 'sinceId': sinceId,
+      if (untilId != null) 'untilId': untilId,
+      'markAsRead': markAsRead,
+    };
 
-      try {
-        return await _fetchList(
-          'MisskeyApi.getMessagingMessages[chat]',
-          '/api/chat/messages/user-timeline',
-          data,
-        );
-      } catch (e2) {
-        return await _fetchList(
-          'MisskeyApi.getMessagingMessages[messaging]',
-          '/api/messaging/messages',
-          data,
-        );
-      }
-    }
+    return executeApiCall(
+      'MisskeyApi.getMessagingMessages',
+      () async {
+        try {
+          return await _dio.post(
+            '/api/chat/messages/user-timeline',
+            data: data,
+          );
+        } catch (e) {
+          return await _dio.post('/api/messaging/messages', data: data);
+        }
+      },
+      (response) => response.data as List<dynamic>,
+    );
   }
 
   Future<Map<String, dynamic>> createMessagingMessage({
     required String userId,
     String? text,
     String? fileId,
-  }) async {
-    try {
-      final jsonString = await _rustClient.createChatMessage(
-        userId: userId,
-        text: text,
-        fileId: fileId,
-      );
-      return Map<String, dynamic>.from(jsonDecode(jsonString));
-    } catch (e) {
-      logger.error('MisskeyApi.createMessagingMessage error', e);
-      final data = {
-        'i': token,
-        'userId': userId,
-        if (text != null) 'text': text,
-        if (fileId != null) 'fileId': fileId,
-      };
+  }) {
+    final data = {
+      'i': token,
+      'userId': userId,
+      if (text != null) 'text': text,
+      if (fileId != null) 'fileId': fileId,
+    };
 
-      try {
-        final response = await _dio.post('/api/chat/messages/create-to-user', data: data);
-        return Map<String, dynamic>.from(response.data);
-      } catch (e2) {
-        final response = await _dio.post('/api/messaging/messages/create', data: data);
-        return Map<String, dynamic>.from(response.data);
-      }
-    }
+    return executeApiCall(
+      'MisskeyApi.createMessagingMessage',
+      () async {
+        try {
+          return await _dio.post(
+            '/api/chat/messages/create-to-user',
+            data: data,
+          );
+        } catch (e) {
+          return await _dio.post('/api/messaging/messages/create', data: data);
+        }
+      },
+      (response) => Map<String, dynamic>.from(response.data),
+    );
   }
 
   Future<void> readMessagingMessage(String messageId) async {
     // Note: The new Chat API provides 'read-all' which takes a userId/roomId, not a single messageId.
     // However, keeping this for compatibility with standard Misskey.
     // For Chat API, we might need a different method to mark conversation as read.
-    // For now, we try 'read-all' with the messageId as a fallback if the API is confusing, 
-    // but likely 'read-all' expects 'userId'. 
-    // Since we don't have userId here, we'll skip the chat endpoint for single message read 
+    // For now, we try 'read-all' with the messageId as a fallback if the API is confusing,
+    // but likely 'read-all' expects 'userId'.
+    // Since we don't have userId here, we'll skip the chat endpoint for single message read
     // OR we could change this method signature.
     // Given the constraints, let's keep the standard messaging fallback.
-    
+
     final data = {'i': token, 'messageId': messageId};
     try {
       // Standard Misskey
       await _dio.post('/api/messaging/messages/read', data: data);
     } catch (e) {
-       logger.warning('MisskeyApi: /api/messaging/messages/read failed. Chat API may require read-all per user.');
+      logger.warning(
+        'MisskeyApi: /api/messaging/messages/read failed. Chat API may require read-all per user.',
+      );
     }
   }
 
@@ -513,106 +425,74 @@ class MisskeyApi extends BaseApi {
 
   Future<Map<String, dynamic>> createChatRoom(String name) => executeApiCall(
     'MisskeyApi.createChatRoom',
-    () => _dio.post(
-      '/api/chat/rooms/create',
-      data: {'i': token, 'name': name},
-    ),
+    () => _dio.post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
     (response) => Map<String, dynamic>.from(response.data),
   );
 
-  Future<List<dynamic>> getChatRooms() async {
-    try {
-      final jsonString = await _rustClient.getChatRooms();
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getChatRooms error', e);
+  Future<List<dynamic>> getChatRooms() => executeApiCall(
+    'MisskeyApi.getChatRooms',
+    () async {
       try {
-        return await _fetchList(
-          'MisskeyApi.getChatRooms[chat]',
-          '/api/chat/rooms/joining',
-          {},
-        );
-      } catch (e2) {
-        logger.warning('MisskeyApi: /api/chat/rooms/joining failed, trying /api/users/groups/joined...');
-        try {
-          return await _fetchList(
-            'MisskeyApi.getChatRooms[groups]',
-            '/api/users/groups/joined',
-            {},
-          );
-        } catch (e3) {
-          logger.error('MisskeyApi: Both chat rooms and groups fetching failed', e3);
-          return [];
-        }
+        return await _dio.post('/api/chat/rooms/joining', data: {'i': token});
+      } catch (e) {
+        return await _dio.post('/api/users/groups/joined', data: {'i': token});
       }
-    }
-  }
+    },
+    (response) => response.data as List<dynamic>,
+  );
 
-  Future<List<dynamic>> getChatRoomMessages(String roomId, {int limit = 20}) async {
-    try {
-      final jsonString = await _rustClient.getChatMessages(
-        roomId: roomId,
-        limit: limit,
-      );
-      return jsonDecode(jsonString) as List<dynamic>;
-    } catch (e) {
-      logger.error('MisskeyApi.getChatRoomMessages error', e);
-      return _fetchList(
+  Future<List<dynamic>> getChatRoomMessages(String roomId, {int limit = 20}) =>
+      _fetchList(
         'MisskeyApi.getChatRoomMessages',
         '/api/chat/messages/room-timeline',
         {'roomId': roomId, 'limit': limit},
       );
-    }
-  }
 
-  Future<void> sendChatRoomMessage(String roomId, {String? text, String? fileId}) async {
-    try {
-      await _rustClient.createChatMessage(
-        roomId: roomId,
-        text: text,
-        fileId: fileId,
-      );
-    } catch (e) {
-      logger.error('MisskeyApi.sendChatRoomMessage error', e);
-      return executeApiCallVoid(
-        'MisskeyApi.sendChatRoomMessage',
-        () => _dio.post(
-          '/api/chat/messages/create-to-room',
-          data: {
-            'i': token, 
-            'roomId': roomId,
-            if (text != null) 'text': text,
-            if (fileId != null) 'fileId': fileId,
-          },
-        ),
-      );
-    }
-  }
+  Future<void> sendChatRoomMessage(
+    String roomId, {
+    String? text,
+    String? fileId,
+  }) => executeApiCallVoid(
+    'MisskeyApi.sendChatRoomMessage',
+    () => _dio.post(
+      '/api/chat/messages/create-to-room',
+      data: {
+        'i': token,
+        'roomId': roomId,
+        if (text != null) 'text': text,
+        if (fileId != null) 'fileId': fileId,
+      },
+    ),
+  );
 
   // --- Clips (Bookmarks) ---
 
-  Future<Map<String, dynamic>> createClip(String name, {bool isPublic = false, String? description}) =>
-      executeApiCall(
-        'MisskeyApi.createClip',
-        () => _dio.post(
-          '/api/clips/create',
-          data: {
-            'i': token,
-            'name': name,
-            'isPublic': isPublic,
-            if (description != null) 'description': description,
-          },
-        ),
-        (response) => Map<String, dynamic>.from(response.data),
-      );
-
-  Future<void> addNoteToClip(String clipId, String noteId) => executeApiCallVoid(
-    'MisskeyApi.addNoteToClip',
+  Future<Map<String, dynamic>> createClip(
+    String name, {
+    bool isPublic = false,
+    String? description,
+  }) => executeApiCall(
+    'MisskeyApi.createClip',
     () => _dio.post(
-      '/api/clips/add-note',
-      data: {'i': token, 'clipId': clipId, 'noteId': noteId},
+      '/api/clips/create',
+      data: {
+        'i': token,
+        'name': name,
+        'isPublic': isPublic,
+        if (description != null) 'description': description,
+      },
     ),
+    (response) => Map<String, dynamic>.from(response.data),
   );
+
+  Future<void> addNoteToClip(String clipId, String noteId) =>
+      executeApiCallVoid(
+        'MisskeyApi.addNoteToClip',
+        () => _dio.post(
+          '/api/clips/add-note',
+          data: {'i': token, 'clipId': clipId, 'noteId': noteId},
+        ),
+      );
 
   // --- Reporting ---
 
@@ -644,5 +524,27 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
     if (includeTypes != null) 'includeTypes': includeTypes,
     if (excludeTypes != null) 'excludeTypes': excludeTypes,
+  });
+
+  /// 搜索笔记
+  Future<List<dynamic>> searchNotes(
+    String query, {
+    int limit = 20,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.searchNotes', '/api/notes/search', {
+    'query': query,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
+
+  /// 搜索用户
+  Future<List<dynamic>> searchUsers(
+    String query, {
+    int limit = 20,
+    String? offset,
+  }) => _fetchList('MisskeyApi.searchUsers', '/api/users/search', {
+    'query': query,
+    'limit': limit,
+    if (offset != null) 'offset': offset,
   });
 }

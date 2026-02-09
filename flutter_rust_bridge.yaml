@@ -1,2 +1,0 @@
-rust_input: "crate::api"
-dart_output: lib/src/rust

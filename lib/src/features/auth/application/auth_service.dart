@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import '../data/auth_repository.dart';
 import '../domain/account.dart';
 import '../../../core/api/flarum_api.dart';
+import '../../flarum/data/flarum_repository.dart';
 import '../../../core/core.dart';
 
 part 'auth_service.g.dart';
@@ -270,11 +271,18 @@ class AuthService extends _$AuthService {
 
       // 获取用户信息以填充头像和准确的用户名
       logger.info('正在获取Flarum用户详细资料');
-      final profileData = await api.getUserProfile(userId);
-      final attributes = profileData['data']?['attributes'] ?? {};
-      final displayName = attributes['displayName'];
-      final username = attributes['username'];
-      final avatarUrl = attributes['avatarUrl'];
+      api.setToken(token, userId: userId);
+      final repo = FlarumRepository(api);
+      final user = await repo.getCurrentUser();
+
+      if (user == null) {
+        logger.error('无法获取Flarum用户信息');
+        throw Exception('无法获取Flarum用户信息');
+      }
+
+      final displayName = user.displayName;
+      final username = user.username;
+      final avatarUrl = user.avatarUrl;
 
       final accountId = '$userId@$host';
       logger.info('Flarum登录成功，用户ID: $userId, 账户ID: $accountId');
@@ -304,8 +312,8 @@ class AuthService extends _$AuthService {
         id: accountId,
         platform: 'flarum',
         host: host,
-        username: username ?? identification,
-        name: displayName ?? username ?? identification,
+        username: username,
+        name: displayName,
         avatarUrl: avatarUrl,
         token: token,
       );

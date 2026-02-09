@@ -120,7 +120,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         final recognizer = TapGestureRecognizer()
           ..onTap = () async {
             if (!mounted) return;
-            
+
             showDialog(
               context: context,
               builder: (dialogContext) => AlertDialog(
@@ -136,7 +136,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                       Navigator.pop(dialogContext);
                       final uri = Uri.parse(matchText);
                       if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
                       }
                     },
                     child: Text('确定'),
@@ -632,7 +635,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   Future<void> _copyLink() async {
     try {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      final host = repository.api.host;
+      final host = repository.host;
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
@@ -818,7 +821,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
   Future<void> _handleRenote() async {
     if (!mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -833,7 +836,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             onPressed: () async {
               Navigator.pop(dialogContext);
               try {
-                final repository = await ref.read(misskeyRepositoryProvider.future);
+                final repository = await ref.read(
+                  misskeyRepositoryProvider.future,
+                );
                 await repository.renote(widget.note.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -845,7 +850,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}),
+                        'note_failed_to_renote'.tr(
+                          namedArgs: {'error': e.toString()},
+                        ),
                       ),
                     ),
                   );

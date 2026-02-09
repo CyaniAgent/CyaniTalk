@@ -15,13 +15,13 @@ final misskeyRepositoryProvider = MisskeyRepositoryProvider._();
 final class MisskeyRepositoryProvider
     extends
         $FunctionalProvider<
-          AsyncValue<MisskeyRepository>,
-          MisskeyRepository,
-          FutureOr<MisskeyRepository>
+          AsyncValue<IMisskeyRepository>,
+          IMisskeyRepository,
+          FutureOr<IMisskeyRepository>
         >
     with
-        $FutureModifier<MisskeyRepository>,
-        $FutureProvider<MisskeyRepository> {
+        $FutureModifier<IMisskeyRepository>,
+        $FutureProvider<IMisskeyRepository> {
   MisskeyRepositoryProvider._()
     : super(
         from: null,
@@ -38,14 +38,14 @@ final class MisskeyRepositoryProvider
 
   @$internal
   @override
-  $FutureProviderElement<MisskeyRepository> $createElement(
+  $FutureProviderElement<IMisskeyRepository> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<MisskeyRepository> create(Ref ref) {
+  FutureOr<IMisskeyRepository> create(Ref ref) {
     return misskeyRepository(ref);
   }
 }
 
-String _$misskeyRepositoryHash() => r'd2e4c81c240d424ef70d58b3cdcb9736a5ae898f';
+String _$misskeyRepositoryHash() => r'a7215cbfca4d166067a787756ecc78e152fde421';

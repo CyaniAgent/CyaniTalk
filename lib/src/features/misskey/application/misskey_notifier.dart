@@ -92,8 +92,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (!ref.mounted) return;
 
       try {
-        final repository = await ref
-            .read(misskeyRepositoryProvider.future);
+        final repository = await ref.read(misskeyRepositoryProvider.future);
         final exists = await repository.checkNoteExists(note.id);
         if (!exists && ref.mounted) {
           logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
@@ -270,9 +269,15 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
       final repository = await ref.read(misskeyRepositoryProvider.future);
 
       final newChannels = await switch (type) {
-        MisskeyChannelListType.favorites => repository.getFavoriteChannels(untilId: lastId),
-        MisskeyChannelListType.following => repository.getFollowingChannels(untilId: lastId),
-        MisskeyChannelListType.managing => repository.getOwnedChannels(untilId: lastId),
+        MisskeyChannelListType.favorites => repository.getFavoriteChannels(
+          untilId: lastId,
+        ),
+        MisskeyChannelListType.following => repository.getFollowingChannels(
+          untilId: lastId,
+        ),
+        MisskeyChannelListType.managing => repository.getOwnedChannels(
+          untilId: lastId,
+        ),
         MisskeyChannelListType.search => repository.searchChannels(
           query ?? '',
           untilId: lastId,
@@ -400,7 +405,9 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
   /// 加载更多片段
   Future<void> loadMore() async {
     if (state.isLoading || state.isRefreshing || !_hasMore) {
-      logger.debug('Misskey片段跳过加载更多: isLoading=${state.isLoading}, hasMore=$_hasMore');
+      logger.debug(
+        'Misskey片段跳过加载更多: isLoading=${state.isLoading}, hasMore=$_hasMore',
+      );
       return;
     }
 
@@ -469,7 +476,10 @@ class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
     final lastId = currentNotes.last.id;
     state = await AsyncValue.guard(() async {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      final newNotes = await repository.getClipNotes(clipId: clipId, untilId: lastId);
+      final newNotes = await repository.getClipNotes(
+        clipId: clipId,
+        untilId: lastId,
+      );
 
       if (newNotes.isEmpty || newNotes.length < 20) {
         _hasMore = false;

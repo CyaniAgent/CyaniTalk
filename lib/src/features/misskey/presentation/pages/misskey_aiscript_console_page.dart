@@ -11,10 +11,12 @@ class MisskeyAiScriptConsolePage extends ConsumerStatefulWidget {
   const MisskeyAiScriptConsolePage({super.key});
 
   @override
-  ConsumerState<MisskeyAiScriptConsolePage> createState() => _MisskeyAiScriptConsolePageState();
+  ConsumerState<MisskeyAiScriptConsolePage> createState() =>
+      _MisskeyAiScriptConsolePageState();
 }
 
-class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptConsolePage> {
+class _MisskeyAiScriptConsolePageState
+    extends ConsumerState<MisskeyAiScriptConsolePage> {
   final TextEditingController _codeController = TextEditingController();
   final List<String> _output = [];
   bool _isRunning = false;
@@ -51,9 +53,9 @@ class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptCons
     try {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final interpreter = AiScriptInterpreter(repository);
-      
+
       await interpreter.execute(code);
-      
+
       if (mounted) {
         setState(() {
           _output.addAll(interpreter.output);
@@ -120,15 +122,14 @@ class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptCons
               controller: _codeController,
               maxLines: null,
               expands: true,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Enter AiScript code here...',
                 border: const OutlineInputBorder(),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                fillColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               ),
             ),
           ),
@@ -138,13 +139,16 @@ class _MisskeyAiScriptConsolePageState extends ConsumerState<MisskeyAiScriptCons
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _isRunning ? null : _runScript,
-                  icon: _isRunning 
-                    ? SizedBox(
-                        width: 18, 
-                        height: 18, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).colorScheme.onPrimary)
-                      )
-                    : const Icon(Icons.play_arrow),
+                  icon: _isRunning
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        )
+                      : const Icon(Icons.play_arrow),
                   label: const Text('Run Script'),
                 ),
               ),

@@ -13,15 +13,15 @@ import '../pages/image_viewer_page.dart';
 import '../pages/video_player_page.dart';
 
 /// NoteCard组件
-/// 
+///
 /// 用于显示单个Misskey笔记的卡片组件，支持显示用户信息、文本内容、媒体文件和互动按钮。
-/// 
+///
 /// @param note 要显示的笔记对象
 class NoteCard extends ConsumerStatefulWidget {
   final Note note;
 
   /// 创建NoteCard组件
-  /// 
+  ///
   /// @param key 组件的键
   /// @param note 要显示的笔记对象
   const NoteCard({super.key, required this.note});
@@ -37,7 +37,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   final Map<String, List<TextSpan>> _textProcessingCache = {};
 
   /// 处理文本中的特殊格式
-  /// 
+  ///
   /// 处理文本中的加粗文本(**text**)、提及(@username)和话题(#hashtag)，
   /// 并返回对应的TextSpan列表。会缓存处理结果，避免重复计算。
   List<TextSpan> _processText(String text) {
@@ -112,7 +112,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
 
     // 缓存处理结果
     _textProcessingCache[text] = spans;
-    
+
     // 限制缓存大小，避免内存泄漏
     if (_textProcessingCache.length > 50) {
       // 移除最早的缓存项
@@ -148,16 +148,16 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         label: 'Note by ${user?.username}',
         value: text ?? cw,
         child: GestureDetector(
-          onSecondaryTapDown: (details) => _showContextMenu(details.globalPosition),
-          onLongPressStart: (details) => _showContextMenu(details.globalPosition),
+          onSecondaryTapDown: (details) =>
+              _showContextMenu(details.globalPosition),
+          onLongPressStart: (details) =>
+              _showContextMenu(details.globalPosition),
           child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              side: BorderSide(color: Theme.of(context).colorScheme.outline),
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -172,7 +172,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                           // Redirect to own profile tab
                           context.go('/profile');
                         } else {
-                          context.push('/misskey/user/${user!.id}', extra: user);
+                          context.push(
+                            '/misskey/user/${user!.id}',
+                            extra: user,
+                          );
                         }
                       }
                     },
@@ -246,7 +249,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                     const SizedBox(height: 8),
                   ] else if (text != null)
                     SelectableText.rich(TextSpan(children: _processText(text))),
-          
+
                   if (note.files.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
@@ -255,7 +258,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                         child: _buildMediaGrid(note.files),
                       ),
                     ),
-          
+
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -313,8 +316,9 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   }
 
   void _showContextMenu(Offset position) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+
     showMenu(
       context: context,
       position: RelativeRect.fromRect(
@@ -399,7 +403,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             children: [
               const Icon(Icons.flag_outlined, size: 20, color: Colors.red),
               const SizedBox(width: 12),
-              Text('post_menu_report'.tr(), style: const TextStyle(color: Colors.red)),
+              Text(
+                'post_menu_report'.tr(),
+                style: const TextStyle(color: Colors.red),
+              ),
             ],
           ),
         ),
@@ -429,9 +436,9 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('post_copied'.tr())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('post_copied'.tr())));
         }
         break;
       case 'copy_link':
@@ -451,9 +458,9 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_id_copied'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr())));
         break;
     }
   }
@@ -492,13 +499,13 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   Future<void> _copyLink() async {
     try {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      final host = repository.api.host;
+      final host = repository.host;
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_link_copied'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_link_copied'.tr())));
       }
     } catch (e) {
       // Ignore
@@ -510,14 +517,18 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_bookmarked'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_bookmarked'.tr())));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}))),
+          SnackBar(
+            content: Text(
+              'post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}),
+            ),
+          ),
         );
       }
     }
@@ -526,7 +537,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   Future<void> _handleReport() async {
     final textController = TextEditingController();
     if (!mounted) return;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -555,13 +566,19 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             onPressed: () async {
               final reason = textController.text;
               if (reason.isEmpty) return;
-              
+
               Navigator.pop(dialogContext);
               try {
-                final repository = await ref.read(misskeyRepositoryProvider.future);
+                final repository = await ref.read(
+                  misskeyRepositoryProvider.future,
+                );
                 if (widget.note.user != null) {
-                   await repository.report(widget.note.id, widget.note.user!.id, reason);
-                   if (mounted) {
+                  await repository.report(
+                    widget.note.id,
+                    widget.note.user!.id,
+                    reason,
+                  );
+                  if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('post_reported'.tr())),
                     );
@@ -596,7 +613,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
               const SizedBox(width: 4),
               Text(
                 label,
-                style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ],
@@ -608,7 +628,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final diff = now.difference(time);
-    
+
     if (diff.inSeconds < 60) {
       return '刚刚';
     } else if (diff.inMinutes < 60) {
@@ -702,7 +722,9 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             onPressed: () async {
               Navigator.pop(dialogContext);
               try {
-                final repository = await ref.read(misskeyRepositoryProvider.future);
+                final repository = await ref.read(
+                  misskeyRepositoryProvider.future,
+                );
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -759,7 +781,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       context,
     ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr())));
   }
-  
+
   /// 构建媒体网格，根据媒体文件数量调整布局
   Widget _buildMediaGrid(List<Map<String, dynamic>> files) {
     // 过滤出图片和视频文件
@@ -769,7 +791,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       if (url == null) return false;
       return _isImageFile(type, url) || _isVideoFile(type, url);
     }).toList();
-    
+
     // 如果没有图片或视频，只显示音频
     if (mediaFiles.isEmpty) {
       return Column(
@@ -777,25 +799,22 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           final url = file['url'] as String?;
           final type = file['type'] as String?;
           final name = file['name'] as String?;
-          
+
           if (url == null) return const SizedBox.shrink();
-          
+
           final isAudio = _isAudioFile(type, url);
           if (isAudio) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: AudioPlayerWidget(
-                audioUrl: url,
-                fileName: name,
-              ),
+              child: AudioPlayerWidget(audioUrl: url, fileName: name),
             );
           }
-          
+
           return const SizedBox.shrink();
         }).toList(),
       );
     }
-    
+
     // 根据媒体文件数量选择不同的布局
     if (mediaFiles.length == 1) {
       // 单个媒体文件
@@ -815,18 +834,18 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       return _buildMultipleMedia(mediaFiles);
     }
   }
-  
+
   /// 构建单个媒体文件的显示
   Widget _buildSingleMedia(Map<String, dynamic> file) {
     final url = file['url'] as String?;
     final type = file['type'] as String?;
-    
+
     if (url == null) return const SizedBox.shrink();
-    
+
     final isImage = _isImageFile(type, url);
     final isVideo = _isVideoFile(type, url);
     final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
-    
+
     if (isVideo) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 4.0),
@@ -845,7 +864,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
               children: [
                 RetryableNetworkImage(
                   url: thumbnailUrl,
-                  width: 160,  // 增加单个图片的宽度
+                  width: 160, // 增加单个图片的宽度
                   height: 160, // 增加单个图片的高度
                   fit: BoxFit.cover,
                 ),
@@ -876,10 +895,8 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => ImageViewerPage(
-                    imageUrl: url,
-                    heroTag: heroTag,
-                  ),
+                  builder: (context) =>
+                      ImageViewerPage(imageUrl: url, heroTag: heroTag),
                 ),
               );
             },
@@ -887,7 +904,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
               tag: heroTag,
               child: RetryableNetworkImage(
                 url: thumbnailUrl,
-                width: 160,  // 增加单个图片的宽度
+                width: 160, // 增加单个图片的宽度
                 height: 160, // 增加单个图片的高度
                 fit: BoxFit.cover,
               ),
@@ -896,10 +913,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
-  
+
   /// 构建两个媒体文件的显示（水平排列）
   Widget _buildTwoMedia(List<Map<String, dynamic>> files) {
     return SizedBox(
@@ -917,7 +934,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       ),
     );
   }
-  
+
   /// 构建三个媒体文件的显示（一个大图加两个小图）
   Widget _buildThreeMedia(List<Map<String, dynamic>> files) {
     return Column(
@@ -939,7 +956,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       ],
     );
   }
-  
+
   /// 构建四个媒体文件的显示（2x2网格）
   Widget _buildFourMedia(List<Map<String, dynamic>> files) {
     return Column(
@@ -974,7 +991,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       ],
     );
   }
-  
+
   /// 构建多个媒体文件的显示（2列网格）
   Widget _buildMultipleMedia(List<Map<String, dynamic>> files) {
     return GridView.builder(
@@ -992,18 +1009,22 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       },
     );
   }
-  
+
   /// 构建单个媒体缩略图
-  Widget _buildMediaThumbnail(Map<String, dynamic> file, {double width = 100, double height = 100}) {
+  Widget _buildMediaThumbnail(
+    Map<String, dynamic> file, {
+    double width = 100,
+    double height = 100,
+  }) {
     final url = file['url'] as String?;
     final type = file['type'] as String?;
-    
+
     if (url == null) return const SizedBox.shrink();
-    
+
     final isImage = _isImageFile(type, url);
     final isVideo = _isVideoFile(type, url);
     final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
-    
+
     if (isVideo) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -1048,10 +1069,8 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => ImageViewerPage(
-                  imageUrl: url,
-                  heroTag: heroTag,
-                ),
+                builder: (context) =>
+                    ImageViewerPage(imageUrl: url, heroTag: heroTag),
               ),
             );
           },
@@ -1067,7 +1086,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 }

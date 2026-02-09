@@ -1,45 +1,44 @@
-class Post {
-  final String id;
-  final int number;
-  final String createdAt;
-  final String contentType;
-  final String contentHtml;
-  final bool renderFailed;
-  final String discussionId;
-  final String userId;
-  final List<String> tagIds;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Post({
-    required this.id,
-    required this.number,
-    required this.createdAt,
-    required this.contentType,
-    required this.contentHtml,
-    required this.renderFailed,
-    required this.discussionId,
-    required this.userId,
-    required this.tagIds,
-  });
+part 'post.freezed.dart';
 
-  factory Post.fromJson(Map<String, dynamic> json) {
+@freezed
+abstract class Post with _$Post {
+  const factory Post({
+    required String id,
+    required int number,
+    required String createdAt,
+    required String contentType,
+    required String contentHtml,
+    required bool renderFailed,
+    required String discussionId,
+    required String userId,
+    @Default([]) List<String> tagIds,
+  }) = _Post;
+
+  factory Post.fromJson(
+    Map<String, dynamic> json, {
+    List<dynamic> included = const [],
+  }) {
+    final attrs = json['attributes'] ?? {};
+    final rels = json['relationships'] ?? {};
+
     List<String> tagIds = [];
-    if (json.containsKey('relationships') &&
-        json['relationships'].containsKey('tags')) {
-      final tagsData = json['relationships']['tags']['data'];
-      if (tagsData is List) {
-        tagIds = tagsData.map((tag) => tag['id'] as String).toList();
-      }
+    if (rels['tags'] != null && rels['tags']['data'] is List) {
+      tagIds = (rels['tags']['data'] as List)
+          .map((tag) => tag['id'] as String)
+          .toList();
     }
 
     return Post(
-      id: json['id'],
-      number: json['attributes']['number'],
-      createdAt: json['attributes']['createdAt'],
-      contentType: json['attributes']['contentType'],
-      contentHtml: json['attributes']['contentHtml'] ?? '<p></p>',
-      renderFailed: json['attributes']['renderFailed'] ?? false,
-      discussionId: json['relationships']['discussion']['data']['id'],
-      userId: json['relationships']['user']['data']['id'],
+      id: json['id'] as String? ?? '',
+      number: attrs['number'] as int? ?? 0,
+      createdAt: attrs['createdAt'] as String? ?? '',
+      contentType: attrs['contentType'] as String? ?? '',
+      contentHtml: attrs['contentHtml'] as String? ?? '<p></p>',
+      renderFailed: attrs['renderFailed'] as bool? ?? false,
+      discussionId: rels['discussion']?['data']?['id'] as String? ?? 'unknown',
+      userId: rels['user']?['data']?['id'] as String? ?? 'unknown',
       tagIds: tagIds,
     );
   }

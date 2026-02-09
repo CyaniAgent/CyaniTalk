@@ -5,38 +5,56 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import '../domain/note.dart';
+import '../domain/note_event.dart';
 import '../domain/messaging_message.dart';
 
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/config/constants.dart';
+import '../../../core/services/streaming/streaming_service_interface.dart';
 
 part 'misskey_streaming_service.g.dart';
 
 @Riverpod(keepAlive: true)
-class MisskeyStreamingService extends _$MisskeyStreamingService {
+class MisskeyStreamingService extends _$MisskeyStreamingService
+    implements IMisskeyStreamingService {
   WebSocketChannel? _channel;
-  StreamSubscription? _subscription;
-  Timer? _reconnectTimer;
+  final _noteController = StreamController<NoteEvent>.broadcast();
+  final _notificationController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  final _messageController = StreamController<MessagingMessage>.broadcast();
+  final _statusController = StreamController<StreamingStatus>.broadcast();
 
-  // Track connected account to avoid redundant reconnections
-  String? _connectedAccountId;
-
-  // Stream for broadcasting received notes
-  final _noteStreamController = StreamController<NoteEvent>.broadcast();
-  Stream<NoteEvent> get noteStream => _noteStreamController.stream;
-
-  // Stream for broadcasting received messages
-  final _messageStreamController = StreamController<MessagingMessage>.broadcast();
-  Stream<MessagingMessage> get messageStream => _messageStreamController.stream;
-
-  // Stream for broadcasting received notifications
-  final _notificationStreamController = StreamController<Map<String, dynamic>>.broadcast();
-  Stream<Map<String, dynamic>> get notificationStream => _notificationStreamController.stream;
-
-  // Track active timeline subscriptions to avoid duplicates
   final Set<String> _activeTimelineSubscriptions = {};
+  Timer? _reconnectTimer;
+  Timer? _heartbeatTimer;
+  int _reconnectAttempts = 0;
+  StreamingStatus _status = StreamingStatus.disconnected;
+
+  @override
+  Stream<NoteEvent> get noteStream => _noteController.stream;
+
+  @override
+  Stream<Map<String, dynamic>> get notificationStream =>
+      _notificationController.stream;
+
+  @override
+  Stream<MessagingMessage> get messageStream => _messageController.stream;
+
+  @override
+  Stream<StreamingStatus> get statusStream => _statusController.stream;
+
+  StreamingStatus get status => _status;
+
+  void _updateStatus(StreamingStatus newStatus) {
+    if (_status == newStatus) return;
+    _status = newStatus;
+    if (!_statusController.isClosed) {
+      _statusController.add(newStatus);
+    }
+    logger.info('MisskeyStreaming: Status updated to $newStatus');
+  }
 
   @override
   void build() {
@@ -44,7 +62,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
     ref.listen(selectedMisskeyAccountProvider, (previous, next) {
       final account = next.asData?.value;
       if (account != null) {
-        _connect(account);
+        _connect();
       } else {
         _disconnect();
       }
@@ -56,29 +74,45 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
         .asData
         ?.value;
     if (initialAccount != null) {
-      _connect(initialAccount);
+      _connect();
     }
 
     ref.onDispose(() {
-      _disconnect();
-      _noteStreamController.close();
-      _messageStreamController.close();
-      _notificationStreamController.close();
+      _cleanup();
+      _noteController.close();
+      _messageController.close();
+      _notificationController.close();
+      _statusController.close();
     });
   }
 
-  void _connect(Account account) {
-    if (_connectedAccountId == account.id && _channel != null) return;
-
-    _disconnect();
-    _connectedAccountId = account.id;
+  void _cleanup() {
+    _reconnectTimer?.cancel();
+    _heartbeatTimer?.cancel();
+    _channel?.sink.close();
+    _channel = null;
     _activeTimelineSubscriptions.clear();
+  }
+
+  @override
+  void dispose() {
+    _cleanup();
+  }
+
+  Future<void> _connect() async {
+    final account = ref.read(selectedMisskeyAccountProvider).value;
+    if (account == null) {
+      _updateStatus(StreamingStatus.disconnected);
+      return;
+    }
+
+    _cleanup();
+    _updateStatus(StreamingStatus.connecting);
 
     final uri = Uri.parse('wss://${account.host}/streaming?i=${account.token}');
     logger.info('MisskeyStreaming: Connecting to $uri');
 
     try {
-      // 使用自定义 HttpClient 以绕过证书校验问题
       final client = HttpClient()
         ..badCertificateCallback = (cert, host, port) => true;
 
@@ -86,51 +120,68 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
         uri,
         customClient: client,
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}',
+          'User-Agent':
+              'Mozilla/5.0 (Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}',
         },
       );
 
-      _subscription = _channel!.stream.listen(
-        (message) {
-          _handleMessage(message);
+      _updateStatus(StreamingStatus.connected);
+      _reconnectAttempts = 0;
+
+      _channel!.stream.listen(
+        _handleMessage,
+        onDone: () {
+          logger.warning('MisskeyStreaming: Connection closed by server');
+          _updateStatus(StreamingStatus.disconnected);
+          _handleDisconnect(account);
         },
         onError: (error) {
-          logger.error('MisskeyStreaming Error: $error');
-          _scheduleReconnect(account);
-        },
-        onDone: () {
-          logger.info('MisskeyStreaming Connection closed');
-          if (_connectedAccountId == account.id) {
-            _scheduleReconnect(account);
-          }
+          logger.error('MisskeyStreaming: Connection error: $error');
+          _updateStatus(StreamingStatus.error);
+          _handleDisconnect(account);
         },
       );
 
-      // Connect to the main channel
+      _startHeartbeat();
       _subscribeToMain();
     } catch (e) {
       logger.error('MisskeyStreaming Connection failed: $e');
-      _scheduleReconnect(account);
+      _updateStatus(StreamingStatus.error);
+      _handleDisconnect(account);
     }
   }
 
-  void _disconnect() {
+  void _handleDisconnect(Account account) {
     _reconnectTimer?.cancel();
-    _subscription?.cancel();
-    _channel?.sink.close();
-    _channel = null;
-    _subscription = null;
-    _connectedAccountId = null;
-    logger.info('MisskeyStreaming: Disconnected');
-  }
+    // Exponential backoff
+    final delay = Duration(seconds: (2 + _reconnectAttempts * 2).clamp(2, 30));
+    _reconnectAttempts++;
 
-  void _scheduleReconnect(Account account) {
-    _reconnectTimer?.cancel();
-    _reconnectTimer = Timer(const Duration(seconds: 5), () {
-      if (_connectedAccountId == account.id) {
-        _connect(account);
+    logger.info(
+      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts)',
+    );
+    _reconnectTimer = Timer(delay, () {
+      final currentAccount = ref.read(selectedMisskeyAccountProvider).value;
+      if (currentAccount?.id == account.id) {
+        _connect();
       }
     });
+  }
+
+  void _startHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (_status == StreamingStatus.connected && _channel != null) {
+        // Misskey usually doesn't need heartbeats if using WebSocket PING/PONG,
+        // but explicit messages help with some proxies.
+        // For Misskey, just sending a "h" is sometimes used by web clients.
+      }
+    });
+  }
+
+  Future<void> _disconnect() async {
+    _cleanup();
+    _updateStatus(StreamingStatus.disconnected);
   }
 
   void _subscribeToMain() {
@@ -140,7 +191,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
       'type': 'connect',
       'body': {
         'channel': 'main',
-        'id': 'main-channel-${DateTime.now().millisecondsSinceEpoch}',
+        'id': 'main-${DateTime.now().millisecondsSinceEpoch}',
       },
     });
 
@@ -148,6 +199,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
     logger.info('MisskeyStreaming: Subscribed to main channel');
   }
 
+  @override
   void subscribeToTimeline(String timelineType) {
     if (_channel == null) return;
 
@@ -155,7 +207,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
     final channelName = switch (timelineType) {
       'Home' => 'homeTimeline',
       'Local' => 'localTimeline',
-      'Social' => 'hybridTimeline', // Social is usually hybrid in Misskey terms
+      'Social' => 'hybridTimeline',
       'Global' => 'globalTimeline',
       _ => 'homeTimeline',
     };
@@ -201,39 +253,27 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
           }
 
           if (timelineType != null) {
-            _noteStreamController.add(
+            _noteController.add(
               NoteEvent(note: note, timelineType: timelineType),
             );
           }
         } else if (eventType == 'notification' && eventBody != null) {
-          _notificationStreamController.add(eventBody as Map<String, dynamic>);
-        } else if ((eventType == 'chatMessage' || eventType == 'messagingMessage') && eventBody != null) {
+          _notificationController.add(eventBody as Map<String, dynamic>);
+        } else if ((eventType == 'chatMessage' ||
+                eventType == 'messagingMessage') &&
+            eventBody != null) {
           final message = MessagingMessage.fromJson(
             eventBody as Map<String, dynamic>,
           );
-          _messageStreamController.add(message);
+          _messageController.add(message);
         } else if (eventType == 'noteDeleted') {
-          logger.info(
-            'MisskeyStreaming: Received noteDeleted event: $eventBody',
-          );
-
-          // Try different possible field names for the note ID
           final noteId =
               eventBody?['deletedId'] as String? ??
               eventBody?['id'] as String? ??
               eventBody?['noteId'] as String?;
 
           if (noteId != null) {
-            _noteStreamController.add(
-              NoteEvent(noteId: noteId, isDelete: true),
-            );
-            logger.info(
-              'MisskeyStreaming: Emitted deletion event for note: $noteId',
-            );
-          } else {
-            logger.warning(
-              'MisskeyStreaming: noteDeleted event missing ID field. Event body: $eventBody',
-            );
+            _noteController.add(NoteEvent(noteId: noteId, isDelete: true));
           }
         }
       }
@@ -242,18 +282,10 @@ class MisskeyStreamingService extends _$MisskeyStreamingService {
     }
   }
 
+  @override
   void sendMessage(Map<String, dynamic> data) {
     if (_channel != null) {
       _channel!.sink.add(jsonEncode(data));
     }
   }
-}
-
-class NoteEvent {
-  final Note? note;
-  final String? timelineType;
-  final String? noteId;
-  final bool isDelete;
-
-  NoteEvent({this.note, this.timelineType, this.noteId, this.isDelete = false});
 }

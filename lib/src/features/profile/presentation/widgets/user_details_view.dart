@@ -7,8 +7,12 @@ import '../../../../core/core.dart';
 import '../../../auth/domain/account.dart';
 import '../../../../core/api/misskey_api.dart';
 import '../../../../core/api/flarum_api.dart';
+import '../../../misskey/domain/misskey_user.dart';
+import '../../../flarum/data/models/user.dart' as flarum;
+import '../../../misskey/data/misskey_repository.dart';
+import '../../../flarum/data/flarum_repository.dart';
 
-final userDetailsProvider = FutureProvider.family<Map<String, dynamic>, Account>((
+final userDetailsProvider = FutureProvider.family<dynamic, Account>((
   ref,
   account,
 ) async {
@@ -17,22 +21,17 @@ final userDetailsProvider = FutureProvider.family<Map<String, dynamic>, Account>
   );
   try {
     if (account.platform == 'misskey') {
-      final api = MisskeyApi(host: account.host, token: account.token);
-      final details = await api.i();
-      logger.info(
-        'UserDetailsView: Successfully fetched Misskey user details for ${account.id}',
+      final repo = MisskeyRepository(
+        MisskeyApi(host: account.host, token: account.token),
       );
-      return details;
+      return await repo.getMe();
     } else if (account.platform == 'flarum') {
       final api = FlarumApi();
       api.setBaseUrl('https://${account.host}');
-      // userId is stored in account.id as userId@host
       final userId = account.id.split('@').first;
-      final details = await api.getUserProfile(userId);
-      logger.info(
-        'UserDetailsView: Successfully fetched Flarum user details for ${account.id}',
-      );
-      return details;
+      api.setToken(account.token, userId: userId);
+      final repo = FlarumRepository(api);
+      return await repo.getCurrentUser();
     }
     throw Exception('Unknown platform');
   } catch (e) {
@@ -74,7 +73,7 @@ class UserDetailsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetails(BuildContext context, Map<String, dynamic> data) {
+  Widget _buildDetails(BuildContext context, dynamic data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -101,10 +100,11 @@ class UserDetailsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, Map<String, dynamic> data) {
+  Widget _buildInfoCard(BuildContext context, dynamic data) {
     final theme = Theme.of(context);
 
     if (account.platform == 'misskey') {
+      final user = data as MisskeyUser;
       return Column(
         children: [
           Row(
@@ -113,7 +113,7 @@ class UserDetailsView extends ConsumerWidget {
                 child: _buildStatCard(
                   context,
                   'user_details_notes_count'.tr(),
-                  data['notesCount']?.toString() ?? '0',
+                  user.notesCount?.toString() ?? '0',
                   Icons.notes,
                 ),
               ),
@@ -122,7 +122,7 @@ class UserDetailsView extends ConsumerWidget {
                 child: _buildStatCard(
                   context,
                   'user_details_following'.tr(),
-                  data['followingCount']?.toString() ?? '0',
+                  user.followingCount?.toString() ?? '0',
                   Icons.person_add_outlined,
                 ),
               ),
@@ -131,7 +131,7 @@ class UserDetailsView extends ConsumerWidget {
                 child: _buildStatCard(
                   context,
                   'user_details_followers'.tr(),
-                  data['followersCount']?.toString() ?? '0',
+                  user.followersCount?.toString() ?? '1',
                   Icons.people_outline,
                 ),
               ),
@@ -151,13 +151,13 @@ class UserDetailsView extends ConsumerWidget {
                   _buildDetailRow(
                     context,
                     'user_details_name'.tr(),
-                    data['name'] ?? 'N/A',
+                    user.name ?? 'N/A',
                   ),
                   const Divider(height: 24),
                   _buildDetailRow(
                     context,
                     'user_details_username'.tr(),
-                    '@${data['username'] ?? 'N/A'}',
+                    '@${user.username}',
                   ),
                 ],
               ),
@@ -167,7 +167,7 @@ class UserDetailsView extends ConsumerWidget {
       );
     } else {
       // Flarum
-      final attributes = data['data']?['attributes'] ?? {};
+      final user = data as flarum.User;
       return Column(
         children: [
           Row(
@@ -176,7 +176,7 @@ class UserDetailsView extends ConsumerWidget {
                 child: _buildStatCard(
                   context,
                   'user_details_discussions'.tr(),
-                  attributes['discussionCount']?.toString() ?? '0',
+                  user.discussionCount.toString(),
                   Icons.chat_bubble_outline,
                 ),
               ),
@@ -185,7 +185,7 @@ class UserDetailsView extends ConsumerWidget {
                 child: _buildStatCard(
                   context,
                   'user_details_comments'.tr(),
-                  attributes['commentCount']?.toString() ?? '0',
+                  user.commentCount.toString(),
                   Icons.comment_outlined,
                 ),
               ),
@@ -205,19 +205,13 @@ class UserDetailsView extends ConsumerWidget {
                   _buildDetailRow(
                     context,
                     'user_details_display_name'.tr(),
-                    attributes['displayName'] ?? 'N/A',
+                    user.displayName,
                   ),
                   const Divider(height: 24),
                   _buildDetailRow(
                     context,
                     'user_details_username'.tr(),
-                    attributes['username'] ?? 'N/A',
-                  ),
-                  const Divider(height: 24),
-                  _buildDetailRow(
-                    context,
-                    'user_details_email'.tr(),
-                    attributes['email'] ?? 'Hidden',
+                    user.username,
                   ),
                 ],
               ),
@@ -287,21 +281,18 @@ class UserDetailsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildRolesCard(BuildContext context, Map<String, dynamic> data) {
+  Widget _buildRolesCard(BuildContext context, dynamic data) {
     final roles = <String>[];
     if (account.platform == 'misskey') {
-      if (data['isAdmin'] == true) roles.add('user_details_admin'.tr());
-      if (data['isModerator'] == true) roles.add('user_details_moderator'.tr());
-      if (data['isSilenced'] == true) roles.add('user_details_silenced'.tr());
-      if (data['isSuspended'] == true) roles.add('user_details_suspended'.tr());
+      final user = data as MisskeyUser;
+      if (user.isAdmin) roles.add('user_details_admin'.tr());
+      if (user.isModerator) roles.add('user_details_moderator'.tr());
       if (roles.isEmpty) roles.add('user_details_standard_user'.tr());
     } else {
       // Flarum
-      final included = data['included'] as List? ?? [];
-      for (var item in included) {
-        if (item['type'] == 'groups') {
-          roles.add(item['attributes']?['nameSingular'] ?? 'Unknown Group');
-        }
+      final user = data as flarum.User;
+      for (var group in user.groups) {
+        roles.add(group.nameSingular);
       }
       if (roles.isEmpty) roles.add('user_details_member'.tr());
     }
@@ -326,7 +317,7 @@ class UserDetailsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildRawDataCard(BuildContext context, Map<String, dynamic> data) {
+  Widget _buildRawDataCard(BuildContext context, dynamic data) {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(

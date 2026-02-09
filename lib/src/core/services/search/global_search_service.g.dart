@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'rust_misskey_streaming_service.dart';
+part of 'global_search_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,30 +8,37 @@ part of 'rust_misskey_streaming_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 全局搜索服务
+///
+/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
 
-@ProviderFor(RustMisskeyStreamingService)
-final rustMisskeyStreamingServiceProvider =
-    RustMisskeyStreamingServiceProvider._();
+@ProviderFor(GlobalSearch)
+final globalSearchProvider = GlobalSearchProvider._();
 
-final class RustMisskeyStreamingServiceProvider
-    extends $NotifierProvider<RustMisskeyStreamingService, void> {
-  RustMisskeyStreamingServiceProvider._()
+/// 全局搜索服务
+///
+/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
+final class GlobalSearchProvider extends $NotifierProvider<GlobalSearch, void> {
+  /// 全局搜索服务
+  ///
+  /// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
+  GlobalSearchProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'rustMisskeyStreamingServiceProvider',
-        isAutoDispose: false,
+        name: r'globalSearchProvider',
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$rustMisskeyStreamingServiceHash();
+  String debugGetCreateSourceHash() => _$globalSearchHash();
 
   @$internal
   @override
-  RustMisskeyStreamingService create() => RustMisskeyStreamingService();
+  GlobalSearch create() => GlobalSearch();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -42,10 +49,13 @@ final class RustMisskeyStreamingServiceProvider
   }
 }
 
-String _$rustMisskeyStreamingServiceHash() =>
-    r'1c9de3daa0181f479f27891635b87950d9a8c72f';
+String _$globalSearchHash() => r'4c9bfee87e4305d4bf0c26f1056bf9030b790b4a';
 
-abstract class _$RustMisskeyStreamingService extends $Notifier<void> {
+/// 全局搜索服务
+///
+/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
+
+abstract class _$GlobalSearch extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

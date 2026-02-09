@@ -1,43 +1,29 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'group.dart';
 
-class User {
-  final String id;
-  final String username;
-  final String displayName;
-  final String? avatarUrl;
-  final String slug;
-  final String joinTime;
-  final int discussionCount;
-  final int commentCount;
-  final bool canEdit;
-  final bool canEditCredentials;
-  final bool canEditGroups;
-  final bool canDelete;
-  final String? lastSeenAt;
-  final bool isEmailConfirmed;
-  final bool isAdmin;
-  final Map<String, dynamic> preferences;
-  final List<Group> groups;
+part 'user.freezed.dart';
 
-  User({
-    required this.id,
-    required this.username,
-    required this.displayName,
-    this.avatarUrl,
-    required this.slug,
-    required this.joinTime,
-    required this.discussionCount,
-    required this.commentCount,
-    required this.canEdit,
-    required this.canEditCredentials,
-    required this.canEditGroups,
-    required this.canDelete,
-    this.lastSeenAt,
-    required this.isEmailConfirmed,
-    required this.isAdmin,
-    required this.preferences,
-    this.groups = const [],
-  });
+@freezed
+abstract class User with _$User {
+  const factory User({
+    required String id,
+    required String username,
+    required String displayName,
+    String? avatarUrl,
+    required String slug,
+    required String joinTime,
+    required int discussionCount,
+    required int commentCount,
+    required bool canEdit,
+    required bool canEditCredentials,
+    required bool canEditGroups,
+    required bool canDelete,
+    String? lastSeenAt,
+    required bool isEmailConfirmed,
+    required bool isAdmin,
+    required Map<String, dynamic> preferences,
+    @Default([]) List<Group> groups,
+  }) = _User;
 
   factory User.fromJson(
     Map<String, dynamic> json, {
@@ -61,22 +47,26 @@ class User {
     }
 
     return User(
-      id: json['id'] ?? '',
-      username: attrs['username'] ?? 'unknown',
-      displayName: attrs['displayName'] ?? attrs['username'] ?? 'User',
-      avatarUrl: attrs['avatarUrl'],
-      slug: attrs['slug'] ?? '',
-      joinTime: attrs['joinTime'] ?? DateTime.now().toIso8601String(),
-      discussionCount: attrs['discussionCount'] ?? 0,
-      commentCount: attrs['commentCount'] ?? 0,
-      canEdit: attrs['canEdit'] ?? false,
-      canEditCredentials: attrs['canEditCredentials'] ?? false,
-      canEditGroups: attrs['canEditGroups'] ?? false,
-      canDelete: attrs['canDelete'] ?? false,
-      lastSeenAt: attrs['lastSeenAt'],
-      isEmailConfirmed: attrs['isEmailConfirmed'] ?? false,
-      isAdmin: attrs['isAdmin'] ?? false,
-      preferences: attrs['preferences'] ?? {},
+      id: json['id'] as String? ?? '',
+      username: attrs['username'] as String? ?? 'unknown',
+      displayName:
+          attrs['displayName'] as String? ??
+          attrs['username'] as String? ??
+          'User',
+      avatarUrl: attrs['avatarUrl'] as String?,
+      slug: attrs['slug'] as String? ?? '',
+      joinTime:
+          attrs['joinTime'] as String? ?? DateTime.now().toIso8601String(),
+      discussionCount: attrs['discussionCount'] as int? ?? 0,
+      commentCount: attrs['commentCount'] as int? ?? 0,
+      canEdit: attrs['canEdit'] as bool? ?? false,
+      canEditCredentials: attrs['canEditCredentials'] as bool? ?? false,
+      canEditGroups: attrs['canEditGroups'] as bool? ?? false,
+      canDelete: attrs['canDelete'] as bool? ?? false,
+      lastSeenAt: attrs['lastSeenAt'] as String?,
+      isEmailConfirmed: attrs['isEmailConfirmed'] as bool? ?? false,
+      isAdmin: attrs['isAdmin'] as bool? ?? false,
+      preferences: attrs['preferences'] as Map<String, dynamic>? ?? {},
       groups: parsedGroups,
     );
   }

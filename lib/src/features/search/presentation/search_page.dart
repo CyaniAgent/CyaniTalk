@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/services/search/global_search_service.dart';
 import '../../../core/utils/logger.dart';
 
-class SearchPage extends StatefulWidget {
+class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPageState extends ConsumerState<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
-  final GlobalSearchService _searchService = GlobalSearchService();
   List<SearchResult> _results = [];
   bool _isLoading = false;
 
@@ -36,7 +36,9 @@ class _SearchPageState extends State<SearchPage> {
     });
 
     try {
-      final results = await _searchService.search(query);
+      final results = await ref
+          .read(globalSearchProvider.notifier)
+          .search(query);
       if (mounted) {
         setState(() {
           _results = results;
@@ -49,9 +51,9 @@ class _SearchPageState extends State<SearchPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -90,41 +92,39 @@ class _SearchPageState extends State<SearchPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _results.isEmpty
-              ? Center(
-                  child: Text(
-                    _searchController.text.isEmpty
-                        ? 'search_enter_query'.tr()
-                        : 'search_no_results'.tr(),
+          ? Center(
+              child: Text(
+                _searchController.text.isEmpty
+                    ? 'search_enter_query'.tr()
+                    : 'search_no_results'.tr(),
+              ),
+            )
+          : ListView.builder(
+              itemCount: _results.length,
+              itemBuilder: (context, index) {
+                final result = _results[index];
+                final sourceText = result.source == 'misskey'
+                    ? 'search_source_misskey'.tr()
+                    : 'search_source_flarum'.tr();
+                return ListTile(
+                  leading: Icon(
+                    result.source == 'misskey' ? Icons.public : Icons.forum,
+                    color: result.source == 'misskey'
+                        ? Colors.green
+                        : Colors.orange,
                   ),
-                )
-              : ListView.builder(
-                  itemCount: _results.length,
-                  itemBuilder: (context, index) {
-                    final result = _results[index];
-                    final sourceText = result.source == 'misskey'
-                        ? 'search_source_misskey'.tr()
-                        : 'search_source_flarum'.tr();
-                    return ListTile(
-                      leading: Icon(
-                        result.source == 'misskey'
-                            ? Icons.public
-                            : Icons.forum,
-                        color: result.source == 'misskey'
-                            ? Colors.green
-                            : Colors.orange,
-                      ),
-                      title: Text(result.title),
-                      subtitle: Text(
-                        '$sourceText • ${result.type}\n${result.subtitle}',
-                      ),
-                      isThreeLine: true,
-                      onTap: () {
-                        logger.info('SearchPage: 选择搜索结果: ${result.title}');
-                        // TODO: Implement navigation to result details
-                      },
-                    );
+                  title: Text(result.title),
+                  subtitle: Text(
+                    '$sourceText • ${result.type}\n${result.subtitle}',
+                  ),
+                  isThreeLine: true,
+                  onTap: () {
+                    logger.info('SearchPage: 选择搜索结果: ${result.title}');
+                    // TODO: Implement navigation to result details
                   },
-                ),
+                );
+              },
+            ),
     );
   }
 }

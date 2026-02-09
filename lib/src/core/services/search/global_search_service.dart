@@ -1,10 +1,9 @@
-// 全局搜索服务相关的类和定义
-//
-// 该文件包含搜索结果模型和全局搜索服务的实现，
-// 负责处理跨平台搜索请求并返回统一的搜索结果。
-import 'dart:async';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../utils/utils.dart';
+import '../../../features/flarum/application/flarum_providers.dart';
+import '../../../features/misskey/data/misskey_repository.dart';
+
+part 'global_search_service.g.dart';
 
 /// 搜索结果模型
 ///
@@ -12,45 +11,35 @@ import '../../utils/utils.dart';
 class SearchResult {
   /// 搜索结果的标题
   final String title;
-  
+
   /// 搜索结果的副标题或描述
   final String subtitle;
-  
+
   /// 搜索结果的来源平台，如'Misskey'或'Flarum'
   final String source;
-  
+
   /// 搜索结果的类型，如'User'、'Post'、'Tag'等
   final String type;
 
-  /// 创建一个新的搜索结果实例
-  ///
-  /// [title] - 搜索结果的标题
-  /// [subtitle] - 搜索结果的副标题或描述
-  /// [source] - 搜索结果的来源平台
-  /// [type] - 搜索结果的类型
+  /// 关联的原始数据ID或对象
+  final dynamic originalData;
+
   SearchResult({
     required this.title,
     required this.subtitle,
     required this.source,
     required this.type,
+    this.originalData,
   });
 }
 
 /// 全局搜索服务
 ///
 /// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
-/// 使用单例模式确保全局只有一个实例。
-class GlobalSearchService {
-  // 单例实例，用于确保全局只有一个搜索服务实例
-  static final GlobalSearchService _instance = GlobalSearchService._internal();
-
-  /// 获取全局搜索服务的实例
-  factory GlobalSearchService() {
-    return _instance;
-  }
-
-  /// 私有构造函数，用于创建单例实例
-  GlobalSearchService._internal();
+@riverpod
+class GlobalSearch extends _$GlobalSearch {
+  @override
+  void build() {}
 
   /// 执行全局搜索
   ///
@@ -58,49 +47,69 @@ class GlobalSearchService {
   ///
   /// 返回包含搜索结果的Future列表
   Future<List<SearchResult>> search(String query) async {
-    logger.info('GlobalSearchService: 开始搜索，关键词: $query');
-    // 模拟网络延迟
-    await Future.delayed(const Duration(milliseconds: 500));
+    if (query.isEmpty) return [];
 
-    if (query.isEmpty) {
-      logger.debug('GlobalSearchService: 搜索关键词为空，返回空结果');
-      return [];
-    }
-
-    // 模拟搜索结果
+    logger.info('GlobalSearch: Starting search for: $query');
     final results = <SearchResult>[];
 
-    // Misskey平台模拟结果
-    logger.debug('GlobalSearchService: 添加Misskey平台搜索结果');
-    results.add(SearchResult(
-      title: 'Note containing "$query"',
-      subtitle: '@user: This is a misskey note about $query...',
-      source: 'misskey',
-      type: 'Note',
-    ));
-    results.add(SearchResult(
-      title: 'User $query',
-      subtitle: '@$query@misskey.io',
-      source: 'misskey',
-      type: 'User',
-    ));
+    // Search Misskey (if available)
+    try {
+      final misskeyRepo = await ref.read(misskeyRepositoryProvider.future);
+      final users = await misskeyRepo.searchUsers(query, limit: 5);
+      results.addAll(
+        users.map(
+          (u) => SearchResult(
+            title: u.name ?? u.username,
+            subtitle: '@${u.username}@${misskeyRepo.host}',
+            source: 'misskey',
+            type: 'User',
+            originalData: u,
+          ),
+        ),
+      );
 
-    // Flarum平台模拟结果
-    logger.debug('GlobalSearchService: 添加Flarum平台搜索结果');
-    results.add(SearchResult(
-      title: 'Discussion about "$query"',
-      subtitle: 'Latest reply in General tag',
-      source: 'flarum',
-      type: 'Discussion',
-    ));
-    results.add(SearchResult(
-      title: '#$query',
-      subtitle: 'Flarum Tag',
-      source: 'flarum',
-      type: 'Tag',
-    ));
+      final notes = await misskeyRepo.searchNotes(query, limit: 5);
+      results.addAll(
+        notes.map(
+          (n) => SearchResult(
+            title: n.text ?? 'Note',
+            subtitle:
+                '@${n.user?.username ?? "unknown"}: ${n.text?.substring(0, 30.clamp(0, n.text?.length ?? 0)) ?? ""}${(n.text?.length ?? 0) > 30 ? "..." : ""}',
+            source: 'misskey',
+            type: 'Note',
+            originalData: n,
+          ),
+        ),
+      );
+    } catch (e) {
+      logger.warning('GlobalSearch: Misskey search failed: $e');
+    }
 
-    logger.info('GlobalSearchService: 搜索完成，找到 ${results.length} 个结果');
+    // Search Flarum (if available)
+    try {
+      final flarumRepo = ref.read(flarumRepositoryProvider);
+      final discussions = await flarumRepo.searchDiscussions(query);
+      results.addAll(
+        discussions
+            .take(5)
+            .map(
+              (d) => SearchResult(
+                title: d.title,
+                subtitle: 'Discussions about ${d.title}',
+                source: 'flarum',
+                type: 'Discussion',
+                originalData: d,
+              ),
+            ),
+      );
+
+      // We could also search tags but Flarum doesn't have a specific tag search API usually,
+      // they are usually fetched all at once.
+    } catch (e) {
+      logger.warning('GlobalSearch: Flarum search failed: $e');
+    }
+
+    logger.info('GlobalSearch: Found ${results.length} results');
     return results;
   }
 }

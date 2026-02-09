@@ -3,6 +3,7 @@
 // 该文件包含GlobalSearchDelegate类，用于处理应用程序的全局搜索功能，
 // 负责构建搜索界面、处理搜索操作和显示搜索结果。
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../utils/utils.dart';
 import 'global_search_service.dart';
@@ -12,11 +13,11 @@ import 'global_search_service.dart';
 /// 继承自Flutter的SearchDelegate，负责处理应用程序的全局搜索功能，
 /// 支持跨Misskey和Flarum平台搜索内容。
 class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
-  /// 全局搜索服务实例
-  final GlobalSearchService _searchService = GlobalSearchService();
+  /// Riverpod WidgetRef
+  final WidgetRef ref;
 
   /// 构造函数
-  GlobalSearchDelegate() {
+  GlobalSearchDelegate(this.ref) {
     logger.info('GlobalSearchDelegate: 初始化全局搜索代理');
   }
 
@@ -65,7 +66,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
   Widget buildResults(BuildContext context) {
     logger.info('GlobalSearchDelegate: 构建搜索结果，关键词: $query');
     return FutureBuilder<List<SearchResult>>(
-      future: _searchService.search(query),
+      future: ref.read(globalSearchProvider.notifier).search(query),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           logger.debug('GlobalSearchDelegate: 搜索中...');
@@ -84,14 +85,20 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
           itemCount: results.length,
           itemBuilder: (context, index) {
             final result = results[index];
-            final sourceText = result.source == 'misskey' ? 'search_source_misskey'.tr() : 'search_source_flarum'.tr();
+            final sourceText = result.source == 'misskey'
+                ? 'search_source_misskey'.tr()
+                : 'search_source_flarum'.tr();
             return ListTile(
               leading: Icon(
                 result.source == 'misskey' ? Icons.public : Icons.forum,
-                color: result.source == 'misskey' ? Colors.green : Colors.orange,
+                color: result.source == 'misskey'
+                    ? Colors.green
+                    : Colors.orange,
               ),
               title: Text(result.title),
-              subtitle: Text('$sourceText • ${result.type}\n${result.subtitle}'),
+              subtitle: Text(
+                '$sourceText • ${result.type}\n${result.subtitle}',
+              ),
               isThreeLine: true,
               onTap: () {
                 logger.info('GlobalSearchDelegate: 选择搜索结果: ${result.title}');

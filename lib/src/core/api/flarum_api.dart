@@ -2,15 +2,15 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cyanitalk/src/rust/api/flarum.dart';
 
 import '../constants/flarum_constants.dart';
 import '../utils/verification_window.dart';
 import '../utils/utils.dart';
+import '../utils/logger.dart';
 import '../../routing/router.dart';
 import 'base_api.dart';
+import 'network_client.dart';
 
 class FlarumApi extends BaseApi {
   static final FlarumApi _instance = FlarumApi._internal();
@@ -19,11 +19,9 @@ class FlarumApi extends BaseApi {
 
   FlarumApi._internal() {
     _initDio();
-    _rustClient = FlarumRustClient(baseUrl: _baseUrl!);
   }
 
   late Dio _dio;
-  late FlarumRustClient _rustClient;
   late CookieJar _cookieJar;
   String? _token;
   String? _userId;
@@ -63,20 +61,10 @@ class FlarumApi extends BaseApi {
 
     final headers = {...basicHeaders, ...browserHeaders};
 
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: _baseUrl!,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: headers,
-      ),
-    );
-
-    _dio.httpClientAdapter = Http2Adapter(
-      ConnectionManager(
-        idleTimeout: const Duration(seconds: 10),
-        onClientCreate: (uri, config) {},
-      ),
+    _dio = NetworkClient().createDio(
+      host: _baseUrl!.replaceFirst('https://', ''),
+      userAgent: userAgent,
+      extraHeaders: headers,
     );
 
     _cookieJar = CookieJar();
@@ -191,23 +179,17 @@ class FlarumApi extends BaseApi {
     _dio.options.baseUrl = url;
     _dio.options.headers['Referer'] = url;
     _dio.options.headers['Origin'] = url;
-    _rustClient = FlarumRustClient(baseUrl: url);
-    if (_token != null) {
-      _rustClient.setToken(token: _token!, userId: _userId);
-    }
   }
 
   void setToken(String token, {String? userId}) {
     logger.debug('FlarumApi: 设置令牌');
     _token = token;
     _userId = userId;
-    _rustClient.setToken(token: token, userId: userId);
   }
 
   void clearToken() {
     logger.debug('FlarumApi: 清除令牌');
     _token = null;
-    _rustClient.clearToken();
   }
 
   String? get token => _token;
@@ -411,6 +393,83 @@ class FlarumApi extends BaseApi {
     (response) => Map<String, dynamic>.from(response.data),
     dioErrorParser: (error) =>
         error.response?.data?['errors']?[0]?['detail'] ?? error.message,
+  );
+
+  /// 获取讨论列表
+  Future<Map<String, dynamic>> getDiscussions({
+    int? limit,
+    int? offset,
+    String? include,
+  }) => executeApiCall(
+    'FlarumApi.getDiscussions',
+    () => get(
+      '/api/discussions',
+      queryParameters: {
+        if (limit != null) 'page[limit]': limit,
+        if (offset != null) 'page[offset]': offset,
+        if (include != null) 'include': include,
+      },
+    ),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
+
+  /// 搜索讨论
+  Future<Map<String, dynamic>> searchDiscussions(
+    String query, {
+    int? limit,
+    int? offset,
+  }) => executeApiCall(
+    'FlarumApi.searchDiscussions',
+    () => get(
+      '/api/discussions',
+      queryParameters: {
+        'filter[q]': query,
+        if (limit != null) 'page[limit]': limit,
+        if (offset != null) 'page[offset]': offset,
+        'include': 'user,lastPostedUser,tags',
+      },
+    ),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
+
+  /// 获取讨论详情
+  Future<Map<String, dynamic>> getDiscussionDetails(String id) =>
+      executeApiCall(
+        'FlarumApi.getDiscussionDetails',
+        () => get(
+          '/api/discussions/$id',
+          queryParameters: {
+            'include': 'user,posts,posts.user,posts.discussion,tags',
+          },
+        ),
+        (response) => Map<String, dynamic>.from(response.data),
+      );
+
+  /// 获取帖子列表
+  Future<Map<String, dynamic>> getPosts(
+    String discussionId, {
+    int? limit,
+    int? offset,
+  }) => executeApiCall(
+    'FlarumApi.getPosts',
+    () => get(
+      '/api/posts',
+      queryParameters: {
+        'filter[discussion]': discussionId,
+        'filter[type]': 'comment',
+        if (limit != null) 'page[limit]': limit,
+        if (offset != null) 'page[offset]': offset,
+        'include': 'user,discussion',
+      },
+    ),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
+
+  /// 获取所有标签
+  Future<Map<String, dynamic>> getTags() => executeApiCall(
+    'FlarumApi.getTags',
+    () => get('/api/tags'),
+    (response) => Map<String, dynamic>.from(response.data),
   );
 
   Future<Response> get(

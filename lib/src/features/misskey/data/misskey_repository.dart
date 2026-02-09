@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/utils/logger.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../core/api/misskey_api.dart';
@@ -11,14 +12,19 @@ import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
 import '../domain/misskey_notification.dart';
 import '../domain/chat_room.dart';
+import 'misskey_repository_interface.dart';
 
 part 'misskey_repository.g.dart';
 
-class MisskeyRepository {
+class MisskeyRepository implements IMisskeyRepository {
   final MisskeyApi api;
 
   MisskeyRepository(this.api);
 
+  @override
+  String get host => api.host;
+
+  @override
   Future<MisskeyUser> getMe() async {
     logger.info('MisskeyRepository: Getting current user information');
     try {
@@ -35,6 +41,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<Map<String, dynamic>> getDriveInfo() async {
     logger.info('MisskeyRepository: Getting drive information');
     try {
@@ -45,6 +52,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Note>> getTimeline(
     String type, {
     int limit = 20,
@@ -55,7 +63,9 @@ class MisskeyRepository {
     );
     try {
       final data = await api.getTimeline(type, limit: limit, untilId: untilId);
-      final notes = data.map((e) => Note.fromJson(e)).toList();
+      final notes = await compute((List<dynamic> list) {
+        return list.map((e) => Note.fromJson(e)).toList();
+      }, data);
       logger.info(
         'MisskeyRepository: Successfully retrieved ${notes.length} notes for $type timeline',
       );
@@ -66,11 +76,14 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Channel>> getFeaturedChannels() async {
     logger.info('MisskeyRepository: Getting featured channels');
     try {
       final data = await api.getFeaturedChannels();
-      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      final channels = await compute((List<dynamic> list) {
+        return list.map((e) => Channel.fromJson(e)).toList();
+      }, data);
       logger.info(
         'MisskeyRepository: Successfully retrieved ${channels.length} featured channels',
       );
@@ -81,14 +94,20 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Channel>> getFollowingChannels({
     int limit = 20,
     String? untilId,
   }) async {
     logger.info('MisskeyRepository: Getting following channels');
     try {
-      final data = await api.getFollowingChannels(limit: limit, untilId: untilId);
-      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      final data = await api.getFollowingChannels(
+        limit: limit,
+        untilId: untilId,
+      );
+      final channels = await compute((List<dynamic> list) {
+        return list.map((e) => Channel.fromJson(e)).toList();
+      }, data);
       return channels;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting following channels', e);
@@ -96,6 +115,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Channel>> getOwnedChannels({
     int limit = 20,
     String? untilId,
@@ -103,7 +123,9 @@ class MisskeyRepository {
     logger.info('MisskeyRepository: Getting owned channels');
     try {
       final data = await api.getOwnedChannels(limit: limit, untilId: untilId);
-      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      final channels = await compute((List<dynamic> list) {
+        return list.map((e) => Channel.fromJson(e)).toList();
+      }, data);
       return channels;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting owned channels', e);
@@ -111,14 +133,20 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Channel>> getFavoriteChannels({
     int limit = 20,
     String? untilId,
   }) async {
     logger.info('MisskeyRepository: Getting favorite channels');
     try {
-      final data = await api.getFavoriteChannels(limit: limit, untilId: untilId);
-      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      final data = await api.getFavoriteChannels(
+        limit: limit,
+        untilId: untilId,
+      );
+      final channels = await compute((List<dynamic> list) {
+        return list.map((e) => Channel.fromJson(e)).toList();
+      }, data);
       return channels;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting favorite channels', e);
@@ -126,6 +154,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Channel>> searchChannels(
     String query, {
     int limit = 20,
@@ -140,7 +169,9 @@ class MisskeyRepository {
         limit: limit,
         untilId: untilId,
       );
-      final channels = data.map((e) => Channel.fromJson(e)).toList();
+      final channels = await compute((List<dynamic> list) {
+        return list.map((e) => Channel.fromJson(e)).toList();
+      }, data);
       logger.info(
         'MisskeyRepository: Successfully retrieved ${channels.length} channels for search query',
       );
@@ -151,6 +182,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<Channel> showChannel(String channelId) async {
     logger.info('MisskeyRepository: Showing channel $channelId');
     try {
@@ -162,6 +194,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<MisskeyUser> showUser(String userId) async {
     logger.info('MisskeyRepository: Showing user $userId');
     try {
@@ -173,6 +206,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -187,7 +221,9 @@ class MisskeyRepository {
         limit: limit,
         untilId: untilId,
       );
-      final notes = data.map((e) => Note.fromJson(e)).toList();
+      final notes = await compute((List<dynamic> list) {
+        return list.map((e) => Note.fromJson(e)).toList();
+      }, data);
       logger.info(
         'MisskeyRepository: Successfully retrieved ${notes.length} notes for channel $channelId timeline',
       );
@@ -201,11 +237,14 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Clip>> getClips({int limit = 20, String? untilId}) async {
     logger.info('MisskeyRepository: Getting clips, limit=$limit');
     try {
       final data = await api.getClips(limit: limit, untilId: untilId);
-      final clips = data.map((e) => Clip.fromJson(e)).toList();
+      final clips = await compute((List<dynamic> list) {
+        return list.map((e) => Clip.fromJson(e)).toList();
+      }, data);
       logger.info(
         'MisskeyRepository: Successfully retrieved ${clips.length} clips',
       );
@@ -216,6 +255,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<Note>> getClipNotes({
     required String clipId,
     int limit = 20,
@@ -228,7 +268,9 @@ class MisskeyRepository {
         limit: limit,
         untilId: untilId,
       );
-      final notes = data.map((e) => Note.fromJson(e)).toList();
+      final notes = await compute((List<dynamic> list) {
+        return list.map((e) => Note.fromJson(e)).toList();
+      }, data);
       logger.info(
         'MisskeyRepository: Successfully retrieved ${notes.length} notes for clip $clipId',
       );
@@ -239,6 +281,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> createNote({
     String? text,
     String? replyId,
@@ -266,6 +309,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> renote(String noteId) async {
     logger.info('MisskeyRepository: Renoting note $noteId');
     try {
@@ -277,6 +321,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> reply(String noteId, String text) async {
     logger.info('MisskeyRepository: Replying to note $noteId');
     try {
@@ -288,6 +333,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> addReaction(String noteId, String reaction) async {
     logger.info(
       'MisskeyRepository: Adding reaction "$reaction" to note $noteId',
@@ -306,6 +352,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> removeReaction(String noteId) async {
     logger.info('MisskeyRepository: Removing reaction from note $noteId');
     try {
@@ -322,6 +369,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<DriveFile>> getDriveFiles({
     String? folderId,
     int limit = 20,
@@ -336,13 +384,16 @@ class MisskeyRepository {
         limit: limit,
         untilId: untilId,
       );
-      return data.map((e) => DriveFile.fromJson(e)).toList();
+      return await compute((List<dynamic> list) {
+        return list.map((e) => DriveFile.fromJson(e)).toList();
+      }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error getting drive files', e);
       rethrow;
     }
   }
 
+  @override
   Future<List<DriveFolder>> getDriveFolders({
     String? folderId,
     int limit = 20,
@@ -357,13 +408,16 @@ class MisskeyRepository {
         limit: limit,
         untilId: untilId,
       );
-      return data.map((e) => DriveFolder.fromJson(e)).toList();
+      return await compute((List<dynamic> list) {
+        return list.map((e) => DriveFolder.fromJson(e)).toList();
+      }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error getting drive folders', e);
       rethrow;
     }
   }
 
+  @override
   Future<DriveFolder> createDriveFolder(String name, {String? parentId}) async {
     logger.info(
       'MisskeyRepository: Creating drive folder "$name", parentId=$parentId',
@@ -377,6 +431,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<String?> getOrCreateAppFolder() async {
     const folderName = 'CyaniTalk App Transfered';
     try {
@@ -385,7 +440,9 @@ class MisskeyRepository {
       final appFolder = folders.where((f) => f.name == folderName).firstOrNull;
 
       if (appFolder != null) {
-        logger.info('MisskeyRepository: Found existing folder: ${appFolder.id}');
+        logger.info(
+          'MisskeyRepository: Found existing folder: ${appFolder.id}',
+        );
         return appFolder.id;
       }
 
@@ -398,6 +455,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> deleteDriveFile(String fileId) async {
     logger.info('MisskeyRepository: Deleting drive file $fileId');
     try {
@@ -408,6 +466,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> deleteDriveFolder(String folderId) async {
     logger.info('MisskeyRepository: Deleting drive folder $folderId');
     try {
@@ -418,6 +477,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<DriveFile> uploadDriveFile(
     List<int> bytes,
     String filename, {
@@ -443,6 +503,7 @@ class MisskeyRepository {
   }
 
   /// Check if a note still exists on the server
+  @override
   Future<bool> checkNoteExists(String noteId) async {
     logger.debug('MisskeyRepository: Checking if note exists: $noteId');
     try {
@@ -454,6 +515,7 @@ class MisskeyRepository {
   }
 
   /// Get the number of online users
+  @override
   Future<int> getOnlineUsersCount() async {
     logger.debug('MisskeyRepository: Getting online users count');
     try {
@@ -466,96 +528,42 @@ class MisskeyRepository {
 
   // --- Messaging ---
 
+  @override
   Future<List<MessagingMessage>> getMessagingHistory({int limit = 20}) async {
     logger.info('MisskeyRepository: Getting messaging history, limit=$limit');
     try {
       final data = await api.getMessagingHistory(limit: limit);
-      
-      final messages = <MessagingMessage>[];
-      final missingUserIds = <String>{};
-      
-      for (final item in data) {
-        try {
-          var map = Map<String, dynamic>.from(item as Map);
-          
-          if (map.containsKey('message') && map['message'] is Map) {
-            final outer = map;
-            map = Map<String, dynamic>.from(map['message'] as Map);
-            
-            // 重要：从外层对象复制用户信息，防止内层 message 对象缺少这些字段
-            if (map['user'] == null && outer['user'] != null) map['user'] = outer['user'];
-            if (map['recipient'] == null && outer['recipient'] != null) map['recipient'] = outer['recipient'];
-            if (map['userId'] == null && outer['userId'] != null) map['userId'] = outer['userId'];
-            if (map['recipientId'] == null && outer['recipientId'] != null) map['recipientId'] = outer['recipientId'];
-          }
 
-          if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
-          if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
-          
-          // Handle room data in group field
-          if (map['group'] != null && map['room'] == null) {
-            final group = map['group'];
-            if (group is Map && group['room'] != null) {
-               map['room'] = group['room'];
-            }
-          }
-
-          final message = MessagingMessage.fromJson(map);
-          messages.add(message);
-
-          // Check if we have user info but user object is null, add to missing IDs
-          // Check for various possible field names that could contain user IDs
-          if (message.userId != null && message.user == null) {
-            missingUserIds.add(message.userId!);
-          }
-          if (message.recipientId != null && message.recipient == null) {
-            missingUserIds.add(message.recipientId!);
-          }
-          
-          // Additional check for possible field aliases that might have been processed but still missing user objects
-          // In case the ID exists in raw JSON but didn't map properly to the model
-          if (map['userId'] != null && message.user == null) {
-            missingUserIds.add(map['userId'] as String);
-          }
-          if (map['recipientId'] != null && message.recipient == null) {
-            missingUserIds.add(map['recipientId'] as String);
-          }
-          if (map['fromId'] != null && message.user == null) {
-            missingUserIds.add(map['fromId'] as String);
-          }
-          if (map['toId'] != null && message.recipient == null) {
-            missingUserIds.add(map['toId'] as String);
-          }
-          if (map['senderId'] != null && message.user == null) {
-            missingUserIds.add(map['senderId'] as String);
-          }
-          if (map['recipientUserId'] != null && message.recipient == null) {
-            missingUserIds.add(map['recipientUserId'] as String);
-          }
-        } catch (e) {
-          logger.error('MisskeyRepository: Error decoding message item', e);
-        }
-      }
+      final result = await compute(_parseMessagingHistory, data);
+      final messages = result.messages;
+      final missingUserIds = result.missingUserIds;
 
       // Fetch missing users
       if (missingUserIds.isNotEmpty) {
-        logger.info('MisskeyRepository: Fetching ${missingUserIds.length} missing users');
+        logger.info(
+          'MisskeyRepository: Fetching ${missingUserIds.length} missing users',
+        );
         final users = <String, MisskeyUser>{};
-        await Future.wait(missingUserIds.map((id) async {
-          try {
-            final user = await showUser(id);
-            users[id] = user;
-          } catch (e) {
-            logger.error('MisskeyRepository: Error fetching missing user $id', e);
-          }
-        }));
+        await Future.wait(
+          missingUserIds.map((id) async {
+            try {
+              final user = await showUser(id);
+              users[id] = user;
+            } catch (e) {
+              logger.error(
+                'MisskeyRepository: Error fetching missing user $id',
+                e,
+              );
+            }
+          }),
+        );
 
         // Update messages with fetched users
         for (var i = 0; i < messages.length; i++) {
           final m = messages[i];
           MisskeyUser? updatedUser = m.user ?? users[m.userId];
           MisskeyUser? updatedRecipient = m.recipient ?? users[m.recipientId];
-          
+
           if (updatedUser != m.user || updatedRecipient != m.recipient) {
             messages[i] = m.copyWith(
               user: updatedUser,
@@ -564,8 +572,10 @@ class MisskeyRepository {
           }
         }
       }
-      
-      logger.info('MisskeyRepository: Successfully retrieved ${messages.length} messages');
+
+      logger.info(
+        'MisskeyRepository: Successfully retrieved ${messages.length} messages',
+      );
       return messages;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting messaging history', e);
@@ -573,45 +583,57 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<MessagingMessage>> getChatRoomMessages({
     required String roomId,
     int limit = 20,
     String? untilId,
   }) async {
-    logger.info('MisskeyRepository: Getting chat room messages for room $roomId');
+    logger.info(
+      'MisskeyRepository: Getting chat room messages for room $roomId',
+    );
     try {
       final data = await api.getChatRoomMessages(roomId, limit: limit);
-      final messages = <MessagingMessage>[];
-      
-      for (final item in data) {
-        try {
-          var map = Map<String, dynamic>.from(item as Map);
-          if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
-          if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
-          
-          messages.add(MessagingMessage.fromJson(map));
-        } catch (e) {
-          logger.error('MisskeyRepository: Error decoding chat room message', e);
+      return await compute((List<dynamic> list) {
+        final messages = <MessagingMessage>[];
+        for (final item in data) {
+          try {
+            var map = Map<String, dynamic>.from(item as Map);
+            if (map['user'] == null && map['from'] != null) {
+              map['user'] = map['from'];
+            }
+            if (map['userId'] == null && map['fromId'] != null) {
+              map['userId'] = map['fromId'];
+            }
+
+            messages.add(MessagingMessage.fromJson(map));
+          } catch (_) {}
         }
-      }
-      return messages;
+        return messages;
+      }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error getting chat room messages', e);
       rethrow;
     }
   }
 
+  @override
   Future<List<ChatRoom>> getJoinedChatRooms() async {
     logger.info('MisskeyRepository: Getting joined chat rooms');
     try {
       final data = await api.getChatRooms();
-      return data.map((e) => ChatRoom.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      return await compute((List<dynamic> list) {
+        return list
+            .map((e) => ChatRoom.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+      }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error getting chat rooms', e);
       rethrow;
     }
   }
 
+  @override
   Future<void> sendChatRoomMessage({
     required String roomId,
     String? text,
@@ -626,6 +648,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<List<MessagingMessage>> getMessagingMessages({
     required String userId,
     int limit = 10,
@@ -644,84 +667,37 @@ class MisskeyRepository {
         untilId: untilId,
         markAsRead: markAsRead,
       );
-      
-      final messages = <MessagingMessage>[];
-      final missingUserIds = <String>{};
-      for (final item in data) {
-        try {
-          var map = Map<String, dynamic>.from(item as Map);
 
-          // Check for wrapped message
-          if (map.containsKey('message') && map['message'] is Map) {
-            final outer = map;
-            map = Map<String, dynamic>.from(map['message'] as Map);
-            
-            // 重要：从外层对象复制用户信息，防止内层 message 对象缺少这些字段
-            if (map['user'] == null && outer['user'] != null) map['user'] = outer['user'];
-            if (map['recipient'] == null && outer['recipient'] != null) map['recipient'] = outer['recipient'];
-            if (map['userId'] == null && outer['userId'] != null) map['userId'] = outer['userId'];
-            if (map['recipientId'] == null && outer['recipientId'] != null) map['recipientId'] = outer['recipientId'];
-          }
+      final result = await compute(_parseMessagingHistory, data);
+      final messages = result.messages;
+      final missingUserIds = result.missingUserIds;
 
-          // Handle aliases manually
-          if (map['user'] == null && map['from'] != null) map['user'] = map['from'];
-          if (map['userId'] == null && map['fromId'] != null) map['userId'] = map['fromId'];
-          
-          final message = MessagingMessage.fromJson(map);
-          messages.add(message);
-          
-          // Check if we have user info but user object is null, add to missing IDs
-          // Check for various possible field names that could contain user IDs
-          if (message.userId != null && message.user == null) {
-            missingUserIds.add(message.userId!);
-          }
-          if (message.recipientId != null && message.recipient == null) {
-            missingUserIds.add(message.recipientId!);
-          }
-          
-          // Additional check for possible field aliases that might have been processed but still missing user objects
-          if (map['userId'] != null && message.user == null) {
-            missingUserIds.add(map['userId'] as String);
-          }
-          if (map['recipientId'] != null && message.recipient == null) {
-            missingUserIds.add(map['recipientId'] as String);
-          }
-          if (map['fromId'] != null && message.user == null) {
-            missingUserIds.add(map['fromId'] as String);
-          }
-          if (map['toId'] != null && message.recipient == null) {
-            missingUserIds.add(map['toId'] as String);
-          }
-          if (map['senderId'] != null && message.user == null) {
-            missingUserIds.add(map['senderId'] as String);
-          }
-          if (map['recipientUserId'] != null && message.recipient == null) {
-            missingUserIds.add(map['recipientUserId'] as String);
-          }
-        } catch (e) {
-          logger.error('MisskeyRepository: Error decoding message item', e);
-        }
-      }
-
-      // Fetch missing users (similar to getMessagingHistory)
+      // Fetch missing users
       if (missingUserIds.isNotEmpty) {
-        logger.info('MisskeyRepository: Fetching ${missingUserIds.length} missing users for direct messages');
+        logger.info(
+          'MisskeyRepository: Fetching ${missingUserIds.length} missing users for direct messages',
+        );
         final users = <String, MisskeyUser>{};
-        await Future.wait(missingUserIds.map((id) async {
-          try {
-            final user = await showUser(id);
-            users[id] = user;
-          } catch (e) {
-            logger.error('MisskeyRepository: Error fetching missing user $id for direct messages', e);
-          }
-        }));
+        await Future.wait(
+          missingUserIds.map((id) async {
+            try {
+              final user = await showUser(id);
+              users[id] = user;
+            } catch (e) {
+              logger.error(
+                'MisskeyRepository: Error fetching missing user $id for direct messages',
+                e,
+              );
+            }
+          }),
+        );
 
         // Update messages with fetched users
         for (var i = 0; i < messages.length; i++) {
           final m = messages[i];
           MisskeyUser? updatedUser = m.user ?? users[m.userId];
           MisskeyUser? updatedRecipient = m.recipient ?? users[m.recipientId];
-          
+
           if (updatedUser != m.user || updatedRecipient != m.recipient) {
             messages[i] = m.copyWith(
               user: updatedUser,
@@ -730,7 +706,7 @@ class MisskeyRepository {
           }
         }
       }
-      
+
       return messages;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting messaging messages', e);
@@ -738,6 +714,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<MessagingMessage> sendMessagingMessage({
     required String userId,
     String? text,
@@ -757,8 +734,11 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> markMessagingMessageAsRead(String messageId) async {
-    logger.info('MisskeyRepository: Marking messaging message $messageId as read');
+    logger.info(
+      'MisskeyRepository: Marking messaging message $messageId as read',
+    );
     try {
       await api.readMessagingMessage(messageId);
     } catch (e) {
@@ -767,6 +747,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> deleteMessagingMessage(String messageId) async {
     logger.info('MisskeyRepository: Deleting messaging message $messageId');
     try {
@@ -779,13 +760,14 @@ class MisskeyRepository {
 
   // --- Actions ---
 
+  @override
   Future<void> bookmark(String noteId) async {
     logger.info('MisskeyRepository: Bookmarking note $noteId');
     try {
       // 1. Check if "Bookmarks" clip exists
       final clips = await getClips();
       String? clipId;
-      
+
       for (final clip in clips) {
         if (clip.name == 'Bookmarks') {
           clipId = clip.id;
@@ -795,17 +777,24 @@ class MisskeyRepository {
 
       // 2. If not, create it
       if (clipId == null) {
-        logger.info('MisskeyRepository: "Bookmarks" clip not found, creating it');
-        final newClip = await api.createClip('Bookmarks', description: 'Created by CyaniTalk');
+        logger.info(
+          'MisskeyRepository: "Bookmarks" clip not found, creating it',
+        );
+        final newClip = await api.createClip(
+          'Bookmarks',
+          description: 'Created by CyaniTalk',
+        );
         clipId = newClip['id'];
       }
 
       // 3. Add note to clip
       if (clipId != null) {
         await api.addNoteToClip(clipId, noteId);
-        logger.info('MisskeyRepository: Successfully added note to clip $clipId');
+        logger.info(
+          'MisskeyRepository: Successfully added note to clip $clipId',
+        );
       } else {
-         throw Exception('Failed to get or create Bookmarks clip');
+        throw Exception('Failed to get or create Bookmarks clip');
       }
     } catch (e) {
       logger.error('MisskeyRepository: Error bookmarking note', e);
@@ -813,6 +802,7 @@ class MisskeyRepository {
     }
   }
 
+  @override
   Future<void> report(String noteId, String userId, String reason) async {
     logger.info('MisskeyRepository: Reporting note $noteId by user $userId');
     try {
@@ -825,8 +815,45 @@ class MisskeyRepository {
     }
   }
 
+  @override
+  Future<List<Note>> searchNotes(
+    String query, {
+    int limit = 20,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Searching notes for query: $query');
+    try {
+      final data = await api.searchNotes(query, limit: limit, untilId: untilId);
+      return await compute((List<dynamic> list) {
+        return list.map((e) => Note.fromJson(e)).toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error searching notes', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<MisskeyUser>> searchUsers(
+    String query, {
+    int limit = 20,
+    String? offset,
+  }) async {
+    logger.info('MisskeyRepository: Searching users for query: $query');
+    try {
+      final data = await api.searchUsers(query, limit: limit, offset: offset);
+      return await compute((List<dynamic> list) {
+        return list.map((e) => MisskeyUser.fromJson(e)).toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error searching users', e);
+      rethrow;
+    }
+  }
+
   // --- Notifications ---
 
+  @override
   Future<List<MisskeyNotification>> getNotifications({
     int limit = 20,
     String? untilId,
@@ -834,16 +861,92 @@ class MisskeyRepository {
     logger.info('MisskeyRepository: Getting notifications, limit=$limit');
     try {
       final data = await api.getNotifications(limit: limit, untilId: untilId);
-      return data.map((e) => MisskeyNotification.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      return await compute((List<dynamic> list) {
+        return list
+            .map(
+              (e) => MisskeyNotification.fromJson(
+                Map<String, dynamic>.from(e as Map),
+              ),
+            )
+            .toList();
+      }, data);
     } catch (e, stack) {
       logger.error('MisskeyRepository: Error getting notifications', e, stack);
       rethrow;
     }
   }
+
+  static _MessagingParsingResult _parseMessagingHistory(List<dynamic> data) {
+    final messages = <MessagingMessage>[];
+    final missingUserIds = <String>{};
+
+    for (final item in data) {
+      try {
+        var map = Map<String, dynamic>.from(item as Map);
+
+        if (map.containsKey('message') && map['message'] is Map) {
+          final outer = map;
+          map = Map<String, dynamic>.from(map['message'] as Map);
+
+          if (map['user'] == null && outer['user'] != null) {
+            map['user'] = outer['user'];
+          }
+          if (map['recipient'] == null && outer['recipient'] != null) {
+            map['recipient'] = outer['recipient'];
+          }
+          if (map['userId'] == null && outer['userId'] != null) {
+            map['userId'] = outer['userId'];
+          }
+          if (map['recipientId'] == null && outer['recipientId'] != null) {
+            map['recipientId'] = outer['recipientId'];
+          }
+        }
+
+        if (map['user'] == null && map['from'] != null) {
+          map['user'] = map['from'];
+        }
+        if (map['userId'] == null && map['fromId'] != null) {
+          map['userId'] = map['fromId'];
+        }
+
+        if (map['group'] != null && map['room'] == null) {
+          final group = map['group'];
+          if (group is Map && group['room'] != null) {
+            map['room'] = group['room'];
+          }
+        }
+
+        final message = MessagingMessage.fromJson(map);
+        messages.add(message);
+
+        if (message.userId != null && message.user == null) {
+          missingUserIds.add(message.userId!);
+        }
+        if (message.recipientId != null && message.recipient == null) {
+          missingUserIds.add(message.recipientId!);
+        }
+        if (map['userId'] != null && message.user == null) {
+          missingUserIds.add(map['userId'] as String);
+        }
+        if (map['recipientId'] != null && message.recipient == null) {
+          missingUserIds.add(map['recipientId'] as String);
+        }
+      } catch (_) {}
+    }
+
+    return _MessagingParsingResult(messages, missingUserIds.toList());
+  }
+}
+
+class _MessagingParsingResult {
+  final List<MessagingMessage> messages;
+  final List<String> missingUserIds;
+
+  _MessagingParsingResult(this.messages, this.missingUserIds);
 }
 
 @riverpod
-Future<MisskeyRepository> misskeyRepository(Ref ref) async {
+Future<IMisskeyRepository> misskeyRepository(Ref ref) async {
   logger.info('MisskeyRepository: Initializing repository');
   final account = await ref.watch(selectedMisskeyAccountProvider.future);
 

@@ -1,74 +1,68 @@
-class Discussion {
-  final String id;
-  final String title;
-  final String slug;
-  final int commentCount;
-  final int participantCount;
-  final String createdAt;
-  final String lastPostedAt;
-  final int lastPostNumber;
-  final bool canReply;
-  final bool canRename;
-  final bool canDelete;
-  final bool canHide;
-  final bool isHidden;
-  final bool isLocked;
-  final bool isSticky;
-  final String? subscription;
-  final String userId;
-  final String lastPostedUserId;
-  final List<String> tagIds;
-  final String firstPostId;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Discussion({
-    required this.id,
-    required this.title,
-    required this.slug,
-    required this.commentCount,
-    required this.participantCount,
-    required this.createdAt,
-    required this.lastPostedAt,
-    required this.lastPostNumber,
-    required this.canReply,
-    required this.canRename,
-    required this.canDelete,
-    required this.canHide,
-    required this.isHidden,
-    required this.isLocked,
-    required this.isSticky,
-    this.subscription,
-    required this.userId,
-    required this.lastPostedUserId,
-    required this.tagIds,
-    required this.firstPostId,
-  });
+part 'discussion.freezed.dart';
 
-  factory Discussion.fromJson(Map<String, dynamic> json) {
-    return Discussion(
-      id: json['id'],
-      title: json['attributes']['title'],
-      slug: json['attributes']['slug'],
-      commentCount: json['attributes']['commentCount'],
-      participantCount: json['attributes']['participantCount'],
-      createdAt: json['attributes']['createdAt'],
-      lastPostedAt: json['attributes']['lastPostedAt'],
-      lastPostNumber: json['attributes']['lastPostNumber'],
-      canReply: json['attributes']['canReply'] ?? true,
-      canRename: json['attributes']['canRename'] ?? false,
-      canDelete: json['attributes']['canDelete'] ?? false,
-      canHide: json['attributes']['canHide'] ?? false,
-      isHidden: json['attributes']['isHidden'] ?? false,
-      isLocked: json['attributes']['isLocked'] ?? false,
-      isSticky: json['attributes']['isSticky'] ?? false,
-      subscription: json['attributes']['subscription'],
-      userId: json['relationships']['user']?['data']?['id'] ?? 'unknown',
-      lastPostedUserId:
-          json['relationships']['lastPostedUser']?['data']?['id'] ?? 'unknown',
-      tagIds: (json['relationships']['tags']?['data'] as List? ?? [])
+@freezed
+abstract class Discussion with _$Discussion {
+  const factory Discussion({
+    required String id,
+    required String title,
+    required String slug,
+    required int commentCount,
+    required int participantCount,
+    required String createdAt,
+    required String lastPostedAt,
+    required int lastPostNumber,
+    required bool canReply,
+    required bool canRename,
+    required bool canDelete,
+    required bool canHide,
+    required bool isHidden,
+    required bool isLocked,
+    required bool isSticky,
+    String? subscription,
+    required String userId,
+    required String lastPostedUserId,
+    @Default([]) List<String> tagIds,
+    required String firstPostId,
+  }) = _Discussion;
+
+  factory Discussion.fromJson(
+    Map<String, dynamic> json, {
+    List<dynamic> included = const [],
+  }) {
+    final attrs = json['attributes'] ?? {};
+    final rels = json['relationships'] ?? {};
+
+    List<String> tagIds = [];
+    if (rels['tags'] != null && rels['tags']['data'] is List) {
+      tagIds = (rels['tags']['data'] as List)
           .map((tag) => tag['id'] as String)
-          .toList(),
-      firstPostId:
-          json['relationships']['firstPost']?['data']?['id'] ?? 'unknown',
+          .toList();
+    }
+
+    return Discussion(
+      id: json['id'] as String? ?? '',
+      title: attrs['title'] as String? ?? '',
+      slug: attrs['slug'] as String? ?? '',
+      commentCount: attrs['commentCount'] as int? ?? 0,
+      participantCount: attrs['participantCount'] as int? ?? 0,
+      createdAt: attrs['createdAt'] as String? ?? '',
+      lastPostedAt: attrs['lastPostedAt'] as String? ?? '',
+      lastPostNumber: attrs['lastPostNumber'] as int? ?? 0,
+      canReply: attrs['canReply'] as bool? ?? true,
+      canRename: attrs['canRename'] as bool? ?? false,
+      canDelete: attrs['canDelete'] as bool? ?? false,
+      canHide: attrs['canHide'] as bool? ?? false,
+      isHidden: attrs['isHidden'] as bool? ?? false,
+      isLocked: attrs['isLocked'] as bool? ?? false,
+      isSticky: attrs['isSticky'] as bool? ?? false,
+      subscription: attrs['subscription'] as String?,
+      userId: rels['user']?['data']?['id'] as String? ?? 'unknown',
+      lastPostedUserId:
+          rels['lastPostedUser']?['data']?['id'] as String? ?? 'unknown',
+      tagIds: tagIds,
+      firstPostId: rels['firstPost']?['data']?['id'] as String? ?? 'unknown',
     );
   }
 }

@@ -57,6 +57,18 @@ class AppLogger {
     );
   }
 
+  /// 为测试环境初始化日志配置
+  ///
+  /// 仅使用控制台输出，避免依赖 path_provider 等平台相关库。
+  void setupForTesting() {
+    final consoleOutput = ConsoleOutput();
+    _logger = Logger(
+      level: Level.error,
+      output: consoleOutput,
+      printer: SimplePrinter(),
+    );
+  }
+
   /// 创建文件输出
   ///
   /// 根据平台创建合适的日志文件输出实例，处理不同平台的文件路径差异。

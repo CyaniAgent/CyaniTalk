@@ -1,16 +1,16 @@
 import 'dart:convert';
 import '../../../core/utils/logger.dart';
-import '../data/misskey_repository.dart';
+import '../data/misskey_repository_interface.dart';
 
 /// A local interpreter for AiScript, designed for Misskey interaction.
-/// 
+///
 /// This class parses and executes AiScript-like code, providing a bridge
 /// to the Misskey API and local UI state.
 class AiScriptInterpreter {
-  final MisskeyRepository _repository;
+  final IMisskeyRepository _repository;
   final Map<String, dynamic> _variables = {};
   final List<String> _output = [];
-  
+
   AiScriptInterpreter(this._repository);
 
   List<String> get output => _output;
@@ -18,10 +18,10 @@ class AiScriptInterpreter {
   /// Executes the provided AiScript code.
   Future<void> execute(String code) async {
     _output.add('> Execution started.');
-    
+
     // Remove comments and prepare code for processing
     String workingCode = code.replaceAll(RegExp(r'//.*'), '');
-    
+
     // We'll use a more flexible approach to find and execute commands
     // 1. First, handle all variable assignments
     final letRegex = RegExp(r'let\s+(\w+)\s*=\s*(.*)', multiLine: true);
@@ -34,10 +34,10 @@ class AiScriptInterpreter {
     // 2. Handle Mk:api calls (Case-insensitive as requested: "mk.api")
     // Using dotAll: true to handle multi-line calls
     final apiRegex = RegExp(
-      r'[Mm]k:api\s*\(\s*"(.*?)"\s*,\s*\{(.*?)\}\s*\)', 
-      dotAll: true
+      r'[Mm]k:api\s*\(\s*"(.*?)"\s*,\s*\{(.*?)\}\s*\)',
+      dotAll: true,
     );
-    
+
     for (var match in apiRegex.allMatches(workingCode)) {
       final endpoint = match.group(1)!;
       final paramsStr = match.group(2)!;
@@ -84,19 +84,19 @@ class AiScriptInterpreter {
 
   Future<void> _handleApiCall(String endpoint, String paramsStr) async {
     _output.add('[API] Calling $endpoint...');
-    
+
     // Improved shim to convert AiScript-like object to JSON
     // Support newlines and different spacing
     String jsonStr = paramsStr.trim();
-    
+
     // Wrap keys in quotes if they aren't already
     jsonStr = jsonStr.replaceAllMapped(
-      RegExp(r'(?<!["\w])(\w+)\s*:'), 
-      (match) => '"${match.group(1)}":'
+      RegExp(r'(?<!["\w])(\w+)\s*:'),
+      (match) => '"${match.group(1)}":',
     );
-    
+
     if (!jsonStr.startsWith('{')) jsonStr = '{$jsonStr}';
-    
+
     try {
       final Map<String, dynamic> params = jsonDecode(jsonStr);
       final repository = _repository;
@@ -105,14 +105,18 @@ class AiScriptInterpreter {
         final text = params['text']?.toString();
         if (text != null) {
           // Resolve variable if text is a variable name (simple support)
-          final resolvedText = _variables.containsKey(text) ? _variables[text].toString() : text;
+          final resolvedText = _variables.containsKey(text)
+              ? _variables[text].toString()
+              : text;
           await repository.createNote(text: resolvedText);
           _output.add('[API] Note created successfully! (≧▽≦)');
         } else {
           throw Exception('Missing "text" parameter for notes/create');
         }
       } else {
-        _output.add('[WARN] Endpoint "$endpoint" is not supported by the local bridge yet.');
+        _output.add(
+          '[WARN] Endpoint "$endpoint" is not supported by the local bridge yet.',
+        );
       }
     } catch (e) {
       throw Exception('Failed to parse API parameters: $e');
