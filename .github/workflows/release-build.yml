@@ -147,10 +147,6 @@ jobs:
         with:
           channel: stable  # 使用Flutter的稳定版
 
-      # 设置Rust环境
-      - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
       # 显示Flutter版本信息
       - name: Check Flutter version
         run: flutter --version
@@ -158,15 +154,6 @@ jobs:
       # 安装Flutter依赖
       - name: Install dependencies
         run: flutter pub get
-
-      # 构建rust组件
-      - name: Building Rust Components
-        run: |
-          cd rust
-          cargo build
-          cd ..
-          cargo install flutter_rust_bridge_codegen
-          flutter_rust_bridge_codegen generate
 
       # 根据矩阵配置，为不同平台执行构建命令
       - name: Build Android APK
