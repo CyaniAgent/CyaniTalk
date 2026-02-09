@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import './api_request_manager.dart';
 import '../utils/logger.dart';
+import '../utils/error_handler.dart';
 
 /// Base API class for common error handling and response validation
 abstract class BaseApi {
@@ -28,17 +30,24 @@ abstract class BaseApi {
     String operationName, {
     String Function(DioException)? dioErrorParser,
   }) {
-    if (error is DioException) {
-      logger.error('$operationName: DIO error', error);
-      final message =
-          dioErrorParser?.call(error) ?? error.message ?? 'Unknown error';
+    // 使用 ErrorHandler 处理错误
+    final appError = ErrorHandler.handleError(error);
+    ErrorHandler.logError(operationName, error);
+
+    if (error is DioException && dioErrorParser != null) {
+      final message = dioErrorParser(error);
       return Exception('$operationName error: $message');
     }
-    logger.error('$operationName: Unexpected error', error);
-    return Exception('$operationName error: $error');
+
+    return Exception('$operationName error: ${appError.message}');
   }
 
-  /// Wraps a Future operation with consistent error handling
+  /// 初始化 API 请求管理器
+  void initialize() {
+    apiRequestManager.initialize();
+  }
+
+  /// Wraps a Future operation with consistent error handling, caching, and deduplication
   ///
   /// Usage:
   /// ```dart
@@ -46,42 +55,74 @@ abstract class BaseApi {
   ///   'MyOperation',
   ///   () => _dio.post('/api/endpoint', data: {...}),
   ///   (response) => MyModel.fromJson(response.data),
+  ///   params: {'id': 123},
+  ///   cacheTtl: Duration(minutes: 5),
+  ///   useCache: true,
   /// );
   /// ```
   Future<T> executeApiCall<T>(
     String operationName,
     Future<Response> Function() apiCall,
     T Function(Response) parser, {
+    Map<String, dynamic>? params,
+    Duration? cacheTtl,
+    bool useCache = false,
+    bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
   }) async {
-    try {
-      logger.info('$operationName: Starting');
-      final response = await apiCall();
-      return handleResponse(
-        response,
-        operationName,
-        parser: (_) => parser(response),
-      );
-    } catch (e) {
-      if (e is Exception) rethrow;
-      throw handleError(e, operationName, dioErrorParser: dioErrorParser);
-    }
+    return apiRequestManager.execute(
+      operationName,
+      () async {
+        try {
+          logger.info('$operationName: Starting');
+          final response = await apiCall();
+          return handleResponse(
+            response,
+            operationName,
+            parser: (_) => parser(response),
+          );
+        } catch (e) {
+          if (e is Exception) rethrow;
+          throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+        }
+      },
+      params: params,
+      cacheTtl: cacheTtl,
+      useCache: useCache,
+      useDeduplication: useDeduplication,
+    );
   }
 
   /// Similar to executeApiCall but for operations that don't return data (void operations)
   Future<void> executeApiCallVoid(
     String operationName,
     Future<Response> Function() apiCall, {
+    Map<String, dynamic>? params,
+    bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
   }) async {
-    try {
-      logger.info('$operationName: Starting');
-      final response = await apiCall();
-      handleResponse(response, operationName);
-    } catch (e) {
-      if (e is Exception) rethrow;
-      throw handleError(e, operationName, dioErrorParser: dioErrorParser);
-    }
+    await apiRequestManager.execute(
+      operationName,
+      () async {
+        try {
+          logger.info('$operationName: Starting');
+          final response = await apiCall();
+          handleResponse(response, operationName);
+          return null;
+        } catch (e) {
+          if (e is Exception) rethrow;
+          throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+        }
+      },
+      params: params,
+      useCache: false,
+      useDeduplication: useDeduplication,
+    );
+  }
+
+  /// 清理 API 请求管理器资源
+  void dispose() {
+    apiRequestManager.dispose();
   }
 
   /// Extract error message from DioException

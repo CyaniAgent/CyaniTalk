@@ -97,9 +97,23 @@ class MisskeyMessagingHistoryNotifier extends _$MisskeyMessagingHistoryNotifier 
   void _handleNewMessage(MessagingMessage message) {
     if (!ref.mounted) return;
     
-    // 当收到新消息时，刷新历史列表以显示最新状态
-    // TODO: 优化为本地增量更新以提高性能
-    refresh();
+    // 实现本地增量更新，只添加新消息而不重新加载整个历史
+    final currentMessages = state.value ?? [];
+    
+    // 检查消息是否已经存在
+    if (currentMessages.any((m) => m.id == message.id)) {
+      logger.debug('Misskey消息历史: 消息已存在，跳过添加: ${message.id}');
+      return;
+    }
+    
+    logger.debug('Misskey消息历史: 添加新消息: ${message.id}');
+    
+    // 创建新的消息列表，添加新消息并保持按时间倒序排列
+    final updatedMessages = [...currentMessages, message];
+    updatedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    
+    // 更新状态
+    state = AsyncValue.data(updatedMessages);
   }
 
   Future<void> refresh() async {

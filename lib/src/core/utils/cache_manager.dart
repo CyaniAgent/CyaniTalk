@@ -89,6 +89,12 @@ class CacheManager {
     }
   }
 
+  /// 最大缓存文件大小 (50MB)
+  static const int maxCacheFileSize = 50 * 1024 * 1024;
+
+  /// 下载超时时间
+  static const Duration downloadTimeout = Duration(seconds: 30);
+
   /// 缓存文件
   Future<String> cacheFile(String url) async {
     try {
@@ -101,8 +107,27 @@ class CacheManager {
       }
 
       // 下载并缓存文件
-      final dio = Dio();
+      final dio = Dio()..options.connectTimeout = downloadTimeout;
+      dio.options.receiveTimeout = downloadTimeout;
+      
+      // 先获取文件大小信息
+      final response = await dio.head(url);
+      final contentLength = response.headers.value('content-length');
+      if (contentLength != null) {
+        final fileSize = int.tryParse(contentLength);
+        if (fileSize != null && fileSize > maxCacheFileSize) {
+          throw Exception('文件过大，超过缓存限制');
+        }
+      }
+      
       await dio.download(url, cacheFilePath);
+      
+      // 下载后再次检查文件大小
+      final finalSize = await file.length();
+      if (finalSize > maxCacheFileSize) {
+        await file.delete();
+        throw Exception('文件过大，超过缓存限制');
+      }
       
       return cacheFilePath;
     } catch (e) {

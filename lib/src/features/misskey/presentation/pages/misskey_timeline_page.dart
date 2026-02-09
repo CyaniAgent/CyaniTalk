@@ -119,20 +119,36 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                 onRefresh: () => ref
                     .read(misskeyTimelineProvider(timelineType).notifier)
                     .refresh(),
-                child: ListView.builder(
+                child: CustomScrollView(
                   controller: _scrollController,
-                  itemCount: notes.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index < notes.length) {
-                      return ModernNoteCard(
-                        key: ValueKey(notes[index].id),
-                        note: notes[index],
-                        timelineType: timelineType,
-                      );
-                    } else {
-                      return _buildLoadMoreIndicator();
-                    }
-                  },
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          if (index < notes.length) {
+                            return RepaintBoundary(
+                              child: ModernNoteCard(
+                                key: ValueKey(notes[index].id),
+                                note: notes[index],
+                                timelineType: timelineType,
+                              ),
+                            );
+                          } else {
+                            return _buildLoadMoreIndicator();
+                          }
+                        },
+                        childCount: notes.length + 1,
+                        semanticIndexCallback: (widget, localIndex) {
+                          return localIndex < notes.length ? localIndex : null;
+                        },
+                        addAutomaticKeepAlives: true,
+                        addRepaintBoundaries: true,
+                        addSemanticIndexes: true,
+                      ),
+                    ),
+                  ],
+                  cacheExtent: 2000, // 增加预加载范围
+                  physics: const BouncingScrollPhysics(), // 优化滚动体验
                 ),
               );
             },

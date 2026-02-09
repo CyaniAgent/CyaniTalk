@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'navigation_item.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../config/navigation_settings_config.dart';
 
 /// 导航设置状态
 class NavigationSettings {
@@ -16,50 +17,18 @@ class NavigationSettings {
 
   /// 获取默认导航设置
   factory NavigationSettings.defaultSettings([BuildContext? context]) {
-    return NavigationSettings(
-      items: [
-        NavigationItem(
-          id: 'misskey',
-          title: 'nav_misskey'.tr(),
-          icon: Icons.public_outlined,
-          selectedIcon: Icons.public,
-          isEnabled: true,
-          isRemovable: true,
-        ),
-        NavigationItem(
-          id: 'flarum',
-          title: 'nav_flarum'.tr(),
-          icon: Icons.forum_outlined,
-          selectedIcon: Icons.forum,
-          isEnabled: true,
-          isRemovable: true,
-        ),
-        NavigationItem(
-          id: 'drive',
-          title: 'nav_drive'.tr(),
-          icon: Icons.cloud_queue_outlined,
-          selectedIcon: Icons.cloud_queue,
-          isEnabled: true,
-          isRemovable: true,
-        ),
-        NavigationItem(
-          id: 'messages',
-          title: 'nav_messages'.tr(),
-          icon: Icons.chat_bubble_outline,
-          selectedIcon: Icons.chat_bubble,
-          isEnabled: true,
-          isRemovable: true,
-        ),
-        NavigationItem(
-          id: 'me',
-          title: 'nav_me'.tr(),
-          icon: Icons.person_outline,
-          selectedIcon: Icons.person,
-          isEnabled: true,
-          isRemovable: false, // 个人页面不可移除
-        ),
-      ],
-    );
+    final items = NavigationSettingsConfig.defaultNavigationItems.map((config) {
+      return NavigationItem(
+        id: config['id'] as String,
+        title: (config['titleKey'] as String).tr(),
+        icon: config['icon'] as IconData,
+        selectedIcon: config['selectedIcon'] as IconData,
+        isEnabled: config['isEnabled'] as bool,
+        isRemovable: config['isRemovable'] as bool,
+      );
+    }).toList();
+
+    return NavigationSettings(items: items);
   }
 
   /// 复制并更新导航设置
@@ -81,7 +50,12 @@ class NavigationSettings {
   NavigationItem findItemById(String id) {
     return items.firstWhere(
       (item) => item.id == id,
-      orElse: () => NavigationItem(id: '', title: '', icon: Icons.star_outline, selectedIcon: Icons.star),
+      orElse: () => NavigationItem(
+        id: '',
+        title: '',
+        icon: Icons.star_outline,
+        selectedIcon: Icons.star,
+      ),
     );
   }
 

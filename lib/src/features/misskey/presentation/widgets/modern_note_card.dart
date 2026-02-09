@@ -52,11 +52,17 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     super.dispose();
   }
 
+  // 静态正则表达式，避免每次调用时重新创建
+  static final RegExp _boldRegex = RegExp(r'\*\*(.*?)\*\*');
+  static final RegExp _mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
+  static final RegExp _hashtagRegex = RegExp(r'#([^\s]+)');
+  static final RegExp _urlRegex = RegExp(r'https?:\/\/[^\s]+');
+
   /// 处理文本中的特殊格式
   ///
   /// 处理文本中的加粗文本(**text**)、提及(@username)、话题(#hashtag)和链接(http/https)，
   /// 并返回对应的TextSpan列表。会缓存处理结果，避免重复计算。
-  List<TextSpan> _processText(String text) {
+  List<TextSpan> _processText(String text, BuildContext context) {
     // 检查是否已缓存处理结果
     if (_textProcessingCache.containsKey(text)) {
       return _textProcessingCache[text]!;
@@ -65,18 +71,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     final List<TextSpan> spans = [];
     int currentIndex = 0;
 
-    // 处理加粗文本 (**text**)
-    final boldRegex = RegExp(r'\*\*(.*?)\*\*');
-    final mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
-    final hashtagRegex = RegExp(r'#([^\s]+)');
-    final urlRegex = RegExp(r'https?:\/\/[^\s]+');
-
     // 收集所有匹配项并按位置排序
     final List<RegExpMatch> allMatches = [];
-    allMatches.addAll(boldRegex.allMatches(text));
-    allMatches.addAll(mentionRegex.allMatches(text));
-    allMatches.addAll(hashtagRegex.allMatches(text));
-    allMatches.addAll(urlRegex.allMatches(text));
+    allMatches.addAll(_boldRegex.allMatches(text));
+    allMatches.addAll(_mentionRegex.allMatches(text));
+    allMatches.addAll(_hashtagRegex.allMatches(text));
+    allMatches.addAll(_urlRegex.allMatches(text));
 
     // 按匹配位置排序
     allMatches.sort((a, b) => a.start.compareTo(b.start));
@@ -90,7 +90,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final matchText = text.substring(match.start, match.end);
 
       // 检查是哪种匹配
-      if (boldRegex.hasMatch(matchText)) {
+      if (_boldRegex.hasMatch(matchText)) {
         // 加粗文本
         spans.add(
           TextSpan(
@@ -98,16 +98,15 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         );
-      } else if (mentionRegex.hasMatch(matchText)) {
+      } else if (_mentionRegex.hasMatch(matchText)) {
         // 提及用户
         spans.add(
           TextSpan(
             text: matchText,
             style: TextStyle(color: Theme.of(context).colorScheme.primary),
-            recognizer: null, // 可以添加TapGestureRecognizer来处理点击
           ),
         );
-      } else if (hashtagRegex.hasMatch(matchText)) {
+      } else if (_hashtagRegex.hasMatch(matchText)) {
         // 话题
         spans.add(
           TextSpan(
@@ -115,7 +114,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             style: TextStyle(color: Theme.of(context).colorScheme.secondary),
           ),
         );
-      } else if (urlRegex.hasMatch(matchText)) {
+      } else if (_urlRegex.hasMatch(matchText)) {
         // 链接
         final recognizer = TapGestureRecognizer()
           ..onTap = () async {
@@ -124,12 +123,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             showDialog(
               context: context,
               builder: (dialogContext) => AlertDialog(
-                title: Text('打开链接'),
+                title: const Text('打开链接'),
                 content: Text('确定要打开以下链接吗？\n$matchText'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(dialogContext),
-                    child: Text('取消'),
+                    child: const Text('取消'),
                   ),
                   FilledButton(
                     onPressed: () async {
@@ -142,7 +141,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         );
                       }
                     },
-                    child: Text('确定'),
+                    child: const Text('确定'),
                   ),
                 ],
               ),
@@ -197,234 +196,215 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   }
 
   @override
+  void didUpdateWidget(covariant ModernNoteCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only rebuild if the note has actually changed
+    if (oldWidget.note.id != widget.note.id) {
+      // Clear cache for new note
+      _textProcessingCache.clear();
+      for (final recognizer in _recognizers) {
+        recognizer.dispose();
+      }
+      _recognizers.clear();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final note = widget.note;
     final user = note.user;
     final text = note.text;
     final cw = note.cw;
+    final theme = Theme.of(context);
 
-    Widget card = RepaintBoundary(
-      child: Semantics(
-        label: 'Note by ${user?.username}',
-        value: text ?? cw,
-        child: GestureDetector(
-          onSecondaryTapDown: (details) =>
-              _showContextMenu(details.globalPosition),
-          onLongPressStart: (details) =>
-              _showContextMenu(details.globalPosition),
-          child: Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 用户信息行
-                  GestureDetector(
-                    onTap: () {
-                      if (user?.id != null) {
-                        final me = ref.read(misskeyMeProvider).value;
-                        if (me != null && me.id == user!.id) {
-                          // Redirect to own profile tab
-                          context.go('/profile');
-                        } else {
-                          context.push(
-                            '/misskey/user/${user!.id}',
-                            extra: user,
-                          );
-                        }
+    final card = RepaintBoundary(
+      child: GestureDetector(
+        onSecondaryTapDown: (details) =>
+            _showContextMenu(details.globalPosition),
+        onLongPressStart: (details) => _showContextMenu(details.globalPosition),
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 用户信息行
+                GestureDetector(
+                  onTap: () {
+                    if (user?.id != null) {
+                      final me = ref.read(misskeyMeProvider).value;
+                      if (me != null && me.id == user!.id) {
+                        // Redirect to own profile tab
+                        context.go('/profile');
+                      } else {
+                        context.push('/misskey/user/${user!.id}', extra: user);
                       }
-                    },
-                    child: Row(
-                      children: [
-                        Semantics(
-                          label: 'Avatar for ${user?.username}',
-                          child: CircleAvatar(
-                            radius: 20,
-                            backgroundImage: user?.avatarUrl != null
-                                ? NetworkImage(user!.avatarUrl!)
-                                : null,
-                            child: user?.avatarUrl == null
-                                ? Text(user?.username[0].toUpperCase() ?? '?')
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Semantics(
-                                label: 'User name',
-                                child: Text(
-                                  user?.name ?? user?.username ?? 'Unknown',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (user?.host != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 1.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.public,
-                                        size: 10,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary
-                                            .withValues(alpha: 0.7),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Flexible(
-                                        child: Text(
-                                          user!.host!,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w500,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .secondary
-                                                .withValues(alpha: 0.8),
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              Semantics(
-                                label: 'User handle',
-                                child: Text(
-                                  '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Semantics(
-                          label: 'Post time',
-                          child: Text(
-                            _formatTime(note.createdAt),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // 如果是回复，显示原帖预览
-                  if (note.reply != null) ...[
-                    _buildReplyPreview(note.reply!),
-                    const SizedBox(height: 12),
-                  ],
-
-                  // CW (Content Warning) 或正文内容
-                  if (cw != null) ...[
-                    Card(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      elevation: 0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: user?.avatarUrl != null
+                            ? NetworkImage(user!.avatarUrl!)
+                            : null,
+                        child: user?.avatarUrl == null
+                            ? Text(
+                                user!.username.isNotEmpty
+                                    ? user.username[0].toUpperCase()
+                                    : '?',
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.warning_amber_rounded, size: 16),
-                            const SizedBox(width: 8),
-                            Expanded(child: SelectableText(cw)),
-                            const Icon(Icons.keyboard_arrow_down, size: 16),
+                            Text(
+                              user?.name ?? user?.username ?? 'Unknown',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: theme.colorScheme.primary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (user?.host != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 1.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.public, size: 10),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        user!.host!,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                          color: theme.colorScheme.secondary
+                                              .withAlpha(179),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            Text(
+                              '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                  ] else if (text != null) ...[
-                    SelectableText.rich(
-                      TextSpan(
-                        children: _processText(text),
+                      Text(
+                        _formatTime(note.createdAt),
                         style: TextStyle(
-                          fontSize: 13,
-                          color: Theme.of(context).colorScheme.onSurface,
-                          height: 1.5,
+                          fontSize: 12,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-
-                  // 附件内容
-                  if (note.files.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Semantics(
-                        label: 'Attached files',
-                        child: _buildMediaGrid(note.files),
-                      ),
-                    ),
-
-                  const SizedBox(height: 16),
-
-                  // 交互按钮行
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // 回复按钮
-                      _buildAction(
-                        Icons.reply,
-                        note.repliesCount.toString(),
-                        _handleReply,
-                        tooltip: 'Reply',
-                      ),
-
-                      // 转发按钮
-                      _buildAction(
-                        Icons.repeat,
-                        note.renoteCount.toString(),
-                        _handleRenote,
-                        tooltip: 'Renote',
-                      ),
-
-                      // 反应按钮
-                      _buildAction(
-                        Icons.add_reaction_outlined,
-                        note.reactions.length.toString(),
-                        _handleReaction,
-                        tooltip: 'Reaction',
-                      ),
-
-                      // 更多按钮
-                      _buildAction(
-                        Icons.more_vert,
-                        "",
-                        _showContextMenuFromButton,
-                        tooltip: 'More',
                       ),
                     ],
                   ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // 如果是回复，显示原帖预览
+                if (note.reply != null) ...[
+                  _buildReplyPreview(note.reply!),
+                  const SizedBox(height: 12),
                 ],
-              ),
+
+                // CW (Content Warning) 或正文内容
+                if (cw != null) ...[
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_rounded, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(child: SelectableText(cw)),
+                        const Icon(Icons.keyboard_arrow_down, size: 16),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ] else if (text != null) ...[
+                  SelectableText.rich(
+                    TextSpan(
+                      children: _processText(text, context),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+
+                // 附件内容
+                if (note.files.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: _buildMediaGrid(note.files),
+                  ),
+
+                const SizedBox(height: 16),
+
+                // 交互按钮行
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // 回复按钮
+                    _buildAction(
+                      Icons.reply,
+                      note.repliesCount.toString(),
+                      _handleReply,
+                      tooltip: 'Reply',
+                    ),
+
+                    // 转发按钮
+                    _buildAction(
+                      Icons.repeat,
+                      note.renoteCount.toString(),
+                      _handleRenote,
+                      tooltip: 'Renote',
+                    ),
+
+                    // 反应按钮
+                    _buildAction(
+                      Icons.add_reaction_outlined,
+                      note.reactions.length.toString(),
+                      _handleReaction,
+                      tooltip: 'Reaction',
+                    ),
+
+                    // 更多按钮
+                    _buildAction(
+                      Icons.more_vert,
+                      "",
+                      _showContextMenuFromButton,
+                      tooltip: 'More',
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -442,8 +422,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   }
 
   void _showContextMenuFromButton() {
-    RenderBox button = context.findRenderObject() as RenderBox;
-    Offset position = Offset(
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final Offset position = Offset(
       button.localToGlobal(Offset.zero).dx + button.size.width,
       button.localToGlobal(Offset.zero).dy + button.size.height / 2,
     );
@@ -741,27 +721,32 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     VoidCallback onTap, {
     String? tooltip,
   }) {
-    return TextButton.icon(
+    final theme = Theme.of(context);
+    return IconButton(
       onPressed: onTap,
-      icon: Icon(
-        icon,
-        size: 18,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
-      label: label.isNotEmpty
-          ? Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+      icon: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          if (label.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            )
-          : const SizedBox.shrink(),
-      style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+        ],
+      ),
+      style: IconButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         minimumSize: Size.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
+      tooltip: tooltip,
     );
   }
 

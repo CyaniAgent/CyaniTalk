@@ -51,12 +51,20 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
+    // 使用 ImageCacheConfig 计算缓存尺寸
+    final (cacheWidth, cacheHeight) = ImageCacheConfig.calculateCacheSize(
+      widget.width,
+      widget.height,
+    );
+
     return Image.network(
       widget.url,
       key: ValueKey(_imageKey),
       fit: widget.fit,
       width: widget.width,
       height: widget.height,
+      cacheWidth: cacheWidth,
+      cacheHeight: cacheHeight,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
         return Container(
@@ -124,5 +132,33 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
         );
       },
     );
+  }
+}
+
+/// 图片缓存配置
+class ImageCacheConfig {
+  /// 最大缓存宽度
+  static const int maxCacheWidth = 800;
+
+  /// 最大缓存高度
+  static const int maxCacheHeight = 800;
+
+  /// 默认缓存宽度
+  static const int defaultCacheWidth = 400;
+
+  /// 默认缓存高度
+  static const int defaultCacheHeight = 400;
+
+  /// 计算合适的缓存尺寸
+  static (int, int) calculateCacheSize(double? width, double? height) {
+    if (width != null && height != null) {
+      // 检查是否为有效数字
+      if (width.isFinite && height.isFinite) {
+        final cacheWidth = width.toInt().clamp(1, maxCacheWidth);
+        final cacheHeight = height.toInt().clamp(1, maxCacheHeight);
+        return (cacheWidth, cacheHeight);
+      }
+    }
+    return (defaultCacheWidth, defaultCacheHeight);
   }
 }

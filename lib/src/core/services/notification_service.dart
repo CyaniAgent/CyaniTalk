@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'navigation_service.dart';
 
 /// 通知服务类
-/// 
+///
 /// 负责处理通知权限请求和通知显示，支持多平台通知管理。
 /// 使用单例模式，确保应用中只有一个通知服务实例。
 class NotificationService {
@@ -20,8 +21,9 @@ class NotificationService {
   ///
   /// @return 无返回值，初始化完成后通知服务即可使用
   Future<void> initialize() async {
-    const initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initializationSettingsAndroid = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const initializationSettingsDarwin = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -30,7 +32,7 @@ class NotificationService {
     const initializationSettingsLinux = LinuxInitializationSettings(
       defaultActionName: 'Open',
     );
-    
+
     const initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsDarwin,
@@ -46,15 +48,27 @@ class NotificationService {
     await _notificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse details) {
-        debugPrint('Notification tapped: ${details.id}');
-        // TODO: 在此处添加导航逻辑，例如跳转到对应的消息页面
-        // 根据 details.payload 来判断跳转目标
+        debugPrint(
+          'Notification tapped: ${details.id}, payload: ${details.payload}',
+        );
+        // 处理通知点击事件，使用导航服务处理跳转
+        final payload = details.payload;
+        if (payload != null) {
+          // 使用导航服务处理跳转，支持通过ID直接跳转
+          navigationService.navigateFromPayload(payload).then((success) {
+            if (success) {
+              debugPrint('Navigation successful');
+            } else {
+              debugPrint('Navigation failed');
+            }
+          });
+        }
       },
     );
   }
 
   /// 请求通知权限
-  /// 
+  ///
   /// 在移动设备上会弹出权限请求对话框
   /// 在桌面设备上通常自动授予
   ///
@@ -64,23 +78,23 @@ class NotificationService {
 
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          _notificationsPlugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      
-      final bool? granted = await androidImplementation?.requestNotificationsPermission();
+          _notificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >();
+
+      final bool? granted = await androidImplementation
+          ?.requestNotificationsPermission();
       return granted ?? false;
     } else if (Platform.isIOS || Platform.isMacOS) {
       final bool? granted = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
       return granted ?? false;
     }
-    
+
     // 桌面端（Windows/Linux）通常不需要动态请求权限
     return true;
   }
@@ -93,8 +107,10 @@ class NotificationService {
   Future<bool> checkPermissionStatus() async {
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          _notificationsPlugin.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+          _notificationsPlugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >();
       return await androidImplementation?.areNotificationsEnabled() ?? false;
     }
     // iOS/macOS 暂时通过重新请求（非静默）或者假设已授权
@@ -103,7 +119,7 @@ class NotificationService {
   }
 
   /// 显示通知
-  /// 
+  ///
   /// 在设备上显示本地通知，支持自定义标题、内容和附加数据。
   ///
   /// @param id 通知的唯一标识符
@@ -127,7 +143,7 @@ class NotificationService {
       priority: Priority.high,
       groupKey: groupKey,
     );
-    
+
     final darwinNotificationDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,

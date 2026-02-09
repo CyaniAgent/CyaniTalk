@@ -10,6 +10,31 @@ import '../../../core/core.dart';
 
 part 'misskey_notifier.g.dart';
 
+/// 时间线验证状态管理
+class TimelineValidationState {
+  /// 上次验证时间
+  final DateTime lastValidation;
+  /// 验证中标记
+  final bool isValidating;
+
+  const TimelineValidationState({
+    required this.lastValidation,
+    this.isValidating = false,
+  });
+
+  TimelineValidationState copyWith({
+    DateTime? lastValidation,
+    bool? isValidating,
+  }) {
+    return TimelineValidationState(
+      lastValidation: lastValidation ?? this.lastValidation,
+      isValidating: isValidating ?? this.isValidating,
+    );
+  }
+}
+
+
+
 /// Misskey时间线状态管理类
 ///
 /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
@@ -18,6 +43,9 @@ part 'misskey_notifier.g.dart';
 class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// 验证定时器，用于定期检测已删除的笔记
   Timer? _validationTimer;
+  
+  /// 最后验证时间，用于节流验证频率
+  DateTime _lastValidation = DateTime.now();
 
   /// 初始化Misskey时间线
   ///
@@ -63,12 +91,12 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
   /// 启动定期验证
   ///
-  /// 启动定期验证定时器，每3秒检测一次已删除的笔记。
+  /// 启动定期验证定时器，每60秒检测一次已删除的笔记。
   ///
   /// @return 无返回值
   void _startPeriodicValidation() {
     _validationTimer?.cancel();
-    _validationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+    _validationTimer = Timer.periodic(const Duration(seconds: 60), (_) {
       _validateNotes();
     });
   }
@@ -76,31 +104,52 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// 验证笔记
   ///
   /// 验证时间线中的笔记是否存在，检测已删除的笔记。
-  /// 只检查最近的10条笔记，避免过多的API调用。
+  /// 只检查最近的3条笔记，避免过多的API调用。
+  /// 添加了验证节流，避免频繁的网络请求。
   ///
   /// @return 无返回值
   Future<void> _validateNotes() async {
     if (!ref.mounted) return;
 
-    final currentNotes = state.value ?? [];
-    if (currentNotes.isEmpty) return;
+    // 检查上次验证时间过近
+    final now = DateTime.now();
+    final timeSinceLastValidation = now.difference(_lastValidation);
+    
+    // 至少等待45秒才能再次验证
+    if (timeSinceLastValidation < const Duration(seconds: 45)) {
+      logger.debug('Misskey时间线: 跳过验证，时间过近');
+      return;
+    }
 
-    // Check the top 10 most recent notes
-    final notesToCheck = currentNotes.take(10).toList();
+    // 更新最后验证时间
+    _lastValidation = now;
 
-    for (final note in notesToCheck) {
-      if (!ref.mounted) return;
+    try {
+      final currentNotes = state.value ?? [];
+      if (currentNotes.isEmpty) return;
 
-      try {
-        final repository = await ref.read(misskeyRepositoryProvider.future);
-        final exists = await repository.checkNoteExists(note.id);
-        if (!exists && ref.mounted) {
-          logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
-          _handleDeleteNote(note.id);
+      // Check the top 3 most recent notes
+      final notesToCheck = currentNotes.take(3).toList();
+
+      for (final note in notesToCheck) {
+        if (!ref.mounted) break;
+
+        try {
+          final repository = await ref.read(misskeyRepositoryProvider.future);
+          final exists = await repository.checkNoteExists(note.id);
+          if (!exists && ref.mounted) {
+            logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
+            _handleDeleteNote(note.id);
+          }
+        } catch (e) {
+          logger.error('Misskey时间线: 验证笔记失败: ${note.id}', e);
         }
-      } catch (e) {
-        logger.error('Misskey时间线: 验证笔记失败: ${note.id}', e);
+
+        // 添加小延迟，避免并发请求过多
+        await Future.delayed(const Duration(milliseconds: 100));
       }
+    } finally {
+      // 验证完成，不需要更新状态
     }
   }
 

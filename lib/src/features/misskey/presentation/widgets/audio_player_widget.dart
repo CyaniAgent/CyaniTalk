@@ -1,8 +1,5 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_soloud/flutter_soloud.dart';
-import '../../../../core/utils/cache_manager.dart';
+import '../../application/audio_player_notifier.dart';
 
 /// Inline audio player widget for Misskey posts using flutter_soloud
 class AudioPlayerWidget extends StatefulWidget {
@@ -15,139 +12,56 @@ class AudioPlayerWidget extends StatefulWidget {
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
 }
 
-class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKeepAliveClientMixin {
-  AudioSource? _audioSource;
-  SoundHandle? _soundHandle;
-  bool _isPlaying = false;
-  bool _isLoading = false;
-  Duration _duration = Duration.zero;
-  Duration _position = Duration.zero;
-  String? _cachedFilePath;
-  Timer? _positionTimer;
+class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
+  late AudioPlayerController _controller;
+  late AudioPlayerState _state;
 
   @override
-  bool get wantKeepAlive => _isPlaying || _isLoading;
+  void initState() {
+    super.initState();
+    _controller = AudioPlayerController(widget.audioUrl, widget.fileName);
+    _state = _controller.state;
+    _controller.onStateChanged = (newState) {
+      if (mounted) {
+        setState(() {
+          _state = newState;
+        });
+      }
+    };
+  }
 
   @override
   void dispose() {
-    _positionTimer?.cancel();
-    _stopAndDispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  Future<void> _stopAndDispose() async {
-    if (_soundHandle != null) {
-      await SoLoud.instance.stop(_soundHandle!);
-    }
-    if (_audioSource != null) {
-      SoLoud.instance.disposeSource(_audioSource!);
-    }
-  }
-
-  void _startPositionPolling() {
-    _positionTimer?.cancel();
-    _positionTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (_soundHandle != null && _isPlaying) {
-        final pos = SoLoud.instance.getPosition(_soundHandle!);
-        if (mounted) {
-          setState(() {
-            _position = pos;
-          });
-        }
-      }
-    });
-  }
-
-  Future<void> _togglePlayPause() async {
-    if (_isPlaying) {
-      if (_soundHandle != null) {
-        SoLoud.instance.setPause(_soundHandle!, true);
-        setState(() {
-          _isPlaying = false;
-        });
-        _positionTimer?.cancel();
-        updateKeepAlive();
-      }
-    } else {
-      if (_audioSource == null) {
-        setState(() {
-          _isLoading = true;
-        });
-        updateKeepAlive();
-
-        try {
-          // 确保文件已缓存
-          _cachedFilePath ??= await cacheManager.cacheFile(widget.audioUrl);
-          final file = File(_cachedFilePath!);
-          
-          if (await file.exists()) {
-            _audioSource = await SoLoud.instance.loadFile(_cachedFilePath!);
-            _duration = SoLoud.instance.getLength(_audioSource!);
-          } else {
-            throw Exception('Cache file not found');
-          }
-        } catch (e) {
-          debugPrint('AudioPlayerWidget: Error loading audio: $e');
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-            updateKeepAlive();
-          }
-          return;
-        }
-
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          updateKeepAlive();
-        }
-      }
-
-      if (_audioSource != null) {
-        if (_soundHandle != null && SoLoud.instance.getPause(_soundHandle!)) {
-          SoLoud.instance.setPause(_soundHandle!, false); // toggle pause
-        } else {
-          _soundHandle = await SoLoud.instance.play(_audioSource!);
-          
-          // Listen for completion (SoLoud doesn't have a direct completion stream easily, 
-          // but we can check position vs duration in polling)
-        }
-        
-        setState(() {
-          _isPlaying = true;
-        });
-        _startPositionPolling();
-        updateKeepAlive();
-      }
-    }
-  }
-
-  void _seek(double value) {
-    if (_soundHandle == null) return;
-    final position = Duration(seconds: value.toInt());
-    SoLoud.instance.seek(_soundHandle!, position);
-    setState(() {
-      _position = position;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final theme = Theme.of(context);
 
-    // Auto-reset when finished
-    if (_isPlaying && _position >= _duration && _duration > Duration.zero) {
-      Future.microtask(() {
-        setState(() {
-          _isPlaying = false;
-          _position = Duration.zero;
-        });
-        _positionTimer?.cancel();
-        updateKeepAlive();
-      });
+    // 监听错误状态
+    if (_state.error.isNotEmpty) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _state.error,
+                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return Container(
@@ -184,7 +98,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
           Row(
             children: [
               // 播放/暂停按钮和加载指示器
-              if (_isLoading)
+              if (_state.isLoading)
                 const Padding(
                   padding: EdgeInsets.only(right: 12),
                   child: SizedBox(
@@ -196,26 +110,26 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> with AutomaticKee
               else
                 IconButton(
                   icon: Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    _state.isPlaying ? Icons.pause : Icons.play_arrow,
                     color: theme.colorScheme.primary,
                   ),
-                  onPressed: _togglePlayPause,
+                  onPressed: () => _controller.togglePlayPause(),
                 ),
                 // 进度滑块
                 Expanded(
                   child: Slider(
-                    value: _position.inSeconds.toDouble().clamp(0, _duration.inSeconds.toDouble()),
-                    max: _duration.inSeconds.toDouble().clamp(
+                    value: _state.position.inSeconds.toDouble().clamp(0, _state.duration.inSeconds.toDouble()),
+                    max: _state.duration.inSeconds.toDouble().clamp(
                       0.001, // 避免 max 为 0
                       double.infinity,
                     ),
-                    onChanged: _seek,
+                    onChanged: _controller.seek,
                     activeColor: theme.colorScheme.primary,
                   ),
                 ),
               // 时间显示
               Text(
-                '${_formatDuration(_position)} / ${_formatDuration(_duration)}',
+                '${_formatDuration(_state.position)} / ${_formatDuration(_state.duration)}',
                 style: theme.textTheme.bodySmall,
               ),
             ],
