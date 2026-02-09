@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:math' as math;
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/application/timeline_jump_provider.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
@@ -31,6 +32,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
 
+  /// 存储每个笔记卡片的 GlobalKey，用于精确定位
+  final Map<String, GlobalKey> _noteKeys = {};
+
   @override
   void initState() {
     super.initState();
@@ -46,17 +50,79 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   void _onScroll() {
     // 避免重复触发加载更多
     if (_isLoadingMore) return;
-    
+
     // 当滚动到距离底部300像素时触发加载更多
-    if (_scrollController.position.pixels >= 
+    if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
       _loadMore();
     }
   }
-  
+
+  /// 滚动到指定索引的笔记
+  ///
+  /// 使用 GlobalKey 和 Scrollable.ensureVisible 方法，确保笔记完全可见
+  ///
+  /// @param index 要滚动到的笔记索引
+  void _scrollToNoteIndex(int index) {
+    // TODO: 滚动位置精度问题暂时放弃
+    // 由于 ListView.builder 的动态高度特性，精确滚动位置计算存在挑战
+    // 当前实现使用估算位置 + Scrollable.ensureVisible 的组合方案
+    // 虽然能基本满足需求，但仍可能存在位置偏差
+    // 后续考虑使用更复杂的方案，如：
+    // 1. 实现基于 SliverList 的自定义列表，支持精确的 scrollToIndex
+    // 2. 使用第三方库如 scroll_to_index 来处理动态高度列表的滚动
+
+    final notes =
+        ref.watch(misskeyTimelineProvider(_selectedTimeline.first)).value ?? [];
+    if (notes.isEmpty || index >= notes.length) return;
+
+    final targetNote = notes[index];
+    final noteId = targetNote.id;
+
+    // 确保目标笔记有对应的 GlobalKey
+    if (!_noteKeys.containsKey(noteId)) {
+      _noteKeys[noteId] = GlobalKey();
+    }
+
+    // 计算估算的滚动位置，确保目标笔记被构建
+    const double estimatedHeightPerItem = 250.0;
+    const double safetyMargin = 100.0;
+    double estimatedPosition = index * estimatedHeightPerItem - safetyMargin;
+    estimatedPosition = math.max(0, estimatedPosition);
+
+    // 首先滚动到估算位置，确保目标笔记被构建
+    _scrollController.jumpTo(estimatedPosition);
+
+    // 等待几帧，确保目标笔记已经构建完成
+    int frameCount = 0;
+    void tryScrollToNote() {
+      frameCount++;
+      if (!mounted || frameCount > 10) return; // 最多尝试10帧
+
+      final noteKey = _noteKeys[noteId];
+      final context = noteKey?.currentContext;
+
+      if (context != null) {
+        // 使用 Scrollable.ensureVisible 方法，这是 Flutter 提供的标准方法
+        // 可以确保一个 widget 完全可见
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        // 目标笔记还没有构建，继续等待下一帧
+        WidgetsBinding.instance.addPostFrameCallback((_) => tryScrollToNote());
+      }
+    }
+
+    // 开始尝试滚动
+    WidgetsBinding.instance.addPostFrameCallback((_) => tryScrollToNote());
+  }
+
   Future<void> _loadMore() async {
     if (_isLoadingMore) return;
-    
+
     _isLoadingMore = true;
     try {
       await ref
@@ -83,14 +149,11 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
         final notes = timelineAsync.value ?? [];
         final index = notes.indexWhere((n) => n.id == next);
         if (index != -1) {
-          // 找到笔记，尝试滚动到该位置
-          // 由于是动态高度，这里使用估算值或简单的动画
-          _scrollController.animateTo(
-            index * 250.0, // 估算每个卡片平均高度
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-          );
-          // 清除跳转信号
+          // 直接滚动到对应的索引位置
+          // 使用 ListView 的 scrollToIndex 功能，通过索引精确定位
+          // 为了确保准确性，使用一个合理的动画持续时间
+          _scrollToNoteIndex(index);
+          // 重置跳转信号
           ref.read(timelineJumpProvider(timelineType).notifier).state = null;
         }
       }
@@ -145,9 +208,13 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   itemBuilder: (context, index) {
                     if (index < notes.length) {
                       final note = notes[index];
+                      // 确保每个笔记都有对应的 GlobalKey
+                      if (!_noteKeys.containsKey(note.id)) {
+                        _noteKeys[note.id] = GlobalKey();
+                      }
                       return RepaintBoundary(
                         child: ModernNoteCard(
-                          key: ValueKey(note.id),
+                          key: _noteKeys[note.id], // 使用 GlobalKey 而不是 ValueKey
                           note: note,
                           timelineType: timelineType,
                         ),

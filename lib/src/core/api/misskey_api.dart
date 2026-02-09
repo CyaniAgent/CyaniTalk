@@ -52,8 +52,14 @@ class MisskeyApi extends BaseApi {
     (response) => Map<String, dynamic>.from(response.data),
   );
 
-  /// Check if a note still exists on the server
-  /// Returns true if the note exists, false if it was deleted (404)
+  /// 检查笔记是否仍然存在于服务器上
+  ///
+  /// 通过调用 `/api/notes/show` 接口检查指定 ID 的笔记是否存在。
+  /// 如果笔记不存在（404 错误），返回 false；如果存在，返回 true。
+  /// 对于其他错误，默认假设笔记仍然存在，以避免误删除。
+  ///
+  /// @param noteId 要检查的笔记 ID
+  /// @return 如果笔记存在返回 true，不存在返回 false
   Future<bool> checkNoteExists(String noteId) async {
     try {
       logger.debug('MisskeyApi: Checking if note exists: $noteId');
@@ -77,7 +83,13 @@ class MisskeyApi extends BaseApi {
     }
   }
 
-  /// Get a single note by ID
+  /// 根据 ID 获取单个笔记
+  ///
+  /// 通过调用 `/api/notes/show` 接口获取指定 ID 的笔记详情。
+  ///
+  /// @param noteId 要获取的笔记 ID
+  /// @return 笔记详情的 Map 对象
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> getNote(String noteId) async {
     logger.debug('MisskeyApi: Getting note: $noteId');
     return executeApiCall(
@@ -87,14 +99,29 @@ class MisskeyApi extends BaseApi {
     );
   }
 
-  /// Get drive usage information
+  /// 获取云盘使用信息
+  ///
+  /// 通过调用 `/api/drive` 接口获取当前用户的云盘使用情况，
+  /// 包括总空间、已用空间等信息。
+  ///
+  /// @return 云盘使用信息的 Map 对象
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
     'MisskeyApi.getDriveInfo',
     () => _dio.post('/api/drive', data: {'i': token}),
     (response) => Map<String, dynamic>.from(response.data),
   );
 
-  /// Helper method for fetching lists of items from the API
+  /// 从 API 获取列表数据的辅助方法
+  ///
+  /// 用于统一处理从 API 获取列表类型数据的请求，
+  /// 自动添加认证令牌并将响应数据转换为列表格式。
+  ///
+  /// @param operationName 操作名称，用于日志记录
+  /// @param endpoint API 端点路径
+  /// @param data 请求数据
+  /// @return API 返回的列表数据
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> _fetchList(
     String operationName,
     String endpoint,
@@ -132,12 +159,26 @@ class MisskeyApi extends BaseApi {
     });
   }
 
+  /// 获取推荐频道
+  ///
+  /// 通过调用 `/api/channels/featured` 接口获取平台推荐的频道列表。
+  ///
+  /// @return 推荐频道列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getFeaturedChannels() => _fetchList(
     'MisskeyApi.getFeaturedChannels',
     '/api/channels/featured',
     {},
   );
 
+  /// 获取已关注的频道
+  ///
+  /// 通过调用 `/api/channels/followed` 接口获取当前用户已关注的频道列表。
+  ///
+  /// @param limit 返回的频道数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 已关注的频道列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getFollowingChannels({
     int limit = 20,
     String? untilId,
@@ -147,12 +188,28 @@ class MisskeyApi extends BaseApi {
     {'limit': limit, if (untilId != null) 'untilId': untilId},
   );
 
+  /// 获取自己创建的频道
+  ///
+  /// 通过调用 `/api/channels/owned` 接口获取当前用户创建的频道列表。
+  ///
+  /// @param limit 返回的频道数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 自己创建的频道列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getOwnedChannels({int limit = 20, String? untilId}) =>
       _fetchList('MisskeyApi.getOwnedChannels', '/api/channels/owned', {
         'limit': limit,
         if (untilId != null) 'untilId': untilId,
       });
 
+  /// 获取收藏的频道
+  ///
+  /// 通过调用 `/api/channels/my-favorites` 接口获取当前用户收藏的频道列表。
+  ///
+  /// @param limit 返回的频道数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 收藏的频道列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getFavoriteChannels({
     int limit = 20,
     String? untilId,
@@ -162,6 +219,15 @@ class MisskeyApi extends BaseApi {
     {'limit': limit, if (untilId != null) 'untilId': untilId},
   );
 
+  /// 搜索频道
+  ///
+  /// 通过调用 `/api/channels/search` 接口根据关键词搜索频道。
+  ///
+  /// @param query 搜索关键词
+  /// @param limit 返回的频道数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 搜索结果频道列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> searchChannels(
     String query, {
     int limit = 20,
@@ -172,6 +238,13 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
+  /// 获取频道详情
+  ///
+  /// 通过调用 `/api/channels/show` 接口获取指定 ID 的频道详细信息。
+  ///
+  /// @param channelId 要获取的频道 ID
+  /// @return 频道详情的 Map 对象
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> showChannel(String channelId) => executeApiCall(
     'MisskeyApi.showChannel',
     () => _dio.post(
@@ -181,6 +254,15 @@ class MisskeyApi extends BaseApi {
     (response) => Map<String, dynamic>.from(response.data),
   );
 
+  /// 获取频道时间线
+  ///
+  /// 通过调用 `/api/channels/timeline` 接口获取指定频道的时间线内容。
+  ///
+  /// @param channelId 频道 ID
+  /// @param limit 返回的笔记数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 频道时间线笔记列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -191,12 +273,29 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
+  /// 获取收藏夹列表
+  ///
+  /// 通过调用 `/api/clips/list` 接口获取当前用户的收藏夹列表。
+  ///
+  /// @param limit 返回的收藏夹数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 收藏夹列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getClips({int limit = 20, String? untilId}) =>
       _fetchList('MisskeyApi.getClips', '/api/clips/list', {
         'limit': limit,
         if (untilId != null) 'untilId': untilId,
       });
 
+  /// 获取收藏夹中的笔记
+  ///
+  /// 通过调用 `/api/clips/notes` 接口获取指定收藏夹中的笔记列表。
+  ///
+  /// @param clipId 收藏夹 ID
+  /// @param limit 返回的笔记数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 收藏夹中的笔记列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getClipNotes({
     required String clipId,
     int limit = 20,
@@ -207,6 +306,18 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
+  /// 创建新笔记
+  ///
+  /// 通过调用 `/api/notes/create` 接口创建一条新的笔记。
+  ///
+  /// @param text 笔记内容
+  /// @param replyId 回复的笔记 ID
+  /// @param renoteId 转发的笔记 ID
+  /// @param fileIds 附件文件 ID 列表
+  /// @param visibility 可见性：public、home、followers、specified
+  /// @param localOnly 是否仅本地可见
+  /// @param cw 内容警告
+  /// @throws DioException 如果请求失败
   Future<void> createNote({
     String? text,
     String? replyId,
@@ -232,6 +343,13 @@ class MisskeyApi extends BaseApi {
     ),
   );
 
+  /// 创建反应
+  ///
+  /// 通过调用 `/api/notes/reactions/create` 接口为指定笔记添加反应。
+  ///
+  /// @param noteId 笔记 ID
+  /// @param reaction 反应表情
+  /// @throws DioException 如果请求失败
   Future<void> createReaction(String noteId, String reaction) =>
       executeApiCallVoid(
         'MisskeyApi.createReaction',
@@ -241,6 +359,12 @@ class MisskeyApi extends BaseApi {
         ),
       );
 
+  /// 删除反应
+  ///
+  /// 通过调用 `/api/notes/reactions/delete` 接口删除对指定笔记的反应。
+  ///
+  /// @param noteId 笔记 ID
+  /// @throws DioException 如果请求失败
   Future<void> deleteReaction(String noteId) => executeApiCallVoid(
     'MisskeyApi.deleteReaction',
     () => _dio.post(
@@ -249,6 +373,15 @@ class MisskeyApi extends BaseApi {
     ),
   );
 
+  /// 获取云盘文件列表
+  ///
+  /// 通过调用 `/api/drive/files` 接口获取云盘中的文件列表。
+  ///
+  /// @param folderId 文件夹 ID，为空则获取根目录
+  /// @param limit 返回的文件数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 云盘文件列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getDriveFiles({
     String? folderId,
     int limit = 20,
@@ -259,6 +392,15 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
+  /// 获取云盘文件夹列表
+  ///
+  /// 通过调用 `/api/drive/folders` 接口获取云盘中的文件夹列表。
+  ///
+  /// @param folderId 父文件夹 ID，为空则获取根目录
+  /// @param limit 返回的文件夹数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 云盘文件夹列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getDriveFolders({
     String? folderId,
     int limit = 20,
@@ -269,6 +411,14 @@ class MisskeyApi extends BaseApi {
     if (untilId != null) 'untilId': untilId,
   });
 
+  /// 创建云盘文件夹
+  ///
+  /// 通过调用 `/api/drive/folders/create` 接口在云盘中创建新文件夹。
+  ///
+  /// @param name 文件夹名称
+  /// @param parentId 父文件夹 ID，为空则在根目录创建
+  /// @return 创建的文件夹信息
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> createDriveFolder(
     String name, {
     String? parentId,
@@ -285,6 +435,12 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as Map<String, dynamic>,
   );
 
+  /// 删除云盘文件
+  ///
+  /// 通过调用 `/api/drive/files/delete` 接口删除云盘中的文件。
+  ///
+  /// @param fileId 要删除的文件 ID
+  /// @throws DioException 如果请求失败
   Future<void> deleteDriveFile(String fileId) => executeApiCallVoid(
     'MisskeyApi.deleteDriveFile',
     () => _dio.post(
@@ -293,6 +449,12 @@ class MisskeyApi extends BaseApi {
     ),
   );
 
+  /// 删除云盘文件夹
+  ///
+  /// 通过调用 `/api/drive/folders/delete` 接口删除云盘中的文件夹。
+  ///
+  /// @param folderId 要删除的文件夹 ID
+  /// @throws DioException 如果请求失败
   Future<void> deleteDriveFolder(String folderId) => executeApiCallVoid(
     'MisskeyApi.deleteDriveFolder',
     () => _dio.post(
@@ -301,6 +463,15 @@ class MisskeyApi extends BaseApi {
     ),
   );
 
+  /// 上传文件到云盘
+  ///
+  /// 通过调用 `/api/drive/files/create` 接口将文件上传到云盘。
+  ///
+  /// @param bytes 文件字节数据
+  /// @param filename 文件名
+  /// @param folderId 目标文件夹 ID，为空则上传到根目录
+  /// @return 上传的文件信息
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> uploadDriveFile(
     List<int> bytes,
     String filename, {
@@ -318,6 +489,13 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as Map<String, dynamic>,
   );
 
+  /// 获取在线用户数量
+  ///
+  /// 通过调用 `/api/get-online-users-count` 接口获取当前平台的在线用户数量。
+  /// 设置了 5 秒的超时时间，避免请求过慢影响用户体验。
+  ///
+  /// @return 在线用户数量
+  /// @throws DioException 如果请求失败或超时
   Future<int> getOnlineUsersCount() async {
     try {
       logger.debug('MisskeyApi: Getting online users count');
@@ -338,7 +516,14 @@ class MisskeyApi extends BaseApi {
 
   // --- Messaging (Chat) API ---
 
-  /// 这是一个高度兼容的方法，会尝试多个可能的端点
+  /// 获取消息历史记录
+  ///
+  /// 这是一个高度兼容的方法，会尝试多个可能的端点获取消息历史记录。
+  /// 首先尝试 `/api/chat/history`，如果失败则尝试 `/api/messaging/history`。
+  ///
+  /// @param limit 返回的消息数量限制，默认 10
+  /// @return 消息历史记录列表
+  /// @throws DioException 如果所有端点都请求失败
   Future<List<dynamic>> getMessagingHistory({int limit = 10}) =>
       executeApiCall('MisskeyApi.getMessagingHistory', () async {
         try {
@@ -354,6 +539,18 @@ class MisskeyApi extends BaseApi {
         }
       }, (response) => response.data as List<dynamic>);
 
+  /// 获取与指定用户的消息
+  ///
+  /// 这是一个兼容方法，会尝试多个可能的端点获取与指定用户的消息记录。
+  /// 首先尝试 `/api/chat/messages/user-timeline`，如果失败则尝试 `/api/messaging/messages`。
+  ///
+  /// @param userId 用户 ID
+  /// @param limit 返回的消息数量限制，默认 10
+  /// @param sinceId 分页标记，用于加载更新的消息
+  /// @param untilId 分页标记，用于加载更早的消息
+  /// @param markAsRead 是否标记为已读，默认 true
+  /// @return 消息列表
+  /// @throws DioException 如果所有端点都请求失败
   Future<List<dynamic>> getMessagingMessages({
     required String userId,
     int limit = 10,
@@ -386,6 +583,16 @@ class MisskeyApi extends BaseApi {
     );
   }
 
+  /// 向指定用户发送消息
+  ///
+  /// 这是一个兼容方法，会尝试多个可能的端点向指定用户发送消息。
+  /// 首先尝试 `/api/chat/messages/create-to-user`，如果失败则尝试 `/api/messaging/messages/create`。
+  ///
+  /// @param userId 接收消息的用户 ID
+  /// @param text 消息内容
+  /// @param fileId 附件文件 ID
+  /// @return 创建的消息信息
+  /// @throws DioException 如果所有端点都请求失败
   Future<Map<String, dynamic>> createMessagingMessage({
     required String userId,
     String? text,
@@ -414,6 +621,13 @@ class MisskeyApi extends BaseApi {
     );
   }
 
+  /// 标记消息为已读
+  ///
+  /// 通过调用 `/api/messaging/messages/read` 接口标记指定消息为已读。
+  /// 注意：新的 Chat API 提供了 'read-all' 接口，需要 userId/roomId 而不是单个 messageId。
+  /// 但为了兼容标准 Misskey，保留此方法。
+  ///
+  /// @param messageId 要标记为已读的消息 ID
   Future<void> readMessagingMessage(String messageId) async {
     // Note: The new Chat API provides 'read-all' which takes a userId/roomId, not a single messageId.
     // However, keeping this for compatibility with standard Misskey.
@@ -435,6 +649,12 @@ class MisskeyApi extends BaseApi {
     }
   }
 
+  /// 删除消息
+  ///
+  /// 通过调用 `/api/chat/messages/delete` 接口删除指定的消息。
+  ///
+  /// @param messageId 要删除的消息 ID
+  /// @throws DioException 如果请求失败
   Future<void> deleteMessagingMessage(String messageId) => executeApiCallVoid(
     'MisskeyApi.deleteMessagingMessage',
     () => _dio.post(
@@ -445,12 +665,26 @@ class MisskeyApi extends BaseApi {
 
   // --- Chat Room API (New) ---
 
+  /// 创建聊天室
+  ///
+  /// 通过调用 `/api/chat/rooms/create` 接口创建一个新的聊天室。
+  ///
+  /// @param name 聊天室名称
+  /// @return 创建的聊天室信息
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> createChatRoom(String name) => executeApiCall(
     'MisskeyApi.createChatRoom',
     () => _dio.post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
     (response) => Map<String, dynamic>.from(response.data),
   );
 
+  /// 获取已加入的聊天室
+  ///
+  /// 这是一个兼容方法，会尝试多个可能的端点获取已加入的聊天室列表。
+  /// 首先尝试 `/api/chat/rooms/joining`，如果失败则尝试 `/api/users/groups/joined`。
+  ///
+  /// @return 已加入的聊天室列表
+  /// @throws DioException 如果所有端点都请求失败
   Future<List<dynamic>> getChatRooms() => executeApiCall(
     'MisskeyApi.getChatRooms',
     () async {
@@ -463,6 +697,14 @@ class MisskeyApi extends BaseApi {
     (response) => response.data as List<dynamic>,
   );
 
+  /// 获取聊天室消息
+  ///
+  /// 通过调用 `/api/chat/messages/room-timeline` 接口获取指定聊天室的消息列表。
+  ///
+  /// @param roomId 聊天室 ID
+  /// @param limit 返回的消息数量限制，默认 20
+  /// @return 聊天室消息列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getChatRoomMessages(String roomId, {int limit = 20}) =>
       _fetchList(
         'MisskeyApi.getChatRoomMessages',
@@ -470,6 +712,14 @@ class MisskeyApi extends BaseApi {
         {'roomId': roomId, 'limit': limit},
       );
 
+  /// 发送聊天室消息
+  ///
+  /// 通过调用 `/api/chat/messages/create-to-room` 接口向指定聊天室发送消息。
+  ///
+  /// @param roomId 聊天室 ID
+  /// @param text 消息内容
+  /// @param fileId 附件文件 ID
+  /// @throws DioException 如果请求失败
   Future<void> sendChatRoomMessage(
     String roomId, {
     String? text,
@@ -489,6 +739,15 @@ class MisskeyApi extends BaseApi {
 
   // --- Clips (Bookmarks) ---
 
+  /// 创建收藏夹
+  ///
+  /// 通过调用 `/api/clips/create` 接口创建一个新的收藏夹。
+  ///
+  /// @param name 收藏夹名称
+  /// @param isPublic 是否公开，默认 false
+  /// @param description 收藏夹描述
+  /// @return 创建的收藏夹信息
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> createClip(
     String name, {
     bool isPublic = false,
@@ -507,6 +766,13 @@ class MisskeyApi extends BaseApi {
     (response) => Map<String, dynamic>.from(response.data),
   );
 
+  /// 将笔记添加到收藏夹
+  ///
+  /// 通过调用 `/api/clips/add-note` 接口将指定笔记添加到收藏夹中。
+  ///
+  /// @param clipId 收藏夹 ID
+  /// @param noteId 要添加的笔记 ID
+  /// @throws DioException 如果请求失败
   Future<void> addNoteToClip(String clipId, String noteId) =>
       executeApiCallVoid(
         'MisskeyApi.addNoteToClip',
@@ -518,12 +784,26 @@ class MisskeyApi extends BaseApi {
 
   // --- Reporting ---
 
+  /// 获取用户信息
+  ///
+  /// 通过调用 `/api/users/show` 接口获取指定用户的详细信息。
+  ///
+  /// @param userId 用户 ID
+  /// @return 用户信息的 Map 对象
+  /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> showUser(String userId) => executeApiCall(
     'MisskeyApi.showUser',
     () => _dio.post('/api/users/show', data: {'i': token, 'userId': userId}),
     (response) => Map<String, dynamic>.from(response.data),
   );
 
+  /// 举报用户
+  ///
+  /// 通过调用 `/api/users/report-abuse` 接口举报指定用户。
+  ///
+  /// @param userId 要举报的用户 ID
+  /// @param comment 举报理由
+  /// @throws DioException 如果请求失败
   Future<void> reportUser(String userId, String comment) => executeApiCallVoid(
     'MisskeyApi.reportUser',
     () => _dio.post(
@@ -534,6 +814,17 @@ class MisskeyApi extends BaseApi {
 
   // --- Notifications ---
 
+  /// 获取通知列表
+  ///
+  /// 通过调用 `/api/i/notifications` 接口获取当前用户的通知列表。
+  ///
+  /// @param limit 返回的通知数量限制，默认 20
+  /// @param sinceId 分页标记，用于加载更新的通知
+  /// @param untilId 分页标记，用于加载更早的通知
+  /// @param includeTypes 要包含的通知类型列表
+  /// @param excludeTypes 要排除的通知类型列表
+  /// @return 通知列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> getNotifications({
     int limit = 20,
     String? sinceId,
@@ -549,6 +840,14 @@ class MisskeyApi extends BaseApi {
   });
 
   /// 搜索笔记
+  ///
+  /// 通过调用 `/api/notes/search` 接口根据关键词搜索笔记。
+  ///
+  /// @param query 搜索关键词
+  /// @param limit 返回的笔记数量限制，默认 20
+  /// @param untilId 分页标记，用于加载更多内容
+  /// @return 搜索结果笔记列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> searchNotes(
     String query, {
     int limit = 20,
@@ -560,6 +859,14 @@ class MisskeyApi extends BaseApi {
   });
 
   /// 搜索用户
+  ///
+  /// 通过调用 `/api/users/search` 接口根据关键词搜索用户。
+  ///
+  /// @param query 搜索关键词
+  /// @param limit 返回的用户数量限制，默认 20
+  /// @param offset 分页偏移量
+  /// @return 搜索结果用户列表
+  /// @throws DioException 如果请求失败
   Future<List<dynamic>> searchUsers(
     String query, {
     int limit = 20,

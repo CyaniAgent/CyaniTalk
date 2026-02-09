@@ -12,6 +12,7 @@ part of 'misskey_notifier.dart';
 ///
 /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
 /// 支持实时更新、加载更多和刷新功能。
+/// 使用缓存管理器提高性能，支持后台比对和自动更新。
 
 @ProviderFor(MisskeyTimelineNotifier)
 final misskeyTimelineProvider = MisskeyTimelineNotifierFamily._();
@@ -20,12 +21,14 @@ final misskeyTimelineProvider = MisskeyTimelineNotifierFamily._();
 ///
 /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
 /// 支持实时更新、加载更多和刷新功能。
+/// 使用缓存管理器提高性能，支持后台比对和自动更新。
 final class MisskeyTimelineNotifierProvider
     extends $AsyncNotifierProvider<MisskeyTimelineNotifier, List<Note>> {
   /// Misskey时间线状态管理类
   ///
   /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
   /// 支持实时更新、加载更多和刷新功能。
+  /// 使用缓存管理器提高性能，支持后台比对和自动更新。
   MisskeyTimelineNotifierProvider._({
     required MisskeyTimelineNotifierFamily super.from,
     required String super.argument,
@@ -64,12 +67,13 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'5d399ca90d32b88658b10a93305270719cf324bc';
+    r'f4f929fe2d1b754f27b583355633182e9a51cf88';
 
 /// Misskey时间线状态管理类
 ///
 /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
 /// 支持实时更新、加载更多和刷新功能。
+/// 使用缓存管理器提高性能，支持后台比对和自动更新。
 
 final class MisskeyTimelineNotifierFamily extends $Family
     with
@@ -93,6 +97,7 @@ final class MisskeyTimelineNotifierFamily extends $Family
   ///
   /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
   /// 支持实时更新、加载更多和刷新功能。
+  /// 使用缓存管理器提高性能，支持后台比对和自动更新。
 
   MisskeyTimelineNotifierProvider call(String type) =>
       MisskeyTimelineNotifierProvider._(argument: type, from: this);
@@ -105,6 +110,7 @@ final class MisskeyTimelineNotifierFamily extends $Family
 ///
 /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
 /// 支持实时更新、加载更多和刷新功能。
+/// 使用缓存管理器提高性能，支持后台比对和自动更新。
 
 abstract class _$MisskeyTimelineNotifier extends $AsyncNotifier<List<Note>> {
   late final _$args = ref.$arg as String;
@@ -427,14 +433,20 @@ abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
 }
 
 /// Misskey片段笔记状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
 
 @ProviderFor(MisskeyClipNotesNotifier)
 final misskeyClipNotesProvider = MisskeyClipNotesNotifierFamily._();
 
 /// Misskey片段笔记状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
 final class MisskeyClipNotesNotifierProvider
     extends $AsyncNotifierProvider<MisskeyClipNotesNotifier, List<Note>> {
   /// Misskey片段笔记状态管理类
+  ///
+  /// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
   MisskeyClipNotesNotifierProvider._({
     required MisskeyClipNotesNotifierFamily super.from,
     required String super.argument,
@@ -476,6 +488,8 @@ String _$misskeyClipNotesNotifierHash() =>
     r'388bacd0f378b7a67ea9f9b6f942aceb32e78d65';
 
 /// Misskey片段笔记状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
 
 final class MisskeyClipNotesNotifierFamily extends $Family
     with
@@ -496,6 +510,8 @@ final class MisskeyClipNotesNotifierFamily extends $Family
       );
 
   /// Misskey片段笔记状态管理类
+  ///
+  /// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
 
   MisskeyClipNotesNotifierProvider call(String clipId) =>
       MisskeyClipNotesNotifierProvider._(argument: clipId, from: this);
@@ -505,6 +521,8 @@ final class MisskeyClipNotesNotifierFamily extends $Family
 }
 
 /// Misskey片段笔记状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
 
 abstract class _$MisskeyClipNotesNotifier extends $AsyncNotifier<List<Note>> {
   late final _$args = ref.$arg as String;
@@ -562,7 +580,7 @@ final class MisskeyOnlineUsersNotifierProvider
 }
 
 String _$misskeyOnlineUsersNotifierHash() =>
-    r'f847694a24b3e7f0a993118f6285b03a4bb2b100';
+    r'17f418a9911dc370b8f927f8c47e12e34aa94f50';
 
 /// Misskey在线用户数状态管理类
 ///

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 import '../../../core/utils/cache_manager.dart';
 import '../../../core/utils/logger.dart';
@@ -223,3 +224,48 @@ class AudioPlayerController {
     await _stopAndReset();
   }
 }
+
+/// 音频播放器控制器提供者
+/// 
+/// 使用Riverpod的Provider来管理音频播放器控制器的生命周期
+final audioPlayerControllerProvider = Provider.family<AudioPlayerController, String>((ref, audioUrl) {
+  final controller = AudioPlayerController(audioUrl, null);
+  
+  // 当提供者被销毁时，清理资源
+  ref.onDispose(() async {
+    await controller.dispose();
+  });
+  
+  return controller;
+});
+
+/// 音频播放器状态提供者
+/// 
+/// 使用Riverpod的StreamProvider来管理音频播放器状态，实现自动生命周期管理
+/// 避免内存泄漏和手动状态管理的复杂性
+final audioPlayerStateProvider = StreamProvider.family<AudioPlayerState, String>((ref, audioUrl) async* {
+  final controller = ref.watch(audioPlayerControllerProvider(audioUrl));
+  
+  // 创建一个流控制器
+  final streamController = StreamController<AudioPlayerState>();
+  
+  // 监听状态变化并发送到流
+  controller.onStateChanged = (state) {
+    if (!streamController.isClosed) {
+      streamController.add(state);
+    }
+  };
+  
+  // 初始状态
+  yield controller.state;
+  
+  // 监听流
+  await for (final state in streamController.stream) {
+    yield state;
+  }
+  
+  // 当提供者被销毁时，清理资源
+  ref.onDispose(() {
+    streamController.close();
+  });
+});

@@ -52,8 +52,14 @@ class NoteCacheManager {
   /// 最后比对时间
   DateTime _lastValidation = DateTime.now();
 
+  /// 最后保存时间
+  DateTime _lastSaveTime = DateTime.now();
+
   /// 最小比对间隔（30秒）
   static const Duration _minValidationInterval = Duration(seconds: 30);
+
+  /// 最小保存间隔（5秒）
+  static const Duration _minSaveInterval = Duration(seconds: 5);
 
   /// SharedPreferences 实例
   SharedPreferences? _prefs;
@@ -126,17 +132,34 @@ class NoteCacheManager {
     }
   }
 
-  /// 立即保存所有笔记到持久化存储
+  /// 保存所有笔记到持久化存储
   ///
-  /// 确保所有笔记都被保存，防止应用被强制关闭导致数据丢失
-  Future<void> saveAllToStorage() async {
+  /// 确保所有笔记都被保存，防止应用被强制关闭导致数据丢失。
+  /// 添加了节流机制，避免频繁保存影响性能。
+  ///
+  /// @param force 是否强制保存，忽略节流机制
+  Future<void> saveAllToStorage({bool force = false}) async {
     if (_prefs == null) return;
+
+    // 节流机制，避免频繁保存
+    final now = DateTime.now();
+    final timeSinceLastSave = now.difference(_lastSaveTime);
+
+    if (!force && timeSinceLastSave < _minSaveInterval) {
+      logger.debug('NoteCacheManager: Skipping save due to throttle');
+      return;
+    }
 
     try {
       final allCacheData = <String, dynamic>{};
       final allAccessOrder = <String>[];
 
-      for (final noteId in _accessOrder) {
+      // 限制保存的笔记数量，只保存最近的笔记
+      final notesToSave = _accessOrder.length > _maxPersistentCacheSize
+          ? _accessOrder.sublist(_accessOrder.length - _maxPersistentCacheSize)
+          : _accessOrder;
+
+      for (final noteId in notesToSave) {
         final cacheItem = _cache[noteId];
         if (cacheItem != null) {
           try {
@@ -157,8 +180,10 @@ class NoteCacheManager {
       };
 
       await _prefs!.setString(_persistentCacheKey, jsonEncode(allCacheJson));
+      _lastSaveTime = now;
+
       logger.debug(
-        'NoteCacheManager: Saved all ${allCacheData.length} notes to persistent storage',
+        'NoteCacheManager: Saved ${allCacheData.length} notes to persistent storage',
       );
     } catch (e) {
       logger.warning(
@@ -267,10 +292,29 @@ class NoteCacheManager {
   }
 
   /// 批量添加笔记到缓存
+  ///
+  /// 批量添加笔记到缓存，只在全部添加完成后保存一次，提高性能。
+  ///
+  /// @param notes 要添加的笔记列表
   void putNotes(List<Note> notes) {
     for (final note in notes) {
-      putNote(note);
+      final noteId = note.id;
+
+      if (_cache.containsKey(noteId)) {
+        _cache[noteId]!.note = note;
+        _cache[noteId]!.cachedAt = DateTime.now();
+      } else {
+        if (_cache.length >= _maxMemoryCacheSize + _maxPersistentCacheSize) {
+          _evictLRU();
+        }
+        _cache[noteId] = NoteCacheItem(note: note, cachedAt: DateTime.now());
+      }
+
+      _updateAccessOrder(noteId);
     }
+
+    // 批量添加完成后只保存一次，提高性能
+    saveAllToStorage();
   }
 
   /// 从缓存中移除笔记
@@ -335,11 +379,29 @@ class NoteCacheManager {
   }
 
   /// 淘汰最近最少使用的缓存项
+  ///
+  /// 淘汰最近最少使用的缓存项，确保缓存大小不超过限制。
+  /// 优先淘汰已过期的缓存项，如果没有过期项，则淘汰最早访问的项。
   void _evictLRU() {
     if (_accessOrder.isEmpty) return;
 
+    // 优先淘汰已过期的缓存项
+    for (int i = 0; i < _accessOrder.length; i++) {
+      final noteId = _accessOrder[i];
+      final cacheItem = _cache[noteId];
+
+      if (cacheItem != null && cacheItem.isExpired) {
+        _accessOrder.removeAt(i);
+        _cache.remove(noteId);
+        logger.debug('NoteCacheManager: Evicted expired note: $noteId');
+        return;
+      }
+    }
+
+    // 如果没有过期项，淘汰最早访问的项
     final lruNoteId = _accessOrder.removeAt(0);
     _cache.remove(lruNoteId);
+    logger.debug('NoteCacheManager: Evicted LRU note: $lruNoteId');
   }
 
   /// 启动后台比对定时器

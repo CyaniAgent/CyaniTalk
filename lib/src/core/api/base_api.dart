@@ -69,21 +69,38 @@ abstract class BaseApi {
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
+    int maxRetries = 3,
+    Duration retryDelay = const Duration(seconds: 1),
   }) async {
     return apiRequestManager.execute(
       operationName,
       () async {
-        try {
-          logger.info('$operationName: Starting');
-          final response = await apiCall();
-          return handleResponse(
-            response,
-            operationName,
-            parser: (_) => parser(response),
-          );
-        } catch (e) {
-          if (e is Exception) rethrow;
-          throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+        int retryCount = 0;
+        
+        while (true) {
+          try {
+            logger.info('$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)');
+            final response = await apiCall();
+            return handleResponse(
+              response,
+              operationName,
+              parser: (_) => parser(response),
+            );
+          } catch (e) {
+            if (e is DioException) {
+              // 检查是否是可重试的错误
+              if (_isRetryableError(e) && retryCount < maxRetries) {
+                retryCount++;
+                final delay = retryDelay * (retryCount * retryCount); // 指数退避
+                logger.warning('$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}');
+                await Future.delayed(delay);
+                continue;
+              }
+            }
+            
+            if (e is Exception) rethrow;
+            throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+          }
         }
       },
       params: params,
@@ -91,6 +108,18 @@ abstract class BaseApi {
       useCache: useCache,
       useDeduplication: useDeduplication,
     );
+  }
+  
+  /// 检查错误是否可重试
+  bool _isRetryableError(DioException error) {
+    return error.type == DioExceptionType.connectionTimeout ||
+           error.type == DioExceptionType.sendTimeout ||
+           error.type == DioExceptionType.receiveTimeout ||
+           error.type == DioExceptionType.connectionError ||
+           error.type == DioExceptionType.unknown ||
+           (error.response?.statusCode != null && 
+            (error.response!.statusCode! >= 500 || 
+             error.response!.statusCode == 429)); // 500+ 错误或 429 (Too Many Requests)
   }
 
   /// Similar to executeApiCall but for operations that don't return data (void operations)
@@ -100,18 +129,35 @@ abstract class BaseApi {
     Map<String, dynamic>? params,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
+    int maxRetries = 3,
+    Duration retryDelay = const Duration(seconds: 1),
   }) async {
     await apiRequestManager.execute(
       operationName,
       () async {
-        try {
-          logger.info('$operationName: Starting');
-          final response = await apiCall();
-          handleResponse(response, operationName);
-          return null;
-        } catch (e) {
-          if (e is Exception) rethrow;
-          throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+        int retryCount = 0;
+        
+        while (true) {
+          try {
+            logger.info('$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)');
+            final response = await apiCall();
+            handleResponse(response, operationName);
+            return null;
+          } catch (e) {
+            if (e is DioException) {
+              // 检查是否是可重试的错误
+              if (_isRetryableError(e) && retryCount < maxRetries) {
+                retryCount++;
+                final delay = retryDelay * (retryCount * retryCount); // 指数退避
+                logger.warning('$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}');
+                await Future.delayed(delay);
+                continue;
+              }
+            }
+            
+            if (e is Exception) rethrow;
+            throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+          }
         }
       },
       params: params,

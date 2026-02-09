@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:async';
 
 /// A network image widget with automatic retry on failure
@@ -57,31 +58,41 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
       widget.height,
     );
 
-    return Image.network(
-      widget.url,
+    return CachedNetworkImage(
+      imageUrl: widget.url,
       key: ValueKey(_imageKey),
       fit: widget.fit,
       width: widget.width,
       height: widget.height,
-      cacheWidth: cacheWidth,
-      cacheHeight: cacheHeight,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
+      maxWidthDiskCache: cacheWidth,
+      maxHeightDiskCache: cacheHeight,
+      placeholder: (context, url) {
+        return Container(
+          width: widget.width,
+          height: widget.height ?? 200,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+      progressIndicatorBuilder: (context, url, downloadProgress) {
         return Container(
           width: widget.width,
           height: widget.height ?? 200,
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Center(
             child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
+              value: downloadProgress.totalSize != null
+                  ? downloadProgress.downloaded / downloadProgress.totalSize!
                   : null,
             ),
           ),
         );
       },
-      errorBuilder: (context, error, stackTrace) {
+      errorWidget: (context, url, error) {
         // Auto-retry on first few failures
         if (_retryCount < widget.maxRetries) {
           _retryTimer = Timer(Duration(seconds: _retryCount + 1), _retry);
@@ -130,6 +141,10 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
             ],
           ),
         );
+      },
+      // 添加超时设置
+      httpHeaders: {
+        'Cache-Control': 'max-age=86400', // 24小时缓存
       },
     );
   }

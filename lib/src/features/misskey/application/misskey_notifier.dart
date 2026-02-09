@@ -762,11 +762,19 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
 }
 
 /// Misskey片段笔记状态管理类
+///
+/// 负责管理Misskey平台的片段(Clips)中的笔记列表，支持片段笔记的刷新和加载更多功能。
 @riverpod
 class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
   bool _hasMore = true;
   bool get hasMore => _hasMore;
 
+  /// 初始化Misskey片段笔记
+  ///
+  /// 初始化指定片段ID的笔记列表，加载该片段中的笔记。
+  ///
+  /// @param clipId 片段ID
+  /// @return 返回片段笔记列表
   @override
   FutureOr<List<Note>> build(String clipId) async {
     logger.info('初始化Misskey片段笔记，片段ID: $clipId');
@@ -779,6 +787,11 @@ class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
     return notes;
   }
 
+  /// 刷新片段笔记列表
+  ///
+  /// 重新从服务器获取片段笔记数据，替换当前的笔记列表内容。
+  ///
+  /// @return 无返回值
   Future<void> refresh() async {
     _hasMore = true;
     state = const AsyncValue.loading();
@@ -792,6 +805,11 @@ class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
     });
   }
 
+  /// 加载更多片段笔记
+  ///
+  /// 加载片段笔记的更多内容，从当前列表的最后一条笔记开始获取。
+  ///
+  /// @return 无返回值
   Future<void> loadMore() async {
     if (state.isLoading || state.isRefreshing || !_hasMore) return;
 

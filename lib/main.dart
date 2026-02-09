@@ -22,11 +22,12 @@ import 'dart:io';
 /// - 初始化日志系统
 /// - 初始化国际化支持
 /// - 创建Riverpod的ProviderContainer
-/// - 初始化通知服务
-/// - 启动后台服务
+/// - 初始化核心服务
 /// - 运行CyaniTalkApp组件
+/// - 延迟加载非核心服务
 ///
 /// 这是应用程序的启动点，负责所有必要的初始化工作。
+/// 为了提高启动速度，将非核心服务的初始化延迟到应用启动后执行。
 ///
 /// @return 无返回值，应用程序启动后会持续运行
 void main() async {
@@ -46,29 +47,11 @@ void main() async {
     overrides: [sharedPreferencesProvider.overrideWithValue(sharedPrefs)],
   );
 
-  // 初始化通知服务
+  // 初始化核心服务（启动必需）
   final notificationService = NotificationService();
   await notificationService.initialize();
 
-  // 初始化音频引擎
-  await container.read(audioEngineProvider).initialize();
-
-  // 启动全局通知管理器
-  container.read(notificationManagerProvider).start();
-
-  // 初始化后台服务
-  try {
-    await initializeBackgroundService();
-    logger.info('Background service initialized');
-
-    // 在移动端请求通知权限
-    if (Platform.isAndroid || Platform.isIOS) {
-      await notificationService.requestPermissions();
-    }
-  } catch (e) {
-    logger.error('Failed to initialize background service: $e');
-  }
-
+  // 运行应用
   runApp(
     EasyLocalization(
       supportedLocales: const [
@@ -88,4 +71,33 @@ void main() async {
       ),
     ),
   );
+
+  // 延迟加载非核心服务（提高启动速度）
+  Future.microtask(() async {
+    try {
+      logger.info('Starting deferred initialization of non-core services');
+
+      // 初始化音频引擎
+      await container.read(audioEngineProvider).initialize();
+      logger.info('Audio engine initialized');
+
+      // 启动全局通知管理器
+      container.read(notificationManagerProvider).start();
+      logger.info('Notification manager started');
+
+      // 初始化后台服务
+      await initializeBackgroundService();
+      logger.info('Background service initialized');
+
+      // 在移动端请求通知权限
+      if (Platform.isAndroid || Platform.isIOS) {
+        await notificationService.requestPermissions();
+        logger.info('Notification permissions requested');
+      }
+
+      logger.info('All deferred services initialized successfully');
+    } catch (e) {
+      logger.error('Failed to initialize deferred services: $e');
+    }
+  });
 }

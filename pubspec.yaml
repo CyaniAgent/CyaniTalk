@@ -98,6 +98,8 @@ dependencies:
   palette_generator: ^0.3.3+3
   # 跨平台设备信息获取库，用于获取设备型号、操作系统等信息
   device_info_plus: ^12.0.0
+  # 图片缓存库，支持图片缓存和加载优化
+  cached_network_image: ^3.4.1
   # 后台任务服务库，支持在应用后台持续运行任务
   flutter_background_service: ^5.1.0
   # 本地通知库，用于发送系统级通知

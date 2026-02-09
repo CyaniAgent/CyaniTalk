@@ -38,7 +38,7 @@ final class MisskeyNotificationsNotifierProvider
 }
 
 String _$misskeyNotificationsNotifierHash() =>
-    r'd7a38fc1867c48e4205fcee0cf35dc271198a34d';
+    r'd8709736ff2b4344de16cfd2323e46ebd77bea84';
 
 abstract class _$MisskeyNotificationsNotifier
     extends $AsyncNotifier<List<MisskeyNotification>> {
