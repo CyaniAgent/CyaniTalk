@@ -20,10 +20,24 @@ class MisskeyUserNotifier extends _$MisskeyUserNotifier {
   }
 
   Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      return await repository.showUser(userId);
-    });
+    try {
+      if (!ref.mounted) return;
+      
+      state = const AsyncValue.loading();
+      
+      final result = await AsyncValue.guard<MisskeyUser>(() async {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        return await repository.showUser(userId);
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 }

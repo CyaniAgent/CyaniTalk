@@ -13,12 +13,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// 初始化后台服务
 ///
-/// 配置并启动应用的后台服务，支持Android和iOS平台。
+/// 配置并启动应用的后台服务，仅支持Android和iOS平台。
 /// 在Android上使用前台服务确保后台运行稳定性，
 /// 在iOS上配置后台执行权限。
 ///
 /// @return 无返回值，后台服务启动后完成
 Future<void> initializeBackgroundService() async {
+  // 仅在移动平台上初始化后台服务
   if (!Platform.isAndroid && !Platform.isIOS) {
     return;
   }

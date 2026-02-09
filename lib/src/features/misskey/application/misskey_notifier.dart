@@ -14,6 +14,7 @@ part 'misskey_notifier.g.dart';
 class TimelineValidationState {
   /// 上次验证时间
   final DateTime lastValidation;
+
   /// 验证中标记
   final bool isValidating;
 
@@ -33,8 +34,6 @@ class TimelineValidationState {
   }
 }
 
-
-
 /// Misskey时间线状态管理类
 ///
 /// 负责管理Misskey平台的各种时间线，包括本地、全球、社交等类型的时间线。
@@ -43,7 +42,7 @@ class TimelineValidationState {
 class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// 验证定时器，用于定期检测已删除的笔记
   Timer? _validationTimer;
-  
+
   /// 最后验证时间，用于节流验证频率
   DateTime _lastValidation = DateTime.now();
 
@@ -56,37 +55,47 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// @return 返回时间线笔记列表
   @override
   FutureOr<List<Note>> build(String type) async {
-    logger.info('初始化Misskey时间线，类型: $type');
+    try {
+      logger.info('初始化Misskey时间线，类型: $type');
 
-    // Subscribe to this timeline via WebSocket
-    final streamingService = ref.watch(
-      misskeyStreamingServiceProvider.notifier,
-    );
-    streamingService.subscribeToTimeline(type);
+      // Subscribe to this timeline via WebSocket
+      final streamingService = ref.watch(
+        misskeyStreamingServiceProvider.notifier,
+      );
+      streamingService.subscribeToTimeline(type);
 
-    // Initial fetch from REST API
-    final repository = await ref.watch(misskeyRepositoryProvider.future);
-    final notes = await repository.getTimeline(type);
+      // Initial fetch from REST API
+      final repository = await ref.watch(misskeyRepositoryProvider.future);
+      if (!ref.mounted) return [];
 
-    // Listening to the note stream from the streaming service
-    final subscription = streamingService.noteStream.listen((event) {
-      if (event.isDelete) {
-        _handleDeleteNote(event.noteId!);
-      } else if (event.timelineType == type) {
-        _handleNewNote(event.note!);
+      final notes = await repository.getTimeline(type);
+      if (!ref.mounted) return [];
+
+      // Listening to the note stream from the streaming service
+      final subscription = streamingService.noteStream.listen((event) {
+        if (event.isDelete) {
+          _handleDeleteNote(event.noteId!);
+        } else if (event.timelineType == type) {
+          _handleNewNote(event.note!);
+        }
+      });
+
+      ref.onDispose(() {
+        subscription.cancel();
+        _validationTimer?.cancel();
+      });
+
+      // Start periodic validation to detect deleted notes
+      _startPeriodicValidation();
+
+      logger.info('Misskey时间线初始化完成，加载了 ${notes.length} 条笔记');
+      return notes;
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return [];
       }
-    });
-
-    ref.onDispose(() {
-      subscription.cancel();
-      _validationTimer?.cancel();
-    });
-
-    // Start periodic validation to detect deleted notes
-    _startPeriodicValidation();
-
-    logger.info('Misskey时间线初始化完成，加载了 ${notes.length} 条笔记');
-    return notes;
+      rethrow;
+    }
   }
 
   /// 启动定期验证
@@ -109,47 +118,61 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   ///
   /// @return 无返回值
   Future<void> _validateNotes() async {
-    if (!ref.mounted) return;
-
-    // 检查上次验证时间过近
-    final now = DateTime.now();
-    final timeSinceLastValidation = now.difference(_lastValidation);
-    
-    // 至少等待45秒才能再次验证
-    if (timeSinceLastValidation < const Duration(seconds: 45)) {
-      logger.debug('Misskey时间线: 跳过验证，时间过近');
-      return;
-    }
-
-    // 更新最后验证时间
-    _lastValidation = now;
-
     try {
-      final currentNotes = state.value ?? [];
-      if (currentNotes.isEmpty) return;
+      if (!ref.mounted) return;
 
-      // Check the top 3 most recent notes
-      final notesToCheck = currentNotes.take(3).toList();
+      // 检查上次验证时间过近
+      final now = DateTime.now();
+      final timeSinceLastValidation = now.difference(_lastValidation);
 
-      for (final note in notesToCheck) {
-        if (!ref.mounted) break;
-
-        try {
-          final repository = await ref.read(misskeyRepositoryProvider.future);
-          final exists = await repository.checkNoteExists(note.id);
-          if (!exists && ref.mounted) {
-            logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
-            _handleDeleteNote(note.id);
-          }
-        } catch (e) {
-          logger.error('Misskey时间线: 验证笔记失败: ${note.id}', e);
-        }
-
-        // 添加小延迟，避免并发请求过多
-        await Future.delayed(const Duration(milliseconds: 100));
+      // 至少等待45秒才能再次验证
+      if (timeSinceLastValidation < const Duration(seconds: 45)) {
+        logger.debug('Misskey时间线: 跳过验证，时间过近');
+        return;
       }
-    } finally {
-      // 验证完成，不需要更新状态
+
+      // 更新最后验证时间
+      _lastValidation = now;
+
+      try {
+        final currentNotes = state.value ?? [];
+        if (currentNotes.isEmpty) return;
+
+        // Check the top 3 most recent notes
+        final notesToCheck = currentNotes.take(3).toList();
+
+        for (final note in notesToCheck) {
+          if (!ref.mounted) break;
+
+          try {
+            final repository = await ref.read(misskeyRepositoryProvider.future);
+            if (!ref.mounted) break;
+
+            final exists = await repository.checkNoteExists(note.id);
+            if (!ref.mounted) break;
+
+            if (!exists && ref.mounted) {
+              logger.info('Misskey时间线: 检测到已删除的笔记: ${note.id}');
+              _handleDeleteNote(note.id);
+            }
+          } catch (e) {
+            if (e.toString().contains('UnmountedRefException')) {
+              break;
+            }
+            logger.error('Misskey时间线: 验证笔记失败: ${note.id}', e);
+          }
+
+          // 添加小延迟，避免并发请求过多
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+      } finally {
+        // 验证完成，不需要更新状态
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
     }
   }
 
@@ -161,15 +184,22 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// @param note 新收到的笔记
   /// @return 无返回值
   void _handleNewNote(Note note) {
-    if (!ref.mounted) return;
+    try {
+      if (!ref.mounted) return;
 
-    final currentNotes = state.value ?? [];
+      final currentNotes = state.value ?? [];
 
-    // Avoid duplicates
-    if (currentNotes.any((n) => n.id == note.id)) return;
+      // Avoid duplicates
+      if (currentNotes.any((n) => n.id == note.id)) return;
 
-    logger.debug('Misskey时间线收到实时笔记: ${note.id}');
-    state = AsyncData([note, ...currentNotes]);
+      logger.debug('Misskey时间线收到实时笔记: ${note.id}');
+      state = AsyncData([note, ...currentNotes]);
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// 处理笔记删除
@@ -179,13 +209,20 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// @param noteId 要删除的笔记ID
   /// @return 无返回值
   void _handleDeleteNote(String noteId) {
-    if (!ref.mounted) return;
+    try {
+      if (!ref.mounted) return;
 
-    final currentNotes = state.value ?? [];
-    if (!currentNotes.any((n) => n.id == noteId)) return;
+      final currentNotes = state.value ?? [];
+      if (!currentNotes.any((n) => n.id == noteId)) return;
 
-    logger.debug('Misskey时间线删除笔记: $noteId');
-    state = AsyncData(currentNotes.where((n) => n.id != noteId).toList());
+      logger.debug('Misskey时间线删除笔记: $noteId');
+      state = AsyncData(currentNotes.where((n) => n.id != noteId).toList());
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// 刷新时间线
@@ -194,14 +231,41 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   ///
   /// @return 无返回值
   Future<void> refresh() async {
-    logger.info('刷新Misskey时间线，类型: $type');
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      final notes = await repository.getTimeline(type);
-      logger.info('Misskey时间线刷新完成，加载了 ${notes.length} 条笔记');
-      return notes;
-    });
+    try {
+      if (!ref.mounted) return;
+
+      logger.info('刷新Misskey时间线，类型: $type');
+      state = const AsyncValue.loading();
+
+      final result = await AsyncValue.guard<List<Note>>(() async {
+        try {
+          if (!ref.mounted) return <Note>[];
+
+          final repository = await ref.read(misskeyRepositoryProvider.future);
+          if (!ref.mounted) return <Note>[];
+
+          final notes = await repository.getTimeline(type);
+          if (!ref.mounted) return <Note>[];
+
+          logger.info('Misskey时间线刷新完成，加载了 ${notes.length} 条笔记');
+          return notes;
+        } catch (e) {
+          if (e.toString().contains('UnmountedRefException')) {
+            return <Note>[];
+          }
+          rethrow;
+        }
+      });
+
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// 加载更多
@@ -210,29 +274,50 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   ///
   /// @return 无返回值
   Future<void> loadMore() async {
-    if (state.isLoading || state.isRefreshing) {
-      logger.debug('Misskey时间线正在加载中，跳过加载更多');
-      return;
+    try {
+      if (state.isLoading || state.isRefreshing || !ref.mounted) {
+        logger.debug('Misskey时间线正在加载中或provider已被dispose，跳过加载更多');
+        return;
+      }
+
+      final currentNotes = state.value ?? [];
+      if (currentNotes.isEmpty) {
+        logger.debug('Misskey时间线为空，跳过加载更多');
+        return;
+      }
+
+      final lastId = currentNotes.last.id;
+      logger.info('加载更多Misskey时间线内容，类型: $type, 最后笔记ID: $lastId');
+
+      final result = await AsyncValue.guard<List<Note>>(() async {
+        try {
+          if (!ref.mounted) return currentNotes;
+
+          final repository = await ref.read(misskeyRepositoryProvider.future);
+          if (!ref.mounted) return currentNotes;
+
+          final newNotes = await repository.getTimeline(type, untilId: lastId);
+          if (!ref.mounted) return currentNotes;
+
+          logger.info('Misskey时间线加载更多完成，新增 ${newNotes.length} 条笔记');
+          return [...currentNotes, ...newNotes];
+        } catch (e) {
+          if (e.toString().contains('UnmountedRefException')) {
+            return currentNotes;
+          }
+          rethrow;
+        }
+      });
+
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
     }
-
-    final currentNotes = state.value ?? [];
-    if (currentNotes.isEmpty) {
-      logger.debug('Misskey时间线为空，跳过加载更多');
-      return;
-    }
-
-    final lastId = currentNotes.last.id;
-    logger.info('加载更多Misskey时间线内容，类型: $type, 最后笔记ID: $lastId');
-
-    state = await AsyncValue.guard(() async {
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      final newNotes = await repository.getTimeline(type, untilId: lastId);
-
-      if (!ref.mounted) return currentNotes;
-
-      logger.info('Misskey时间线加载更多完成，新增 ${newNotes.length} 条笔记');
-      return [...currentNotes, ...newNotes];
-    });
   }
 }
 

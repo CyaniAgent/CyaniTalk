@@ -19,15 +19,17 @@ class MisskeyTimelinePage extends ConsumerStatefulWidget {
 
   /// 创建MisskeyTimelinePage的状态管理对象
   @override
-  ConsumerState<MisskeyTimelinePage> createState() => _MisskeyTimelinePageState();
+  ConsumerState<MisskeyTimelinePage> createState() =>
+      _MisskeyTimelinePageState();
 }
 
 /// MisskeyTimelinePage的状态管理类
 class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   /// 当前选中的时间线类型集合
   Set<String> _selectedTimeline = {'Global'};
-  
+
   final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -42,8 +44,26 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      ref.read(misskeyTimelineProvider(_selectedTimeline.first).notifier).loadMore();
+    // 避免重复触发加载更多
+    if (_isLoadingMore) return;
+    
+    // 当滚动到距离底部300像素时触发加载更多
+    if (_scrollController.position.pixels >= 
+        _scrollController.position.maxScrollExtent - 300) {
+      _loadMore();
+    }
+  }
+  
+  Future<void> _loadMore() async {
+    if (_isLoadingMore) return;
+    
+    _isLoadingMore = true;
+    try {
+      await ref
+          .read(misskeyTimelineProvider(_selectedTimeline.first).notifier)
+          .loadMore();
+    } finally {
+      _isLoadingMore = false;
     }
   }
 
@@ -119,36 +139,29 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                 onRefresh: () => ref
                     .read(misskeyTimelineProvider(timelineType).notifier)
                     .refresh(),
-                child: CustomScrollView(
+                child: ListView.builder(
                   controller: _scrollController,
-                  slivers: [
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          if (index < notes.length) {
-                            return RepaintBoundary(
-                              child: ModernNoteCard(
-                                key: ValueKey(notes[index].id),
-                                note: notes[index],
-                                timelineType: timelineType,
-                              ),
-                            );
-                          } else {
-                            return _buildLoadMoreIndicator();
-                          }
-                        },
-                        childCount: notes.length + 1,
-                        semanticIndexCallback: (widget, localIndex) {
-                          return localIndex < notes.length ? localIndex : null;
-                        },
-                        addAutomaticKeepAlives: true,
-                        addRepaintBoundaries: true,
-                        addSemanticIndexes: true,
-                      ),
-                    ),
-                  ],
-                  cacheExtent: 2000, // 增加预加载范围
-                  physics: const BouncingScrollPhysics(), // 优化滚动体验
+                  itemCount: notes.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < notes.length) {
+                      final note = notes[index];
+                      return RepaintBoundary(
+                        child: ModernNoteCard(
+                          key: ValueKey(note.id),
+                          note: note,
+                          timelineType: timelineType,
+                        ),
+                      );
+                    } else {
+                      return _buildLoadMoreIndicator();
+                    }
+                  },
+                  cacheExtent: 3000, // 增加预加载范围，提前加载更多内容
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  physics: const BouncingScrollPhysics(),
+                  addAutomaticKeepAlives: true,
+                  addRepaintBoundaries: true,
+                  addSemanticIndexes: true,
                 ),
               );
             },
@@ -160,16 +173,19 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error: $err',
-                        textAlign: TextAlign.center,
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.red,
                       ),
+                      const SizedBox(height: 16),
+                      Text('Error: $err', textAlign: TextAlign.center),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () => ref
-                            .read(misskeyTimelineProvider(timelineType).notifier)
+                            .read(
+                              misskeyTimelineProvider(timelineType).notifier,
+                            )
                             .refresh(),
                         child: Text('timeline_retry'.tr()),
                       ),
@@ -198,15 +214,15 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
           Text(
             'timeline_no_notes_found'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'timeline_your_timeline_is_empty'.tr(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ],
       ),

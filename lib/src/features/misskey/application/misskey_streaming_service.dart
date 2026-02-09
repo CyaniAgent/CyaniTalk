@@ -16,7 +16,7 @@ import '../../../core/services/streaming/streaming_service_interface.dart';
 
 part 'misskey_streaming_service.g.dart';
 
-@Riverpod(keepAlive: true)
+@Riverpod()
 class MisskeyStreamingService extends _$MisskeyStreamingService
     implements IMisskeyStreamingService {
   WebSocketChannel? _channel;
@@ -60,6 +60,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   void build() {
     // Listen to account changes
     ref.listen(selectedMisskeyAccountProvider, (previous, next) {
+      if (!ref.mounted) return;
+
       final account = next.asData?.value;
       if (account != null) {
         _connect();
@@ -100,6 +102,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   }
 
   Future<void> _connect() async {
+    if (!ref.mounted) return;
+
     final account = ref.read(selectedMisskeyAccountProvider).value;
     if (account == null) {
       _updateStatus(StreamingStatus.disconnected);
@@ -161,6 +165,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts)',
     );
     _reconnectTimer = Timer(delay, () {
+      if (!ref.mounted) return;
+
       final currentAccount = ref.read(selectedMisskeyAccountProvider).value;
       if (currentAccount?.id == account.id) {
         _connect();

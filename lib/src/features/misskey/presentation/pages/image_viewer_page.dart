@@ -22,13 +22,18 @@ class ImageViewerPage extends StatelessWidget {
                   maxScale: PhotoViewComputedScale.covered * 2.0,
                   initialScale: PhotoViewComputedScale.contained,
                   basePosition: Alignment.center,
-                  backgroundDecoration: const BoxDecoration(color: Colors.black),
-                  heroAttributes: PhotoViewHeroAttributes(tag: heroTag!),
-                  loadingBuilder: (context, event) => const Center(
-                    child: CircularProgressIndicator(),
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.black,
                   ),
+                  heroAttributes: PhotoViewHeroAttributes(tag: heroTag!),
+                  loadingBuilder: (context, event) =>
+                      const Center(child: CircularProgressIndicator()),
                   errorBuilder: (context, error, stackTrace) => Center(
-                    child: Icon(Icons.error_outline, size: 50, color: Theme.of(context).colorScheme.surface),
+                    child: Icon(
+                      Icons.error_outline,
+                      size: 50,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
                   ),
                 )
               : PhotoView(
@@ -37,12 +42,17 @@ class ImageViewerPage extends StatelessWidget {
                   maxScale: PhotoViewComputedScale.covered * 2.0,
                   initialScale: PhotoViewComputedScale.contained,
                   basePosition: Alignment.center,
-                  backgroundDecoration: const BoxDecoration(color: Colors.black),
-                  loadingBuilder: (context, event) => const Center(
-                    child: CircularProgressIndicator(),
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.black,
                   ),
+                  loadingBuilder: (context, event) =>
+                      const Center(child: CircularProgressIndicator()),
                   errorBuilder: (context, error, stackTrace) => Center(
-                    child: Icon(Icons.error_outline, size: 50, color: Theme.of(context).colorScheme.surface),
+                    child: Icon(
+                      Icons.error_outline,
+                      size: 50,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
                   ),
                 ),
           // Close button
@@ -50,30 +60,12 @@ class ImageViewerPage extends StatelessWidget {
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
             child: IconButton(
-              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.surface, size: 32),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-          // Double tap to zoom hint (appears briefly)
-          Positioned(
-            bottom: 80,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  '双击可放大图片',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.surface,
-                    fontSize: 14,
-                  ),
-                ),
+              icon: Icon(
+                Icons.close,
+                color: Theme.of(context).colorScheme.surface,
+                size: 32,
               ),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ),
         ],

@@ -39,7 +39,7 @@ final class MisskeyMessagingHistoryNotifierProvider
 }
 
 String _$misskeyMessagingHistoryNotifierHash() =>
-    r'cf3d01a0db357e267a209d40a61b54f7c895a16f';
+    r'908da4bb0dfbb3c339feddc4736dbc42b42327b2';
 
 abstract class _$MisskeyMessagingHistoryNotifier
     extends $AsyncNotifier<List<MessagingMessage>> {

@@ -64,7 +64,7 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'80ef4e3db5bc91310141b8d72e6a744cc19774ab';
+    r'5d399ca90d32b88658b10a93305270719cf324bc';
 
 /// Misskey时间线状态管理类
 ///

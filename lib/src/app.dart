@@ -8,6 +8,7 @@ import '/src/core/core.dart';
 import '/src/routing/router.dart';
 import '/src/features/misskey/application/misskey_streaming_service.dart';
 import '/src/features/profile/presentation/settings/appearance_page.dart';
+import '/src/core/services/notification_manager.dart';
 
 /// CyaniTalk应用程序的根组件
 ///
@@ -29,7 +30,8 @@ class CyaniTalkApp extends ConsumerStatefulWidget {
 /// CyaniTalkApp的状态管理类
 ///
 /// 负责管理应用程序的状态，包括主题缓存和外观设置。
-class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
+class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
+    with WidgetsBindingObserver {
   /// 缓存的亮色主题
   ThemeData? _cachedLightTheme;
 
@@ -38,6 +40,36 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp> {
 
   /// 缓存的外观设置
   AppearanceSettings? _cachedSettings;
+
+  @override
+  void initState() {
+    super.initState();
+    // 注册生命周期观察者
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // 移除生命周期观察者
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    logger.debug('CyaniTalkApp: 应用生命周期状态变化: $state');
+
+    if (state == AppLifecycleState.detached) {
+      // 应用完全退出时清理资源
+      logger.info('CyaniTalkApp: 应用正在退出，清理资源...');
+      // 清理Misskey流媒体服务
+      ref.read(misskeyStreamingServiceProvider.notifier).dispose();
+      // 清理通知管理器
+      ref.read(notificationManagerProvider).stop();
+      logger.info('CyaniTalkApp: 资源清理完成');
+    }
+  }
 
   /// 构建应用程序的UI
   ///

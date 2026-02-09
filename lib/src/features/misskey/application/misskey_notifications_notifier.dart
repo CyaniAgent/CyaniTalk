@@ -35,39 +35,71 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
   }
 
   void _handleNewNotification(Map<String, dynamic> event) {
-    if (!ref.mounted) return;
-    
-    // 目前简单实现为直接刷新
-    refresh();
+    try {
+      if (!ref.mounted) return;
+      
+      // 目前简单实现为直接刷新
+      refresh();
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> refresh() async {
-    logger.info('刷新Misskey通知列表');
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      return await repository.getNotifications();
-    });
+    try {
+      if (!ref.mounted) return;
+      
+      logger.info('刷新Misskey通知列表');
+      state = const AsyncValue.loading();
+      
+      final result = await AsyncValue.guard<List<MisskeyNotification>>(() async {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        return await repository.getNotifications();
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> loadMore() async {
-    if (state.isLoading || state.isRefreshing) return;
+    try {
+      if (state.isLoading || state.isRefreshing || !ref.mounted) return;
 
-    final currentNotifications = state.value ?? [];
-    if (currentNotifications.isEmpty) return;
+      final currentNotifications = state.value ?? [];
+      if (currentNotifications.isEmpty) return;
 
-    final lastId = currentNotifications.last.id;
-    logger.info('加载更多Misskey通知，起始ID: $lastId');
+      final lastId = currentNotifications.last.id;
+      logger.info('加载更多Misskey通知，起始ID: $lastId');
 
-    state = await AsyncValue.guard(() async {
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      final newNotifications = await repository.getNotifications(
-        untilId: lastId,
-      );
+      final result = await AsyncValue.guard<List<MisskeyNotification>>(() async {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        final newNotifications = await repository.getNotifications(
+          untilId: lastId,
+        );
 
-      if (!ref.mounted) return currentNotifications;
+        if (!ref.mounted) return currentNotifications;
 
-      return [...currentNotifications, ...newNotifications];
-    });
+        return [...currentNotifications, ...newNotifications];
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 }

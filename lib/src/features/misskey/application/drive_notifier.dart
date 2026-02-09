@@ -81,70 +81,131 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   }
 
   Future<void> cd(DriveFolder folder) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
-      return _fetchDriveContent(
-        folderId: folder.id,
-        breadcrumbs: [...currentBreadcrumbs, folder],
-      );
-    });
+    try {
+      if (!ref.mounted) return;
+      
+      state = const AsyncValue.loading();
+      
+      final result = await AsyncValue.guard<DriveState>(() async {
+        final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
+        return _fetchDriveContent(
+          folderId: folder.id,
+          breadcrumbs: [...currentBreadcrumbs, folder],
+        );
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> cdBack() async {
-    final currentBreadcrumbs = List<DriveFolder>.from(
-      state.value?.breadcrumbs ?? [],
-    );
-    if (currentBreadcrumbs.isEmpty) return;
-
-    currentBreadcrumbs.removeLast();
-    final parentId = currentBreadcrumbs.isEmpty
-        ? null
-        : currentBreadcrumbs.last.id;
-
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      return _fetchDriveContent(
-        folderId: parentId,
-        breadcrumbs: currentBreadcrumbs,
+    try {
+      if (!ref.mounted) return;
+      
+      final currentBreadcrumbs = List<DriveFolder>.from(
+        state.value?.breadcrumbs ?? [],
       );
-    });
+      if (currentBreadcrumbs.isEmpty) return;
+
+      currentBreadcrumbs.removeLast();
+      final parentId = currentBreadcrumbs.isEmpty
+          ? null
+          : currentBreadcrumbs.last.id;
+
+      state = const AsyncValue.loading();
+      
+      final result = await AsyncValue.guard<DriveState>(() async {
+        return _fetchDriveContent(
+          folderId: parentId,
+          breadcrumbs: currentBreadcrumbs,
+        );
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> cdTo(int index) async {
-    if (index == -1) {
-      // Root
+    try {
+      if (!ref.mounted) return;
+      
+      if (index == -1) {
+        // Root
+        state = const AsyncValue.loading();
+        
+        final result = await AsyncValue.guard<DriveState>(() async => _fetchDriveContent());
+        
+        if (ref.mounted) {
+          state = result;
+        }
+        return;
+      }
+
+      final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
+      if (index >= currentBreadcrumbs.length) return;
+
+      final targetBreadcrumbs = currentBreadcrumbs.sublist(0, index + 1);
+      final targetFolder = targetBreadcrumbs.last;
+
       state = const AsyncValue.loading();
-      state = await AsyncValue.guard(() async => _fetchDriveContent());
-      return;
+      
+      final result = await AsyncValue.guard<DriveState>(() async {
+        return _fetchDriveContent(
+          folderId: targetFolder.id,
+          breadcrumbs: targetBreadcrumbs,
+        );
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
     }
-
-    final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
-    if (index >= currentBreadcrumbs.length) return;
-
-    final targetBreadcrumbs = currentBreadcrumbs.sublist(0, index + 1);
-    final targetFolder = targetBreadcrumbs.last;
-
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      return _fetchDriveContent(
-        folderId: targetFolder.id,
-        breadcrumbs: targetBreadcrumbs,
-      );
-    });
   }
 
   Future<void> refresh() async {
-    final currentFolderId = state.value?.currentFolderId;
-    final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
+    try {
+      if (!ref.mounted) return;
+      
+      final currentFolderId = state.value?.currentFolderId;
+      final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
 
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      return _fetchDriveContent(
-        folderId: currentFolderId,
-        breadcrumbs: currentBreadcrumbs,
-      );
-    });
+      state = const AsyncValue.loading();
+      
+      final result = await AsyncValue.guard<DriveState>(() async {
+        return _fetchDriveContent(
+          folderId: currentFolderId,
+          breadcrumbs: currentBreadcrumbs,
+        );
+      });
+      
+      if (ref.mounted) {
+        state = result;
+      }
+    } catch (e) {
+      if (e.toString().contains('UnmountedRefException')) {
+        return;
+      }
+      rethrow;
+    }
   }
 
   Future<void> deleteFile(String fileId) async {
