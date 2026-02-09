@@ -46,37 +46,12 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 ## 🛠 Tech Stack
 
 *   **Framework:** [Flutter](https://flutter.dev/) (Dart)
-*   **Core Logic & Networking:** [Rust](https://www.rust-lang.org/) (High-performance backend logic)
-    *   `reqwest` (REST API calls in Rust).
-    *   `serde` (Compile-time JSON serialization).
-    *   `flutter_rust_bridge` (Seamless Dart-Rust FFI).
 *   **State Management:** [Riverpod](https://riverpod.dev/) (Handling multi-account states).
-*   **Networking (Legacy/UI):**
-    *   `dio` (Being ported to Rust).
+*   **Networking:**
+    *   `dio` (REST API calls).
     *   `web_socket_channel` (Misskey Streaming).
 *   **UI Components:** `flutter_adaptive_scaffold` (or custom LayoutBuilder implementation), `flutter_markdown`.
 *   **Storage:** `flutter_secure_storage` for credentials, `shared_preferences` for settings.
-
----
-
-## 🦀 Rust Core Development
-
-CyaniTalk uses Rust for its network and business logic layer to ensure maximum performance and type safety.
-
-### Building Rust Components
-1.  **Install Rust:** [rustup.rs](https://rustup.rs/)
-2.  **Install Codegen Tool:**
-    ```bash
-    cargo install flutter_rust_bridge_codegen
-    ```
-3.  **Generate Bindings:**
-    Whenever you modify Rust code in `rust/src/api/`, run:
-    ```bash
-    cd rust
-    cargo build
-    cd ..
-    flutter_rust_bridge_codegen generate
-    ```
 
 ---
 

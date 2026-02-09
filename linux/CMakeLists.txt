@@ -112,14 +112,6 @@ install(DIRECTORY "${NATIVE_ASSETS_DIR}"
    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
    COMPONENT Runtime)
 
-# Copy Rust library
-set(RUST_LIB_PATH "${CMAKE_SOURCE_DIR}/../rust/target/debug/librust_lib.so")
-if(EXISTS ${RUST_LIB_PATH})
-    install(FILES ${RUST_LIB_PATH}
-        DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-        COMPONENT Runtime)
-endif()
-
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.
 set(FLUTTER_ASSET_DIR_NAME "flutter_assets")

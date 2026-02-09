@@ -46,50 +46,22 @@ CyaniTalk 将导航逻辑与内容展示分离，在不同设备上提供符合�
 ## 🛠 技术栈
 
 *   **框架：** [Flutter](https://flutter.dev/) (Dart)
-*   **核心引擎：** [Rust](https://www.rust-lang.org/) (高性能网络层与业务逻辑)
-    *   `reqwest` (Rust 端 REST API 请求)。
-    *   `serde` (编译时 JSON 序列化)。
-    *   `flutter_rust_bridge` (无缝 Dart-Rust FFI 桥接)。
 *   **状态管理：** [Riverpod](https://riverpod.dev/) (处理多账户与跨平台状态)。
-*   **网络层 (迁移中)：**
-    *   `dio` (正在逐步迁移至 Rust)。
+*   **网络层：**
+    *   `dio` (REST API 请求)。
     *   `web_socket_channel` (Misskey 实时流)。
 *   **UI 组件：** `flutter_adaptive_scaffold` (或自定义 LayoutBuilder)、`flutter_markdown`。
 *   **本地存储：** `flutter_secure_storage` (用于加密存储 Token)。
 
 ---
 
-## 🦀 Rust 核心开发
-
-CyaniTalk 使用 Rust 处理所有网络请求和复杂业务逻辑，以确保极致的性能和类型安全。
-
-### 构建 Rust 组件
-1.  **安装 Rust：** [rustup.rs](https://rustup.rs/)
-2.  **安装 Bindgen 工具：**
-    ```bash
-    cargo install flutter_rust_bridge_codegen
-    ```
-3.  **生成绑定：**
-    每当你修改了 `rust/src/api/` 中的 Rust 代码后，运行：
-    ```bash
-    cd rust
-    cargo build
-    cd ..
-    flutter_rust_bridge_codegen generate
-    ```
-
----
-
 ## 🗺️ 开发路线图
 
-### 第一阶段：响应式骨架与 Rust 集成 🚧
+### 第一阶段：响应式骨架 🚧
 - [x] 初始化 Flutter 项目。
 - [x] 实现 **响应式外壳** (移动端底栏 vs 桌面端侧栏)。
-- [x] 集成 **Rust 核心层** (flutter_rust_bridge)。
-- [ ] 将所有 REST API 调用迁移至 Rust (`reqwest`)。
 
 ### 第二阶段：认证与核心连接
-- [x] 实现 **JuheAuth** (Rust 驱动)。
 - [ ] 实现 Misskey 的 **MiAuth** 认证流程。
 - [ ] 实现 Flarum 的 Token 获取与登录。
 - [ ] 创建统一登录管理器 (Unified Login Manager)。

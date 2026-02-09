@@ -39,19 +39,3 @@ target_include_directories(${BINARY_NAME} PRIVATE "${CMAKE_SOURCE_DIR}")
 
 # Run the Flutter tool portions of the build. This must not be removed.
 add_dependencies(${BINARY_NAME} flutter_assemble)
-
-# === Rust Library Integration ===
-# Copy the Rust library DLL to the output directory so the executable can find it.
-set(RUST_LIB_NAME "rust_lib.dll")
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(RUST_LIB_SOURCE "${CMAKE_SOURCE_DIR}/../rust/target/release/${RUST_LIB_NAME}")
-else()
-    set(RUST_LIB_SOURCE "${CMAKE_SOURCE_DIR}/../rust/target/debug/${RUST_LIB_NAME}")
-endif()
-
-add_custom_command(TARGET ${BINARY_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  "${RUST_LIB_SOURCE}"
-  "$<TARGET_FILE_DIR:${BINARY_NAME}>/${RUST_LIB_NAME}"
-  VERBATIM
-)
