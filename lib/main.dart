@@ -20,7 +20,6 @@ import 'dart:io';
 /// - 初始化Flutter绑定
 /// - 初始化持久化存储
 /// - 初始化日志系统
-/// - 初始化Rust库
 /// - 初始化国际化支持
 /// - 创建Riverpod的ProviderContainer
 /// - 初始化通知服务
