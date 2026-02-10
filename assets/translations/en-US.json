@@ -111,6 +111,7 @@
   "settings_notif_permission_desc": "Manage app notification permissions in system settings",
   "settings_notif_permission_granted": "Notification permission granted!",
   "settings_notif_permission_denied": "Notification permission denied or needs manual enabling",
+  "settings_notif_mobile_only": "Current version of the App's notification capabilities are only supported on mobile devices",
   "settings_notif_test": "Send Test Notification",
   "settings_notif_test_desc": "Send a notification to register this app in Windows system settings",
   "settings_notif_test_body": "This is a test notification from CyaniTalk! You should now be able to see me in system settings (≧▽≦)",

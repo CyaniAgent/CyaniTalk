@@ -90,6 +90,7 @@
   "settings_language_description": "更改应用语言喵~",
   "settings_notifications_title": "通知喵~",
   "settings_notifications_description": "推送和应用内提醒喵~",
+  "settings_notif_mobile_only": "当前版本的 App 通知功能仅在移动端设备上受支持喵~",
   "settings_sound_title": "声音喵~",
   "settings_sound_description": "音量和音效喵~",
   "settings_section_system": "系统喵~",

@@ -30,7 +30,7 @@ class NetworkClient {
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {
-          if (userAgent != null) 'User-Agent': userAgent,
+          'User-Agent':? userAgent,
           'Accept': '*/*',
           ...?extraHeaders,
         },

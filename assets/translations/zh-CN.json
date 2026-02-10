@@ -111,6 +111,7 @@
   "settings_notif_permission_desc": "在系统设置中管理应用通知权限",
   "settings_notif_permission_granted": "已获得通知权限！",
   "settings_notif_permission_denied": "通知权限被拒绝或需手动开启",
+  "settings_notif_mobile_only": "当前版本的 App 通知功能仅在移动端设备上受支持",
   "settings_notif_test": "发送测试通知",
   "settings_notif_test_desc": "发送一条通知以在 Windows 系统设置中注册此应用",
   "settings_notif_test_body": "这是一条来自 CyaniTalk 的测试通知！现在你应该可以在系统设置中看到我了 (≧▽≦)",

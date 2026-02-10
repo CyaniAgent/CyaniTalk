@@ -88,6 +88,7 @@
   "settings_language_description": "Change app language Meow~",
   "settings_notifications_title": "Notifications Meow~",
   "settings_notifications_description": "Push and in-app alerts Meow~",
+  "settings_notif_mobile_only": "Current version of the App's notification capabilities are only supported on mobile devices Meow~",
   "settings_sound_title": "Sound Meow~",
   "settings_sound_description": "Volume and sound effects Meow~",
   "settings_section_system": "System Meow~",

@@ -96,6 +96,7 @@
   "settings_language_description": "アプリの言語を変更する",
   "settings_notifications_title": "通知",
   "settings_notifications_description": "プッシュ通知とアプリ内通知",
+  "settings_notif_mobile_only": "現在のバージョンのアプリの通知機能はモバイルデバイスのみをサポートしています",
   "settings_sound_title": "音声",
   "settings_sound_description": "音量と効果音",
   "settings_section_system": "システム",

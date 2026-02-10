@@ -208,3 +208,6 @@ flutter:
     - family: MiSans
       fonts:
         - asset: assets/fonts/MiSans VF.ttf
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/monospace/JetBrainsMono.ttf

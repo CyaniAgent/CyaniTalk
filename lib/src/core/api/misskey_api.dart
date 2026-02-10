@@ -155,7 +155,7 @@ class MisskeyApi extends BaseApi {
 
     return _fetchList('MisskeyApi.getTimeline', endpoint, {
       'limit': limit,
-      if (untilId != null) 'untilId': untilId,
+      'untilId':? untilId,
     });
   }
 
@@ -185,7 +185,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList(
     'MisskeyApi.getFollowingChannels',
     '/api/channels/followed',
-    {'limit': limit, if (untilId != null) 'untilId': untilId},
+    {'limit': limit, 'untilId':? untilId},
   );
 
   /// 获取自己创建的频道
@@ -199,7 +199,7 @@ class MisskeyApi extends BaseApi {
   Future<List<dynamic>> getOwnedChannels({int limit = 20, String? untilId}) =>
       _fetchList('MisskeyApi.getOwnedChannels', '/api/channels/owned', {
         'limit': limit,
-        if (untilId != null) 'untilId': untilId,
+        'untilId':? untilId,
       });
 
   /// 获取收藏的频道
@@ -216,7 +216,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList(
     'MisskeyApi.getFavoriteChannels',
     '/api/channels/my-favorites',
-    {'limit': limit, if (untilId != null) 'untilId': untilId},
+    {'limit': limit, 'untilId':? untilId},
   );
 
   /// 搜索频道
@@ -235,7 +235,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.searchChannels', '/api/channels/search', {
     'query': query,
     'limit': limit,
-    if (untilId != null) 'untilId': untilId,
+    'untilId':? untilId,
   });
 
   /// 获取频道详情
@@ -270,7 +270,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.getChannelTimeline', '/api/channels/timeline', {
     'channelId': channelId,
     'limit': limit,
-    if (untilId != null) 'untilId': untilId,
+    'untilId':? untilId,
   });
 
   /// 获取收藏夹列表
@@ -284,7 +284,7 @@ class MisskeyApi extends BaseApi {
   Future<List<dynamic>> getClips({int limit = 20, String? untilId}) =>
       _fetchList('MisskeyApi.getClips', '/api/clips/list', {
         'limit': limit,
-        if (untilId != null) 'untilId': untilId,
+        'untilId':? untilId,
       });
 
   /// 获取收藏夹中的笔记
@@ -303,7 +303,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.getClipNotes', '/api/clips/notes', {
     'clipId': clipId,
     'limit': limit,
-    if (untilId != null) 'untilId': untilId,
+    'untilId':? untilId,
   });
 
   /// 创建新笔记
@@ -332,13 +332,13 @@ class MisskeyApi extends BaseApi {
       '/api/notes/create',
       data: {
         'i': token,
-        if (text != null) 'text': text,
-        if (replyId != null) 'replyId': replyId,
-        if (renoteId != null) 'renoteId': renoteId,
+        'text':? text,
+        'replyId':? replyId,
+        'renoteId':? renoteId,
         if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
-        if (visibility != null) 'visibility': visibility,
-        if (localOnly != null) 'localOnly': localOnly,
-        if (cw != null) 'cw': cw,
+        'visibility':? visibility,
+        'localOnly':? localOnly,
+        'cw':? cw,
       },
     ),
   );
@@ -388,8 +388,8 @@ class MisskeyApi extends BaseApi {
     String? untilId,
   }) => _fetchList('MisskeyApi.getDriveFiles', '/api/drive/files', {
     'limit': limit,
-    if (folderId != null) 'folderId': folderId,
-    if (untilId != null) 'untilId': untilId,
+    'folderId':? folderId,
+    'untilId':? untilId,
   });
 
   /// 获取云盘文件夹列表
@@ -407,8 +407,8 @@ class MisskeyApi extends BaseApi {
     String? untilId,
   }) => _fetchList('MisskeyApi.getDriveFolders', '/api/drive/folders', {
     'limit': limit,
-    if (folderId != null) 'folderId': folderId,
-    if (untilId != null) 'untilId': untilId,
+    'folderId':? folderId,
+    'untilId':? untilId,
   });
 
   /// 创建云盘文件夹
@@ -429,7 +429,7 @@ class MisskeyApi extends BaseApi {
       data: {
         'i': token,
         'name': name,
-        if (parentId != null) 'parentId': parentId,
+        'parentId':? parentId,
       },
     ),
     (response) => response.data as Map<String, dynamic>,
@@ -482,7 +482,7 @@ class MisskeyApi extends BaseApi {
       '/api/drive/files/create',
       data: FormData.fromMap({
         'i': token,
-        if (folderId != null) 'folderId': folderId,
+        'folderId':? folderId,
         'file': MultipartFile.fromBytes(bytes, filename: filename),
       }),
     ),
@@ -562,8 +562,8 @@ class MisskeyApi extends BaseApi {
       'i': token,
       'userId': userId,
       'limit': limit,
-      if (sinceId != null) 'sinceId': sinceId,
-      if (untilId != null) 'untilId': untilId,
+      'sinceId':? sinceId,
+      'untilId':? untilId,
       'markAsRead': markAsRead,
     };
 
@@ -601,8 +601,8 @@ class MisskeyApi extends BaseApi {
     final data = {
       'i': token,
       'userId': userId,
-      if (text != null) 'text': text,
-      if (fileId != null) 'fileId': fileId,
+      'text':? text,
+      'fileId':? fileId,
     };
 
     return executeApiCall(
@@ -731,8 +731,8 @@ class MisskeyApi extends BaseApi {
       data: {
         'i': token,
         'roomId': roomId,
-        if (text != null) 'text': text,
-        if (fileId != null) 'fileId': fileId,
+        'text':? text,
+        'fileId':? fileId,
       },
     ),
   );
@@ -760,7 +760,7 @@ class MisskeyApi extends BaseApi {
         'i': token,
         'name': name,
         'isPublic': isPublic,
-        if (description != null) 'description': description,
+        'description':? description,
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
@@ -833,10 +833,10 @@ class MisskeyApi extends BaseApi {
     List<String>? excludeTypes,
   }) => _fetchList('MisskeyApi.getNotifications', '/api/i/notifications', {
     'limit': limit,
-    if (sinceId != null) 'sinceId': sinceId,
-    if (untilId != null) 'untilId': untilId,
-    if (includeTypes != null) 'includeTypes': includeTypes,
-    if (excludeTypes != null) 'excludeTypes': excludeTypes,
+    'sinceId':? sinceId,
+    'untilId':? untilId,
+    'includeTypes':? includeTypes,
+    'excludeTypes':? excludeTypes,
   });
 
   /// 搜索笔记
@@ -855,7 +855,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.searchNotes', '/api/notes/search', {
     'query': query,
     'limit': limit,
-    if (untilId != null) 'untilId': untilId,
+    'untilId':? untilId,
   });
 
   /// 搜索用户
@@ -874,6 +874,6 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.searchUsers', '/api/users/search', {
     'query': query,
     'limit': limit,
-    if (offset != null) 'offset': offset,
+    'offset':? offset,
   });
 }

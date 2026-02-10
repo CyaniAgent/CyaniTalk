@@ -405,9 +405,9 @@ class FlarumApi extends BaseApi {
     () => get(
       '/api/discussions',
       queryParameters: {
-        if (limit != null) 'page[limit]': limit,
-        if (offset != null) 'page[offset]': offset,
-        if (include != null) 'include': include,
+        'page[limit]':? limit,
+        'page[offset]':? offset,
+        'include':? include,
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
@@ -424,8 +424,8 @@ class FlarumApi extends BaseApi {
       '/api/discussions',
       queryParameters: {
         'filter[q]': query,
-        if (limit != null) 'page[limit]': limit,
-        if (offset != null) 'page[offset]': offset,
+        'page[limit]':? limit,
+        'page[offset]':? offset,
         'include': 'user,lastPostedUser,tags',
       },
     ),
@@ -457,8 +457,8 @@ class FlarumApi extends BaseApi {
       queryParameters: {
         'filter[discussion]': discussionId,
         'filter[type]': 'comment',
-        if (limit != null) 'page[limit]': limit,
-        if (offset != null) 'page[offset]': offset,
+        'page[limit]':? limit,
+        'page[offset]':? offset,
         'include': 'user,discussion',
       },
     ),

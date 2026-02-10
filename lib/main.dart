@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/src/app.dart';
 import '/src/core/core.dart';
+import '/src/core/utils/http_overrides.dart';
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/core/services/background_service.dart';
 import '/src/core/services/notification_service.dart';
@@ -32,6 +33,9 @@ import 'dart:io';
 /// @return 无返回值，应用程序启动后会持续运行
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 设置全局 HTTP 覆盖以处理自签名证书 (HandshakeException fix)
+  HttpOverrides.global = CyaniHttpOverrides();
 
   // 初始化持久化存储
   final sharedPrefs = await SharedPreferences.getInstance();

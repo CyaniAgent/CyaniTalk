@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/src/core/core.dart';
@@ -114,6 +115,16 @@ class CacheManager {
       // 下载并缓存文件
       final dio = Dio()..options.connectTimeout = downloadTimeout;
       dio.options.receiveTimeout = downloadTimeout;
+
+      // 处理 SSL/TLS 证书验证 (HandshakeException fix)
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          return client;
+        },
+      );
 
       // 先获取文件大小信息
       final response = await dio.head(url);

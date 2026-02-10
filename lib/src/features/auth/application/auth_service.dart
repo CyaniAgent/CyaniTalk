@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import '../data/auth_repository.dart';
 import '../domain/account.dart';
 import '../../../core/api/flarum_api.dart';
+import '../../../core/api/network_client.dart';
 import '../../flarum/data/flarum_repository.dart';
 import '../../../core/core.dart';
 
@@ -114,16 +115,9 @@ class AuthService extends _$AuthService {
     final sanitizedHost = _sanitizeHost(host);
     logger.info('检查Misskey MiAuth认证状态，主机: $sanitizedHost');
 
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: 'https://$sanitizedHost',
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
-        headers: {
-          'User-Agent':
-              'CyaniTalk/${Constants.appVersion} (Android; Mobile; rv:1.0)',
-        },
-      ),
+    final dio = NetworkClient().createDio(
+      host: sanitizedHost,
+      userAgent: 'CyaniTalk/${Constants.appVersion} (Android; Mobile; rv:1.0)',
     );
 
     int retryCount = 0;

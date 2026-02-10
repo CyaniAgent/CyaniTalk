@@ -135,6 +135,12 @@ class NotificationService {
     String? payload,
     String? groupKey,
   }) async {
+    // 桌面端（Windows/macOS/Linux）禁用通知显示
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      debugPrint('Notifications are disabled on desktop platforms.');
+      return;
+    }
+
     final androidNotificationDetails = AndroidNotificationDetails(
       'cyanitalk_general_channel',
       'CyaniTalk Notifications',

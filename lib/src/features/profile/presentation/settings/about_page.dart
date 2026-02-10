@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/core.dart';
+import '../../../../core/api/network_client.dart';
 import '../../../../core/services/audio_engine.dart';
 import 'sponsor_page.dart';
 
@@ -137,9 +138,9 @@ class _AboutPageState extends ConsumerState<AboutPage> {
 
       // 缓存过期或不存在，从API获取
       logger.info('AboutPage: Fetching GitHub contributors from API');
-      final dio = Dio();
+      final dio = NetworkClient().createDio(host: 'api.github.com');
       final response = await dio.get(
-        'https://api.github.com/repos/CyaniAgent/CyaniTalk/contributors',
+        '/repos/CyaniAgent/CyaniTalk/contributors',
         options: Options(
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
@@ -209,9 +210,9 @@ class _AboutPageState extends ConsumerState<AboutPage> {
   Future<void> _refreshContributorsInBackground() async {
     try {
       logger.info('AboutPage: Refreshing contributors in background');
-      final dio = Dio();
+      final dio = NetworkClient().createDio(host: 'api.github.com');
       final response = await dio.get(
-        'https://api.github.com/repos/CyaniAgent/CyaniTalk/contributors',
+        '/repos/CyaniAgent/CyaniTalk/contributors',
         options: Options(
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),

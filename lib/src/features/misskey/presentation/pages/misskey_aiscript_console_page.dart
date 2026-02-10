@@ -82,112 +82,212 @@ class _MisskeyAiScriptConsolePageState
     });
   }
 
+  void _showExampleScripts(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'aiscript_console_scripts'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              ..._availableScripts.map((path) {
+                final name = path.split('/').last;
+                return ListTile(
+                  leading: const Icon(Icons.description_outlined),
+                  title: Text(name),
+                  onTap: () {
+                    _loadScript(path);
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Text(
-                'aiscript_console_scripts'.tr(),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _availableScripts.map((path) {
-                      final name = path.split('/').last;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: ActionChip(
-                          label: Text(name),
-                          onPressed: () => _loadScript(path),
-                        ),
-                      );
-                    }).toList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth > 800;
+
+        return Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
+            ),
+            Positioned(
+              right: 24,
+              bottom: 24,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  FloatingActionButton.small(
+                    heroTag: 'clear_console',
+                    onPressed: _clearConsole,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    child: const Icon(Icons.delete_outline),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            flex: 2,
-            child: TextField(
-              controller: _codeController,
-              maxLines: null,
-              expands: true,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
-              decoration: InputDecoration(
-                hintText: 'Enter AiScript code here...',
-                border: const OutlineInputBorder(),
-                filled: true,
-                fillColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _isRunning ? null : _runScript,
-                  icon: _isRunning
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        )
-                      : const Icon(Icons.play_arrow),
-                  label: const Text('Run Script'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              OutlinedButton.icon(
-                onPressed: _clearConsole,
-                icon: const Icon(Icons.delete_outline),
-                label: const Text('Clear Output'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            flex: 3,
-            child: ExcludeSemantics(
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black87,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ListView.builder(
-                  itemCount: _output.length,
-                  itemBuilder: (context, index) {
-                    return Text(
-                      _output[index],
-                      style: const TextStyle(
-                        color: Colors.greenAccent,
-                        fontFamily: 'monospace',
-                        fontSize: 13,
-                      ),
-                    ).animate().fadeIn(duration: 200.ms);
-                  },
-                ),
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onLongPress: () => _showExampleScripts(context),
+                    child: FloatingActionButton.extended(
+                      heroTag: 'run_aiscript',
+                      onPressed: _isRunning ? null : _runScript,
+                      icon: _isRunning
+                          ? SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            )
+                          : const Icon(Icons.play_arrow),
+                      label: Text('aiscript_console_run'.tr()),
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: 1,
+          child: _buildCodeInput(),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 1,
+          child: _buildConsoleOutput(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          flex: 1,
+          child: _buildCodeInput(),
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          flex: 1,
+          child: _buildConsoleOutput(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCodeInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.code, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'Editor',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: TextField(
+            controller: _codeController,
+            maxLines: null,
+            expands: true,
+            style: const TextStyle(
+              fontFamily: 'JetBrainsMono',
+              fontSize: 14,
+              height: 1.5,
+            ),
+            decoration: InputDecoration(
+              hintText: 'aiscript_console_hint'.tr(),
+              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              contentPadding: const EdgeInsets.all(12),
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConsoleOutput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.terminal, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'Output',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+            ),
+            child: ListView.builder(
+              itemCount: _output.length,
+              itemBuilder: (context, index) {
+                return Text(
+                  _output[index],
+                  style: const TextStyle(
+                    color: Colors.greenAccent,
+                    fontFamily: 'JetBrainsMono',
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ).animate().fadeIn(duration: 200.ms);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
