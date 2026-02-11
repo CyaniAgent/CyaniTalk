@@ -391,6 +391,7 @@ class FlarumApi extends BaseApi {
     'FlarumApi.getUserProfile',
     () => get('/api/users/$userId'),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {'userId': userId},
     dioErrorParser: (error) =>
         error.response?.data?['errors']?[0]?['detail'] ?? error.message,
   );
@@ -411,6 +412,11 @@ class FlarumApi extends BaseApi {
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {
+      'limit': limit,
+      'offset': offset,
+      'include': include,
+    },
   );
 
   /// 搜索讨论
@@ -430,6 +436,11 @@ class FlarumApi extends BaseApi {
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {
+      'query': query,
+      'limit': limit,
+      'offset': offset,
+    },
   );
 
   /// 获取讨论详情
@@ -443,6 +454,7 @@ class FlarumApi extends BaseApi {
           },
         ),
         (response) => Map<String, dynamic>.from(response.data),
+        params: {'id': id},
       );
 
   /// 获取帖子列表
@@ -463,6 +475,11 @@ class FlarumApi extends BaseApi {
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {
+      'discussionId': discussionId,
+      'limit': limit,
+      'offset': offset,
+    },
   );
 
   /// 获取所有标签

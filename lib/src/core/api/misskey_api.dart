@@ -96,6 +96,9 @@ class MisskeyApi extends BaseApi {
       'MisskeyApi.getNote',
       () => _dio.post('/api/notes/show', data: {'i': token, 'noteId': noteId}),
       (response) => Map<String, dynamic>.from(response.data),
+      params: {'noteId': noteId},
+      dioErrorParser: (error) =>
+          error.response?.data?['error']?['message'] ?? error.message,
     );
   }
 
@@ -130,6 +133,9 @@ class MisskeyApi extends BaseApi {
     operationName,
     () => _dio.post(endpoint, data: {'i': token, ...data}),
     (response) => response.data as List<dynamic>,
+    params: data,
+    dioErrorParser: (error) =>
+        error.response?.data?['error']?['message'] ?? error.message,
   );
 
   /// 获取时间线
@@ -252,6 +258,7 @@ class MisskeyApi extends BaseApi {
       data: {'i': token, 'channelId': channelId},
     ),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {'channelId': channelId},
   );
 
   /// 获取频道时间线
@@ -341,6 +348,15 @@ class MisskeyApi extends BaseApi {
         'cw':? cw,
       },
     ),
+    params: {
+      'text': text,
+      'replyId': replyId,
+      'renoteId': renoteId,
+      'fileIds': fileIds,
+      'visibility': visibility,
+      'localOnly': localOnly,
+      'cw': cw,
+    },
   );
 
   /// 创建反应
@@ -357,6 +373,7 @@ class MisskeyApi extends BaseApi {
           '/api/notes/reactions/create',
           data: {'i': token, 'noteId': noteId, 'reaction': reaction},
         ),
+        params: {'noteId': noteId, 'reaction': reaction},
       );
 
   /// 删除反应
@@ -371,6 +388,7 @@ class MisskeyApi extends BaseApi {
       '/api/notes/reactions/delete',
       data: {'i': token, 'noteId': noteId},
     ),
+    params: {'noteId': noteId},
   );
 
   /// 获取云盘文件列表
@@ -447,6 +465,7 @@ class MisskeyApi extends BaseApi {
       '/api/drive/files/delete',
       data: {'i': token, 'fileId': fileId},
     ),
+    params: {'fileId': fileId},
   );
 
   /// 删除云盘文件夹
@@ -461,6 +480,7 @@ class MisskeyApi extends BaseApi {
       '/api/drive/folders/delete',
       data: {'i': token, 'folderId': folderId},
     ),
+    params: {'folderId': folderId},
   );
 
   /// 上传文件到云盘
@@ -580,6 +600,7 @@ class MisskeyApi extends BaseApi {
         }
       },
       (response) => response.data as List<dynamic>,
+      params: data,
     );
   }
 
@@ -618,6 +639,7 @@ class MisskeyApi extends BaseApi {
         }
       },
       (response) => Map<String, dynamic>.from(response.data),
+      params: data,
     );
   }
 
@@ -661,6 +683,7 @@ class MisskeyApi extends BaseApi {
       '/api/chat/messages/delete',
       data: {'i': token, 'messageId': messageId},
     ),
+    params: {'messageId': messageId},
   );
 
   // --- Chat Room API (New) ---
@@ -676,6 +699,7 @@ class MisskeyApi extends BaseApi {
     'MisskeyApi.createChatRoom',
     () => _dio.post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {'name': name},
   );
 
   /// 获取已加入的聊天室
@@ -735,6 +759,7 @@ class MisskeyApi extends BaseApi {
         'fileId':? fileId,
       },
     ),
+    params: {'roomId': roomId, 'text': text, 'fileId': fileId},
   );
 
   // --- Clips (Bookmarks) ---
@@ -764,6 +789,7 @@ class MisskeyApi extends BaseApi {
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {'name': name, 'isPublic': isPublic, 'description': description},
   );
 
   /// 将笔记添加到收藏夹
@@ -780,6 +806,7 @@ class MisskeyApi extends BaseApi {
           '/api/clips/add-note',
           data: {'i': token, 'clipId': clipId, 'noteId': noteId},
         ),
+        params: {'clipId': clipId, 'noteId': noteId},
       );
 
   // --- Reporting ---
@@ -795,6 +822,7 @@ class MisskeyApi extends BaseApi {
     'MisskeyApi.showUser',
     () => _dio.post('/api/users/show', data: {'i': token, 'userId': userId}),
     (response) => Map<String, dynamic>.from(response.data),
+    params: {'userId': userId},
   );
 
   /// 举报用户
@@ -810,6 +838,7 @@ class MisskeyApi extends BaseApi {
       '/api/users/report-abuse',
       data: {'i': token, 'userId': userId, 'comment': comment},
     ),
+    params: {'userId': userId, 'comment': comment},
   );
 
   // --- Notifications ---
