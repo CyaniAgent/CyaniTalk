@@ -263,12 +263,16 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
             logger.debug('Misskey时间线: 笔记 $noteId 无变化');
           }
         } catch (e) {
-          if (e.toString().contains('UnmountedRefException')) {
+          if (!ref.mounted) break;
+          final errorStr = e.toString();
+          if (errorStr.contains('UnmountedRefException')) {
             break;
           }
-          if (e.toString().contains('404')) {
+          if (errorStr.contains('404') || errorStr.contains('400')) {
+            // 404 means deleted, 400 often means the ID is invalid for this instance
+            // or some other restriction. We treat it as something we should remove from UI.
             deletedNoteIds.add(noteId);
-            logger.info('Misskey时间线: 检测到已删除的笔记: $noteId');
+            logger.info('Misskey时间线: 检测到无法加载的笔记 ($noteId): $errorStr');
             _handleDeleteNote(noteId);
           } else {
             logger.error('Misskey时间线: 验证笔记失败: $noteId', e);

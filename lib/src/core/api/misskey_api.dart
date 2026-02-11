@@ -61,6 +61,7 @@ class MisskeyApi extends BaseApi {
   /// @param noteId 要检查的笔记 ID
   /// @return 如果笔记存在返回 true，不存在返回 false
   Future<bool> checkNoteExists(String noteId) async {
+    if (noteId.isEmpty) return false;
     try {
       logger.debug('MisskeyApi: Checking if note exists: $noteId');
       final response = await _dio.post(
@@ -91,6 +92,7 @@ class MisskeyApi extends BaseApi {
   /// @return 笔记详情的 Map 对象
   /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> getNote(String noteId) async {
+    if (noteId.isEmpty) throw Exception('noteId cannot be empty');
     logger.debug('MisskeyApi: Getting note: $noteId');
     return executeApiCall(
       'MisskeyApi.getNote',
