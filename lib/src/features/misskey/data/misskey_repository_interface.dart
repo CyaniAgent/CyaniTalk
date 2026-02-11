@@ -59,6 +59,7 @@ abstract interface class IMisskeyRepository {
     String? text,
     String? replyId,
     String? renoteId,
+    String? channelId,
     List<String>? fileIds,
     String? visibility,
     bool? localOnly,
@@ -102,6 +103,8 @@ abstract interface class IMisskeyRepository {
   Future<bool> checkNoteExists(String noteId);
 
   Future<Note> getNote(String noteId);
+
+  Future<Map<String, dynamic>> getMeta();
 
   Future<int> getOnlineUsersCount();
 

@@ -179,14 +179,25 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: $err'),
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'common_loading_failed'.tr(),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => ref
                   .read(misskeyChannelsProvider(type: type, query: query).notifier)
                   .refresh(),
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text('common_reload'.tr()),
             ),
           ],
         ),

@@ -92,7 +92,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
           });
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
         heroTag: 'misskey_fab',
         onPressed: () async {
           logger.info('MisskeyPage: Floating action button pressed');
@@ -149,7 +149,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
           }
         },
         child: const Icon(Icons.edit),
-      ),
+      ) : null,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [

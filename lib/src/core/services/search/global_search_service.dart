@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../utils/utils.dart';
 import '../../../features/flarum/application/flarum_providers.dart';
 import '../../../features/misskey/data/misskey_repository.dart';
@@ -18,11 +19,14 @@ class SearchResult {
   /// 搜索结果的来源平台，如'Misskey'或'Flarum'
   final String source;
 
-  /// 搜索结果的类型，如'User'、'Post'、'Tag'等
+  /// 搜索结果的类型，如'User'、'Post'、'Tag'、'Error'等
   final String type;
 
   /// 关联的原始数据ID或对象
   final dynamic originalData;
+
+  /// 是否是禁用消息
+  final bool isDisabledMessage;
 
   SearchResult({
     required this.title,
@@ -30,6 +34,7 @@ class SearchResult {
     required this.source,
     required this.type,
     this.originalData,
+    this.isDisabledMessage = false,
   });
 }
 
@@ -55,32 +60,61 @@ class GlobalSearch extends _$GlobalSearch {
     // Search Misskey (if available)
     try {
       final misskeyRepo = await ref.read(misskeyRepositoryProvider.future);
-      final users = await misskeyRepo.searchUsers(query, limit: 5);
-      results.addAll(
-        users.map(
-          (u) => SearchResult(
-            title: u.name ?? u.username,
-            subtitle: '@${u.username}@${misskeyRepo.host}',
-            source: 'misskey',
-            type: 'User',
-            originalData: u,
-          ),
-        ),
-      );
+      final meta = await misskeyRepo.getMeta();
+      
+      // Check if search features are enabled
+      // In Misskey, policies are usually in /api/i (getMe) or sometimes in meta
+      // We'll check both meta and assume enabled if not explicitly disabled
+      final policies = meta['policies'] as Map<String, dynamic>?;
+      final canSearchUsers = policies?['canSearchUsers'] ?? true;
+      final canSearchNotes = policies?['canSearchNotes'] ?? true;
 
-      final notes = await misskeyRepo.searchNotes(query, limit: 5);
-      results.addAll(
-        notes.map(
-          (n) => SearchResult(
-            title: n.text ?? 'Note',
-            subtitle:
-                '@${n.user?.username ?? "unknown"}: ${n.text?.substring(0, 30.clamp(0, n.text?.length ?? 0)) ?? ""}${(n.text?.length ?? 0) > 30 ? "..." : ""}',
-            source: 'misskey',
-            type: 'Note',
-            originalData: n,
+      if (!canSearchUsers) {
+        results.add(SearchResult(
+          title: 'search_misskey_users_disabled'.tr(),
+          subtitle: '',
+          source: 'misskey',
+          type: 'User',
+          isDisabledMessage: true,
+        ));
+      } else {
+        final users = await misskeyRepo.searchUsers(query, limit: 5);
+        results.addAll(
+          users.map(
+            (u) => SearchResult(
+              title: u.name ?? u.username,
+              subtitle: '@${u.username}@${misskeyRepo.host}',
+              source: 'misskey',
+              type: 'User',
+              originalData: u,
+            ),
           ),
-        ),
-      );
+        );
+      }
+
+      if (!canSearchNotes) {
+        results.add(SearchResult(
+          title: 'search_misskey_posts_disabled'.tr(),
+          subtitle: '',
+          source: 'misskey',
+          type: 'Note',
+          isDisabledMessage: true,
+        ));
+      } else {
+        final notes = await misskeyRepo.searchNotes(query, limit: 5);
+        results.addAll(
+          notes.map(
+            (n) => SearchResult(
+              title: n.text ?? 'Note',
+              subtitle:
+                  '@${n.user?.username ?? "unknown"}: ${n.text?.substring(0, 30.clamp(0, n.text?.length ?? 0)) ?? ""}${(n.text?.length ?? 0) > 30 ? "..." : ""}',
+              source: 'misskey',
+              type: 'Note',
+              originalData: n,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       logger.warning('GlobalSearch: Misskey search failed: $e');
     }
@@ -102,9 +136,6 @@ class GlobalSearch extends _$GlobalSearch {
               ),
             ),
       );
-
-      // We could also search tags but Flarum doesn't have a specific tag search API usually,
-      // they are usually fetched all at once.
     } catch (e) {
       logger.warning('GlobalSearch: Flarum search failed: $e');
     }

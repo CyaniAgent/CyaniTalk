@@ -329,6 +329,7 @@ class MisskeyApi extends BaseApi {
     String? text,
     String? replyId,
     String? renoteId,
+    String? channelId,
     List<String>? fileIds,
     String? visibility,
     bool? localOnly,
@@ -342,6 +343,7 @@ class MisskeyApi extends BaseApi {
         'text':? text,
         'replyId':? replyId,
         'renoteId':? renoteId,
+        'channelId':? channelId,
         if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
         'visibility':? visibility,
         'localOnly':? localOnly,
@@ -352,6 +354,7 @@ class MisskeyApi extends BaseApi {
       'text': text,
       'replyId': replyId,
       'renoteId': renoteId,
+      'channelId': channelId,
       'fileIds': fileIds,
       'visibility': visibility,
       'localOnly': localOnly,
@@ -523,8 +526,8 @@ class MisskeyApi extends BaseApi {
         '/api/get-online-users-count',
         data: {'i': token},
         options: Options(
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 5),
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
         ),
       );
       return response.data['count'] as int;
@@ -886,6 +889,17 @@ class MisskeyApi extends BaseApi {
     'limit': limit,
     'untilId':? untilId,
   });
+
+  /// 获取实例元数据
+  ///
+  /// 通过调用 `/api/meta` 接口获取实例的元数据信息，包括策略、功能开关等。
+  ///
+  /// @return 实例元数据的 Map 对象
+  Future<Map<String, dynamic>> getMeta() => executeApiCall(
+    'MisskeyApi.getMeta',
+    () => _dio.post('/api/meta', data: {'i': token}),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
 
   /// 搜索用户
   ///

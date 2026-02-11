@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cyanitalk/src/core/utils/logger.dart';
+import 'package:cyanitalk/src/core/services/audio_engine.dart';
+import 'package:cyanitalk/src/features/auth/application/auth_service.dart';
+import 'package:cyanitalk/src/routing/router.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_post_page.dart';
 import '../../application/misskey_notifier.dart';
 import '../../domain/clip.dart';
 import '../widgets/modern_note_card.dart';
@@ -44,6 +49,58 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
       appBar: AppBar(
         title: Text(widget.clip.name),
       ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'misskey_fab_clip_${widget.clip.id}',
+        onPressed: () async {
+          logger.info('MisskeyClipNotesPage: Floating action button pressed');
+          // 检查是否已登录 Misskey
+          final authState = ref.read(authServiceProvider);
+          final hasMisskeyAccount = authState.maybeWhen(
+            data: (accounts) => accounts.any((a) => a.platform == 'misskey'),
+            orElse: () => false,
+          );
+
+          if (hasMisskeyAccount) {
+            // 已登录，打开发布窗口
+            logger.info('MisskeyClipNotesPage: Opening post dialog');
+            showDialog(
+              context: context,
+              builder: (context) => const MisskeyPostPage(),
+            );
+          } else {
+            // 未登录，根据当前语言播放提示音
+            logger.info('MisskeyClipNotesPage: User not logged in, playing prompt sound');
+            final isMounted = mounted;
+            final currentContext = context;
+            final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
+            try {
+              final String soundPath = switch (currentContext.locale.languageCode) {
+                'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
+                'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
+                'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
+                _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
+              };
+              await ref.read(audioEngineProvider).playAsset(soundPath);
+              logger.info('MisskeyClipNotesPage: Played login prompt sound: $soundPath');
+            } catch (e) {
+              logger.error('MisskeyClipNotesPage: Error playing sound: $e');
+            }
+
+            if (isMounted) {
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Text('misskey_page_please_login'.tr()),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              // 跳转到 Profile 页面进行登录
+              final router = ref.read(goRouterProvider);
+              router.go('/profile');
+            }
+          }
+        },
+        child: const Icon(Icons.edit),
+      ),
       body: notesAsync.when(
         data: (notes) {
           if (notes.isEmpty) {
@@ -70,7 +127,33 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'common_loading_failed'.tr(),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => ref
+                    .read(misskeyClipNotesProvider(widget.clip.id).notifier)
+                    .refresh(),
+                icon: const Icon(Icons.refresh),
+                label: Text('common_reload'.tr()),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

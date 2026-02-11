@@ -338,5 +338,13 @@
   "messaging_error_title": "加载失败",
   "messaging_error_description": "无法加载消息列表，请检查网络连接后重试",
   "messaging_error_retry": "重试",
-  "navigation_no_items": "没有可用的导航项"
+  "navigation_no_items": "没有可用的导航项",
+  "common_loading_failed": "加载失败",
+  "common_reload": "重新加载？",
+  "search_misskey_posts_related": "与 {search_result} 相关的 Misskey 帖子",
+  "search_misskey_users_related": "与 {search_result} 相关的 Misskey 用户",
+  "search_flarum_discussions_related": "与 {search_result} 相关的 Flarum 讨论",
+  "search_misskey_posts_disabled": "此实例已禁用搜索帖子功能",
+  "search_misskey_users_disabled": "此实例已禁用搜索用户功能",
+  "search_feature_disabled_hint": "请联系实例管理员了解更多信息"
 }

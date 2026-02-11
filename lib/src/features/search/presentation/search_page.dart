@@ -60,6 +60,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final query = _searchController.text;
+    final misskeyUsers = _results.where((r) => r.source == 'misskey' && r.type == 'User').toList();
+    final misskeyNotes = _results.where((r) => r.source == 'misskey' && r.type == 'Note').toList();
+    final flarumDiscussions = _results.where((r) => r.source == 'flarum' && r.type == 'Discussion').toList();
+
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -99,32 +104,67 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     : 'search_no_results'.tr(),
               ),
             )
-          : ListView.builder(
-              itemCount: _results.length,
-              itemBuilder: (context, index) {
-                final result = _results[index];
-                final sourceText = result.source == 'misskey'
-                    ? 'search_source_misskey'.tr()
-                    : 'search_source_flarum'.tr();
-                return ListTile(
-                  leading: Icon(
-                    result.source == 'misskey' ? Icons.public : Icons.forum,
-                    color: result.source == 'misskey'
-                        ? Colors.green
-                        : Colors.orange,
-                  ),
-                  title: Text(result.title),
-                  subtitle: Text(
-                    '$sourceText • ${result.type}\n${result.subtitle}',
-                  ),
-                  isThreeLine: true,
-                  onTap: () {
-                    logger.info('SearchPage: 选择搜索结果: ${result.title}');
-                    // TODO: Implement navigation to result details
-                  },
-                );
-              },
+          : ListView(
+              children: [
+                if (misskeyUsers.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'search_misskey_users_related'.tr(namedArgs: {'search_result': query})),
+                  ...misskeyUsers.map((r) => _buildResultTile(context, r)),
+                ],
+                if (misskeyNotes.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'search_misskey_posts_related'.tr(namedArgs: {'search_result': query})),
+                  ...misskeyNotes.map((r) => _buildResultTile(context, r)),
+                ],
+                if (flarumDiscussions.isNotEmpty) ...[
+                  _buildSectionHeader(context, 'search_flarum_discussions_related'.tr(namedArgs: {'search_result': query})),
+                  ...flarumDiscussions.map((r) => _buildResultTile(context, r)),
+                ],
+              ],
             ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultTile(BuildContext context, SearchResult result) {
+    if (result.isDisabledMessage) {
+      return ListTile(
+        leading: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+        title: Text(result.title),
+        subtitle: Text('search_feature_disabled_hint'.tr()),
+      );
+    }
+
+    final sourceText = result.source == 'misskey'
+        ? 'search_source_misskey'.tr()
+        : 'search_source_flarum'.tr();
+    
+    return ListTile(
+      leading: Icon(
+        result.source == 'misskey' ? (result.type == 'User' ? Icons.person : Icons.public) : Icons.forum,
+        color: result.source == 'misskey'
+            ? Colors.green
+            : Colors.orange,
+      ),
+      title: Text(result.title),
+      subtitle: Text(
+        '$sourceText • ${result.type}\n${result.subtitle}',
+      ),
+      isThreeLine: true,
+      onTap: () {
+        logger.info('SearchPage: 选择搜索结果: ${result.title}');
+        // TODO: Implement navigation to result details
+      },
     );
   }
 }

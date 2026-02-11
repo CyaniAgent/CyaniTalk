@@ -9,10 +9,13 @@ import '../../data/misskey_repository.dart';
 /// 用于创建和发布Misskey笔记，支持设置可见性、本地仅可见等选项，
 /// 并提供预览功能。
 class MisskeyPostPage extends ConsumerStatefulWidget {
+  final String? channelId;
+
   /// 创建一个新的MisskeyPostPage实例
   ///
   /// [key] - 组件的键，用于唯一标识组件
-  const MisskeyPostPage({super.key});
+  /// [channelId] - 可选的频道ID，如果提供，笔记将发布到该频道
+  const MisskeyPostPage({super.key, this.channelId});
 
   /// 创建MisskeyPostPage的状态管理对象
   @override
@@ -344,6 +347,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         text: text,
         visibility: _visibility,
         localOnly: _localOnly,
+        channelId: widget.channelId,
       );
 
       if (mounted) {

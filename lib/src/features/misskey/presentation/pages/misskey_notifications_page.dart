@@ -51,7 +51,31 @@ class MisskeyNotificationsPage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('${'common_error'.tr()}: $err')),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'common_loading_failed'.tr(),
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text('Error: $err', textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => ref.read(misskeyNotificationsProvider.notifier).refresh(),
+                icon: const Icon(Icons.refresh),
+                label: Text('common_reload'.tr()),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

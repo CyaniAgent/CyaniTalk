@@ -336,5 +336,13 @@
   "messaging_error_title": "Failed to Load",
   "messaging_error_description": "Could not load message list. Please check your network connection and try again.",
   "messaging_error_retry": "Retry",
-  "navigation_no_items": "No navigation items available"
+  "navigation_no_items": "No navigation items available",
+  "common_loading_failed": "Loading failed",
+  "common_reload": "Reload?",
+  "search_misskey_posts_related": "Misskey posts related to {search_result}",
+  "search_misskey_users_related": "Misskey users related to {search_result}",
+  "search_flarum_discussions_related": "Flarum Discussions related to {search_result}",
+  "search_misskey_posts_disabled": "Search Posts feature is disabled on this instance",
+  "search_misskey_users_disabled": "Search Users feature is disabled on this instance",
+  "search_feature_disabled_hint": "Please contact instance administrator for more information"
 }

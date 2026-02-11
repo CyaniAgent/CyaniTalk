@@ -286,6 +286,7 @@ class MisskeyRepository implements IMisskeyRepository {
     String? text,
     String? replyId,
     String? renoteId,
+    String? channelId,
     List<String>? fileIds,
     String? visibility,
     bool? localOnly,
@@ -297,6 +298,7 @@ class MisskeyRepository implements IMisskeyRepository {
         text: text,
         replyId: replyId,
         renoteId: renoteId,
+        channelId: channelId,
         fileIds: fileIds,
         visibility: visibility,
         localOnly: localOnly,
@@ -498,6 +500,17 @@ class MisskeyRepository implements IMisskeyRepository {
       return DriveFile.fromJson(data);
     } catch (e) {
       logger.error('MisskeyRepository: Error uploading drive file', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getMeta() async {
+    logger.debug('MisskeyRepository: Getting instance meta');
+    try {
+      return await api.getMeta();
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting instance meta', e);
       rethrow;
     }
   }

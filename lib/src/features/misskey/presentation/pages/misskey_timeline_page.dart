@@ -246,15 +246,21 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                         color: Colors.red,
                       ),
                       const SizedBox(height: 16),
-                      Text('Error: $err', textAlign: TextAlign.center),
+                      Text(
+                        'common_loading_failed'.tr(),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
                       const SizedBox(height: 16),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () => ref
                             .read(
                               misskeyTimelineProvider(timelineType).notifier,
                             )
                             .refresh(),
-                        child: Text('timeline_retry'.tr()),
+                        icon: const Icon(Icons.refresh),
+                        label: Text('common_reload'.tr()),
                       ),
                     ],
                   ),
