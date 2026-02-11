@@ -7,21 +7,19 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../core/utils/logger.dart';
-import '../../../core/services/audio_engine.dart';
-import '../../auth/application/auth_service.dart';
-import '../../../routing/router.dart';
-import 'widgets/misskey_drawer.dart';
-import '../application/misskey_notifier.dart';
-import 'pages/misskey_timeline_page.dart';
-import 'pages/misskey_notes_page.dart';
-import 'pages/misskey_antennas_page.dart';
-import 'pages/misskey_channels_page.dart';
-import 'pages/misskey_explore_page.dart';
-import 'pages/misskey_follow_requests_page.dart';
-import 'pages/misskey_announcements_page.dart';
-import 'pages/misskey_aiscript_console_page.dart';
-import 'pages/misskey_post_page.dart';
+import '/src/core/utils/logger.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/features/misskey/presentation/widgets/misskey_drawer.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/misskey/presentation/pages/misskey_timeline_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_notes_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_antennas_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_channels_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_explore_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_follow_requests_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_announcements_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_aiscript_console_page.dart';
+import '/src/features/misskey/presentation/pages/misskey_post_page.dart';
 
 /// Misskey功能模块的主页面组件
 ///
@@ -92,63 +90,26 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
           });
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'misskey_fab',
-        onPressed: () async {
-          logger.info('MisskeyPage: Floating action button pressed');
-          // 检查是否已登录 Misskey
-          final authState = ref.read(authServiceProvider);
-          final hasMisskeyAccount = authState.maybeWhen(
-            data: (accounts) => accounts.any((a) => a.platform == 'misskey'),
-            orElse: () => false,
-          );
-
-          if (hasMisskeyAccount) {
-            // 已登录，打开发布窗口
-            logger.info('MisskeyPage: Opening post dialog (user logged in)');
-            showDialog(
-              context: context,
-              builder: (context) => const MisskeyPostPage(),
+      floatingActionButton: selectedAccountAsync.when(
+        data: (account) {
+          if (account != null) {
+            return FloatingActionButton(
+              heroTag: 'misskey_fab',
+              onPressed: () async {
+                logger.info('MisskeyPage: Floating action button pressed');
+                logger.info('MisskeyPage: Opening post dialog (user logged in)');
+                showDialog(
+                  context: context,
+                  builder: (context) => const MisskeyPostPage(),
+                );
+              },
+              child: const Icon(Icons.edit),
             );
-          } else {
-            // 未登录，根据当前语言播放提示音
-            logger.info(
-              'MisskeyPage: User not logged in, playing prompt sound',
-            );
-            final isMounted = mounted;
-            final currentContext = context;
-            final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
-            try {
-              final String soundPath =
-                  switch (currentContext.locale.languageCode) {
-                    'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
-                    'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
-                    'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
-                    _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
-                  };
-              await ref.read(audioEngineProvider).playAsset(soundPath);
-              logger.info('MisskeyPage: Played login prompt sound: $soundPath');
-            } catch (e) {
-              logger.error('MisskeyPage: Error playing sound: $e');
-            }
-
-            if (isMounted) {
-              // 使用提前获取的scaffoldMessenger实例，避免BuildContext警告
-              logger.info('MisskeyPage: Showing login prompt snackbar');
-              scaffoldMessenger.showSnackBar(
-                SnackBar(
-                  content: Text('misskey_page_please_login'.tr()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              // 跳转到 Profile 页面进行登录
-              logger.info('MisskeyPage: Navigating to profile page for login');
-              final router = ref.read(goRouterProvider);
-              router.go('/profile');
-            }
           }
+          return null;
         },
-        child: const Icon(Icons.edit),
+        loading: () => null,
+        error: (err, stack) => null,
       ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
