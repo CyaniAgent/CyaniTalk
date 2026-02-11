@@ -68,16 +68,6 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
       memCacheHeight: cacheHeight,
       maxWidthDiskCache: cacheWidth,
       maxHeightDiskCache: cacheHeight,
-      placeholder: (context, url) {
-        return Container(
-          width: widget.width,
-          height: widget.height ?? 200,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      },
       progressIndicatorBuilder: (context, url, downloadProgress) {
         return Container(
           width: widget.width,

@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/constants.dart';
 
 /// 日志工具类，管理应用中的所有日志输出
@@ -55,6 +56,9 @@ class AppLogger {
       output: AppMultiOutput([consoleOutput, _fileOutput]),
       printer: SimplePrinter(),
     );
+
+    // 异步执行清理
+    Future.microtask(() => cleanupLogs());
   }
 
   /// 为测试环境初始化日志配置
@@ -76,42 +80,41 @@ class AppLogger {
   /// @return 返回创建的AppFileOutput实例
   Future<AppFileOutput> _createFileOutput() async {
     try {
-      String path;
+      Directory? debugDir;
+      final now = DateTime.now();
+      final dateStr =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final timeStr =
+          "${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}_${now.second.toString().padLeft(2, '0')}";
+      final fileName = "${Constants.logFilePrefix}_${dateStr}_$timeStr.log";
+
       if (Platform.isAndroid) {
-        // Android 平台：动态获取外部存储目录
+        // Android 平台：/storage/emulated/0/Android/data/{app_package}/files/logs
+        // getExternalStorageDirectory() 通常返回 /storage/emulated/0/Android/data/{package}/files
         final directory = await getExternalStorageDirectory();
         if (directory == null) throw Exception('无法获取外部存储目录');
-
-        final now = DateTime.now();
-        final dateStr =
-            "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-        final timeStr =
-            "${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}";
-
-        final debugDir = Directory(
-          '${directory.path}/${Constants.logDirectoryName}',
-        );
-        if (!debugDir.existsSync()) {
-          debugDir.createSync(recursive: true);
-        }
-        path =
-            '${debugDir.path}/${Constants.logFilePrefix}_${dateStr}_$timeStr.txt';
-      } else {
-        // 其他平台：保持原样，使用文档目录
+        debugDir = Directory('${directory.path}/logs');
+      } else if (Platform.isIOS) {
+        // iOS 平台：My iPhone/iPad > CyaniTalk > logs
+        // 使用 getApplicationDocumentsDirectory() 并确保在 Info.plist 中启用了文件共享
         final directory = await getApplicationDocumentsDirectory();
-        final debugDir = Directory(
-          '${directory.path}/${Constants.logDirectoryName}',
-        );
-        if (!debugDir.existsSync()) {
-          debugDir.createSync(recursive: true);
-        }
-        final now = DateTime.now();
-        final dateStr =
-            "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-        path = '${debugDir.path}/${Constants.logFilePrefix}_$dateStr.txt';
+        debugDir = Directory('${directory.path}/logs');
+      } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+        // 桌面端：应用程序目录/logs
+        final exePath = Platform.resolvedExecutable;
+        final appDir = File(exePath).parent.path;
+        debugDir = Directory('$appDir/logs');
+      } else {
+        // 默认备选方案
+        final directory = await getApplicationDocumentsDirectory();
+        debugDir = Directory('${directory.path}/logs');
       }
 
-      _logFilePath = path;
+      if (!debugDir.existsSync()) {
+        debugDir.createSync(recursive: true);
+      }
+
+      _logFilePath = "${debugDir.path}/$fileName";
       final file = File(_logFilePath!);
 
       // 确保文件存在
@@ -119,10 +122,8 @@ class AppLogger {
         file.createSync(recursive: true);
       }
 
-      // 检查文件大小，超过限制则清理（仅针对非 Android 或固定文件名的平台）
-      if (!Platform.isAndroid) {
-        await _checkAndCleanLogFile(file);
-      }
+      // 检查文件大小，超过限制则清理
+      await _checkAndCleanLogFile(file);
 
       return AppFileOutput(
         file: file,
@@ -131,9 +132,8 @@ class AppLogger {
       );
     } catch (e) {
       // 如果文件创建失败，返回本地控制台输出
-      // 使用调试输出，避免在生产代码中使用print
       debugPrint('AppLogger Error: Failed to create file output: $e');
-      final defaultPath = './${Constants.logFilePrefix}_logs.txt';
+      final defaultPath = './${Constants.logFilePrefix}_logs.log';
       _logFilePath = defaultPath;
       return AppFileOutput(
         file: File(defaultPath),
@@ -234,38 +234,19 @@ class AppLogger {
       if (_logFilePath == null) await initialize();
       final sourceFile = File(_logFilePath!);
       if (sourceFile.existsSync()) {
-        String exportPath;
-        if (Platform.isAndroid) {
-          // Android 平台：导出到外部存储的 debug 目录
-          final directory = await getExternalStorageDirectory();
-          if (directory == null) throw Exception('无法获取外部存储目录');
+        final now = DateTime.now();
+        final timestamp =
+            "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}";
+        final exportFileName = "${Constants.logFilePrefix}_export_$timestamp.log";
 
-          final now = DateTime.now();
-          final timestamp =
-              "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}";
+        final debugDir = await getLogDir();
+        if (debugDir == null) return null;
 
-          final debugDir = Directory(
-            '${directory.path}/${Constants.logDirectoryName}',
-          );
-          if (!debugDir.existsSync()) {
-            debugDir.createSync(recursive: true);
-          }
-          exportPath =
-              '${debugDir.path}/${Constants.logFilePrefix}_export_$timestamp.txt';
-        } else {
-          // 其他平台：保持原样，使用文档目录
-          final directory = await getApplicationDocumentsDirectory();
-          final debugDir = Directory(
-            '${directory.path}/${Constants.logDirectoryName}',
-          );
-          if (!debugDir.existsSync()) {
-            debugDir.createSync(recursive: true);
-          }
-          final timestamp = DateTime.now().millisecondsSinceEpoch;
-          exportPath =
-              '${debugDir.path}/${Constants.logFilePrefix}_export_$timestamp.txt';
+        if (!debugDir.existsSync()) {
+          debugDir.createSync(recursive: true);
         }
 
+        final exportPath = "${debugDir.path}/$exportFileName";
         final exportFile = File(exportPath);
         // 复制文件
         await sourceFile.copy(exportPath);
@@ -285,36 +266,12 @@ class AppLogger {
   /// @return 无返回值
   Future<void> deleteLogs() async {
     try {
-      if (_logFilePath == null) await initialize();
-
-      if (Platform.isAndroid) {
-        // Android 平台：删除 debug 目录下的所有文件
-        final directory = await getExternalStorageDirectory();
-        if (directory != null) {
-          final debugDir = Directory(
-            '${directory.path}/${Constants.logDirectoryName}',
-          );
-          if (debugDir.existsSync()) {
-            final files = debugDir.listSync();
-            for (final file in files) {
-              if (file is File) {
-                await file.delete();
-              }
-            }
-          }
-        }
-      } else {
-        // 其他平台：清空当前日志文件
-        final directory = await getApplicationDocumentsDirectory();
-        final debugDir = Directory(
-          '${directory.path}/${Constants.logDirectoryName}',
-        );
-        if (debugDir.existsSync()) {
-          final files = debugDir.listSync();
-          for (final file in files) {
-            if (file is File) {
-              await file.delete();
-            }
+      final dir = await getLogDir();
+      if (dir != null && dir.existsSync()) {
+        final files = dir.listSync();
+        for (final file in files) {
+          if (file is File) {
+            await file.delete();
           }
         }
       }
@@ -323,6 +280,89 @@ class AppLogger {
       await initialize();
     } catch (e) {
       // 忽略错误
+    }
+  }
+
+  /// 获取日志目录
+  Future<Directory?> getLogDir() async {
+    try {
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = await getExternalStorageDirectory();
+      } else {
+        directory = await getApplicationDocumentsDirectory();
+      }
+
+      if (directory != null) {
+        final debugDir = Directory(
+          '${directory.path}/${Constants.logDirectoryName}',
+        );
+        return debugDir;
+      }
+    } catch (e) {
+      debugPrint('AppLogger Error: Failed to get log directory: $e');
+    }
+    return null;
+  }
+
+  /// 列出所有日志文件
+  Future<List<File>> listLogFiles() async {
+    try {
+      final dir = await getLogDir();
+      if (dir != null && dir.existsSync()) {
+        final files = dir.listSync();
+        return files
+            .whereType<File>()
+            .where(
+              (f) =>
+                  f.path.contains(Constants.logFilePrefix) &&
+                  (f.path.endsWith('.log') || f.path.endsWith('.txt')),
+            )
+            .toList()
+          ..sort(
+            (a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
+          ); // 最新优先
+      }
+    } catch (e) {
+      // 忽略错误
+    }
+    return [];
+  }
+
+  /// 执行日志清理（基于大小和天数）
+  Future<void> cleanupLogs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final maxMB = prefs.getInt('log_max_size') ?? Constants.defaultMaxLogSize;
+      final autoClear = prefs.getBool('log_auto_clear') ?? true;
+      final retentionDays = prefs.getInt('log_retention_days') ?? 7;
+
+      final files = await listLogFiles();
+      final now = DateTime.now();
+
+      for (final file in files) {
+        // 1. 基于天数的清理
+        if (autoClear) {
+          final lastModified = file.lastModifiedSync();
+          if (now.difference(lastModified).inDays > retentionDays) {
+            // 如果是当前正在使用的日志文件，跳过或截断
+            if (file.path == _logFilePath) {
+              await _checkAndCleanLogFile(file);
+            } else {
+              await file.delete();
+            }
+            continue;
+          }
+        }
+
+        // 2. 基于大小的清理
+        final stat = file.statSync();
+        if (stat.size > maxMB * 1024 * 1024) {
+          await _checkAndCleanLogFile(file);
+        }
+      }
+    } catch (e) {
+      debugPrint('AppLogger Error: Cleanup failed: $e');
     }
   }
 

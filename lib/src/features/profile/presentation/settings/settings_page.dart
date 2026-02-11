@@ -11,6 +11,7 @@ import 'cache_settings_page.dart';
 import 'notification_settings_page.dart';
 import 'sound_settings_page.dart';
 import 'navigation_settings_page.dart';
+import 'log_settings_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -170,6 +171,11 @@ class _SettingsPageState extends State<SettingsPage> {
             Icons.history,
             'settings_logs_title'.tr(),
             'settings_logs_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const LogSettingsPage()),
+              );
+            },
           ),
           _buildSettingsTile(
             context,

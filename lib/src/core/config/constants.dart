@@ -25,8 +25,8 @@ class Constants {
 
   /// 默认日志文件前缀
   /// 
-  /// 日志文件的命名前缀，后续会添加时间戳和序号。
-  static const String logFilePrefix = 'CyaniTalk';
+  /// 日志文件的命名前缀，后续会添加时间戳。
+  static const String logFilePrefix = 'CyaniTalk_Console_log';
 
   /// 默认日志级别
   /// 
