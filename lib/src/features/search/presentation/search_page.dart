@@ -139,7 +139,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget _buildResultTile(BuildContext context, SearchResult result) {
     if (result.isDisabledMessage) {
       return ListTile(
-        leading: const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+        leading: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error),
+      tileColor: Theme.of(context).colorScheme.surfaceContainerLow,
         title: Text(result.title),
         subtitle: Text('search_feature_disabled_hint'.tr()),
       );
@@ -150,11 +151,21 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         : 'search_source_flarum'.tr();
     
     return ListTile(
-      leading: Icon(
-        result.source == 'misskey' ? (result.type == 'User' ? Icons.person : Icons.public) : Icons.forum,
-        color: result.source == 'misskey'
-            ? Colors.green
-            : Colors.orange,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: result.source == 'misskey'
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          result.source == 'misskey' ? (result.type == 'User' ? Icons.person : Icons.public) : Icons.forum,
+          size: 20,
+          color: result.source == 'misskey'
+              ? Theme.of(context).colorScheme.onPrimaryContainer
+              : Theme.of(context).colorScheme.onSecondaryContainer,
+        ),
       ),
       title: Text(result.title),
       subtitle: Text(

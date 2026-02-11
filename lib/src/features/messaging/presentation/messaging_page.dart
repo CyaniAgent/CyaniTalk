@@ -67,7 +67,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
               },
               selectedColor: Theme.of(
                 context,
-              ).colorScheme.primary.withValues(alpha: 0.2),
+              ).colorScheme.primary.withAlpha(51), // 0.2 * 255
               labelStyle: TextStyle(
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
@@ -365,7 +365,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: primaryColor.withValues(alpha: 0.1),
+          color: primaryColor.withAlpha(26), // 0.1 * 255
           shape: BoxShape.circle,
         ),
         child: Icon(Icons.notifications_active, color: primaryColor),

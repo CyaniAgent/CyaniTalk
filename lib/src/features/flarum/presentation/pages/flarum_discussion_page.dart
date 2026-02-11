@@ -35,9 +35,8 @@ class FlarumDiscussionPage extends ConsumerWidget {
           );
         }
 
-        return ListView.separated(
+        return ListView.builder(
           itemCount: discussions.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final discussion = discussions[index];
             return DiscussionListItem(
@@ -47,6 +46,7 @@ class FlarumDiscussionPage extends ConsumerWidget {
               },
             );
           },
+          padding: const EdgeInsets.symmetric(vertical: 8),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -54,11 +54,11 @@ class FlarumDiscussionPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 48,
-              color: Colors.red,
-            ), // Changed color to red for error visibility
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text('Error: $error'),
             TextButton(

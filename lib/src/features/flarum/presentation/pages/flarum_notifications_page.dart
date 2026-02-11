@@ -37,16 +37,26 @@ class FlarumNotificationsPage extends ConsumerWidget {
 
         return ListView.separated(
           itemCount: notifications.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
+          separatorBuilder: (context, index) => const SizedBox(height: 4),
           itemBuilder: (context, index) {
             final notification = notifications[index];
-            return FlarumNotificationListItem(
-              notification: notification,
-              onTap: () {
-                // TODO: Handle notification tap
-              },
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: FlarumNotificationListItem(
+                  notification: notification,
+                  onTap: () {
+                    // TODO: Handle notification tap
+                  },
+                ),
+              ),
             );
           },
+          padding: const EdgeInsets.symmetric(vertical: 8),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -54,11 +64,11 @@ class FlarumNotificationsPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 48,
-              color: Colors.red,
-            ), // Changed color to red for error
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text('Error: $error'),
             TextButton(

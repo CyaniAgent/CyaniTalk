@@ -126,7 +126,14 @@ class CloudPage extends ConsumerWidget {
         final item = combined[index];
         return ListTile(
           leading: item.isFolder
-              ? const Icon(Icons.folder, color: Colors.amber)
+              ? Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.folder, size: 20, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                )
               : _buildFileIcon(item.file!),
           title: Text(item.name),
           subtitle: Text(item.subtitle),
@@ -215,7 +222,7 @@ class CloudPage extends ConsumerWidget {
                 ),
                 error: (_, _) => Text(
                   'cloud_error'.tr(),
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.red),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
                 ),
               ),
             ],
@@ -236,7 +243,7 @@ class CloudPage extends ConsumerWidget {
                   minHeight: 8,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    percent > 0.9 ? Colors.red : theme.colorScheme.primary,
+                    percent > 0.9 ? theme.colorScheme.error : theme.colorScheme.primary,
                   ),
                 ),
               );
@@ -254,7 +261,7 @@ class CloudPage extends ConsumerWidget {
                 value: 0,
                 minHeight: 8,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.error),
               ),
             ),
           ),
@@ -341,10 +348,10 @@ class CloudPage extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
               title: Text(
                 'cloud_delete'.tr(),
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
               onTap: () {
                 Navigator.pop(context);

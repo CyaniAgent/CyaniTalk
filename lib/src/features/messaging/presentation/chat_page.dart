@@ -219,7 +219,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withAlpha(13), // 0.05 * 255
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -261,7 +261,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5))),
+        border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant.withAlpha(128))), // 0.5 * 255
       ),
       child: Row(
         children: [

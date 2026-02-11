@@ -25,21 +25,35 @@ class FlarumNotificationListItem extends StatelessWidget {
     }
 
     return ListTile(
-      leading: Icon(
-        iconData,
-        color: notification.isRead
-            ? null
-            : Theme.of(context).colorScheme.primary,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: notification.isRead
+              ? Theme.of(context).colorScheme.surfaceVariant
+              : Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          iconData,
+          size: 20,
+          color: notification.isRead
+              ? Theme.of(context).colorScheme.onSurfaceVariant
+              : Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
       ),
       title: Text(
         notification.content ?? notification.type,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.bodyMedium,
       ),
       subtitle: Text(
         notification.createdAt,
-        style: Theme.of(context).textTheme.bodySmall,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.outline,
+        ),
       ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       onTap: onTap,
     );
   }

@@ -42,11 +42,21 @@ class MisskeyNotificationsPage extends ConsumerWidget {
             onRefresh: () => ref.read(misskeyNotificationsProvider.notifier).refresh(),
             child: ListView.separated(
               itemCount: notifications.length,
-              separatorBuilder: (context, index) => const Divider(indent: 72, height: 1, thickness: 0.5),
+              separatorBuilder: (context, index) => const SizedBox(height: 4),
               itemBuilder: (context, index) {
                 final notification = notifications[index];
-                return _buildNotificationTile(context, notification);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: _buildNotificationTile(context, notification),
+                  ),
+                );
               },
+              padding: const EdgeInsets.symmetric(vertical: 8),
             ),
           );
         },
@@ -55,10 +65,10 @@ class MisskeyNotificationsPage extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Colors.red,
+                color: theme.colorScheme.error,
               ),
               const SizedBox(height: 16),
               Text(
@@ -86,11 +96,26 @@ class MisskeyNotificationsPage extends ConsumerWidget {
     Color iconColor = theme.colorScheme.primary;
 
     switch (notification.type) {
-      case 'follow': iconData = Icons.person_add; iconColor = Colors.blue; break;
-      case 'mention': iconData = Icons.alternate_email; iconColor = Colors.orange; break;
-      case 'reply': iconData = Icons.reply; iconColor = Colors.green; break;
-      case 'renote': iconData = Icons.repeat; iconColor = Colors.teal; break;
-      case 'reaction': iconData = Icons.add_reaction; iconColor = Colors.pink; break;
+      case 'follow': 
+        iconData = Icons.person_add;
+        iconColor = theme.colorScheme.primary;
+        break;
+      case 'mention': 
+        iconData = Icons.alternate_email;
+        iconColor = theme.colorScheme.secondary;
+        break;
+      case 'reply': 
+        iconData = Icons.reply;
+        iconColor = theme.colorScheme.tertiary;
+        break;
+      case 'renote': 
+        iconData = Icons.repeat;
+        iconColor = theme.colorScheme.surfaceTint;
+        break;
+      case 'reaction': 
+        iconData = Icons.add_reaction;
+        iconColor = theme.colorScheme.error;
+        break;
     }
 
     return ListTile(

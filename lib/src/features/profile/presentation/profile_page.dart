@@ -174,7 +174,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Color(0xFF962832),
+                                theme.colorScheme.primaryContainer,
                                 theme.colorScheme.primary,
                               ],
                             )
@@ -187,7 +187,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            theme.colorScheme.shadow.withValues(alpha: 0.5),
+                            theme.colorScheme.shadow.withAlpha(128), // 0.5 * 255
                           ],
                           stops: const [0.6, 1.0],
                         ),
@@ -262,7 +262,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       BoxShadow(
                         color: Theme.of(
                           context,
-                        ).colorScheme.shadow.withValues(alpha: 0.1),
+                        ).colorScheme.shadow.withAlpha(25), // 0.1 * 255
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),
@@ -335,11 +335,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onPrimary.withValues(alpha: 0.2),
+                                ).colorScheme.onPrimary.withAlpha(51), // 0.2 * 255
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: Theme.of(context).colorScheme.onPrimary
-                                      .withValues(alpha: 0.3),
+                                      .withAlpha(77), // 0.3 * 255
                                 ),
                               ),
                               child: Text(
@@ -361,8 +361,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary.withValues(alpha: 0.9),
+                                  context,
+                                ).colorScheme.onPrimary.withAlpha(230), // 0.9 * 255
                       ),
                     ),
                   ],
@@ -380,13 +380,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   fontSize: 13,
                   color: Theme.of(
                     context,
-                  ).colorScheme.onPrimary.withValues(alpha: 0.85),
+                  ).colorScheme.onPrimary.withAlpha(217), // 0.85 * 255
                   shadows: [
                     Shadow(
                       blurRadius: 2,
                       color: Theme.of(
                         context,
-                      ).colorScheme.shadow.withValues(alpha: 0.2),
+                      ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
                       offset: const Offset(0, 1),
                     ),
                   ],
@@ -444,9 +444,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Shadow(
                   blurRadius: 2,
                   color: Theme.of(
-                    context,
-                  ).colorScheme.shadow.withValues(alpha: 0.2),
-                  offset: const Offset(0, 1),
+                  context,
+                ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
+                offset: const Offset(0, 1),
                 ),
               ],
             ),
