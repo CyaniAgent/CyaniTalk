@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/src/core/core.dart';
+import '../core.dart';
 
 /// 缓存管理器，用于处理多媒体文件的缓存
 class CacheManager {

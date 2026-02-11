@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/src/app.dart';
-import '/src/core/core.dart';
-import '/src/core/utils/http_overrides.dart';
-import '/src/features/auth/data/auth_repository.dart';
-import '/src/core/services/background_service.dart';
-import '/src/core/services/notification_service.dart';
-import '/src/core/services/notification_manager.dart';
-import '/src/core/services/audio_engine.dart';
+import 'src/app.dart';
+import 'src/core/core.dart';
+import 'src/core/utils/http_overrides.dart';
+import 'src/features/auth/data/auth_repository.dart';
+import 'src/core/services/background_service.dart';
+import 'src/core/services/notification_service.dart';
+import 'src/core/services/notification_manager.dart';
+import 'src/core/services/audio_engine.dart';
 import 'dart:io';
 
 /// 应用程序的入口点
