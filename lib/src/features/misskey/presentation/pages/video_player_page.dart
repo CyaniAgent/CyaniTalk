@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import '/src/core/utils/cache_manager.dart';
-import '/src/core/utils/logger.dart';
+import '../../../../core/utils/cache_manager.dart';
+import '../../../../core/utils/logger.dart';
 
 /// Fullscreen video player with semi-transparent background
 class VideoPlayerPage extends StatefulWidget {
