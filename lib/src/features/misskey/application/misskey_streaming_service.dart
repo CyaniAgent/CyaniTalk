@@ -124,8 +124,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
         uri,
         customClient: client,
         headers: {
-          'User-Agent':
-              'Mozilla/5.0 (Mobile; rv:109.0) Gecko/20100101 Firefox/115.0 CyaniTalk/${Constants.appVersion}',
+          'User-Agent': Constants.getUserAgent(),
         },
       );
 

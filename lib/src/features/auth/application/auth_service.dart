@@ -117,7 +117,7 @@ class AuthService extends _$AuthService {
 
     final dio = NetworkClient().createDio(
       host: sanitizedHost,
-      userAgent: 'CyaniTalk/${Constants.appVersion} (Android; Mobile; rv:1.0)',
+      userAgent: Constants.getUserAgent(),
     );
 
     int retryCount = 0;

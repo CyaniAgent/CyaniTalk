@@ -40,8 +40,11 @@ void main() async {
   // 初始化持久化存储
   final sharedPrefs = await SharedPreferences.getInstance();
 
-  // 初始化日志系统
-  await logger.initialize();
+  // 读取存储的日志级别设置
+  final storedLogLevel = sharedPrefs.getString('log_level');
+
+  // 初始化日志系统，传入用户的日志级别设置
+  await logger.initialize(logLevel: storedLogLevel);
   logger.info('CyaniTalk app started');
 
   await EasyLocalization.ensureInitialized();

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/note.dart';
+import '../../domain/mfm_renderer.dart';
 import '../../data/misskey_repository.dart';
 import '../../application/misskey_notifier.dart';
 import '../../application/timeline_jump_provider.dart';
@@ -39,147 +38,20 @@ class ModernNoteCard extends ConsumerStatefulWidget {
 class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   bool _shouldAnimate = false;
 
-  // 缓存文本处理结果，避免重复计算
-  final Map<String, List<TextSpan>> _textProcessingCache = {};
-  final List<TapGestureRecognizer> _recognizers = [];
+  // MFM渲染器
+  final MfmRenderer _mfmRenderer = MfmRenderer();
 
   @override
   void dispose() {
-    for (final r in _recognizers) {
-      r.dispose();
-    }
-    _recognizers.clear();
+    _mfmRenderer.dispose();
     super.dispose();
   }
 
-  // 静态正则表达式，避免每次调用时重新创建
-  static final RegExp _boldRegex = RegExp(r'\*\*(.*?)\*\*');
-  static final RegExp _mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
-  static final RegExp _hashtagRegex = RegExp(r'#([^\s]+)');
-  static final RegExp _urlRegex = RegExp(r'https?:\/\/[^\s]+');
-
   /// 处理文本中的特殊格式
   ///
-  /// 处理文本中的加粗文本(**text**)、提及(@username)、话题(#hashtag)和链接(http/https)，
-  /// 并返回对应的TextSpan列表。会缓存处理结果，避免重复计算。
+  /// 使用MFM渲染器处理文本中的各种特殊格式，并返回对应的TextSpan列表。
   List<TextSpan> _processText(String text, BuildContext context) {
-    // 检查是否已缓存处理结果
-    if (_textProcessingCache.containsKey(text)) {
-      return _textProcessingCache[text]!;
-    }
-
-    final List<TextSpan> spans = [];
-    int currentIndex = 0;
-
-    // 收集所有匹配项并按位置排序
-    final List<RegExpMatch> allMatches = [];
-    allMatches.addAll(_boldRegex.allMatches(text));
-    allMatches.addAll(_mentionRegex.allMatches(text));
-    allMatches.addAll(_hashtagRegex.allMatches(text));
-    allMatches.addAll(_urlRegex.allMatches(text));
-
-    // 按匹配位置排序
-    allMatches.sort((a, b) => a.start.compareTo(b.start));
-
-    for (final match in allMatches) {
-      // 添加匹配前的文本
-      if (match.start > currentIndex) {
-        spans.add(TextSpan(text: text.substring(currentIndex, match.start)));
-      }
-
-      final matchText = text.substring(match.start, match.end);
-
-      // 检查是哪种匹配
-      if (_boldRegex.hasMatch(matchText)) {
-        // 加粗文本
-        spans.add(
-          TextSpan(
-            text: match.group(1),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        );
-      } else if (_mentionRegex.hasMatch(matchText)) {
-        // 提及用户
-        spans.add(
-          TextSpan(
-            text: matchText,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-          ),
-        );
-      } else if (_hashtagRegex.hasMatch(matchText)) {
-        // 话题
-        spans.add(
-          TextSpan(
-            text: matchText,
-            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-          ),
-        );
-      } else if (_urlRegex.hasMatch(matchText)) {
-        // 链接
-        final recognizer = TapGestureRecognizer()
-          ..onTap = () async {
-            if (!mounted) return;
-
-            showDialog(
-              context: context,
-              builder: (dialogContext) => AlertDialog(
-                title: const Text('打开链接'),
-                content: Text('确定要打开以下链接吗？\n$matchText'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    child: const Text('取消'),
-                  ),
-                  FilledButton(
-                    onPressed: () async {
-                      Navigator.pop(dialogContext);
-                      final uri = Uri.parse(matchText);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
-                    },
-                    child: const Text('确定'),
-                  ),
-                ],
-              ),
-            );
-          };
-        _recognizers.add(recognizer);
-
-        spans.add(
-          TextSpan(
-            text: matchText,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.tertiary,
-              decoration: TextDecoration.underline,
-            ),
-            recognizer: recognizer,
-          ),
-        );
-      }
-
-      currentIndex = match.end;
-    }
-
-    // 处理剩余文本
-    if (currentIndex < text.length) {
-      spans.add(TextSpan(text: text.substring(currentIndex)));
-    }
-
-    // 缓存处理结果
-    _textProcessingCache[text] = spans;
-
-    // 限制缓存大小，避免内存泄漏
-    if (_textProcessingCache.length > 50) {
-      // 移除最早的缓存项
-      final firstKey = _textProcessingCache.keys.first;
-      _textProcessingCache.remove(firstKey);
-    }
-
-    return spans;
+    return _mfmRenderer.processText(text, context);
   }
 
   @override
@@ -200,12 +72,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     super.didUpdateWidget(oldWidget);
     // Only rebuild if the note has actually changed
     if (oldWidget.note.id != widget.note.id) {
-      // Clear cache for new note
-      _textProcessingCache.clear();
-      for (final recognizer in _recognizers) {
-        recognizer.dispose();
-      }
-      _recognizers.clear();
+      // 缓存管理由MfmRenderer内部处理
     }
   }
 

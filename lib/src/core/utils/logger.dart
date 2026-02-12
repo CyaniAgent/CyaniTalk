@@ -32,7 +32,7 @@ class AppLogger {
   late final AppFileOutput _fileOutput;
 
   /// 当前日志级别
-  Level _currentLevel = Level.error;
+  Level _currentLevel = Level.debug;
 
   /// 日志文件路径
   String? _logFilePath;
@@ -41,9 +41,39 @@ class AppLogger {
   ///
   /// 配置日志输出方式，包括控制台输出和文件输出。
   /// 会根据平台选择合适的日志文件存储位置。
+  /// 如果是Release模式，默认日志级别会被覆盖为WARNING。
+  /// 如果提供了logLevel参数，会使用该值覆盖默认级别。
   ///
+  /// @param logLevel 可选的日志级别字符串，如'debug'、'info'、'warning'、'error'
   /// @return 无返回值，初始化完成后日志系统即可使用
-  Future<void> initialize() async {
+  Future<void> initialize({String? logLevel}) async {
+    // 如果是Release模式，默认日志级别为WARNING
+    if (kReleaseMode) {
+      _currentLevel = Level.warning;
+    }
+
+    // 如果提供了日志级别参数，使用该值覆盖默认级别
+    if (logLevel != null) {
+      switch (logLevel.toLowerCase()) {
+        case 'debug':
+          _currentLevel = Level.debug;
+          break;
+        case 'info':
+          _currentLevel = Level.info;
+          break;
+        case 'warning':
+        case 'warn':
+          _currentLevel = Level.warning;
+          break;
+        case 'error':
+          _currentLevel = Level.error;
+          break;
+        default:
+          // 无效的日志级别，保持当前级别
+          break;
+      }
+    }
+
     // 创建控制台输出
     final consoleOutput = ConsoleOutput();
 
@@ -56,6 +86,12 @@ class AppLogger {
       output: AppMultiOutput([consoleOutput, _fileOutput]),
       printer: SimplePrinter(),
     );
+
+    // 输出初始化信息和当前日志级别
+    debug('AppLogger: Initialized with log level: $_currentLevel');
+    debug('AppLogger: Log file path: $_logFilePath');
+    debug('AppLogger: Build mode: ${kReleaseMode ? 'Release' : 'Debug'}');
+    debug('AppLogger: User log level: $logLevel');
 
     // 异步执行清理
     Future.microtask(() => cleanupLogs());
@@ -237,7 +273,8 @@ class AppLogger {
         final now = DateTime.now();
         final timestamp =
             "${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}";
-        final exportFileName = "${Constants.logFilePrefix}_export_$timestamp.log";
+        final exportFileName =
+            "${Constants.logFilePrefix}_export_$timestamp.log";
 
         final debugDir = await getLogDir();
         if (debugDir == null) return null;

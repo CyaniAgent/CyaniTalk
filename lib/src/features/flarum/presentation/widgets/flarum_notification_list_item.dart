@@ -29,7 +29,7 @@ class FlarumNotificationListItem extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: notification.isRead
-              ? Theme.of(context).colorScheme.surfaceVariant
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
               : Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(12),
         ),

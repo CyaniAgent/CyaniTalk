@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import '../utils/logger.dart';
-import 'base_api.dart';
-import 'network_client.dart';
-import '../config/constants.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/api/base_api.dart';
+import '/src/core/api/network_client.dart';
+import '/src/core/config/constants.dart';
 
 /// Misskey API客户端
 ///
@@ -26,19 +26,8 @@ class MisskeyApi extends BaseApi {
     _dio = NetworkClient().createDio(
       host: host,
       token: token,
-      userAgent: _generateUserAgent(),
+      userAgent: Constants.getUserAgent(),
     );
-  }
-
-  /// 生成更加真实的User-Agent字符串
-  String _generateUserAgent() {
-    if (Platform.isAndroid) {
-      return 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36 CyaniTalk/${Constants.appVersion}';
-    } else if (Platform.isIOS) {
-      return 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1 CyaniTalk/${Constants.appVersion}';
-    } else {
-      return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 CyaniTalk/${Constants.appVersion}';
-    }
   }
 
   /// 获取当前用户信息
@@ -163,7 +152,7 @@ class MisskeyApi extends BaseApi {
 
     return _fetchList('MisskeyApi.getTimeline', endpoint, {
       'limit': limit,
-      'untilId':? untilId,
+      'untilId': ?untilId,
     });
   }
 
@@ -193,7 +182,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList(
     'MisskeyApi.getFollowingChannels',
     '/api/channels/followed',
-    {'limit': limit, 'untilId':? untilId},
+    {'limit': limit, 'untilId': ?untilId},
   );
 
   /// 获取自己创建的频道
@@ -207,7 +196,7 @@ class MisskeyApi extends BaseApi {
   Future<List<dynamic>> getOwnedChannels({int limit = 20, String? untilId}) =>
       _fetchList('MisskeyApi.getOwnedChannels', '/api/channels/owned', {
         'limit': limit,
-        'untilId':? untilId,
+        'untilId': ?untilId,
       });
 
   /// 获取收藏的频道
@@ -224,7 +213,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList(
     'MisskeyApi.getFavoriteChannels',
     '/api/channels/my-favorites',
-    {'limit': limit, 'untilId':? untilId},
+    {'limit': limit, 'untilId': ?untilId},
   );
 
   /// 搜索频道
@@ -243,7 +232,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.searchChannels', '/api/channels/search', {
     'query': query,
     'limit': limit,
-    'untilId':? untilId,
+    'untilId': ?untilId,
   });
 
   /// 获取频道详情
@@ -279,7 +268,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.getChannelTimeline', '/api/channels/timeline', {
     'channelId': channelId,
     'limit': limit,
-    'untilId':? untilId,
+    'untilId': ?untilId,
   });
 
   /// 获取收藏夹列表
@@ -293,7 +282,7 @@ class MisskeyApi extends BaseApi {
   Future<List<dynamic>> getClips({int limit = 20, String? untilId}) =>
       _fetchList('MisskeyApi.getClips', '/api/clips/list', {
         'limit': limit,
-        'untilId':? untilId,
+        'untilId': ?untilId,
       });
 
   /// 获取收藏夹中的笔记
@@ -312,7 +301,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.getClipNotes', '/api/clips/notes', {
     'clipId': clipId,
     'limit': limit,
-    'untilId':? untilId,
+    'untilId': ?untilId,
   });
 
   /// 创建新笔记
@@ -342,14 +331,14 @@ class MisskeyApi extends BaseApi {
       '/api/notes/create',
       data: {
         'i': token,
-        'text':? text,
-        'replyId':? replyId,
-        'renoteId':? renoteId,
-        'channelId':? channelId,
+        'text': ?text,
+        'replyId': ?replyId,
+        'renoteId': ?renoteId,
+        'channelId': ?channelId,
         if (fileIds != null && fileIds.isNotEmpty) 'fileIds': fileIds,
-        'visibility':? visibility,
-        'localOnly':? localOnly,
-        'cw':? cw,
+        'visibility': ?visibility,
+        'localOnly': ?localOnly,
+        'cw': ?cw,
       },
     ),
     params: {
@@ -411,8 +400,8 @@ class MisskeyApi extends BaseApi {
     String? untilId,
   }) => _fetchList('MisskeyApi.getDriveFiles', '/api/drive/files', {
     'limit': limit,
-    'folderId':? folderId,
-    'untilId':? untilId,
+    'folderId': ?folderId,
+    'untilId': ?untilId,
   });
 
   /// 获取云盘文件夹列表
@@ -430,8 +419,8 @@ class MisskeyApi extends BaseApi {
     String? untilId,
   }) => _fetchList('MisskeyApi.getDriveFolders', '/api/drive/folders', {
     'limit': limit,
-    'folderId':? folderId,
-    'untilId':? untilId,
+    'folderId': ?folderId,
+    'untilId': ?untilId,
   });
 
   /// 创建云盘文件夹
@@ -449,11 +438,7 @@ class MisskeyApi extends BaseApi {
     'MisskeyApi.createDriveFolder',
     () => _dio.post(
       '/api/drive/folders/create',
-      data: {
-        'i': token,
-        'name': name,
-        'parentId':? parentId,
-      },
+      data: {'i': token, 'name': name, 'parentId': ?parentId},
     ),
     (response) => response.data as Map<String, dynamic>,
   );
@@ -507,7 +492,7 @@ class MisskeyApi extends BaseApi {
       '/api/drive/files/create',
       data: FormData.fromMap({
         'i': token,
-        'folderId':? folderId,
+        'folderId': ?folderId,
         'file': MultipartFile.fromBytes(bytes, filename: filename),
       }),
     ),
@@ -587,8 +572,8 @@ class MisskeyApi extends BaseApi {
       'i': token,
       'userId': userId,
       'limit': limit,
-      'sinceId':? sinceId,
-      'untilId':? untilId,
+      'sinceId': ?sinceId,
+      'untilId': ?untilId,
       'markAsRead': markAsRead,
     };
 
@@ -627,8 +612,8 @@ class MisskeyApi extends BaseApi {
     final data = {
       'i': token,
       'userId': userId,
-      'text':? text,
-      'fileId':? fileId,
+      'text': ?text,
+      'fileId': ?fileId,
     };
 
     return executeApiCall(
@@ -757,12 +742,7 @@ class MisskeyApi extends BaseApi {
     'MisskeyApi.sendChatRoomMessage',
     () => _dio.post(
       '/api/chat/messages/create-to-room',
-      data: {
-        'i': token,
-        'roomId': roomId,
-        'text':? text,
-        'fileId':? fileId,
-      },
+      data: {'i': token, 'roomId': roomId, 'text': ?text, 'fileId': ?fileId},
     ),
     params: {'roomId': roomId, 'text': text, 'fileId': fileId},
   );
@@ -790,7 +770,7 @@ class MisskeyApi extends BaseApi {
         'i': token,
         'name': name,
         'isPublic': isPublic,
-        'description':? description,
+        'description': ?description,
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
@@ -867,10 +847,10 @@ class MisskeyApi extends BaseApi {
     List<String>? excludeTypes,
   }) => _fetchList('MisskeyApi.getNotifications', '/api/i/notifications', {
     'limit': limit,
-    'sinceId':? sinceId,
-    'untilId':? untilId,
-    'includeTypes':? includeTypes,
-    'excludeTypes':? excludeTypes,
+    'sinceId': ?sinceId,
+    'untilId': ?untilId,
+    'includeTypes': ?includeTypes,
+    'excludeTypes': ?excludeTypes,
   });
 
   /// 搜索笔记
@@ -889,7 +869,7 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.searchNotes', '/api/notes/search', {
     'query': query,
     'limit': limit,
-    'untilId':? untilId,
+    'untilId': ?untilId,
   });
 
   /// 获取实例元数据
@@ -919,6 +899,32 @@ class MisskeyApi extends BaseApi {
   }) => _fetchList('MisskeyApi.searchUsers', '/api/users/search', {
     'query': query,
     'limit': limit,
-    'offset':? offset,
+    'offset': ?offset,
   });
+
+  /// 获取单个表情信息
+  ///
+  /// 通过调用 `/api/emoji` 接口获取指定名称的表情详细信息。
+  ///
+  /// @param name 表情名称
+  /// @return 表情详细信息的 Map 对象
+  /// @throws DioException 如果请求失败
+  Future<Map<String, dynamic>> getEmoji(String name) => executeApiCall(
+    'MisskeyApi.getEmoji',
+    () => _dio.post('/api/emoji', data: {'i': token, 'name': name}),
+    (response) => Map<String, dynamic>.from(response.data),
+    params: {'name': name},
+  );
+
+  /// 获取表情列表
+  ///
+  /// 通过调用 `/api/emojis` 接口获取实例的表情列表。
+  ///
+  /// @return 表情列表的 Map 对象，包含 emojis 字段
+  /// @throws DioException 如果请求失败
+  Future<Map<String, dynamic>> getEmojis() => executeApiCall(
+    'MisskeyApi.getEmojis',
+    () => _dio.post('/api/emojis', data: {'i': token}),
+    (response) => Map<String, dynamic>.from(response.data),
+  );
 }

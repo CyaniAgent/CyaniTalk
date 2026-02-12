@@ -32,4 +32,11 @@ class Constants {
   /// 
   /// 应用程序启动时的默认日志级别，可选值包括：debug, info, warning, error
   static const String defaultLogLevel = 'error';
+  
+  /// 生成用户代理字符串
+  /// 
+  /// 用于网络请求的User-Agent头，包含应用名称和版本号。
+  static String getUserAgent() {
+    return 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36 CyaniTalk/$appVersion';
+  }
 }
