@@ -22,7 +22,7 @@ class NotificationService {
   /// @return 无返回值，初始化完成后通知服务即可使用
   Future<void> initialize() async {
     const initializationSettingsAndroid = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
+      'ic_launcher',
     );
     const initializationSettingsDarwin = DarwinInitializationSettings(
       requestAlertPermission: false,
