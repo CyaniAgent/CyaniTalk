@@ -1,5 +1,5 @@
 name: cyanitalk
-description: "一个新的Flutter项目。"
+description: "A comprehensive, multi-functional social application built with Flutter, connecting Misskey and Flarum, and belonging to CyaniAgent."
 # 以下行防止包被意外发布到
 # 使用 `flutter pub publish` 发布到 pub.dev。这是私有包的首选设置。
 publish_to: "none" # 如果你想发布到 pub.dev，请删除此行
@@ -15,7 +15,7 @@ publish_to: "none" # 如果你想发布到 pub.dev，请删除此行
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # 在 Windows 中，build-name 用作产品和文件版本的主要、次要和补丁部分
 # 而 build-number 用作构建后缀。
-version: 1.0.0+1
+version: 1.1.0+146
 
 environment:
   sdk: ^3.10.4
