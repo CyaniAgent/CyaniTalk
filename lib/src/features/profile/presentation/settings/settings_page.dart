@@ -12,6 +12,7 @@ import 'notification_settings_page.dart';
 import 'sound_settings_page.dart';
 import 'navigation_settings_page.dart';
 import 'log_settings_page.dart';
+import 'licenses_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -138,7 +139,9 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings_notifications_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const NotificationSettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const NotificationSettingsPage(),
+                ),
               );
             },
           ),
@@ -149,7 +152,9 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings_sound_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SoundSettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const SoundSettingsPage(),
+                ),
               );
             },
           ),
@@ -160,7 +165,9 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings_navigation_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const NavigationSettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const NavigationSettingsPage(),
+                ),
               );
             },
           ),
@@ -173,7 +180,9 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings_logs_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const LogSettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const LogSettingsPage(),
+                ),
               );
             },
           ),
@@ -184,7 +193,9 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings_storage_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const CacheSettingsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const CacheSettingsPage(),
+                ),
               );
             },
           ),
@@ -198,6 +209,17 @@ class _SettingsPageState extends State<SettingsPage> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const AboutPage()),
+              );
+            },
+          ),
+          _buildSettingsTile(
+            context,
+            Icons.description_outlined,
+            'settings_licenses_title'.tr(),
+            'settings_licenses_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const LicensesPage()),
               );
             },
           ),

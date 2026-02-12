@@ -19,6 +19,7 @@ import '../features/misskey/domain/chat_room.dart';
 import '../features/profile/presentation/profile_page.dart';
 import '../features/profile/presentation/settings/about_page.dart';
 import '../features/profile/presentation/settings/settings_page.dart';
+import '../features/profile/presentation/settings/licenses_page.dart';
 import '../features/search/presentation/search_page.dart';
 import '../shared/widgets/responsive_shell.dart';
 
@@ -113,6 +114,11 @@ GoRouter goRouter(Ref ref) {
         builder: (context, state) => const AboutPage(),
       ),
       GoRoute(
+        path: '/licenses',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const LicensesPage(),
+      ),
+      GoRoute(
         path: '/misskey/notifications',
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const MisskeyNotificationsPage(),
@@ -123,10 +129,7 @@ GoRouter goRouter(Ref ref) {
         builder: (context, state) {
           final userId = state.pathParameters['userId']!;
           final user = state.extra as MisskeyUser?;
-          return MisskeyUserProfilePage(
-            userId: userId,
-            initialUser: user,
-          );
+          return MisskeyUserProfilePage(userId: userId, initialUser: user);
         },
       ),
       GoRoute(
@@ -135,11 +138,7 @@ GoRouter goRouter(Ref ref) {
         builder: (context, state) {
           final userId = state.pathParameters['userId']!;
           final user = state.extra as MisskeyUser?;
-          return ChatPage(
-            id: userId,
-            type: ChatType.direct,
-            initialData: user,
-          );
+          return ChatPage(id: userId, type: ChatType.direct, initialData: user);
         },
       ),
       GoRoute(
@@ -148,11 +147,7 @@ GoRouter goRouter(Ref ref) {
         builder: (context, state) {
           final roomId = state.pathParameters['roomId']!;
           final room = state.extra as ChatRoom?;
-          return ChatPage(
-            id: roomId,
-            type: ChatType.room,
-            initialData: room,
-          );
+          return ChatPage(id: roomId, type: ChatType.room, initialData: room);
         },
       ),
     ],

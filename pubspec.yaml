@@ -132,6 +132,7 @@ dev_dependencies:
   # 应用图标生成工具，用于生成不同平台的应用图标
   flutter_launcher_icons: ^0.13.1
   mocktail: ^1.0.4
+  dart_pubspec_licenses: ^3.0.15
 
 flutter_launcher_icons:
   android: "launcher_icon"
