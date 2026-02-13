@@ -158,14 +158,19 @@ jobs:
       # [New Step] Generate signing file and configuration file
       - name: Create Keystore and Properties file
         if: matrix.name == 'android' || matrix.name == 'android-aab'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          PROPS_STORE_PASS: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          PROPS_KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PROPS_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           # 1. Decode Base64 to restore the .jks file to the android/app directory
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
           # 2. Generate the key.properties file for Gradle to read
-          echo "storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}" > android/key.properties
-          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
-          echo "storeFile=upload-keystore.jks" >> android/key.properties
+          printf "storePassword=%s\n" "$PROPS_STORE_PASS" > android/key.properties
+          printf "keyPassword=%s\n" "$PROPS_KEY_PASS" >> android/key.properties
+          printf "keyAlias=%s\n" "$PROPS_KEY_ALIAS" >> android/key.properties
+          printf "storeFile=upload-keystore.jks\n" >> android/key.properties
         shell: bash
 
       # 根据矩阵配置，为不同平台执行构建命令
