@@ -1,14 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import '../../core/navigation/navigation.dart';
 
-class ComingSoonPage extends StatelessWidget {
+class ComingSoonPage extends ConsumerWidget {
   const ComingSoonPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Breakpoints.small.isActive(context)
+            ? IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () => ref
+                    .read(navigationControllerProvider.notifier)
+                    .openDrawer(),
+              )
+            : null,
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [

@@ -116,39 +116,13 @@ class AppLogger {
   /// @return 返回创建的AppFileOutput实例
   Future<AppFileOutput> _createFileOutput() async {
     try {
-      Directory? debugDir;
+      final debugDir = await _getLogDirectory();
       final now = DateTime.now();
       final dateStr =
           "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       final timeStr =
           "${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}_${now.second.toString().padLeft(2, '0')}";
       final fileName = "${Constants.logFilePrefix}_${dateStr}_$timeStr.log";
-
-      if (Platform.isAndroid) {
-        // Android 平台：/storage/emulated/0/Android/data/{app_package}/files/logs
-        // getExternalStorageDirectory() 通常返回 /storage/emulated/0/Android/data/{package}/files
-        final directory = await getExternalStorageDirectory();
-        if (directory == null) throw Exception('无法获取外部存储目录');
-        debugDir = Directory('${directory.path}/logs');
-      } else if (Platform.isIOS) {
-        // iOS 平台：My iPhone/iPad > CyaniTalk > logs
-        // 使用 getApplicationDocumentsDirectory() 并确保在 Info.plist 中启用了文件共享
-        final directory = await getApplicationDocumentsDirectory();
-        debugDir = Directory('${directory.path}/logs');
-      } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-        // 桌面端：应用程序目录/logs
-        final exePath = Platform.resolvedExecutable;
-        final appDir = File(exePath).parent.path;
-        debugDir = Directory('$appDir/logs');
-      } else {
-        // 默认备选方案
-        final directory = await getApplicationDocumentsDirectory();
-        debugDir = Directory('${directory.path}/logs');
-      }
-
-      if (!debugDir.existsSync()) {
-        debugDir.createSync(recursive: true);
-      }
 
       _logFilePath = "${debugDir.path}/$fileName";
       final file = File(_logFilePath!);
@@ -177,6 +151,29 @@ class AppLogger {
         mode: FileMode.append,
       );
     }
+  }
+
+  /// 获取日志目录 (私有统一方法)
+  Future<Directory> _getLogDirectory() async {
+    Directory? directory;
+    if (Platform.isAndroid) {
+      directory = await getExternalStorageDirectory();
+    } else if (Platform.isIOS) {
+      directory = await getApplicationDocumentsDirectory();
+    } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      final exePath = Platform.resolvedExecutable;
+      directory = File(exePath).parent;
+    } else {
+      directory = await getApplicationDocumentsDirectory();
+    }
+
+    if (directory == null) throw Exception('无法获取存储目录');
+    
+    final debugDir = Directory('${directory.path}/${Constants.logDirectoryName}');
+    if (!debugDir.existsSync()) {
+      debugDir.createSync(recursive: true);
+    }
+    return debugDir;
   }
 
   /// 检查并清理日志文件
@@ -276,23 +273,32 @@ class AppLogger {
         final exportFileName =
             "${Constants.logFilePrefix}_export_$timestamp.log";
 
-        final debugDir = await getLogDir();
-        if (debugDir == null) return null;
-
-        if (!debugDir.existsSync()) {
-          debugDir.createSync(recursive: true);
+        final exportDir = await _getExportDirectory();
+        if (!exportDir.existsSync()) {
+          exportDir.createSync(recursive: true);
         }
 
-        final exportPath = "${debugDir.path}/$exportFileName";
+        final exportPath = "${exportDir.path}/$exportFileName";
         final exportFile = File(exportPath);
         // 复制文件
         await sourceFile.copy(exportPath);
         return exportFile;
       }
     } catch (e) {
-      // 忽略错误
+      debugPrint('AppLogger Error: Export failed: $e');
     }
     return null;
+  }
+
+  /// 获取导出目录
+  Future<Directory> _getExportDirectory() async {
+    if (Platform.isAndroid) {
+      // Android 平台：/storage/emulated/0/Download/CyaniTalk Logs
+      return Directory('/storage/emulated/0/Download/CyaniTalk Logs');
+    }
+    
+    // 其他平台默认使用内部日志目录
+    return await _getLogDirectory();
   }
 
   /// 删除日志
@@ -303,8 +309,8 @@ class AppLogger {
   /// @return 无返回值
   Future<void> deleteLogs() async {
     try {
-      final dir = await getLogDir();
-      if (dir != null && dir.existsSync()) {
+      final dir = await _getLogDirectory();
+      if (dir.existsSync()) {
         final files = dir.listSync();
         for (final file in files) {
           if (file is File) {
@@ -323,19 +329,7 @@ class AppLogger {
   /// 获取日志目录
   Future<Directory?> getLogDir() async {
     try {
-      Directory? directory;
-      if (Platform.isAndroid) {
-        directory = await getExternalStorageDirectory();
-      } else {
-        directory = await getApplicationDocumentsDirectory();
-      }
-
-      if (directory != null) {
-        final debugDir = Directory(
-          '${directory.path}/${Constants.logDirectoryName}',
-        );
-        return debugDir;
-      }
+      return await _getLogDirectory();
     } catch (e) {
       debugPrint('AppLogger Error: Failed to get log directory: $e');
     }
@@ -345,8 +339,8 @@ class AppLogger {
   /// 列出所有日志文件
   Future<List<File>> listLogFiles() async {
     try {
-      final dir = await getLogDir();
-      if (dir != null && dir.existsSync()) {
+      final dir = await _getLogDirectory();
+      if (dir.existsSync()) {
         final files = dir.listSync();
         return files
             .whereType<File>()

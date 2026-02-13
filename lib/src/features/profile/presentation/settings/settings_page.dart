@@ -13,6 +13,7 @@ import 'sound_settings_page.dart';
 import 'navigation_settings_page.dart';
 import 'log_settings_page.dart';
 import 'licenses_page.dart';
+import 'flarum_endpoints_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -93,6 +94,11 @@ class _SettingsPageState extends State<SettingsPage> {
             Icons.api,
             'settings_flarum_endpoint_title'.tr(),
             'settings_flarum_endpoint_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const FlarumEndpointsPage()),
+              );
+            },
           ),
           _buildSettingsTile(
             context,

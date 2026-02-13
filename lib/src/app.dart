@@ -114,7 +114,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     ref.watch(misskeyStreamingServiceProvider);
 
     return appearanceSettingsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => Container(color: Colors.white),
       error: (error, stack) {
         logger.error('CyaniTalkApp: 加载外观设置失败', error);
         // 使用默认设置

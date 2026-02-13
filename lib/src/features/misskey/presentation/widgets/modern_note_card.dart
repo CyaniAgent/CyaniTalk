@@ -57,14 +57,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   @override
   void initState() {
     super.initState();
-    // Only animate if the note is new (created within the last 15 seconds)
-    // This prevents animation on old posts when scrolling, which can cause
-    // issues with AudioPlayer state and "Bad Element" errors.
-    final diff = DateTime.now()
-        .difference(widget.note.createdAt)
-        .inSeconds
-        .abs();
-    _shouldAnimate = diff < 15;
+    _shouldAnimate = false;
   }
 
   @override

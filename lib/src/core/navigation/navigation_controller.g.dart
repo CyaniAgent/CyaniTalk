@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'global_search_service.dart';
+part of 'navigation_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,37 +8,29 @@ part of 'global_search_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 全局搜索服务
-///
-/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
 
-@ProviderFor(GlobalSearch)
-final globalSearchProvider = GlobalSearchProvider._();
+@ProviderFor(NavigationController)
+final navigationControllerProvider = NavigationControllerProvider._();
 
-/// 全局搜索服务
-///
-/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
-final class GlobalSearchProvider extends $NotifierProvider<GlobalSearch, void> {
-  /// 全局搜索服务
-  ///
-  /// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
-  GlobalSearchProvider._()
+final class NavigationControllerProvider
+    extends $NotifierProvider<NavigationController, void> {
+  NavigationControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'globalSearchProvider',
+        name: r'navigationControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$globalSearchHash();
+  String debugGetCreateSourceHash() => _$navigationControllerHash();
 
   @$internal
   @override
-  GlobalSearch create() => GlobalSearch();
+  NavigationController create() => NavigationController();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -49,13 +41,10 @@ final class GlobalSearchProvider extends $NotifierProvider<GlobalSearch, void> {
   }
 }
 
-String _$globalSearchHash() => r'1af7867c56e9a9b8aa1b935b8d17152d7b08fed9';
+String _$navigationControllerHash() =>
+    r'faf8bb2d5e13490079393959f615423e1c9cebab';
 
-/// 全局搜索服务
-///
-/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
-
-abstract class _$GlobalSearch extends $Notifier<void> {
+abstract class _$NavigationController extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

@@ -42,7 +42,7 @@ final class MisskeyStreamingServiceProvider
 }
 
 String _$misskeyStreamingServiceHash() =>
-    r'e9fcd20b10499d617c933415e656cb54de091167';
+    r'f7f180a819e3dce48d9cef475074ea11ab0c933c';
 
 abstract class _$MisskeyStreamingService extends $Notifier<void> {
   void build();

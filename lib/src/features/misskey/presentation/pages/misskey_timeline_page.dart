@@ -232,7 +232,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                 ),
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const SizedBox.shrink(),
             error: (err, stack) => Center(
               child: SingleChildScrollView(
                 child: Padding(

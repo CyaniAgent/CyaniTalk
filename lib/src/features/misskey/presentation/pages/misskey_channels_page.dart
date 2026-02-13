@@ -157,7 +157,7 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
                   crossAxisCount: crossAxisCount,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: crossAxisCount == 1 ? 2.5 : 1.5,
+                  childAspectRatio: crossAxisCount == 1 ? 2.2 : 1.3,
                 ),
                 itemCount: channels.length,
                 itemBuilder: (context, index) {
@@ -283,7 +283,7 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

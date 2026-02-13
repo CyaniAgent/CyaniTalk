@@ -5,3 +5,4 @@ export 'navigation_item.dart';
 export 'navigation_settings.dart';
 export 'navigation_settings_notifier.dart';
 export 'navigation_service.dart';
+export 'navigation_controller.dart';

@@ -67,7 +67,7 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'f4f929fe2d1b754f27b583355633182e9a51cf88';
+    r'7f0fa3479b7ce4e9fd125f7ee754e4213455c21e';
 
 /// Misskey时间线状态管理类
 ///
@@ -580,7 +580,7 @@ final class MisskeyOnlineUsersNotifierProvider
 }
 
 String _$misskeyOnlineUsersNotifierHash() =>
-    r'17f418a9911dc370b8f927f8c47e12e34aa94f50';
+    r'5a8a489a209ee2483ffa1ca1eff5d04b0c4907f9';
 
 /// Misskey在线用户数状态管理类
 ///

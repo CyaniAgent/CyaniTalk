@@ -12,6 +12,8 @@ import '../../../core/utils/logger.dart';
 import '../../../core/services/audio_engine.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../routing/router.dart';
+import '../../../core/navigation/navigation.dart';
+import '../../../core/navigation/sub_navigation_notifier.dart';
 import '../application/misskey_notifier.dart';
 import 'pages/misskey_timeline_page.dart';
 import 'pages/misskey_notes_page.dart';
@@ -39,9 +41,6 @@ class MisskeyPage extends ConsumerStatefulWidget {
 
 /// MisskeyPage的状态管理类
 class _MisskeyPageState extends ConsumerState<MisskeyPage> {
-  /// 当前选中的页面索引
-  final int _selectedIndex = 0;
-
   @override
   void dispose() {
     super.dispose();
@@ -176,9 +175,10 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   @override
   Widget build(BuildContext context) {
     final selectedAccountAsync = ref.watch(selectedMisskeyAccountProvider);
+    final selectedIndex = ref.watch(misskeySubIndexProvider);
 
     return Scaffold(
-      floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
+      floatingActionButton: selectedIndex == 0 ? FloatingActionButton(
         heroTag: 'misskey_fab',
         onPressed: () async {
           logger.info('MisskeyPage: Floating action button pressed');
@@ -243,7 +243,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               leading: Breakpoints.small.isActive(context)
                   ? IconButton(
                       icon: const Icon(Icons.menu),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
+                      onPressed: () => ref
+                          .read(navigationControllerProvider.notifier)
+                          .openDrawer(),
                     )
                   : null,
               title: ExcludeSemantics(
@@ -252,11 +254,11 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                   children: [
                     Flexible(
                       child: Text(
-                        _titles[_selectedIndex],
+                        _titles[selectedIndex],
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (_selectedIndex == 0) ...[
+                    if (selectedIndex == 0) ...[
                       const SizedBox(width: 8),
                       ref.watch(misskeyOnlineUsersProvider).when(
                             data: (count) => InkWell(
@@ -321,7 +323,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                                   ],
                                 ),
                               ),
-                            ).animate().fadeIn().scale(),
+                            ),
                             loading: () => const SizedBox(
                               width: 12,
                               height: 12,
@@ -374,13 +376,8 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               return _buildNoAccountState(context);
             }
             return AnimatedSwitcher(
-              duration: 400.ms,
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return FadeTransition(opacity: animation, child: child);
-              },
-              child: _pages[_selectedIndex],
+              duration: Duration.zero,
+              child: _pages[selectedIndex],
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -401,7 +398,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               Icons.account_circle_outlined,
               size: 80,
               color: Theme.of(context).colorScheme.outlineVariant,
-            ).animate().scale(delay: 200.ms).fadeIn(),
+            ),
             const SizedBox(height: 24),
             Text(
               'misskey_page_no_account_title'.tr(),
@@ -409,7 +406,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
-            ).animate().slideY(begin: 0.2, curve: Curves.easeOutQuad).fadeIn(),
+            ),
             const SizedBox(height: 12),
             Text(
               'misskey_page_no_account_subtitle'.tr(),
@@ -417,13 +414,13 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                 color: Theme.of(context).colorScheme.outline,
               ),
               textAlign: TextAlign.center,
-            ).animate().slideY(begin: 0.3, curve: Curves.easeOutQuad).fadeIn(),
+            ),
             const SizedBox(height: 32),
             FilledButton.icon(
               onPressed: () => context.go('/profile'),
               icon: const Icon(Icons.login),
               label: Text('misskey_page_login_now'.tr()),
-            ).animate().scale(delay: 400.ms).fadeIn(),
+            ),
           ],
         ),
       ),

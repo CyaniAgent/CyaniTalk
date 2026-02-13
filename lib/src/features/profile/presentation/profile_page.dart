@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import '../../../core/navigation/navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 import 'package:palette_generator/palette_generator.dart';
@@ -148,7 +148,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             leading: Breakpoints.small.isActive(context)
                 ? IconButton(
                     icon: Icon(Icons.menu, color: theme.colorScheme.onPrimary),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
+                    onPressed: () => ref
+                        .read(navigationControllerProvider.notifier)
+                        .openDrawer(),
                   )
                 : null,
             backgroundColor: isLoggedIn
@@ -297,7 +299,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         : null,
                   ),
                 ),
-              ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
+              ),
               const SizedBox(width: 20),
               Expanded(
                 child: Column(
@@ -374,7 +376,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     ),
                   ],
-                ).animate().fadeIn(delay: 200.ms).slideX(begin: 0.1),
+                ),
               ),
             ],
           ),
@@ -433,14 +435,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   );
                 },
               ),
-            ).animate().fadeIn(delay: 400.ms),
+            ),
 
           const SizedBox(height: 20),
           _buildUserStats(
             context,
             misskeyUser,
             flarumUser,
-          ).animate().fadeIn(delay: 500.ms),
+          ),
         ],
       ),
     );
@@ -509,11 +511,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ],
             ),
-          ).animate().scale(
-                duration: 400.ms,
-                begin: const Offset(0.8, 0.8),
-                curve: Curves.easeOutBack,
-              ).fadeIn(),
+          ),
         ),
       ),
     );
@@ -543,7 +541,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ],
             ),
-          ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0),
+          ),
           const SizedBox(height: 8),
           Text(
             'misskey_page_no_account_subtitle'.tr(),
@@ -562,7 +560,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ],
             ),
-          ).animate().fadeIn(delay: 200.ms, duration: 600.ms),
+          ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
                 onPressed: () => _showAddAccountDialog(context),
@@ -580,10 +578,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-              )
-              .animate()
-              .fadeIn(delay: 400.ms, duration: 600.ms)
-              .scale(begin: const Offset(0.9, 0.9)),
+              ),
         ],
       ),
     );
@@ -612,7 +607,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
       ],
-    ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1);
+    );
   }
 
   void _showAddAccountDialog(BuildContext context) {
@@ -653,7 +648,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
       ],
-    ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1);
+    );
   }
 
   Widget _buildUserStats(

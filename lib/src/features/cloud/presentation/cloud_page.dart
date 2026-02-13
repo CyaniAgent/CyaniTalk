@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import '../../../core/navigation/navigation.dart';
 import '../../misskey/application/drive_notifier.dart';
 import '../../misskey/domain/drive_file.dart';
 import '../../misskey/domain/drive_folder.dart';
@@ -19,7 +21,17 @@ class CloudPage extends ConsumerWidget {
 
     if (account == null) {
       return Scaffold(
-        appBar: AppBar(title: Text('cloud_storage_title'.tr())),
+        appBar: AppBar(
+          leading: Breakpoints.small.isActive(context)
+              ? IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => ref
+                      .read(navigationControllerProvider.notifier)
+                      .openDrawer(),
+                )
+              : null,
+          title: Text('cloud_storage_title'.tr()),
+        ),
         body: LoginReminder(
           title: 'misskey_page_no_account_title'.tr(),
           message: 'misskey_page_please_login'.tr(),
@@ -33,6 +45,14 @@ class CloudPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Breakpoints.small.isActive(context)
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => ref
+                    .read(navigationControllerProvider.notifier)
+                    .openDrawer(),
+              )
+            : null,
         title: Text('cloud_storage_title'.tr()),
         actions: [
           IconButton(

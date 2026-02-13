@@ -1,5 +1,4 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
 
@@ -15,18 +14,17 @@ class AudioEngine {
   /// 初始化音频引擎
   Future<void> initialize() async {
     // 设置全局音频上下文，解决 Android 上的通道/流类型警告
-    AudioPlayer.global.setAudioContext(const AudioContext(
+    AudioPlayer.global.setAudioContext(AudioContext(
       android: AudioContextAndroid(
         usageType: AndroidUsageType.notificationEvent,
         contentType: AndroidContentType.sonification,
         audioFocus: AndroidAudioFocus.gainTransientMayDuck,
       ),
       iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.ambient,
-        options: [
+        category: AVAudioSessionCategory.playback,
+        options: {
           AVAudioSessionOptions.duckOthers,
-          AVAudioSessionOptions.defaultToSpeaker,
-        ],
+        },
       ),
     ));
 

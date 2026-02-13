@@ -42,7 +42,13 @@ Future<ForumInfo> forumInfo(Ref ref) async {
 @riverpod
 Future<User?> flarumCurrentUser(Ref ref) async {
   final repo = ref.watch(flarumRepositoryProvider);
-  return repo.getCurrentUser();
+  final api = ref.watch(flarumApiProvider);
+  if (api.token == null) return null;
+  try {
+    return await repo.getCurrentUser();
+  } catch (e) {
+    return null;
+  }
 }
 
 @riverpod

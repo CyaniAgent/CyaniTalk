@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import '../../../core/api/flarum_api.dart';
+import '../../../core/navigation/navigation.dart';
+import '../../../core/navigation/sub_navigation_notifier.dart';
 import '../../flarum/presentation/pages/flarum_discussion_page.dart';
 import '../../flarum/presentation/pages/flarum_tags_page.dart';
 import '../../flarum/presentation/pages/flarum_notifications_page.dart';
@@ -17,8 +19,6 @@ class ForumPage extends ConsumerStatefulWidget {
 }
 
 class _ForumPageState extends ConsumerState<ForumPage> {
-  final int _selectedIndex = 0;
-
   final List<Widget> _pages = const [
     FlarumDiscussionPage(key: ValueKey('discussion')),
     FlarumTagsPage(key: ValueKey('tags')),
@@ -30,10 +30,24 @@ class _ForumPageState extends ConsumerState<ForumPage> {
   @override
   Widget build(BuildContext context) {
     final account = ref.watch(selectedFlarumAccountProvider).asData?.value;
+    final selectedIndex = ref.watch(forumSubIndexProvider);
+    final flarumApi = FlarumApi();
+    final hasEndpoint = flarumApi.baseUrl != null;
 
-    if (account == null) {
+    if (account == null && !hasEndpoint) {
       return Scaffold(
-        appBar: AppBar(title: Text('forum_page_title'.tr()), centerTitle: true),
+        appBar: AppBar(
+          leading: Breakpoints.small.isActive(context)
+              ? IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => ref
+                      .read(navigationControllerProvider.notifier)
+                      .openDrawer(),
+                )
+              : null,
+          title: Text('forum_page_title'.tr()),
+          centerTitle: true,
+        ),
         body: LoginReminder(
           title: 'forum_page_not_connected'.tr(),
           message: 'forum_page_please_connect'.tr(),
@@ -50,10 +64,12 @@ class _ForumPageState extends ConsumerState<ForumPage> {
               leading: Breakpoints.small.isActive(context)
                   ? IconButton(
                       icon: const Icon(Icons.menu),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
+                      onPressed: () => ref
+                          .read(navigationControllerProvider.notifier)
+                          .openDrawer(),
                     )
                   : null,
-              title: Text(_titles[_selectedIndex]),
+              title: Text(_titles[selectedIndex]),
               centerTitle: true,
               floating: true,
               pinned: true,
@@ -61,30 +77,7 @@ class _ForumPageState extends ConsumerState<ForumPage> {
             ),
           ];
         },
-        body: AnimatedSwitcher(
-          duration: 400.ms,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.05, 0),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: ScaleTransition(
-                  scale: Tween<double>(
-                    begin: 0.95,
-                    end: 1.0,
-                  ).animate(animation),
-                  child: child,
-                ),
-              ),
-            );
-          },
-          child: _pages[_selectedIndex],
-        ),
+        body: _pages[selectedIndex],
       ),
     );
   }

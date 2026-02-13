@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../application/log_settings_provider.dart';
@@ -268,7 +269,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
   Future<void> _viewFileContent(BuildContext context, File file) async {
     if (!file.existsSync()) return;
 
-    final content = await file.readAsString();
+    final content = await file.readAsLines();
     if (!context.mounted) return;
 
     final fileNameWithSuffix =
@@ -280,15 +281,62 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          appBar: AppBar(title: Text(fileName)),
-          body: SingleChildScrollView(
+          appBar: AppBar(
+            title: Text(fileName),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.copy_all),
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: content.join('\n')));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Copied to clipboard')),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+          body: ListView.builder(
             padding: const EdgeInsets.all(16),
-            child: Text(
-              content,
-              style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12),
-            ),
+            itemCount: content.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 1),
+                child: _buildColoredLogLine(context, content[index]),
+              );
+            },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildColoredLogLine(BuildContext context, String line) {
+    Color color = Theme.of(context).colorScheme.onSurface;
+    FontWeight weight = FontWeight.normal;
+
+    final upperLine = line.toUpperCase();
+
+    if (upperLine.contains('[E]') || upperLine.contains('ERROR')) {
+      color = Colors.redAccent;
+      weight = FontWeight.bold;
+    } else if (upperLine.contains('[W]') || upperLine.contains('WARN') || upperLine.contains('WARNING')) {
+      color = Colors.orangeAccent;
+      weight = FontWeight.bold;
+    } else if (upperLine.contains('[I]') || upperLine.contains('INFO')) {
+      color = Colors.blueAccent;
+    } else if (upperLine.contains('[D]') || upperLine.contains('DEBUG')) {
+      color = Colors.grey;
+    }
+
+    return SelectableText(
+      line,
+      style: TextStyle(
+        fontFamily: 'JetBrainsMono',
+        fontSize: 11,
+        color: color,
+        fontWeight: weight,
       ),
     );
   }

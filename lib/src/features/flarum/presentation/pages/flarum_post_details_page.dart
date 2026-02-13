@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import '../../../../core/navigation/navigation.dart';
 
-class FlarumPostDetailsPage extends StatelessWidget {
+class FlarumPostDetailsPage extends ConsumerWidget {
   final int discussionId;
   final String title;
 
@@ -12,9 +15,17 @@ class FlarumPostDetailsPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
+        leading: Breakpoints.small.isActive(context)
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => ref
+                    .read(navigationControllerProvider.notifier)
+                    .openDrawer(),
+              )
+            : null,
         title: Text('flarum_post_details_title'.tr()),
       ),
       body: Center(
