@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_soloud/flutter_soloud.dart';
-import '../../../core/utils/cache_manager.dart';
 import '../../../core/utils/logger.dart';
 
 /// 音频播放器状态
@@ -11,9 +9,6 @@ class AudioPlayerState {
   final bool isLoading;
   final Duration duration;
   final Duration position;
-  final String? cachedFilePath;
-  final AudioSource? audioSource;
-  final SoundHandle? soundHandle;
   final String error;
 
   const AudioPlayerState({
@@ -21,9 +16,6 @@ class AudioPlayerState {
     this.isLoading = false,
     this.duration = Duration.zero,
     this.position = Duration.zero,
-    this.cachedFilePath,
-    this.audioSource,
-    this.soundHandle,
     this.error = '',
   });
 
@@ -32,9 +24,6 @@ class AudioPlayerState {
     bool? isLoading,
     Duration? duration,
     Duration? position,
-    String? cachedFilePath,
-    AudioSource? audioSource,
-    SoundHandle? soundHandle,
     String? error,
   }) {
     return AudioPlayerState(
@@ -42,9 +31,6 @@ class AudioPlayerState {
       isLoading: isLoading ?? this.isLoading,
       duration: duration ?? this.duration,
       position: position ?? this.position,
-      cachedFilePath: cachedFilePath ?? this.cachedFilePath,
-      audioSource: audioSource ?? this.audioSource,
-      soundHandle: soundHandle ?? this.soundHandle,
       error: error ?? this.error,
     );
   }
@@ -60,11 +46,8 @@ class AudioPlayerController {
   /// 音频URL
   final String audioUrl;
 
-  /// 文件名
-  final String? fileName;
-
-  /// 位置轮询定时器
-  Timer? _positionTimer;
+  /// AudioPlayer 实例
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   /// 状态
   AudioPlayerState _state = const AudioPlayerState();
@@ -72,8 +55,13 @@ class AudioPlayerController {
   /// 状态变化回调
   Function(AudioPlayerState)? onStateChanged;
 
+  /// 监听器订阅
+  final List<StreamSubscription> _subscriptions = [];
+
   /// 构造函数
-  AudioPlayerController(this.audioUrl, this.fileName);
+  AudioPlayerController(this.audioUrl) {
+    _initListeners();
+  }
 
   /// 获取当前状态
   AudioPlayerState get state => _state;
@@ -84,187 +72,94 @@ class AudioPlayerController {
     onStateChanged?.call(newState);
   }
 
+  /// 初始化监听器
+  void _initListeners() {
+    _subscriptions.add(_audioPlayer.onPositionChanged.listen((pos) {
+      _setState(_state.copyWith(position: pos));
+    }));
+
+    _subscriptions.add(_audioPlayer.onDurationChanged.listen((dur) {
+      _setState(_state.copyWith(duration: dur));
+    }));
+
+    _subscriptions.add(_audioPlayer.onPlayerStateChanged.listen((playerState) {
+      _setState(_state.copyWith(isPlaying: playerState == PlayerState.playing));
+    }));
+
+    _subscriptions.add(_audioPlayer.onPlayerComplete.listen((event) {
+      _setState(_state.copyWith(isPlaying: false, position: Duration.zero));
+    }));
+  }
+
   /// 切换播放/暂停状态
   Future<void> togglePlayPause() async {
-    final currentState = _state;
-
-    if (currentState.isPlaying) {
-      // 暂停播放
-      if (currentState.soundHandle != null) {
-        SoLoud.instance.setPause(currentState.soundHandle!, true);
-        _setState(_state.copyWith(isPlaying: false));
-        _stopPositionPolling();
-      }
-    } else {
-      // 开始播放
-      if (currentState.audioSource == null) {
-        // 加载音频
-        _setState(_state.copyWith(isLoading: true, error: ''));
-
-        try {
-          // 确保文件已缓存
-          final cachedFilePath =
-              currentState.cachedFilePath ??
-              await cacheManager.cacheFile(audioUrl);
-          final file = File(cachedFilePath);
-
-          if (await file.exists()) {
-            final audioSource = await SoLoud.instance.loadFile(cachedFilePath);
-            final duration = SoLoud.instance.getLength(audioSource);
-
-            _setState(
-              _state.copyWith(
-                cachedFilePath: cachedFilePath,
-                audioSource: audioSource,
-                duration: duration,
-                isLoading: false,
-              ),
-            );
-          } else {
-            throw Exception('Cache file not found');
-          }
-        } catch (e) {
-          logger.error('AudioPlayerController: Error loading audio: $e');
-          _setState(
-            _state.copyWith(
-              isLoading: false,
-              error: 'Failed to load audio: $e',
-            ),
-          );
-          return;
+    try {
+      if (_state.isPlaying) {
+        await _audioPlayer.pause();
+      } else {
+        if (_audioPlayer.source == null) {
+          _setState(_state.copyWith(isLoading: true, error: ''));
+          await _audioPlayer.setSource(UrlSource(audioUrl));
+          _setState(_state.copyWith(isLoading: false));
         }
+        await _audioPlayer.resume();
       }
-
-      // 播放音频
-      final updatedState = _state;
-      if (updatedState.audioSource != null) {
-        SoundHandle soundHandle;
-
-        if (updatedState.soundHandle != null &&
-            SoLoud.instance.getPause(updatedState.soundHandle!)) {
-          // 恢复播放
-          SoLoud.instance.setPause(updatedState.soundHandle!, false);
-          soundHandle = updatedState.soundHandle!;
-        } else {
-          // 开始新的播放
-          soundHandle = await SoLoud.instance.play(updatedState.audioSource!);
-        }
-
-        _setState(_state.copyWith(isPlaying: true, soundHandle: soundHandle));
-
-        _startPositionPolling();
-      }
+    } catch (e) {
+      logger.error('AudioPlayerController: Error toggling play/pause: $e');
+      _setState(
+        _state.copyWith(
+          isLoading: false,
+          error: 'Failed to play audio: $e',
+        ),
+      );
     }
-  }
-
-  /// 开始位置轮询
-  void _startPositionPolling() {
-    _stopPositionPolling();
-    _positionTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      final currentState = _state;
-      if (currentState.soundHandle != null && currentState.isPlaying) {
-        final pos = SoLoud.instance.getPosition(currentState.soundHandle!);
-
-        // 检查是否播放完成
-        if (pos >= currentState.duration &&
-            currentState.duration > Duration.zero) {
-          _stopAndReset();
-          return;
-        }
-
-        _setState(_state.copyWith(position: pos));
-      }
-    });
-  }
-
-  /// 停止位置轮询
-  void _stopPositionPolling() {
-    _positionTimer?.cancel();
-    _positionTimer = null;
-  }
-
-  /// 停止并重置播放器
-  Future<void> _stopAndReset() async {
-    final currentState = _state;
-
-    _stopPositionPolling();
-
-    if (currentState.soundHandle != null) {
-      await SoLoud.instance.stop(currentState.soundHandle!);
-    }
-
-    if (currentState.audioSource != null) {
-      SoLoud.instance.disposeSource(currentState.audioSource!);
-    }
-
-    _setState(
-      _state.copyWith(
-        isPlaying: false,
-        isLoading: false,
-        position: Duration.zero,
-        audioSource: null,
-        soundHandle: null,
-      ),
-    );
   }
 
   /// 跳转播放位置
-  void seek(double value) {
-    final currentState = _state;
-    if (currentState.soundHandle == null) return;
-
+  Future<void> seek(double value) async {
     final position = Duration(seconds: value.toInt());
-    SoLoud.instance.seek(currentState.soundHandle!, position);
-    _setState(_state.copyWith(position: position));
+    await _audioPlayer.seek(position);
   }
 
   /// 清理资源
   Future<void> dispose() async {
     onStateChanged = null;
-    await _stopAndReset();
+    for (var sub in _subscriptions) {
+      await sub.cancel();
+    }
+    await _audioPlayer.dispose();
   }
 }
 
 /// 音频播放器控制器提供者
-/// 
-/// 使用Riverpod的Provider来管理音频播放器控制器的生命周期
 final audioPlayerControllerProvider = Provider.family<AudioPlayerController, String>((ref, audioUrl) {
-  final controller = AudioPlayerController(audioUrl, null);
+  final controller = AudioPlayerController(audioUrl);
   
-  // 当提供者被销毁时，清理资源
-  ref.onDispose(() async {
-    await controller.dispose();
+  ref.onDispose(() {
+    controller.dispose();
   });
   
   return controller;
 });
 
 /// 音频播放器状态提供者
-/// 
-/// 使用Riverpod的StreamProvider来管理音频播放器状态，实现自动生命周期管理
-/// 避免内存泄漏和手动状态管理的复杂性
 final audioPlayerStateProvider = StreamProvider.family<AudioPlayerState, String>((ref, audioUrl) async* {
   final controller = ref.watch(audioPlayerControllerProvider(audioUrl));
   
-  // 创建一个流控制器
   final streamController = StreamController<AudioPlayerState>();
   
-  // 监听状态变化并发送到流
   controller.onStateChanged = (state) {
     if (!streamController.isClosed) {
       streamController.add(state);
     }
   };
   
-  // 初始状态
   yield controller.state;
   
-  // 监听流
   await for (final state in streamController.stream) {
     yield state;
   }
   
-  // 当提供者被销毁时，清理资源
   ref.onDispose(() {
     streamController.close();
   });

@@ -68,8 +68,8 @@ dependencies:
   flutter_animate: ^4.5.2
   # 跨平台获取应用信息，如版本号、包名等
   package_info_plus: ^9.0.0
-  # 低延迟、实时音频播放引擎
-  flutter_soloud: ^3.4.10
+  # 强大的音频播放库，支持多平台和各种音频源
+  audioplayers: ^5.2.1
   # Dio的Cookie管理器，用于处理HTTP请求中的Cookie
   dio_cookie_manager: ^3.3.0
   # Cookie存储库，用于持久化存储Cookie

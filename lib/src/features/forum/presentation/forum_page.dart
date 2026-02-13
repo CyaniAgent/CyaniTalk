@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../flarum/presentation/widgets/flarum_drawer.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import '../../flarum/presentation/pages/flarum_discussion_page.dart';
 import '../../flarum/presentation/pages/flarum_tags_page.dart';
 import '../../flarum/presentation/pages/flarum_notifications_page.dart';
@@ -17,7 +17,7 @@ class ForumPage extends ConsumerStatefulWidget {
 }
 
 class _ForumPageState extends ConsumerState<ForumPage> {
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
     FlarumDiscussionPage(key: ValueKey('discussion')),
@@ -43,18 +43,16 @@ class _ForumPageState extends ConsumerState<ForumPage> {
     }
 
     return Scaffold(
-      drawer: FlarumDrawer(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
+              leading: Breakpoints.small.isActive(context)
+                  ? IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    )
+                  : null,
               title: Text(_titles[_selectedIndex]),
               centerTitle: true,
               floating: true,

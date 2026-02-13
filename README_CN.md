@@ -39,7 +39,7 @@ CyaniTalk 将导航逻辑与内容展示分离，在不同设备上提供符合�
 *   **全局搜索：** 实现跨 Misskey 和 Flarum 平台的统一搜索功能。
 *   **通知系统：** 实现统一的通知管理系统，支持多种通知类型和多端推送。
 *   **缓存管理：** 内置笔记与图片缓存管理器，提升加载速度并节省流量。
-*   **音频引擎：** 集成 `flutter_soloud` 实现高性能、低延迟的音频播放体验。
+*   **音频引擎：** 集成 `audioplayers` 实现高质量的音频播放体验。
 
 ### 🛡️ 管理员与高级工具 (仅限管理员)
 *   **统一控制台：** 自动检测管理员权限，解锁隐藏的管理入口。
@@ -57,7 +57,7 @@ CyaniTalk 将导航逻辑与内容展示分离，在不同设备上提供符合�
     *   `dio` (REST API 请求)。
     *   `web_socket_channel` (Misskey 实时流)。
 *   **路由管理：** `go_router` (支持桌面端的分栏路由)。
-*   **音频引擎：** `flutter_soloud` (用于高质量音效与音频播放)。
+*   **音频引擎：** `audioplayers` (用于高质量音效与音频播放)。
 *   **UI 组件：** `flutter_adaptive_scaffold`、基于 Material Design 3 的自定义主题系统。
 *   **数据模型：** `freezed` & `json_serializable` (不可变模型与自动化序列化)。
 *   **本地存储：** `flutter_secure_storage` (加密存储 Token) 与 `shared_preferences` (设置项)。

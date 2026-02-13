@@ -190,36 +190,44 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Semantics(
-                        label: 'Reply button',
-                        child: _buildAction(
-                          Icons.reply,
-                          note.repliesCount.toString(),
-                          _handleReply,
+                      Expanded(
+                        child: Semantics(
+                          label: 'Reply button',
+                          child: _buildAction(
+                            Icons.reply,
+                            note.repliesCount.toString(),
+                            _handleReply,
+                          ),
                         ),
                       ),
-                      Semantics(
-                        label: 'Renote button',
-                        child: _buildAction(
-                          Icons.repeat,
-                          note.renoteCount.toString(),
-                          _handleRenote,
+                      Expanded(
+                        child: Semantics(
+                          label: 'Renote button',
+                          child: _buildAction(
+                            Icons.repeat,
+                            note.renoteCount.toString(),
+                            _handleRenote,
+                          ),
                         ),
                       ),
-                      Semantics(
-                        label: 'Reaction button',
-                        child: _buildAction(
-                          Icons.add_reaction_outlined,
-                          note.reactions.length.toString(),
-                          _handleReaction,
+                      Expanded(
+                        child: Semantics(
+                          label: 'Reaction button',
+                          child: _buildAction(
+                            Icons.add_reaction_outlined,
+                            note.reactions.length.toString(),
+                            _handleReaction,
+                          ),
                         ),
                       ),
-                      Semantics(
-                        label: 'Share button',
-                        child: _buildAction(
-                          Icons.share_outlined,
-                          "",
-                          _handleShare,
+                      Expanded(
+                        child: Semantics(
+                          label: 'Share button',
+                          child: _buildAction(
+                            Icons.share_outlined,
+                            "",
+                            _handleShare,
+                          ),
                         ),
                       ),
                     ],
@@ -534,15 +542,19 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
             if (label.isNotEmpty) ...[
               const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

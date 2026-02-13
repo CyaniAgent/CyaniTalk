@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'sauce_palette.dart';
+import 'typography.dart';
 
 /// 应用程序主题工厂
 /// 
@@ -8,6 +9,11 @@ class MaterialTheme {
   final TextTheme textTheme;
 
   const MaterialTheme(this.textTheme);
+
+  /// 创建一个新的 MaterialTheme 实例，使用默认的自适应字型
+  factory MaterialTheme.adaptive(TargetPlatform platform) {
+    return MaterialTheme(SauceTypography.createTextTheme(platform));
+  }
 
   ThemeData light(ColorScheme? dynamicScheme) {
     return _buildTheme(dynamicScheme ?? SaucePalette.lightScheme());

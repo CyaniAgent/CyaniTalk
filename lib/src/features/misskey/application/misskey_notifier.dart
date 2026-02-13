@@ -848,36 +848,45 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
 
   /// 初始化Misskey在线用户数
   ///
-  /// 初始化Misskey平台的在线用户数，并设置每30秒自动更新一次。
+  /// 初始化Misskey平台的在线用户数，并设置每10秒自动更新一次。
   ///
   /// @return 返回当前在线用户数
   @override
   FutureOr<int> build() async {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (!ref.mounted) return;
-      state = await AsyncValue.guard(() async {
-        final repository = await ref.read(misskeyRepositoryProvider.future);
-        return await repository.getOnlineUsersCount();
-      });
+      await refresh();
     });
 
     ref.onDispose(() {
       _timer?.cancel();
     });
 
-    // 首次加载时使用AsyncValue.guard()处理异常
+    // 首次加载
+    return await _fetchCount();
+  }
+
+  /// 获取在线用户数
+  Future<int> _fetchCount() async {
     final result = await AsyncValue.guard(() async {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       return await repository.getOnlineUsersCount();
     });
 
-    // 如果有数据，返回数据；如果失败，抛出异常让AsyncNotifier处理
     if (result.hasError) {
-      logger.warning('Misskey在线用户数: 首次加载失败', result.error);
+      logger.warning('Misskey在线用户数: 加载失败', result.error);
       throw result.error!;
     }
     return result.value!;
+  }
+
+  /// 刷新在线用户数
+  Future<void> refresh() async {
+    state = await AsyncValue.guard(() async {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      return await repository.getOnlineUsersCount();
+    });
   }
 }
 

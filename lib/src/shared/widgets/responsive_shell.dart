@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/navigation/navigation.dart';
+import 'root_navigation_drawer.dart';
 
 /// 应用程序的响应式布局外壳组件
 ///
@@ -23,12 +24,14 @@ class ResponsiveShell extends ConsumerWidget {
   /// [key] - 组件的键，用于唯一标识组件
   const ResponsiveShell({required this.navigationShell, super.key});
 
-  /// 构建导航目标
-  NavigationDestination _buildNavigationDestination(NavigationItem item) {
-    return NavigationDestination(
+  /// 构建侧边导航目标
+  NavigationRailDestination _buildNavigationRailDestination(
+    NavigationItem item,
+  ) {
+    return NavigationRailDestination(
       icon: Icon(item.icon),
       selectedIcon: Icon(item.selectedIcon),
-      label: item.title,
+      label: Text(item.title),
     );
   }
 
@@ -44,51 +47,82 @@ class ResponsiveShell extends ConsumerWidget {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
 
     return navigationSettingsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Container(),
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(child: Text('Error: $error')),
+      ),
       data: (navigationSettings) {
-        // 构建启用的导航目标列表
-        final destinations = navigationSettings.items
-            .where((item) => item.isEnabled)
-            .map(_buildNavigationDestination)
-            .toList();
-
         // 确保至少有一个目标
-        if (destinations.isEmpty) {
-          return Center(child: Text('navigation_no_items'.tr()));
+        if (navigationSettings.items.where((item) => item.isEnabled).isEmpty) {
+          return Scaffold(
+            body: Center(child: Text('navigation_no_items'.tr())),
+          );
         }
 
-        // 计算当前索引 - 使用NavigationService将原始分支索引映射到显示索引
+        // 计算当前索引
         int selectedIndex = NavigationService.mapBranchIndexToDisplayIndex(
           navigationShell.currentIndex,
           navigationSettings,
         );
 
-        // 确保索引有效
-        if (selectedIndex >= destinations.length) {
+        if (selectedIndex >=
+            navigationSettings.items.where((item) => item.isEnabled).length) {
           selectedIndex = 0;
         }
 
-        return AdaptiveScaffold(
-          useDrawer: false,
-          selectedIndex: selectedIndex,
-          onSelectedIndexChange: (index) {
-            // 由于目标可能被隐藏，需要映射到实际的分支索引
-            int branchIndex = NavigationService.mapDisplayIndexToBranchIndex(
-              index,
-              navigationSettings,
-            );
-
-            navigationShell.goBranch(
-              branchIndex,
-              initialLocation: branchIndex == navigationShell.currentIndex,
-            );
-          },
-          destinations: destinations,
-          body: (_) => navigationShell,
-          // 断点定义（可选），默认值通常已经足够
-          // < 600: 底部导航栏
-          // >= 600: 侧边导航栏
+        return Scaffold(
+          drawer: RootNavigationDrawer(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (index) {
+              int branchIndex = NavigationService.mapDisplayIndexToBranchIndex(
+                index,
+                navigationSettings,
+              );
+              navigationShell.goBranch(
+                branchIndex,
+                initialLocation: branchIndex == navigationShell.currentIndex,
+              );
+            },
+          ),
+          body: AdaptiveLayout(
+            primaryNavigation: SlotLayout(
+              config: <Breakpoint, SlotLayoutConfig>{
+                Breakpoints.mediumAndUp: SlotLayout.from(
+                  key: const Key('primaryNavigationMedium'),
+                  builder: (_) => NavigationRail(
+                    extended: Breakpoints.large.isActive(context),
+                    selectedIndex: selectedIndex,
+                    onDestinationSelected: (index) {
+                      int branchIndex =
+                          NavigationService.mapDisplayIndexToBranchIndex(
+                        index,
+                        navigationSettings,
+                      );
+                      navigationShell.goBranch(
+                        branchIndex,
+                        initialLocation:
+                            branchIndex == navigationShell.currentIndex,
+                      );
+                    },
+                    destinations: navigationSettings.items
+                        .where((item) => item.isEnabled)
+                        .map(_buildNavigationRailDestination)
+                        .toList(),
+                  ),
+                ),
+              },
+            ),
+            body: SlotLayout(
+              config: <Breakpoint, SlotLayoutConfig>{
+                Breakpoints.standard: SlotLayout.from(
+                  key: const Key('body'),
+                  builder: (_) => navigationShell,
+                ),
+              },
+            ),
+          ),
         );
       },
     );

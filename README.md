@@ -39,7 +39,7 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 *   **Global Search:** Unified search across Misskey and Flarum platforms.
 *   **Notification System:** Unified management system supporting multiple notification types.
 *   **Cache Management:** Integrated note and image cache management for improved performance.
-*   **Audio Engine:** Low-latency audio playback powered by `flutter_soloud`.
+*   **Audio Engine:** Audio playback powered by `audioplayers`.
 
 ### 🛡️ Admin & Power Tools (Admin Only)
 *   **Unified Dashboard:** Detects admin privileges to reveal hidden control panels.
@@ -57,7 +57,7 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
     *   `dio` (REST API calls).
     *   `web_socket_channel` (Misskey Streaming).
 *   **Routing:** `go_router` with support for Master-Detail views on Desktop.
-*   **Audio:** `flutter_soloud` for high-quality, low-latency audio.
+*   **Audio:** `audioplayers` for high-quality audio playback.
 *   **UI Components:** `flutter_adaptive_scaffold`, custom Material Design 3 theme system.
 *   **Data Models:** `freezed` & `json_serializable`.
 *   **Storage:** `flutter_secure_storage` for credentials, `shared_preferences` for settings.

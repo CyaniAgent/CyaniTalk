@@ -65,6 +65,22 @@ class NotificationService {
         }
       },
     );
+
+    // 在 Android 上显式创建通知通道，避免后续显示通知时可能出现的警告或延迟
+    if (Platform.isAndroid) {
+      final androidImplementation = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidImplementation != null) {
+        const channel = AndroidNotificationChannel(
+          'cyanitalk_general_channel',
+          'CyaniTalk Notifications',
+          description: 'General notifications for CyaniTalk',
+          importance: Importance.max,
+        );
+        await androidImplementation.createNotificationChannel(channel);
+      }
+    }
   }
 
   /// 请求通知权限

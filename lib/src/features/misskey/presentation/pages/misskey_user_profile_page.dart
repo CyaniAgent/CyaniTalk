@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../application/misskey_user_notifier.dart';
 import '../../domain/misskey_user.dart';
 import '../widgets/retryable_network_image.dart';
@@ -119,7 +121,44 @@ class MisskeyUserProfilePage extends ConsumerWidget {
                     ),
                     if (user.description != null && user.description!.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      Text(user.description!),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final text = user.description!;
+                          final style = theme.textTheme.bodyMedium!;
+
+                          final textPainter = TextPainter(
+                            text: TextSpan(text: text, style: style),
+                            maxLines: 10,
+                            textDirection: ui.TextDirection.ltr,
+                          )..layout(maxWidth: constraints.maxWidth);
+
+                          final isOverflown = textPainter.didExceedMaxLines;
+
+                          if (isOverflown) {
+                            return InkWell(
+                              onTap: () => _showFullBioCard(context, text),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'user_details_bio_truncated'.tr(),
+                                    style: style.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return SelectableText(
+                            text,
+                            style: style,
+                          );
+                        },
+                      ),
                     ],
                     const SizedBox(height: 16),
                     Row(
@@ -160,6 +199,80 @@ class MisskeyUserProfilePage extends ConsumerWidget {
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
         ),
       ],
-    );
-  }
-}
+        );
+      }
+    }
+    
+    void _showFullBioCard(BuildContext context, String bio) {
+      showDialog(
+        context: context,
+        builder: (context) => Center(
+          child: Container(
+            margin: const EdgeInsets.all(24),
+            child: Material(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(28),
+              elevation: 10,
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.description_outlined,
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'user_details_bio'.tr(),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: SelectableText(
+                        bio,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('post_close'.tr()),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ).animate().scale(
+                  duration: 400.ms,
+                  begin: const Offset(0.8, 0.8),
+                  curve: Curves.easeOutBack,
+                ).fadeIn(),
+          ),
+        ),
+      );
+    }
+    

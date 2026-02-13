@@ -239,35 +239,43 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // 回复按钮
-                    _buildAction(
-                      Icons.reply,
-                      note.repliesCount.toString(),
-                      _handleReply,
-                      tooltip: 'Reply',
+                    Expanded(
+                      child: _buildAction(
+                        Icons.reply,
+                        note.repliesCount.toString(),
+                        _handleReply,
+                        tooltip: 'Reply',
+                      ),
                     ),
 
                     // 转发按钮
-                    _buildAction(
-                      Icons.repeat,
-                      note.renoteCount.toString(),
-                      _handleRenote,
-                      tooltip: 'Renote',
+                    Expanded(
+                      child: _buildAction(
+                        Icons.repeat,
+                        note.renoteCount.toString(),
+                        _handleRenote,
+                        tooltip: 'Renote',
+                      ),
                     ),
 
                     // 反应按钮
-                    _buildAction(
-                      Icons.add_reaction_outlined,
-                      note.reactions.length.toString(),
-                      _handleReaction,
-                      tooltip: 'Reaction',
+                    Expanded(
+                      child: _buildAction(
+                        Icons.add_reaction_outlined,
+                        note.reactions.length.toString(),
+                        _handleReaction,
+                        tooltip: 'Reaction',
+                      ),
                     ),
 
                     // 更多按钮
-                    _buildAction(
-                      Icons.more_vert,
-                      "",
-                      _showContextMenuFromButton,
-                      tooltip: 'More',
+                    Expanded(
+                      child: _buildAction(
+                        Icons.more_vert,
+                        "",
+                        _showContextMenuFromButton,
+                        tooltip: 'More',
+                      ),
                     ),
                   ],
                 ),
@@ -596,13 +604,16 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         children: [
           Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
           if (label.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(left: 4),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.onSurfaceVariant,
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),

@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/services/audio_engine.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../routing/router.dart';
-import 'widgets/misskey_drawer.dart';
 import '../application/misskey_notifier.dart';
 import 'pages/misskey_timeline_page.dart';
 import 'pages/misskey_notes_page.dart';
@@ -40,7 +40,7 @@ class MisskeyPage extends ConsumerStatefulWidget {
 /// MisskeyPage的状态管理类
 class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   /// 当前选中的页面索引
-  int _selectedIndex = 0;
+  final int _selectedIndex = 0;
 
   @override
   void dispose() {
@@ -58,6 +58,103 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
     MisskeyAnnouncementsPage(key: ValueKey('announcements')),
     MisskeyAiScriptConsolePage(key: ValueKey('aiscript_console')),
   ];
+
+  /// 显示在线用户浮动卡片
+  void _showOnlineUsersCard(BuildContext context, int count) {
+    showDialog(
+      context: context,
+      builder: (context) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(32),
+          child: Material(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            elevation: 10,
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.people_alt_rounded,
+                        size: 56,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ).animate().scale(
+                            duration: 600.ms,
+                            curve: Curves.elasticOut,
+                          ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'misskey_online_users_title'.tr(),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      Text(
+                        'misskey_online_users'.tr(
+                          namedArgs: {'count': count.toString()},
+                        ),
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                ref
+                                    .read(misskeyOnlineUsersProvider.notifier)
+                                    .refresh();
+                                Navigator.of(context).pop();
+                              },
+                              icon: const Icon(Icons.refresh),
+                              label: Text('misskey_online_users_refresh'.tr()),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('misskey_online_users_ok'.tr()),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ).animate().scale(
+                duration: 400.ms,
+                begin: const Offset(0.8, 0.8),
+                curve: Curves.easeOutBack,
+              ).fadeIn(),
+        ),
+      ),
+    );
+  }
 
   /// 对应页面的标题列表
   final List<String> _titles = [
@@ -81,17 +178,6 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
     final selectedAccountAsync = ref.watch(selectedMisskeyAccountProvider);
 
     return Scaffold(
-      drawer: MisskeyDrawer(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (int index) {
-          logger.info(
-            'MisskeyPage: Navigation drawer selected index: $index (${_titles[index]})',
-          );
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-      ),
       floatingActionButton: _selectedIndex == 0 ? FloatingActionButton(
         heroTag: 'misskey_fab',
         onPressed: () async {
@@ -154,6 +240,12 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
+              leading: Breakpoints.small.isActive(context)
+                  ? IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    )
+                  : null,
               title: ExcludeSemantics(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -166,33 +258,79 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                     ),
                     if (_selectedIndex == 0) ...[
                       const SizedBox(width: 8),
-                      Flexible(
-                        child: ref
-                            .watch(misskeyOnlineUsersProvider)
-                            .when(
-                              data: (count) => Text(
-                                'misskey_online_users'.tr(
-                                  namedArgs: {'count': count.toString()},
+                      ref.watch(misskeyOnlineUsersProvider).when(
+                            data: (count) => InkWell(
+                              onTap: () {
+                                _showOnlineUsersCard(context, count);
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
                                 ),
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: Colors.greenAccent[400],
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.greenAccent[400]!
+                                                .withValues(alpha: 0.5),
+                                            blurRadius: 4,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                        .animate(
+                                          onPlay: (controller) =>
+                                              controller.repeat(),
+                                        )
+                                        .scale(
+                                          duration: 1.seconds,
+                                          begin: const Offset(1, 1),
+                                          end: const Offset(1.3, 1.3),
+                                          curve: Curves.easeInOut,
+                                        )
+                                        .then()
+                                        .scale(
+                                          duration: 1.seconds,
+                                          begin: const Offset(1.3, 1.3),
+                                          end: const Offset(1, 1),
+                                          curve: Curves.easeInOut,
+                                        ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      count.toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
-                                overflow: TextOverflow.ellipsis,
-                              ).animate().fadeIn().scale(),
-                              loading: () => const SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                  ],
                                 ),
                               ),
-                              error: (error, stack) => const SizedBox.shrink(),
+                            ).animate().fadeIn().scale(),
+                            loading: () => const SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
                             ),
-                      ),
+                            error: (error, stack) => const SizedBox.shrink(),
+                          ),
                     ],
                   ],
                 ),

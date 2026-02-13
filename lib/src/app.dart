@@ -197,6 +197,10 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
             ),
       useMaterial3: true,
       fontFamily: 'MiSans',
+      textTheme: SauceTypography.createTextTheme(Theme.of(context).platform).apply(
+        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+      ),
     );
 
     // 缓存主题和设置

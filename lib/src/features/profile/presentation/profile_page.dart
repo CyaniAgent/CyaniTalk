@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
@@ -143,6 +145,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             floating: false,
             pinned: true,
             stretch: true,
+            leading: Breakpoints.small.isActive(context)
+                ? IconButton(
+                    icon: Icon(Icons.menu, color: theme.colorScheme.onPrimary),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  )
+                : null,
             backgroundColor: isLoggedIn
                 ? _appBarColor
                 : theme.colorScheme.primary,
@@ -374,25 +382,56 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               misskeyUser!.description!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 16, left: 4),
-              child: Text(
-                misskeyUser.description!,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onPrimary.withAlpha(217), // 0.85 * 255
-                  shadows: [
-                    Shadow(
-                      blurRadius: 2,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final text = misskeyUser.description!;
+                  final style = TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onPrimary.withAlpha(217), // 0.85 * 255
+                    shadows: [
+                      Shadow(
+                        blurRadius: 2,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  );
+
+                  final textPainter = TextPainter(
+                    text: TextSpan(text: text, style: style),
+                    maxLines: 10,
+                    textDirection: ui.TextDirection.ltr,
+                  )..layout(maxWidth: constraints.maxWidth);
+
+                  final isOverflown = textPainter.didExceedMaxLines;
+
+                  if (isOverflown) {
+                    return InkWell(
+                      onTap: () => _showFullBioCard(context, text),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'user_details_bio_truncated'.tr(),
+                            style: style.copyWith(
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return SelectableText(
+                    text,
+                    style: style,
+                  );
+                },
               ),
             ).animate().fadeIn(delay: 400.ms),
 
@@ -403,6 +442,79 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             flarumUser,
           ).animate().fadeIn(delay: 500.ms),
         ],
+      ),
+    );
+  }
+
+  void _showFullBioCard(BuildContext context, String bio) {
+    showDialog(
+      context: context,
+      builder: (context) => Center(
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          child: Material(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            elevation: 10,
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.description_outlined,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'user_details_bio'.tr(),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: SelectableText(
+                      bio,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text('post_close'.tr()),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ).animate().scale(
+                duration: 400.ms,
+                begin: const Offset(0.8, 0.8),
+                curve: Curves.easeOutBack,
+              ).fadeIn(),
+        ),
       ),
     );
   }
