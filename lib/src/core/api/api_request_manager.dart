@@ -108,6 +108,8 @@ class ApiRequestManager {
       return result;
     } catch (e) {
       logger.error('ApiRequestManager: Error executing request for $key', e);
+      // 这里不直接 rethrow，而是通过 completer.completeError 传递错误
+      // 这样可以确保即使请求失败，也能正确清理 pendingRequests
       completer.completeError(e);
       rethrow;
     } finally {

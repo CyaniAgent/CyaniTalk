@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/audio_player_notifier.dart';
 
-/// Inline audio player widget for Misskey posts using flutter_soloud
+/// Inline audio player widget for Misskey posts using audioplayers
 class AudioPlayerWidget extends ConsumerWidget {
   final String audioUrl;
   final String? fileName;
@@ -12,13 +12,13 @@ class AudioPlayerWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     // 获取音频控制器
     final audioController = ref.watch(audioPlayerControllerProvider(audioUrl));
-    
+
     // 获取当前状态
     final asyncState = ref.watch(audioPlayerStateProvider(audioUrl));
-    
+
     return asyncState.when(
       data: (state) {
         // 监听错误状态

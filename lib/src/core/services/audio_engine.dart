@@ -1,22 +1,22 @@
-import 'package:flutter_soloud/flutter_soloud.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
 
 /// 全局音频引擎服务
-/// 
-/// 使用 flutter_soloud 提供低延迟音频播放能力
+///
+/// 使用 audioplayers 提供跨平台音频播放能力
 class AudioEngine {
   bool _isInitialized = false;
-  final Map<String, AudioSource> _cache = {};
+  final Map<String, AudioPlayer> _cache = {};
 
   bool get isInitialized => _isInitialized;
 
   /// 初始化音频引擎
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
-      await SoLoud.instance.init();
+      // audioplayers 不需要显式初始化
       _isInitialized = true;
       logger.info('AudioEngine: Initialized successfully');
     } catch (e) {
@@ -31,15 +31,14 @@ class AudioEngine {
     }
 
     try {
-      AudioSource? source = _cache[assetPath];
-      if (source == null) {
-        // flutter_soloud assets need to be correctly prefixed in pubspec
-        // usually 'assets/sounds/...'
-        source = await SoLoud.instance.loadAsset('assets/$assetPath');
-        _cache[assetPath] = source;
+      AudioPlayer? player = _cache[assetPath];
+      if (player == null) {
+        player = AudioPlayer();
+        _cache[assetPath] = player;
       }
-      
-      SoLoud.instance.play(source, volume: volume);
+
+      await player.setVolume(volume);
+      await player.play(AssetSource(assetPath));
     } catch (e) {
       logger.error('AudioEngine: Failed to play asset $assetPath', e);
     }
@@ -47,12 +46,16 @@ class AudioEngine {
 
   /// 释放资源
   Future<void> dispose() async {
-    for (final source in _cache.values) {
-      SoLoud.instance.disposeSource(source);
+    try {
+      for (final player in _cache.values) {
+        await player.dispose();
+      }
+      _cache.clear();
+      _isInitialized = false;
+      logger.info('AudioEngine: Disposed successfully');
+    } catch (e) {
+      logger.error('AudioEngine: Failed to dispose', e);
     }
-    _cache.clear();
-    SoLoud.instance.deinit();
-    _isInitialized = false;
   }
 }
 

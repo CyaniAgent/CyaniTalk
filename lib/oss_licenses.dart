@@ -20,6 +20,13 @@ const allDependencies = <Package>[
   _archive,
   _args,
   _async,
+  _audioplayers,
+  _audioplayers_android,
+  _audioplayers_darwin,
+  _audioplayers_linux,
+  _audioplayers_platform_interface,
+  _audioplayers_web,
+  _audioplayers_windows,
   _boolean_selector,
   _build,
   _build_config,
@@ -89,7 +96,6 @@ const allDependencies = <Package>[
   _flutter_secure_storage_web,
   _flutter_secure_storage_windows,
   _flutter_shaders,
-  _flutter_soloud,
   _flutter_web_plugins,
   _freezed,
   _freezed_annotation,
@@ -247,7 +253,7 @@ const dependencies = <Package>[
   _json_annotation,
   _flutter_animate,
   _package_info_plus,
-  _flutter_soloud,
+  _audioplayers,
   _dio_cookie_manager,
   _cookie_jar,
   _dio_http2_adapter,
@@ -647,6 +653,258 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+  );
+
+/// audioplayers 6.5.1
+const _audioplayers = Package(
+    name: 'audioplayers',
+    description: 'A Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers',
+    authors: [],
+    version: '6.5.1',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('audioplayers_android'), PackageRef('audioplayers_darwin'), PackageRef('audioplayers_linux'), PackageRef('audioplayers_platform_interface'), PackageRef('audioplayers_web'), PackageRef('audioplayers_windows'), PackageRef('file'), PackageRef('flutter'), PackageRef('http'), PackageRef('meta'), PackageRef('path_provider'), PackageRef('synchronized'), PackageRef('uuid')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+  );
+
+/// audioplayers_android 5.2.1
+const _audioplayers_android = Package(
+    name: 'audioplayers_android',
+    description: 'Android implementation of audioplayers, a Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers_android',
+    authors: [],
+    version: '5.2.1',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('audioplayers_platform_interface'), PackageRef('flutter')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+  );
+
+/// audioplayers_darwin 6.3.0
+const _audioplayers_darwin = Package(
+    name: 'audioplayers_darwin',
+    description: 'iOS and macOS implementation of audioplayers, a Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers_darwin',
+    authors: [],
+    version: '6.3.0',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('audioplayers_platform_interface'), PackageRef('flutter')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+  );
+
+/// audioplayers_linux 4.2.1
+const _audioplayers_linux = Package(
+    name: 'audioplayers_linux',
+    description: 'Linux implementation of audioplayers, a Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers_linux',
+    authors: [],
+    version: '4.2.1',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('audioplayers_platform_interface'), PackageRef('flutter')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+  );
+
+/// audioplayers_platform_interface 7.1.1
+const _audioplayers_platform_interface = Package(
+    name: 'audioplayers_platform_interface',
+    description: 'The platform interface for audioplayers, a Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers_platform_interface',
+    authors: [],
+    version: '7.1.1',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+  );
+
+/// audioplayers_web 5.1.1
+const _audioplayers_web = Package(
+    name: 'audioplayers_web',
+    description: 'Web implementation of audioplayers, a Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers_web',
+    authors: [],
+    version: '5.1.1',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('audioplayers_platform_interface'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('web')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+  );
+
+/// audioplayers_windows 4.2.1
+const _audioplayers_windows = Package(
+    name: 'audioplayers_windows',
+    description: 'Windows implementation of audioplayers, a Flutter plugin to play multiple audio files simultaneously',
+    homepage: 'https://github.com/bluefireteam/audioplayers',
+    repository: 'https://github.com/bluefireteam/audioplayers/tree/master/packages/audioplayers_windows',
+    authors: [],
+    version: '4.2.1',
+    spdxIdentifiers: ['MIT'],
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('audioplayers_platform_interface'), PackageRef('flutter')],
+    devDependencies: [],
+    license: '''MIT License
+
+Copyright (c) 2017 Blue Fire
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
   );
 
 /// boolean_selector 2.1.2
@@ -3662,13 +3920,13 @@ const _fake_async = Package(
    limitations under the License.''',
   );
 
-/// ffi 2.1.5
+/// ffi 2.2.0
 const _ffi = Package(
     name: 'ffi',
     description: 'Utilities for working with Foreign Function Interface (FFI) code.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/ffi',
     authors: [],
-    version: '2.1.5',
+    version: '2.2.0',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -4171,13 +4429,13 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// flutter_local_notifications 20.0.0
+/// flutter_local_notifications 20.1.0
 const _flutter_local_notifications = Package(
     name: 'flutter_local_notifications',
     description: 'A cross platform plugin for displaying and scheduling local notifications for Flutter applications with the ability to customise for each platform.',
     homepage: 'https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications',
     authors: [],
-    version: '20.0.0',
+    version: '20.1.0',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -4706,39 +4964,6 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// flutter_soloud 3.4.10
-const _flutter_soloud = Package(
-    name: 'flutter_soloud',
-    description: 'A low-level audio plugin for Flutter, mainly meant for games and immersive apps. Based on the SoLoud (C++) audio engine.',
-    homepage: 'https://github.com/alnitak/flutter_soloud',
-    authors: [],
-    version: '3.4.10',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('http'), PackageRef('logging'), PackageRef('meta'), PackageRef('path'), PackageRef('path_provider'), PackageRef('plugin_platform_interface'), PackageRef('web')],
-    devDependencies: [PackageRef('test')],
-    license: '''Copyright (c) 2024 The flutter_soloud Authors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
   );
 
 /// flutter_web_plugins null
@@ -10585,13 +10810,13 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// video_player_avfoundation 2.9.1
+/// video_player_avfoundation 2.9.3
 const _video_player_avfoundation = Package(
     name: 'video_player_avfoundation',
     description: 'iOS and macOS implementation of the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_avfoundation',
     authors: [],
-    version: '2.9.1',
+    version: '2.9.3',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -11436,7 +11661,7 @@ const _cyanitalk = Package(
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('flutter_soloud'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('webview_flutter'), PackageRef('webview_windows'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('file_picker'), PackageRef('palette_generator'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago')],
+    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('audioplayers'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('webview_flutter'), PackageRef('webview_windows'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('file_picker'), PackageRef('palette_generator'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago')],
     devDependencies: [PackageRef('flutter_lints'), PackageRef('riverpod_generator'), PackageRef('build_runner'), PackageRef('custom_lint'), PackageRef('riverpod_lint'), PackageRef('freezed'), PackageRef('json_serializable'), PackageRef('flutter_launcher_icons'), PackageRef('mocktail'), PackageRef('dart_pubspec_licenses')],
     license: '''MIT License
 
