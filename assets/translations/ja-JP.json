@@ -332,5 +332,11 @@
   "search_flarum_discussions_related": "{search_result} に関連する Flarum ディスカッション",
   "search_misskey_posts_disabled": "このインスタンスでは投稿の検索機能が無効になっています",
   "search_misskey_users_disabled": "このインスタンスではユーザーの検索機能が無効になっています",
-  "search_feature_disabled_hint": "詳細についてはインスタンスの管理者にお問い合わせください"
+  "search_feature_disabled_hint": "詳細についてはインスタンスの管理者にお問い合わせください",
+  "menu_user_profile": "ユーザープロフィール",
+  "menu_settings": "設定",
+  "menu_logout": "ログアウト",
+  "menu_logout_confirm": "ログアウトの確認",
+  "menu_logout_confirm_message": "すべてのアカウントからログアウトしますか？",
+  "menu_login": "ログイン"
 }

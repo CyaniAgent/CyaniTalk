@@ -31,7 +31,7 @@ class RootNavigationDrawer extends ConsumerWidget {
         // This is called for any destination. We need to distinguish between root and sub.
       },
       children: [
-        const UserNavigationHeader(isDrawer: true),
+        UserNavigationHeader(isDrawer: true),
         const Divider(indent: 12, endIndent: 12),
         
         // Root Sections

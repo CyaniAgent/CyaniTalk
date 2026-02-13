@@ -361,5 +361,11 @@
   "search_flarum_discussions_related": "Flarum Discussions related to {search_result}",
   "search_misskey_posts_disabled": "Search Posts feature is disabled on this instance",
   "search_misskey_users_disabled": "Search Users feature is disabled on this instance",
-  "search_feature_disabled_hint": "Please contact instance administrator for more information"
+  "search_feature_disabled_hint": "Please contact instance administrator for more information",
+  "menu_user_profile": "User Profile",
+  "menu_settings": "Settings",
+  "menu_logout": "Log Out",
+  "menu_logout_confirm": "Confirm Log Out",
+  "menu_logout_confirm_message": "Are you sure you want to log out of all accounts?",
+  "menu_login": "Log In"
 }

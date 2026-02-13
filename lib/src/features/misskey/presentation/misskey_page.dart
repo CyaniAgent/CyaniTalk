@@ -65,91 +65,113 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
       builder: (context) => Center(
         child: Container(
           margin: const EdgeInsets.all(32),
-          child: Material(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(28),
-            elevation: 10,
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.people_alt_rounded,
-                        size: 56,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ).animate().scale(
-                            duration: 600.ms,
-                            curve: Curves.elasticOut,
+          child:
+              Material(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(28),
+                    elevation: 10,
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 32),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                           ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'misskey_online_users_title'.tr(),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Text(
-                        'misskey_online_users'.tr(
-                          namedArgs: {'count': count.toString()},
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.people_alt_rounded,
+                                size: 56,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                              ).animate().scale(
+                                duration: 600.ms,
+                                curve: Curves.elasticOut,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'misskey_online_users_title'.tr(),
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                ref
-                                    .read(misskeyOnlineUsersProvider.notifier)
-                                    .refresh();
-                                Navigator.of(context).pop();
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: Text('misskey_online_users_refresh'.tr()),
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            children: [
+                              Text(
+                                'misskey_online_users'.tr(
+                                  namedArgs: {'count': count.toString()},
+                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: () {
+                                        ref
+                                            .read(
+                                              misskeyOnlineUsersProvider
+                                                  .notifier,
+                                            )
+                                            .refresh();
+                                        Navigator.of(context).pop();
+                                      },
+                                      icon: const Icon(Icons.refresh),
+                                      label: Text(
+                                        'misskey_online_users_refresh'.tr(),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: FilledButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                      child: Text(
+                                        'misskey_online_users_ok'.tr(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('misskey_online_users_ok'.tr()),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ).animate().scale(
-                duration: 400.ms,
-                begin: const Offset(0.8, 0.8),
-                curve: Curves.easeOutBack,
-              ).fadeIn(),
+                        ),
+                      ],
+                    ),
+                  )
+                  .animate()
+                  .scale(
+                    duration: 400.ms,
+                    begin: const Offset(0.8, 0.8),
+                    curve: Curves.easeOutBack,
+                  )
+                  .fadeIn(),
         ),
       ),
     );
@@ -178,64 +200,75 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
     final selectedIndex = ref.watch(misskeySubIndexProvider);
 
     return Scaffold(
-      floatingActionButton: selectedIndex == 0 ? FloatingActionButton(
-        heroTag: 'misskey_fab',
-        onPressed: () async {
-          logger.info('MisskeyPage: Floating action button pressed');
-          // 检查是否已登录 Misskey
-          final authState = ref.read(authServiceProvider);
-          final hasMisskeyAccount = authState.maybeWhen(
-            data: (accounts) => accounts.any((a) => a.platform == 'misskey'),
-            orElse: () => false,
-          );
+      floatingActionButton: selectedIndex == 0
+          ? FloatingActionButton(
+              heroTag: 'misskey_fab',
+              onPressed: () async {
+                logger.info('MisskeyPage: Floating action button pressed');
+                // 检查是否已登录 Misskey
+                final authState = ref.read(authServiceProvider);
+                final hasMisskeyAccount = authState.maybeWhen(
+                  data: (accounts) =>
+                      accounts.any((a) => a.platform == 'misskey'),
+                  orElse: () => false,
+                );
 
-          if (hasMisskeyAccount) {
-            // 已登录，打开发布窗口
-            logger.info('MisskeyPage: Opening post dialog (user logged in)');
-            showDialog(
-              context: context,
-              builder: (context) => const MisskeyPostPage(),
-            );
-          } else {
-            // 未登录，根据当前语言播放提示音
-            logger.info(
-              'MisskeyPage: User not logged in, playing prompt sound',
-            );
-            final isMounted = mounted;
-            final currentContext = context;
-            final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
-            try {
-              final String soundPath =
-                  switch (currentContext.locale.languageCode) {
-                    'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
-                    'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
-                    'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
-                    _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
-                  };
-              await ref.read(audioEngineProvider).playAsset(soundPath);
-              logger.info('MisskeyPage: Played login prompt sound: $soundPath');
-            } catch (e) {
-              logger.error('MisskeyPage: Error playing sound: $e');
-            }
+                if (hasMisskeyAccount) {
+                  // 已登录，打开发布窗口
+                  logger.info(
+                    'MisskeyPage: Opening post dialog (user logged in)',
+                  );
+                  showDialog(
+                    context: context,
+                    builder: (context) => const MisskeyPostPage(),
+                  );
+                } else {
+                  // 未登录，根据当前语言播放提示音
+                  logger.info(
+                    'MisskeyPage: User not logged in, playing prompt sound',
+                  );
+                  final isMounted = mounted;
+                  final currentContext = context;
+                  final scaffoldMessenger = ScaffoldMessenger.of(
+                    currentContext,
+                  );
+                  try {
+                    final String soundPath =
+                        switch (currentContext.locale.languageCode) {
+                          'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
+                          'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
+                          'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
+                          _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
+                        };
+                    await ref.read(audioEngineProvider).playAsset(soundPath);
+                    logger.info(
+                      'MisskeyPage: Played login prompt sound: $soundPath',
+                    );
+                  } catch (e) {
+                    logger.error('MisskeyPage: Error playing sound: $e');
+                  }
 
-            if (isMounted) {
-              // 使用提前获取的scaffoldMessenger实例，避免BuildContext警告
-              logger.info('MisskeyPage: Showing login prompt snackbar');
-              scaffoldMessenger.showSnackBar(
-                SnackBar(
-                  content: Text('misskey_page_please_login'.tr()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-              // 跳转到 Profile 页面进行登录
-              logger.info('MisskeyPage: Navigating to profile page for login');
-              final router = ref.read(goRouterProvider);
-              router.go('/profile');
-            }
-          }
-        },
-        child: const Icon(Icons.edit),
-      ) : null,
+                  if (isMounted) {
+                    // 使用提前获取的scaffoldMessenger实例，避免BuildContext警告
+                    logger.info('MisskeyPage: Showing login prompt snackbar');
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text('misskey_page_please_login'.tr()),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    // 跳转到 Profile 页面进行登录
+                    logger.info(
+                      'MisskeyPage: Navigating to profile page for login',
+                    );
+                    final router = ref.read(goRouterProvider);
+                    router.go('/profile');
+                  }
+                }
+              },
+              child: const Icon(Icons.edit),
+            )
+          : null,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -260,7 +293,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                     ),
                     if (selectedIndex == 0) ...[
                       const SizedBox(width: 8),
-                      ref.watch(misskeyOnlineUsersProvider).when(
+                      ref
+                          .watch(misskeyOnlineUsersProvider)
+                          .when(
                             data: (count) => InkWell(
                               onTap: () {
                                 _showOnlineUsersCard(context, count);
@@ -275,21 +310,25 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: Colors.greenAccent[400],
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.greenAccent[400]!
-                                                .withValues(alpha: 0.5),
-                                            blurRadius: 4,
-                                            spreadRadius: 1,
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                    .withAlpha(128),
+                                                blurRadius: 4,
+                                                spreadRadius: 1,
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    )
+                                        )
                                         .animate(
                                           onPlay: (controller) =>
                                               controller.repeat(),
@@ -314,9 +353,9 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                                           .textTheme
                                           .bodySmall
                                           ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
                                             fontWeight: FontWeight.bold,
                                           ),
                                     ),
@@ -327,9 +366,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                             loading: () => const SizedBox(
                               width: 12,
                               height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                             error: (error, stack) => const SizedBox.shrink(),
                           ),
