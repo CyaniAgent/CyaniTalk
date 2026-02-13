@@ -26,7 +26,7 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 
 ### 🪐 Misskey Integration (The "Dynamic" Layer)
 *   **Real-time Streaming:** Connects to the Misskey WebSocket (`streaming`) to deliver notes, notifications, and messaging instantly.
-*   **Rich Interaction:** Supports posting notes, reactions (Emoji), and basic MFM (Misskey Flavored Markdown) rendering.
+*   **MFM Renderer:** Full Markup Language For Misskey rendering support including emoji, search, links, and more syntax elements.
 *   **Misskey Drive:** A dedicated visual interface for managing cloud files and images.
 *   **AiScript & API:** Support for running basic AiScript interactions and an embedded API Console.
 
@@ -34,6 +34,12 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 *   **Structured Discussions:** Browse tags, discussions, and posts with a clean reading experience.
 *   **Community interaction:** Create discussions, reply to posts, and manage your forum identity.
 *   **Authentication:** Seamless JSON:API based login and token management.
+
+### 🔍 Unified Services
+*   **Global Search:** Unified search across Misskey and Flarum platforms.
+*   **Notification System:** Unified management system supporting multiple notification types.
+*   **Cache Management:** Integrated note and image cache management for improved performance.
+*   **Audio Engine:** Low-latency audio playback powered by `flutter_soloud`.
 
 ### 🛡️ Admin & Power Tools (Admin Only)
 *   **Unified Dashboard:** Detects admin privileges to reveal hidden control panels.
@@ -46,39 +52,46 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 ## 🛠 Tech Stack
 
 *   **Framework:** [Flutter](https://flutter.dev/) (Dart)
-*   **State Management:** [Riverpod](https://riverpod.dev/) (Handling multi-account states).
+*   **State Management:** [Riverpod](https://riverpod.dev/) (with `@riverpod` annotations for type-safety).
 *   **Networking:**
     *   `dio` (REST API calls).
     *   `web_socket_channel` (Misskey Streaming).
-*   **UI Components:** `flutter_adaptive_scaffold` (or custom LayoutBuilder implementation), `flutter_markdown`.
+*   **Routing:** `go_router` with support for Master-Detail views on Desktop.
+*   **Audio:** `flutter_soloud` for high-quality, low-latency audio.
+*   **UI Components:** `flutter_adaptive_scaffold`, custom Material Design 3 theme system.
+*   **Data Models:** `freezed` & `json_serializable`.
 *   **Storage:** `flutter_secure_storage` for credentials, `shared_preferences` for settings.
 
 ---
 
 ## 🗺️ Development Roadmap
 
-### Phase 1: The Responsive Foundation 🚧
-- [ ] Initialize Flutter project.
-- [ ] Implement the **Responsive Shell** (Bottom Nav vs. Nav Rail).
-- [ ] Create skeleton pages for the 5 main tabs.
+### Phase 1: The Responsive Foundation ✅
+- [x] Initialize Flutter project.
+- [x] Implement the **Responsive Shell** (Bottom Nav vs. Nav Rail).
+- [x] Create skeleton pages for the 5 main tabs.
 
-### Phase 2: Authentication & Core Connectivity
-- [ ] Implement **MiAuth** flow for Misskey.
-- [ ] Implement Token retrieval for Flarum.
-- [ ] Create the Unified Login Manager.
+### Phase 2: Authentication & Core Connectivity ✅
+- [x] Implement **MiAuth** flow for Misskey.
+- [x] Implement Token retrieval for Flarum.
+- [x] Create the Unified Login Manager (Misskey, Flarum, WeChat).
 
-### Phase 3: The Real-time Engine
-- [ ] Establish WebSocket connections for Misskey.
-- [ ] Implement global event distribution (Notifications/New Notes).
-- [ ] Build the "Messages" tab aggregation.
+### Phase 3: The Real-time Engine ✅
+- [x] Establish WebSocket connections for Misskey.
+- [x] Implement global event distribution (Notifications/New Notes).
+- [x] Build the "Messages" tab aggregation.
 
-### Phase 4: Content & Creation
-- [ ] **Misskey:** Timeline rendering and Posting interface.
-- [ ] **Flarum:** Discussion list and Thread view.
-- [ ] **Drive:** File grid view and upload functionality.
+### Phase 4: Content & Creation 🚧
+- [x] **Misskey:** Timeline rendering and Posting interface.
+- [x] **MFM Renderer:** Full syntax support.
+- [x] **Flarum:** Discussion list and Thread view.
+- [x] **Drive:** File grid view and upload functionality.
+- [ ] Advanced drafting and rich media uploads.
 
-### Phase 5: Admin Tools & Polish
-- [ ] Build the API Console.
+### Phase 5: Admin Tools & Polish 🚧
+- [x] Build the API Console.
+- [x] Implement Global Search Service.
+- [x] Audio Engine integration.
 - [ ] Implement Admin-only route protection.
 - [ ] Desktop-specific optimizations (keyboard shortcuts, window management).
 
@@ -99,10 +112,15 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
     flutter pub get
     ```
 
-3.  **Run the app:**
+3.  **Code Generation:**
     ```bash
-    # For Mobile（You need Android Platform Tools, and use 'adb devices' to list your mobile's device code.）
-    flutter run -d {your-android-device-code}
+    dart run build_runner build --delete-conflicting-outputs
+    ```
+
+4.  **Run the app:**
+    ```bash
+    # For Mobile
+    flutter run
 
     # For Desktop (macOS/Windows/Linux)
     flutter run -d windows # or macos/linux
@@ -112,7 +130,7 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 
 ## 🤝 Contributing
 
-This project is currently in the **Greenfield** stage. Contributions, especially regarding MFM parsing and Flarum JSON:API handling, are welcome!
+This project is moving towards its first stable release. Contributions, especially regarding UI refinement and Flarum JSON:API edge cases, are welcome!
 
 ## 📄 License
 
