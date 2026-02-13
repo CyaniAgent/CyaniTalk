@@ -12,13 +12,13 @@ class AudioPlayerWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     // 获取音频控制器
     final audioController = ref.watch(audioPlayerControllerProvider(audioUrl));
-    
+
     // 获取当前状态
     final asyncState = ref.watch(audioPlayerStateProvider(audioUrl));
-    
+
     return asyncState.when(
       data: (state) {
         // 监听错误状态

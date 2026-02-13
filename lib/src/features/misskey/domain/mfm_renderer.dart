@@ -25,7 +25,9 @@ class MfmRenderer {
   static final RegExp _mentionRegex = RegExp(r'@([a-zA-Z0-9_]+)');
   static final RegExp _hashtagRegex = RegExp(r'#([^\s]+)');
   static final RegExp _urlRegex = RegExp(r'https?:\/\/[^\s]+');
-  static final RegExp _linkRegex = RegExp(r'\[(.*?)\]\((https?:\/\/[^\s]+)\)');
+  static final RegExp _linkRegex = RegExp(
+    r'\[([^\]]+)\]\((https?:\/\/[^)]+)\)',
+  );
   static final RegExp _smallRegex = RegExp(r'<small>(.*?)<\/small>');
   static final RegExp _quoteRegex = RegExp(r'> (.*?)(?=\n|$)');
   static final RegExp _centerRegex = RegExp(r'<center>(.*?)<\/center>');

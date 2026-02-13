@@ -540,7 +540,8 @@ class MisskeyRepository implements IMisskeyRepository {
       return note;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting note: $noteId', e);
-      rethrow;
+      // 抛出更友好的异常信息，而不是直接 rethrow
+      throw Exception('Failed to get note: ${e.toString()}');
     }
   }
 

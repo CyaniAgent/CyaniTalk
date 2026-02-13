@@ -69,12 +69,12 @@ CyaniTalk 将导航逻辑与内容展示分离，在不同设备上提供符合�
 ### 第一阶段：响应式骨架 ✅
 - [x] 初始化 Flutter 项目。
 - [x] 实现 **响应式外壳** (移动端底栏 vs 桌面端侧栏)。
-- [x] 构建核心单例与基础服务。
 
-### 第二阶段：认证与核心连接 ✅
+### 第二阶段：认证与核心连接
+- [x] 实现 **JuheAuth** (Rust 驱动)。
 - [x] 实现 Misskey 的 **MiAuth** 认证流程。
 - [x] 实现 Flarum 的 Token 获取与登录。
-- [x] 创建统一登录管理器 (支持 Misskey, Flarum, 微信登录)。
+- [x] 创建统一登录管理器 (Unified Login Manager)。
 
 ### 第三阶段：实时流引擎 ✅
 - [x] 建立 Misskey WebSocket 长连接。
@@ -125,6 +125,7 @@ CyaniTalk 将导航逻辑与内容展示分离，在不同设备上提供符合�
     # 桌面端 (macOS/Windows/Linux)
     flutter run -d windows # 或 macos/linux
     ```
+注：更改依赖后需要运行“dart run dart_pubspec_licenses:generate”以更新开源许可证文件。
 
 ---
 

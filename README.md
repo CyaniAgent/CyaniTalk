@@ -66,15 +66,15 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
 
 ## 🗺️ Development Roadmap
 
-### Phase 1: The Responsive Foundation ✅
+### Phase 1: The Responsive Foundation 🚧
 - [x] Initialize Flutter project.
 - [x] Implement the **Responsive Shell** (Bottom Nav vs. Nav Rail).
 - [x] Create skeleton pages for the 5 main tabs.
 
-### Phase 2: Authentication & Core Connectivity ✅
+### Phase 2: Authentication & Core Connectivity
 - [x] Implement **MiAuth** flow for Misskey.
 - [x] Implement Token retrieval for Flarum.
-- [x] Create the Unified Login Manager (Misskey, Flarum, WeChat).
+- [x] Create the Unified Login Manager.
 
 ### Phase 3: The Real-time Engine ✅
 - [x] Establish WebSocket connections for Misskey.
@@ -125,6 +125,7 @@ CyaniTalk decouples the navigation logic from the content to provide an ergonomi
     # For Desktop (macOS/Windows/Linux)
     flutter run -d windows # or macos/linux
     ```
+Note: After changing dependencies, you need to run "dart run dart_pubspec_licenses:generate" to update the open-source license file.
 
 ---
 

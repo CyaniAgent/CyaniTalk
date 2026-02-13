@@ -44,7 +44,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     try {
       // 尝试从缓存加载视频
       final cachedFilePath = await _getCachedVideoPath();
-      
+
       if (cachedFilePath != null) {
         // 使用缓存文件
         logger.info('VideoPlayer: Using cached video file');
@@ -68,13 +68,19 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<String?> _getCachedVideoPath() async {
     try {
       // 检查视频是否已缓存且有效
-      final isCached = await cacheManager.isFileCachedAndValid(widget.videoUrl);
+      final isCached = await cacheManager.isFileCachedAndValid(
+        widget.videoUrl,
+        CacheCategory.other,
+      );
       if (isCached) {
-        return await cacheManager.getCacheFilePath(widget.videoUrl);
+        return await cacheManager.getCacheFilePath(
+          widget.videoUrl,
+          CacheCategory.other,
+        );
       }
-      
+
       // 尝试缓存视频
-      return await cacheManager.cacheFile(widget.videoUrl);
+      return await cacheManager.cacheFile(widget.videoUrl, CacheCategory.other);
     } catch (e) {
       logger.warning('VideoPlayer: Cache error', e);
       return null;
@@ -85,16 +91,16 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   Future<void> _setupController(Uri uri) async {
     // 释放旧控制器
     _controller?.dispose();
-    
+
     // 创建新控制器
     _controller = VideoPlayerController.networkUrl(uri);
-    
+
     // 初始化控制器
     await _controller!.initialize();
-    
+
     // 开始播放
     await _controller!.play();
-    
+
     // 更新状态
     setState(() {
       _isInitialized = true;
@@ -121,7 +127,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
   void _togglePlayPause() {
     if (_controller == null) return;
-    
+
     setState(() {
       if (_controller!.value.isPlaying) {
         _controller!.pause();
@@ -146,9 +152,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         child: Stack(
           children: [
             // Video player
-            Center(
-              child: _buildVideoContent(),
-            ),
+            Center(child: _buildVideoContent()),
             // Controls overlay
             if (_showControls && _isInitialized && _controller != null)
               Positioned.fill(
@@ -206,24 +210,37 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               _controller!,
                               allowScrubbing: true,
                               colors: VideoProgressColors(
-                                playedColor: Theme.of(context).colorScheme.primary,
-                                bufferedColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.3),
-                                backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.12),
+                                playedColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                                bufferedColor: Theme.of(
+                                  context,
+                                ).colorScheme.surface.withValues(alpha: 0.3),
+                                backgroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.surface.withValues(alpha: 0.12),
                               ),
                             ),
                             const SizedBox(height: 8),
                             // Time display
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   _formatDuration(_controller!.value.position),
-                                  style: TextStyle(color: Theme.of(context).colorScheme.surface),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                  ),
                                 ),
                                 Text(
                                   _formatDuration(_controller!.value.duration),
-                                  style: TextStyle(color: Theme.of(context).colorScheme.surface),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                  ),
                                 ),
                               ],
                             ),

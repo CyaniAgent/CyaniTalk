@@ -62,9 +62,19 @@ class MisskeyApi extends BaseApi {
       }
       return false;
     } catch (e) {
-      if (e is DioException && e.response?.statusCode == 404) {
-        logger.debug('MisskeyApi: Note $noteId was deleted (404)');
-        return false;
+      if (e is DioException) {
+        if (e.response?.statusCode == 404) {
+          logger.debug('MisskeyApi: Note $noteId was deleted (404)');
+          return false;
+        } else if (e.response?.statusCode == 400) {
+          final errorMessage = e.response?.data?['error']?['message'] ?? '';
+          if (errorMessage.contains('No such note')) {
+            logger.debug(
+              'MisskeyApi: Note $noteId was deleted (400: No such note)',
+            );
+            return false;
+          }
+        }
       }
       // For other errors, assume the note still exists to avoid false deletions
       logger.warning('MisskeyApi: Error checking note $noteId: $e');
@@ -78,18 +88,33 @@ class MisskeyApi extends BaseApi {
   ///
   /// @param noteId 要获取的笔记 ID
   /// @return 笔记详情的 Map 对象
-  /// @throws DioException 如果请求失败
+  /// @throws Exception 如果请求失败
   Future<Map<String, dynamic>> getNote(String noteId) async {
     if (noteId.isEmpty) throw Exception('noteId cannot be empty');
     logger.debug('MisskeyApi: Getting note: $noteId');
-    return executeApiCall(
-      'MisskeyApi.getNote',
-      () => _dio.post('/api/notes/show', data: {'i': token, 'noteId': noteId}),
-      (response) => Map<String, dynamic>.from(response.data),
-      params: {'noteId': noteId},
-      dioErrorParser: (error) =>
-          error.response?.data?['error']?['message'] ?? error.message,
-    );
+    try {
+      final response = await _dio.post(
+        '/api/notes/show',
+        data: {'i': token, 'noteId': noteId},
+      );
+      return Map<String, dynamic>.from(response.data);
+    } catch (e) {
+      logger.error('MisskeyApi: Error getting note: $noteId', e);
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          final errorMessage =
+              e.response?.data?['error']?['message'] ??
+              'Invalid note ID or parameters';
+          if (errorMessage.contains('No such note')) {
+            throw Exception('Note not found');
+          }
+          throw Exception('Bad request: $errorMessage');
+        } else if (e.response?.statusCode == 404) {
+          throw Exception('Note not found');
+        }
+      }
+      throw Exception('Failed to get note: ${e.toString()}');
+    }
   }
 
   /// 获取云盘使用信息
