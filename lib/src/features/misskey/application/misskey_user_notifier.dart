@@ -14,7 +14,11 @@ class MisskeyUserNotifier extends _$MisskeyUserNotifier {
       final repository = await ref.watch(misskeyRepositoryProvider.future);
       return await repository.showUser(userId);
     } catch (e, stack) {
-      logger.error('MisskeyUserNotifier: Error fetching user $userId', e, stack);
+      logger.error(
+        'MisskeyUserNotifier: Error fetching user $userId',
+        e,
+        stack,
+      );
       rethrow;
     }
   }
@@ -22,14 +26,14 @@ class MisskeyUserNotifier extends _$MisskeyUserNotifier {
   Future<void> refresh() async {
     try {
       if (!ref.mounted) return;
-      
+
       state = const AsyncValue.loading();
-      
+
       final result = await AsyncValue.guard<MisskeyUser>(() async {
         final repository = await ref.read(misskeyRepositoryProvider.future);
         return await repository.showUser(userId);
       });
-      
+
       if (ref.mounted) {
         state = result;
       }

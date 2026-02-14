@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 /// 酱汁字型 (Sauce Typography)
-/// 
+///
 /// 负责定义应用程序的文字排版规范。
 /// 支持跨平台自适应缩放，并针对 Android 进行了微调。
 class SauceTypography {
   /// 创建自适应的 TextTheme
-  /// 
+  ///
   /// [platform] 当前运行的平台
   static TextTheme createTextTheme(TargetPlatform platform) {
     // Android 平台字体略微缩小，以适应较小的屏幕像素密度感

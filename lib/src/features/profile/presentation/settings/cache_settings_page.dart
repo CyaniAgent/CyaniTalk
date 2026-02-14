@@ -354,7 +354,7 @@ class _CacheSettingsPageState extends State<CacheSettingsPage> {
                   title: Text('持久化'),
                   subtitle: Text('音频文件会一直保留，不会自动清理'),
                   value: AudioCacheType.persistent,
-                  groupValue: _audioCacheType,
+                  selected: _audioCacheType == AudioCacheType.persistent,
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {
@@ -367,7 +367,7 @@ class _CacheSettingsPageState extends State<CacheSettingsPage> {
                   title: Text('非持久化'),
                   subtitle: Text('音频文件会根据缓存大小限制自动清理'),
                   value: AudioCacheType.temporary,
-                  groupValue: _audioCacheType,
+                  selected: _audioCacheType == AudioCacheType.temporary,
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {

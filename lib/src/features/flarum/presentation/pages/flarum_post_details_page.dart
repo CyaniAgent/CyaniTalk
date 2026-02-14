@@ -41,8 +41,8 @@ class FlarumPostDetailsPage extends ConsumerWidget {
             Text(
               'flarum_post_details_loading'.tr(),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           ],
         ),

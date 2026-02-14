@@ -9,32 +9,32 @@ library;
 /// 这些常量在整个应用程序中被广泛使用，确保配置的一致性。
 class Constants {
   /// 应用版本号
-  /// 
+  ///
   /// 当前应用程序的版本标识，用于显示和更新检查。
   static const String appVersion = '1.0.0';
 
   /// 默认最大日志文件大小（MB）
-  /// 
+  ///
   /// 单个日志文件的最大大小，超过此大小会创建新的日志文件。
   static const int defaultMaxLogSize = 5;
 
   /// 日志目录名称
-  /// 
+  ///
   /// 日志文件存储的目录名称，位于应用程序的文档目录中。
   static const String logDirectoryName = 'debug';
 
   /// 默认日志文件前缀
-  /// 
+  ///
   /// 日志文件的命名前缀，后续会添加时间戳。
   static const String logFilePrefix = 'CyaniTalk_Console_log';
 
   /// 默认日志级别
-  /// 
+  ///
   /// 应用程序启动时的默认日志级别，可选值包括：debug, info, warning, error
   static const String defaultLogLevel = 'error';
-  
+
   /// 生成用户代理字符串
-  /// 
+  ///
   /// 用于网络请求的User-Agent头，包含应用名称和版本号。
   static String getUserAgent() {
     return 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36 CyaniTalk/$appVersion';

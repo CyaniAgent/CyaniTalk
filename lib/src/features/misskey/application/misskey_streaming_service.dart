@@ -123,9 +123,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       _channel = IOWebSocketChannel.connect(
         uri,
         customClient: client,
-        headers: {
-          'User-Agent': Constants.getUserAgent(),
-        },
+        headers: {'User-Agent': Constants.getUserAgent()},
       );
 
       _updateStatus(StreamingStatus.connected);

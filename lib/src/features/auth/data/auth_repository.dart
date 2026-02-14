@@ -17,7 +17,7 @@ part 'auth_repository.g.dart';
 class AuthRepository {
   /// SharedPreferences实例，用于持久化存储账户信息
   final SharedPreferences _prefs;
-  
+
   /// 存储账户信息的密钥
   static const _kAccountsKey = 'cyani_accounts';
   static const _kSelectedMisskeyIdKey = 'cyani_selected_misskey_id';
@@ -42,7 +42,9 @@ class AuthRepository {
     try {
       final List<dynamic> jsonList = jsonDecode(jsonString);
       final accounts = jsonList.map((e) => Account.fromJson(e)).toList();
-      logger.info('AuthRepository: Successfully retrieved ${accounts.length} accounts');
+      logger.info(
+        'AuthRepository: Successfully retrieved ${accounts.length} accounts',
+      );
       return accounts;
     } catch (e) {
       logger.error('AuthRepository: Error decoding accounts data', e);
@@ -61,7 +63,9 @@ class AuthRepository {
   Future<void> saveSelectedMisskeyId(String id) async {
     logger.info('AuthRepository: Saving selected Misskey account ID: $id');
     await _prefs.setString(_kSelectedMisskeyIdKey, id);
-    logger.info('AuthRepository: Successfully saved selected Misskey account ID');
+    logger.info(
+      'AuthRepository: Successfully saved selected Misskey account ID',
+    );
   }
 
   Future<String?> getSelectedFlarumId() async {
@@ -74,14 +78,18 @@ class AuthRepository {
   Future<void> saveSelectedFlarumId(String id) async {
     logger.info('AuthRepository: Saving selected Flarum account ID: $id');
     await _prefs.setString(_kSelectedFlarumIdKey, id);
-    logger.info('AuthRepository: Successfully saved selected Flarum account ID');
+    logger.info(
+      'AuthRepository: Successfully saved selected Flarum account ID',
+    );
   }
 
   /// 保存或更新账户
   ///
   /// [account] - 要保存的账户实例
   Future<void> saveAccount(Account account) async {
-    logger.info('AuthRepository: Saving account: ${account.id} (${account.platform})');
+    logger.info(
+      'AuthRepository: Saving account: ${account.id} (${account.platform})',
+    );
     final accounts = await getAccounts();
     // 如果存在相同ID的账户，则替换它（更新场景）
     final newAccounts = [...accounts.where((a) => a.id != account.id), account];

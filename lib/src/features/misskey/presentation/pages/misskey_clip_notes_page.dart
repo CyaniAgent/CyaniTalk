@@ -16,7 +16,8 @@ class MisskeyClipNotesPage extends ConsumerStatefulWidget {
   const MisskeyClipNotesPage({super.key, required this.clip});
 
   @override
-  ConsumerState<MisskeyClipNotesPage> createState() => _MisskeyClipNotesPageState();
+  ConsumerState<MisskeyClipNotesPage> createState() =>
+      _MisskeyClipNotesPageState();
 }
 
 class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
@@ -35,7 +36,8 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       ref.read(misskeyClipNotesProvider(widget.clip.id).notifier).loadMore();
     }
   }
@@ -43,12 +45,12 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
   @override
   Widget build(BuildContext context) {
     final notesAsync = ref.watch(misskeyClipNotesProvider(widget.clip.id));
-    final hasMore = ref.watch(misskeyClipNotesProvider(widget.clip.id).notifier).hasMore;
+    final hasMore = ref
+        .watch(misskeyClipNotesProvider(widget.clip.id).notifier)
+        .hasMore;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.clip.name),
-      ),
+      appBar: AppBar(title: Text(widget.clip.name)),
       floatingActionButton: FloatingActionButton(
         heroTag: 'misskey_fab_clip_${widget.clip.id}',
         onPressed: () async {
@@ -69,19 +71,24 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
             );
           } else {
             // 未登录，根据当前语言播放提示音
-            logger.info('MisskeyClipNotesPage: User not logged in, playing prompt sound');
+            logger.info(
+              'MisskeyClipNotesPage: User not logged in, playing prompt sound',
+            );
             final isMounted = mounted;
             final currentContext = context;
             final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
             try {
-              final String soundPath = switch (currentContext.locale.languageCode) {
-                'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
-                'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
-                'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
-                _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
-              };
+              final String soundPath =
+                  switch (currentContext.locale.languageCode) {
+                    'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
+                    'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
+                    'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
+                    _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
+                  };
               await ref.read(audioEngineProvider).playAsset(soundPath);
-              logger.info('MisskeyClipNotesPage: Played login prompt sound: $soundPath');
+              logger.info(
+                'MisskeyClipNotesPage: Played login prompt sound: $soundPath',
+              );
             } catch (e) {
               logger.error('MisskeyClipNotesPage: Error playing sound: $e');
             }
@@ -131,18 +138,18 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 'common_loading_failed'.tr(),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'Error: $err',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () => ref

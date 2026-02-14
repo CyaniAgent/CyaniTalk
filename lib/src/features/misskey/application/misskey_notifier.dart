@@ -268,7 +268,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
           if (errorStr.contains('UnmountedRefException')) {
             break;
           }
-          if (errorStr.contains('404') || errorStr.contains('400') || errorStr.contains('Note not found')) {
+          if (errorStr.contains('404') ||
+              errorStr.contains('400') ||
+              errorStr.contains('Note not found')) {
             // 404 means deleted, 400 often means the ID is invalid for this instance
             // or some other restriction. Note not found is our specific exception for deleted notes.
             // We treat it as something we should remove from UI.

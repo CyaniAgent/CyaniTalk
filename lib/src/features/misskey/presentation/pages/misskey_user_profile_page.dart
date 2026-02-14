@@ -25,7 +25,7 @@ class MisskeyUserProfilePage extends ConsumerWidget {
     return Scaffold(
       body: userAsync.when(
         data: (user) => _buildProfile(context, user, theme),
-        loading: () => initialUser != null 
+        loading: () => initialUser != null
             ? _buildProfile(context, initialUser!, theme, isLoading: true)
             : const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Scaffold(
@@ -36,7 +36,12 @@ class MisskeyUserProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfile(BuildContext context, MisskeyUser user, ThemeData theme, {bool isLoading = false}) {
+  Widget _buildProfile(
+    BuildContext context,
+    MisskeyUser user,
+    ThemeData theme, {
+    bool isLoading = false,
+  }) {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -47,12 +52,11 @@ class MisskeyUserProfilePage extends ConsumerWidget {
               fit: StackFit.expand,
               children: [
                 if (user.bannerUrl != null)
-                  RetryableNetworkImage(
-                    url: user.bannerUrl!,
-                    fit: BoxFit.cover,
-                  )
+                  RetryableNetworkImage(url: user.bannerUrl!, fit: BoxFit.cover)
                 else
-                  Container(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+                  Container(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                  ),
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -70,7 +74,10 @@ class MisskeyUserProfilePage extends ConsumerWidget {
             ),
             title: Text(
               user.name ?? user.username,
-              style: TextStyle(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: theme.colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -91,8 +98,12 @@ class MisskeyUserProfilePage extends ConsumerWidget {
                       ),
                       child: CircleAvatar(
                         radius: 40,
-                        backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-                        child: user.avatarUrl == null ? const Icon(Icons.person, size: 40) : null,
+                        backgroundImage: user.avatarUrl != null
+                            ? NetworkImage(user.avatarUrl!)
+                            : null,
+                        child: user.avatarUrl == null
+                            ? const Icon(Icons.person, size: 40)
+                            : null,
                       ),
                     ),
                     const Spacer(),
@@ -113,13 +124,18 @@ class MisskeyUserProfilePage extends ConsumerWidget {
                   children: [
                     Text(
                       user.name ?? user.username,
-                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       '@${user.username}${user.host != null ? "@${user.host}" : ""}',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
                     ),
-                    if (user.description != null && user.description!.isNotEmpty) ...[
+                    if (user.description != null &&
+                        user.description!.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       LayoutBuilder(
                         builder: (context, constraints) {
@@ -153,21 +169,30 @@ class MisskeyUserProfilePage extends ConsumerWidget {
                             );
                           }
 
-                          return SelectableText(
-                            text,
-                            style: style,
-                          );
+                          return SelectableText(text, style: style);
                         },
                       ),
                     ],
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        _buildStat(context, user.followingCount?.toString() ?? '0', 'user_following'.tr()),
+                        _buildStat(
+                          context,
+                          user.followingCount?.toString() ?? '0',
+                          'user_following'.tr(),
+                        ),
                         const SizedBox(width: 24),
-                        _buildStat(context, user.followersCount?.toString() ?? '0', 'user_followers'.tr()),
+                        _buildStat(
+                          context,
+                          user.followersCount?.toString() ?? '0',
+                          'user_followers'.tr(),
+                        ),
                         const SizedBox(width: 24),
-                        _buildStat(context, user.notesCount?.toString() ?? '0', 'user_notes'.tr()),
+                        _buildStat(
+                          context,
+                          user.notesCount?.toString() ?? '0',
+                          'user_notes'.tr(),
+                        ),
                       ],
                     ),
                     const Divider(height: 32),
@@ -192,87 +217,97 @@ class MisskeyUserProfilePage extends ConsumerWidget {
       children: [
         Text(
           count,
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           label,
-          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.outline,
+          ),
         ),
       ],
-        );
-      }
-    }
-    
-    void _showFullBioCard(BuildContext context, String bio) {
-      showDialog(
-        context: context,
-        builder: (context) => Center(
-          child: Container(
-            margin: const EdgeInsets.all(24),
-            child: Material(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(28),
-              elevation: 10,
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.description_outlined,
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+    );
+  }
+}
+
+void _showFullBioCard(BuildContext context, String bio) {
+  showDialog(
+    context: context,
+    builder: (context) => Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        child:
+            Material(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(28),
+                  elevation: 10,
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'user_details_bio'.tr(),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.description_outlined,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'user_details_bio'.tr(),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(24),
-                      child: SelectableText(
-                        bio,
-                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('post_close'.tr()),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(24),
+                          child: SelectableText(
+                            bio,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('post_close'.tr()),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ).animate().scale(
+                )
+                .animate()
+                .scale(
                   duration: 400.ms,
                   begin: const Offset(0.8, 0.8),
                   curve: Curves.easeOutBack,
-                ).fadeIn(),
-          ),
-        ),
-      );
-    }
-    
+                )
+                .fadeIn(),
+      ),
+    ),
+  );
+}

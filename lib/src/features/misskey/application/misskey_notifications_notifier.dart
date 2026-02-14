@@ -17,7 +17,9 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       final notifications = await repository.getNotifications();
 
       // 监听实时通知
-      final streamingService = ref.watch(misskeyStreamingServiceProvider.notifier);
+      final streamingService = ref.watch(
+        misskeyStreamingServiceProvider.notifier,
+      );
       final subscription = streamingService.notificationStream.listen((event) {
         logger.debug('通知Notifier收到实时通知，准备刷新');
         _handleNewNotification(event);
@@ -37,7 +39,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
   void _handleNewNotification(Map<String, dynamic> event) {
     try {
       if (!ref.mounted) return;
-      
+
       // 目前简单实现为直接刷新
       refresh();
     } catch (e) {
@@ -51,15 +53,17 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
   Future<void> refresh() async {
     try {
       if (!ref.mounted) return;
-      
+
       logger.info('刷新Misskey通知列表');
       state = const AsyncValue.loading();
-      
-      final result = await AsyncValue.guard<List<MisskeyNotification>>(() async {
-        final repository = await ref.read(misskeyRepositoryProvider.future);
-        return await repository.getNotifications();
-      });
-      
+
+      final result = await AsyncValue.guard<List<MisskeyNotification>>(
+        () async {
+          final repository = await ref.read(misskeyRepositoryProvider.future);
+          return await repository.getNotifications();
+        },
+      );
+
       if (ref.mounted) {
         state = result;
       }
@@ -81,17 +85,19 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       final lastId = currentNotifications.last.id;
       logger.info('加载更多Misskey通知，起始ID: $lastId');
 
-      final result = await AsyncValue.guard<List<MisskeyNotification>>(() async {
-        final repository = await ref.read(misskeyRepositoryProvider.future);
-        final newNotifications = await repository.getNotifications(
-          untilId: lastId,
-        );
+      final result = await AsyncValue.guard<List<MisskeyNotification>>(
+        () async {
+          final repository = await ref.read(misskeyRepositoryProvider.future);
+          final newNotifications = await repository.getNotifications(
+            untilId: lastId,
+          );
 
-        if (!ref.mounted) return currentNotifications;
+          if (!ref.mounted) return currentNotifications;
 
-        return [...currentNotifications, ...newNotifications];
-      });
-      
+          return [...currentNotifications, ...newNotifications];
+        },
+      );
+
       if (ref.mounted) {
         state = result;
       }

@@ -40,7 +40,9 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       if (file != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('settings_logs_export_success'.tr(namedArgs: {'path': file.path})),
+            content: Text(
+              'settings_logs_export_success'.tr(namedArgs: {'path': file.path}),
+            ),
           ),
         );
       } else {
@@ -64,7 +66,9 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: Text('accounts_remove_confirm_button'.tr()),
           ),
         ],
@@ -106,11 +110,11 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
               title: Text('settings_logs_auto_clear'.tr()),
               subtitle: Text('settings_logs_auto_clear_desc'.tr()),
               value: config.autoClear,
-              onChanged: (value) => ref.read(logSettingsProvider.notifier).setAutoClear(value),
+              onChanged: (value) =>
+                  ref.read(logSettingsProvider.notifier).setAutoClear(value),
             ),
-            if (config.autoClear)
-              _buildRetentionTile(context, config),
-            
+            if (config.autoClear) _buildRetentionTile(context, config),
+
             const Divider(),
             _buildSectionHeader(context, 'settings_logs_section_history'.tr()),
             ListTile(
@@ -124,18 +128,33 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
               onTap: _exportLogs,
             ),
             ListTile(
-              leading: Icon(Icons.delete_sweep_outlined, color: Theme.of(context).colorScheme.error),
-              title: Text('settings_logs_delete_all'.tr(), 
-                style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              leading: Icon(
+                Icons.delete_sweep_outlined,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              title: Text(
+                'settings_logs_delete_all'.tr(),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               onTap: _deleteAllLogs,
             ),
 
             const Divider(),
             _buildSectionHeader(context, 'settings_logs_file_list'.tr()),
             if (_isLoading)
-              const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                ),
+              )
             else if (_logFiles.isEmpty)
-              Center(child: Padding(padding: const EdgeInsets.all(32), child: Text('settings_logs_empty'.tr())))
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text('settings_logs_empty'.tr()),
+                ),
+              )
             else
               ..._logFiles.map((file) => _buildFileTile(context, file)),
           ],
@@ -165,9 +184,11 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       subtitle: Text('settings_logs_level_desc'.tr()),
       trailing: DropdownButton<String>(
         value: config.logLevel.toLowerCase(),
-        items: ['debug', 'info', 'warning', 'error'].map((l) => 
-          DropdownMenuItem(value: l, child: Text(l.toUpperCase()))
-        ).toList(),
+        items: ['debug', 'info', 'warning', 'error']
+            .map(
+              (l) => DropdownMenuItem(value: l, child: Text(l.toUpperCase())),
+            )
+            .toList(),
         onChanged: (value) {
           if (value != null) {
             ref.read(logSettingsProvider.notifier).setLogLevel(value);
@@ -209,7 +230,9 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           keyboardType: TextInputType.number,
           textAlign: TextAlign.end,
           decoration: const InputDecoration(suffixText: ' Days'),
-          controller: TextEditingController(text: config.retentionDays.toString()),
+          controller: TextEditingController(
+            text: config.retentionDays.toString(),
+          ),
           onSubmitted: (value) {
             final days = int.tryParse(value);
             if (days != null && days > 0) {
@@ -222,10 +245,12 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
   }
 
   Widget _buildFileTile(BuildContext context, File file) {
-    final fileNameWithSuffix =
-        file.path.split(Platform.isWindows ? r'\' : '/').last;
-    final fileName =
-        fileNameWithSuffix.replaceAll('.log', '').replaceAll('.txt', '');
+    final fileNameWithSuffix = file.path
+        .split(Platform.isWindows ? r'\' : '/')
+        .last;
+    final fileName = fileNameWithSuffix
+        .replaceAll('.log', '')
+        .replaceAll('.txt', '');
 
     final stat = file.statSync();
     final size = (stat.size / 1024).toStringAsFixed(1);
@@ -272,10 +297,12 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     final content = await file.readAsLines();
     if (!context.mounted) return;
 
-    final fileNameWithSuffix =
-        file.path.split(Platform.isWindows ? r'\' : '/').last;
-    final fileName =
-        fileNameWithSuffix.replaceAll('.log', '').replaceAll('.txt', '');
+    final fileNameWithSuffix = file.path
+        .split(Platform.isWindows ? r'\' : '/')
+        .last;
+    final fileName = fileNameWithSuffix
+        .replaceAll('.log', '')
+        .replaceAll('.txt', '');
 
     Navigator.push(
       context,
@@ -287,7 +314,9 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
               IconButton(
                 icon: const Icon(Icons.copy_all),
                 onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: content.join('\n')));
+                  await Clipboard.setData(
+                    ClipboardData(text: content.join('\n')),
+                  );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Copied to clipboard')),
@@ -321,7 +350,9 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     if (upperLine.contains('[E]') || upperLine.contains('ERROR')) {
       color = Colors.redAccent;
       weight = FontWeight.bold;
-    } else if (upperLine.contains('[W]') || upperLine.contains('WARN') || upperLine.contains('WARNING')) {
+    } else if (upperLine.contains('[W]') ||
+        upperLine.contains('WARN') ||
+        upperLine.contains('WARNING')) {
       color = Colors.orangeAccent;
       weight = FontWeight.bold;
     } else if (upperLine.contains('[I]') || upperLine.contains('INFO')) {

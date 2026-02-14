@@ -17,10 +17,12 @@ class MisskeyChannelDetailsPage extends ConsumerStatefulWidget {
   const MisskeyChannelDetailsPage({super.key, required this.channel});
 
   @override
-  ConsumerState<MisskeyChannelDetailsPage> createState() => _MisskeyChannelDetailsPageState();
+  ConsumerState<MisskeyChannelDetailsPage> createState() =>
+      _MisskeyChannelDetailsPageState();
 }
 
-class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetailsPage> {
+class _MisskeyChannelDetailsPageState
+    extends ConsumerState<MisskeyChannelDetailsPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -36,14 +38,19 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
-      ref.read(misskeyChannelTimelineProvider(widget.channel.id).notifier).loadMore();
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref
+          .read(misskeyChannelTimelineProvider(widget.channel.id).notifier)
+          .loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final timelineAsync = ref.watch(misskeyChannelTimelineProvider(widget.channel.id));
+    final timelineAsync = ref.watch(
+      misskeyChannelTimelineProvider(widget.channel.id),
+    );
 
     // 监听跳转信号
     ref.listen(timelineJumpProvider(widget.channel.id), (previous, next) {
@@ -56,19 +63,20 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
           );
-          ref.read(timelineJumpProvider(widget.channel.id).notifier).state = null;
+          ref.read(timelineJumpProvider(widget.channel.id).notifier).state =
+              null;
         }
       }
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.channel.name),
-      ),
+      appBar: AppBar(title: Text(widget.channel.name)),
       floatingActionButton: FloatingActionButton(
         heroTag: 'misskey_fab_channel_${widget.channel.id}',
         onPressed: () async {
-          logger.info('MisskeyChannelDetailsPage: Floating action button pressed');
+          logger.info(
+            'MisskeyChannelDetailsPage: Floating action button pressed',
+          );
           // 检查是否已登录 Misskey
           final authState = ref.read(authServiceProvider);
           final hasMisskeyAccount = authState.maybeWhen(
@@ -78,28 +86,38 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
 
           if (hasMisskeyAccount) {
             // 已登录，打开发布窗口，并传入当前频道ID
-            logger.info('MisskeyChannelDetailsPage: Opening post dialog for channel ${widget.channel.id}');
+            logger.info(
+              'MisskeyChannelDetailsPage: Opening post dialog for channel ${widget.channel.id}',
+            );
             showDialog(
               context: context,
-              builder: (context) => MisskeyPostPage(channelId: widget.channel.id),
+              builder: (context) =>
+                  MisskeyPostPage(channelId: widget.channel.id),
             );
           } else {
             // 未登录，根据当前语言播放提示音
-            logger.info('MisskeyChannelDetailsPage: User not logged in, playing prompt sound');
+            logger.info(
+              'MisskeyChannelDetailsPage: User not logged in, playing prompt sound',
+            );
             final isMounted = mounted;
             final currentContext = context;
             final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
             try {
-              final String soundPath = switch (currentContext.locale.languageCode) {
-                'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
-                'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
-                'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
-                _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
-              };
+              final String soundPath =
+                  switch (currentContext.locale.languageCode) {
+                    'zh' => 'sounds/SpeechNoti/PleaseLogin-zh.wav',
+                    'en' => 'sounds/SpeechNoti/PleaseLogin-en.wav',
+                    'ja' => 'sounds/SpeechNoti/PleaseLogin-ja.wav',
+                    _ => 'sounds/SpeechNoti/PleaseLogin-default.wav',
+                  };
               await ref.read(audioEngineProvider).playAsset(soundPath);
-              logger.info('MisskeyChannelDetailsPage: Played login prompt sound: $soundPath');
+              logger.info(
+                'MisskeyChannelDetailsPage: Played login prompt sound: $soundPath',
+              );
             } catch (e) {
-              logger.error('MisskeyChannelDetailsPage: Error playing sound: $e');
+              logger.error(
+                'MisskeyChannelDetailsPage: Error playing sound: $e',
+              );
             }
 
             if (isMounted) {
@@ -120,11 +138,15 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
       body: timelineAsync.when(
         data: (notes) {
           if (notes.isEmpty) {
-            return Center(child: Text('channel_details_no_notes_in_this_channel'.tr()));
+            return Center(
+              child: Text('channel_details_no_notes_in_this_channel'.tr()),
+            );
           }
           return RefreshIndicator(
             onRefresh: () => ref
-                .read(misskeyChannelTimelineProvider(widget.channel.id).notifier)
+                .read(
+                  misskeyChannelTimelineProvider(widget.channel.id).notifier,
+                )
                 .refresh(),
             child: ListView.builder(
               controller: _scrollController,
@@ -156,22 +178,26 @@ class _MisskeyChannelDetailsPageState extends ConsumerState<MisskeyChannelDetail
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(
                 'common_loading_failed'.tr(),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'Error: $err',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () => ref
-                    .read(misskeyChannelTimelineProvider(widget.channel.id).notifier)
+                    .read(
+                      misskeyChannelTimelineProvider(
+                        widget.channel.id,
+                      ).notifier,
+                    )
                     .refresh(),
                 icon: const Icon(Icons.refresh),
                 label: Text('common_reload'.tr()),

@@ -61,9 +61,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   @override
   Widget build(BuildContext context) {
     final query = _searchController.text;
-    final misskeyUsers = _results.where((r) => r.source == 'misskey' && r.type == 'User').toList();
-    final misskeyNotes = _results.where((r) => r.source == 'misskey' && r.type == 'Note').toList();
-    final flarumDiscussions = _results.where((r) => r.source == 'flarum' && r.type == 'Discussion').toList();
+    final misskeyUsers = _results
+        .where((r) => r.source == 'misskey' && r.type == 'User')
+        .toList();
+    final misskeyNotes = _results
+        .where((r) => r.source == 'misskey' && r.type == 'Note')
+        .toList();
+    final flarumDiscussions = _results
+        .where((r) => r.source == 'flarum' && r.type == 'Discussion')
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -107,15 +113,30 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           : ListView(
               children: [
                 if (misskeyUsers.isNotEmpty) ...[
-                  _buildSectionHeader(context, 'search_misskey_users_related'.tr(namedArgs: {'search_result': query})),
+                  _buildSectionHeader(
+                    context,
+                    'search_misskey_users_related'.tr(
+                      namedArgs: {'search_result': query},
+                    ),
+                  ),
                   ...misskeyUsers.map((r) => _buildResultTile(context, r)),
                 ],
                 if (misskeyNotes.isNotEmpty) ...[
-                  _buildSectionHeader(context, 'search_misskey_posts_related'.tr(namedArgs: {'search_result': query})),
+                  _buildSectionHeader(
+                    context,
+                    'search_misskey_posts_related'.tr(
+                      namedArgs: {'search_result': query},
+                    ),
+                  ),
                   ...misskeyNotes.map((r) => _buildResultTile(context, r)),
                 ],
                 if (flarumDiscussions.isNotEmpty) ...[
-                  _buildSectionHeader(context, 'search_flarum_discussions_related'.tr(namedArgs: {'search_result': query})),
+                  _buildSectionHeader(
+                    context,
+                    'search_flarum_discussions_related'.tr(
+                      namedArgs: {'search_result': query},
+                    ),
+                  ),
                   ...flarumDiscussions.map((r) => _buildResultTile(context, r)),
                 ],
               ],
@@ -139,8 +160,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Widget _buildResultTile(BuildContext context, SearchResult result) {
     if (result.isDisabledMessage) {
       return ListTile(
-        leading: Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.error),
-      tileColor: Theme.of(context).colorScheme.surfaceContainerLow,
+        leading: Icon(
+          Icons.warning_amber_rounded,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        tileColor: Theme.of(context).colorScheme.surfaceContainerLow,
         title: Text(result.title),
         subtitle: Text('search_feature_disabled_hint'.tr()),
       );
@@ -149,7 +173,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final sourceText = result.source == 'misskey'
         ? 'search_source_misskey'.tr()
         : 'search_source_flarum'.tr();
-    
+
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
@@ -160,7 +184,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
-          result.source == 'misskey' ? (result.type == 'User' ? Icons.person : Icons.public) : Icons.forum,
+          result.source == 'misskey'
+              ? (result.type == 'User' ? Icons.person : Icons.public)
+              : Icons.forum,
           size: 20,
           color: result.source == 'misskey'
               ? Theme.of(context).colorScheme.onPrimaryContainer
@@ -168,9 +194,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ),
       ),
       title: Text(result.title),
-      subtitle: Text(
-        '$sourceText • ${result.type}\n${result.subtitle}',
-      ),
+      subtitle: Text('$sourceText • ${result.type}\n${result.subtitle}'),
       isThreeLine: true,
       onTap: () {
         logger.info('SearchPage: 选择搜索结果: ${result.title}');

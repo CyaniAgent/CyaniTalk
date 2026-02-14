@@ -168,8 +168,10 @@ class AppLogger {
     }
 
     if (directory == null) throw Exception('无法获取存储目录');
-    
-    final debugDir = Directory('${directory.path}/${Constants.logDirectoryName}');
+
+    final debugDir = Directory(
+      '${directory.path}/${Constants.logDirectoryName}',
+    );
     if (!debugDir.existsSync()) {
       debugDir.createSync(recursive: true);
     }
@@ -296,7 +298,7 @@ class AppLogger {
       // Android 平台：/storage/emulated/0/Download/CyaniTalk Logs
       return Directory('/storage/emulated/0/Download/CyaniTalk Logs');
     }
-    
+
     // 其他平台默认使用内部日志目录
     return await _getLogDirectory();
   }

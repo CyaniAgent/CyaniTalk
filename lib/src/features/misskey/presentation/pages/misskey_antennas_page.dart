@@ -10,9 +10,18 @@ class MisskeyAntennasPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.satellite_alt_outlined, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
+          Icon(
+            Icons.satellite_alt_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
           const SizedBox(height: 16),
-          Text('misskey_antennas_none'.tr(), style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+          Text(
+            'misskey_antennas_none'.tr(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
         ],
       ),
     );

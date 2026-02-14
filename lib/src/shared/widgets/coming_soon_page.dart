@@ -10,7 +10,7 @@ class ComingSoonPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -29,16 +29,11 @@ class ComingSoonPage extends ConsumerWidget {
         fit: StackFit.expand,
         children: [
           // Background Image
-          Image.asset(
-            'assets/images/coming-soon-bg.png',
-            fit: BoxFit.cover,
-          ),
-          
+          Image.asset('assets/images/coming-soon-bg.png', fit: BoxFit.cover),
+
           // Dark overlay for better text readability
-          Container(
-            color: Colors.black.withValues(alpha: 0.4),
-          ),
-          
+          Container(color: Colors.black.withValues(alpha: 0.4)),
+
           // Content
           Center(
             child: Column(

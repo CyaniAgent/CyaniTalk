@@ -26,11 +26,15 @@ class SoundSettings {
     bool? enableMisskeyMessages,
   }) {
     return SoundSettings(
-      enableMisskeyRealtimePost: enableMisskeyRealtimePost ?? this.enableMisskeyRealtimePost,
+      enableMisskeyRealtimePost:
+          enableMisskeyRealtimePost ?? this.enableMisskeyRealtimePost,
       enableMisskeyPosting: enableMisskeyPosting ?? this.enableMisskeyPosting,
-      enableMisskeyNotifications: enableMisskeyNotifications ?? this.enableMisskeyNotifications,
-      enableMisskeyEmojiReactions: enableMisskeyEmojiReactions ?? this.enableMisskeyEmojiReactions,
-      enableMisskeyMessages: enableMisskeyMessages ?? this.enableMisskeyMessages,
+      enableMisskeyNotifications:
+          enableMisskeyNotifications ?? this.enableMisskeyNotifications,
+      enableMisskeyEmojiReactions:
+          enableMisskeyEmojiReactions ?? this.enableMisskeyEmojiReactions,
+      enableMisskeyMessages:
+          enableMisskeyMessages ?? this.enableMisskeyMessages,
     );
   }
 }
@@ -50,7 +54,8 @@ class SoundSettingsNotifier extends _$SoundSettingsNotifier {
       enableMisskeyRealtimePost: prefs.getBool(_kMisskeyRealtimePost) ?? true,
       enableMisskeyPosting: prefs.getBool(_kMisskeyPosting) ?? true,
       enableMisskeyNotifications: prefs.getBool(_kMisskeyNotifications) ?? true,
-      enableMisskeyEmojiReactions: prefs.getBool(_kMisskeyEmojiReactions) ?? true,
+      enableMisskeyEmojiReactions:
+          prefs.getBool(_kMisskeyEmojiReactions) ?? true,
       enableMisskeyMessages: prefs.getBool(_kMisskeyMessages) ?? true,
     );
   }
@@ -76,7 +81,9 @@ class SoundSettingsNotifier extends _$SoundSettingsNotifier {
   Future<void> toggleMisskeyEmojiReactions(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kMisskeyEmojiReactions, value);
-    state = AsyncData(state.value!.copyWith(enableMisskeyEmojiReactions: value));
+    state = AsyncData(
+      state.value!.copyWith(enableMisskeyEmojiReactions: value),
+    );
   }
 
   Future<void> toggleMisskeyMessages(bool value) async {

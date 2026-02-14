@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/logger.dart';
 
 /// 全局音频引擎服务
-/// 
+///
 /// 使用 audioplayers 提供音频播放能力
 class AudioEngine {
   final Map<String, AudioPlayer> _players = {};
@@ -14,19 +14,19 @@ class AudioEngine {
   /// 初始化音频引擎
   Future<void> initialize() async {
     // 设置全局音频上下文，解决 Android 上的通道/流类型警告
-    AudioPlayer.global.setAudioContext(AudioContext(
-      android: AudioContextAndroid(
-        usageType: AndroidUsageType.notificationEvent,
-        contentType: AndroidContentType.sonification,
-        audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+    AudioPlayer.global.setAudioContext(
+      AudioContext(
+        android: AudioContextAndroid(
+          usageType: AndroidUsageType.notificationEvent,
+          contentType: AndroidContentType.sonification,
+          audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: {AVAudioSessionOptions.duckOthers},
+        ),
       ),
-      iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.playback,
-        options: {
-          AVAudioSessionOptions.duckOthers,
-        },
-      ),
-    ));
+    );
 
     _isInitialized = true;
     logger.info('AudioEngine: Initialized (audioplayers)');
@@ -42,7 +42,7 @@ class AudioEngine {
       await player.setVolume(volume);
       // audioplayers expects asset path without 'assets/' prefix if using AssetSource
       await player.play(AssetSource(assetPath));
-      
+
       // We should dispose the player after it finishes playing
       player.onPlayerComplete.listen((event) {
         player.dispose();

@@ -61,7 +61,7 @@ class GlobalSearch extends _$GlobalSearch {
     try {
       final misskeyRepo = await ref.read(misskeyRepositoryProvider.future);
       final meta = await misskeyRepo.getMeta();
-      
+
       // Check if search features are enabled
       // In Misskey, policies are usually in /api/i (getMe) or sometimes in meta
       // We'll check both meta and assume enabled if not explicitly disabled
@@ -70,13 +70,15 @@ class GlobalSearch extends _$GlobalSearch {
       final canSearchNotes = policies?['canSearchNotes'] ?? true;
 
       if (!canSearchUsers) {
-        results.add(SearchResult(
-          title: 'search_misskey_users_disabled'.tr(),
-          subtitle: '',
-          source: 'misskey',
-          type: 'User',
-          isDisabledMessage: true,
-        ));
+        results.add(
+          SearchResult(
+            title: 'search_misskey_users_disabled'.tr(),
+            subtitle: '',
+            source: 'misskey',
+            type: 'User',
+            isDisabledMessage: true,
+          ),
+        );
       } else {
         final users = await misskeyRepo.searchUsers(query, limit: 5);
         results.addAll(
@@ -93,13 +95,15 @@ class GlobalSearch extends _$GlobalSearch {
       }
 
       if (!canSearchNotes) {
-        results.add(SearchResult(
-          title: 'search_misskey_posts_disabled'.tr(),
-          subtitle: '',
-          source: 'misskey',
-          type: 'Note',
-          isDisabledMessage: true,
-        ));
+        results.add(
+          SearchResult(
+            title: 'search_misskey_posts_disabled'.tr(),
+            subtitle: '',
+            source: 'misskey',
+            type: 'Note',
+            isDisabledMessage: true,
+          ),
+        );
       } else {
         final notes = await misskeyRepo.searchNotes(query, limit: 5);
         results.addAll(

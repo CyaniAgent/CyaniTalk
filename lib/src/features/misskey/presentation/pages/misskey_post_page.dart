@@ -86,9 +86,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
           _buildToolBar(context),
           const Divider(height: 1),
           Expanded(
-            child: SingleChildScrollView(
-              child: _buildInputArea(context),
-            ),
+            child: SingleChildScrollView(child: _buildInputArea(context)),
           ),
           const Divider(height: 1),
           _buildAttachmentBar(context),
@@ -112,9 +110,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               _buildDesktopHeader(context),
               const Divider(height: 1),
               Flexible(
-                child: SingleChildScrollView(
-                  child: _buildInputArea(context),
-                ),
+                child: SingleChildScrollView(child: _buildInputArea(context)),
               ),
               const Divider(height: 1),
               _buildAttachmentBar(context),
@@ -169,8 +165,14 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
           ),
           itemBuilder: (context) => [
             PopupMenuItem(value: 'drafts', child: Text('post_drafts'.tr())),
-            PopupMenuItem(value: 'scheduled', child: Text('post_scheduled_posts'.tr())),
-            PopupMenuItem(value: 'switch', child: Text('post_switch_account'.tr())),
+            PopupMenuItem(
+              value: 'scheduled',
+              child: Text('post_scheduled_posts'.tr()),
+            ),
+            PopupMenuItem(
+              value: 'switch',
+              child: Text('post_switch_account'.tr()),
+            ),
           ],
         ),
         // 可见性设置
@@ -179,10 +181,22 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
           icon: Icon(_getVisibilityIcon(_visibility), size: 20),
           onSelected: (value) => setState(() => _visibility = value),
           itemBuilder: (context) => [
-            PopupMenuItem(value: 'public', child: Text('post_visibility_public'.tr())),
-            PopupMenuItem(value: 'home', child: Text('post_visibility_home'.tr())),
-            PopupMenuItem(value: 'followers', child: Text('post_visibility_followers'.tr())),
-            PopupMenuItem(value: 'direct', child: Text('post_visibility_direct'.tr())),
+            PopupMenuItem(
+              value: 'public',
+              child: Text('post_visibility_public'.tr()),
+            ),
+            PopupMenuItem(
+              value: 'home',
+              child: Text('post_visibility_home'.tr()),
+            ),
+            PopupMenuItem(
+              value: 'followers',
+              child: Text('post_visibility_followers'.tr()),
+            ),
+            PopupMenuItem(
+              value: 'direct',
+              child: Text('post_visibility_direct'.tr()),
+            ),
           ],
         ),
         // 仅本地可见
@@ -205,9 +219,13 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               child: Row(
                 children: [
                   Icon(
-                    _showPreview ? Icons.check_box : Icons.check_box_outline_blank,
+                    _showPreview
+                        ? Icons.check_box
+                        : Icons.check_box_outline_blank,
                     size: 18,
-                    color: _showPreview ? Theme.of(context).colorScheme.primary : null,
+                    color: _showPreview
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
                   ),
                   const SizedBox(width: 8),
                   Text('post_preview'.tr()),
@@ -271,10 +289,14 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: Column(
@@ -282,9 +304,11 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.visibility_outlined, 
-                   size: 14, 
-                   color: Theme.of(context).colorScheme.primary),
+              Icon(
+                Icons.visibility_outlined,
+                size: 14,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               const SizedBox(width: 6),
               Text(
                 'post_preview'.tr(),
@@ -314,10 +338,19 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
-          _buildAttachIcon(Icons.image_outlined, 'post_insert_attachment_from_local'.tr()),
-          _buildAttachIcon(Icons.cloud_queue, 'post_insert_attachment_from_cloud'.tr()),
+          _buildAttachIcon(
+            Icons.image_outlined,
+            'post_insert_attachment_from_local'.tr(),
+          ),
+          _buildAttachIcon(
+            Icons.cloud_queue,
+            'post_insert_attachment_from_cloud'.tr(),
+          ),
           _buildAttachIcon(Icons.poll_outlined, 'post_poll'.tr()),
-          _buildAttachIcon(Icons.visibility_off_outlined, 'post_hide_content'.tr()),
+          _buildAttachIcon(
+            Icons.visibility_off_outlined,
+            'post_hide_content'.tr(),
+          ),
           _buildAttachIcon(Icons.tag, 'post_tags'.tr()),
           _buildAttachIcon(Icons.alternate_email, 'post_mention'.tr()),
           _buildAttachIcon(Icons.emoji_emotions_outlined, 'post_emoji'.tr()),
@@ -351,16 +384,16 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('post_post_created'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('post_post_created'.tr())));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -371,11 +404,15 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
   IconData _getVisibilityIcon(String visibility) {
     switch (visibility) {
-      case 'home': return Icons.home;
-      case 'followers': return Icons.lock_open;
-      case 'direct': return Icons.mail;
+      case 'home':
+        return Icons.home;
+      case 'followers':
+        return Icons.lock_open;
+      case 'direct':
+        return Icons.mail;
       case 'public':
-      default: return Icons.public;
+      default:
+        return Icons.public;
     }
   }
 }

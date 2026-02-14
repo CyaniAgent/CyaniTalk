@@ -13,7 +13,8 @@ class MisskeyChannelsPage extends ConsumerStatefulWidget {
   const MisskeyChannelsPage({super.key});
 
   @override
-  ConsumerState<MisskeyChannelsPage> createState() => _MisskeyChannelsPageState();
+  ConsumerState<MisskeyChannelsPage> createState() =>
+      _MisskeyChannelsPageState();
 }
 
 class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
@@ -71,15 +72,9 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
             : Text('misskey_page_channels'.tr()),
         actions: [
           if (_isSearching)
-            IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: _stopSearch,
-            )
+            IconButton(icon: const Icon(Icons.close), onPressed: _stopSearch)
           else
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: _startSearch,
-            ),
+            IconButton(icon: const Icon(Icons.search), onPressed: _startSearch),
         ],
         bottom: _isSearching
             ? null
@@ -112,7 +107,8 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
   }
 
   Widget _buildChannelGrid(MisskeyChannelListType type, {String? query}) {
-    if (type == MisskeyChannelListType.search && (query == null || query.isEmpty)) {
+    if (type == MisskeyChannelListType.search &&
+        (query == null || query.isEmpty)) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -129,7 +125,9 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
       );
     }
 
-    final channelsAsync = ref.watch(misskeyChannelsProvider(type: type, query: query));
+    final channelsAsync = ref.watch(
+      misskeyChannelsProvider(type: type, query: query),
+    );
 
     return channelsAsync.when(
       data: (channels) {
@@ -149,7 +147,9 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
 
             return RefreshIndicator(
               onRefresh: () => ref
-                  .read(misskeyChannelsProvider(type: type, query: query).notifier)
+                  .read(
+                    misskeyChannelsProvider(type: type, query: query).notifier,
+                  )
                   .refresh(),
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -162,9 +162,16 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
                 itemCount: channels.length,
                 itemBuilder: (context, index) {
                   if (index == channels.length - 1) {
-                    Future.microtask(() => ref
-                        .read(misskeyChannelsProvider(type: type, query: query).notifier)
-                        .loadMore());
+                    Future.microtask(
+                      () => ref
+                          .read(
+                            misskeyChannelsProvider(
+                              type: type,
+                              query: query,
+                            ).notifier,
+                          )
+                          .loadMore(),
+                    );
                   }
                   final channel = channels[index];
                   return _buildChannelCard(context, channel);
@@ -179,22 +186,24 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.red,
-            ),
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'common_loading_failed'.tr(),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              'Error: $err',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => ref
-                  .read(misskeyChannelsProvider(type: type, query: query).notifier)
+                  .read(
+                    misskeyChannelsProvider(type: type, query: query).notifier,
+                  )
                   .refresh(),
               icon: const Icon(Icons.refresh),
               label: Text('common_reload'.tr()),
@@ -283,7 +292,10 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                  vertical: 8.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -321,7 +333,12 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
     );
   }
 
-  Widget _buildStat(BuildContext context, IconData icon, String value, Color color) {
+  Widget _buildStat(
+    BuildContext context,
+    IconData icon,
+    String value,
+    Color color,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -330,9 +347,9 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
         Text(
           value,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

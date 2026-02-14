@@ -70,7 +70,8 @@ class NotificationService {
     if (Platform.isAndroid) {
       final androidImplementation = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       if (androidImplementation != null) {
         const channel = AndroidNotificationChannel(
           'cyanitalk_general_channel',

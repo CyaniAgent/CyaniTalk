@@ -76,10 +76,12 @@ abstract class BaseApi {
       operationName,
       () async {
         int retryCount = 0;
-        
+
         while (true) {
           try {
-            logger.info('$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)');
+            logger.info(
+              '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
+            );
             final response = await apiCall();
             return handleResponse(
               response,
@@ -92,12 +94,14 @@ abstract class BaseApi {
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;
                 final delay = retryDelay * (retryCount * retryCount); // 指数退避
-                logger.warning('$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}');
+                logger.warning(
+                  '$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
+                );
                 await Future.delayed(delay);
                 continue;
               }
             }
-            
+
             if (e is Exception) rethrow;
             throw handleError(e, operationName, dioErrorParser: dioErrorParser);
           }
@@ -109,17 +113,18 @@ abstract class BaseApi {
       useDeduplication: useDeduplication,
     );
   }
-  
+
   /// 检查错误是否可重试
   bool _isRetryableError(DioException error) {
     return error.type == DioExceptionType.connectionTimeout ||
-           error.type == DioExceptionType.sendTimeout ||
-           error.type == DioExceptionType.receiveTimeout ||
-           error.type == DioExceptionType.connectionError ||
-           error.type == DioExceptionType.unknown ||
-           (error.response?.statusCode != null && 
-            (error.response!.statusCode! >= 500 || 
-             error.response!.statusCode == 429)); // 500+ 错误或 429 (Too Many Requests)
+        error.type == DioExceptionType.sendTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.unknown ||
+        (error.response?.statusCode != null &&
+            (error.response!.statusCode! >= 500 ||
+                error.response!.statusCode ==
+                    429)); // 500+ 错误或 429 (Too Many Requests)
   }
 
   /// Similar to executeApiCall but for operations that don't return data (void operations)
@@ -136,10 +141,12 @@ abstract class BaseApi {
       operationName,
       () async {
         int retryCount = 0;
-        
+
         while (true) {
           try {
-            logger.info('$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)');
+            logger.info(
+              '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
+            );
             final response = await apiCall();
             handleResponse(response, operationName);
             return null;
@@ -149,12 +156,14 @@ abstract class BaseApi {
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;
                 final delay = retryDelay * (retryCount * retryCount); // 指数退避
-                logger.warning('$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}');
+                logger.warning(
+                  '$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
+                );
                 await Future.delayed(delay);
                 continue;
               }
             }
-            
+
             if (e is Exception) rethrow;
             throw handleError(e, operationName, dioErrorParser: dioErrorParser);
           }
