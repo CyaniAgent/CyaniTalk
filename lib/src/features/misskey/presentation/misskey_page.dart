@@ -380,20 +380,6 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
               snap: true,
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.widgets_outlined),
-                  tooltip: 'misskey_page_widgets'.tr(),
-                  onPressed: () {
-                    logger.info('MisskeyPage: Widgets button pressed');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'misskey_page_misskey_widgets_opened'.tr(),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                IconButton(
                   icon: const Icon(Icons.search),
                   tooltip: 'misskey_page_global_search'.tr(),
                   onPressed: () {
