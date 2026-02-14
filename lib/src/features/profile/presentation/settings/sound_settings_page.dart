@@ -31,7 +31,8 @@ class SoundSettingsPage extends ConsumerWidget {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyRealtimePost(value),
-              onPreview: () => _playSound(ref, 'assets/sounds/PostReceived/n-aec.mp3'),
+              onPreview: () =>
+                  _playSound(ref, 'assets/sounds/PostReceived/n-aec.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -41,7 +42,8 @@ class SoundSettingsPage extends ConsumerWidget {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyPosting(value),
-              onPreview: () => _playSound(ref, 'assets/sounds/PostSend/n-cea-4va.mp3'),
+              onPreview: () =>
+                  _playSound(ref, 'assets/sounds/PostSend/n-cea-4va.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -51,7 +53,8 @@ class SoundSettingsPage extends ConsumerWidget {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyNotifications(value),
-              onPreview: () => _playSound(ref, 'assets/sounds/Notifications/n-ea.mp3'),
+              onPreview: () =>
+                  _playSound(ref, 'assets/sounds/Notifications/n-ea.mp3'),
             ),
             _buildSoundTile(
               context,
@@ -61,7 +64,8 @@ class SoundSettingsPage extends ConsumerWidget {
               onChanged: (value) => ref
                   .read(soundSettingsProvider.notifier)
                   .toggleMisskeyEmojiReactions(value),
-              onPreview: () => _playSound(ref, 'assets/sounds/Emoji-Responses/bubble2.mp3'),
+              onPreview: () =>
+                  _playSound(ref, 'assets/sounds/Emoji-Responses/bubble2.mp3'),
             ),
             _buildSoundTile(
               context,

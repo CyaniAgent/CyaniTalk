@@ -78,7 +78,7 @@ class NavigationSettingsConfig {
   };
 
   /// 获取导航项的图标
-  /// 
+  ///
   /// @param itemId 导航项ID
   /// @return 对应的图标
   static IconData getIconForItem(String itemId) {
@@ -86,7 +86,7 @@ class NavigationSettingsConfig {
   }
 
   /// 获取导航项的选中图标
-  /// 
+  ///
   /// @param itemId 导航项ID
   /// @return 对应的选中图标
   static IconData getSelectedIconForItem(String itemId) {
@@ -94,7 +94,7 @@ class NavigationSettingsConfig {
   }
 
   /// 获取导航项的标题键
-  /// 
+  ///
   /// @param itemId 导航项ID
   /// @return 对应的标题键
   static String getTitleKeyForItem(String itemId) {
@@ -102,7 +102,7 @@ class NavigationSettingsConfig {
   }
 
   /// 检查导航项是否可移除
-  /// 
+  ///
   /// @param itemId 导航项ID
   /// @return 是否可移除
   static bool isItemRemovable(String itemId) {

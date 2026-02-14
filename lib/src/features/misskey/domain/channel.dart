@@ -3,13 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'channel.freezed.dart';
 part 'channel.g.dart';
 
-enum MisskeyChannelListType {
-  featured,
-  favorites,
-  following,
-  managing,
-  search,
-}
+enum MisskeyChannelListType { featured, favorites, following, managing, search }
 
 @freezed
 abstract class Channel with _$Channel {
@@ -32,5 +26,6 @@ abstract class Channel with _$Channel {
     bool? isFavorited,
   }) = _Channel;
 
-  factory Channel.fromJson(Map<String, dynamic> json) => _$ChannelFromJson(json);
+  factory Channel.fromJson(Map<String, dynamic> json) =>
+      _$ChannelFromJson(json);
 }

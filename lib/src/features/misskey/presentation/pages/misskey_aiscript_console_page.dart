@@ -172,15 +172,9 @@ class _MisskeyAiScriptConsolePageState
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          flex: 1,
-          child: _buildCodeInput(),
-        ),
+        Expanded(flex: 1, child: _buildCodeInput()),
         const SizedBox(width: 16),
-        Expanded(
-          flex: 1,
-          child: _buildConsoleOutput(),
-        ),
+        Expanded(flex: 1, child: _buildConsoleOutput()),
       ],
     );
   }
@@ -189,15 +183,9 @@ class _MisskeyAiScriptConsolePageState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          flex: 1,
-          child: _buildCodeInput(),
-        ),
+        Expanded(flex: 1, child: _buildCodeInput()),
         const SizedBox(height: 16),
-        Expanded(
-          flex: 1,
-          child: _buildConsoleOutput(),
-        ),
+        Expanded(flex: 1, child: _buildConsoleOutput()),
       ],
     );
   }
@@ -212,9 +200,9 @@ class _MisskeyAiScriptConsolePageState
             const SizedBox(width: 8),
             Text(
               'Editor',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -254,9 +242,9 @@ class _MisskeyAiScriptConsolePageState
             const SizedBox(width: 8),
             Text(
               'Output',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),

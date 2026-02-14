@@ -39,8 +39,9 @@ class NotificationSettingsPage extends ConsumerWidget {
                         child: Text(
                           'settings_notif_mobile_only'.tr(),
                           style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
                           ),
                         ),
                       ),
@@ -74,8 +75,8 @@ class NotificationSettingsPage extends ConsumerWidget {
               onChanged: isDesktop
                   ? null
                   : (value) => ref
-                      .read(notificationSettingsProvider.notifier)
-                      .toggleMisskeyRealtimePost(value),
+                        .read(notificationSettingsProvider.notifier)
+                        .toggleMisskeyRealtimePost(value),
             ),
             SwitchListTile(
               secondary: const Icon(Icons.message_outlined),
@@ -85,8 +86,8 @@ class NotificationSettingsPage extends ConsumerWidget {
               onChanged: isDesktop
                   ? null
                   : (value) => ref
-                      .read(notificationSettingsProvider.notifier)
-                      .toggleMisskeyMessages(value),
+                        .read(notificationSettingsProvider.notifier)
+                        .toggleMisskeyMessages(value),
             ),
             const Divider(),
             _buildSectionHeader(context, 'Flarum'),
@@ -98,8 +99,8 @@ class NotificationSettingsPage extends ConsumerWidget {
               onChanged: isDesktop
                   ? null
                   : (value) => ref
-                      .read(notificationSettingsProvider.notifier)
-                      .toggleFlarumNotifications(value),
+                        .read(notificationSettingsProvider.notifier)
+                        .toggleFlarumNotifications(value),
             ),
           ],
         ),

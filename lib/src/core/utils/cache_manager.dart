@@ -7,30 +7,57 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core.dart';
 
 /// 缓存类别枚举
+///
+/// 用于区分不同类型的缓存，以便进行针对性的管理和清理。
 enum CacheCategory {
-  audio, // 音频缓存
-  image, // 图片缓存
-  other, // 其他缓存
+  /// 音频缓存，用于存储音频文件
+  audio,
+
+  /// 图片缓存，用于存储图片文件
+  image,
+
+  /// 其他缓存，用于存储其他类型的文件
+  other,
 }
 
 /// 缓存优先级枚举
+///
+/// 用于标识缓存项的优先级，影响缓存清理的顺序。
 enum CachePriority {
-  high, // 高优先级，例如用户正在查看的内容
-  medium, // 中优先级，例如用户可能很快会查看的内容
-  low, // 低优先级，例如后台预加载的内容
+  /// 高优先级，例如用户正在查看的内容
+  high,
+
+  /// 中优先级，例如用户可能很快会查看的内容
+  medium,
+
+  /// 低优先级，例如后台预加载的内容
+  low,
 }
 
 /// 音频缓存类型枚举
+///
+/// 用于指定音频文件的缓存策略。
 enum AudioCacheType {
-  persistent, // 持久化缓存，不会自动清理
-  temporary, // 非持久化缓存，会自动清理
+  /// 持久化缓存，音频文件会一直保留，不会自动清理
+  persistent,
+
+  /// 非持久化缓存，音频文件会根据缓存大小限制自动清理
+  temporary,
 }
 
 /// 文件锁类，用于同步文件操作
+///
+/// 确保同一时间只有一个操作可以访问指定的文件或资源，
+/// 防止并发访问导致的文件损坏或数据不一致。
 class _FileLock {
+  /// 存储文件锁的映射，键为文件标识符，值为对应的Completer
   final Map<String, Completer<void>> _locks = {};
 
   /// 获取文件锁
+  ///
+  /// 如果锁已存在，会等待其释放后再获取。
+  ///
+  /// @param key 文件或资源的唯一标识符
   Future<void> lock(String key) async {
     // 如果锁已存在，等待其释放
     while (_locks.containsKey(key)) {
@@ -42,6 +69,8 @@ class _FileLock {
   }
 
   /// 释放文件锁
+  ///
+  /// @param key 文件或资源的唯一标识符
   void unlock(String key) {
     if (_locks.containsKey(key)) {
       _locks[key]!.complete();
@@ -50,6 +79,12 @@ class _FileLock {
   }
 
   /// 执行带锁的操作
+  ///
+  /// 在获取锁后执行操作，操作完成后自动释放锁。
+  ///
+  /// @param key 文件或资源的唯一标识符
+  /// @param operation 需要在锁定状态下执行的异步操作
+  /// @return 操作的返回值
   Future<T> withLock<T>(String key, Future<T> Function() operation) async {
     await lock(key);
     try {
@@ -61,15 +96,39 @@ class _FileLock {
 }
 
 /// 缓存项信息类
+///
+/// 用于存储单个缓存项的详细信息，包括名称、路径、大小、修改时间等。
 class CacheItem {
+  /// 缓存项的名称
   final String name;
+
+  /// 缓存项的文件路径
   final String path;
+
+  /// 缓存项的大小（字节）
   final int size;
+
+  /// 缓存项的最后修改时间
   final DateTime modified;
+
+  /// 缓存项的类别
   final CacheCategory category;
-  final AudioCacheType? audioCacheType; // 仅音频缓存使用
+
+  /// 音频缓存类型，仅音频缓存使用
+  final AudioCacheType? audioCacheType;
+
+  /// 缓存项是否可以被清理
   final bool canBeCleared;
 
+  /// 创建缓存项信息
+  ///
+  /// @param name 缓存项的名称
+  /// @param path 缓存项的文件路径
+  /// @param size 缓存项的大小（字节）
+  /// @param modified 缓存项的最后修改时间
+  /// @param category 缓存项的类别
+  /// @param audioCacheType 音频缓存类型，仅音频缓存使用
+  /// @param canBeCleared 缓存项是否可以被清理，默认为true
   CacheItem({
     required this.name,
     required this.path,
@@ -80,6 +139,9 @@ class CacheItem {
     this.canBeCleared = true,
   });
 
+  /// 将缓存项信息转换为Map
+  ///
+  /// @return 包含缓存项信息的Map
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -92,6 +154,10 @@ class CacheItem {
     };
   }
 
+  /// 从Map创建缓存项信息
+  ///
+  /// @param map 包含缓存项信息的Map
+  /// @return 缓存项信息对象
   factory CacheItem.fromMap(Map<String, dynamic> map) {
     AudioCacheType? audioCacheType;
     if (map['audioCacheType'] != null) {
@@ -120,10 +186,20 @@ class CacheItem {
 }
 
 /// 统一缓存管理器，用于处理不同类型的缓存
+///
+/// 提供了缓存目录管理、缓存大小控制、文件下载与缓存等功能，
+/// 支持不同类型缓存的分类管理和自动清理。
 class CacheManager {
+  /// 缓存目录名称
   static const String _cacheDirName = 'CyaniTalk Cached Files';
+
+  /// 首选项键：缓存目录路径
   static const String _prefKey = 'cache_directory_path';
+
+  /// 首选项键：最大缓存大小
   static const String _maxCacheSizeKey = 'max_cache_size';
+
+  /// 首选项键前缀：类别最大大小
   static const String _categoryMaxSizeKey = 'category_max_size_';
 
   /// 用于同步文件操作的锁
@@ -139,6 +215,12 @@ class CacheManager {
   static const Duration downloadTimeout = Duration(seconds: 30);
 
   /// 获取缓存目录
+  ///
+  /// 首先尝试从首选项中获取保存的缓存目录路径，
+  /// 如果不存在或路径无效，则使用默认路径（下载目录下的CyaniTalk Cached Files文件夹）。
+  ///
+  /// @return 缓存目录的Directory对象
+  /// @throws Exception 如果无法获取缓存目录
   Future<Directory> getCacheDirectory() async {
     final prefs = await SharedPreferences.getInstance();
     final savedPath = prefs.getString(_prefKey);
@@ -163,6 +245,11 @@ class CacheManager {
   }
 
   /// 获取指定类别的缓存子目录
+  ///
+  /// 根据缓存类别获取对应的子目录，如果目录不存在则创建。
+  ///
+  /// @param category 缓存类别
+  /// @return 对应类别的缓存子目录
   Future<Directory> getCategoryCacheDirectory(CacheCategory category) async {
     final cacheDir = await getCacheDirectory();
     final categoryDir = Directory('${cacheDir.path}/${category.name}');
@@ -173,6 +260,10 @@ class CacheManager {
   }
 
   /// 设置自定义缓存目录
+  ///
+  /// 设置用户指定的缓存目录路径，并在路径不存在时创建目录。
+  ///
+  /// @param path 自定义缓存目录的路径
   Future<void> setCustomCacheDirectory(String path) async {
     final dir = Directory(path);
     if (!await dir.exists()) {
@@ -184,12 +275,20 @@ class CacheManager {
   }
 
   /// 获取最大缓存大小
+  ///
+  /// 从首选项中获取最大缓存大小，如果未设置则返回默认值（100MB）。
+  ///
+  /// @return 最大缓存大小（字节）
   Future<int> getMaxCacheSize() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_maxCacheSizeKey) ?? defaultMaxCacheSize;
   }
 
   /// 设置最大缓存大小
+  ///
+  /// 设置缓存的最大大小限制，并在设置后检查并清理超出限制的缓存。
+  ///
+  /// @param sizeInBytes 最大缓存大小（字节）
   Future<void> setMaxCacheSize(int sizeInBytes) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_maxCacheSizeKey, sizeInBytes);

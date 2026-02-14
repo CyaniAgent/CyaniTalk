@@ -15,11 +15,15 @@ class MisskeyNotificationsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('notifications_title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'notifications_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(misskeyNotificationsProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(misskeyNotificationsProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -30,7 +34,11 @@ class MisskeyNotificationsPage extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_none, size: 64, color: theme.colorScheme.outlineVariant),
+                  Icon(
+                    Icons.notifications_none,
+                    size: 64,
+                    color: theme.colorScheme.outlineVariant,
+                  ),
                   const SizedBox(height: 16),
                   Text('search_no_results'.tr()),
                 ],
@@ -39,7 +47,8 @@ class MisskeyNotificationsPage extends ConsumerWidget {
           }
 
           return RefreshIndicator(
-            onRefresh: () => ref.read(misskeyNotificationsProvider.notifier).refresh(),
+            onRefresh: () =>
+                ref.read(misskeyNotificationsProvider.notifier).refresh(),
             child: ListView.separated(
               itemCount: notifications.length,
               separatorBuilder: (context, index) => const SizedBox(height: 4),
@@ -76,10 +85,15 @@ class MisskeyNotificationsPage extends ConsumerWidget {
                 style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text('Error: $err', textAlign: TextAlign.center, style: theme.textTheme.bodySmall),
+              Text(
+                'Error: $err',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall,
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () => ref.read(misskeyNotificationsProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(misskeyNotificationsProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),
                 label: Text('common_reload'.tr()),
               ),
@@ -90,29 +104,32 @@ class MisskeyNotificationsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildNotificationTile(BuildContext context, MisskeyNotification notification) {
+  Widget _buildNotificationTile(
+    BuildContext context,
+    MisskeyNotification notification,
+  ) {
     final theme = Theme.of(context);
     IconData iconData = Icons.notifications;
     Color iconColor = theme.colorScheme.primary;
 
     switch (notification.type) {
-      case 'follow': 
+      case 'follow':
         iconData = Icons.person_add;
         iconColor = theme.colorScheme.primary;
         break;
-      case 'mention': 
+      case 'mention':
         iconData = Icons.alternate_email;
         iconColor = theme.colorScheme.secondary;
         break;
-      case 'reply': 
+      case 'reply':
         iconData = Icons.reply;
         iconColor = theme.colorScheme.tertiary;
         break;
-      case 'renote': 
+      case 'renote':
         iconData = Icons.repeat;
         iconColor = theme.colorScheme.surfaceTint;
         break;
-      case 'reaction': 
+      case 'reaction':
         iconData = Icons.add_reaction;
         iconColor = theme.colorScheme.error;
         break;
@@ -123,14 +140,22 @@ class MisskeyNotificationsPage extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundImage: notification.user?.avatarUrl != null ? NetworkImage(notification.user!.avatarUrl!) : null,
-            child: notification.user?.avatarUrl == null ? const Icon(Icons.person) : null,
+            backgroundImage: notification.user?.avatarUrl != null
+                ? NetworkImage(notification.user!.avatarUrl!)
+                : null,
+            child: notification.user?.avatarUrl == null
+                ? const Icon(Icons.person)
+                : null,
           ),
           Positioned(
-            right: 0, bottom: 0,
+            right: 0,
+            bottom: 0,
             child: Container(
               padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(color: theme.colorScheme.surface, shape: BoxShape.circle),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                shape: BoxShape.circle,
+              ),
               child: Icon(iconData, size: 12, color: iconColor),
             ),
           ),
@@ -138,10 +163,14 @@ class MisskeyNotificationsPage extends ConsumerWidget {
       ),
       title: Text(
         _getNotificationText(notification),
-        maxLines: 2, overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 14),
       ),
-      subtitle: Text(timeago.format(notification.createdAt), style: theme.textTheme.bodySmall),
+      subtitle: Text(
+        timeago.format(notification.createdAt),
+        style: theme.textTheme.bodySmall,
+      ),
       onTap: () {
         // Handle notification tap
       },

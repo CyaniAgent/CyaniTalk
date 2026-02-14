@@ -74,21 +74,31 @@ class AudioPlayerController {
 
   /// 初始化监听器
   void _initListeners() {
-    _subscriptions.add(_audioPlayer.onPositionChanged.listen((pos) {
-      _setState(_state.copyWith(position: pos));
-    }));
+    _subscriptions.add(
+      _audioPlayer.onPositionChanged.listen((pos) {
+        _setState(_state.copyWith(position: pos));
+      }),
+    );
 
-    _subscriptions.add(_audioPlayer.onDurationChanged.listen((dur) {
-      _setState(_state.copyWith(duration: dur));
-    }));
+    _subscriptions.add(
+      _audioPlayer.onDurationChanged.listen((dur) {
+        _setState(_state.copyWith(duration: dur));
+      }),
+    );
 
-    _subscriptions.add(_audioPlayer.onPlayerStateChanged.listen((playerState) {
-      _setState(_state.copyWith(isPlaying: playerState == PlayerState.playing));
-    }));
+    _subscriptions.add(
+      _audioPlayer.onPlayerStateChanged.listen((playerState) {
+        _setState(
+          _state.copyWith(isPlaying: playerState == PlayerState.playing),
+        );
+      }),
+    );
 
-    _subscriptions.add(_audioPlayer.onPlayerComplete.listen((event) {
-      _setState(_state.copyWith(isPlaying: false, position: Duration.zero));
-    }));
+    _subscriptions.add(
+      _audioPlayer.onPlayerComplete.listen((event) {
+        _setState(_state.copyWith(isPlaying: false, position: Duration.zero));
+      }),
+    );
   }
 
   /// 切换播放/暂停状态
@@ -107,10 +117,7 @@ class AudioPlayerController {
     } catch (e) {
       logger.error('AudioPlayerController: Error toggling play/pause: $e');
       _setState(
-        _state.copyWith(
-          isLoading: false,
-          error: 'Failed to play audio: $e',
-        ),
+        _state.copyWith(isLoading: false, error: 'Failed to play audio: $e'),
       );
     }
   }
@@ -132,35 +139,37 @@ class AudioPlayerController {
 }
 
 /// 音频播放器控制器提供者
-final audioPlayerControllerProvider = Provider.family<AudioPlayerController, String>((ref, audioUrl) {
-  final controller = AudioPlayerController(audioUrl);
-  
-  ref.onDispose(() {
-    controller.dispose();
-  });
-  
-  return controller;
-});
+final audioPlayerControllerProvider =
+    Provider.family<AudioPlayerController, String>((ref, audioUrl) {
+      final controller = AudioPlayerController(audioUrl);
+
+      ref.onDispose(() {
+        controller.dispose();
+      });
+
+      return controller;
+    });
 
 /// 音频播放器状态提供者
-final audioPlayerStateProvider = StreamProvider.family<AudioPlayerState, String>((ref, audioUrl) async* {
-  final controller = ref.watch(audioPlayerControllerProvider(audioUrl));
-  
-  final streamController = StreamController<AudioPlayerState>();
-  
-  controller.onStateChanged = (state) {
-    if (!streamController.isClosed) {
-      streamController.add(state);
-    }
-  };
-  
-  yield controller.state;
-  
-  await for (final state in streamController.stream) {
-    yield state;
-  }
-  
-  ref.onDispose(() {
-    streamController.close();
-  });
-});
+final audioPlayerStateProvider =
+    StreamProvider.family<AudioPlayerState, String>((ref, audioUrl) async* {
+      final controller = ref.watch(audioPlayerControllerProvider(audioUrl));
+
+      final streamController = StreamController<AudioPlayerState>();
+
+      controller.onStateChanged = (state) {
+        if (!streamController.isClosed) {
+          streamController.add(state);
+        }
+      };
+
+      yield controller.state;
+
+      await for (final state in streamController.stream) {
+        yield state;
+      }
+
+      ref.onDispose(() {
+        streamController.close();
+      });
+    });

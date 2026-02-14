@@ -59,7 +59,7 @@ class UserNavigationHeader extends ConsumerWidget {
       );
     }
 
-    Widget content = Container(
+    return Container(
       margin: isDrawer ? const EdgeInsets.fromLTRB(12, 48, 12, 8) : const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
@@ -111,15 +111,6 @@ class UserNavigationHeader extends ConsumerWidget {
         ],
       ),
     );
-
-    if (!isDrawer) {
-      return ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 256),
-        child: content,
-      );
-    }
-
-    return content;
   }
 
   String _getUserName(

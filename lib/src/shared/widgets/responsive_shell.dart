@@ -27,12 +27,9 @@ class ResponsiveShell extends ConsumerWidget {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
 
     return navigationSettingsAsync.when(
-      loading: () => const Scaffold(
-        body: SizedBox.shrink(),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(child: Text('Error: $error')),
-      ),
+      loading: () => const Scaffold(body: SizedBox.shrink()),
+      error: (error, stack) =>
+          Scaffold(body: Center(child: Text('Error: $error'))),
       data: (navigationSettings) {
         // 过滤启用的导航项 (Excluding 'me' as it's in the header)
         final rootItems = navigationSettings.items
@@ -53,9 +50,11 @@ class ResponsiveShell extends ConsumerWidget {
           navigationShell.currentIndex,
           navigationSettings,
         );
-        
+
         // Explicitly check if we are on the 'me' branch
-        final bool isMeSelected = navigationShell.currentIndex == NavigationService.getBranchIndexForItem('me');
+        final bool isMeSelected =
+            navigationShell.currentIndex ==
+            NavigationService.getBranchIndexForItem('me');
 
         if (isMeSelected || selectedRootIndex >= rootItems.length) {
           selectedRootIndex = -1; // Header handled selection
@@ -63,20 +62,27 @@ class ResponsiveShell extends ConsumerWidget {
 
         return Scaffold(
           key: rootScaffoldKey,
-          drawer: isSmall
-              ? RootNavigationDrawer(
-                  selectedRootIndex: selectedRootIndex,
-                  onRootSelected: (index) => _onRootSelected(index, navigationSettings),
-                )
-              : null,
+          drawer:
+              isSmall
+                  ? RootNavigationDrawer(
+                    selectedRootIndex: selectedRootIndex,
+                    onRootSelected:
+                        (index) => _onRootSelected(index, navigationSettings),
+                  )
+                  : null,
           body: Row(
             children: [
               if (!isSmall)
-                _buildSidebar(context, ref, selectedRootIndex, rootItems, isLarge, navigationSettings),
+                _buildSidebar(
+                  context,
+                  ref,
+                  selectedRootIndex,
+                  rootItems,
+                  isLarge,
+                  navigationSettings,
+                ),
               const VerticalDivider(thickness: 1, width: 1),
-              Expanded(
-                child: navigationShell,
-              ),
+              Expanded(child: navigationShell),
             ],
           ),
         );
@@ -93,7 +99,7 @@ class ResponsiveShell extends ConsumerWidget {
     dynamic navigationSettings,
   ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       width: isLarge ? 256 : 80,
       color: theme.colorScheme.surface,
@@ -116,7 +122,15 @@ class ResponsiveShell extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               children: [
                 for (int i = 0; i < rootItems.length; i++) ...[
-                  _buildRootSidebarItem(context, ref, rootItems[i], i, selectedRootIndex, isLarge, navigationSettings),
+                  _buildRootSidebarItem(
+                    context,
+                    ref,
+                    rootItems[i],
+                    i,
+                    selectedRootIndex,
+                    isLarge,
+                    navigationSettings,
+                  ),
                 ],
               ],
             ),
@@ -148,34 +162,48 @@ class ResponsiveShell extends ConsumerWidget {
             height: 56,
             padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
             decoration: BoxDecoration(
-              color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+              color:
+                  isSelected
+                      ? theme.colorScheme.secondaryContainer
+                      : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: isLarge
-                ? Row(
-                    children: [
-                      Icon(
-                        isSelected ? item.selectedIcon : item.icon,
-                        color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style: TextStyle(
-                            color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            child:
+                isLarge
+                    ? Row(
+                      children: [
+                        Icon(
+                          isSelected ? item.selectedIcon : item.icon,
+                          color:
+                              isSelected
+                                  ? theme.colorScheme.onSecondaryContainer
+                                  : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            item.title,
+                            style: TextStyle(
+                              color:
+                                  isSelected
+                                      ? theme.colorScheme.onSecondaryContainer
+                                      : theme.colorScheme.onSurfaceVariant,
+                              fontWeight:
+                                  isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
                           ),
                         ),
+                      ],
+                    )
+                    : Center(
+                      child: Icon(
+                        isSelected ? item.selectedIcon : item.icon,
+                        color:
+                            isSelected
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurfaceVariant,
                       ),
-                    ],
-                  )
-                : Center(
-                    child: Icon(
-                      isSelected ? item.selectedIcon : item.icon,
-                      color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
                     ),
-                  ),
           ),
         ),
         ClipRect(
@@ -183,9 +211,10 @@ class ResponsiveShell extends ConsumerWidget {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child: isSelected 
-                ? _buildSidebarSubNavigation(context, ref, item.id, isLarge)
-                : const SizedBox(width: double.infinity, height: 0),
+            child:
+                isSelected
+                    ? _buildSidebarSubNavigation(context, ref, item.id, isLarge)
+                    : const SizedBox(width: double.infinity, height: 0),
           ),
         ),
         const SizedBox(height: 4),
@@ -193,7 +222,12 @@ class ResponsiveShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildSidebarSubNavigation(BuildContext context, WidgetRef ref, String rootId, bool isLarge) {
+  Widget _buildSidebarSubNavigation(
+    BuildContext context,
+    WidgetRef ref,
+    String rootId,
+    bool isLarge,
+  ) {
     if (rootId == 'misskey') {
       return _buildMisskeySidebarSubs(context, ref, isLarge);
     } else if (rootId == 'flarum') {
@@ -202,15 +236,25 @@ class ResponsiveShell extends ConsumerWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _buildMisskeySidebarSubs(BuildContext context, WidgetRef ref, bool isLarge) {
+  Widget _buildMisskeySidebarSubs(
+    BuildContext context,
+    WidgetRef ref,
+    bool isLarge,
+  ) {
     final selectedSub = ref.watch(misskeySubIndexProvider);
     final subs = [
       {'icon': Icons.timeline, 'label': 'misskey_drawer_timeline'.tr()},
-      {'icon': Icons.collections_bookmark, 'label': 'misskey_drawer_clips'.tr()},
+      {
+        'icon': Icons.collections_bookmark,
+        'label': 'misskey_drawer_clips'.tr(),
+      },
       {'icon': Icons.satellite_alt, 'label': 'misskey_drawer_antennas'.tr()},
       {'icon': Icons.hub, 'label': 'misskey_drawer_channels'.tr()},
       {'icon': Icons.explore, 'label': 'misskey_drawer_explore'.tr()},
-      {'icon': Icons.person_add, 'label': 'misskey_drawer_follow_requests'.tr()},
+      {
+        'icon': Icons.person_add,
+        'label': 'misskey_drawer_follow_requests'.tr(),
+      },
       {'icon': Icons.campaign, 'label': 'misskey_drawer_announcements'.tr()},
       {'icon': Icons.terminal, 'label': 'misskey_drawer_aiscript_console'.tr()},
     ];
@@ -233,12 +277,19 @@ class ResponsiveShell extends ConsumerWidget {
     );
   }
 
-  Widget _buildForumSidebarSubs(BuildContext context, WidgetRef ref, bool isLarge) {
+  Widget _buildForumSidebarSubs(
+    BuildContext context,
+    WidgetRef ref,
+    bool isLarge,
+  ) {
     final selectedSub = ref.watch(forumSubIndexProvider);
     final subs = [
       {'icon': Icons.forum, 'label': 'flarum_drawer_discussions'.tr()},
       {'icon': Icons.label, 'label': 'flarum_drawer_tags'.tr()},
-      {'icon': Icons.notifications, 'label': 'flarum_drawer_notifications'.tr()},
+      {
+        'icon': Icons.notifications,
+        'label': 'flarum_drawer_notifications'.tr(),
+      },
     ];
 
     return Padding(
@@ -277,37 +328,51 @@ class ResponsiveShell extends ConsumerWidget {
           height: 40,
           padding: EdgeInsets.symmetric(horizontal: isLarge ? 12 : 0),
           decoration: BoxDecoration(
-            color: isSelected ? theme.colorScheme.surfaceContainerHighest : Colors.transparent,
+            color:
+                isSelected
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: isLarge
-              ? Row(
-                  children: [
-                    Icon(
+          child:
+              isLarge
+                  ? Row(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 18,
+                        color:
+                            isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color:
+                                isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  )
+                  : Center(
+                    child: Icon(
                       icon,
                       size: 18,
-                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                      color:
+                          isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                )
-              : Center(
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                   ),
-                ),
         ),
       ),
     );

@@ -84,16 +84,29 @@ class _VerificationWindowState extends State<VerificationWindow> {
 
   void _startCookieCheck() {
     _cookieTimer?.cancel();
-    _cookieTimer = Timer.periodic(const Duration(milliseconds: 1000), (timer) async {
+    _cookieTimer = Timer.periodic(const Duration(milliseconds: 1000), (
+      timer,
+    ) async {
       try {
         String? cookiesString;
         if (_isWindows) {
           if (!_windowsController.value.isInitialized) return;
-          cookiesString = await _windowsController.executeScript('document.cookie');
+          cookiesString = await _windowsController.executeScript(
+            'document.cookie',
+          );
         } else {
-          cookiesString = await _mobileController.runJavaScriptReturningResult('document.cookie') as String?;
-          if (cookiesString != null && cookiesString.startsWith('"') && cookiesString.endsWith('"')) {
-            cookiesString = cookiesString.substring(1, cookiesString.length - 1);
+          cookiesString =
+              await _mobileController.runJavaScriptReturningResult(
+                    'document.cookie',
+                  )
+                  as String?;
+          if (cookiesString != null &&
+              cookiesString.startsWith('"') &&
+              cookiesString.endsWith('"')) {
+            cookiesString = cookiesString.substring(
+              1,
+              cookiesString.length - 1,
+            );
           }
         }
 
@@ -165,8 +178,8 @@ class _VerificationWindowState extends State<VerificationWindow> {
               Expanded(
                 child: _isWebviewInitialized
                     ? (_isWindows
-                        ? windows.Webview(_windowsController)
-                        : mobile.WebViewWidget(controller: _mobileController))
+                          ? windows.Webview(_windowsController)
+                          : mobile.WebViewWidget(controller: _mobileController))
                     : const Center(child: CircularProgressIndicator()),
               ),
             ],

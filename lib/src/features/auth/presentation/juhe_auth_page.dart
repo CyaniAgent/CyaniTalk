@@ -38,7 +38,9 @@ class _JuheAuthPageState extends State<JuheAuthPage> {
         _setupController();
       } else {
         if (mounted) {
-          Navigator.pop(context, {'error': result['msg'] ?? 'Failed to get login URL'});
+          Navigator.pop(context, {
+            'error': result['msg'] ?? 'Failed to get login URL',
+          });
         }
       }
     } catch (e) {
@@ -105,7 +107,9 @@ class _JuheAuthPageState extends State<JuheAuthPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.type == 'qq' ? 'auth_login_qq'.tr() : 'auth_login_wechat'.tr()),
+        title: Text(
+          widget.type == 'qq' ? 'auth_login_qq'.tr() : 'auth_login_wechat'.tr(),
+        ),
       ),
       body: Stack(
         children: [
@@ -113,8 +117,7 @@ class _JuheAuthPageState extends State<JuheAuthPage> {
             WebViewWidget(controller: _controller)
           else
             const Center(child: CircularProgressIndicator()),
-          if (_loading)
-            const Center(child: CircularProgressIndicator()),
+          if (_loading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

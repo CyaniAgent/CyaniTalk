@@ -406,17 +406,13 @@ class FlarumApi extends BaseApi {
     () => get(
       '/api/discussions',
       queryParameters: {
-        'page[limit]':? limit,
-        'page[offset]':? offset,
-        'include':? include,
+        'page[limit]': ?limit,
+        'page[offset]': ?offset,
+        'include': ?include,
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
-    params: {
-      'limit': limit,
-      'offset': offset,
-      'include': include,
-    },
+    params: {'limit': limit, 'offset': offset, 'include': include},
   );
 
   /// 搜索讨论
@@ -430,17 +426,13 @@ class FlarumApi extends BaseApi {
       '/api/discussions',
       queryParameters: {
         'filter[q]': query,
-        'page[limit]':? limit,
-        'page[offset]':? offset,
+        'page[limit]': ?limit,
+        'page[offset]': ?offset,
         'include': 'user,lastPostedUser,tags',
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
-    params: {
-      'query': query,
-      'limit': limit,
-      'offset': offset,
-    },
+    params: {'query': query, 'limit': limit, 'offset': offset},
   );
 
   /// 获取讨论详情
@@ -469,17 +461,13 @@ class FlarumApi extends BaseApi {
       queryParameters: {
         'filter[discussion]': discussionId,
         'filter[type]': 'comment',
-        'page[limit]':? limit,
-        'page[offset]':? offset,
+        'page[limit]': ?limit,
+        'page[offset]': ?offset,
         'include': 'user,discussion',
       },
     ),
     (response) => Map<String, dynamic>.from(response.data),
-    params: {
-      'discussionId': discussionId,
-      'limit': limit,
-      'offset': offset,
-    },
+    params: {'discussionId': discussionId, 'limit': limit, 'offset': offset},
   );
 
   /// 获取所有标签

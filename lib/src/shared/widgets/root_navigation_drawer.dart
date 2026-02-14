@@ -18,12 +18,14 @@ class RootNavigationDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navigationSettings = ref.watch(navigationSettingsProvider).value;
-    
+
     // We only care about the first 4 roots: Misskey, Flarum, Drive, Messages
     // 'me' is now handled by the header.
-    final rootItems = navigationSettings?.items
-        .where((item) => item.isEnabled && item.id != 'me')
-        .toList() ?? [];
+    final rootItems =
+        navigationSettings?.items
+            .where((item) => item.isEnabled && item.id != 'me')
+            .toList() ??
+        [];
 
     // Actually, selectedRootIndex passed here is already the display index.
     // Let's refine the logic to match ResponsiveShell.
@@ -33,7 +35,8 @@ class RootNavigationDrawer extends ConsumerWidget {
     }
 
     return NavigationDrawer(
-      selectedIndex: -1, // We'll manage highlighting manually to support hierarchical view
+      selectedIndex:
+          -1, // We'll manage highlighting manually to support hierarchical view
       onDestinationSelected: (index) {
         // This is called for any destination. We need to distinguish between root and sub.
       },
@@ -49,16 +52,28 @@ class RootNavigationDrawer extends ConsumerWidget {
           },
         ),
         const Divider(indent: 12, endIndent: 12),
-        
+
         // Root Sections
         for (int i = 0; i < rootItems.length; i++) ...[
-          _buildRootSection(context, ref, rootItems[i], i, effectiveSelectedRootIndex),
+          _buildRootSection(
+            context,
+            ref,
+            rootItems[i],
+            i,
+            effectiveSelectedRootIndex,
+          ),
         ],
       ],
     );
   }
 
-  Widget _buildRootSection(BuildContext context, WidgetRef ref, NavigationItem rootItem, int index, int effectiveSelectedRootIndex) {
+  Widget _buildRootSection(
+    BuildContext context,
+    WidgetRef ref,
+    NavigationItem rootItem,
+    int index,
+    int effectiveSelectedRootIndex,
+  ) {
     final isSelected = index == effectiveSelectedRootIndex;
     final theme = Theme.of(context);
 
@@ -74,22 +89,32 @@ class RootNavigationDrawer extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+                color:
+                    isSelected
+                        ? theme.colorScheme.secondaryContainer
+                        : Colors.transparent,
                 borderRadius: BorderRadius.circular(32),
               ),
               child: Row(
                 children: [
                   Icon(
                     isSelected ? rootItem.selectedIcon : rootItem.icon,
-                    color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
+                    color:
+                        isSelected
+                            ? theme.colorScheme.onSecondaryContainer
+                            : theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       rootItem.title,
                       style: TextStyle(
-                        color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        color:
+                            isSelected
+                                ? theme.colorScheme.onSecondaryContainer
+                                : theme.colorScheme.onSurfaceVariant,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                   ),
@@ -105,18 +130,23 @@ class RootNavigationDrawer extends ConsumerWidget {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child: isSelected 
-                ? _buildSubNavigation(context, ref, rootItem.id)
-                : const SizedBox(width: double.infinity, height: 0),
+            child:
+                isSelected
+                    ? _buildSubNavigation(context, ref, rootItem.id)
+                    : const SizedBox(width: double.infinity, height: 0),
           ),
         ),
-        
+
         const SizedBox(height: 4),
       ],
     );
   }
 
-  Widget _buildSubNavigation(BuildContext context, WidgetRef ref, String rootId) {
+  Widget _buildSubNavigation(
+    BuildContext context,
+    WidgetRef ref,
+    String rootId,
+  ) {
     if (rootId == 'misskey') {
       return _buildMisskeySubs(context, ref);
     } else if (rootId == 'flarum') {
@@ -130,11 +160,17 @@ class RootNavigationDrawer extends ConsumerWidget {
 
     final subs = [
       {'icon': Icons.timeline, 'label': 'misskey_drawer_timeline'.tr()},
-      {'icon': Icons.collections_bookmark, 'label': 'misskey_drawer_clips'.tr()},
+      {
+        'icon': Icons.collections_bookmark,
+        'label': 'misskey_drawer_clips'.tr(),
+      },
       {'icon': Icons.satellite_alt, 'label': 'misskey_drawer_antennas'.tr()},
       {'icon': Icons.hub, 'label': 'misskey_drawer_channels'.tr()},
       {'icon': Icons.explore, 'label': 'misskey_drawer_explore'.tr()},
-      {'icon': Icons.person_add, 'label': 'misskey_drawer_follow_requests'.tr()},
+      {
+        'icon': Icons.person_add,
+        'label': 'misskey_drawer_follow_requests'.tr(),
+      },
       {'icon': Icons.campaign, 'label': 'misskey_drawer_announcements'.tr()},
       {'icon': Icons.terminal, 'label': 'misskey_drawer_aiscript_console'.tr()},
     ];
@@ -165,7 +201,10 @@ class RootNavigationDrawer extends ConsumerWidget {
     final subs = [
       {'icon': Icons.forum, 'label': 'flarum_drawer_discussions'.tr()},
       {'icon': Icons.label, 'label': 'flarum_drawer_tags'.tr()},
-      {'icon': Icons.notifications, 'label': 'flarum_drawer_notifications'.tr()},
+      {
+        'icon': Icons.notifications,
+        'label': 'flarum_drawer_notifications'.tr(),
+      },
     ];
 
     return Padding(
@@ -204,7 +243,10 @@ class RootNavigationDrawer extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? theme.colorScheme.surfaceContainerHighest : Colors.transparent,
+            color:
+                isSelected
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Row(
@@ -212,15 +254,22 @@ class RootNavigationDrawer extends ConsumerWidget {
               Icon(
                 icon,
                 size: 20,
-                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                color:
+                    isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color:
+                        isSelected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ),

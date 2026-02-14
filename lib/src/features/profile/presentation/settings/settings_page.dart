@@ -96,7 +96,9 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings_flarum_endpoint_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const FlarumEndpointsPage()),
+                MaterialPageRoute(
+                  builder: (context) => const FlarumEndpointsPage(),
+                ),
               );
             },
           ),

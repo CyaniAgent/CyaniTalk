@@ -197,7 +197,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            theme.colorScheme.shadow.withAlpha(128), // 0.5 * 255
+                            theme.colorScheme.shadow.withAlpha(
+                              128,
+                            ), // 0.5 * 255
                           ],
                           stops: const [0.6, 1.0],
                         ),
@@ -343,9 +345,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary.withAlpha(51), // 0.2 * 255
+                                color: Theme.of(context).colorScheme.onPrimary
+                                    .withAlpha(51), // 0.2 * 255
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: Theme.of(context).colorScheme.onPrimary
@@ -371,8 +372,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimary.withAlpha(230), // 0.9 * 255
+                          context,
+                        ).colorScheme.onPrimary.withAlpha(230), // 0.9 * 255
                       ),
                     ),
                   ],
@@ -429,20 +430,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     );
                   }
 
-                  return SelectableText(
-                    text,
-                    style: style,
-                  );
+                  return SelectableText(text, style: style);
                 },
               ),
             ),
 
           const SizedBox(height: 20),
-          _buildUserStats(
-            context,
-            misskeyUser,
-            flarumUser,
-          ),
+          _buildUserStats(context, misskeyUser, flarumUser),
         ],
       ),
     );
@@ -479,11 +473,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       Text(
                         'user_details_bio'.tr(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -554,31 +548,28 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 Shadow(
                   blurRadius: 2,
                   color: Theme.of(
-                  context,
-                ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
-                offset: const Offset(0, 1),
+                    context,
+                  ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-                onPressed: () => _showAddAccountDialog(context),
-                icon: const Icon(Icons.login),
-                label: Text('misskey_page_login_now'.tr()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
+            onPressed: () => _showAddAccountDialog(context),
+            icon: const Icon(Icons.login),
+            label: Text('misskey_page_login_now'.tr()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
+            ),
+          ),
         ],
       ),
     );

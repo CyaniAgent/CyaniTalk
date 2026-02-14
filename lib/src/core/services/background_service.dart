@@ -3,6 +3,7 @@
 /// 该文件包含后台服务的初始化和管理逻辑，
 /// 负责在应用后台运行时保持连接活跃和执行轻量级任务。
 library;
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -40,7 +41,8 @@ Future<void> initializeBackgroundService() async {
   if (Platform.isAndroid) {
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
   }
 
@@ -112,7 +114,7 @@ void onStart(ServiceInstance service) async {
         );
       }
     }
-    
+
     // Perform light background tasks if needed
     debugPrint('CyaniTalk Backstage is humming... desu!');
   });

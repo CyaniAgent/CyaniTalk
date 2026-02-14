@@ -19,8 +19,8 @@ class FlarumTagsPage extends StatelessWidget {
           Text(
             'flarum_tags_no_tags'.tr(),
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
         ],
       ),

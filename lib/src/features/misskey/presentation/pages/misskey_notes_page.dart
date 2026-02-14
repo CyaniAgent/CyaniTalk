@@ -5,7 +5,7 @@ import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart
 import 'misskey_clip_notes_page.dart';
 
 /// Misskey 笔记页面组件
-/// 
+///
 /// 这里展示全域时间线（Global Timeline）作为探索发现页面。
 class MisskeyNotesPage extends ConsumerStatefulWidget {
   const MisskeyNotesPage({super.key});
@@ -30,7 +30,8 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       ref.read(misskeyClipsProvider.notifier).loadMore();
     }
   }
@@ -44,12 +45,14 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
       body: clipsAsync.when(
         data: (clips) {
           if (clips.isEmpty) {
-            return Center(child: Text('${'misskey_page_clips'.tr()} ${'search_no_results'.tr()}'));
+            return Center(
+              child: Text(
+                '${'misskey_page_clips'.tr()} ${'search_no_results'.tr()}',
+              ),
+            );
           }
           return RefreshIndicator(
-            onRefresh: () => ref
-                .read(misskeyClipsProvider.notifier)
-                .refresh(),
+            onRefresh: () => ref.read(misskeyClipsProvider.notifier).refresh(),
             child: ListView.builder(
               controller: _scrollController,
               itemCount: clips.length + (hasMore ? 1 : 0),
@@ -57,27 +60,46 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                 if (index < clips.length) {
                   final clip = clips[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: NetworkImage(clip.user.avatarUrl ?? ''),
-                        child: clip.user.avatarUrl == null ? const Icon(Icons.person) : null,
+                        backgroundImage: NetworkImage(
+                          clip.user.avatarUrl ?? '',
+                        ),
+                        child: clip.user.avatarUrl == null
+                            ? const Icon(Icons.person)
+                            : null,
                       ),
-                      title: Text(clip.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(
+                        clip.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (clip.description != null && clip.description!.isNotEmpty)
-                            Text(clip.description!, maxLines: 2, overflow: TextOverflow.ellipsis),
+                          if (clip.description != null &&
+                              clip.description!.isNotEmpty)
+                            Text(
+                              clip.description!,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           const SizedBox(height: 4),
-                          Text('By ${clip.user.name ?? clip.user.username}', style: Theme.of(context).textTheme.bodySmall),
+                          Text(
+                            'By ${clip.user.name ?? clip.user.username}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                         ],
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => MisskeyClipNotesPage(clip: clip),
+                            builder: (context) =>
+                                MisskeyClipNotesPage(clip: clip),
                           ),
                         );
                       },
@@ -115,12 +137,15 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text('Error: $err', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                'Error: $err',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                onPressed: () => ref
-                    .read(misskeyClipsProvider.notifier)
-                    .refresh(),
+                onPressed: () =>
+                    ref.read(misskeyClipsProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),
                 label: Text('common_reload'.tr()),
               ),

@@ -80,7 +80,8 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                   child: CircularProgressIndicator(
                     value: event == null
                         ? 0
-                        : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+                        : event.cumulativeBytesLoaded /
+                              event.expectedTotalBytes!,
                   ),
                 ),
               ),
@@ -126,13 +127,16 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                                   vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.shadow.withAlpha(128), // 0.5 * 255
+                                  color: Theme.of(context).colorScheme.shadow
+                                      .withAlpha(128), // 0.5 * 255
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   '${_currentIndex + 1} / ${widget.imageUrls.length}',
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.surface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -154,20 +158,25 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                                 children: [
                                   Icon(
                                     Icons.chevron_left,
-                                    color: Theme.of(context).colorScheme.surface.withAlpha(178), // 0.7 * 255
+                                    color: Theme.of(context).colorScheme.surface
+                                        .withAlpha(178), // 0.7 * 255
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     '滑动切换图片',
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.surface.withAlpha(178), // 0.7 * 255
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surface
+                                          .withAlpha(178), // 0.7 * 255
                                       fontSize: 14,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   Icon(
                                     Icons.chevron_right,
-                                    color: Theme.of(context).colorScheme.surface.withAlpha(178), // 0.7 * 255
+                                    color: Theme.of(context).colorScheme.surface
+                                        .withAlpha(178), // 0.7 * 255
                                   ),
                                 ],
                               ),
@@ -175,17 +184,19 @@ class _ImageViewerPageState extends State<ImageViewerPage> {
                             Row(
                               children: [
                                 Icon(
-                                    Icons.zoom_in,
-                                    color: Theme.of(context).colorScheme.surface.withAlpha(178), // 0.7 * 255
+                                  Icons.zoom_in,
+                                  color: Theme.of(context).colorScheme.surface
+                                      .withAlpha(178), // 0.7 * 255
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '双指缩放',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.surface
+                                        .withAlpha(178), // 0.7 * 255
+                                    fontSize: 14,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '双指缩放',
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.surface.withAlpha(178), // 0.7 * 255
-                                      fontSize: 14,
-                                    ),
-                                  ),
+                                ),
                               ],
                             ),
                           ],

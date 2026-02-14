@@ -152,7 +152,11 @@ class CloudPage extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.folder, size: 20, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                  child: Icon(
+                    Icons.folder,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 )
               : _buildFileIcon(item.file!),
           title: Text(item.name),
@@ -195,11 +199,17 @@ class CloudPage extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud_off, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(
+            Icons.cloud_off,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(height: 16),
           Text(
             'cloud_no_files_or_folders'.tr(),
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -242,7 +252,9 @@ class CloudPage extends ConsumerWidget {
                 ),
                 error: (_, _) => Text(
                   'cloud_error'.tr(),
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.error),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
                 ),
               ),
             ],
@@ -263,7 +275,9 @@ class CloudPage extends ConsumerWidget {
                   minHeight: 8,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    percent > 0.9 ? theme.colorScheme.error : theme.colorScheme.primary,
+                    percent > 0.9
+                        ? theme.colorScheme.error
+                        : theme.colorScheme.primary,
                   ),
                 ),
               );
@@ -281,7 +295,9 @@ class CloudPage extends ConsumerWidget {
                 value: 0,
                 minHeight: 8,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.error),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  theme.colorScheme.error,
+                ),
               ),
             ),
           ),
@@ -368,7 +384,10 @@ class CloudPage extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+              leading: Icon(
+                Icons.delete,
+                color: Theme.of(context).colorScheme.error,
+              ),
               title: Text(
                 'cloud_delete'.tr(),
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -394,7 +413,7 @@ class CloudPage extends ConsumerWidget {
 
   void _openFilePreview(BuildContext context, DriveFile file) {
     final mimeType = file.type.toLowerCase();
-    
+
     if (mimeType.startsWith('image/')) {
       // 图片文件 - 打开图片查看器
       Navigator.push(
@@ -422,10 +441,7 @@ class CloudPage extends ConsumerWidget {
           title: Text(file.name),
           content: SizedBox(
             width: double.maxFinite,
-            child: AudioPlayerWidget(
-              audioUrl: file.url,
-              fileName: file.name,
-            ),
+            child: AudioPlayerWidget(audioUrl: file.url, fileName: file.name),
           ),
           actions: [
             TextButton(
@@ -487,7 +503,10 @@ class CloudPage extends ConsumerWidget {
               const Divider(),
               Text(
                 'cloud_debug_check_console'.tr(),
-                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),

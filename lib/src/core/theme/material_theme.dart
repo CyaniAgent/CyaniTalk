@@ -3,7 +3,7 @@ import 'sauce_palette.dart';
 import 'typography.dart';
 
 /// 应用程序主题工厂
-/// 
+///
 /// 负责根据配色方案构建 ThemeData。
 class MaterialTheme {
   final TextTheme textTheme;
@@ -24,15 +24,15 @@ class MaterialTheme {
   }
 
   ThemeData _buildTheme(ColorScheme colorScheme) => ThemeData(
-     useMaterial3: true,
-     brightness: colorScheme.brightness,
-     colorScheme: colorScheme,
-     textTheme: textTheme.apply(
-       bodyColor: colorScheme.onSurface,
-       displayColor: colorScheme.onSurface,
-     ),
-     scaffoldBackgroundColor: colorScheme.surface,
-     canvasColor: colorScheme.surface,
-     fontFamily: 'MiSans',
+    useMaterial3: true,
+    brightness: colorScheme.brightness,
+    colorScheme: colorScheme,
+    textTheme: textTheme.apply(
+      bodyColor: colorScheme.onSurface,
+      displayColor: colorScheme.onSurface,
+    ),
+    scaffoldBackgroundColor: colorScheme.surface,
+    canvasColor: colorScheme.surface,
+    fontFamily: 'MiSans',
   );
 }

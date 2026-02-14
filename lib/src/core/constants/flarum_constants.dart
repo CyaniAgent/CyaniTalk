@@ -22,10 +22,14 @@ class FlarumConstants {
 
   // Notifications
   static const String enableNotificationsKey = 'enable_notifications';
-  static const String enableMessageNotificationsKey = 'enable_message_notifications';
-  static const String enableMentionNotificationsKey = 'enable_mention_notifications';
-  static const String enableReplyNotificationsKey = 'enable_reply_notifications';
-  static const String enableSystemNotificationsKey = 'enable_system_notifications';
+  static const String enableMessageNotificationsKey =
+      'enable_message_notifications';
+  static const String enableMentionNotificationsKey =
+      'enable_mention_notifications';
+  static const String enableReplyNotificationsKey =
+      'enable_reply_notifications';
+  static const String enableSystemNotificationsKey =
+      'enable_system_notifications';
 
   // Screen layout
   static const double narrowScreenThreshold = 600;

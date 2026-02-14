@@ -9,7 +9,8 @@ class FlarumEndpointsPage extends ConsumerStatefulWidget {
   const FlarumEndpointsPage({super.key});
 
   @override
-  ConsumerState<FlarumEndpointsPage> createState() => _FlarumEndpointsPageState();
+  ConsumerState<FlarumEndpointsPage> createState() =>
+      _FlarumEndpointsPageState();
 }
 
 class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
@@ -66,7 +67,7 @@ class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
       if (!url.startsWith('http')) {
         url = 'https://$url';
       }
-      
+
       try {
         await FlarumApi().saveEndpoint(url);
         // Switching to endpoint also means guest mode for that endpoint if no token saved
@@ -74,7 +75,7 @@ class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
         // Invalidate flarum providers to trigger reload with new endpoint
         ref.invalidate(flarumRepositoryProvider);
         await _loadEndpoints();
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('auth_flarum_endpoint_added'.tr())),
@@ -118,41 +119,40 @@ class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
       appBar: AppBar(
         title: Text('settings_flarum_endpoint_title'.tr()),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _addEndpoint,
-          ),
+          IconButton(icon: const Icon(Icons.add), onPressed: _addEndpoint),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _endpoints.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  itemCount: _endpoints.length,
-                  itemBuilder: (context, index) {
-                    final endpoint = _endpoints[index];
-                    final isSelected = endpoint == _currentEndpoint;
-                    
-                    return ListTile(
-                      leading: Icon(
-                        Icons.api,
-                        color: isSelected ? Theme.of(context).colorScheme.primary : null,
-                      ),
-                      title: Text(endpoint),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _deleteEndpoint(endpoint),
-                      ),
-                      selected: isSelected,
-                      onTap: () async {
-                        await FlarumApi().switchEndpoint(endpoint);
-                        ref.invalidate(flarumRepositoryProvider);
-                        setState(() => _currentEndpoint = endpoint);
-                      },
-                    );
+          ? _buildEmptyState()
+          : ListView.builder(
+              itemCount: _endpoints.length,
+              itemBuilder: (context, index) {
+                final endpoint = _endpoints[index];
+                final isSelected = endpoint == _currentEndpoint;
+
+                return ListTile(
+                  leading: Icon(
+                    Icons.api,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+                  title: Text(endpoint),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () => _deleteEndpoint(endpoint),
+                  ),
+                  selected: isSelected,
+                  onTap: () async {
+                    await FlarumApi().switchEndpoint(endpoint);
+                    ref.invalidate(flarumRepositoryProvider);
+                    setState(() => _currentEndpoint = endpoint);
                   },
-                ),
+                );
+              },
+            ),
     );
   }
 
@@ -170,8 +170,8 @@ class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
           Text(
             'No endpoints added yet',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+              color: Theme.of(context).colorScheme.outline,
+            ),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(

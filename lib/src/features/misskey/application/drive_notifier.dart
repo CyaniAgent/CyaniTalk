@@ -45,16 +45,14 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     final repository = await ref.read(misskeyRepositoryProvider.future);
 
     // 检查是否需要刷新用户和存储空间信息
-    final shouldRefreshInfo = _lastInfoFetch == null || 
+    final shouldRefreshInfo =
+        _lastInfoFetch == null ||
         DateTime.now().difference(_lastInfoFetch!) > _infoCacheDuration;
 
     // 构建需要执行的请求
     final requests = <Future>[];
     if (shouldRefreshInfo) {
-      requests.addAll([
-        repository.getMe(),
-        repository.getDriveInfo(),
-      ]);
+      requests.addAll([repository.getMe(), repository.getDriveInfo()]);
     }
     requests.addAll([
       repository.getDriveFiles(folderId: folderId),
@@ -86,7 +84,8 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     // 1. driveUsage from cached user
     // 2. usage from cached driveInfo
     final int usageBytes =
-        _cachedUser?.driveUsage ?? (_cachedDriveInfo?['usage'] as num? ?? 0).toInt();
+        _cachedUser?.driveUsage ??
+        (_cachedDriveInfo?['usage'] as num? ?? 0).toInt();
 
     logger.info(
       'DriveNotifier: Final Storage - Capacity: $capacityBytes, Usage: $usageBytes',
@@ -108,19 +107,19 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> cd(DriveFolder folder) async {
     try {
       if (!ref.mounted) return;
-      
+
       state = const AsyncValue.loading();
-      
+
       final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
       final newBreadcrumbs = [...currentBreadcrumbs, folder];
-      
+
       final result = await AsyncValue.guard<DriveState>(() async {
         return _fetchDriveContent(
           folderId: folder.id,
           breadcrumbs: newBreadcrumbs,
         );
       });
-      
+
       if (ref.mounted) {
         state = result;
       }
@@ -143,7 +142,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> cdBack() async {
     try {
       if (!ref.mounted) return;
-      
+
       final currentBreadcrumbs = List<DriveFolder>.from(
         state.value?.breadcrumbs ?? [],
       );
@@ -155,14 +154,14 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
           : currentBreadcrumbs.last.id;
 
       state = const AsyncValue.loading();
-      
+
       final result = await AsyncValue.guard<DriveState>(() async {
         return _fetchDriveContent(
           folderId: parentId,
           breadcrumbs: currentBreadcrumbs,
         );
       });
-      
+
       if (ref.mounted) {
         state = result;
       }
@@ -185,13 +184,15 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> cdTo(int index) async {
     try {
       if (!ref.mounted) return;
-      
+
       if (index == -1) {
         // Root
         state = const AsyncValue.loading();
-        
-        final result = await AsyncValue.guard<DriveState>(() async => _fetchDriveContent());
-        
+
+        final result = await AsyncValue.guard<DriveState>(
+          () async => _fetchDriveContent(),
+        );
+
         if (ref.mounted) {
           state = result;
         }
@@ -205,14 +206,14 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       final targetFolder = targetBreadcrumbs.last;
 
       state = const AsyncValue.loading();
-      
+
       final result = await AsyncValue.guard<DriveState>(() async {
         return _fetchDriveContent(
           folderId: targetFolder.id,
           breadcrumbs: targetBreadcrumbs,
         );
       });
-      
+
       if (ref.mounted) {
         state = result;
       }
@@ -235,27 +236,24 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> refresh() async {
     try {
       if (!ref.mounted) return;
-      
+
       final currentState = state.value ?? const DriveState();
-      
+
       // 使用isRefreshing状态，避免完全重置UI
       state = AsyncValue.data(
-        currentState.copyWith(
-          isRefreshing: true,
-          errorMessage: null,
-        ),
+        currentState.copyWith(isRefreshing: true, errorMessage: null),
       );
-      
+
       final currentFolderId = currentState.currentFolderId;
       final currentBreadcrumbs = currentState.breadcrumbs;
-      
+
       final result = await AsyncValue.guard<DriveState>(() async {
         return _fetchDriveContent(
           folderId: currentFolderId,
           breadcrumbs: currentBreadcrumbs,
         );
       });
-      
+
       if (ref.mounted) {
         state = result;
       }
@@ -278,19 +276,17 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   /// 清除错误信息
   void clearError() {
     if (!ref.mounted) return;
-    
+
     final currentState = state.value;
     if (currentState != null && currentState.errorMessage != null) {
-      state = AsyncValue.data(
-        currentState.copyWith(errorMessage: null),
-      );
+      state = AsyncValue.data(currentState.copyWith(errorMessage: null));
     }
   }
 
   Future<void> deleteFile(String fileId) async {
     try {
       if (!ref.mounted) return;
-      
+
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.deleteDriveFile(fileId);
       await refresh();
@@ -312,7 +308,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> deleteFolder(String folderId) async {
     try {
       if (!ref.mounted) return;
-      
+
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.deleteDriveFolder(folderId);
       await refresh();
@@ -334,7 +330,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> createFolder(String name) async {
     try {
       if (!ref.mounted) return;
-      
+
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final currentFolderId = state.value?.currentFolderId;
       await repository.createDriveFolder(name, parentId: currentFolderId);
@@ -357,7 +353,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
   Future<void> uploadFile(List<int> bytes, String filename) async {
     try {
       if (!ref.mounted) return;
-      
+
       // 显示上传状态
       state = AsyncValue.data(
         (state.value ?? const DriveState()).copyWith(
@@ -365,7 +361,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
           errorMessage: null,
         ),
       );
-      
+
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final currentFolderId = state.value?.currentFolderId;
       await repository.uploadDriveFile(
