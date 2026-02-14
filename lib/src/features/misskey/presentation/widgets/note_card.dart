@@ -10,8 +10,8 @@ import '../../data/misskey_repository.dart';
 import '../../application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
-import '../pages/image_viewer_page.dart';
-import '../pages/video_player_page.dart';
+import '../../../common/presentation/pages/media_viewer_page.dart';
+import '../../../common/presentation/widgets/media_viewer.dart';
 
 /// NoteCard组件
 ///
@@ -785,9 +785,42 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           borderRadius: BorderRadius.circular(12),
           child: GestureDetector(
             onTap: () {
+              // 收集笔记中的所有媒体文件
+              final mediaItems = <MediaItem>[];
+              int initialIndex = 0;
+              
+              for (int i = 0; i < widget.note.files.length; i++) {
+                final file = widget.note.files[i] as Map<String, dynamic>;
+                final fileUrl = file['url'] as String;
+                final fileType = file['type'] as String;
+                final isImage = fileType.startsWith('image/');
+                final isVideo = fileType.startsWith('video/');
+                final isAudio = fileType.startsWith('audio/');
+                
+                if (isImage) {
+                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image, fileName: file['name'] as String?));
+                  if (fileUrl == url) {
+                    initialIndex = mediaItems.length - 1;
+                  }
+                } else if (isVideo) {
+                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video, fileName: file['name'] as String?));
+                  if (fileUrl == url) {
+                    initialIndex = mediaItems.length - 1;
+                  }
+                } else if (isAudio) {
+                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.audio, fileName: file['name'] as String?));
+                  if (fileUrl == url) {
+                    initialIndex = mediaItems.length - 1;
+                  }
+                }
+              }
+              
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => VideoPlayerPage(videoUrl: url),
+                  builder: (context) => MediaViewerPage(
+                    mediaItems: mediaItems,
+                    initialIndex: initialIndex,
+                  ),
                 ),
               );
             },
@@ -825,10 +858,43 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           borderRadius: BorderRadius.circular(12),
           child: GestureDetector(
             onTap: () {
+              // 收集笔记中的所有图片
+              final mediaItems = <MediaItem>[];
+              int initialIndex = 0;
+              
+              for (int i = 0; i < widget.note.files.length; i++) {
+                final file = widget.note.files[i] as Map<String, dynamic>;
+                final fileUrl = file['url'] as String;
+                final fileType = file['type'] as String;
+                final isImage = fileType.startsWith('image/');
+                final isVideo = fileType.startsWith('video/');
+                final isAudio = fileType.startsWith('audio/');
+                
+                if (isImage) {
+                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image, fileName: file['name'] as String?));
+                  if (fileUrl == url) {
+                    initialIndex = mediaItems.length - 1;
+                  }
+                } else if (isVideo) {
+                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video, fileName: file['name'] as String?));
+                  if (fileUrl == url) {
+                    initialIndex = mediaItems.length - 1;
+                  }
+                } else if (isAudio) {
+                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.audio, fileName: file['name'] as String?));
+                  if (fileUrl == url) {
+                    initialIndex = mediaItems.length - 1;
+                  }
+                }
+              }
+              
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ImageViewerPage(imageUrl: url, heroTag: heroTag),
+                  builder: (context) => MediaViewerPage(
+                    mediaItems: mediaItems,
+                    initialIndex: initialIndex,
+                    heroTag: heroTag,
+                  ),
                 ),
               );
             },
@@ -962,9 +1028,42 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         borderRadius: BorderRadius.circular(12),
         child: GestureDetector(
           onTap: () {
+            // 收集笔记中的所有媒体文件
+            final mediaItems = <MediaItem>[];
+            int initialIndex = 0;
+            
+            for (int i = 0; i < widget.note.files.length; i++) {
+              final file = widget.note.files[i] as Map<String, dynamic>;
+              final fileUrl = file['url'] as String;
+              final fileType = file['type'] as String;
+              final isImage = fileType.startsWith('image/');
+              final isVideo = fileType.startsWith('video/');
+              final isAudio = fileType.startsWith('audio/');
+              
+              if (isImage) {
+                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image));
+                if (fileUrl == url) {
+                  initialIndex = mediaItems.length - 1;
+                }
+              } else if (isVideo) {
+                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video));
+                if (fileUrl == url) {
+                  initialIndex = mediaItems.length - 1;
+                }
+              } else if (isAudio) {
+                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.audio));
+                if (fileUrl == url) {
+                  initialIndex = mediaItems.length - 1;
+                }
+              }
+            }
+            
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => VideoPlayerPage(videoUrl: url),
+                builder: (context) => MediaViewerPage(
+                  mediaItems: mediaItems,
+                  initialIndex: initialIndex,
+                ),
               ),
             );
           },
@@ -999,10 +1098,43 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         borderRadius: BorderRadius.circular(12),
         child: GestureDetector(
           onTap: () {
+            // 收集笔记中的所有图片
+            final mediaItems = <MediaItem>[];
+            int initialIndex = 0;
+            
+            for (int i = 0; i < widget.note.files.length; i++) {
+              final file = widget.note.files[i] as Map<String, dynamic>;
+              final fileUrl = file['url'] as String;
+              final fileType = file['type'] as String;
+              final isImage = fileType.startsWith('image/');
+              final isVideo = fileType.startsWith('video/');
+              final isAudio = fileType.startsWith('audio/');
+              
+              if (isImage) {
+                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image));
+                if (fileUrl == url) {
+                  initialIndex = mediaItems.length - 1;
+                }
+              } else if (isVideo) {
+                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video));
+                if (fileUrl == url) {
+                  initialIndex = mediaItems.length - 1;
+                }
+              } else if (isAudio) {
+                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.audio));
+                if (fileUrl == url) {
+                  initialIndex = mediaItems.length - 1;
+                }
+              }
+            }
+            
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) =>
-                    ImageViewerPage(imageUrl: url, heroTag: heroTag),
+                builder: (context) => MediaViewerPage(
+                  mediaItems: mediaItems,
+                  initialIndex: initialIndex,
+                  heroTag: heroTag,
+                ),
               ),
             );
           },

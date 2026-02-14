@@ -29,10 +29,7 @@ class RootNavigationDrawer extends ConsumerWidget {
 
     // Actually, selectedRootIndex passed here is already the display index.
     // Let's refine the logic to match ResponsiveShell.
-    int effectiveSelectedRootIndex = selectedRootIndex;
-    if (selectedRootIndex >= rootItems.length) {
-      effectiveSelectedRootIndex = -1;
-    }
+    final effectiveSelectedRootIndex = selectedRootIndex >= rootItems.length ? -1 : selectedRootIndex;
 
     return NavigationDrawer(
       selectedIndex:
@@ -45,10 +42,12 @@ class RootNavigationDrawer extends ConsumerWidget {
           isDrawer: true,
           isSelected: effectiveSelectedRootIndex == -1,
           onTap: () {
-            onRootSelected(NavigationService.mapBranchIndexToDisplayIndex(
-              NavigationService.getBranchIndexForItem('me'),
-              navigationSettings!,
-            ));
+            onRootSelected(
+              NavigationService.mapBranchIndexToDisplayIndex(
+                NavigationService.getBranchIndexForItem('me'),
+                navigationSettings!,
+              ),
+            );
           },
         ),
         const Divider(indent: 12, endIndent: 12),
@@ -83,42 +82,74 @@ class RootNavigationDrawer extends ConsumerWidget {
         // Custom root item implementation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-          child: InkWell(
-            onTap: () => onRootSelected(index),
-            borderRadius: BorderRadius.circular(32),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color:
-                    isSelected
-                        ? theme.colorScheme.secondaryContainer
-                        : Colors.transparent,
-                borderRadius: BorderRadius.circular(32),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    isSelected ? rootItem.selectedIcon : rootItem.icon,
-                    color:
-                        isSelected
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: InkWell(
+              onTap: () => onRootSelected(index),
+              borderRadius: BorderRadius.circular(32),
+              splashColor: theme.colorScheme.primary.withAlpha(20),
+              highlightColor: theme.colorScheme.primary.withAlpha(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? theme.colorScheme.secondaryContainer
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withAlpha(10),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? theme.colorScheme.primaryContainer.withAlpha(40)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isSelected ? rootItem.selectedIcon : rootItem.icon,
+                        color: isSelected
                             ? theme.colorScheme.onSecondaryContainer
                             : theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      rootItem.title,
-                      style: TextStyle(
-                        color:
-                            isSelected
-                                ? theme.colorScheme.onSecondaryContainer
-                                : theme.colorScheme.onSurfaceVariant,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        size: 20,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        rootItem.title,
+                        style: TextStyle(
+                          color: isSelected
+                              ? theme.colorScheme.onSecondaryContainer
+                              : theme.colorScheme.onSurfaceVariant,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      Container(
+                        width: 4,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -127,13 +158,12 @@ class RootNavigationDrawer extends ConsumerWidget {
         // Sub-navigation for the selected root
         ClipRect(
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOutCubic,
             alignment: Alignment.topCenter,
-            child:
-                isSelected
-                    ? _buildSubNavigation(context, ref, rootItem.id)
-                    : const SizedBox(width: double.infinity, height: 0),
+            child: isSelected
+                ? _buildSubNavigation(context, ref, rootItem.id)
+                : const SizedBox(width: double.infinity, height: 0),
           ),
         ),
 
@@ -237,43 +267,71 @@ class RootNavigationDrawer extends ConsumerWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? theme.colorScheme.surfaceContainerHighest
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(28),
+          splashColor: theme.colorScheme.primary.withAlpha(20),
+          highlightColor: theme.colorScheme.primary.withAlpha(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? theme.colorScheme.primary.withAlpha(15)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: isSelected
+                    ? theme.colorScheme.primary.withAlpha(30)
                     : Colors.transparent,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color:
-                    isSelected
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primaryContainer.withAlpha(30)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: isSelected
                         ? theme.colorScheme.primary
                         : theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color:
-                        isSelected
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurfaceVariant,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

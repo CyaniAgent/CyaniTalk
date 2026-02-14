@@ -229,16 +229,16 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         await _loadCacheSettings();
 
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('${_getCategoryName(category)}缓存已清除')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${_getCategoryName(category)}缓存已清除')),
+          );
         }
       } catch (e) {
         debugPrint('Error clearing category cache: $e');
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('清除${_getCategoryName(category)}缓存失败: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('清除${_getCategoryName(category)}缓存失败: $e')),
+          );
         }
       }
     }
@@ -317,8 +317,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   Future<void> _setCategoryMaxSize(CacheCategory category) async {
     final currentSize = _categoryMaxSizes[category];
     final TextEditingController controller = TextEditingController(
-      text:
-          currentSize != null ? (currentSize / (1024 * 1024)).toStringAsFixed(0) : '',
+      text: currentSize != null
+          ? (currentSize / (1024 * 1024)).toStringAsFixed(0)
+          : '',
     );
 
     bool? confirmed = await showDialog<bool>(
@@ -528,298 +529,295 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('缓存设置')),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView(
-                children: [
-                  // 缓存路径设置
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '缓存路径',
-                          style: Theme.of(context).textTheme.titleMedium,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              children: [
+                // 缓存路径设置
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '缓存路径',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                _cachePath ?? '未知',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.tonal(
+                            onPressed: _selectCustomCacheDirectory,
+                            child: const Text('更改'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Divider(indent: 16, endIndent: 16),
+
+                // 缓存大小设置
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '缓存大小设置',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildSettingRow(
+                        '当前总缓存大小',
+                        _formatBytes(_totalCacheSize),
+                      ),
+                      _buildSettingRow('最大缓存大小', _formatBytes(_maxCacheSize)),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: _setMaximumCacheSize,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        const SizedBox(height: 8),
-                        Row(
+                        child: const Text('设置最大缓存大小'),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Divider(indent: 16, endIndent: 16),
+
+                // 音频缓存类型设置
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '音频缓存设置',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildSettingRow(
+                        '音频缓存类型',
+                        _audioCacheType == AudioCacheType.persistent
+                            ? '持久化'
+                            : '非持久化',
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _audioCacheType == AudioCacheType.persistent
+                            ? '音频文件会一直保留，不会自动清理'
+                            : '音频文件会根据缓存大小限制自动清理',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: _setAudioCacheType,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('设置音频缓存类型'),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Divider(indent: 16, endIndent: 16),
+
+                // 缓存分类管理
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '缓存分类管理',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      ..._categoryCacheSizes.entries.map((entry) {
+                        final category = entry.key;
+                        final size = entry.value;
+                        final maxSize = _categoryMaxSizes[category];
+                        return Column(
                           children: [
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Theme.of(context).colorScheme.outline,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(_getCategoryName(category)),
+                                Row(
+                                  children: [
+                                    Text(_formatBytes(size)),
+                                    const SizedBox(width: 16),
+                                    IconButton(
+                                      onPressed: () =>
+                                          _clearCategoryCache(category),
+                                      icon: const Icon(Icons.delete_outline),
+                                      tooltip:
+                                          '清除${_getCategoryName(category)}缓存',
+                                    ),
+                                    IconButton(
+                                      onPressed: () =>
+                                          _setCategoryMaxSize(category),
+                                      icon: const Icon(Icons.settings_outlined),
+                                      tooltip:
+                                          '设置${_getCategoryName(category)}最大大小',
+                                    ),
+                                  ],
                                 ),
-                                child: Text(
-                                  _cachePath ?? '未知',
-                                  overflow: TextOverflow.ellipsis,
+                              ],
+                            ),
+                            if (maxSize != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16),
+                                child: _buildSettingRow(
+                                  '最大缓存大小',
+                                  _formatBytes(maxSize),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            FilledButton.tonal(
-                              onPressed: _selectCustomCacheDirectory,
-                              child: const Text('更改'),
-                            ),
+                            const SizedBox(height: 12),
                           ],
+                        );
+                      }),
+                      FilledButton(
+                        onPressed: _clearAllCache,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                      ],
-                    ),
+                        child: const Text('清除所有缓存'),
+                      ),
+                    ],
                   ),
+                ),
 
-                  const Divider(indent: 16, endIndent: 16),
+                const Divider(indent: 16, endIndent: 16),
 
-                  // 缓存大小设置
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '缓存大小设置',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSettingRow(
-                          '当前总缓存大小',
-                          _formatBytes(_totalCacheSize),
-                        ),
-                        _buildSettingRow(
-                          '最大缓存大小',
-                          _formatBytes(_maxCacheSize),
-                        ),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                          onPressed: _setMaximumCacheSize,
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('设置最大缓存大小'),
-                        ),
-                      ],
-                    ),
+                // 缓存文件管理
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-
-                  const Divider(indent: 16, endIndent: 16),
-
-                  // 音频缓存类型设置
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '音频缓存设置',
-                          style: Theme.of(context).textTheme.titleMedium,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '缓存文件管理',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: _viewCacheFiles,
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        const SizedBox(height: 12),
-                        _buildSettingRow(
-                          '音频缓存类型',
-                          _audioCacheType == AudioCacheType.persistent
-                              ? '持久化'
-                              : '非持久化',
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _audioCacheType == AudioCacheType.persistent
-                              ? '音频文件会一直保留，不会自动清理'
-                              : '音频文件会根据缓存大小限制自动清理',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                          onPressed: _setAudioCacheType,
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('设置音频缓存类型'),
-                        ),
-                      ],
-                    ),
+                        child: const Text('查看缓存文件列表'),
+                      ),
+                    ],
                   ),
+                ),
 
-                  const Divider(indent: 16, endIndent: 16),
+                const Divider(indent: 16, endIndent: 16),
 
-                  // 缓存分类管理
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '缓存分类管理',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        ..._categoryCacheSizes.entries.map((entry) {
-                          final category = entry.key;
-                          final size = entry.value;
-                          final maxSize = _categoryMaxSizes[category];
-                          return Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(_getCategoryName(category)),
-                                  Row(
-                                    children: [
-                                      Text(_formatBytes(size)),
-                                      const SizedBox(width: 16),
-                                      IconButton(
-                                        onPressed:
-                                            () => _clearCategoryCache(category),
-                                        icon: const Icon(Icons.delete_outline),
-                                        tooltip:
-                                            '清除${_getCategoryName(category)}缓存',
-                                      ),
-                                      IconButton(
-                                        onPressed:
-                                            () => _setCategoryMaxSize(category),
-                                        icon: const Icon(Icons.settings_outlined),
-                                        tooltip:
-                                            '设置${_getCategoryName(category)}最大大小',
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              if (maxSize != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 16),
-                                  child: _buildSettingRow(
-                                    '最大缓存大小',
-                                    _formatBytes(maxSize),
-                                  ),
-                                ),
-                              const SizedBox(height: 12),
-                            ],
-                          );
-                        }),
-                        FilledButton(
-                          onPressed: _clearAllCache,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('清除所有缓存'),
-                        ),
-                      ],
-                    ),
+                // 危险区域
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-
-                  const Divider(indent: 16, endIndent: 16),
-
-                  // 缓存文件管理
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '缓存文件管理',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                          onPressed: _viewCacheFiles,
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text('查看缓存文件列表'),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const Divider(indent: 16, endIndent: 16),
-
-                  // 危险区域
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '危险区域',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: _resetApp,
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('重置此应用'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '危险区域',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
                             ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _resetApp,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('重置此应用'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置。',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.red.withAlpha(204),
-                          ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置。',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.red.withAlpha(204),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
 
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-                  // 说明信息
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '缓存用于存储音频、视频、图片等多媒体文件，以提升加载速度并减少网络流量消耗。',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '系统会自动管理缓存大小，当缓存达到上限时，会删除最旧的缓存文件。',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
+                // 说明信息
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
                   ),
-                ],
-              ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '缓存用于存储音频、视频、图片等多媒体文件，以提升加载速度并减少网络流量消耗。',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '系统会自动管理缓存大小，当缓存达到上限时，会删除最旧的缓存文件。',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -874,18 +872,17 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
           return ListTile(
             leading: Checkbox(
               value: isSelected,
-              onChanged:
-                  item.canBeCleared
-                      ? (value) {
-                        setState(() {
-                          if (value == true) {
-                            _selectedItems.add(item);
-                          } else {
-                            _selectedItems.remove(item);
-                          }
-                        });
-                      }
-                      : null,
+              onChanged: item.canBeCleared
+                  ? (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedItems.add(item);
+                        } else {
+                          _selectedItems.remove(item);
+                        }
+                      });
+                    }
+                  : null,
             ),
             title: Text(item.name),
             subtitle: Column(
@@ -898,30 +895,28 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
                   const Text('不可清除', style: TextStyle(color: Colors.red)),
               ],
             ),
-            onTap:
-                item.canBeCleared
-                    ? () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedItems.remove(item);
-                        } else {
-                          _selectedItems.add(item);
-                        }
-                      });
-                    }
-                    : null,
+            onTap: item.canBeCleared
+                ? () {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedItems.remove(item);
+                      } else {
+                        _selectedItems.add(item);
+                      }
+                    });
+                  }
+                : null,
           );
         },
       ),
-      bottomNavigationBar:
-          _selectedItems.isNotEmpty
-              ? BottomAppBar(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text('已选择 ${_selectedItems.length} 个文件'),
-                ),
-              )
-              : null,
+      bottomNavigationBar: _selectedItems.isNotEmpty
+          ? BottomAppBar(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text('已选择 ${_selectedItems.length} 个文件'),
+              ),
+            )
+          : null,
     );
   }
 
@@ -932,9 +927,7 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('确认删除'),
-            content: Text(
-              '确定要删除选中的 ${_selectedItems.length} 个缓存文件吗？此操作无法撤销。',
-            ),
+            content: Text('确定要删除选中的 ${_selectedItems.length} 个缓存文件吗？此操作无法撤销。'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),

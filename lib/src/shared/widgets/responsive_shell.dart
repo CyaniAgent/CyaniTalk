@@ -99,14 +99,18 @@ class ResponsiveShell extends ConsumerWidget {
     dynamic navigationSettings,
   ) {
     final theme = Theme.of(context);
+    final isMedium = Breakpoints.medium.isActive(context);
+    
+    // 根据屏幕尺寸动态调整侧边栏宽度
+    final sidebarWidth = isLarge ? 280.0 : isMedium ? 240.0 : 80.0;
 
     return Container(
-      width: isLarge ? 256 : 80,
+      width: sidebarWidth,
       color: theme.colorScheme.surface,
       child: Column(
         children: [
           UserNavigationHeader(
-            isExtended: isLarge,
+            isExtended: !Breakpoints.small.isActive(context),
             isSelected: selectedRootIndex == -1,
             onTap: () {
               int branchIndex = NavigationService.getBranchIndexForItem('me');
@@ -119,7 +123,9 @@ class ResponsiveShell extends ConsumerWidget {
           const Divider(indent: 12, endIndent: 12),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: !Breakpoints.small.isActive(context) ? 8 : 4,
+              ),
               children: [
                 for (int i = 0; i < rootItems.length; i++) ...[
                   _buildRootSidebarItem(
@@ -128,7 +134,7 @@ class ResponsiveShell extends ConsumerWidget {
                     rootItems[i],
                     i,
                     selectedRootIndex,
-                    isLarge,
+                    !Breakpoints.small.isActive(context),
                     navigationSettings,
                   ),
                 ],

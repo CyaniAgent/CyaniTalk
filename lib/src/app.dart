@@ -65,15 +65,15 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     if (state == AppLifecycleState.resumed) {
       // 应用回到前台时刷新数据
       logger.info('CyaniTalkApp: 应用回到前台，刷新实时数据...');
-      
+
       // 重新连接 Misskey 流媒体服务
       ref.read(misskeyStreamingServiceProvider.notifier).reconnect();
-      
+
       // 刷新 Misskey 各种 Provider (如果已挂载)
       // 注意：这里我们只刷新最关键的通知，时间线通常由 UI 层的 Visibility 触发或由流式服务维持
       // 但为了确保万无一失，我们可以尝试刷新一次全局的 Misskey 状态
       ref.invalidate(misskeyNotificationsProvider);
-      
+
       // 如果有挂载的时间线，也会因为流式连接重置而更新，
       // 或者我们可以显式地让某些关键 provider 刷新
     }

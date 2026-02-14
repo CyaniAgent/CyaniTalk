@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import '../../../core/navigation/navigation.dart';
-import '../../misskey/application/drive_notifier.dart';
-import '../../misskey/domain/drive_file.dart';
-import '../../misskey/domain/drive_folder.dart';
-import '../../misskey/presentation/pages/video_player_page.dart';
-import '../../misskey/presentation/widgets/audio_player_widget.dart';
-import '../../auth/application/auth_service.dart';
-import '../../../shared/widgets/login_reminder.dart';
-import 'image_viewer_page.dart';
+import '/src/core/navigation/navigation.dart';
+import '/src/features/misskey/application/drive_notifier.dart';
+import '/src/features/misskey/domain/drive_file.dart';
+import '/src/features/misskey/domain/drive_folder.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/shared/widgets/login_reminder.dart';
+import '/src/features/common/presentation/pages/media_viewer_page.dart';
+import '/src/features/common/presentation/widgets/media_viewer.dart';
 
 class CloudPage extends ConsumerWidget {
   const CloudPage({super.key});
@@ -415,40 +414,52 @@ class CloudPage extends ConsumerWidget {
     final mimeType = file.type.toLowerCase();
 
     if (mimeType.startsWith('image/')) {
-      // 图片文件 - 打开图片查看器
+      // 图片文件 - 打开媒体查看器
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ImageViewerPage(
-            imageUrls: [file.url],
+          builder: (context) => MediaViewerPage(
+            mediaItems: [
+              MediaItem(
+                url: file.url,
+                type: MediaType.image,
+                fileName: file.name,
+              ),
+            ],
             heroTag: 'cloud_image_${file.id}',
           ),
         ),
       );
     } else if (mimeType.startsWith('video/')) {
-      // 视频文件 - 打开视频播放器
+      // 视频文件 - 打开媒体查看器
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VideoPlayerPage(videoUrl: file.url),
+          builder: (context) => MediaViewerPage(
+            mediaItems: [
+              MediaItem(
+                url: file.url,
+                type: MediaType.video,
+                fileName: file.name,
+              ),
+            ],
+          ),
         ),
       );
     } else if (mimeType.startsWith('audio/')) {
-      // 音频文件 - 显示音频播放器对话框
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(file.name),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: AudioPlayerWidget(audioUrl: file.url, fileName: file.name),
+      // 音频文件 - 打开媒体查看器
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MediaViewerPage(
+            mediaItems: [
+              MediaItem(
+                url: file.url,
+                type: MediaType.audio,
+                fileName: file.name,
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('cloud_close'.tr()),
-            ),
-          ],
         ),
       );
     } else {
