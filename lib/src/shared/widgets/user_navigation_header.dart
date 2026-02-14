@@ -12,11 +12,15 @@ import '../../features/flarum/application/flarum_providers.dart';
 class UserNavigationHeader extends ConsumerWidget {
   final bool isExtended;
   final bool isDrawer;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   UserNavigationHeader({
     super.key,
     this.isExtended = true,
     this.isDrawer = false,
+    this.isSelected = false,
+    this.onTap,
   });
 
   /// 用于获取用户信息部分的位置
@@ -32,6 +36,7 @@ class UserNavigationHeader extends ConsumerWidget {
     final flarumUser = flarumAccount != null ? ref.watch(flarumCurrentUserProvider).asData?.value : null;
 
     final bool isLoggedIn = misskeyAccount != null || flarumAccount != null;
+    final theme = Theme.of(context);
 
     if (!isExtended && !isDrawer) {
       const double radius = 24;
@@ -39,41 +44,71 @@ class UserNavigationHeader extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: InkWell(
           key: _userInfoKey,
-          onTap: () => _showUserMenu(context, ref, isLoggedIn),
+          onTap: onTap ?? () => _showUserMenu(context, ref, isLoggedIn),
+          onLongPress: () => _showUserMenu(context, ref, isLoggedIn),
           borderRadius: BorderRadius.circular(radius),
-          child: _buildAvatar(context, misskeyAccount, misskeyUser, flarumAccount, flarumUser, radius: radius),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: _buildAvatar(context, misskeyAccount, misskeyUser, flarumAccount, flarumUser, radius: radius),
+          ),
         ),
       );
     }
 
     Widget content = Container(
-      padding: isDrawer 
-          ? const EdgeInsets.fromLTRB(16, 48, 16, 16)
-          : const EdgeInsets.all(12),
-      child: InkWell(
-        key: _userInfoKey,
-        onTap: () => _showUserMenu(context, ref, isLoggedIn),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            children: [
-              _buildAvatar(context, misskeyAccount, misskeyUser, flarumAccount, flarumUser, radius: 18),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  isLoggedIn 
-                      ? _getUserName(misskeyAccount, misskeyUser, flarumAccount, flarumUser)
-                      : 'nav_no_account'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+      margin: isDrawer ? const EdgeInsets.fromLTRB(12, 48, 12, 8) : const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: onTap,
+              onLongPress: () => _showUserMenu(context, ref, isLoggedIn),
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    _buildAvatar(context, misskeyAccount, misskeyUser, flarumAccount, flarumUser, radius: 18),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        isLoggedIn 
+                            ? _getUserName(misskeyAccount, misskeyUser, flarumAccount, flarumUser)
+                            : 'nav_no_account'.tr(),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+          InkWell(
+            key: _userInfoKey,
+            onTap: () => _showUserMenu(context, ref, isLoggedIn),
+            borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+              child: Icon(
+                Icons.arrow_drop_down,
+                size: 20,
+                color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
     );
 
@@ -175,17 +210,6 @@ class UserNavigationHeader extends ConsumerWidget {
       context: context,
       position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + size.width, offset.dy),
       items: <PopupMenuEntry<String>>[
-        // 用户页面选项
-        PopupMenuItem<String>(
-          value: 'profile',
-          child: Row(
-            children: [
-              Icon(Icons.person, color: Theme.of(context).colorScheme.onSurface),
-              const SizedBox(width: 8),
-              Text('menu_user_profile'.tr()),
-            ],
-          ),
-        ),
         // 设置页面选项
         PopupMenuItem<String>(
           value: 'settings',
@@ -224,12 +248,10 @@ class UserNavigationHeader extends ConsumerWidget {
           ),
       ],
     ).then((value) {
+      if (!context.mounted) return;
       // 处理菜单选项
       if (value != null) {
         switch (value) {
-          case 'profile':
-            context.push('/profile');
-            break;
           case 'settings':
             context.push('/settings');
             break;
@@ -278,6 +300,7 @@ class UserNavigationHeader extends ConsumerWidget {
               // 刷新认证服务状态
               await ref.read(authServiceProvider.future);
               
+              if (!context.mounted) return;
               Navigator.of(context).pop();
             },
             child: Text('menu_logout'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.error)),

@@ -350,11 +350,14 @@ class _CacheSettingsPageState extends State<CacheSettingsPage> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // ignore: deprecated_member_use
                 RadioListTile<AudioCacheType>(
                   title: Text('持久化'),
                   subtitle: Text('音频文件会一直保留，不会自动清理'),
                   value: AudioCacheType.persistent,
+                  // ignore: deprecated_member_use
                   groupValue: _audioCacheType,
+                  // ignore: deprecated_member_use
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {
@@ -363,11 +366,14 @@ class _CacheSettingsPageState extends State<CacheSettingsPage> {
                     }
                   },
                 ),
+                // ignore: deprecated_member_use
                 RadioListTile<AudioCacheType>(
                   title: Text('非持久化'),
                   subtitle: Text('音频文件会根据缓存大小限制自动清理'),
                   value: AudioCacheType.temporary,
+                  // ignore: deprecated_member_use
                   groupValue: _audioCacheType,
+                  // ignore: deprecated_member_use
                   onChanged: (value) {
                     if (value != null) {
                       setState(() {

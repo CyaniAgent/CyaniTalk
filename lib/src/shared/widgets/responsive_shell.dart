@@ -45,16 +45,6 @@ class ResponsiveShell extends ConsumerWidget {
           );
         }
 
-        // 计算当前显示索引
-        int selectedIndex = NavigationService.mapBranchIndexToDisplayIndex(
-          navigationShell.currentIndex,
-          navigationSettings,
-        );
-
-        if (selectedIndex >= rootItems.length) {
-          selectedIndex = 0;
-        }
-
         final bool isSmall = Breakpoints.small.isActive(context);
         final bool isLarge = Breakpoints.large.isActive(context);
 
@@ -64,9 +54,10 @@ class ResponsiveShell extends ConsumerWidget {
           navigationSettings,
         );
         
-        // If 'me' is selected, we might want to highlight something else or nothing
-        // for now just cap it.
-        if (selectedRootIndex >= rootItems.length) {
+        // Explicitly check if we are on the 'me' branch
+        final bool isMeSelected = navigationShell.currentIndex == NavigationService.getBranchIndexForItem('me');
+
+        if (isMeSelected || selectedRootIndex >= rootItems.length) {
           selectedRootIndex = -1; // Header handled selection
         }
 
@@ -108,7 +99,17 @@ class ResponsiveShell extends ConsumerWidget {
       color: theme.colorScheme.surface,
       child: Column(
         children: [
-          UserNavigationHeader(isExtended: isLarge),
+          UserNavigationHeader(
+            isExtended: isLarge,
+            isSelected: selectedRootIndex == -1,
+            onTap: () {
+              int branchIndex = NavigationService.getBranchIndexForItem('me');
+              navigationShell.goBranch(
+                branchIndex,
+                initialLocation: branchIndex == navigationShell.currentIndex,
+              );
+            },
+          ),
           const Divider(indent: 12, endIndent: 12),
           Expanded(
             child: ListView(
@@ -177,8 +178,16 @@ class ResponsiveShell extends ConsumerWidget {
                   ),
           ),
         ),
-        if (isSelected) 
-          _buildSidebarSubNavigation(context, ref, item.id, isLarge),
+        ClipRect(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: isSelected 
+                ? _buildSidebarSubNavigation(context, ref, item.id, isLarge)
+                : const SizedBox(width: double.infinity, height: 0),
+          ),
+        ),
         const SizedBox(height: 4),
       ],
     );

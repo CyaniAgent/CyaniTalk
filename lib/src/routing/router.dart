@@ -54,8 +54,25 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/misskey',
-                pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: MisskeyPage()),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const MisskeyPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: animation.drive(
+                          Tween<Offset>(
+                            begin: const Offset(0.0, 0.05),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -63,8 +80,25 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/forum',
-                pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: ForumPage()),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ForumPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: animation.drive(
+                          Tween<Offset>(
+                            begin: const Offset(0.0, 0.05),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -72,8 +106,25 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/cloud',
-                pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: CloudPage()),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const CloudPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: animation.drive(
+                          Tween<Offset>(
+                            begin: const Offset(0.0, 0.05),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -81,8 +132,25 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/messaging',
-                pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: ComingSoonPage()),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ComingSoonPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: animation.drive(
+                          Tween<Offset>(
+                            begin: const Offset(0.0, 0.05),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -90,8 +158,25 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/profile',
-                pageBuilder: (context, state) =>
-                    const NoTransitionPage(child: ProfilePage()),
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  child: const ProfilePage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: animation.drive(
+                          Tween<Offset>(
+                            begin: const Offset(0.0, 0.05),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),

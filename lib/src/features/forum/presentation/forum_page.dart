@@ -77,7 +77,32 @@ class _ForumPageState extends ConsumerState<ForumPage> {
             ),
           ];
         },
-        body: _pages[selectedIndex],
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            final isIncoming = child.key == _pages[selectedIndex].key;
+            final inAnimation = Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(animation);
+            final outAnimation = Tween<Offset>(
+              begin: const Offset(0.0, -0.1),
+              end: Offset.zero,
+            ).animate(animation);
+
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: isIncoming ? inAnimation : outAnimation,
+                // 如果是正在退出的组件，则屏蔽其辅助功能语义，防止 AXTree 报错
+                child: isIncoming ? child : ExcludeSemantics(child: child),
+              ),
+            );
+          },
+          child: _pages[selectedIndex],
+        ),
       ),
     );
   }

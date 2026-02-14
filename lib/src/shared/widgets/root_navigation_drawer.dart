@@ -25,25 +25,41 @@ class RootNavigationDrawer extends ConsumerWidget {
         .where((item) => item.isEnabled && item.id != 'me')
         .toList() ?? [];
 
+    // Actually, selectedRootIndex passed here is already the display index.
+    // Let's refine the logic to match ResponsiveShell.
+    int effectiveSelectedRootIndex = selectedRootIndex;
+    if (selectedRootIndex >= rootItems.length) {
+      effectiveSelectedRootIndex = -1;
+    }
+
     return NavigationDrawer(
       selectedIndex: -1, // We'll manage highlighting manually to support hierarchical view
       onDestinationSelected: (index) {
         // This is called for any destination. We need to distinguish between root and sub.
       },
       children: [
-        UserNavigationHeader(isDrawer: true),
+        UserNavigationHeader(
+          isDrawer: true,
+          isSelected: effectiveSelectedRootIndex == -1,
+          onTap: () {
+            onRootSelected(NavigationService.mapBranchIndexToDisplayIndex(
+              NavigationService.getBranchIndexForItem('me'),
+              navigationSettings!,
+            ));
+          },
+        ),
         const Divider(indent: 12, endIndent: 12),
         
         // Root Sections
         for (int i = 0; i < rootItems.length; i++) ...[
-          _buildRootSection(context, ref, rootItems[i], i),
+          _buildRootSection(context, ref, rootItems[i], i, effectiveSelectedRootIndex),
         ],
       ],
     );
   }
 
-  Widget _buildRootSection(BuildContext context, WidgetRef ref, NavigationItem rootItem, int index) {
-    final isSelected = index == selectedRootIndex;
+  Widget _buildRootSection(BuildContext context, WidgetRef ref, NavigationItem rootItem, int index, int effectiveSelectedRootIndex) {
+    final isSelected = index == effectiveSelectedRootIndex;
     final theme = Theme.of(context);
 
     return Column(
@@ -84,8 +100,16 @@ class RootNavigationDrawer extends ConsumerWidget {
         ),
 
         // Sub-navigation for the selected root
-        if (isSelected) 
-          _buildSubNavigation(context, ref, rootItem.id),
+        ClipRect(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: isSelected 
+                ? _buildSubNavigation(context, ref, rootItem.id)
+                : const SizedBox(width: double.infinity, height: 0),
+          ),
+        ),
         
         const SizedBox(height: 4),
       ],
