@@ -14,6 +14,12 @@ FlarumApi flarumApi(Ref ref) {
   return FlarumApi();
 }
 
+@riverpod
+Future<List<String>> flarumEndpoints(Ref ref) async {
+  final api = ref.watch(flarumApiProvider);
+  return await api.getEndpoints();
+}
+
 @Riverpod(keepAlive: true)
 FlarumRepository flarumRepository(Ref ref) {
   final api = ref.watch(flarumApiProvider);

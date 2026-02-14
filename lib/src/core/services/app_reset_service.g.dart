@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'misskey_streaming_service.dart';
+part of 'app_reset_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,29 +8,31 @@ part of 'misskey_streaming_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 应用程序重置服务
 
-@ProviderFor(MisskeyStreamingService)
-final misskeyStreamingServiceProvider = MisskeyStreamingServiceProvider._();
+@ProviderFor(AppReset)
+final appResetProvider = AppResetProvider._();
 
-final class MisskeyStreamingServiceProvider
-    extends $NotifierProvider<MisskeyStreamingService, void> {
-  MisskeyStreamingServiceProvider._()
+/// 应用程序重置服务
+final class AppResetProvider extends $NotifierProvider<AppReset, void> {
+  /// 应用程序重置服务
+  AppResetProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'misskeyStreamingServiceProvider',
+        name: r'appResetProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$misskeyStreamingServiceHash();
+  String debugGetCreateSourceHash() => _$appResetHash();
 
   @$internal
   @override
-  MisskeyStreamingService create() => MisskeyStreamingService();
+  AppReset create() => AppReset();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(void value) {
@@ -41,10 +43,11 @@ final class MisskeyStreamingServiceProvider
   }
 }
 
-String _$misskeyStreamingServiceHash() =>
-    r'3dda47b737af56c267684b6fb75d1eac9e3d7548';
+String _$appResetHash() => r'161932bdf89ff402bc7ffc992d056890b499cf65';
 
-abstract class _$MisskeyStreamingService extends $Notifier<void> {
+/// 应用程序重置服务
+
+abstract class _$AppReset extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override

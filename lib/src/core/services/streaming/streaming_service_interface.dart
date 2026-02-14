@@ -44,6 +44,9 @@ abstract interface class IMisskeyStreamingService extends IStreamingService {
   /// 订阅特定类型的时间线
   void subscribeToTimeline(String timelineType);
 
+  /// 重新连接
+  void reconnect();
+
   /// 发送原始串流消息
   void sendMessage(Map<String, dynamic> data);
 }

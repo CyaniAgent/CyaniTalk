@@ -101,6 +101,18 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     _cleanup();
   }
 
+  @override
+  void reconnect() {
+    logger.info('MisskeyStreaming: Manually triggering reconnect...');
+    // Store current subscriptions to restore them after connection
+    final subscriptionsToRestore = Set<String>.from(_activeTimelineSubscriptions);
+    _connect().then((_) {
+      for (final channelName in subscriptionsToRestore) {
+        _subscribeToChannel(channelName);
+      }
+    });
+  }
+
   Future<void> _connect() async {
     if (!ref.mounted) return;
 
@@ -204,8 +216,6 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   @override
   void subscribeToTimeline(String timelineType) {
-    if (_channel == null) return;
-
     // Map internal type to Misskey channel name
     final channelName = switch (timelineType) {
       'Home' => 'homeTimeline',
@@ -215,7 +225,11 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       _ => 'homeTimeline',
     };
 
-    if (_activeTimelineSubscriptions.contains(channelName)) return;
+    _subscribeToChannel(channelName);
+  }
+
+  void _subscribeToChannel(String channelName) {
+    if (_channel == null) return;
 
     final msg = jsonEncode({
       'type': 'connect',

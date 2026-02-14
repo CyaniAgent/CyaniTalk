@@ -42,8 +42,45 @@ class MisskeyPage extends ConsumerStatefulWidget {
 /// MisskeyPage的状态管理类
 class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   @override
+  void initState() {
+    super.initState();
+    // Trigger initial refresh for the current sub-page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final selectedIndex = ref.read(misskeySubIndexProvider);
+        _refreshCurrentSubPage(selectedIndex);
+      }
+    });
+  }
+
+  @override
   void dispose() {
     super.dispose();
+  }
+
+  void _refreshCurrentSubPage(int index) {
+    // Only refresh if account is selected
+    final account = ref.read(selectedMisskeyAccountProvider).value;
+    if (account == null) return;
+
+    switch (index) {
+      case 0: // Timeline
+        // MisskeyTimelineNotifier uses 'type' as arg, we need to know current active type
+        // Usually handled by the specific timeline widget building, but we can force it here
+        // if we have a way to track the active type provider.
+        // For now, build handles auto-refresh via loadLatestData with 2s delay.
+        // We can't easily invalidate a parameterized provider without knowing the param.
+        break;
+      case 1: // Clips
+        ref.invalidate(misskeyClipsProvider);
+        break;
+      case 3: // Channels
+        ref.invalidate(misskeyChannelsProvider);
+        break;
+      case 6: // Announcements
+        // Add if there is a provider
+        break;
+    }
   }
 
   /// 所有可用的Misskey页面列表
@@ -198,6 +235,11 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
   Widget build(BuildContext context) {
     final selectedAccountAsync = ref.watch(selectedMisskeyAccountProvider);
     final selectedIndex = ref.watch(misskeySubIndexProvider);
+
+    // Auto-refresh when switching sub-tabs
+    ref.listen(misskeySubIndexProvider, (previous, next) {
+      _refreshCurrentSubPage(next);
+    });
 
     return Scaffold(
       floatingActionButton: selectedIndex == 0

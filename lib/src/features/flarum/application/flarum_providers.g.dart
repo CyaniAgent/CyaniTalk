@@ -50,6 +50,45 @@ final class FlarumApiProvider
 
 String _$flarumApiHash() => r'0b906ab670fafb28b2d983098d525705ba24ab74';
 
+@ProviderFor(flarumEndpoints)
+final flarumEndpointsProvider = FlarumEndpointsProvider._();
+
+final class FlarumEndpointsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          FutureOr<List<String>>
+        >
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  FlarumEndpointsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'flarumEndpointsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$flarumEndpointsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    return flarumEndpoints(ref);
+  }
+}
+
+String _$flarumEndpointsHash() => r'd131e0578177056fc2ec38ca144ce077276b2766';
+
 @ProviderFor(flarumRepository)
 final flarumRepositoryProvider = FlarumRepositoryProvider._();
 
@@ -165,7 +204,7 @@ final class FlarumCurrentUserProvider
   }
 }
 
-String _$flarumCurrentUserHash() => r'6daf552a4ea4c91088cc1d758ca65b7670d411a3';
+String _$flarumCurrentUserHash() => r'39b3c7dd02ca04763d0b310a0ad4eb161d798bca';
 
 @ProviderFor(discussions)
 final discussionsProvider = DiscussionsProvider._();

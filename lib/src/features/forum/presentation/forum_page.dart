@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import '../../../core/api/flarum_api.dart';
+import '../../flarum/application/flarum_providers.dart';
 import '../../../core/navigation/navigation.dart';
 import '../../../core/navigation/sub_navigation_notifier.dart';
 import '../../flarum/presentation/pages/flarum_discussion_page.dart';
@@ -28,13 +28,34 @@ class _ForumPageState extends ConsumerState<ForumPage> {
   final List<String> _titles = const ['Discussions', 'Tags', 'Notifications'];
 
   @override
+  void initState() {
+    super.initState();
+    // Trigger initial refresh for the first tab
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final selectedIndex = ref.read(forumSubIndexProvider);
+        _refreshCurrentSubPage(selectedIndex);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final account = ref.watch(selectedFlarumAccountProvider).asData?.value;
+    final endpointsAsync = ref.watch(flarumEndpointsProvider);
     final selectedIndex = ref.watch(forumSubIndexProvider);
-    final flarumApi = FlarumApi();
+    final flarumApi = ref.watch(flarumApiProvider);
+    
+    // Check if the current account's host is in the endpoints list
+    final bool isEndpointValid = endpointsAsync.maybeWhen(
+      data: (endpoints) => account != null && endpoints.contains('https://${account.host}'),
+      orElse: () => false,
+    );
+
     final hasEndpoint = flarumApi.baseUrl != null;
 
-    if (account == null && !hasEndpoint) {
+    // Real-time detection: if account is not in valid endpoints, treat as not logged in
+    if ((account == null && !hasEndpoint) || (account != null && !isEndpointValid)) {
       return Scaffold(
         appBar: AppBar(
           leading: Breakpoints.small.isActive(context)
@@ -55,6 +76,11 @@ class _ForumPageState extends ConsumerState<ForumPage> {
         ),
       );
     }
+
+    // Auto-refresh when opening the page
+    ref.listen(forumSubIndexProvider, (previous, next) {
+      _refreshCurrentSubPage(next);
+    });
 
     return Scaffold(
       body: NestedScrollView(
@@ -105,5 +131,19 @@ class _ForumPageState extends ConsumerState<ForumPage> {
         ),
       ),
     );
+  }
+
+  void _refreshCurrentSubPage(int index) {
+    switch (index) {
+      case 0:
+        ref.invalidate(discussionsProvider);
+        break;
+      case 1:
+        ref.invalidate(forumInfoProvider);
+        break;
+      case 2:
+        ref.invalidate(flarumNotificationsProvider);
+        break;
+    }
   }
 }
