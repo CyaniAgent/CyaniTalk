@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
@@ -26,6 +27,8 @@ class MediaViewer extends StatefulWidget {
 class _MediaViewerState extends State<MediaViewer> {
   late PageController _pageController;
   int _currentIndex = 0;
+  bool _showControls = true;
+  Timer? _hideControlsTimer;
 
   @override
   void initState() {
@@ -60,6 +63,7 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void dispose() {
     _pageController.dispose();
+    _hideControlsTimer?.cancel();
     // 释放媒体播放器资源
     for (var item in widget.mediaItems) {
       try {
@@ -127,12 +131,15 @@ class _MediaViewerState extends State<MediaViewer> {
                         child: FadeTransition(
                           opacity: curvedAnimation,
                           // 如果是正在退出的组件，则屏蔽其辅助功能语义
-                          child: isIncoming ? child : ExcludeSemantics(child: child),
+                          child: isIncoming
+                              ? child
+                              : ExcludeSemantics(child: child),
                         ),
                       );
                     },
                     child: Container(
                       key: ValueKey<int>(index),
+                      color: Colors.transparent,
                       child: () {
                         if (mediaItem.type == MediaType.image) {
                           return _buildImageViewer(mediaItem, index);
@@ -151,101 +158,128 @@ class _MediaViewerState extends State<MediaViewer> {
               ),
             ),
 
-            // 左侧翻页按钮
-            if (_currentIndex > 0)
+            // 左侧翻页按钮 - 仅在宽屏显示
+            if (_currentIndex > 0 && MediaQuery.of(context).size.width > 600)
               Positioned(
                 left: 16,
                 top: 0,
                 bottom: 0,
                 child: Center(
-                  child: FilledButton.tonal(
-                    onPressed: () {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      minimumSize: const Size(56, 56),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      color: Colors.white.withAlpha(150),
                     ),
-                    child: const Icon(Icons.chevron_left, size: 24),
+                    child: IconButton(
+                      onPressed: () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      icon: const Icon(Icons.chevron_left, size: 24),
+                      style: IconButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        minimumSize: const Size(56, 56),
+                      ),
+                    ),
                   ),
                 ),
               ),
 
-            // 右侧翻页按钮
-            if (_currentIndex < widget.mediaItems.length - 1)
+            // 右侧翻页按钮 - 仅在宽屏显示
+            if (_currentIndex < widget.mediaItems.length - 1 &&
+                MediaQuery.of(context).size.width > 600)
               Positioned(
                 right: 16,
                 top: 0,
                 bottom: 0,
                 child: Center(
-                  child: FilledButton.tonal(
-                    onPressed: () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28),
-                      ),
-                      padding: const EdgeInsets.all(16),
-                      minimumSize: const Size(56, 56),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28),
+                      color: Colors.white.withAlpha(150),
                     ),
-                    child: const Icon(Icons.chevron_right, size: 24),
+                    child: IconButton(
+                      onPressed: () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      icon: const Icon(Icons.chevron_right, size: 24),
+                      style: IconButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        minimumSize: const Size(56, 56),
+                      ),
+                    ),
                   ),
                 ),
               ),
 
-            // 顶部控件
+            // 顶部控件 - 带动画效果
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
               left: 16,
               right: 16,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // 关闭按钮
-                  FilledButton.tonal(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              child: AnimatedOpacity(
+                opacity: _showControls ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  height: _showControls ? null : 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // 关闭按钮 - 半透明圆形样式
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          color: Colors.white.withAlpha(150),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(Icons.arrow_back),
+                          style: IconButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            padding: const EdgeInsets.all(12),
+                          ),
+                        ),
                       ),
-                      padding: const EdgeInsets.all(12),
-                    ),
-                    child: const Icon(Icons.close),
+
+                      // 媒体索引指示器 - 半透明样式
+                      if (widget.mediaItems.length > 1)
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withAlpha(150),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            '${_currentIndex + 1}/${widget.mediaItems.length}',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+
+                      // 占位
+                      const SizedBox(width: 56),
+                    ],
                   ),
-
-                  // 媒体索引指示器 - 遵循MD3规范
-                  if (widget.mediaItems.length > 1)
-                    FilledButton.tonal(
-                      onPressed: () {},
-                      style: FilledButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                      child: Text(
-                        '${_currentIndex + 1}/${widget.mediaItems.length}',
-                      ),
-                    ),
-
-                  // 占位
-                  const SizedBox(width: 60),
-                ],
+                ),
               ),
             ),
           ],
@@ -281,10 +315,45 @@ class _MediaViewerState extends State<MediaViewer> {
     );
   }
 
+  // 重置自动隐藏定时器
+  void _resetHideTimer(MediaItem mediaItem) {
+    _hideControlsTimer?.cancel();
+    if (mediaItem.videoController?.value.isPlaying ?? false) {
+      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) {
+          setState(() {
+            _showControls = false;
+          });
+        }
+      });
+    }
+  }
+
+  // 切换播放/暂停状态
+  void _togglePlayPause(MediaItem mediaItem) {
+    if (mediaItem.videoController == null) return;
+
+    setState(() {
+      if (mediaItem.videoController!.value.isPlaying) {
+        mediaItem.videoController?.pause();
+      } else {
+        mediaItem.videoController?.play();
+        // 启动自动隐藏定时器
+        _resetHideTimer(mediaItem);
+      }
+    });
+  }
+
+  // 格式化时间
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+
   // 构建视频查看器
   Widget _buildVideoViewer(MediaItem mediaItem, int index) {
-    bool showControls = true;
-
     mediaItem.videoController ??=
         VideoPlayerController.networkUrl(Uri.parse(mediaItem.url))
           ..initialize().then((_) {
@@ -292,149 +361,120 @@ class _MediaViewerState extends State<MediaViewer> {
               setState(() {
                 // 初始化完成后播放视频
                 mediaItem.videoController?.play();
+                // 启动自动隐藏定时器
+                _resetHideTimer(mediaItem);
               });
             }
           });
-
-    void togglePlayPause() {
-      if (mediaItem.videoController == null) return;
-
-      setState(() {
-        if (mediaItem.videoController!.value.isPlaying) {
-          mediaItem.videoController?.pause();
-        } else {
-          mediaItem.videoController?.play();
-        }
-      });
-    }
-
-    String formatDuration(Duration duration) {
-      String twoDigits(int n) => n.toString().padLeft(2, '0');
-      final minutes = twoDigits(duration.inMinutes.remainder(60));
-      final seconds = twoDigits(duration.inSeconds.remainder(60));
-      return '$minutes:$seconds';
-    }
 
     return Center(
       child: mediaItem.videoController?.value.isInitialized ?? false
           ? GestureDetector(
               onTap: () {
                 setState(() {
-                  showControls = !showControls;
+                  _showControls = !_showControls;
+                  // 重置自动隐藏定时器
+                  if (_showControls) {
+                    _resetHideTimer(mediaItem);
+                  }
                 });
               },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  AspectRatio(
-                    aspectRatio: mediaItem.videoController!.value.aspectRatio,
-                    child: VideoPlayer(mediaItem.videoController!),
-                  ),
-                  if (showControls)
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withAlpha(150),
-                            Colors.transparent,
-                            Colors.black.withAlpha(150),
+              child: Container(
+                color: Colors.black,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: AspectRatio(
+                        aspectRatio:
+                            mediaItem.videoController!.value.aspectRatio,
+                        child: VideoPlayer(mediaItem.videoController!),
+                      ),
+                    ),
+                    // 底部控制栏 - 带动画效果
+                    AnimatedOpacity(
+                      opacity: _showControls ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        height: _showControls ? null : 0,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // 底部控制栏
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withAlpha(150),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  children: [
+                                    // 进度条
+                                    VideoProgressIndicator(
+                                      mediaItem.videoController!,
+                                      allowScrubbing: true,
+                                      colors: VideoProgressColors(
+                                        playedColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        bufferedColor: Colors.white.withAlpha(
+                                          100,
+                                        ),
+                                        backgroundColor: Colors.white.withAlpha(
+                                          50,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    // 播放/暂停按钮和时间显示
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // 播放/暂停按钮
+                                        IconButton(
+                                          onPressed: () =>
+                                              _togglePlayPause(mediaItem),
+                                          icon: Icon(
+                                            mediaItem
+                                                    .videoController!
+                                                    .value
+                                                    .isPlaying
+                                                ? Icons.pause
+                                                : Icons.play_arrow,
+                                            color: Colors.white,
+                                          ),
+                                          style: IconButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(28),
+                                            ),
+                                            padding: const EdgeInsets.all(8),
+                                          ),
+                                        ),
+                                        // 时间显示
+                                        Text(
+                                          '${_formatDuration(mediaItem.videoController!.value.position)} / ${_formatDuration(mediaItem.videoController!.value.duration)}',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // 顶部空间，保持对称
-                          SizedBox(height: 40),
-
-                          // 中心播放/暂停按钮
-                          IconButton(
-                            icon: Icon(
-                              mediaItem.videoController!.value.isPlaying
-                                  ? Icons.pause_circle
-                                  : Icons.play_circle,
-                              color: Colors.white,
-                              size: 80,
-                            ),
-                            onPressed: togglePlayPause,
-                          ),
-
-                          // 底部控制栏
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withAlpha(150),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withAlpha(50),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                children: [
-                                  // 进度条
-                                  VideoProgressIndicator(
-                                    mediaItem.videoController!,
-                                    allowScrubbing: true,
-                                    colors: VideoProgressColors(
-                                      playedColor: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      bufferedColor: Colors.white.withAlpha(
-                                        100,
-                                      ),
-                                      backgroundColor: Colors.white.withAlpha(
-                                        50,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // 时间显示
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        formatDuration(
-                                          mediaItem
-                                              .videoController!
-                                              .value
-                                              .position,
-                                        ),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      Text(
-                                        formatDuration(
-                                          mediaItem
-                                              .videoController!
-                                              .value
-                                              .duration,
-                                        ),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                ],
+                  ],
+                ),
               ),
             )
           : const Center(child: CircularProgressIndicator()),
@@ -631,7 +671,9 @@ class _MediaViewerState extends State<MediaViewer> {
         );
         mediaItem.cachedPath = cachedPath;
         mediaItem.isCached = true;
-        logger.debug('Media background caching completed for: ${mediaItem.url}');
+        logger.debug(
+          'Media background caching completed for: ${mediaItem.url}',
+        );
       }
 
       // 如果组件已经销毁，不再初始化控制器
@@ -661,7 +703,9 @@ class _MediaViewerState extends State<MediaViewer> {
         // 预加载音频
         mediaItem.audioPlayer = AudioPlayer();
         if (mediaItem.cachedPath != null) {
-          mediaItem.audioPlayer?.setSource(DeviceFileSource(mediaItem.cachedPath!));
+          mediaItem.audioPlayer?.setSource(
+            DeviceFileSource(mediaItem.cachedPath!),
+          );
         } else {
           mediaItem.audioPlayer?.setSource(UrlSource(mediaItem.url));
         }
