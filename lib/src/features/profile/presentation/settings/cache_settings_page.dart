@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/core/utils/cache_manager.dart';
 import 'package:cyanitalk/src/core/services/app_reset_service.dart';
 
@@ -15,16 +16,118 @@ class CacheSettingsPage extends ConsumerStatefulWidget {
 class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   String? _cachePath;
   int _totalCacheSize = 0;
+  int _appTotalUsage = 0;
   Map<CacheCategory, int> _categoryCacheSizes = {};
   Map<CacheCategory, int?> _categoryMaxSizes = {};
   int _maxCacheSize = CacheManager.defaultMaxCacheSize;
   AudioCacheType _audioCacheType = AudioCacheType.temporary;
-  bool _isLoading = true;
+  
+  // 系统级存储统计
+  int _systemTotal = 0;
+  int _systemAvailable = 0;
+  int _systemUsedByOthers = 0;
+  
+  // 分离加载状态
+  bool _isBasicSettingsLoading = true;
+  bool _isStatsLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadCacheSettings();
+  }
+
+  /// 加载缓存设置与真实的系统统计
+  Future<void> _loadCacheSettings() async {
+    // 首先加载基础配置（较快）
+    try {
+      final cacheDir = await cacheManager.getCacheDirectory();
+      final maxSize = await cacheManager.getMaxCacheSize();
+      final audioCacheType = await cacheManager.getAudioCacheType();
+      
+      if (mounted) {
+        setState(() {
+          _cachePath = cacheDir.path;
+          _maxCacheSize = maxSize;
+          _audioCacheType = audioCacheType;
+          _isBasicSettingsLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isBasicSettingsLoading = false);
+      debugPrint('Error loading basic cache settings: $e');
+    }
+
+    // 然后并行加载统计数据（可能较慢，涉及磁盘扫描）
+    try {
+      final results = await Future.wait([
+        cacheManager.getTotalCacheSize(),
+        cacheManager.getAppTotalUsage(),
+        cacheManager.getDeviceStorageStats(),
+      ]);
+
+      final totalSize = results[0] as int;
+      final appUsage = results[1] as int;
+      final systemStats = results[2] as Map<String, int>;
+
+      // 加载各分类缓存大小
+      final categorySizes = <CacheCategory, int>{};
+      final categoryMaxSizes = <CacheCategory, int?>{};
+      for (final category in CacheCategory.values) {
+        categorySizes[category] = await cacheManager.getCategoryCacheSize(category);
+        categoryMaxSizes[category] = await cacheManager.getCategoryMaxSize(category);
+      }
+
+      if (mounted) {
+        setState(() {
+          _totalCacheSize = totalSize;
+          _appTotalUsage = appUsage;
+          _categoryCacheSizes = categorySizes;
+          _categoryMaxSizes = categoryMaxSizes;
+          
+          _systemTotal = systemStats['total'] ?? 0;
+          _systemAvailable = systemStats['available'] ?? 0;
+          
+          // 其他已使用 = 磁盘总已用 (Total - Free) - 本 App 占用
+          final int rawUsedByOthers = (systemStats['total']! - systemStats['available']!) - appUsage;
+          _systemUsedByOthers = rawUsedByOthers > 0 ? rawUsedByOthers : 0;
+          
+          _isStatsLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isStatsLoading = false);
+      debugPrint('Error loading storage stats: $e');
+    }
+  }
+
+  /// 选择自定义缓存目录
+  Future<void> _selectCustomCacheDirectory() async {
+    try {
+      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
+        dialogTitle: '选择缓存目录',
+      );
+
+      if (selectedDirectory != null && mounted) {
+        await cacheManager.setCustomCacheDirectory(selectedDirectory);
+
+        // 重新加载基础设置
+        await _loadCacheSettings();
+
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('缓存目录已更新')));
+        }
+      }
+    } catch (e) {
+      debugPrint('Error selecting cache directory: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('选择缓存目录失败: $e')));
+      }
+    }
   }
 
   /// 重置应用程序
@@ -34,9 +137,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('确认重置应用'),
-            content: const Text(
-              '这将清除所有账户、设置和缓存数据，使应用恢复到首次打开的状态。此操作无法撤销，应用将自动退出。',
-            ),
+            content: Text('这将清除所有账户、设置 and 缓存数据，使应用恢复到首次打开的状态。此操作无法撤销，应用将自动退出。'.tr()),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -54,7 +155,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     if (confirm && mounted) {
       try {
         await ref.read(appResetProvider.notifier).resetApp();
-
+        
         if (mounted) {
           showDialog(
             context: context,
@@ -75,81 +176,10 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('重置失败: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('重置失败: $e')),
+          );
         }
-      }
-    }
-  }
-
-  /// 加载缓存设置
-  Future<void> _loadCacheSettings() async {
-    try {
-      final cacheDir = await cacheManager.getCacheDirectory();
-      final totalSize = await cacheManager.getTotalCacheSize();
-      final maxSize = await cacheManager.getMaxCacheSize();
-      final audioCacheType = await cacheManager.getAudioCacheType();
-
-      // 加载各分类缓存大小
-      final categorySizes = <CacheCategory, int>{};
-      // 加载各分类最大缓存大小
-      final categoryMaxSizes = <CacheCategory, int?>{};
-      for (final category in CacheCategory.values) {
-        categorySizes[category] = await cacheManager.getCategoryCacheSize(
-          category,
-        );
-        categoryMaxSizes[category] = await cacheManager.getCategoryMaxSize(
-          category,
-        );
-      }
-
-      if (mounted) {
-        setState(() {
-          _cachePath = cacheDir.path;
-          _totalCacheSize = totalSize;
-          _categoryCacheSizes = categorySizes;
-          _categoryMaxSizes = categoryMaxSizes;
-          _maxCacheSize = maxSize;
-          _audioCacheType = audioCacheType;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        debugPrint('Error loading cache settings: $e');
-      }
-    }
-  }
-
-  /// 选择自定义缓存目录
-  Future<void> _selectCustomCacheDirectory() async {
-    try {
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: '选择缓存目录',
-      );
-
-      if (selectedDirectory != null && mounted) {
-        await cacheManager.setCustomCacheDirectory(selectedDirectory);
-
-        // 重新加载设置
-        await _loadCacheSettings();
-
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('缓存目录已更新')));
-        }
-      }
-    } catch (e) {
-      debugPrint('Error selecting cache directory: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('选择缓存目录失败: $e')));
       }
     }
   }
@@ -179,8 +209,8 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     if (confirm) {
       try {
         await cacheManager.clearAllCache();
-
-        // 重新加载缓存大小
+        // 重新触发统计加载
+        setState(() => _isStatsLoading = true);
         await _loadCacheSettings();
 
         if (mounted) {
@@ -224,8 +254,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     if (confirm) {
       try {
         await cacheManager.clearCategoryCache(category);
-
-        // 重新加载缓存大小
+        setState(() => _isStatsLoading = true);
         await _loadCacheSettings();
 
         if (mounted) {
@@ -317,9 +346,8 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   Future<void> _setCategoryMaxSize(CacheCategory category) async {
     final currentSize = _categoryMaxSizes[category];
     final TextEditingController controller = TextEditingController(
-      text: currentSize != null
-          ? (currentSize / (1024 * 1024)).toStringAsFixed(0)
-          : '',
+      text:
+          currentSize != null ? (currentSize / (1024 * 1024)).toStringAsFixed(0) : '',
     );
 
     bool? confirmed = await showDialog<bool>(
@@ -359,7 +387,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     if (confirmed == true) {
       try {
         if (controller.text.isEmpty) {
-          // 留空表示使用全局设置
+          // 留空逻辑
         } else {
           final sizeInMB = double.tryParse(controller.text);
           if (sizeInMB != null && sizeInMB > 0) {
@@ -491,7 +519,6 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
               ),
             )
             .then((_) {
-              // 返回后重新加载缓存大小
               _loadCacheSettings();
             });
       }
@@ -503,6 +530,175 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         ).showSnackBar(SnackBar(content: Text('加载缓存文件失败: $e')));
       }
     }
+  }
+
+  /// 构建多层级存储进度条 (基于实时 OS 统计)
+  Widget _buildStorageBar() {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            'storage_usage_title'.tr(),
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          elevation: 0,
+          color: theme.colorScheme.surfaceContainerLow,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: _isStatsLoading 
+              ? _buildLoadingStats()
+              : Column(
+                  children: [
+                    // 多层堆叠进度条
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        height: 28,
+                        width: double.infinity,
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Stack(
+                          children: [
+                            // 底层：其他应用占用 (Others + App)
+                            FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: ((_systemUsedByOthers + _appTotalUsage) / _systemTotal).clamp(0.0, 1.0),
+                              child: Container(color: theme.colorScheme.secondaryContainer),
+                            ),
+                            // 顶层：本应用占用 (App Only)
+                            FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor: (_appTotalUsage / _systemTotal).clamp(0.0, 1.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primary,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.colorScheme.primary.withAlpha(120),
+                                      blurRadius: 8,
+                                      offset: const Offset(2, 0),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    // 详细图例
+                    _buildUsageInfoItem(
+                      'storage_usage_app'.tr(),
+                      _formatBytes(_appTotalUsage),
+                      theme.colorScheme.primary,
+                      ((_appTotalUsage / _systemTotal) * 100).toStringAsFixed(2),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildUsageInfoItem(
+                      'storage_usage_others'.tr(),
+                      _formatBytes(_systemUsedByOthers),
+                      theme.colorScheme.secondaryContainer,
+                      ((_systemUsedByOthers / _systemTotal) * 100).toStringAsFixed(1),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildUsageInfoItem(
+                      'storage_usage_free'.tr(),
+                      _formatBytes(_systemAvailable),
+                      theme.colorScheme.surfaceContainerHighest,
+                      ((_systemAvailable / _systemTotal) * 100).toStringAsFixed(1),
+                    ),
+                    const Divider(height: 32),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'storage_total_capacity'.tr(),
+                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                        ),
+                        Text(
+                          _formatBytes(_systemTotal),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'JetBrainsMono',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingStats() {
+    final theme = Theme.of(context);
+    final calculatingText = 'common_calculating'.tr();
+    
+    return Column(
+      children: [
+        // 灰色的进度条占位
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            height: 28,
+            width: double.infinity,
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: LinearProgressIndicator(
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              color: theme.colorScheme.primary.withAlpha(50),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        _buildUsageInfoItem('storage_usage_app'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.00'),
+        const SizedBox(height: 12),
+        _buildUsageInfoItem('storage_usage_others'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
+        const SizedBox(height: 12),
+        _buildUsageInfoItem('storage_usage_free'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
+        const Divider(height: 32),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('storage_total_capacity'.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+            Text(calculatingText, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUsageInfoItem(String label, String size, Color color, String percent) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(label, style: theme.textTheme.bodyMedium),
+        ),
+        Text(
+          _isStatsLoading ? size : '$size ($percent%)',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontFamily: 'JetBrainsMono',
+          ),
+        ),
+      ],
+    );
   }
 
   /// 获取分类名称
@@ -528,11 +724,17 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('缓存设置')),
-      body: _isLoading
+      appBar: AppBar(title: const Text('存储设置')),
+      body: _isBasicSettingsLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
+                const SizedBox(height: 12),
+                // 实时存储占用监控
+                _buildStorageBar(),
+                
+                const Divider(indent: 16, endIndent: 16, height: 32),
+
                 // 缓存路径设置
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -551,16 +753,17 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                         children: [
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(12.0),
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.outline,
+                                  color: Theme.of(context).colorScheme.outlineVariant,
                                 ),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 _cachePath ?? '未知',
                                 overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 13),
                               ),
                             ),
                           ),
@@ -575,9 +778,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                   ),
                 ),
 
-                const Divider(indent: 16, endIndent: 16),
+                const Divider(indent: 16, endIndent: 16, height: 32),
 
-                // 缓存大小设置
+                // 缓存控制
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -587,30 +790,31 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '缓存大小设置',
+                        '缓存控制',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
                       _buildSettingRow(
-                        '当前总缓存大小',
-                        _formatBytes(_totalCacheSize),
+                        '本应用缓存数据',
+                        _isStatsLoading ? 'common_calculating'.tr() : _formatBytes(_totalCacheSize),
                       ),
-                      _buildSettingRow('最大缓存大小', _formatBytes(_maxCacheSize)),
+                      _buildSettingRow('单类别最大上限', _formatBytes(_maxCacheSize)),
                       const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: _setMaximumCacheSize,
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _setMaximumCacheSize,
+                          icon: const Icon(Icons.speed_outlined),
+                          label: const Text('调整最大缓存限额'),
                         ),
-                        child: const Text('设置最大缓存大小'),
                       ),
                     ],
                   ),
                 ),
 
-                const Divider(indent: 16, endIndent: 16),
+                const Divider(indent: 16, endIndent: 16, height: 32),
 
-                // 音频缓存类型设置
+                // 音频缓存设置
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -625,31 +829,24 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                       ),
                       const SizedBox(height: 12),
                       _buildSettingRow(
-                        '音频缓存类型',
+                        '当前缓存策略',
                         _audioCacheType == AudioCacheType.persistent
                             ? '持久化'
                             : '非持久化',
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _audioCacheType == AudioCacheType.persistent
-                            ? '音频文件会一直保留，不会自动清理'
-                            : '音频文件会根据缓存大小限制自动清理',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
                       const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: _setAudioCacheType,
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.tonal(
+                          onPressed: _setAudioCacheType,
+                          child: const Text('管理音频缓存策略'),
                         ),
-                        child: const Text('设置音频缓存类型'),
                       ),
                     ],
                   ),
                 ),
 
-                const Divider(indent: 16, endIndent: 16),
+                const Divider(indent: 16, endIndent: 16, height: 32),
 
                 // 缓存分类管理
                 Padding(
@@ -661,7 +858,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '缓存分类管理',
+                        '内容分类管理',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const SizedBox(height: 12),
@@ -669,87 +866,63 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                         final category = entry.key;
                         final size = entry.value;
                         final maxSize = _categoryMaxSizes[category];
-                        return Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(_getCategoryName(category)),
-                                Row(
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: Icon(_getCategoryIcon(category)),
+                                title: Text(_getCategoryName(category)),
+                                subtitle: Text('${_isStatsLoading ? 'common_calculating'.tr() : _formatBytes(size)} / ${maxSize != null ? _formatBytes(maxSize) : "无限制"}'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(_formatBytes(size)),
-                                    const SizedBox(width: 16),
                                     IconButton(
                                       onPressed: () =>
                                           _clearCategoryCache(category),
                                       icon: const Icon(Icons.delete_outline),
-                                      tooltip:
-                                          '清除${_getCategoryName(category)}缓存',
                                     ),
                                     IconButton(
                                       onPressed: () =>
                                           _setCategoryMaxSize(category),
                                       icon: const Icon(Icons.settings_outlined),
-                                      tooltip:
-                                          '设置${_getCategoryName(category)}最大大小',
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                            if (maxSize != null)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16),
-                                child: _buildSettingRow(
-                                  '最大缓存大小',
-                                  _formatBytes(maxSize),
-                                ),
                               ),
-                            const SizedBox(height: 12),
-                          ],
+                            ],
+                          ),
                         );
                       }),
-                      FilledButton(
-                        onPressed: _clearAllCache,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text('清除所有缓存'),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Divider(indent: 16, endIndent: 16),
-
-                // 缓存文件管理
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '缓存文件管理',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
                       const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: _viewCacheFiles,
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text('查看缓存文件列表'),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _viewCacheFiles,
+                              icon: const Icon(Icons.list_alt_outlined),
+                              label: const Text('详细文件列表'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: FilledButton.tonalIcon(
+                              onPressed: _clearAllCache,
+                              icon: const Icon(Icons.cleaning_services_outlined),
+                              label: const Text('清理全部缓存'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
 
-                const Divider(indent: 16, endIndent: 16),
+                const Divider(indent: 16, endIndent: 16, height: 32),
 
                 // 危险区域
                 Padding(
@@ -762,11 +935,10 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                     children: [
                       Text(
                         '危险区域',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -779,12 +951,13 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                             foregroundColor: Colors.red,
                             side: const BorderSide(color: Colors.red),
                             padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置。',
+                        'storage_reset_app_warning'.tr(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.red.withAlpha(204),
                         ),
@@ -793,32 +966,21 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
-
-                // 说明信息
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '缓存用于存储音频、视频、图片等多媒体文件，以提升加载速度并减少网络流量消耗。',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '系统会自动管理缓存大小，当缓存达到上限时，会删除最旧的缓存文件。',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 32),
               ],
             ),
     );
+  }
+
+  IconData _getCategoryIcon(CacheCategory category) {
+    switch (category) {
+      case CacheCategory.audio:
+        return Icons.audiotrack_outlined;
+      case CacheCategory.image:
+        return Icons.image_outlined;
+      case CacheCategory.other:
+        return Icons.more_horiz_outlined;
+    }
   }
 
   /// 将字节数转换为可读格式
@@ -872,17 +1034,18 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
           return ListTile(
             leading: Checkbox(
               value: isSelected,
-              onChanged: item.canBeCleared
-                  ? (value) {
-                      setState(() {
-                        if (value == true) {
-                          _selectedItems.add(item);
-                        } else {
-                          _selectedItems.remove(item);
-                        }
-                      });
-                    }
-                  : null,
+              onChanged:
+                  item.canBeCleared
+                      ? (value) {
+                        setState(() {
+                          if (value == true) {
+                            _selectedItems.add(item);
+                          } else {
+                            _selectedItems.remove(item);
+                          }
+                        });
+                      }
+                      : null,
             ),
             title: Text(item.name),
             subtitle: Column(
@@ -895,28 +1058,30 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
                   const Text('不可清除', style: TextStyle(color: Colors.red)),
               ],
             ),
-            onTap: item.canBeCleared
-                ? () {
-                    setState(() {
-                      if (isSelected) {
-                        _selectedItems.remove(item);
-                      } else {
-                        _selectedItems.add(item);
-                      }
-                    });
-                  }
-                : null,
+            onTap:
+                item.canBeCleared
+                    ? () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedItems.remove(item);
+                        } else {
+                          _selectedItems.add(item);
+                        }
+                      });
+                    }
+                    : null,
           );
         },
       ),
-      bottomNavigationBar: _selectedItems.isNotEmpty
-          ? BottomAppBar(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text('已选择 ${_selectedItems.length} 个文件'),
-              ),
-            )
-          : null,
+      bottomNavigationBar:
+          _selectedItems.isNotEmpty
+              ? BottomAppBar(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text('已选择 ${_selectedItems.length} 个文件'),
+                ),
+              )
+              : null,
     );
   }
 
@@ -927,7 +1092,9 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('确认删除'),
-            content: Text('确定要删除选中的 ${_selectedItems.length} 个缓存文件吗？此操作无法撤销。'),
+            content: Text(
+              '确定要删除选中的 ${_selectedItems.length} 个缓存文件吗？此操作无法撤销。',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),

@@ -184,6 +184,7 @@
   "flarum_post_details_loading": "加载讨论内容...喵~",
   "flarum_tags_no_tags": "没有找到标签喵~",
   "flarum_drawer_menu_title": "Flarum 菜单喵~",
+  "common_calculating": "计算中...喵~",
   "menu_user_profile": "用户页面喵~",
   "menu_settings": "设置喵~",
   "menu_logout": "退出登录喵~",
@@ -314,5 +315,11 @@
   "messaging_error_title": "加载失败喵~",
   "messaging_error_description": "无法加载消息列表，请检查网络连接后重试喵~",
   "messaging_error_retry": "重试喵~",
-  "navigation_no_items": "没有可用的导航项喵~"
+  "navigation_no_items": "没有可用的导航项喵~",
+  "storage_usage_title": "存储占用情况喵~",
+  "storage_usage_app": "本 App 已使用喵~",
+  "storage_usage_others": "其他已使用喵~",
+  "storage_usage_free": "剩余空间喵~",
+  "storage_total_capacity": "总存储容量喵~",
+  "storage_reset_app_warning": "注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置喵~"
 }

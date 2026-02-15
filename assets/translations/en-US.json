@@ -358,10 +358,17 @@
   "search_misskey_posts_disabled": "Search Posts feature is disabled on this instance",
   "search_misskey_users_disabled": "Search Users feature is disabled on this instance",
   "search_feature_disabled_hint": "Please contact instance administrator for more information",
+  "common_calculating": "Calculating...",
   "menu_user_profile": "User Profile",
   "menu_settings": "Settings",
   "menu_logout": "Log Out",
   "menu_logout_confirm": "Confirm Log Out",
   "menu_logout_confirm_message": "Are you sure you want to log out of all accounts?",
-  "menu_login": "Log In"
+  "menu_login": "Log In",
+  "storage_usage_title": "Storage Usage",
+  "storage_usage_app": "App Used",
+  "storage_usage_others": "Others Used",
+  "storage_usage_free": "Free Space",
+  "storage_total_capacity": "Total Capacity",
+  "storage_reset_app_warning": "Note: Resetting will clear all logged-in accounts, personalized settings, cache files, and endpoint configurations."
 }

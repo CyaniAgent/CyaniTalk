@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:path_provider/path_provider.dart';
@@ -513,6 +514,98 @@ class CacheManager {
     } catch (e) {
       return 0;
     }
+  }
+
+  /// 获取设备存储统计信息 (总空间, 已用空间, 剩余空间)
+  /// 根据操作系统逻辑实时监测盘符或分区空间
+  Future<Map<String, int>> getDeviceStorageStats() async {
+    try {
+      if (Platform.isWindows) {
+        // Windows: 检查安装所在的盘符 (如 D:\)
+        final String drive = Platform.resolvedExecutable.substring(0, 2); // 获取 "C:" 或 "D:"
+        final result = await Process.run('powershell', [
+          '-Command',
+          'Get-CimInstance Win32_LogicalDisk -Filter "DeviceID=\'$drive\'" | Select-Object Size, FreeSpace | ConvertTo-Json'
+        ]);
+        
+        if (result.exitCode == 0) {
+          final Map<String, dynamic> data = jsonDecode(result.stdout);
+          final int total = data['Size'] ?? 0;
+          final int free = data['FreeSpace'] ?? 0;
+          return {
+            'total': total,
+            'available': free,
+            'usedByOthers': total - free, // 这里暂存，后面在 UI 层会减去本 App 占用的部分
+          };
+        }
+      } else {
+        // macOS, Linux, Android, iOS: 检查目录所在分区
+        final dir = await getApplicationDocumentsDirectory();
+        final result = await Process.run('df', ['-k', dir.path]);
+        
+        if (result.exitCode == 0) {
+          final lines = result.stdout.toString().split('\n');
+          if (lines.length > 1) {
+            final parts = lines[1].split(RegExp(r'\s+'));
+            if (parts.length >= 4) {
+              final int total = (int.tryParse(parts[1]) ?? 0) * 1024;
+              final int available = (int.tryParse(parts[3]) ?? 0) * 1024;
+              return {
+                'total': total,
+                'available': available,
+                'usedByOthers': total - available,
+              };
+            }
+          }
+        }
+      }
+    } catch (e) {
+      logger.error('CacheManager: Failed to get storage stats', e);
+    }
+    
+    // Fallback: 实在获取不到时返回 0，避免虚假数据
+    return {'total': 0, 'available': 0, 'usedByOthers': 0};
+  }
+
+  /// 获取本 App 占用的总空间 (应用二进制 + 配置文件 + 缓存)
+  Future<int> getAppTotalUsage() async {
+    int totalUsage = 0;
+    try {
+      // 1. 获取安装/执行目录占用 (Desktop)
+      final exeDir = Directory(Platform.resolvedExecutable).parent;
+      totalUsage += await _getDirectorySize(exeDir);
+
+      // 2. 获取文档目录占用
+      final docDir = await getApplicationDocumentsDirectory();
+      totalUsage += await _getDirectorySize(docDir);
+
+      // 3. 获取支持目录占用
+      final supportDir = await getApplicationSupportDirectory();
+      totalUsage += await _getDirectorySize(supportDir);
+
+      // 4. 临时/缓存目录占用 (通常已包含在 getTotalCacheSize 中，但为了严谨单独计算)
+      final tempDir = await getTemporaryDirectory();
+      totalUsage += await _getDirectorySize(tempDir);
+      
+    } catch (e) {
+      logger.warning('CacheManager: Error calculating app total usage', e);
+    }
+    return totalUsage;
+  }
+
+  /// 递归计算目录大小
+  Future<int> _getDirectorySize(Directory directory) async {
+    int size = 0;
+    try {
+      if (await directory.exists()) {
+        await for (final entity in directory.list(recursive: true, followLinks: false)) {
+          if (entity is File) {
+            size += await entity.length();
+          }
+        }
+      }
+    } catch (_) {}
+    return size;
   }
 
   /// 获取指定类别的缓存大小

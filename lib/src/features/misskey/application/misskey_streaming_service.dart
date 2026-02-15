@@ -30,6 +30,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
   int _reconnectAttempts = 0;
+  static const int _maxReconnectAttempts = 5;
   StreamingStatus _status = StreamingStatus.disconnected;
 
   @override
@@ -166,12 +167,19 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   void _handleDisconnect(Account account) {
     _reconnectTimer?.cancel();
-    // Exponential backoff
-    final delay = Duration(seconds: (2 + _reconnectAttempts * 2).clamp(2, 30));
+    
+    if (_reconnectAttempts >= _maxReconnectAttempts) {
+      logger.error('MisskeyStreaming: Maximum reconnection attempts reached ($_maxReconnectAttempts). Stopping automatic retry.');
+      _updateStatus(StreamingStatus.error);
+      return;
+    }
+
+    // 更加积极的重连策略：1s, 2s, 4s, 8s, 16s
+    final delay = Duration(seconds: (1 << _reconnectAttempts));
     _reconnectAttempts++;
 
     logger.info(
-      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts)',
+      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts/$_maxReconnectAttempts)',
     );
     _reconnectTimer = Timer(delay, () {
       if (!ref.mounted) return;

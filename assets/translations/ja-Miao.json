@@ -298,5 +298,12 @@
   "navigation_no_items": "利用可能なナビゲーションアイテムがありませんにゃ～",
   "common_retry": "再試行にゃ～",
   "common_error": "エラーにゃ～",
-  "common_refresh_stage": "ステージをリフレッシュにゃ～"
+  "common_refresh_stage": "ステージをリフレッシュにゃ～",
+  "common_calculating": "計算中...にゃ～",
+  "storage_usage_title": "ストレージ使用状況にゃ～",
+  "storage_usage_app": "アプリの使用量にゃ～",
+  "storage_usage_others": "その他の使用量にゃ～",
+  "storage_usage_free": "空き容量にゃ～",
+  "storage_total_capacity": "総ストレージ容量にゃ～",
+  "storage_reset_app_warning": "注意：リセット操作により、すべてのログイン済みアカウント、パーソナライズ設定、キャッシュファイル、およびエンドポイント構成が消去されますにゃ～"
 }
