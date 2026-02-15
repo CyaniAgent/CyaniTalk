@@ -4,8 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/utils/logger.dart';
 import '../../application/auth_service.dart';
 import '../../../../core/api/flarum_api.dart';
-import '../../../../core/api/juhe_auth_api.dart';
-import '../juhe_auth_page.dart';
 
 /// 统一的添加账户或端点底部表单
 class AddAccountBottomSheet {
@@ -39,7 +37,6 @@ enum _AddAccountStep {
   misskeyLogin,
   flarumLogin,
   flarumEndpoint,
-  flarumSocialLogin,
   misskeyCheckAuth,
 }
 
@@ -117,9 +114,6 @@ class _AddAccountBottomSheetContentState
       case _AddAccountStep.flarumEndpoint:
         title = 'auth_add_account_flarum_endpoint_title'.tr();
         break;
-      case _AddAccountStep.flarumSocialLogin:
-        title = 'auth_login_wechat'.tr();
-        break;
     }
 
     return Row(
@@ -155,8 +149,6 @@ class _AddAccountBottomSheetContentState
         return _buildFlarumLoginStep();
       case _AddAccountStep.flarumEndpoint:
         return _buildFlarumEndpointStep();
-      case _AddAccountStep.flarumSocialLogin:
-        return _buildFlarumSocialLoginStep();
     }
   }
 
@@ -265,186 +257,6 @@ class _AddAccountBottomSheetContentState
     );
   }
 
-  Widget _buildFlarumSocialLoginStep() {
-    return SingleChildScrollView(
-      key: const ValueKey('flarum_social'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'auth_flarum_host_hint'.tr(),
-            style: Theme.of(context).textTheme.bodyLarge,
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _flarumHostController,
-            decoration: InputDecoration(
-              labelText: 'auth_flarum_host'.tr(),
-              hintText: 'flarum.imikufans.cn',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              prefixIcon: const Icon(Icons.language),
-              prefixText: 'https://',
-            ),
-            autofocus: true,
-          ),
-          const SizedBox(height: 32),
-          FilledButton.icon(
-            onPressed: _loading ? null : () => _checkAndStartWeChatLogin(),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: _loading
-                ? const SizedBox.shrink()
-                : const Icon(Icons.arrow_forward),
-            label: _loading
-                ? SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  )
-                : Text('auth_next'.tr()),
-          ),
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: _loading
-                ? null
-                : () {
-                    // 重置为非快速登录模式，以便返回Flarum登录界面时显示正确的选项
-                    setState(() {
-                      _isQuickLogin = false;
-                      _step = _AddAccountStep.flarumLogin;
-                    });
-                  },
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: const Icon(Icons.arrow_back),
-            label: Text('auth_cancel'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _checkAndStartWeChatLogin() async {
-    final host = _flarumHostController.text.trim();
-    if (host.isEmpty) return;
-
-    // Normalize host
-    String fullUrl = host;
-    if (!host.startsWith('http')) {
-      fullUrl = 'https://$host';
-    }
-
-    setState(() => _loading = true);
-    try {
-      // 创建FlarumApi实例并设置基础URL
-      final flarumApi = FlarumApi();
-      flarumApi.setBaseUrl(fullUrl);
-
-      // 获取Clogin OAuth配置
-      final cloginConfig = await flarumApi.getCloginConfig();
-
-      if (cloginConfig == null ||
-          cloginConfig['app_id'] == null ||
-          cloginConfig['app_key'] == null) {
-        if (mounted) {
-          setState(() => _loading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('auth_wechat_config_not_found'.tr()),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-        return;
-      }
-
-      // 使用动态配置创建JuheAuthApi
-      final juheApi = JuheAuthApi(
-        appid: cloginConfig['app_id']!,
-        appkey: cloginConfig['app_key']!,
-        apiurl: cloginConfig['api_url'] ?? 'https://u.cccyun.cc/',
-      );
-
-      if (mounted) {
-        setState(() => _loading = false);
-
-        final result = await Navigator.push<Map<String, dynamic>>(
-          context,
-          MaterialPageRoute(
-            builder: (context) => JuheAuthPage(type: 'wx', api: juheApi),
-          ),
-        );
-
-        if (result != null && result.containsKey('social_uid')) {
-          _loginWithSocial(fullUrl, result, 'wx');
-        } else if (result != null && result.containsKey('error')) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Login error: ${result['error']}')),
-            );
-          }
-        }
-      }
-    } catch (e) {
-      logger.error('AddAccountBottomSheet: Error getting Clogin config', e);
-      if (mounted) {
-        setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('auth_wechat_config_error'.tr()),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _loginWithSocial(
-    String host,
-    Map<String, dynamic> socialData,
-    String type,
-  ) async {
-    setState(() => _loading = true);
-    try {
-      await ref
-          .read(authServiceProvider.notifier)
-          .loginToFlarumWithSocial(
-            host,
-            socialData['social_uid'],
-            type,
-            nickname: socialData['nickname'],
-            avatarUrl: socialData['faceimg'],
-          );
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('auth_flarum_linked'.tr())));
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Social login failed: $e')));
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
   Widget _buildStyledCard({
     required Widget icon,
     required String title,
@@ -453,7 +265,6 @@ class _AddAccountBottomSheetContentState
     required VoidCallback onTap,
     required bool isVertical,
   }) {
-    final theme = Theme.of(context);
     return Card(
       elevation: 0,
       clipBehavior: Clip.antiAlias,
@@ -476,14 +287,14 @@ class _AddAccountBottomSheetContentState
                     const SizedBox(height: 12),
                     Text(
                       title,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -506,14 +317,14 @@ class _AddAccountBottomSheetContentState
                         children: [
                           Text(
                             title,
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             subtitle,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -521,7 +332,7 @@ class _AddAccountBottomSheetContentState
                     ),
                     Icon(
                       Icons.chevron_right,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -638,7 +449,6 @@ class _AddAccountBottomSheetContentState
   }
 
   Widget _buildFlarumLoginStep() {
-    final theme = Theme.of(context);
     return SingleChildScrollView(
       key: const ValueKey('flarum'),
       child: Column(
@@ -713,43 +523,6 @@ class _AddAccountBottomSheetContentState
                 : Text('auth_login'.tr()),
           ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              const Expanded(child: Divider()),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'auth_or'.tr(),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              ),
-              const Expanded(child: Divider()),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // WeChat Login Button
-          OutlinedButton.icon(
-            onPressed: _loading
-                ? null
-                : () =>
-                      setState(() => _step = _AddAccountStep.flarumSocialLogin),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              side: BorderSide(
-                color: const Color(0xFF07C160).withValues(alpha: 0.5),
-              ),
-              foregroundColor: const Color(0xFF07C160),
-            ),
-            icon: const Icon(Icons.wechat),
-            label: Text('auth_login_wechat'.tr()),
-          ),
-          const SizedBox(height: 12),
 
           // Quick Login to iMikufans Button
           OutlinedButton.icon(

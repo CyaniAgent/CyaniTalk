@@ -68,7 +68,16 @@ GoRouter goRouter(Ref ref) {
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: child,
+                        child: AnimatedBuilder(
+                          animation: secondaryAnimation,
+                          builder: (context, child) {
+                            return ExcludeSemantics(
+                              excluding: !secondaryAnimation.isDismissed,
+                              child: child!,
+                            );
+                          },
+                          child: child,
+                        ),
                       ),
                     );
                   },
@@ -94,7 +103,16 @@ GoRouter goRouter(Ref ref) {
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: child,
+                        child: AnimatedBuilder(
+                          animation: secondaryAnimation,
+                          builder: (context, child) {
+                            return ExcludeSemantics(
+                              excluding: !secondaryAnimation.isDismissed,
+                              child: child!,
+                            );
+                          },
+                          child: child,
+                        ),
                       ),
                     );
                   },
@@ -120,7 +138,16 @@ GoRouter goRouter(Ref ref) {
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: child,
+                        child: AnimatedBuilder(
+                          animation: secondaryAnimation,
+                          builder: (context, child) {
+                            return ExcludeSemantics(
+                              excluding: !secondaryAnimation.isDismissed,
+                              child: child!,
+                            );
+                          },
+                          child: child,
+                        ),
                       ),
                     );
                   },
@@ -146,7 +173,16 @@ GoRouter goRouter(Ref ref) {
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: child,
+                        child: AnimatedBuilder(
+                          animation: secondaryAnimation,
+                          builder: (context, child) {
+                            return ExcludeSemantics(
+                              excluding: !secondaryAnimation.isDismissed,
+                              child: child!,
+                            );
+                          },
+                          child: child,
+                        ),
                       ),
                     );
                   },
@@ -172,7 +208,16 @@ GoRouter goRouter(Ref ref) {
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: child,
+                        child: AnimatedBuilder(
+                          animation: secondaryAnimation,
+                          builder: (context, child) {
+                            return ExcludeSemantics(
+                              excluding: !secondaryAnimation.isDismissed,
+                              child: child!,
+                            );
+                          },
+                          child: child,
+                        ),
                       ),
                     );
                   },

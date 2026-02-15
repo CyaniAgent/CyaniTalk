@@ -62,10 +62,16 @@ class _MediaViewerState extends State<MediaViewer> {
     _pageController.dispose();
     // 释放媒体播放器资源
     for (var item in widget.mediaItems) {
-      if (item.type == MediaType.video && item.videoController != null) {
-        item.videoController?.dispose();
-      } else if (item.type == MediaType.audio && item.audioPlayer != null) {
-        item.audioPlayer?.dispose();
+      try {
+        if (item.type == MediaType.video && item.videoController != null) {
+          item.videoController?.dispose();
+          item.videoController = null;
+        } else if (item.type == MediaType.audio && item.audioPlayer != null) {
+          item.audioPlayer?.dispose();
+          item.audioPlayer = null;
+        }
+      } catch (e) {
+        logger.warning('Error disposing media resources', e);
       }
     }
     super.dispose();
@@ -106,6 +112,9 @@ class _MediaViewerState extends State<MediaViewer> {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
                     transitionBuilder: (child, animation) {
+                      // 检查当前 child 是否为当前索引的页面（incoming）
+                      final isIncoming = child.key == ValueKey<int>(index);
+
                       // 使用非线性动画曲线
                       final curvedAnimation = CurvedAnimation(
                         parent: animation,
@@ -117,7 +126,8 @@ class _MediaViewerState extends State<MediaViewer> {
                         scale: curvedAnimation,
                         child: FadeTransition(
                           opacity: curvedAnimation,
-                          child: child,
+                          // 如果是正在退出的组件，则屏蔽其辅助功能语义
+                          child: isIncoming ? child : ExcludeSemantics(child: child),
                         ),
                       );
                     },
@@ -433,13 +443,19 @@ class _MediaViewerState extends State<MediaViewer> {
 
   // 构建音频播放器
   Widget _buildAudioViewer(MediaItem mediaItem, int index) {
+    if (mediaItem.url.isEmpty) {
+      return const Center(child: Text('Invalid audio URL'));
+    }
+
     if (mediaItem.audioPlayer == null) {
       mediaItem.audioPlayer = AudioPlayer();
       // 预加载并播放音频
       mediaItem.audioPlayer
-          ?.setSourceUrl(mediaItem.url)
+          ?.setSource(UrlSource(mediaItem.url))
           .then((_) {
-            mediaItem.audioPlayer?.resume();
+            if (mounted) {
+              mediaItem.audioPlayer?.resume();
+            }
           })
           .catchError((error) {
             logger.error('Error loading audio', error);
@@ -602,17 +618,23 @@ class _MediaViewerState extends State<MediaViewer> {
 
   // 预加载单个媒体
   void _preloadSingleMedia(MediaItem mediaItem) async {
+    if (mediaItem.url.isEmpty) return;
+
     try {
       // 检查是否已经缓存
       if (!mediaItem.isCached) {
         // 使用CacheManager缓存媒体文件
-        mediaItem.cachedPath = await cacheManager.cacheFile(
+        // 这个异步操作即使在MediaViewer关闭后也会在后台继续完成
+        final cachedPath = await cacheManager.cacheFile(
           mediaItem.url,
           mediaItem.cacheCategory,
         );
+        mediaItem.cachedPath = cachedPath;
         mediaItem.isCached = true;
+        logger.debug('Media background caching completed for: ${mediaItem.url}');
       }
 
+      // 如果组件已经销毁，不再初始化控制器
       if (!mounted) return;
 
       if (mediaItem.type == MediaType.image) {
@@ -639,9 +661,9 @@ class _MediaViewerState extends State<MediaViewer> {
         // 预加载音频
         mediaItem.audioPlayer = AudioPlayer();
         if (mediaItem.cachedPath != null) {
-          mediaItem.audioPlayer?.setSourceUrl(mediaItem.cachedPath!);
+          mediaItem.audioPlayer?.setSource(DeviceFileSource(mediaItem.cachedPath!));
         } else {
-          mediaItem.audioPlayer?.setSourceUrl(mediaItem.url);
+          mediaItem.audioPlayer?.setSource(UrlSource(mediaItem.url));
         }
       }
     } catch (error) {
@@ -659,7 +681,7 @@ class _MediaViewerState extends State<MediaViewer> {
       } else if (mediaItem.type == MediaType.audio &&
           mediaItem.audioPlayer == null) {
         mediaItem.audioPlayer = AudioPlayer();
-        mediaItem.audioPlayer?.setSourceUrl(mediaItem.url);
+        mediaItem.audioPlayer?.setSource(UrlSource(mediaItem.url));
       }
     }
   }

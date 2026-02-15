@@ -164,6 +164,7 @@ class CacheItem {
       try {
         audioCacheType = AudioCacheType.values.firstWhere(
           (e) => e.toString() == map['audioCacheType'],
+          orElse: () => AudioCacheType.temporary,
         );
       } catch (e) {
         audioCacheType = null;
@@ -213,6 +214,9 @@ class CacheManager {
 
   /// 下载超时时间
   static const Duration downloadTimeout = Duration(seconds: 30);
+
+  /// 正在进行的下载任务
+  final Map<String, Future<String>> _activeDownloads = {};
 
   /// 获取缓存目录
   ///
@@ -347,13 +351,13 @@ class CacheManager {
   /// 从URL中提取文件名
   String _getFileNameFromUrl(String url) {
     try {
+      if (url.isEmpty) return 'unknown_${DateTime.now().millisecondsSinceEpoch}.cache';
       final uri = Uri.parse(url);
-      final pathSegments = uri.pathSegments;
+      final pathSegments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
       if (pathSegments.isNotEmpty) {
         String fileName = pathSegments.last;
         // 如果文件名不包含扩展名，尝试从Content-Type推断
         if (!fileName.contains('.')) {
-          // 这里可以添加基于Content-Type推断扩展名的逻辑
           return '${fileName.hashCode}.cache';
         }
         return fileName;
@@ -397,6 +401,28 @@ class CacheManager {
     CacheCategory category, {
     AudioCacheType? audioCacheType,
   }) async {
+    // 检查是否已有相同的下载任务正在进行
+    if (_activeDownloads.containsKey(url)) {
+      logger.debug('CacheManager: Using active download for $url');
+      return _activeDownloads[url]!;
+    }
+
+    final downloadFuture = _doCacheFile(url, category, audioCacheType);
+    _activeDownloads[url] = downloadFuture;
+
+    try {
+      final result = await downloadFuture;
+      return result;
+    } finally {
+      _activeDownloads.remove(url);
+    }
+  }
+
+  Future<String> _doCacheFile(
+    String url,
+    CacheCategory category,
+    AudioCacheType? audioCacheType,
+  ) async {
     try {
       final cacheFilePath = await getCacheFilePath(url, category);
 

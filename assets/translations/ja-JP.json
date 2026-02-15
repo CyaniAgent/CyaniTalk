@@ -210,7 +210,6 @@
   "auth_username_email": "ユーザー名またはメール",
   "auth_password": "パスワード",
     "auth_login": "ログイン",
-    "auth_login_wechat": "WeChat ログイン",
     "auth_login_qq": "QQ ログイン",
     "auth_flarum_server_url": "サーバー URL (例: https://flarum.org)",
   "auth_add_endpoint": "エンドポイントを追加",

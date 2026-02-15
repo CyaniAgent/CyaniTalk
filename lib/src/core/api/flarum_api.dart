@@ -344,46 +344,6 @@ class FlarumApi extends BaseApi {
     }
   }
 
-  /// 使用聚合登录（WeChat/QQ）登录 Flarum
-  ///
-  /// [socialUid] - 聚合登录返回的 social_uid
-  /// [type] - 登录类型 (qq, wx 等)
-  Future<Map<String, dynamic>> loginWithJuhe(
-    String socialUid,
-    String type,
-  ) async {
-    logger.info('FlarumApi: 开始聚合登录，类型: $type, UID: $socialUid');
-    try {
-      // 注意：这里的路径是假设的，实际路径取决于 Flarum 插件的实现
-      // 常见的路径可能是 /api/auth/juhe 或 /api/juhe/login
-      final response = await post(
-        '/api/juhe/login',
-        data: {'social_uid': socialUid, 'type': type},
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        if (data is Map && data.containsKey('token')) {
-          final token = data['token'];
-          final userId = data['userId']?.toString();
-          logger.info('FlarumApi: 聚合登录成功');
-          setToken(token, userId: userId);
-          return Map<String, dynamic>.from(data);
-        }
-      }
-      logger.error('FlarumApi: 聚合登录失败，状态码: ${response.statusCode}');
-      throw Exception('Juhe login failed: ${response.statusCode}');
-    } catch (e) {
-      if (e is DioException) {
-        final msg = e.response?.data?['errors']?[0]?['detail'] ?? e.message;
-        logger.error('FlarumApi: 聚合登录错误: $msg');
-        throw Exception('Flarum Juhe login error: $msg');
-      }
-      logger.error('FlarumApi: 聚合登录异常: $e');
-      rethrow;
-    }
-  }
-
   /// 获取 Flarum 用户详细资料
   ///
   /// [userId] - 用户 ID
@@ -541,60 +501,5 @@ class FlarumApi extends BaseApi {
       queryParameters: queryParameters,
       options: options,
     );
-  }
-
-  /// Check for Clogin OAuth configuration
-  /// Returns a Map with keys: api_url, app_id, app_key if found.
-  Future<Map<String, String>?> getCloginConfig() async {
-    logger.info('FlarumApi: Checking for Clogin OAuth config');
-    try {
-      final response = await get('/api/forum');
-      if (response.statusCode == 200) {
-        final data = response.data['data'];
-        final attributes = data['attributes'];
-        // Note: The specific keys depend on the plugin implementation.
-        // Based on user description, we need to find them.
-        // They might be in 'beichen-clogin-oauth' namespace or similar.
-        // Or exposed as 'clogin_app_id', etc.
-        // Assuming standard plugin patterns or the keys mentioned.
-        // IF the plugin follows the "clogin-oauth" convention:
-        // 'clogin-oauth.app_id', 'clogin-oauth.app_key', 'clogin-oauth.api_url'
-
-        // Let's print attributes to debug if we were running, but for code:
-        // We look for them.
-
-        // Using "clogin-oauth" prefix based on plugin name
-        if (attributes is Map) {
-          // Try to find the keys.
-          // IMPORTANT: API Keys should generally NOT be public.
-          // But the user says "application automatically checks... and retrieves".
-          // So they MUST be in the public /api/forum attributes.
-
-          final apiUrl =
-              attributes['clogin-oauth.api_url'] ??
-              attributes['beichen-auth.api_url'];
-          final appId =
-              attributes['clogin-oauth.app_id'] ??
-              attributes['beichen-auth.app_id'];
-          final appKey =
-              attributes['clogin-oauth.app_key'] ??
-              attributes['beichen-auth.app_key'];
-
-          if (apiUrl != null && appId != null && appKey != null) {
-            logger.info('FlarumApi: Found Clogin config via attributes');
-            return {
-              'api_url': apiUrl.toString(),
-              'app_id': appId.toString(),
-              'app_key': appKey.toString(),
-            };
-          }
-        }
-      }
-      logger.info('FlarumApi: Clogin config not found in forum attributes');
-      return null;
-    } catch (e) {
-      logger.error('FlarumApi: Error checking Clogin config', e);
-      return null;
-    }
   }
 }
