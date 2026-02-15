@@ -513,127 +513,191 @@ class _MediaViewerState extends State<MediaViewer> {
       return '$minutes:$seconds';
     }
 
+    // 处理进度条拖动
+    void handleSeek(double sliderValue, Duration duration) {
+      try {
+        final newPosition = (duration.inMilliseconds * (sliderValue / 100))
+            .toInt();
+        audioPlayer?.seek(Duration(milliseconds: newPosition));
+      } catch (error) {
+        logger.error('Error seeking audio', error);
+      }
+    }
+
     return Center(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 32),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         width: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 480),
+        constraints: const BoxConstraints(maxWidth: 520),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withAlpha(240),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(30),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 音频图标和标题
+            // 音频图标
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Center(child: Icon(Icons.music_note, size: 40)),
+            ),
+            const SizedBox(height: 20),
+
+            // 音频标题
             if (mediaItem.fileName != null)
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  children: [
-                    const Icon(Icons.audiotrack, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        mediaItem.fileName!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Text(
+                  mediaItem.fileName!,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ),
-            // 控制按钮和进度条
-            Row(
-              children: [
-                // 播放/暂停切换按钮
-                StreamBuilder<PlayerState>(
-                  stream: audioPlayer?.onPlayerStateChanged,
-                  builder: (context, snapshot) {
-                    final playerState = snapshot.data ?? PlayerState.stopped;
-                    final isPlaying = playerState == PlayerState.playing;
 
-                    return IconButton(
-                      icon: Icon(
-                        isPlaying ? Icons.pause : Icons.play_arrow,
-                        color: theme.colorScheme.primary,
+            // 进度条和时间显示
+            StreamBuilder<Duration>(
+              stream: audioPlayer?.onDurationChanged,
+              builder: (context, durationSnapshot) {
+                final duration = durationSnapshot.data ?? Duration(seconds: 1);
+
+                return StreamBuilder<Duration>(
+                  stream: audioPlayer?.onPositionChanged,
+                  builder: (context, positionSnapshot) {
+                    final position = positionSnapshot.data ?? Duration.zero;
+                    final initialValue = duration.inMilliseconds > 0
+                        ? ((position.inMilliseconds / duration.inMilliseconds) *
+                                  100)
+                              .clamp(0.0, 100.0)
+                        : 0.0;
+
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        double sliderValue = initialValue;
+
+                        // 当播放位置变化时，更新滑块位置
+                        if (positionSnapshot.hasData) {
+                          final newPosition = positionSnapshot.data!;
+                          final newValue = duration.inMilliseconds > 0
+                              ? ((newPosition.inMilliseconds /
+                                            duration.inMilliseconds) *
+                                        100)
+                                    .clamp(0.0, 100.0)
+                              : 0.0;
+                          if ((newValue - sliderValue).abs() > 1.0) {
+                            sliderValue = newValue;
+                          }
+                        }
+
+                        return Column(
+                          children: [
+                            // 进度条
+                            Slider(
+                              value: sliderValue,
+                              min: 0,
+                              max: 100,
+                              onChanged: (newValue) {
+                                // 实时更新UI
+                                setState(() {
+                                  sliderValue = newValue;
+                                });
+                              },
+                              onChangeEnd: (newValue) {
+                                // 只在拖动结束时seek，避免频繁调用导致异常
+                                handleSeek(newValue, duration);
+                              },
+                              activeColor: theme.colorScheme.primary,
+                              inactiveColor: theme.colorScheme.outline,
+                              thumbColor: theme.colorScheme.primary,
+                            ),
+
+                            // 时间显示
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  formatDuration(position),
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                                Text(
+                                  formatDuration(duration),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface
+                                        .withAlpha(128),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            // 播放/暂停按钮
+            StreamBuilder<PlayerState>(
+              stream: audioPlayer?.onPlayerStateChanged,
+              builder: (context, snapshot) {
+                final playerState = snapshot.data ?? PlayerState.stopped;
+                final isPlaying = playerState == PlayerState.playing;
+
+                return Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withAlpha(30),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
                       ),
-                      onPressed: () {
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      try {
                         if (isPlaying) {
                           audioPlayer?.pause();
                         } else {
                           audioPlayer?.resume();
                         }
-                      },
-                    );
-                  },
-                ),
-                // 进度条和时间显示
-                Expanded(
-                  child: Column(
-                    children: [
-                      StreamBuilder<Duration>(
-                        stream: audioPlayer?.onDurationChanged,
-                        builder: (context, durationSnapshot) {
-                          final duration =
-                              durationSnapshot.data ?? Duration(seconds: 1);
-
-                          return StreamBuilder<Duration>(
-                            stream: audioPlayer?.onPositionChanged,
-                            builder: (context, positionSnapshot) {
-                              final position =
-                                  positionSnapshot.data ?? Duration.zero;
-                              final value = duration.inMilliseconds > 0
-                                  ? ((position.inMilliseconds /
-                                                duration.inMilliseconds) *
-                                            100)
-                                        .clamp(0.0, 100.0)
-                                  : 0.0;
-
-                              return Column(
-                                children: [
-                                  // 进度条
-                                  Slider(
-                                    value: value,
-                                    min: 0,
-                                    max: 100,
-                                    onChanged: (sliderValue) {
-                                      // 实现进度调节
-                                      final newPosition =
-                                          (duration.inMilliseconds *
-                                                  (sliderValue / 100))
-                                              .toInt();
-                                      audioPlayer?.seek(
-                                        Duration(milliseconds: newPosition),
-                                      );
-                                    },
-                                    activeColor: theme.colorScheme.primary,
-                                    inactiveColor: theme.colorScheme.surface,
-                                  ),
-                                  // 时间显示
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        '${formatDuration(position)} / ${formatDuration(duration)}',
-                                        style: theme.textTheme.bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ],
+                      } catch (error) {
+                        logger.error('Error toggling play/pause', error);
+                      }
+                    },
+                    icon: Icon(
+                      isPlaying ? Icons.pause : Icons.play_arrow,
+                      color: theme.colorScheme.onPrimary,
+                      size: 32,
+                    ),
+                    iconSize: 32,
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ],
         ),
