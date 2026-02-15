@@ -788,33 +788,51 @@ class _NoteCardState extends ConsumerState<NoteCard> {
               // 收集笔记中的所有媒体文件
               final mediaItems = <MediaItem>[];
               int initialIndex = 0;
-              
+
               for (int i = 0; i < widget.note.files.length; i++) {
-                final file = widget.note.files[i] as Map<String, dynamic>;
+                final file = widget.note.files[i];
                 final fileUrl = file['url'] as String;
                 final fileType = file['type'] as String;
                 final isImage = fileType.startsWith('image/');
                 final isVideo = fileType.startsWith('video/');
                 final isAudio = fileType.startsWith('audio/');
-                
+
                 if (isImage) {
-                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image, fileName: file['name'] as String?));
+                  mediaItems.add(
+                    MediaItem(
+                      url: fileUrl,
+                      type: MediaType.image,
+                      fileName: file['name'] as String?,
+                    ),
+                  );
                   if (fileUrl == url) {
                     initialIndex = mediaItems.length - 1;
                   }
                 } else if (isVideo) {
-                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video, fileName: file['name'] as String?));
+                  mediaItems.add(
+                    MediaItem(
+                      url: fileUrl,
+                      type: MediaType.video,
+                      fileName: file['name'] as String?,
+                    ),
+                  );
                   if (fileUrl == url) {
                     initialIndex = mediaItems.length - 1;
                   }
                 } else if (isAudio) {
-                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.audio, fileName: file['name'] as String?));
+                  mediaItems.add(
+                    MediaItem(
+                      url: fileUrl,
+                      type: MediaType.audio,
+                      fileName: file['name'] as String?,
+                    ),
+                  );
                   if (fileUrl == url) {
                     initialIndex = mediaItems.length - 1;
                   }
                 }
               }
-              
+
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => MediaViewerPage(
@@ -861,33 +879,51 @@ class _NoteCardState extends ConsumerState<NoteCard> {
               // 收集笔记中的所有图片
               final mediaItems = <MediaItem>[];
               int initialIndex = 0;
-              
+
               for (int i = 0; i < widget.note.files.length; i++) {
-                final file = widget.note.files[i] as Map<String, dynamic>;
+                final file = widget.note.files[i];
                 final fileUrl = file['url'] as String;
                 final fileType = file['type'] as String;
                 final isImage = fileType.startsWith('image/');
                 final isVideo = fileType.startsWith('video/');
                 final isAudio = fileType.startsWith('audio/');
-                
+
                 if (isImage) {
-                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image, fileName: file['name'] as String?));
+                  mediaItems.add(
+                    MediaItem(
+                      url: fileUrl,
+                      type: MediaType.image,
+                      fileName: file['name'] as String?,
+                    ),
+                  );
                   if (fileUrl == url) {
                     initialIndex = mediaItems.length - 1;
                   }
                 } else if (isVideo) {
-                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video, fileName: file['name'] as String?));
+                  mediaItems.add(
+                    MediaItem(
+                      url: fileUrl,
+                      type: MediaType.video,
+                      fileName: file['name'] as String?,
+                    ),
+                  );
                   if (fileUrl == url) {
                     initialIndex = mediaItems.length - 1;
                   }
                 } else if (isAudio) {
-                  mediaItems.add(MediaItem(url: fileUrl, type: MediaType.audio, fileName: file['name'] as String?));
+                  mediaItems.add(
+                    MediaItem(
+                      url: fileUrl,
+                      type: MediaType.audio,
+                      fileName: file['name'] as String?,
+                    ),
+                  );
                   if (fileUrl == url) {
                     initialIndex = mediaItems.length - 1;
                   }
                 }
               }
-              
+
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => MediaViewerPage(
@@ -1031,15 +1067,15 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             // 收集笔记中的所有媒体文件
             final mediaItems = <MediaItem>[];
             int initialIndex = 0;
-            
+
             for (int i = 0; i < widget.note.files.length; i++) {
-              final file = widget.note.files[i] as Map<String, dynamic>;
+              final file = widget.note.files[i];
               final fileUrl = file['url'] as String;
               final fileType = file['type'] as String;
               final isImage = fileType.startsWith('image/');
               final isVideo = fileType.startsWith('video/');
               final isAudio = fileType.startsWith('audio/');
-              
+
               if (isImage) {
                 mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image));
                 if (fileUrl == url) {
@@ -1057,7 +1093,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 }
               }
             }
-            
+
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => MediaViewerPage(
@@ -1101,15 +1137,15 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             // 收集笔记中的所有图片
             final mediaItems = <MediaItem>[];
             int initialIndex = 0;
-            
+
             for (int i = 0; i < widget.note.files.length; i++) {
-              final file = widget.note.files[i] as Map<String, dynamic>;
+              final file = widget.note.files[i];
               final fileUrl = file['url'] as String;
               final fileType = file['type'] as String;
               final isImage = fileType.startsWith('image/');
               final isVideo = fileType.startsWith('video/');
               final isAudio = fileType.startsWith('audio/');
-              
+
               if (isImage) {
                 mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image));
                 if (fileUrl == url) {
@@ -1127,7 +1163,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 }
               }
             }
-            
+
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => MediaViewerPage(

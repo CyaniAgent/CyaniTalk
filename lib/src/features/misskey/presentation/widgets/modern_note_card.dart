@@ -1013,7 +1013,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               int initialIndex = 0;
 
               for (int i = 0; i < widget.note.files.length; i++) {
-                final file = widget.note.files[i] as Map<String, dynamic>;
+                final file = widget.note.files[i];
                 final fileUrl = file['url'] as String;
                 final fileType = file['type'] as String;
                 final isImage = fileType.startsWith('image/');
@@ -1100,7 +1100,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               int initialIndex = 0;
 
               for (int i = 0; i < widget.note.files.length; i++) {
-                final file = widget.note.files[i] as Map<String, dynamic>;
+                final file = widget.note.files[i];
                 final fileUrl = file['url'] as String;
                 final fileType = file['type'] as String;
                 final isImage = fileType.startsWith('image/');
@@ -1287,7 +1287,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             int initialIndex = 0;
 
             for (int i = 0; i < widget.note.files.length; i++) {
-              final file = widget.note.files[i] as Map<String, dynamic>;
+              final file = widget.note.files[i];
               final fileUrl = file['url'] as String;
               final fileType = file['type'] as String;
               final isImage = fileType.startsWith('image/');
@@ -1363,7 +1363,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             int initialIndex = 0;
 
             for (int i = 0; i < widget.note.files.length; i++) {
-              final file = widget.note.files[i] as Map<String, dynamic>;
+              final file = widget.note.files[i];
               final fileUrl = file['url'] as String;
               final fileType = file['type'] as String;
               final isImage = fileType.startsWith('image/');
