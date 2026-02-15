@@ -82,9 +82,9 @@ class NetworkClient {
     final dio = Dio(
       BaseOptions(
         baseUrl: 'https://$host',
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
-        sendTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
         headers: {'User-Agent': userAgent, 'Accept': '*/*', ...?extraHeaders},
       ),
     );

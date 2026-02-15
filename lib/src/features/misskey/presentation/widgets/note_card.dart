@@ -235,7 +235,9 @@ class _NoteCardState extends ConsumerState<NoteCard> {
 
     if (_shouldAnimate) {
       return card
-          .animate()
+          .animate(onComplete: (controller) {
+            if (mounted) setState(() { _shouldAnimate = false; });
+          })
           .fadeIn(duration: 400.ms)
           .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
     }

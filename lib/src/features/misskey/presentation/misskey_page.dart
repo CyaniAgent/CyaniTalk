@@ -335,83 +335,10 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
                     ),
                     if (selectedIndex == 0) ...[
                       const SizedBox(width: 8),
-                      ref
-                          .watch(misskeyOnlineUsersProvider)
-                          .when(
-                            data: (count) => InkWell(
-                              onTap: () {
-                                _showOnlineUsersCard(context, count);
-                              },
-                              borderRadius: BorderRadius.circular(16),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                          width: 8,
-                                          height: 8,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    .withAlpha(128),
-                                                blurRadius: 4,
-                                                spreadRadius: 1,
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                        .animate(
-                                          onPlay: (controller) =>
-                                              controller.repeat(),
-                                        )
-                                        .scale(
-                                          duration: 1.seconds,
-                                          begin: const Offset(1, 1),
-                                          end: const Offset(1.3, 1.3),
-                                          curve: Curves.easeInOut,
-                                        )
-                                        .then()
-                                        .scale(
-                                          duration: 1.seconds,
-                                          begin: const Offset(1.3, 1.3),
-                                          end: const Offset(1, 1),
-                                          curve: Curves.easeInOut,
-                                        ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      count.toString(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            loading: () => const SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            error: (error, stack) => const SizedBox.shrink(),
-                          ),
+                      // 彻底隔离脉冲动画的语义，避免动画过程中干扰 Windows AXTree
+                      const ExcludeSemantics(
+                        child: _OnlineUsersPulse(),
+                      ),
                     ],
                   ],
                 ),
@@ -511,6 +438,78 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 独立的在线人数脉冲动画小组件
+class _OnlineUsersPulse extends ConsumerWidget {
+  const _OnlineUsersPulse();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    return ref.watch(misskeyOnlineUsersProvider).when(
+      data: (count) => InkWell(
+        onTap: () {
+          // 这里我们需要从 context 中获取状态来显示卡片
+          // 逻辑已在 MisskeyPage 中实现，这里通过查找父级或直接调用即可
+          final state = context.findAncestorStateOfType<_MisskeyPageState>();
+          state?._showOnlineUsersCard(context, count);
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withAlpha(128),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              )
+              .animate(onPlay: (controller) => controller.repeat())
+              .scale(
+                duration: 1.seconds,
+                begin: const Offset(1, 1),
+                end: const Offset(1.3, 1.3),
+                curve: Curves.easeInOut,
+              )
+              .then()
+              .scale(
+                duration: 1.seconds,
+                begin: const Offset(1.3, 1.3),
+                end: const Offset(1, 1),
+                curve: Curves.easeInOut,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                count.toString(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      loading: () => const SizedBox(
+        width: 12,
+        height: 12,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 }

@@ -281,7 +281,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
     if (_shouldAnimate) {
       return card
-          .animate()
+          .animate(onComplete: (controller) {
+            // 动画完成后通知组件不再需要为了动效而特殊处理
+            if (mounted) setState(() { _shouldAnimate = false; });
+          })
           .fadeIn(duration: 400.ms)
           .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
     }

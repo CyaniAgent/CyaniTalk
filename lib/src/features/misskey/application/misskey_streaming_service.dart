@@ -130,19 +130,32 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     logger.info('MisskeyStreaming: Connecting to $uri');
 
     try {
-      final client = HttpClient()
-        ..badCertificateCallback = (cert, host, port) => true;
+      final client = HttpClient();
+      client.badCertificateCallback = (cert, host, port) => true;
+      client.connectionTimeout = const Duration(seconds: 10); // 显式设置连接超时
 
-      _channel = IOWebSocketChannel.connect(
+      // 使用局部变量防止竞态条件
+      final channel = IOWebSocketChannel.connect(
         uri,
         customClient: client,
         headers: {'User-Agent': Constants.getUserAgent()},
       );
+      _channel = channel;
+
+      // 显式等待并监听流，以捕获连接初始阶段的异常
+      await channel.ready; 
+
+      // 关键检查：如果在此期间 _channel 已经被换掉了（比如触发了新的重连），则放弃当前逻辑
+      if (_channel != channel) {
+        logger.warning('MisskeyStreaming: Connection established but channel was swapped. Closing old one.');
+        channel.sink.close();
+        return;
+      }
 
       _updateStatus(StreamingStatus.connected);
       _reconnectAttempts = 0;
 
-      _channel!.stream.listen(
+      channel.stream.listen(
         _handleMessage,
         onDone: () {
           logger.warning('MisskeyStreaming: Connection closed by server');
@@ -150,7 +163,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
           _handleDisconnect(account);
         },
         onError: (error) {
-          logger.error('MisskeyStreaming: Connection error: $error');
+          logger.error('MisskeyStreaming: Stream error: $error');
           _updateStatus(StreamingStatus.error);
           _handleDisconnect(account);
         },
@@ -159,7 +172,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       _startHeartbeat();
       _subscribeToMain();
     } catch (e) {
-      logger.error('MisskeyStreaming Connection failed: $e');
+      logger.error('MisskeyStreaming Connection failed (Catch): $e');
       _updateStatus(StreamingStatus.error);
       _handleDisconnect(account);
     }

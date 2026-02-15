@@ -534,7 +534,14 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
 
   /// 构建多层级存储进度条 (基于实时 OS 统计)
   Widget _buildStorageBar() {
+    if (_systemTotal == 0 && !_isStatsLoading) return const SizedBox.shrink();
+
     final theme = Theme.of(context);
+    
+    // 只有在非加载状态下才计算真实百分比，避免除以零
+    final double appPercent = _systemTotal > 0 ? _appTotalUsage / _systemTotal : 0.0;
+    final double othersPercent = _systemTotal > 0 ? _systemUsedByOthers / _systemTotal : 0.0;
+    final double freePercent = _systemTotal > 0 ? _systemAvailable / _systemTotal : 0.0;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,87 +560,12 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: _isStatsLoading 
-              ? _buildLoadingStats()
-              : Column(
-                  children: [
-                    // 多层堆叠进度条
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        height: 28,
-                        width: double.infinity,
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: Stack(
-                          children: [
-                            // 底层：其他应用占用 (Others + App)
-                            FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: ((_systemUsedByOthers + _appTotalUsage) / _systemTotal).clamp(0.0, 1.0),
-                              child: Container(color: theme.colorScheme.secondaryContainer),
-                            ),
-                            // 顶层：本应用占用 (App Only)
-                            FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: (_appTotalUsage / _systemTotal).clamp(0.0, 1.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.colorScheme.primary.withAlpha(120),
-                                      blurRadius: 8,
-                                      offset: const Offset(2, 0),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    // 详细图例
-                    _buildUsageInfoItem(
-                      'storage_usage_app'.tr(),
-                      _formatBytes(_appTotalUsage),
-                      theme.colorScheme.primary,
-                      ((_appTotalUsage / _systemTotal) * 100).toStringAsFixed(2),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildUsageInfoItem(
-                      'storage_usage_others'.tr(),
-                      _formatBytes(_systemUsedByOthers),
-                      theme.colorScheme.secondaryContainer,
-                      ((_systemUsedByOthers / _systemTotal) * 100).toStringAsFixed(1),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildUsageInfoItem(
-                      'storage_usage_free'.tr(),
-                      _formatBytes(_systemAvailable),
-                      theme.colorScheme.surfaceContainerHighest,
-                      ((_systemAvailable / _systemTotal) * 100).toStringAsFixed(1),
-                    ),
-                    const Divider(height: 32),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'storage_total_capacity'.tr(),
-                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-                        ),
-                        Text(
-                          _formatBytes(_systemTotal),
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'JetBrainsMono',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isStatsLoading 
+                ? ExcludeSemantics(key: const ValueKey('loading'), child: _buildLoadingStats())
+                : _buildLoadedStats(appPercent, othersPercent, freePercent),
+            ),
           ),
         ),
       ],
@@ -644,33 +576,119 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     final theme = Theme.of(context);
     final calculatingText = 'common_calculating'.tr();
     
+    return ExcludeSemantics(
+      child: Column(
+        children: [
+          // 灰色的进度条占位
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: 28,
+              width: double.infinity,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: LinearProgressIndicator(
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                color: theme.colorScheme.primary.withAlpha(50),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildUsageInfoItem('storage_usage_app'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.00'),
+          const SizedBox(height: 12),
+          _buildUsageInfoItem('storage_usage_others'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
+          const SizedBox(height: 12),
+          _buildUsageInfoItem('storage_usage_free'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
+          const Divider(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('storage_total_capacity'.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
+              Text(calculatingText, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadedStats(double appPercent, double othersPercent, double freePercent) {
+    final theme = Theme.of(context);
     return Column(
+      key: const ValueKey('loaded'),
       children: [
-        // 灰色的进度条占位
+        // 多层堆叠进度条
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Container(
             height: 28,
             width: double.infinity,
             color: theme.colorScheme.surfaceContainerHighest,
-            child: LinearProgressIndicator(
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              color: theme.colorScheme.primary.withAlpha(50),
+            child: Stack(
+              children: [
+                // 底层：其他应用占用 (Others + App)
+                FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: (othersPercent + appPercent).clamp(0.0, 1.0),
+                  child: Container(color: theme.colorScheme.secondaryContainer),
+                ),
+                // 顶层：本应用占用 (App Only)
+                FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: appPercent.clamp(0.0, 1.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withAlpha(120),
+                          blurRadius: 8,
+                          offset: const Offset(2, 0),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
         const SizedBox(height: 24),
-        _buildUsageInfoItem('storage_usage_app'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.00'),
+        // 详细图例
+        _buildUsageInfoItem(
+          'storage_usage_app'.tr(),
+          _formatBytes(_appTotalUsage),
+          theme.colorScheme.primary,
+          (appPercent * 100).toStringAsFixed(2),
+        ),
         const SizedBox(height: 12),
-        _buildUsageInfoItem('storage_usage_others'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
+        _buildUsageInfoItem(
+          'storage_usage_others'.tr(),
+          _formatBytes(_systemUsedByOthers),
+          theme.colorScheme.secondaryContainer,
+          (othersPercent * 100).toStringAsFixed(1),
+        ),
         const SizedBox(height: 12),
-        _buildUsageInfoItem('storage_usage_free'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
+        _buildUsageInfoItem(
+          'storage_usage_free'.tr(),
+          _formatBytes(_systemAvailable),
+          theme.colorScheme.surfaceContainerHighest,
+          (freePercent * 100).toStringAsFixed(1),
+        ),
         const Divider(height: 32),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('storage_total_capacity'.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-            Text(calculatingText, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
+            Text(
+              'storage_total_capacity'.tr(),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+            ),
+            Text(
+              _formatBytes(_systemTotal),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'JetBrainsMono',
+              ),
+            ),
           ],
         ),
       ],
