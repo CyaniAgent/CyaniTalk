@@ -298,5 +298,12 @@
   "navigation_no_items": "No navigation items available Meow~",
   "common_retry": "Retry Meow~",
   "common_error": "Error Meow~",
-  "common_refresh_stage": "Refresh Stage Meow~"
+  "common_refresh_stage": "Refresh Stage Meow~",
+  "common_calculating": "Calculating... Meow~",
+  "storage_usage_title": "Storage Usage Meow~",
+  "storage_usage_app": "App Used Meow~",
+  "storage_usage_others": "Others Used Meow~",
+  "storage_usage_free": "Free Space Meow~",
+  "storage_total_capacity": "Total Capacity Meow~",
+  "storage_reset_app_warning": "Note: Resetting will clear all logged-in accounts, personalized settings, cache files, and endpoint configurations Meow~"
 }

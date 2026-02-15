@@ -332,10 +332,17 @@
   "search_misskey_posts_disabled": "このインスタンスでは投稿の検索機能が無効になっています",
   "search_misskey_users_disabled": "このインスタンスではユーザーの検索機能が無効になっています",
   "search_feature_disabled_hint": "詳細についてはインスタンスの管理者にお問い合わせください",
+  "common_calculating": "計算中...",
   "menu_user_profile": "ユーザープロフィール",
   "menu_settings": "設定",
   "menu_logout": "ログアウト",
   "menu_logout_confirm": "ログアウトの確認",
   "menu_logout_confirm_message": "すべてのアカウントからログアウトしますか？",
-  "menu_login": "ログイン"
+  "menu_login": "ログイン",
+  "storage_usage_title": "ストレージ使用状況",
+  "storage_usage_app": "アプリの使用量",
+  "storage_usage_others": "その他の使用量",
+  "storage_usage_free": "空き容量",
+  "storage_total_capacity": "総ストレージ容量",
+  "storage_reset_app_warning": "注意：リセット操作により、すべてのログイン済みアカウント、パーソナライズ設定、キャッシュファイル、およびエンドポイント構成が消去されます。"
 }

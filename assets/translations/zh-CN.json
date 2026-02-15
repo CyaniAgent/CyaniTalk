@@ -371,10 +371,17 @@
   "search_misskey_posts_disabled": "此实例已禁用搜索帖子功能",
   "search_misskey_users_disabled": "此实例已禁用搜索用户功能",
   "search_feature_disabled_hint": "请联系实例管理员了解更多信息",
+  "common_calculating": "计算中...",
   "menu_user_profile": "用户页面",
   "menu_settings": "设置",
   "menu_logout": "退出登录",
   "menu_logout_confirm": "确认退出登录",
   "menu_logout_confirm_message": "确定要退出所有登录的账户吗？",
-  "menu_login": "登录"
+  "menu_login": "登录",
+  "storage_usage_title": "存储占用情况",
+  "storage_usage_app": "本 App 已使用",
+  "storage_usage_others": "其他已使用",
+  "storage_usage_free": "剩余空间",
+  "storage_total_capacity": "总存储容量",
+  "storage_reset_app_warning": "注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置。"
 }

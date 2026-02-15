@@ -292,5 +292,12 @@
   "navigation_no_items": "Meow Meow~",
   "common_retry": "Nya~",
   "common_error": "Meow~",
-  "common_refresh_stage": "Mew Mew~"
+  "common_refresh_stage": "Mew Mew~",
+  "common_calculating": "Meow~",
+  "storage_usage_title": "Meow Meow~",
+  "storage_usage_app": "Nya Nya~",
+  "storage_usage_others": "Mew Mew~",
+  "storage_usage_free": "Meow~",
+  "storage_total_capacity": "Nya~",
+  "storage_reset_app_warning": "Mew Mew~"
 }
