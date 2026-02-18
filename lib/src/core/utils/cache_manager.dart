@@ -429,6 +429,7 @@ class CacheManager {
     CacheCategory category,
     AudioCacheType? audioCacheType,
   ) async {
+    final startTime = DateTime.now();
     try {
       final cacheFilePath = await getCacheFilePath(url, category);
 
@@ -438,6 +439,13 @@ class CacheManager {
 
         // 检查是否已存在有效缓存
         if (await file.exists()) {
+          // 记录缓存命中性能
+          final duration = DateTime.now().difference(startTime);
+          performanceMonitor.trackMediaLoading(
+            url,
+            duration,
+            'cache_hit',
+          );
           return cacheFilePath;
         }
 
@@ -482,9 +490,24 @@ class CacheManager {
         _cacheSizeCache.remove('category_${category.name}');
         _cacheSizeCache.remove('total');
 
+        // 记录缓存下载性能
+        final duration = DateTime.now().difference(startTime);
+        performanceMonitor.trackMediaLoading(
+          url,
+          duration,
+          'cache_download',
+        );
+
         return cacheFilePath;
       });
     } catch (e) {
+      // 记录缓存失败性能
+      final duration = DateTime.now().difference(startTime);
+      performanceMonitor.trackMediaLoading(
+        url,
+        duration,
+        'cache_failed',
+      );
       // 如果下载失败，抛出异常
       throw Exception('缓存文件失败: $e');
     }

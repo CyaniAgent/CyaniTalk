@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/utils/cache_manager.dart';
+import '/src/core/utils/performance_monitor.dart';
 import 'media_item.dart';
 
 /// 音频查看器组件
@@ -64,6 +65,7 @@ class _AudioViewerState extends State<AudioViewer> {
   }
 
   void _initializeAudioFromNetwork() {
+    final startTime = DateTime.now();
     try {
       widget.mediaItem.audioPlayer
           ?.setSource(UrlSource(widget.mediaItem.url))
@@ -73,6 +75,14 @@ class _AudioViewerState extends State<AudioViewer> {
                 _isLoading = false;
               });
               widget.mediaItem.audioPlayer?.resume();
+              
+              // 记录音频加载性能
+              final duration = DateTime.now().difference(startTime);
+              performanceMonitor.trackMediaLoading(
+                widget.mediaItem.url,
+                duration,
+                'audio',
+              );
             }
           })
           .catchError((error) {
@@ -83,6 +93,14 @@ class _AudioViewerState extends State<AudioViewer> {
                 _errorMessage = error.toString();
               });
             }
+            
+            // 记录失败的音频加载性能
+            final duration = DateTime.now().difference(startTime);
+            performanceMonitor.trackMediaLoading(
+              widget.mediaItem.url,
+              duration,
+              'audio',
+            );
           });
     } catch (error) {
       logger.error('Exception loading audio from network', error);
@@ -92,6 +110,14 @@ class _AudioViewerState extends State<AudioViewer> {
           _errorMessage = error.toString();
         });
       }
+      
+      // 记录异常情况下的音频加载性能
+      final duration = DateTime.now().difference(startTime);
+      performanceMonitor.trackMediaLoading(
+        widget.mediaItem.url,
+        duration,
+        'audio',
+      );
     }
   }
 
@@ -279,7 +305,7 @@ class _AudioViewerState extends State<AudioViewer> {
                                               handleSeek(newValue, duration);
                                             },
                                       activeColor: theme.colorScheme.primary,
-                                      inactiveColor: theme.colorScheme.outline,
+                                      inactiveColor: theme.colorScheme.onSurface.withAlpha(100),
                                       thumbColor: theme.colorScheme.primary,
                                     ),
                                   ),

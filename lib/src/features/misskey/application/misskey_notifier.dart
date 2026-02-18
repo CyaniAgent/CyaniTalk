@@ -72,6 +72,21 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       );
       streamingService.subscribeToTimeline(type);
 
+      // Listening to the note stream from the streaming service
+      final subscription = streamingService.noteStream.listen((event) {
+        if (event.isDelete) {
+          _handleDeleteNote(event.noteId!);
+        } else if (event.timelineType == type) {
+          _handleNewNote(event.note!);
+        }
+      });
+
+      ref.onDispose(() {
+        subscription.cancel();
+        _validationTimer?.cancel();
+        _cacheManager.stopValidationTimer();
+      });
+
       // 优先从缓存加载
       final cachedNotes = _cacheManager.getAllNotes();
       if (cachedNotes.isNotEmpty) {
@@ -83,6 +98,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
           await _loadLatestData(type, streamingService);
         });
 
+        // Start periodic validation to detect deleted notes
+        _startPeriodicValidation();
+
+        logger.info('Misskey时间线初始化完成，从内存缓存加载了 ${cachedNotes.length} 条笔记');
         return cachedNotes;
       }
 
@@ -101,6 +120,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
           await _loadLatestData(type, streamingService);
         });
 
+        // Start periodic validation to detect deleted notes
+        _startPeriodicValidation();
+
+        logger.info('Misskey时间线初始化完成，从持久化存储加载了 ${persistentNotes.length} 条笔记');
         return persistentNotes;
       }
 
@@ -114,21 +137,6 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
       // 将最新笔记添加到缓存
       _cacheManager.putNotes(latestNotes);
-
-      // Listening to the note stream from the streaming service
-      final subscription = streamingService.noteStream.listen((event) {
-        if (event.isDelete) {
-          _handleDeleteNote(event.noteId!);
-        } else if (event.timelineType == type) {
-          _handleNewNote(event.note!);
-        }
-      });
-
-      ref.onDispose(() {
-        subscription.cancel();
-        _validationTimer?.cancel();
-        _cacheManager.stopValidationTimer();
-      });
 
       // Start periodic validation to detect deleted notes
       _startPeriodicValidation();
@@ -145,7 +153,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
   /// 加载最新数据并更新界面
   ///
-  /// 在后台获取最新数据，直接替换缓存，但UI显示时智能替换对应帖子。
+  /// 在后台获取最新数据，直接替换缓存，优先显示服务器返回的最新数据。
   ///
   /// @param type 时间线类型
   /// @param streamingService 流式服务实例
@@ -164,26 +172,24 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       logger.info('Misskey时间线: 获取到 ${latestNotes.length} 条最新笔记，替换缓存');
       _cacheManager.putNotes(latestNotes);
 
-      // 智能更新UI，只替换变化的帖子
+      // 更新UI，使用服务器返回的最新数据，确保新笔记在最前面
       if (ref.mounted) {
         final currentNotes = state.value ?? [];
-        final newNotes = _updateNotesInList(currentNotes, latestNotes);
-        state = AsyncData(newNotes);
-        logger.debug('Misskey时间线: 智能更新UI，共 ${newNotes.length} 条笔记');
-      }
-
-      // Listening to the note stream from the streaming service
-      final subscription = streamingService.noteStream.listen((event) {
-        if (event.isDelete) {
-          _handleDeleteNote(event.noteId!);
-        } else if (event.timelineType == type) {
-          _handleNewNote(event.note!);
+        // 检查是否有新笔记不在当前列表中
+        final currentNoteIds = currentNotes.map((n) => n.id).toSet();
+        final newNotesCount = latestNotes.where((n) => !currentNoteIds.contains(n.id)).length;
+        
+        if (newNotesCount > 0) {
+          logger.info('Misskey时间线: 发现 $newNotesCount 条新笔记，更新UI');
+          // 直接使用服务器返回的最新数据，确保新笔记在最前面
+          state = AsyncData(latestNotes);
+        } else {
+          // 如果没有新笔记，只更新变化的部分
+          final newNotes = _updateNotesInList(currentNotes, latestNotes);
+          state = AsyncData(newNotes);
+          logger.debug('Misskey时间线: 无新笔记，只更新变化的部分');
         }
-      });
-
-      ref.onDispose(() {
-        subscription.cancel();
-      });
+      }
 
       // Start periodic validation to detect deleted notes
       _startPeriodicValidation();
@@ -322,20 +328,32 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
   /// 在笔记列表中更新笔记
   ///
-  /// 用新笔记替换列表中的旧笔记。
+  /// 用新笔记替换列表中的旧笔记，保持updatedNotes的顺序。
   ///
   /// @param notes 原始笔记列表
   /// @param updatedNotes 需要更新的笔记列表
   /// @return 更新后的笔记列表
   List<Note> _updateNotesInList(List<Note> notes, List<Note> updatedNotes) {
     final noteMap = <String, Note>{};
+    // 先添加原始笔记
     for (final note in notes) {
       noteMap[note.id] = note;
     }
+    // 用新笔记更新，保持updatedNotes的顺序
+    final result = <Note>[];
+    // 先添加updatedNotes中的笔记
     for (final note in updatedNotes) {
-      noteMap[note.id] = note;
+      result.add(note);
+      noteMap.remove(note.id);
     }
-    return noteMap.values.toList();
+    // 再添加剩余的原始笔记
+    for (final note in notes) {
+      if (noteMap.containsKey(note.id)) {
+        result.add(note);
+        noteMap.remove(note.id);
+      }
+    }
+    return result;
   }
 
   /// 处理新笔记

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import '../utils/logger.dart';
+import '../utils/performance_monitor.dart';
 
 /// A custom interceptor that retries failed requests up to a specified number of times.
 class RetryInterceptor extends Interceptor {
@@ -96,6 +97,7 @@ class NetworkClient {
 
     // Attach interceptors
     dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 5));
+    dio.interceptors.add(PerformanceInterceptor());
     dio.interceptors.add(
       LogInterceptor(
         requestHeader: false,
@@ -139,6 +141,52 @@ class NetworkClient {
     );
 
     return dio;
+  }
+}
+
+/// Performance monitoring interceptor to track network request performance
+class PerformanceInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // Start tracking performance
+    options.extra['performanceStart'] = DateTime.now();
+    return handler.next(options);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    // End tracking and record performance
+    final startTime = response.requestOptions.extra['performanceStart'] as DateTime?;
+    if (startTime != null) {
+      final duration = DateTime.now().difference(startTime);
+      final url = '${response.requestOptions.baseUrl}${response.requestOptions.path}';
+      
+      performanceMonitor.trackNetworkRequest(
+        url,
+        duration,
+        response.requestOptions.method,
+        response.statusCode ?? 0,
+      );
+    }
+    return handler.next(response);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    // End tracking for failed requests
+    final startTime = err.requestOptions.extra['performanceStart'] as DateTime?;
+    if (startTime != null) {
+      final duration = DateTime.now().difference(startTime);
+      final url = '${err.requestOptions.baseUrl}${err.requestOptions.path}';
+      
+      performanceMonitor.trackNetworkRequest(
+        url,
+        duration,
+        err.requestOptions.method,
+        err.response?.statusCode ?? 0,
+      );
+    }
+    return handler.next(err);
   }
 }
 

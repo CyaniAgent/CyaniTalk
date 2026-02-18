@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '/src/core/utils/logger.dart';
+import '/src/core/utils/performance_monitor.dart';
 import 'media_item.dart';
 
 /// 视频查看器组件
@@ -40,6 +41,7 @@ class _VideoViewerState extends State<VideoViewer> {
   void _initializeVideo() {
     if (widget.mediaItem.videoController == null) {
       if (widget.mediaItem.cachedPath != null) {
+        final startTime = DateTime.now();
         widget.mediaItem.videoController = VideoPlayerController.file(
           File(widget.mediaItem.cachedPath!),
         )..initialize().then((_) {
@@ -48,6 +50,14 @@ class _VideoViewerState extends State<VideoViewer> {
                 widget.mediaItem.videoController?.play();
                 _resetHideTimer();
               });
+              
+              // 记录本地视频加载性能
+              final duration = DateTime.now().difference(startTime);
+              performanceMonitor.trackMediaLoading(
+                widget.mediaItem.cachedPath!,
+                duration,
+                'video_local',
+              );
             }
           }).catchError((error) {
             logger.error('Error initializing video controller from file', error);
@@ -55,6 +65,14 @@ class _VideoViewerState extends State<VideoViewer> {
             if (mounted) {
               _initializeVideoFromNetwork();
             }
+            
+            // 记录本地视频加载失败性能
+            final duration = DateTime.now().difference(startTime);
+            performanceMonitor.trackMediaLoading(
+              widget.mediaItem.cachedPath!,
+              duration,
+              'video_local',
+            );
           });
       } else {
         _initializeVideoFromNetwork();
@@ -63,6 +81,7 @@ class _VideoViewerState extends State<VideoViewer> {
   }
 
   void _initializeVideoFromNetwork() {
+    final startTime = DateTime.now();
     widget.mediaItem.videoController = VideoPlayerController.networkUrl(
       Uri.parse(widget.mediaItem.url),
     )..initialize().then((_) {
@@ -71,6 +90,14 @@ class _VideoViewerState extends State<VideoViewer> {
             widget.mediaItem.videoController?.play();
             _resetHideTimer();
           });
+          
+          // 记录网络视频加载性能
+          final duration = DateTime.now().difference(startTime);
+          performanceMonitor.trackMediaLoading(
+            widget.mediaItem.url,
+            duration,
+            'video_network',
+          );
         }
       }).catchError((error) {
         logger.error('Error initializing video controller from network', error);
@@ -79,6 +106,14 @@ class _VideoViewerState extends State<VideoViewer> {
             // Video initialization failed, handle error state
           });
         }
+        
+        // 记录网络视频加载失败性能
+        final duration = DateTime.now().difference(startTime);
+        performanceMonitor.trackMediaLoading(
+          widget.mediaItem.url,
+          duration,
+          'video_network',
+        );
       });
   }
 

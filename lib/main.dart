@@ -47,6 +47,9 @@ void main() async {
   await logger.initialize(logLevel: storedLogLevel);
   logger.info('CyaniTalk app started');
 
+  // 初始化性能监控
+  performanceMonitor.initialize();
+
   await EasyLocalization.ensureInitialized();
 
   // 创建 ProviderContainer 以便在非 Widget 环境中使用 Provider
