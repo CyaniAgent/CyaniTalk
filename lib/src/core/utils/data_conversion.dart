@@ -100,16 +100,3 @@ extension NullableHandling<T> on T? {
     return null;
   }
 }
-
-// 使用示例:
-//
-// // 安全转换
-// final age = jsonData.getInt('age');
-// final name = jsonData.getString('name') ?? 'Unknown';
-// final users = jsonData.getList<String>('users');
-//
-// // 空值处理
-// final result = value.orElse(defaultValue);
-// value.ifNotNull((v) => print('Value: $v'));
-// value.ifNull(() => print('Value is null'));
-// final mapped = value.mapIfNotNull((v) => v.toUpperCase());

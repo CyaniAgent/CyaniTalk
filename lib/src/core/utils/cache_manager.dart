@@ -219,6 +219,11 @@ class CacheManager {
   /// 正在进行的下载任务
   final Map<String, Future<String>> _activeDownloads = {};
 
+  /// 缓存统计信息，用于减少文件系统访问
+  final Map<String, int> _cacheSizeCache = {};
+  final DateTime _lastCacheSizeUpdate = DateTime.now();
+  static const Duration _cacheSizeCacheValidity = Duration(minutes: 5);
+
   /// 获取缓存目录
   ///
   /// 首先尝试从首选项中获取保存的缓存目录路径，
@@ -473,6 +478,10 @@ class CacheManager {
         await _ensureCacheSizeLimit();
         await _ensureCategorySizeLimit(category);
 
+        // 清除对应类别的缓存大小缓存和总缓存大小缓存
+        _cacheSizeCache.remove('category_${category.name}');
+        _cacheSizeCache.remove('total');
+
         return cacheFilePath;
       });
     } catch (e) {
@@ -499,6 +508,12 @@ class CacheManager {
   /// 获取总缓存大小
   Future<int> getTotalCacheSize() async {
     try {
+      // 检查缓存是否有效
+      final now = DateTime.now();
+      if (now.difference(_lastCacheSizeUpdate) < _cacheSizeCacheValidity && _cacheSizeCache.containsKey('total')) {
+        return _cacheSizeCache['total']!;
+      }
+
       final cacheDir = await getCacheDirectory();
       int totalSize = 0;
 
@@ -510,6 +525,8 @@ class CacheManager {
         }
       }
 
+      // 更新缓存
+      _cacheSizeCache['total'] = totalSize;
       return totalSize;
     } catch (e) {
       return 0;
@@ -611,6 +628,13 @@ class CacheManager {
   /// 获取指定类别的缓存大小
   Future<int> getCategoryCacheSize(CacheCategory category) async {
     try {
+      // 检查缓存是否有效
+      final cacheKey = 'category_${category.name}';
+      final now = DateTime.now();
+      if (now.difference(_lastCacheSizeUpdate) < _cacheSizeCacheValidity && _cacheSizeCache.containsKey(cacheKey)) {
+        return _cacheSizeCache[cacheKey]!;
+      }
+
       final categoryDir = await getCategoryCacheDirectory(category);
       int totalSize = 0;
 
@@ -622,6 +646,8 @@ class CacheManager {
         }
       }
 
+      // 更新缓存
+      _cacheSizeCache[cacheKey] = totalSize;
       return totalSize;
     } catch (e) {
       return 0;
@@ -715,6 +741,8 @@ class CacheManager {
           await getCategoryCacheDirectory(category);
         }
       }
+      // 清除缓存大小缓存
+      _cacheSizeCache.clear();
     } catch (e) {
       // 清除缓存失败，忽略错误
     }
@@ -729,6 +757,9 @@ class CacheManager {
         // 重新创建目录
         await categoryDir.create(recursive: true);
       }
+      // 清除对应类别的缓存大小缓存和总缓存大小缓存
+      _cacheSizeCache.remove('category_${category.name}');
+      _cacheSizeCache.remove('total');
     } catch (e) {
       // 清除缓存失败，忽略错误
     }
@@ -741,6 +772,9 @@ class CacheManager {
         final file = File(item.path);
         if (await file.exists()) {
           await file.delete();
+          // 清除对应类别的缓存大小缓存和总缓存大小缓存
+          _cacheSizeCache.remove('category_${item.category.name}');
+          _cacheSizeCache.remove('total');
         }
       }
     } catch (e) {
@@ -943,6 +977,8 @@ class CacheManager {
         logger.info(
           'CacheManager: Cache cleanup completed, removed $removedSize bytes',
         );
+        // 清除缓存大小缓存
+        _cacheSizeCache.clear();
       }
     } catch (e) {
       logger.error('CacheManager: Error ensuring cache size limit', e);
@@ -987,6 +1023,9 @@ class CacheManager {
           logger.info(
             'CacheManager: ${category.name} cache cleanup completed, removed $removedSize bytes',
           );
+          // 清除对应类别的缓存大小缓存和总缓存大小缓存
+          _cacheSizeCache.remove('category_${category.name}');
+          _cacheSizeCache.remove('total');
         }
       }
     } catch (e) {

@@ -12,7 +12,8 @@ import '../../application/timeline_jump_provider.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
 import '../../../common/presentation/pages/media_viewer_page.dart';
-import '../../../common/presentation/widgets/media_viewer.dart';
+
+import '../../../common/presentation/widgets/media/media_item.dart';
 
 /// Modern NoteCard组件
 ///

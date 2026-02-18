@@ -344,5 +344,22 @@
   "storage_usage_others": "その他の使用量",
   "storage_usage_free": "空き容量",
   "storage_total_capacity": "総ストレージ容量",
-  "storage_reset_app_warning": "注意：リセット操作により、すべてのログイン済みアカウント、パーソナライズ設定、キャッシュファイル、およびエンドポイント構成が消去されます。"
+  "storage_reset_app_warning": "注意：リセット操作により、すべてのログイン済みアカウント、パーソナライズ設定、キャッシュファイル、およびエンドポイント構成が消去されます。",
+  "error_network_timeout": "ネットワークタイムアウト、ネットワーク接続を確認してください",
+  "error_certificate_error": "証明書エラー、セキュアな接続を確立できません",
+  "error_server_error": "サーバーエラー",
+  "error_bad_request": "リクエストパラメーターエラー",
+  "error_unauthorized": "認証されていません、もう一度ログインしてください",
+  "error_forbidden": "アクセス権限が不足しています",
+  "error_not_found": "要求されたリソースが見つかりません",
+  "error_method_not_allowed": "リクエストメソッドが許可されていません",
+  "error_too_many_requests": "リクエストが多すぎます、後でもう一度お試しください",
+  "error_internal_server_error": "内部サーバーエラー",
+  "error_bad_gateway": "バッドゲートウェイエラー",
+  "error_service_unavailable": "サービスは一時的に利用できません",
+  "error_gateway_timeout": "ゲートウェイタイムアウト",
+  "error_request_canceled": "リクエストがキャンセルされました",
+  "error_connection_error": "ネットワーク接続エラー、ネットワーク設定を確認してください",
+  "error_unknown": "不明なエラー",
+  "error_occurred": "不明なエラーが発生しました"
 }

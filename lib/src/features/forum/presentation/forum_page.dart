@@ -11,6 +11,7 @@ import '../../flarum/presentation/pages/flarum_notifications_page.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../shared/widgets/login_reminder.dart';
 
+
 class ForumPage extends ConsumerStatefulWidget {
   const ForumPage({super.key});
 

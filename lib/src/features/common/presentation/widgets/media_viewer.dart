@@ -1,11 +1,9 @@
-import 'dart:io';
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:video_player/video_player.dart';
-import 'package:audioplayers/audioplayers.dart';
-import '/src/core/utils/cache_manager.dart';
-import '/src/core/utils/logger.dart';
+import './media/media_item.dart';
+import './media/media_preloader.dart';
+import './media/image_viewer.dart';
+import './media/video_viewer.dart';
+import './media/audio_viewer.dart';
 
 /// 统一的媒体浏览器组件，支持图片和视频
 class MediaViewer extends StatefulWidget {
@@ -28,57 +26,42 @@ class _MediaViewerState extends State<MediaViewer> {
   late PageController _pageController;
   int _currentIndex = 0;
   bool _showControls = true;
-  Timer? _hideControlsTimer;
+  late MediaPreloader _preloader;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
+    _preloader = MediaPreloader(context);
+
+    // 检查是否为音频类型，如果是则保持控制栏始终显示
+    if (widget.mediaItems.isNotEmpty &&
+        widget.mediaItems[_currentIndex].type == MediaType.audio) {
+      _showControls = true;
+    }
 
     // 预加载初始媒体和相邻媒体
-    _preloadInitialMedia();
-  }
-
-  // 预加载初始媒体和相邻媒体
-  void _preloadInitialMedia() {
-    // 预加载初始媒体
-    if (widget.mediaItems.isNotEmpty &&
-        _currentIndex < widget.mediaItems.length) {
-      _preloadSingleMedia(widget.mediaItems[_currentIndex]);
-    }
-
-    // 预加载下一个媒体
-    if (widget.mediaItems.length > 1 &&
-        _currentIndex + 1 < widget.mediaItems.length) {
-      _preloadSingleMedia(widget.mediaItems[_currentIndex + 1]);
-    }
-
-    // 预加载上一个媒体
-    if (_currentIndex > 0) {
-      _preloadSingleMedia(widget.mediaItems[_currentIndex - 1]);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _preloader.preloadInitialMedia(widget.mediaItems, _currentIndex);
+      }
+    });
   }
 
   @override
   void dispose() {
     _pageController.dispose();
-    _hideControlsTimer?.cancel();
     // 释放媒体播放器资源
-    for (var item in widget.mediaItems) {
-      try {
-        if (item.type == MediaType.video && item.videoController != null) {
-          item.videoController?.dispose();
-          item.videoController = null;
-        } else if (item.type == MediaType.audio && item.audioPlayer != null) {
-          item.audioPlayer?.dispose();
-          item.audioPlayer = null;
-        }
-      } catch (e) {
-        logger.warning('Error disposing media resources', e);
-      }
-    }
+    MediaPreloader.disposeMediaResources(widget.mediaItems);
     super.dispose();
+  }
+
+  // 切换控制栏显示状态
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
   }
 
   @override
@@ -87,15 +70,28 @@ class _MediaViewerState extends State<MediaViewer> {
       backgroundColor: Colors.transparent,
       body: GestureDetector(
         onTap: () {
-          // 点击非媒体区域关闭
-          Navigator.of(context).pop();
+          // 只有非音频类型才响应点击非媒体区域关闭
+          if (widget.mediaItems.isNotEmpty) {
+            final currentMedia = widget.mediaItems[_currentIndex];
+            if (currentMedia.type != MediaType.audio) {
+              // 点击非媒体区域关闭
+              Navigator.of(context).pop();
+            }
+          } else {
+            // 如果没有媒体项，正常关闭
+            Navigator.of(context).pop();
+          }
         },
         child: Stack(
           children: [
             // 媒体浏览区域
             GestureDetector(
               onTap: () {
-                // 点击媒体区域不关闭
+                // 只有非音频类型才响应点击切换控制栏
+                final currentMedia = widget.mediaItems[_currentIndex];
+                if (currentMedia.type != MediaType.audio) {
+                  _toggleControls();
+                }
               },
               child: PageView.builder(
                 controller: _pageController,
@@ -103,14 +99,20 @@ class _MediaViewerState extends State<MediaViewer> {
                 onPageChanged: (index) {
                   setState(() {
                     _currentIndex = index;
+                    // 检查是否为音频类型，如果是则保持控制栏始终显示
+                    if (widget.mediaItems[index].type == MediaType.audio) {
+                      _showControls = true;
+                    }
                   });
                   // 预加载相邻的媒体
-                  _preloadMedia(index);
+                  _preloader.preloadMedia(widget.mediaItems, index);
                 },
                 physics: const BouncingScrollPhysics(),
                 pageSnapping: true,
                 itemBuilder: (context, index) {
                   final mediaItem = widget.mediaItems[index];
+                  final isInitialItem = index == widget.initialIndex;
+                  final currentHeroTag = isInitialItem ? widget.heroTag : null;
 
                   // 添加页面切换动画
                   return AnimatedSwitcher(
@@ -142,11 +144,22 @@ class _MediaViewerState extends State<MediaViewer> {
                       color: Colors.transparent,
                       child: () {
                         if (mediaItem.type == MediaType.image) {
-                          return _buildImageViewer(mediaItem, index);
+                          return ImageViewer(
+                            mediaItem: mediaItem,
+                            heroTag: currentHeroTag,
+                          );
                         } else if (mediaItem.type == MediaType.video) {
-                          return _buildVideoViewer(mediaItem, index);
+                          return VideoViewer(
+                            mediaItem: mediaItem,
+                            showControls: _showControls,
+                            onControlsToggle: (show) {
+                              setState(() {
+                                _showControls = show;
+                              });
+                            },
+                          );
                         } else if (mediaItem.type == MediaType.audio) {
-                          return _buildAudioViewer(mediaItem, index);
+                          return AudioViewer(mediaItem: mediaItem);
                         }
                         return const Center(
                           child: Text('Unsupported media type'),
@@ -286,539 +299,5 @@ class _MediaViewerState extends State<MediaViewer> {
         ),
       ),
     );
-  }
-
-  // 构建图片查看器
-  Widget _buildImageViewer(MediaItem mediaItem, int index) {
-    final isInitialItem = index == widget.initialIndex;
-    final currentHeroTag = isInitialItem ? widget.heroTag : null;
-
-    return PhotoView(
-      imageProvider: NetworkImage(mediaItem.url),
-      minScale: PhotoViewComputedScale.contained * 0.8,
-      maxScale: PhotoViewComputedScale.covered * 2.0,
-      initialScale: PhotoViewComputedScale.contained,
-      basePosition: Alignment.center,
-      backgroundDecoration: const BoxDecoration(color: Colors.transparent),
-      heroAttributes: currentHeroTag != null
-          ? PhotoViewHeroAttributes(tag: currentHeroTag)
-          : null,
-      loadingBuilder: (context, event) =>
-          const Center(child: CircularProgressIndicator()),
-      errorBuilder: (context, error, stackTrace) => Center(
-        child: Icon(
-          Icons.error_outline,
-          size: 50,
-          color: Theme.of(context).colorScheme.surface,
-        ),
-      ),
-    );
-  }
-
-  // 重置自动隐藏定时器
-  void _resetHideTimer(MediaItem mediaItem) {
-    _hideControlsTimer?.cancel();
-    if (mediaItem.videoController?.value.isPlaying ?? false) {
-      _hideControlsTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _showControls = false;
-          });
-        }
-      });
-    }
-  }
-
-  // 切换播放/暂停状态
-  void _togglePlayPause(MediaItem mediaItem) {
-    if (mediaItem.videoController == null) return;
-
-    setState(() {
-      if (mediaItem.videoController!.value.isPlaying) {
-        mediaItem.videoController?.pause();
-      } else {
-        mediaItem.videoController?.play();
-        // 启动自动隐藏定时器
-        _resetHideTimer(mediaItem);
-      }
-    });
-  }
-
-  // 格式化时间
-  String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
-  }
-
-  // 构建视频查看器
-  Widget _buildVideoViewer(MediaItem mediaItem, int index) {
-    mediaItem.videoController ??=
-        VideoPlayerController.networkUrl(Uri.parse(mediaItem.url))
-          ..initialize().then((_) {
-            if (mounted) {
-              setState(() {
-                // 初始化完成后播放视频
-                mediaItem.videoController?.play();
-                // 启动自动隐藏定时器
-                _resetHideTimer(mediaItem);
-              });
-            }
-          });
-
-    return Center(
-      child: mediaItem.videoController?.value.isInitialized ?? false
-          ? GestureDetector(
-              onTap: () {
-                setState(() {
-                  _showControls = !_showControls;
-                  // 重置自动隐藏定时器
-                  if (_showControls) {
-                    _resetHideTimer(mediaItem);
-                  }
-                });
-              },
-              child: Container(
-                color: Colors.black,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: AspectRatio(
-                        aspectRatio:
-                            mediaItem.videoController!.value.aspectRatio,
-                        child: VideoPlayer(mediaItem.videoController!),
-                      ),
-                    ),
-                    // 底部控制栏 - 带动画效果
-                    AnimatedOpacity(
-                      opacity: _showControls ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 300),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        height: _showControls ? null : 0,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // 底部控制栏
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withAlpha(150),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  children: [
-                                    // 进度条
-                                    VideoProgressIndicator(
-                                      mediaItem.videoController!,
-                                      allowScrubbing: true,
-                                      colors: VideoProgressColors(
-                                        playedColor: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        bufferedColor: Colors.white.withAlpha(
-                                          100,
-                                        ),
-                                        backgroundColor: Colors.white.withAlpha(
-                                          50,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    // 播放/暂停按钮和时间显示
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        // 播放/暂停按钮
-                                        IconButton(
-                                          onPressed: () =>
-                                              _togglePlayPause(mediaItem),
-                                          icon: Icon(
-                                            mediaItem
-                                                    .videoController!
-                                                    .value
-                                                    .isPlaying
-                                                ? Icons.pause
-                                                : Icons.play_arrow,
-                                            color: Colors.white,
-                                          ),
-                                          style: IconButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(28),
-                                            ),
-                                            padding: const EdgeInsets.all(8),
-                                          ),
-                                        ),
-                                        // 时间显示
-                                        Text(
-                                          '${_formatDuration(mediaItem.videoController!.value.position)} / ${_formatDuration(mediaItem.videoController!.value.duration)}',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          : const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  // 构建音频播放器
-  Widget _buildAudioViewer(MediaItem mediaItem, int index) {
-    if (mediaItem.url.isEmpty) {
-      return const Center(child: Text('Invalid audio URL'));
-    }
-
-    if (mediaItem.audioPlayer == null) {
-      mediaItem.audioPlayer = AudioPlayer();
-      // 预加载并播放音频
-      mediaItem.audioPlayer
-          ?.setSource(UrlSource(mediaItem.url))
-          .then((_) {
-            if (mounted) {
-              mediaItem.audioPlayer?.resume();
-            }
-          })
-          .catchError((error) {
-            logger.error('Error loading audio', error);
-          });
-    }
-
-    final theme = Theme.of(context);
-    final audioPlayer = mediaItem.audioPlayer;
-
-    // 格式化时间
-    String formatDuration(Duration d) {
-      String twoDigits(int n) => n.toString().padLeft(2, '0');
-      final minutes = twoDigits(d.inMinutes.remainder(60));
-      final seconds = twoDigits(d.inSeconds.remainder(60));
-      return '$minutes:$seconds';
-    }
-
-    // 处理进度条拖动
-    void handleSeek(double sliderValue, Duration duration) {
-      try {
-        final newPosition = (duration.inMilliseconds * (sliderValue / 100))
-            .toInt();
-        audioPlayer?.seek(Duration(milliseconds: newPosition));
-      } catch (error) {
-        logger.error('Error seeking audio', error);
-      }
-    }
-
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 32),
-        padding: const EdgeInsets.all(24),
-        width: double.infinity,
-        constraints: const BoxConstraints(maxWidth: 520),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withAlpha(240),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(30),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 音频图标
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Center(child: Icon(Icons.music_note, size: 40)),
-            ),
-            const SizedBox(height: 20),
-
-            // 音频标题
-            if (mediaItem.fileName != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Text(
-                  mediaItem.fileName!,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-              ),
-
-            // 进度条和时间显示
-            StreamBuilder<Duration>(
-              stream: audioPlayer?.onDurationChanged,
-              builder: (context, durationSnapshot) {
-                final duration = durationSnapshot.data ?? Duration(seconds: 1);
-
-                return StreamBuilder<Duration>(
-                  stream: audioPlayer?.onPositionChanged,
-                  builder: (context, positionSnapshot) {
-                    final position = positionSnapshot.data ?? Duration.zero;
-                    final initialValue = duration.inMilliseconds > 0
-                        ? ((position.inMilliseconds / duration.inMilliseconds) *
-                                  100)
-                              .clamp(0.0, 100.0)
-                        : 0.0;
-
-                    return StatefulBuilder(
-                      builder: (context, setState) {
-                        double sliderValue = initialValue;
-
-                        // 当播放位置变化时，更新滑块位置
-                        if (positionSnapshot.hasData) {
-                          final newPosition = positionSnapshot.data!;
-                          final newValue = duration.inMilliseconds > 0
-                              ? ((newPosition.inMilliseconds /
-                                            duration.inMilliseconds) *
-                                        100)
-                                    .clamp(0.0, 100.0)
-                              : 0.0;
-                          if ((newValue - sliderValue).abs() > 1.0) {
-                            sliderValue = newValue;
-                          }
-                        }
-
-                        return Column(
-                          children: [
-                            // 进度条
-                            Slider(
-                              value: sliderValue,
-                              min: 0,
-                              max: 100,
-                              onChanged: (newValue) {
-                                // 实时更新UI
-                                setState(() {
-                                  sliderValue = newValue;
-                                });
-                              },
-                              onChangeEnd: (newValue) {
-                                // 只在拖动结束时seek，避免频繁调用导致异常
-                                handleSeek(newValue, duration);
-                              },
-                              activeColor: theme.colorScheme.primary,
-                              inactiveColor: theme.colorScheme.outline,
-                              thumbColor: theme.colorScheme.primary,
-                            ),
-
-                            // 时间显示
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  formatDuration(position),
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                                Text(
-                                  formatDuration(duration),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurface
-                                        .withAlpha(128),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // 播放/暂停按钮
-            StreamBuilder<PlayerState>(
-              stream: audioPlayer?.onPlayerStateChanged,
-              builder: (context, snapshot) {
-                final playerState = snapshot.data ?? PlayerState.stopped;
-                final isPlaying = playerState == PlayerState.playing;
-
-                return Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withAlpha(30),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      try {
-                        if (isPlaying) {
-                          audioPlayer?.pause();
-                        } else {
-                          audioPlayer?.resume();
-                        }
-                      } catch (error) {
-                        logger.error('Error toggling play/pause', error);
-                      }
-                    },
-                    icon: Icon(
-                      isPlaying ? Icons.pause : Icons.play_arrow,
-                      color: theme.colorScheme.onPrimary,
-                      size: 32,
-                    ),
-                    iconSize: 32,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 预加载媒体
-  void _preloadMedia(int currentIndex) {
-    // 预加载下一个媒体
-    if (currentIndex + 1 < widget.mediaItems.length) {
-      final nextItem = widget.mediaItems[currentIndex + 1];
-      _preloadSingleMedia(nextItem);
-    }
-
-    // 预加载上一个媒体
-    if (currentIndex - 1 >= 0) {
-      final prevItem = widget.mediaItems[currentIndex - 1];
-      _preloadSingleMedia(prevItem);
-    }
-  }
-
-  // 预加载单个媒体
-  void _preloadSingleMedia(MediaItem mediaItem) async {
-    if (mediaItem.url.isEmpty) return;
-
-    try {
-      // 检查是否已经缓存
-      if (!mediaItem.isCached) {
-        // 使用CacheManager缓存媒体文件
-        // 这个异步操作即使在MediaViewer关闭后也会在后台继续完成
-        final cachedPath = await cacheManager.cacheFile(
-          mediaItem.url,
-          mediaItem.cacheCategory,
-        );
-        mediaItem.cachedPath = cachedPath;
-        mediaItem.isCached = true;
-        logger.debug(
-          'Media background caching completed for: ${mediaItem.url}',
-        );
-      }
-
-      // 如果组件已经销毁，不再初始化控制器
-      if (!mounted) return;
-
-      if (mediaItem.type == MediaType.image) {
-        // 预加载图片
-        if (mediaItem.cachedPath != null) {
-          precacheImage(FileImage(File(mediaItem.cachedPath!)), context);
-        } else {
-          precacheImage(NetworkImage(mediaItem.url), context);
-        }
-      } else if (mediaItem.type == MediaType.video &&
-          mediaItem.videoController == null) {
-        // 预加载视频
-        if (mediaItem.cachedPath != null) {
-          mediaItem.videoController = VideoPlayerController.file(
-            File(mediaItem.cachedPath!),
-          )..initialize();
-        } else {
-          mediaItem.videoController = VideoPlayerController.networkUrl(
-            Uri.parse(mediaItem.url),
-          )..initialize();
-        }
-      } else if (mediaItem.type == MediaType.audio &&
-          mediaItem.audioPlayer == null) {
-        // 预加载音频
-        mediaItem.audioPlayer = AudioPlayer();
-        if (mediaItem.cachedPath != null) {
-          mediaItem.audioPlayer?.setSource(
-            DeviceFileSource(mediaItem.cachedPath!),
-          );
-        } else {
-          mediaItem.audioPlayer?.setSource(UrlSource(mediaItem.url));
-        }
-      }
-    } catch (error) {
-      logger.error('Error preloading media', error);
-      // 如果缓存失败，使用网络加载
-      if (!mounted) return;
-
-      if (mediaItem.type == MediaType.image) {
-        precacheImage(NetworkImage(mediaItem.url), context);
-      } else if (mediaItem.type == MediaType.video &&
-          mediaItem.videoController == null) {
-        mediaItem.videoController = VideoPlayerController.networkUrl(
-          Uri.parse(mediaItem.url),
-        )..initialize();
-      } else if (mediaItem.type == MediaType.audio &&
-          mediaItem.audioPlayer == null) {
-        mediaItem.audioPlayer = AudioPlayer();
-        mediaItem.audioPlayer?.setSource(UrlSource(mediaItem.url));
-      }
-    }
-  }
-}
-
-/// 媒体类型枚举
-enum MediaType { image, video, audio }
-
-/// 媒体项类
-class MediaItem {
-  final String url;
-  final MediaType type;
-  final String? fileName;
-  VideoPlayerController? videoController;
-  AudioPlayer? audioPlayer;
-  String? cachedPath;
-  bool isCached = false;
-
-  MediaItem({required this.url, required this.type, this.fileName});
-
-  /// 获取对应的缓存类别
-  CacheCategory get cacheCategory {
-    switch (type) {
-      case MediaType.image:
-        return CacheCategory.image;
-      case MediaType.audio:
-        return CacheCategory.audio;
-      case MediaType.video:
-        return CacheCategory.other;
-    }
   }
 }

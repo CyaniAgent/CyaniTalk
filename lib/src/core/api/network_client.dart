@@ -71,11 +71,13 @@ class NetworkClient {
   /// @param host The hostname for the base URL.
   /// @param token Optional authorization token.
   /// @param userAgent Custom User-Agent string.
+  /// @param enableCertificateValidation Whether to enable SSL certificate validation.
   Dio createDio({
     required String host,
     String? token,
     String? userAgent,
     Map<String, dynamic>? extraHeaders,
+    bool enableCertificateValidation = true,
   }) {
     logger.info('NetworkClient: Creating Dio instance for $host');
 
@@ -117,16 +119,52 @@ class NetworkClient {
       );
     }
 
+    // Add rate limiting interceptor
+    dio.interceptors.add(
+      RateLimitInterceptor(),
+    );
+
     // Handle SSL/TLS for local/development instances (HandshakeException fix)
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
-        client.badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
+        
+        if (!enableCertificateValidation) {
+          logger.warning('NetworkClient: SSL certificate validation disabled for $host');
+          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        }
+        
         return client;
       },
     );
 
     return dio;
+  }
+}
+
+/// Rate limit interceptor to prevent excessive requests
+class RateLimitInterceptor extends Interceptor {
+  final Map<String, List<DateTime>> _requestTimes = {};
+  final int _maxRequestsPerMinute = 60; // Adjust based on API limits
+
+  @override
+  Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    final key = '${options.baseUrl}${options.path}';
+    final now = DateTime.now();
+
+    // Clean up old requests
+    _requestTimes.putIfAbsent(key, () => []);
+    _requestTimes[key]?.removeWhere((time) => now.difference(time).inMinutes > 1);
+
+    // Check if we've exceeded the rate limit
+    if (_requestTimes[key]!.length >= _maxRequestsPerMinute) {
+      logger.warning('NetworkClient: Rate limit exceeded for ${options.path}, waiting...');
+      // Wait for 1 second before retrying
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
+    // Record this request
+    _requestTimes[key]?.add(now);
+    return handler.next(options);
   }
 }

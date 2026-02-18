@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart' as windows;
 import 'package:webview_flutter/webview_flutter.dart' as mobile;
 
-/// Verification Window for WAF challenges
+/// WAF 验证窗口
 class VerificationWindow extends StatefulWidget {
   final String url;
 
   const VerificationWindow({super.key, required this.url});
 
-  /// Shows the verification window dialog
+  /// 显示 WAF 验证窗口
   static Future<String?> show(BuildContext context, String url) async {
     return await showDialog<String?>(
       context: context,

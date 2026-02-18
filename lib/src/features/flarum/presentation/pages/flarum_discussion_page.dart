@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../application/flarum_providers.dart';
 import '../widgets/discussion_list_item.dart';
+import '/src/features/common/presentation/pages/media_viewer_page.dart';
+import '/src/features/common/presentation/widgets/media/media_item.dart';
 
 class FlarumDiscussionPage extends ConsumerWidget {
   const FlarumDiscussionPage({super.key});
@@ -42,7 +44,31 @@ class FlarumDiscussionPage extends ConsumerWidget {
             return DiscussionListItem(
               discussion: discussion,
               onTap: () {
-                // TODO: Navigate to discussion details
+                // 导航到讨论详情页面
+                // TODO: 实现讨论详情页面
+                // 示例：Navigator.push(context, MaterialPageRoute(builder: (context) => FlarumDiscussionDetailPage(discussion: discussion)));
+                
+                // 示例：如果讨论包含媒体内容，显示媒体浏览器
+                // 这里只是示例，实际实现需要根据讨论的实际媒体内容来处理
+                final mediaItems = [
+                  MediaItem(
+                    url: 'https://picsum.photos/200/300',
+                    type: MediaType.image,
+                  ),
+                  MediaItem(
+                    url: 'https://picsum.photos/300/200',
+                    type: MediaType.image,
+                  ),
+                ];
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MediaViewerPage(
+                      mediaItems: mediaItems,
+                      initialIndex: 0,
+                    ),
+                  ),
+                );
               },
             );
           },

@@ -305,5 +305,22 @@
   "storage_usage_others": "Others Used Meow~",
   "storage_usage_free": "Free Space Meow~",
   "storage_total_capacity": "Total Capacity Meow~",
-  "storage_reset_app_warning": "Note: Resetting will clear all logged-in accounts, personalized settings, cache files, and endpoint configurations Meow~"
+  "storage_reset_app_warning": "Note: Resetting will clear all logged-in accounts, personalized settings, cache files, and endpoint configurations Meow~",
+  "error_network_timeout": "Network timeout, please check your network connection Meow~",
+  "error_certificate_error": "Certificate error, cannot establish secure connection Meow~",
+  "error_server_error": "Server error Meow~",
+  "error_bad_request": "Bad request parameters Meow~",
+  "error_unauthorized": "Unauthorized, please log in again Meow~",
+  "error_forbidden": "Insufficient permissions, cannot access Meow~",
+  "error_not_found": "Requested resource not found Meow~",
+  "error_method_not_allowed": "Request method not allowed Meow~",
+  "error_too_many_requests": "Too many requests, please try again later Meow~",
+  "error_internal_server_error": "Internal server error Meow~",
+  "error_bad_gateway": "Bad gateway error Meow~",
+  "error_service_unavailable": "Service temporarily unavailable Meow~",
+  "error_gateway_timeout": "Gateway timeout Meow~",
+  "error_request_canceled": "Request canceled Meow~",
+  "error_connection_error": "Network connection error, please check network settings Meow~",
+  "error_unknown": "Unknown error Meow~",
+  "error_occurred": "An unknown error occurred Meow~"
 }

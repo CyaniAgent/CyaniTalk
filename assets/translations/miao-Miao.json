@@ -299,5 +299,22 @@
   "storage_usage_others": "Mew Mew~",
   "storage_usage_free": "Meow~",
   "storage_total_capacity": "Nya~",
-  "storage_reset_app_warning": "Mew Mew~"
+  "storage_reset_app_warning": "Mew Mew~",
+  "error_network_timeout": "Meow~",
+  "error_certificate_error": "Mew Mew~",
+  "error_server_error": "Nya~",
+  "error_bad_request": "Nya Nya~",
+  "error_unauthorized": "Meow~",
+  "error_forbidden": "Mew Mew~",
+  "error_not_found": "Nya~",
+  "error_method_not_allowed": "Nya Nya~",
+  "error_too_many_requests": "Meow~",
+  "error_internal_server_error": "Mew Mew~",
+  "error_bad_gateway": "Nya~",
+  "error_service_unavailable": "Nya Nya~",
+  "error_gateway_timeout": "Meow~",
+  "error_request_canceled": "Mew Mew~",
+  "error_connection_error": "Nya~",
+  "error_unknown": "Nya Nya~",
+  "error_occurred": "Meow~"
 }

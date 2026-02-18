@@ -370,5 +370,22 @@
   "storage_usage_others": "Others Used",
   "storage_usage_free": "Free Space",
   "storage_total_capacity": "Total Capacity",
-  "storage_reset_app_warning": "Note: Resetting will clear all logged-in accounts, personalized settings, cache files, and endpoint configurations."
+  "storage_reset_app_warning": "Note: Resetting will clear all logged-in accounts, personalized settings, cache files, and endpoint configurations.",
+  "error_network_timeout": "Network timeout, please check your network connection",
+  "error_certificate_error": "Certificate error, cannot establish secure connection",
+  "error_server_error": "Server error",
+  "error_bad_request": "Bad request parameters",
+  "error_unauthorized": "Unauthorized, please log in again",
+  "error_forbidden": "Insufficient permissions, cannot access",
+  "error_not_found": "Requested resource not found",
+  "error_method_not_allowed": "Request method not allowed",
+  "error_too_many_requests": "Too many requests, please try again later",
+  "error_internal_server_error": "Internal server error",
+  "error_bad_gateway": "Bad gateway error",
+  "error_service_unavailable": "Service temporarily unavailable",
+  "error_gateway_timeout": "Gateway timeout",
+  "error_request_canceled": "Request canceled",
+  "error_connection_error": "Network connection error, please check network settings",
+  "error_unknown": "Unknown error",
+  "error_occurred": "An unknown error occurred"
 }

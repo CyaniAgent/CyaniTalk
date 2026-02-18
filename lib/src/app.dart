@@ -48,6 +48,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     super.initState();
     // 注册生命周期观察者
     WidgetsBinding.instance.addObserver(this);
+    
+    // 初始化性能监控
+    performanceMonitor.initialize();
   }
 
   @override

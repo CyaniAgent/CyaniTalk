@@ -9,7 +9,8 @@ import '/src/features/misskey/domain/drive_folder.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/shared/widgets/login_reminder.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
-import '/src/features/common/presentation/widgets/media_viewer.dart';
+
+import '/src/features/common/presentation/widgets/media/media_item.dart';
 
 class CloudPage extends ConsumerWidget {
   const CloudPage({super.key});

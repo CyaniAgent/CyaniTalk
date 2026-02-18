@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'logger.dart';
 
 /// 错误类型枚举
@@ -42,51 +43,51 @@ class ErrorHandler {
       case DioExceptionType.receiveTimeout:
         return AppError(
           type: ErrorType.network,
-          message: '网络超时，请检查网络连接',
+          message: 'error_network_timeout'.tr(),
           originalError: error,
           stackTrace: error.stackTrace,
         );
       case DioExceptionType.badCertificate:
         return AppError(
           type: ErrorType.network,
-          message: '证书错误，无法建立安全连接',
+          message: 'error_certificate_error'.tr(),
           originalError: error,
           stackTrace: error.stackTrace,
         );
       case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode;
-        String message = '服务器错误';
+        String message = 'error_server_error'.tr();
 
         switch (statusCode) {
           case 400:
-            message = '请求参数错误';
+            message = 'error_bad_request'.tr();
             break;
           case 401:
-            message = '未授权，请重新登录';
+            message = 'error_unauthorized'.tr();
             break;
           case 403:
-            message = '权限不足，无法访问';
+            message = 'error_forbidden'.tr();
             break;
           case 404:
-            message = '请求的资源不存在';
+            message = 'error_not_found'.tr();
             break;
           case 405:
-            message = '请求方法不允许';
+            message = 'error_method_not_allowed'.tr();
             break;
           case 429:
-            message = '请求过于频繁，请稍后再试';
+            message = 'error_too_many_requests'.tr();
             break;
           case 500:
-            message = '服务器内部错误';
+            message = 'error_internal_server_error'.tr();
             break;
           case 502:
-            message = '网关错误';
+            message = 'error_bad_gateway'.tr();
             break;
           case 503:
-            message = '服务暂时不可用';
+            message = 'error_service_unavailable'.tr();
             break;
           case 504:
-            message = '网关超时';
+            message = 'error_gateway_timeout'.tr();
             break;
         }
 
@@ -99,21 +100,21 @@ class ErrorHandler {
       case DioExceptionType.cancel:
         return AppError(
           type: ErrorType.client,
-          message: '请求已取消',
+          message: 'error_request_canceled'.tr(),
           originalError: error,
           stackTrace: error.stackTrace,
         );
       case DioExceptionType.connectionError:
         return AppError(
           type: ErrorType.network,
-          message: '网络连接错误，请检查网络设置',
+          message: 'error_connection_error'.tr(),
           originalError: error,
           stackTrace: error.stackTrace,
         );
       case DioExceptionType.unknown:
         return AppError(
           type: ErrorType.unknown,
-          message: '未知错误',
+          message: 'error_unknown'.tr(),
           originalError: error,
           stackTrace: error.stackTrace,
         );
@@ -138,7 +139,7 @@ class ErrorHandler {
     } else {
       return AppError(
         type: ErrorType.unknown,
-        message: '发生未知错误',
+        message: 'error_occurred'.tr(),
         originalError: error,
         stackTrace: stackTrace,
       );

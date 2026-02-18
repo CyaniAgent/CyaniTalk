@@ -383,5 +383,22 @@
   "storage_usage_others": "其他已使用",
   "storage_usage_free": "剩余空间",
   "storage_total_capacity": "总存储容量",
-  "storage_reset_app_warning": "注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置。"
+  "storage_reset_app_warning": "注意：重置操作将清除所有已登录账户、个性化设置、缓存文件和端点配置。",
+  "error_network_timeout": "网络超时，请检查网络连接",
+  "error_certificate_error": "证书错误，无法建立安全连接",
+  "error_server_error": "服务器错误",
+  "error_bad_request": "请求参数错误",
+  "error_unauthorized": "未授权，请重新登录",
+  "error_forbidden": "权限不足，无法访问",
+  "error_not_found": "请求的资源不存在",
+  "error_method_not_allowed": "请求方法不允许",
+  "error_too_many_requests": "请求过于频繁，请稍后再试",
+  "error_internal_server_error": "服务器内部错误",
+  "error_bad_gateway": "网关错误",
+  "error_service_unavailable": "服务暂时不可用",
+  "error_gateway_timeout": "网关超时",
+  "error_request_canceled": "请求已取消",
+  "error_connection_error": "网络连接错误，请检查网络设置",
+  "error_unknown": "未知错误",
+  "error_occurred": "发生未知错误"
 }

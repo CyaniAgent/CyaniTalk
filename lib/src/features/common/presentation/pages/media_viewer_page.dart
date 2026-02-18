@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/media_viewer.dart';
+import '../widgets/media/media_item.dart';
 
 /// 媒体浏览器页面，用于全屏浏览图片和视频
 class MediaViewerPage extends StatelessWidget {
