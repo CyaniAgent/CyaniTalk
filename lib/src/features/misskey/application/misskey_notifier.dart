@@ -177,8 +177,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         final currentNotes = state.value ?? [];
         // 检查是否有新笔记不在当前列表中
         final currentNoteIds = currentNotes.map((n) => n.id).toSet();
-        final newNotesCount = latestNotes.where((n) => !currentNoteIds.contains(n.id)).length;
-        
+        final newNotesCount = latestNotes
+            .where((n) => !currentNoteIds.contains(n.id))
+            .length;
+
         if (newNotesCount > 0) {
           logger.info('Misskey时间线: 发现 $newNotesCount 条新笔记，更新UI');
           // 直接使用服务器返回的最新数据，确保新笔记在最前面

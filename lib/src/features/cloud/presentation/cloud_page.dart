@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:async';
 import '/src/core/navigation/navigation.dart';
 import '/src/features/misskey/application/drive_notifier.dart';
 import '/src/features/misskey/domain/drive_file.dart';
@@ -161,9 +164,48 @@ class CloudPage extends ConsumerWidget {
               : _buildFileIcon(item.file!),
           title: Text(item.name),
           subtitle: Text(item.subtitle),
-          trailing: IconButton(
+          trailing: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            onPressed: () => _showItemOptions(context, ref, item),
+            onSelected: (value) {
+              if (value == 'download' && !item.isFolder) {
+                _downloadFile(context, item.file!);
+              } else if (value == 'delete') {
+                if (item.isFolder) {
+                  ref
+                      .read(misskeyDriveProvider.notifier)
+                      .deleteFolder(item.folder!.id);
+                } else {
+                  ref
+                      .read(misskeyDriveProvider.notifier)
+                      .deleteFile(item.file!.id);
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              if (!item.isFolder)
+                PopupMenuItem(
+                  value: 'download',
+                  child: ListTile(
+                    leading: const Icon(Icons.download),
+                    title: Text('cloud_download'.tr()),
+                  ),
+                ),
+              PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  title: Text(
+                    'cloud_delete'.tr(),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           onTap: () {
             if (item.isFolder) {
@@ -376,41 +418,6 @@ class CloudPage extends ConsumerWidget {
     );
   }
 
-  void _showItemOptions(BuildContext context, WidgetRef ref, _DriveItem item) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.delete,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              title: Text(
-                'cloud_delete'.tr(),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                if (item.isFolder) {
-                  ref
-                      .read(misskeyDriveProvider.notifier)
-                      .deleteFolder(item.folder!.id);
-                } else {
-                  ref
-                      .read(misskeyDriveProvider.notifier)
-                      .deleteFile(item.file!.id);
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _openFilePreview(BuildContext context, DriveFile file) {
     final mimeType = file.type.toLowerCase();
 
@@ -479,7 +486,7 @@ class CloudPage extends ConsumerWidget {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // TODO: 实现文件下载
+                  _downloadFile(context, file);
                 },
                 child: const Text('下载文件'),
               ),
@@ -530,6 +537,274 @@ class CloudPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _downloadFile(BuildContext context, DriveFile file) async {
+    final dio = Dio();
+    double progress = 0.0;
+    String status = '准备下载';
+    String savePath = '';
+
+    // 显示下载确认底页
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'cloud_download_confirm'.tr(),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text('cloud_file_name'.tr(namedArgs: {'name': file.name})),
+
+                    const SizedBox(height: 8),
+                    Text(
+                      'cloud_file_size'.tr(
+                        namedArgs: {'size': _formatBytes(file.size.toDouble())},
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+                    Text('cloud_download_link'.tr()),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: SelectableText(
+                        file.url,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontFamily: 'Monospace',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (savePath.isNotEmpty) ...[
+                      Text(
+                        'cloud_save_location'.tr(namedArgs: {'path': savePath}),
+                      ),
+
+                      const SizedBox(height: 8),
+                    ],
+                    if (progress > 0) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        'cloud_download_progress'.tr(
+                          namedArgs: {
+                            'progress':
+                                '${(progress * 100).toStringAsFixed(1)}%',
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(status),
+                    ],
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text('cloud_cancel'.tr()),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: progress > 0
+                                ? null
+                                : () async {
+                                    // 获取下载目录
+                                    final directory =
+                                        await getDownloadsDirectory();
+                                    if (directory == null) {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'cloud_no_download_directory'
+                                                  .tr(),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return;
+                                    }
+
+                                    // 构建文件保存路径
+                                    savePath = '${directory.path}/${file.name}';
+                                    setState(() {});
+
+                                    try {
+                                      // 开始下载
+                                      setState(() {
+                                        status = '开始下载...';
+                                      });
+
+                                      await dio.download(
+                                        file.url,
+                                        savePath,
+                                        onReceiveProgress: (received, total) {
+                                          if (total != -1) {
+                                            setState(() {
+                                              progress = received / total;
+                                              status =
+                                                  '下载中... ${(progress * 100).toStringAsFixed(1)}%';
+                                            });
+                                          }
+                                        },
+                                      );
+
+                                      setState(() {
+                                        status = '下载完成';
+                                      });
+
+                                      // 显示完成信息
+                                      if (context.mounted) {
+                                        final currentContext = context;
+                                        await showDialog(
+                                          context: currentContext,
+                                          builder: (dialogContext) =>
+                                              AlertDialog(
+                                                title: Text(
+                                                  'cloud_download_completed'
+                                                      .tr(),
+                                                ),
+                                                content: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      'cloud_file_saved_to'.tr(
+                                                        namedArgs: {
+                                                          'path': savePath,
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                        dialogContext,
+                                                      );
+                                                      if (currentContext
+                                                          .mounted) {
+                                                        Navigator.pop(
+                                                          currentContext,
+                                                        );
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      'cloud_close'.tr(),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      setState(() {
+                                        status = '下载失败';
+                                      });
+
+                                      if (context.mounted) {
+                                        final currentContext = context;
+                                        await showDialog(
+                                          context: currentContext,
+                                          builder: (dialogContext) =>
+                                              AlertDialog(
+                                                title: Text(
+                                                  'cloud_download_failed'.tr(),
+                                                ),
+                                                content: Text(
+                                                  'cloud_error_message'.tr(
+                                                    namedArgs: {
+                                                      'message': e.toString(),
+                                                    },
+                                                  ),
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(
+                                                        dialogContext,
+                                                      );
+                                                      if (currentContext
+                                                          .mounted) {
+                                                        Navigator.pop(
+                                                          currentContext,
+                                                        );
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      'cloud_close'.tr(),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                        );
+                                      }
+                                    }
+                                  },
+                            child: progress > 0
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text('cloud_start_download'.tr()),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
