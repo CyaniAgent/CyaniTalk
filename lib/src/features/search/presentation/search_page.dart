@@ -198,7 +198,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       isThreeLine: true,
       onTap: () {
         logger.info('SearchPage: 选择搜索结果: ${result.title}');
-        // TODO: Implement navigation to result details
+        // TODO: 实现导航到结果详情
       },
     );
   }

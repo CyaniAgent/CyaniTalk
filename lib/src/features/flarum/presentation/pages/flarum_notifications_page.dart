@@ -50,7 +50,7 @@ class FlarumNotificationsPage extends ConsumerWidget {
                 child: FlarumNotificationListItem(
                   notification: notification,
                   onTap: () {
-                    // TODO: Handle notification tap
+                    // TODO: 处理通知点击
                   },
                 ),
               ),
