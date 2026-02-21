@@ -322,5 +322,11 @@
   "error_request_canceled": "リクエストがキャンセルされましたにゃ～",
   "error_connection_error": "ネットワーク接続エラー、ネットワーク設定を確認してくださいにゃ～",
   "error_unknown": "不明なエラーにゃ～",
-  "error_occurred": "不明なエラーが発生しましたにゃ～"
+  "error_occurred": "不明なエラーが発生しましたにゃ～",
+  "cloud_files_count": "{count}ファイルにゃ～",
+  "cloud_download_preparing": "ダウンロード準備中にゃ～",
+  "cloud_download_completed": "ダウンロード完了にゃ～",
+  "cloud_download_failed_count": "{count}ファイルのダウンロードに失敗しましたにゃ～",
+  "cloud_downloading_current": "ダウンロード中 {current}/{total}: {filename}にゃ～",
+  "cloud_download_starting": "ダウンロード開始にゃ～"
 }

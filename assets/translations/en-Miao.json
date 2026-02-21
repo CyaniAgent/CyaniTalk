@@ -322,5 +322,11 @@
   "error_request_canceled": "Request canceled Meow~",
   "error_connection_error": "Network connection error, please check network settings Meow~",
   "error_unknown": "Unknown error Meow~",
-  "error_occurred": "An unknown error occurred Meow~"
+  "error_occurred": "An unknown error occurred Meow~",
+  "cloud_files_count": "{count} files Meow~",
+  "cloud_download_preparing": "Preparing download Meow~",
+  "cloud_download_completed": "Download completed Meow~",
+  "cloud_download_failed_count": "{count} files failed Meow~",
+  "cloud_downloading_current": "Downloading {current}/{total}: {filename} Meow~",
+  "cloud_download_starting": "Starting download Meow~"
 }

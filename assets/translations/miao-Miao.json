@@ -316,5 +316,11 @@
   "error_request_canceled": "Mew Mew~",
   "error_connection_error": "Nya~",
   "error_unknown": "Nya Nya~",
-  "error_occurred": "Meow~"
+  "error_occurred": "Meow~",
+  "cloud_files_count": "Meow Meow~",
+  "cloud_download_preparing": "Mew Mew~",
+  "cloud_download_completed": "Nya Nya~",
+  "cloud_download_failed_count": "Meow Mew~",
+  "cloud_downloading_current": "Nya Nya~",
+  "cloud_download_starting": "Mew Mew~"
 }
