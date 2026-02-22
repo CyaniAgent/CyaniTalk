@@ -11611,12 +11611,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// cyanitalk 1.3.1+210
+/// cyanitalk 1.3.1+220
 const _cyanitalk = Package(
     name: 'cyanitalk',
     description: 'A comprehensive, multi-functional social application built with Flutter, connecting Misskey and Flarum, and belonging to CyaniAgent.',
     authors: [],
-    version: '1.3.1+210',
+    version: '1.3.1+220',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
