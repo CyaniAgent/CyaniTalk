@@ -17,6 +17,9 @@ enum CacheCategory {
   /// 图片缓存，用于存储图片文件
   image,
 
+  /// 时间线缓存，用于存储时间线数据
+  timeline,
+
   /// 其他缓存，用于存储其他类型的文件
   other,
 }
@@ -224,6 +227,24 @@ class CacheManager {
   final DateTime _lastCacheSizeUpdate = DateTime.now();
   static const Duration _cacheSizeCacheValidity = Duration(minutes: 5);
 
+  /// 当前账户ID，用于缓存隔离
+  String? _currentAccountId;
+
+  /// 设置当前账户ID，用于缓存隔离
+  ///
+  /// 设置后，所有缓存操作将在该账户的独立缓存目录中进行。
+  ///
+  /// @param accountId 账户ID，格式为"用户ID@主机名"
+  void setCurrentAccountId(String? accountId) {
+    _currentAccountId = accountId;
+    logger.debug('当前账户ID设置为: $accountId');
+  }
+
+  /// 获取当前账户ID
+  String? getCurrentAccountId() {
+    return _currentAccountId;
+  }
+
   /// 获取缓存目录
   ///
   /// 首先尝试从首选项中获取保存的缓存目录路径，
@@ -257,15 +278,45 @@ class CacheManager {
   /// 获取指定类别的缓存子目录
   ///
   /// 根据缓存类别获取对应的子目录，如果目录不存在则创建。
+  /// 支持按账户隔离缓存，每个账户有独立的缓存目录。
   ///
   /// @param category 缓存类别
   /// @return 对应类别的缓存子目录
   Future<Directory> getCategoryCacheDirectory(CacheCategory category) async {
     final cacheDir = await getCacheDirectory();
-    final categoryDir = Directory('${cacheDir.path}/${category.name}');
-    if (!await categoryDir.exists()) {
-      await categoryDir.create(recursive: true);
+
+    // 如果设置了账户ID，则在缓存目录中创建账户子目录
+    String categoryPath =
+        '${cacheDir.path}${Platform.pathSeparator}${category.name}';
+    if (_currentAccountId != null && _currentAccountId!.isNotEmpty) {
+      // 将账户ID中的特殊字符替换为下划线，避免文件系统问题
+      final safeAccountId = _currentAccountId!.replaceAll(
+        RegExp(r'[<>:"/\\|?*]'),
+        '_',
+      );
+      categoryPath =
+          '${cacheDir.path}${Platform.pathSeparator}$safeAccountId${Platform.pathSeparator}${category.name}';
+      logger.debug('账户ID: $_currentAccountId');
+      logger.debug('安全账户ID: $safeAccountId');
+      logger.debug('类别路径: $categoryPath');
     }
+
+    final categoryDir = Directory(categoryPath);
+    logger.debug('类别目录对象: ${categoryDir.path}');
+
+    if (!await categoryDir.exists()) {
+      logger.debug('类别目录不存在，创建目录...');
+      try {
+        await categoryDir.create(recursive: true);
+        logger.debug('类别目录创建成功');
+      } catch (e) {
+        logger.error('创建类别目录失败', e);
+        rethrow;
+      }
+    } else {
+      logger.debug('类别目录已存在');
+    }
+
     return categoryDir;
   }
 
@@ -357,7 +408,9 @@ class CacheManager {
   /// 从URL中提取文件名
   String _getFileNameFromUrl(String url) {
     try {
-      if (url.isEmpty) return 'unknown_${DateTime.now().millisecondsSinceEpoch}.cache';
+      if (url.isEmpty) {
+        return 'unknown_${DateTime.now().millisecondsSinceEpoch}.cache';
+      }
       final uri = Uri.parse(url);
       final pathSegments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
       if (pathSegments.isNotEmpty) {
@@ -409,7 +462,7 @@ class CacheManager {
   }) async {
     // 检查是否已有相同的下载任务正在进行
     if (_activeDownloads.containsKey(url)) {
-      logger.debug('CacheManager: Using active download for $url');
+      logger.debug('使用活动下载任务: $url');
       return _activeDownloads[url]!;
     }
 
@@ -441,11 +494,7 @@ class CacheManager {
         if (await file.exists()) {
           // 记录缓存命中性能
           final duration = DateTime.now().difference(startTime);
-          performanceMonitor.trackMediaLoading(
-            url,
-            duration,
-            'cache_hit',
-          );
+          performanceMonitor.trackMediaLoading(url, duration, 'cache_hit');
           return cacheFilePath;
         }
 
@@ -492,22 +541,14 @@ class CacheManager {
 
         // 记录缓存下载性能
         final duration = DateTime.now().difference(startTime);
-        performanceMonitor.trackMediaLoading(
-          url,
-          duration,
-          'cache_download',
-        );
+        performanceMonitor.trackMediaLoading(url, duration, 'cache_download');
 
         return cacheFilePath;
       });
     } catch (e) {
       // 记录缓存失败性能
       final duration = DateTime.now().difference(startTime);
-      performanceMonitor.trackMediaLoading(
-        url,
-        duration,
-        'cache_failed',
-      );
+      performanceMonitor.trackMediaLoading(url, duration, 'cache_failed');
       // 如果下载失败，抛出异常
       throw Exception('缓存文件失败: $e');
     }
@@ -522,9 +563,9 @@ class CacheManager {
           await clearCacheItem(item);
         }
       }
-      logger.info('CacheManager: Cleaned up temporary audio cache');
+      logger.info('清理临时音频缓存完成');
     } catch (e) {
-      logger.error('CacheManager: Error cleaning up temporary audio cache', e);
+      logger.error('清理临时音频缓存失败', e);
     }
   }
 
@@ -533,7 +574,8 @@ class CacheManager {
     try {
       // 检查缓存是否有效
       final now = DateTime.now();
-      if (now.difference(_lastCacheSizeUpdate) < _cacheSizeCacheValidity && _cacheSizeCache.containsKey('total')) {
+      if (now.difference(_lastCacheSizeUpdate) < _cacheSizeCacheValidity &&
+          _cacheSizeCache.containsKey('total')) {
         return _cacheSizeCache['total']!;
       }
 
@@ -562,12 +604,15 @@ class CacheManager {
     try {
       if (Platform.isWindows) {
         // Windows: 检查安装所在的盘符 (如 D:\)
-        final String drive = Platform.resolvedExecutable.substring(0, 2); // 获取 "C:" 或 "D:"
+        final String drive = Platform.resolvedExecutable.substring(
+          0,
+          2,
+        ); // 获取 "C:" 或 "D:"
         final result = await Process.run('powershell', [
           '-Command',
-          'Get-CimInstance Win32_LogicalDisk -Filter "DeviceID=\'$drive\'" | Select-Object Size, FreeSpace | ConvertTo-Json'
+          'Get-CimInstance Win32_LogicalDisk -Filter "DeviceID=\'$drive\'" | Select-Object Size, FreeSpace | ConvertTo-Json',
         ]);
-        
+
         if (result.exitCode == 0) {
           final Map<String, dynamic> data = jsonDecode(result.stdout);
           final int total = data['Size'] ?? 0;
@@ -582,7 +627,7 @@ class CacheManager {
         // macOS, Linux, Android, iOS: 检查目录所在分区
         final dir = await getApplicationDocumentsDirectory();
         final result = await Process.run('df', ['-k', dir.path]);
-        
+
         if (result.exitCode == 0) {
           final lines = result.stdout.toString().split('\n');
           if (lines.length > 1) {
@@ -600,9 +645,9 @@ class CacheManager {
         }
       }
     } catch (e) {
-      logger.error('CacheManager: Failed to get storage stats', e);
+      logger.error('获取存储统计信息失败', e);
     }
-    
+
     // Fallback: 实在获取不到时返回 0，避免虚假数据
     return {'total': 0, 'available': 0, 'usedByOthers': 0};
   }
@@ -626,9 +671,8 @@ class CacheManager {
       // 4. 临时/缓存目录占用 (通常已包含在 getTotalCacheSize 中，但为了严谨单独计算)
       final tempDir = await getTemporaryDirectory();
       totalUsage += await _getDirectorySize(tempDir);
-      
     } catch (e) {
-      logger.warning('CacheManager: Error calculating app total usage', e);
+      logger.warning('计算应用总占用空间失败', e);
     }
     return totalUsage;
   }
@@ -638,7 +682,10 @@ class CacheManager {
     int size = 0;
     try {
       if (await directory.exists()) {
-        await for (final entity in directory.list(recursive: true, followLinks: false)) {
+        await for (final entity in directory.list(
+          recursive: true,
+          followLinks: false,
+        )) {
           if (entity is File) {
             size += await entity.length();
           }
@@ -654,25 +701,37 @@ class CacheManager {
       // 检查缓存是否有效
       final cacheKey = 'category_${category.name}';
       final now = DateTime.now();
-      if (now.difference(_lastCacheSizeUpdate) < _cacheSizeCacheValidity && _cacheSizeCache.containsKey(cacheKey)) {
+      if (now.difference(_lastCacheSizeUpdate) < _cacheSizeCacheValidity &&
+          _cacheSizeCache.containsKey(cacheKey)) {
+        logger.debug(
+          '使用缓存的类别大小: ${category.name} = ${_cacheSizeCache[cacheKey]}',
+        );
         return _cacheSizeCache[cacheKey]!;
       }
 
       final categoryDir = await getCategoryCacheDirectory(category);
+      logger.debug('类别目录: ${category.name} = ${categoryDir.path}');
+      logger.debug('当前账户ID: $_currentAccountId');
+      logger.debug('目录存在: ${await categoryDir.exists()}');
+
       int totalSize = 0;
 
       if (await categoryDir.exists()) {
         await for (final entity in categoryDir.list(recursive: true)) {
           if (entity is File) {
-            totalSize += await entity.length();
+            final fileSize = await entity.length();
+            totalSize += fileSize;
+            logger.debug('文件: ${entity.path}, 大小: $fileSize');
           }
         }
       }
 
       // 更新缓存
       _cacheSizeCache[cacheKey] = totalSize;
+      logger.debug('类别 ${category.name} 总大小: $totalSize');
       return totalSize;
     } catch (e) {
+      logger.error('获取类别缓存大小失败: ${category.name}', e);
       return 0;
     }
   }
@@ -684,32 +743,41 @@ class CacheManager {
       final List<CacheItem> items = [];
 
       if (await cacheDir.exists()) {
-        await for (final categoryEntity in cacheDir.list()) {
-          if (categoryEntity is Directory) {
-            final categoryName = categoryEntity.path.split('/').last;
-            CacheCategory category;
+        // 如果设置了账户ID，只遍历该账户的目录
+        if (_currentAccountId != null && _currentAccountId!.isNotEmpty) {
+          final safeAccountId = _currentAccountId!.replaceAll(
+            RegExp(r'[<>:"/\\|?*]'),
+            '_',
+          );
+          final accountDir = Directory('${cacheDir.path}/$safeAccountId');
 
-            try {
-              category = CacheCategory.values.firstWhere(
-                (e) => e.name == categoryName,
-              );
-            } catch (e) {
-              category = CacheCategory.other;
+          if (await accountDir.exists()) {
+            await for (final categoryEntity in accountDir.list()) {
+              if (categoryEntity is Directory) {
+                await _processCategoryDirectory(categoryEntity, items);
+              }
             }
+          }
+        } else {
+          // 没有设置账户ID，遍历所有目录
+          await for (final entity in cacheDir.list()) {
+            if (entity is Directory) {
+              // 检查是否是账户目录或类别目录
+              final dirName = entity.path.split(RegExp(r'[/\\]')).last;
+              final isAccountDir = !CacheCategory.values.any(
+                (c) => c.name == dirName,
+              );
 
-            await for (final fileEntity in categoryEntity.list()) {
-              if (fileEntity is File) {
-                final stat = await fileEntity.stat();
-                items.add(
-                  CacheItem(
-                    name: fileEntity.path.split('/').last,
-                    path: fileEntity.path,
-                    size: await fileEntity.length(),
-                    modified: stat.modified,
-                    category: category,
-                    canBeCleared: true,
-                  ),
-                );
+              if (isAccountDir) {
+                // 账户目录，遍历其子目录（类别）
+                await for (final categoryEntity in entity.list()) {
+                  if (categoryEntity is Directory) {
+                    await _processCategoryDirectory(categoryEntity, items);
+                  }
+                }
+              } else {
+                // 类别目录
+                await _processCategoryDirectory(entity, items);
               }
             }
           }
@@ -719,6 +787,37 @@ class CacheManager {
       return items;
     } catch (e) {
       return [];
+    }
+  }
+
+  /// 处理类别目录，添加所有文件到缓存项列表
+  Future<void> _processCategoryDirectory(
+    Directory categoryEntity,
+    List<CacheItem> items,
+  ) async {
+    final categoryName = categoryEntity.path.split(RegExp(r'[/\\]')).last;
+    CacheCategory category;
+
+    try {
+      category = CacheCategory.values.firstWhere((e) => e.name == categoryName);
+    } catch (e) {
+      category = CacheCategory.other;
+    }
+
+    await for (final fileEntity in categoryEntity.list()) {
+      if (fileEntity is File) {
+        final stat = await fileEntity.stat();
+        items.add(
+          CacheItem(
+            name: fileEntity.path.split(RegExp(r'[/\\]')).last,
+            path: fileEntity.path,
+            size: await fileEntity.length(),
+            modified: stat.modified,
+            category: category,
+            canBeCleared: true,
+          ),
+        );
+      }
     }
   }
 
@@ -734,7 +833,7 @@ class CacheManager {
             final stat = await entity.stat();
             items.add(
               CacheItem(
-                name: entity.path.split('/').last,
+                name: entity.path.split(RegExp(r'[/\\]')).last,
                 path: entity.path,
                 size: await entity.length(),
                 modified: stat.modified,
@@ -817,7 +916,7 @@ class CacheManager {
     CachePriority priority = CachePriority.medium,
   }) async {
     logger.info(
-      'CacheManager: Starting cache warmup for ${urls.length} items in ${category.name} with $priority priority',
+      '开始缓存预热: ${urls.length} 个项目 (${category.name}, 优先级: $priority)',
     );
 
     try {
@@ -833,21 +932,19 @@ class CacheManager {
             // 检查是否已经缓存
             if (!await isFileCachedAndValid(url, category)) {
               await cacheFile(url, category);
-              logger.debug(
-                'CacheManager: Warmed up cache for $url in ${category.name}',
-              );
+              logger.debug('预热缓存: $url (${category.name})');
             }
           } catch (e) {
-            logger.warning('CacheManager: Failed to warmup cache for $url: $e');
+            logger.warning('预热缓存失败: $url: $e');
           }
         });
 
         await Future.wait(futures);
       }
 
-      logger.info('CacheManager: Cache warmup completed');
+      logger.info('缓存预热完成');
     } catch (e) {
-      logger.error('CacheManager: Error during cache warmup', e);
+      logger.error('缓存预热失败', e);
     }
   }
 
@@ -862,9 +959,7 @@ class CacheManager {
     CacheCategory category, {
     int maxItems = 5,
   }) async {
-    logger.info(
-      'CacheManager: Starting smart preload for up to $maxItems items in ${category.name}',
-    );
+    logger.info('开始智能预加载: 最多 $maxItems 个项目 (${category.name})');
 
     try {
       // 限制预加载数量
@@ -873,11 +968,9 @@ class CacheManager {
       // 执行预加载
       await warmupCache(urlsToPreload, category, priority: CachePriority.low);
 
-      logger.info(
-        'CacheManager: Smart preload completed for ${urlsToPreload.length} items',
-      );
+      logger.info('智能预加载完成: ${urlsToPreload.length} 个项目');
     } catch (e) {
-      logger.error('CacheManager: Error during smart preload', e);
+      logger.error('智能预加载失败', e);
     }
   }
 
@@ -892,9 +985,7 @@ class CacheManager {
     CacheCategory category, {
     void Function(int, int)? onProgress,
   }) async {
-    logger.info(
-      'CacheManager: Starting batch cache for ${urls.length} items in ${category.name}',
-    );
+    logger.info('开始批量缓存: ${urls.length} 个项目 (${category.name})');
 
     final results = <String, String?>{};
     int completed = 0;
@@ -905,7 +996,7 @@ class CacheManager {
           final cachedPath = await cacheFile(url, category);
           results[url] = cachedPath;
         } catch (e) {
-          logger.warning('CacheManager: Failed to cache $url: $e');
+          logger.warning('缓存失败: $url: $e');
           results[url] = null;
         } finally {
           completed++;
@@ -914,10 +1005,10 @@ class CacheManager {
       }
 
       logger.info(
-        'CacheManager: Batch cache completed, ${results.values.where((v) => v != null).length}/${urls.length} successful',
+        '批量缓存完成: ${results.values.where((v) => v != null).length}/${urls.length} 成功',
       );
     } catch (e) {
-      logger.error('CacheManager: Error during batch cache', e);
+      logger.error('批量缓存失败', e);
     }
 
     return results;
@@ -930,7 +1021,7 @@ class CacheManager {
   Future<int> cleanupExpiredCache({
     Duration maxAge = const Duration(days: 7),
   }) async {
-    logger.info('CacheManager: Starting cleanup of expired cache');
+    logger.info('开始清理过期缓存');
 
     try {
       final cacheDir = await getCacheDirectory();
@@ -945,9 +1036,7 @@ class CacheManager {
                 if (DateTime.now().difference(lastModified) > maxAge) {
                   await fileEntity.delete();
                   deletedCount++;
-                  logger.debug(
-                    'CacheManager: Deleted expired cache file: ${fileEntity.path}',
-                  );
+                  logger.debug('删除过期缓存文件: ${fileEntity.path}');
                 }
               }
             }
@@ -955,12 +1044,10 @@ class CacheManager {
         }
       }
 
-      logger.info(
-        'CacheManager: Cleanup completed, deleted $deletedCount expired files',
-      );
+      logger.info('清理完成: 删除了 $deletedCount 个过期文件');
       return deletedCount;
     } catch (e) {
-      logger.error('CacheManager: Error during cache cleanup', e);
+      logger.error('缓存清理失败', e);
       return 0;
     }
   }
@@ -972,7 +1059,7 @@ class CacheManager {
       final currentSize = await getTotalCacheSize();
 
       if (currentSize > maxSize) {
-        logger.info('CacheManager: Cache size exceeds limit, cleaning up...');
+        logger.info('缓存大小超过限制，开始清理...');
 
         // 获取所有缓存项并按修改时间排序（最旧的在前）
         final items = await getAllCacheItems();
@@ -990,21 +1077,17 @@ class CacheManager {
               final fileSize = await file.length();
               await file.delete();
               removedSize += fileSize;
-              logger.debug(
-                'CacheManager: Removed old cache file: ${item.name} ($fileSize bytes)',
-              );
+              logger.debug('删除旧缓存文件: ${item.name} ($fileSize 字节)');
             }
           }
         }
 
-        logger.info(
-          'CacheManager: Cache cleanup completed, removed $removedSize bytes',
-        );
+        logger.info('缓存清理完成: 删除了 $removedSize 字节');
         // 清除缓存大小缓存
         _cacheSizeCache.clear();
       }
     } catch (e) {
-      logger.error('CacheManager: Error ensuring cache size limit', e);
+      logger.error('确保缓存大小限制失败', e);
     }
   }
 
@@ -1016,9 +1099,7 @@ class CacheManager {
         final currentSize = await getCategoryCacheSize(category);
 
         if (currentSize > maxSize) {
-          logger.info(
-            'CacheManager: ${category.name} cache size exceeds limit, cleaning up...',
-          );
+          logger.info('${category.name} 缓存大小超过限制，开始清理...');
 
           // 获取该类别所有缓存项并按修改时间排序（最旧的在前）
           final items = await getCategoryCacheItems(category);
@@ -1037,22 +1118,20 @@ class CacheManager {
                 await file.delete();
                 removedSize += fileSize;
                 logger.debug(
-                  'CacheManager: Removed old ${category.name} cache file: ${item.name} ($fileSize bytes)',
+                  '删除旧的 ${category.name} 缓存文件: ${item.name} ($fileSize 字节)',
                 );
               }
             }
           }
 
-          logger.info(
-            'CacheManager: ${category.name} cache cleanup completed, removed $removedSize bytes',
-          );
+          logger.info('${category.name} 缓存清理完成: 删除了 $removedSize 字节');
           // 清除对应类别的缓存大小缓存和总缓存大小缓存
           _cacheSizeCache.remove('category_${category.name}');
           _cacheSizeCache.remove('total');
         }
       }
     } catch (e) {
-      logger.error('CacheManager: Error ensuring category cache size limit', e);
+      logger.error('确保类别缓存大小限制失败', e);
     }
   }
 

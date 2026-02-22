@@ -29,7 +29,9 @@ class RootNavigationDrawer extends ConsumerWidget {
 
     // Actually, selectedRootIndex passed here is already the display index.
     // Let's refine the logic to match ResponsiveShell.
-    final effectiveSelectedRootIndex = selectedRootIndex >= rootItems.length ? -1 : selectedRootIndex;
+    final effectiveSelectedRootIndex = selectedRootIndex >= rootItems.length
+        ? -1
+        : selectedRootIndex;
 
     return NavigationDrawer(
       selectedIndex:
@@ -90,7 +92,10 @@ class RootNavigationDrawer extends ConsumerWidget {
               splashColor: theme.colorScheme.primary.withAlpha(20),
               highlightColor: theme.colorScheme.primary.withAlpha(10),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.colorScheme.secondaryContainer

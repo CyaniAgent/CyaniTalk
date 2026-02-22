@@ -14,6 +14,7 @@ import '../../../core/api/flarum_api.dart';
 import '../../../core/api/network_client.dart';
 import '../../flarum/data/flarum_repository.dart';
 import '../../../core/core.dart';
+import '../../misskey/application/misskey_notifier.dart';
 
 part 'auth_service.g.dart';
 
@@ -84,7 +85,7 @@ class AuthService extends _$AuthService {
         logger.info('MiAuth授权页面已成功打开');
         return session;
       } else {
-        logger.error('launchUrl 返回 false: ${uri.toString()}');
+        logger.error('启动URL返回失败: ${uri.toString()}');
         throw Exception('无法打开浏览器进行授权');
       }
     } catch (e) {
@@ -152,11 +153,9 @@ class AuthService extends _$AuthService {
           logger.debug('MiAuth检查未通过: $data');
         }
       } on DioException catch (e) {
-        logger.warning(
-          '检查MiAuth HTTP错误 (Attempt ${retryCount + 1}): ${e.message}',
-        );
+        logger.warning('检查MiAuth HTTP错误 (尝试 ${retryCount + 1}): ${e.message}');
         if (e.response != null) {
-          logger.warning('Response Body: ${e.response?.data}');
+          logger.warning('响应体: ${e.response?.data}');
         }
         // Don't rethrow immediately on network glitches, try again
       } catch (e) {
@@ -244,11 +243,11 @@ class AuthService extends _$AuthService {
     final api = FlarumApi();
 
     final originalBaseUrl = api.baseUrl;
-    logger.debug('原始BaseUrl: $originalBaseUrl');
+    logger.debug('原始基础URL: $originalBaseUrl');
 
     try {
       // 临时设置 BaseUrl 进行登录验证
-      logger.debug('设置BaseUrl为: https://$host');
+      logger.debug('设置基础URL为: https://$host');
       api.setBaseUrl('https://$host');
 
       logger.debug('发送Flarum登录请求');
@@ -331,9 +330,8 @@ class AuthService extends _$AuthService {
       logger.info('Flarum登录流程完成');
     } catch (e) {
       // 还原 BaseUrl
-
       if (originalBaseUrl != null) {
-        logger.debug('还原BaseUrl为: $originalBaseUrl');
+        logger.debug('还原基础URL为: $originalBaseUrl');
         api.setBaseUrl(originalBaseUrl);
       }
       logger.error('Flarum登录失败: $e', e);
@@ -385,7 +383,7 @@ class AuthService extends _$AuthService {
       sanitized = sanitized.split('#').first;
     }
 
-    logger.debug('Sanitized host: $host -> $sanitized');
+    logger.debug('清理主机地址: $host -> $sanitized');
     return sanitized;
   }
 }
@@ -399,6 +397,7 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
   ///
   /// 从存储中获取上次选中的Misskey账户ID，如果存在则返回对应的账户，
   /// 否则返回第一个可用的Misskey账户。
+  /// 初始化时同时设置缓存管理器和笔记缓存管理器的当前账户ID。
   ///
   /// @return 返回选中的Misskey账户，如果没有则返回null
   @override
@@ -409,18 +408,37 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
 
     final selectedId = await repository.getSelectedMisskeyId();
 
+    Account? selectedAccount;
     if (selectedId != null) {
       try {
-        return accounts.firstWhere((a) => a.id == selectedId);
+        selectedAccount = accounts.firstWhere((a) => a.id == selectedId);
       } catch (_) {}
     }
 
-    return accounts.where((a) => a.platform == 'misskey').firstOrNull;
+    if (selectedAccount == null) {
+      selectedAccount = accounts
+          .where((a) => a.platform == 'misskey')
+          .firstOrNull;
+    }
+
+    // 设置缓存管理器的当前账户ID
+    if (selectedAccount != null) {
+      cacheManager.setCurrentAccountId(selectedAccount.id);
+      MisskeyTimelineNotifier.cacheManager.setCurrentAccountId(
+        selectedAccount.id,
+      );
+    } else {
+      cacheManager.setCurrentAccountId(null);
+      MisskeyTimelineNotifier.cacheManager.setCurrentAccountId(null);
+    }
+
+    return selectedAccount;
   }
 
   /// 选择Misskey账户
   ///
   /// 选择指定的Misskey账户作为当前活动账户，并保存选择状态。
+  /// 同时更新缓存管理器和笔记缓存管理器的当前账户ID以实现缓存隔离。
   ///
   /// @param account 要选择的账户，必须是Misskey平台的账户
   /// @return 无返回值
@@ -430,6 +448,12 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
     state = AsyncData(account);
 
     await ref.read(authRepositoryProvider).saveSelectedMisskeyId(account.id);
+
+    // 设置缓存管理器的当前账户ID
+    cacheManager.setCurrentAccountId(account.id);
+
+    // 设置笔记缓存管理器的当前账户ID
+    MisskeyTimelineNotifier.cacheManager.setCurrentAccountId(account.id);
   }
 }
 
@@ -442,6 +466,7 @@ class SelectedFlarumAccount extends _$SelectedFlarumAccount {
   ///
   /// 从存储中获取上次选中的Flarum账户ID，如果存在则返回对应的账户，
   /// 否则返回第一个可用的Flarum账户。
+  /// 初始化时同时设置缓存管理器的当前账户ID。
   ///
   /// @return 返回选中的Flarum账户，如果没有则返回null
   @override
@@ -452,18 +477,31 @@ class SelectedFlarumAccount extends _$SelectedFlarumAccount {
 
     final selectedId = await repository.getSelectedFlarumId();
 
+    Account? selectedAccount;
     if (selectedId != null) {
       try {
-        return accounts.firstWhere((a) => a.id == selectedId);
+        selectedAccount = accounts.firstWhere((a) => a.id == selectedId);
       } catch (_) {}
     }
 
-    return accounts.where((a) => a.platform == 'flarum').firstOrNull;
+    selectedAccount ??= accounts
+        .where((a) => a.platform == 'flarum')
+        .firstOrNull;
+
+    // 设置缓存管理器的当前账户ID
+    if (selectedAccount != null) {
+      cacheManager.setCurrentAccountId(selectedAccount.id);
+    } else {
+      cacheManager.setCurrentAccountId(null);
+    }
+
+    return selectedAccount;
   }
 
   /// 选择Flarum账户
   ///
   /// 选择指定的Flarum账户作为当前活动账户，并保存选择状态。
+  /// 同时更新缓存管理器的当前账户ID以实现缓存隔离。
   ///
   /// @param account 要选择的账户，必须是Flarum平台的账户
   /// @return 无返回值
@@ -473,6 +511,9 @@ class SelectedFlarumAccount extends _$SelectedFlarumAccount {
     state = AsyncData(account);
 
     await ref.read(authRepositoryProvider).saveSelectedFlarumId(account.id);
+
+    // 设置缓存管理器的当前账户ID
+    cacheManager.setCurrentAccountId(account.id);
   }
 }
 

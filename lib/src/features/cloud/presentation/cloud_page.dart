@@ -6,6 +6,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
 import '/src/core/utils/download_utils.dart';
+import '/src/core/utils/file_icon_manager.dart';
+import '/src/core/utils/cache_manager.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/features/misskey/application/drive_notifier.dart';
 import '/src/features/misskey/domain/drive_file.dart';
@@ -21,6 +23,77 @@ class CloudPage extends ConsumerStatefulWidget {
 
   @override
   ConsumerState<CloudPage> createState() => _CloudPageState();
+}
+
+/// 缓存缩略图小部件
+class _CachedThumbnail extends StatefulWidget {
+  final String thumbnailUrl;
+  final IconData icon;
+
+  const _CachedThumbnail({
+    required this.thumbnailUrl,
+    required this.icon,
+  });
+
+  @override
+  State<_CachedThumbnail> createState() => _CachedThumbnailState();
+}
+
+class _CachedThumbnailState extends State<_CachedThumbnail> {
+  Future<String?> _cacheThumbnail() async {
+    try {
+      // 检查是否已缓存
+      final isCached = await cacheManager.isFileCachedAndValid(
+        widget.thumbnailUrl,
+        CacheCategory.image,
+      );
+
+      if (isCached) {
+        // 已缓存，返回缓存路径
+        return await cacheManager.getCacheFilePath(
+          widget.thumbnailUrl,
+          CacheCategory.image,
+        );
+      } else {
+        // 未缓存，下载并缓存
+        return await cacheManager.cacheFile(
+          widget.thumbnailUrl,
+          CacheCategory.image,
+        );
+      }
+    } catch (e) {
+      // 缓存失败，返回null
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _cacheThumbnail(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 加载中，显示图标
+          return Icon(widget.icon, size: 24);
+        } else if (snapshot.hasData && snapshot.data != null) {
+          // 缓存成功，显示本地缓存的图片
+          return Image.file(
+            File(snapshot.data!),
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              // 加载失败时显示图标
+              return Icon(widget.icon, size: 24);
+            },
+          );
+        } else {
+          // 缓存失败，显示图标
+          return Icon(widget.icon, size: 24);
+        }
+      },
+    );
+  }
 }
 
 class _CloudPageState extends ConsumerState<CloudPage> {
@@ -940,20 +1013,25 @@ class _CloudPageState extends ConsumerState<CloudPage> {
   }
 
   Widget _buildFileIcon(DriveFile file) {
+    final icon = FileIconManager.getIconForFileName(file.name);
     if (file.thumbnailUrl != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(4),
-        child: Image.network(
-          file.thumbnailUrl!,
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              const Icon(Icons.insert_drive_file),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 先显示图标
+            Icon(icon, size: 24),
+            // 然后加载图片，加载完成后会覆盖图标
+            _CachedThumbnail(
+              thumbnailUrl: file.thumbnailUrl!,
+              icon: icon,
+            ),
+          ],
         ),
       );
     }
-    return const Icon(Icons.insert_drive_file);
+    return Icon(icon);
   }
 
   Widget _buildEmptyState(BuildContext context) {

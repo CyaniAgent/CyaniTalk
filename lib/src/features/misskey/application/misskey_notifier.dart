@@ -147,7 +147,21 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return [];
       }
-      rethrow;
+
+      // 处理网络连接错误，不阻塞程序
+      if (e.toString().contains('HandshakeException') ||
+          e.toString().contains('SocketException') ||
+          e.toString().contains('DioException')) {
+        logger.warning('Misskey时间线: 网络连接错误，返回空列表: $e');
+        return [];
+      }
+
+      // 其他错误返回错误状态
+      logger.error('Misskey时间线: 初始化失败', e);
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
+      return [];
     }
   }
 
@@ -308,7 +322,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey时间线: 验证缓存失败', e);
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
     }
   }
 
@@ -384,7 +401,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey时间线: 处理新笔记失败', e);
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
     }
   }
 
@@ -411,7 +431,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey时间线: 处理删除笔记失败', e);
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
     }
   }
 
@@ -462,7 +485,28 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+
+      // 处理网络连接错误，保持当前状态
+      if (e.toString().contains('HandshakeException') ||
+          e.toString().contains('SocketException') ||
+          e.toString().contains('DioException')) {
+        logger.warning('Misskey时间线: 网络连接错误，保持当前状态: $e');
+        // 如果有缓存数据，保持当前状态
+        if (state.value != null && state.value!.isNotEmpty) {
+          logger.debug('Misskey时间线: 使用缓存数据');
+          return;
+        }
+        // 如果没有缓存数据，设置错误状态
+        if (ref.mounted) {
+          state = AsyncError(e, StackTrace.current);
+        }
+        return;
+      }
+
+      logger.error('Misskey时间线: 刷新失败', e);
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
     }
   }
 
@@ -523,7 +567,8 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
           if (e.toString().contains('UnmountedRefException')) {
             return currentNotes;
           }
-          rethrow;
+          logger.error('Misskey时间线: 加载更多失败', e);
+          return currentNotes;
         }
       });
 
@@ -534,7 +579,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey时间线: 加载更多失败', e);
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
     }
   }
 }

@@ -7,6 +7,7 @@ import '../../features/auth/application/auth_service.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/domain/account.dart';
 import '../../features/misskey/application/misskey_notifier.dart';
+import '../../features/misskey/application/misskey_notifications_notifier.dart';
 import '../../features/flarum/application/flarum_providers.dart';
 
 class UserNavigationHeader extends ConsumerWidget {
@@ -29,11 +30,21 @@ class UserNavigationHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Accounts info
-    final misskeyAccount = ref.watch(selectedMisskeyAccountProvider).asData?.value;
-    final flarumAccount = ref.watch(selectedFlarumAccountProvider).asData?.value;
-    
-    final misskeyUser = misskeyAccount != null ? ref.watch(misskeyMeProvider).asData?.value : null;
-    final flarumUser = flarumAccount != null ? ref.watch(flarumCurrentUserProvider).asData?.value : null;
+    final misskeyAccount = ref
+        .watch(selectedMisskeyAccountProvider)
+        .asData
+        ?.value;
+    final flarumAccount = ref
+        .watch(selectedFlarumAccountProvider)
+        .asData
+        ?.value;
+
+    final misskeyUser = misskeyAccount != null
+        ? ref.watch(misskeyMeProvider).asData?.value
+        : null;
+    final flarumUser = flarumAccount != null
+        ? ref.watch(flarumCurrentUserProvider).asData?.value
+        : null;
 
     final bool isLoggedIn = misskeyAccount != null || flarumAccount != null;
     final theme = Theme.of(context);
@@ -50,19 +61,32 @@ class UserNavigationHeader extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+              color: isSelected
+                  ? theme.colorScheme.secondaryContainer
+                  : Colors.transparent,
               shape: BoxShape.circle,
             ),
-            child: _buildAvatar(context, misskeyAccount, misskeyUser, flarumAccount, flarumUser, radius: radius),
+            child: _buildAvatar(
+              context,
+              misskeyAccount,
+              misskeyUser,
+              flarumAccount,
+              flarumUser,
+              radius: radius,
+            ),
           ),
         ),
       );
     }
 
     return Container(
-      margin: isDrawer ? const EdgeInsets.fromLTRB(12, 48, 12, 8) : const EdgeInsets.all(8),
+      margin: isDrawer
+          ? const EdgeInsets.fromLTRB(12, 48, 12, 8)
+          : const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: isSelected ? theme.colorScheme.secondaryContainer : Colors.transparent,
+        color: isSelected
+            ? theme.colorScheme.secondaryContainer
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -71,21 +95,37 @@ class UserNavigationHeader extends ConsumerWidget {
             child: InkWell(
               onTap: onTap,
               onLongPress: () => _showUserMenu(context, ref, isLoggedIn),
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(16),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
                   children: [
-                    _buildAvatar(context, misskeyAccount, misskeyUser, flarumAccount, flarumUser, radius: 18),
+                    _buildAvatar(
+                      context,
+                      misskeyAccount,
+                      misskeyUser,
+                      flarumAccount,
+                      flarumUser,
+                      radius: 18,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        isLoggedIn 
-                            ? _getUserName(misskeyAccount, misskeyUser, flarumAccount, flarumUser)
+                        isLoggedIn
+                            ? _getUserName(
+                                misskeyAccount,
+                                misskeyUser,
+                                flarumAccount,
+                                flarumUser,
+                              )
                             : 'nav_no_account'.tr(),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurface,
+                          color: isSelected
+                              ? theme.colorScheme.onSecondaryContainer
+                              : theme.colorScheme.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -98,13 +138,17 @@ class UserNavigationHeader extends ConsumerWidget {
           InkWell(
             key: _userInfoKey,
             onTap: () => _showUserMenu(context, ref, isLoggedIn),
-            borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
               child: Icon(
                 Icons.arrow_drop_down,
                 size: 20,
-                color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? theme.colorScheme.onSecondaryContainer
+                    : theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -120,9 +164,15 @@ class UserNavigationHeader extends ConsumerWidget {
     dynamic flarumUser,
   ) {
     if (misskeyAccount != null) {
-      return misskeyUser?.name ?? misskeyAccount.name ?? misskeyAccount.username ?? 'Misskey User';
+      return misskeyUser?.name ??
+          misskeyAccount.name ??
+          misskeyAccount.username ??
+          'Misskey User';
     } else if (flarumAccount != null) {
-      return flarumUser?.displayName ?? flarumAccount.name ?? flarumAccount.username ?? 'Flarum User';
+      return flarumUser?.displayName ??
+          flarumAccount.name ??
+          flarumAccount.username ??
+          'Flarum User';
     }
     return 'CyaniUser';
   }
@@ -135,8 +185,12 @@ class UserNavigationHeader extends ConsumerWidget {
     dynamic flarumUser, {
     double radius = 32,
   }) {
-    final avatarUrl = misskeyUser?.avatarUrl ?? misskeyAccount?.avatarUrl ?? flarumUser?.avatarUrl ?? flarumAccount?.avatarUrl;
-    
+    final avatarUrl =
+        misskeyUser?.avatarUrl ??
+        misskeyAccount?.avatarUrl ??
+        flarumUser?.avatarUrl ??
+        flarumAccount?.avatarUrl;
+
     if (avatarUrl != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(radius),
@@ -189,74 +243,235 @@ class UserNavigationHeader extends ConsumerWidget {
   /// 显示用户菜单
   void _showUserMenu(BuildContext context, WidgetRef ref, bool isLoggedIn) {
     // 获取用户信息部分的位置
-    final RenderBox renderBox = _userInfoKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        _userInfoKey.currentContext!.findRenderObject() as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
 
     // 计算菜单位置
     final offset = Offset(position.dx, position.dy + size.height);
 
-    // 显示弹出菜单
-    showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(offset.dx, offset.dy, offset.dx + size.width, offset.dy),
-      items: <PopupMenuEntry<String>>[
-        // 设置页面选项
-        PopupMenuItem<String>(
-          value: 'settings',
-          child: Row(
-            children: [
-              Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
-              const SizedBox(width: 8),
-              Text('menu_settings'.tr()),
-            ],
-          ),
+    if (!isLoggedIn) {
+      // 未登录时显示登录选项
+      showMenu<String>(
+        context: context,
+        position: RelativeRect.fromLTRB(
+          offset.dx,
+          offset.dy,
+          offset.dx + size.width,
+          offset.dy,
         ),
-        // 分隔线
-        const PopupMenuDivider(),
-        // 登录或退出登录选项
-        if (isLoggedIn)
-          PopupMenuItem<String>(
-            value: 'logout',
-            child: Row(
-              children: [
-                Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-                const SizedBox(width: 8),
-                Text('menu_logout'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.error)),
-              ],
-            ),
-          )
-        else
+        items: <PopupMenuEntry<String>>[
           PopupMenuItem<String>(
             value: 'login',
             child: Row(
               children: [
                 Icon(Icons.login, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
-                Text('menu_login'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                Text(
+                  'menu_login'.tr(),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               ],
             ),
           ),
-      ],
-    ).then((value) {
-      if (!context.mounted) return;
-      // 处理菜单选项
-      if (value != null) {
-        switch (value) {
-          case 'settings':
-            context.push('/settings');
-            break;
-          case 'logout':
-            // 退出登录逻辑
-            _logout(context, ref);
-            break;
-          case 'login':
-            // 登录逻辑
-            context.push('/profile');
-            break;
+        ],
+      ).then((value) {
+        if (!context.mounted) return;
+        if (value == 'login') {
+          context.push('/profile');
         }
-      }
-    });
+      });
+      return;
+    }
+
+    // 获取所有账户
+    final accountsAsync = ref.watch(authServiceProvider);
+
+    accountsAsync.when(
+      data: (accounts) {
+        final selectedMisskey = ref
+            .read(selectedMisskeyAccountProvider)
+            .asData
+            ?.value;
+        final selectedFlarum = ref
+            .read(selectedFlarumAccountProvider)
+            .asData
+            ?.value;
+
+        // 按主机分组账户
+        final Map<String, List<Account>> accountsByHost = {};
+        for (final account in accounts) {
+          final host = account.host;
+          if (!accountsByHost.containsKey(host)) {
+            accountsByHost[host] = [];
+          }
+          accountsByHost[host]!.add(account);
+        }
+
+        // 构建账户菜单项
+        final List<PopupMenuEntry<String>> items = [];
+
+        // 遍历每个主机的账户
+        for (final host in accountsByHost.keys) {
+          final hostAccounts = accountsByHost[host]!;
+
+          // 添加主机分组标题
+          items.add(
+            PopupMenuItem<String>(
+              enabled: false,
+              height: 32,
+              child: Text(
+                host,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+
+          // 添加该主机的账户
+          for (final account in hostAccounts) {
+            final isMisskeyActive = account.id == selectedMisskey?.id;
+            final isFlarumActive = account.id == selectedFlarum?.id;
+            final isActive = isMisskeyActive || isFlarumActive;
+
+            items.add(
+              PopupMenuItem<String>(
+                value: account.id,
+                enabled: !isActive,
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundImage: account.avatarUrl != null
+                          ? NetworkImage(account.avatarUrl!)
+                          : null,
+                      child: account.avatarUrl == null
+                          ? Text(account.username?[0].toUpperCase() ?? '?')
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            account.name ?? account.username ?? 'Unknown',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '@${account.username}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isActive)
+                      Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // 如果不是最后一个主机，添加分隔线
+          if (host != accountsByHost.keys.last) {
+            items.add(const PopupMenuDivider(height: 8));
+          }
+        }
+
+        // 添加分隔线和其他选项
+        items.addAll([
+          const PopupMenuDivider(height: 16),
+          PopupMenuItem<String>(
+            value: 'settings',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.settings,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                const SizedBox(width: 8),
+                Text('menu_settings'.tr()),
+              ],
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'logout',
+            child: Row(
+              children: [
+                Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
+                const SizedBox(width: 8),
+                Text(
+                  'menu_logout'.tr(),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+            ),
+          ),
+        ]);
+
+        // 显示菜单
+        showMenu<String>(
+          context: context,
+          position: RelativeRect.fromLTRB(
+            offset.dx,
+            offset.dy,
+            offset.dx + size.width,
+            offset.dy,
+          ),
+          items: items,
+        ).then((value) {
+          if (!context.mounted) return;
+
+          if (value != null) {
+            if (value == 'settings') {
+              context.push('/settings');
+            } else if (value == 'logout') {
+              _logout(context, ref);
+            } else {
+                // 切换账户
+                final account = accounts.firstWhere((a) => a.id == value);
+                if (account.platform == 'misskey') {
+                  ref.read(selectedMisskeyAccountProvider.notifier).select(account);
+                  // 刷新Misskey相关provider
+                  ref.invalidate(misskeyTimelineProvider);
+                  ref.invalidate(misskeyMeProvider);
+                  ref.invalidate(misskeyNotificationsProvider);
+                  // 刷新当前路由
+                  if (context.mounted) {
+                    final router = GoRouter.of(context);
+                    context.go(router.routeInformationProvider.value.uri.toString());
+                  }
+                } else if (account.platform == 'flarum') {
+                  ref.read(selectedFlarumAccountProvider.notifier).select(account);
+                  // 刷新Flarum相关provider
+                  ref.invalidate(flarumCurrentUserProvider);
+                  // 刷新当前路由
+                  if (context.mounted) {
+                    final router = GoRouter.of(context);
+                    context.go(router.routeInformationProvider.value.uri.toString());
+                  }
+                }
+              }
+          }
+        });
+      },
+      loading: () {},
+      error: (err, stack) {},
+    );
   }
 
   /// 退出登录
@@ -277,24 +492,27 @@ class UserNavigationHeader extends ConsumerWidget {
               // 退出所有账号
               final authRepository = ref.read(authRepositoryProvider);
               final accounts = await authRepository.getAccounts();
-              
+
               // 逐个删除所有账户
               for (final account in accounts) {
                 await authRepository.removeAccount(account.id);
               }
-              
+
               // 清除选中的账户ID
               final prefs = ref.read(sharedPreferencesProvider);
               await prefs.remove('cyani_selected_misskey_id');
               await prefs.remove('cyani_selected_flarum_id');
-              
+
               // 刷新认证服务状态
               await ref.read(authServiceProvider.future);
-              
+
               if (!context.mounted) return;
               Navigator.of(context).pop();
             },
-            child: Text('menu_logout'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              'menu_logout'.tr(),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),

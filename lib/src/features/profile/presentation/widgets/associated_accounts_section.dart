@@ -427,39 +427,42 @@ class _AccountAvatarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(32),
-        child: Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: isActive
-                  ? activeColor
-                  : (isFocused
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.transparent),
-              width: 2,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isActive
+                    ? activeColor
+                    : (isFocused
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.transparent),
+                width: 2,
+              ),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: activeColor.withValues(alpha: 0.3),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
             ),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                : null,
-          ),
-          child: CircleAvatar(
-            radius: 24,
-            backgroundImage: account.avatarUrl != null
-                ? NetworkImage(account.avatarUrl!)
-                : null,
-            child: account.avatarUrl == null
-                ? Text(account.username?[0].toUpperCase() ?? '?')
-                : null,
+            child: CircleAvatar(
+              radius: 24,
+              backgroundImage: account.avatarUrl != null
+                  ? NetworkImage(account.avatarUrl!)
+                  : null,
+              child: account.avatarUrl == null
+                  ? Text(account.username?[0].toUpperCase() ?? '?')
+                  : null,
+            ),
           ),
         ),
       ),
@@ -474,20 +477,23 @@ class _AddAccountButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(32),
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1,
+            ),
           ),
+          child: const Icon(Icons.add),
         ),
-        child: const Icon(Icons.add),
       ),
     );
   }

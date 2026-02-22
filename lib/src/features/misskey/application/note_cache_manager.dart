@@ -33,6 +33,7 @@ class NoteCacheItem {
 /// 使用混合缓存策略：内存中保留最近访问的笔记，超过限制时将旧笔记移到持久化存储。
 /// 最大内存缓存 100 条笔记，持久化存储最多 1000 条笔记。
 /// 支持持久化存储，应用重启后缓存依然有效。
+/// 支持按账户隔离缓存，每个账户有独立的缓存数据。
 class NoteCacheManager {
   /// 内存缓存存储，key为笔记ID
   final Map<String, NoteCacheItem> _cache = {};
@@ -64,8 +65,16 @@ class NoteCacheManager {
   /// SharedPreferences 实例
   SharedPreferences? _prefs;
 
-  /// 持久化缓存存储的key
-  static const String _persistentCacheKey = 'misskey_note_persistent_cache';
+  /// 当前账户ID
+  String? _currentAccountId;
+
+  /// 获取持久化缓存存储的key
+  String get _persistentCacheKey {
+    if (_currentAccountId != null && _currentAccountId!.isNotEmpty) {
+      return 'misskey_note_persistent_cache_$_currentAccountId';
+    }
+    return 'misskey_note_persistent_cache';
+  }
 
   /// 是否已初始化
   bool _isInitialized = false;
@@ -79,6 +88,28 @@ class NoteCacheManager {
     _prefs = await SharedPreferences.getInstance();
     await _loadFromStorage();
     _isInitialized = true;
+  }
+
+  /// 设置当前账户ID
+  ///
+  /// 设置后，所有缓存操作将在该账户的独立缓存中进行。
+  ///
+  /// @param accountId 账户ID，格式为"用户ID@主机名"
+  void setCurrentAccountId(String? accountId) {
+    if (_currentAccountId == accountId) return;
+
+    _currentAccountId = accountId;
+    logger.debug('NoteCacheManager: Current account ID set to $accountId');
+
+    // 清空当前缓存并重新加载新账户的缓存
+    _cache.clear();
+    _accessOrder.clear();
+    _loadFromStorage();
+  }
+
+  /// 获取当前账户ID
+  String? getCurrentAccountId() {
+    return _currentAccountId;
   }
 
   /// 从持久化存储加载缓存

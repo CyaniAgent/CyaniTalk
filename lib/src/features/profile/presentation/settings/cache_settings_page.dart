@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/core/utils/cache_manager.dart';
 import 'package:cyanitalk/src/core/services/app_reset_service.dart';
+import 'package:cyanitalk/src/features/auth/application/auth_service.dart';
 
 /// 缓存设置页面组件
 class CacheSettingsPage extends ConsumerStatefulWidget {
@@ -16,17 +17,11 @@ class CacheSettingsPage extends ConsumerStatefulWidget {
 class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   String? _cachePath;
   int _totalCacheSize = 0;
-  int _appTotalUsage = 0;
   Map<CacheCategory, int> _categoryCacheSizes = {};
   Map<CacheCategory, int?> _categoryMaxSizes = {};
   int _maxCacheSize = CacheManager.defaultMaxCacheSize;
   AudioCacheType _audioCacheType = AudioCacheType.temporary;
-  
-  // 系统级存储统计
-  int _systemTotal = 0;
-  int _systemAvailable = 0;
-  int _systemUsedByOthers = 0;
-  
+
   // 分离加载状态
   bool _isBasicSettingsLoading = true;
   bool _isStatsLoading = true;
@@ -39,12 +34,25 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
 
   /// 加载缓存设置与真实的系统统计
   Future<void> _loadCacheSettings() async {
+    // 获取当前选中的账户ID
+    final selectedMisskeyAccount = await ref.read(
+      selectedMisskeyAccountProvider.future,
+    );
+    final selectedFlarumAccount = await ref.read(
+      selectedFlarumAccountProvider.future,
+    );
+    final currentAccountId =
+        selectedMisskeyAccount?.id ?? selectedFlarumAccount?.id;
+
+    // 设置当前账户ID到缓存管理器
+    cacheManager.setCurrentAccountId(currentAccountId);
+
     // 首先加载基础配置（较快）
     try {
       final cacheDir = await cacheManager.getCacheDirectory();
       final maxSize = await cacheManager.getMaxCacheSize();
       final audioCacheType = await cacheManager.getAudioCacheType();
-      
+
       if (mounted) {
         setState(() {
           _cachePath = cacheDir.path;
@@ -60,38 +68,23 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
 
     // 然后并行加载统计数据（可能较慢，涉及磁盘扫描）
     try {
-      final results = await Future.wait([
-        cacheManager.getTotalCacheSize(),
-        cacheManager.getAppTotalUsage(),
-        cacheManager.getDeviceStorageStats(),
-      ]);
-
-      final totalSize = results[0] as int;
-      final appUsage = results[1] as int;
-      final systemStats = results[2] as Map<String, int>;
+      final totalSize = await cacheManager.getTotalCacheSize();
 
       // 加载各分类缓存大小
       final categorySizes = <CacheCategory, int>{};
       final categoryMaxSizes = <CacheCategory, int?>{};
       for (final category in CacheCategory.values) {
-        categorySizes[category] = await cacheManager.getCategoryCacheSize(category);
-        categoryMaxSizes[category] = await cacheManager.getCategoryMaxSize(category);
+        final size = await cacheManager.getCategoryCacheSize(category);
+        final maxSize = await cacheManager.getCategoryMaxSize(category);
+        categorySizes[category] = size;
+        categoryMaxSizes[category] = maxSize;
       }
 
       if (mounted) {
         setState(() {
           _totalCacheSize = totalSize;
-          _appTotalUsage = appUsage;
           _categoryCacheSizes = categorySizes;
           _categoryMaxSizes = categoryMaxSizes;
-          
-          _systemTotal = systemStats['total'] ?? 0;
-          _systemAvailable = systemStats['available'] ?? 0;
-          
-          // 其他已使用 = 磁盘总已用 (Total - Free) - 本 App 占用
-          final int rawUsedByOthers = (systemStats['total']! - systemStats['available']!) - appUsage;
-          _systemUsedByOthers = rawUsedByOthers > 0 ? rawUsedByOthers : 0;
-          
           _isStatsLoading = false;
         });
       }
@@ -137,7 +130,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('确认重置应用'),
-            content: Text('这将清除所有账户、设置 and 缓存数据，使应用恢复到首次打开的状态。此操作无法撤销，应用将自动退出。'.tr()),
+            content: Text(
+              '这将清除所有账户、设置 and 缓存数据，使应用恢复到首次打开的状态。此操作无法撤销，应用将自动退出。'.tr(),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -155,7 +150,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     if (confirm && mounted) {
       try {
         await ref.read(appResetProvider.notifier).resetApp();
-        
+
         if (mounted) {
           showDialog(
             context: context,
@@ -176,9 +171,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('重置失败: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('重置失败: $e')));
         }
       }
     }
@@ -346,8 +341,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   Future<void> _setCategoryMaxSize(CacheCategory category) async {
     final currentSize = _categoryMaxSizes[category];
     final TextEditingController controller = TextEditingController(
-      text:
-          currentSize != null ? (currentSize / (1024 * 1024)).toStringAsFixed(0) : '',
+      text: currentSize != null
+          ? (currentSize / (1024 * 1024)).toStringAsFixed(0)
+          : '',
     );
 
     bool? confirmed = await showDialog<bool>(
@@ -532,203 +528,6 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     }
   }
 
-  /// 构建多层级存储进度条 (基于实时 OS 统计)
-  Widget _buildStorageBar() {
-    if (_systemTotal == 0 && !_isStatsLoading) return const SizedBox.shrink();
-
-    final theme = Theme.of(context);
-    
-    // 只有在非加载状态下才计算真实百分比，避免除以零
-    final double appPercent = _systemTotal > 0 ? _appTotalUsage / _systemTotal : 0.0;
-    final double othersPercent = _systemTotal > 0 ? _systemUsedByOthers / _systemTotal : 0.0;
-    final double freePercent = _systemTotal > 0 ? _systemAvailable / _systemTotal : 0.0;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            'storage_usage_title'.tr(),
-            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerLow,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 400),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                // 只有当前处于顶层的 child 才保留语义
-                final isTopChild = child.key == ( _isStatsLoading ? const ValueKey('loading') : const ValueKey('loaded') );
-                return FadeTransition(
-                  opacity: animation,
-                  child: isTopChild ? child : ExcludeSemantics(child: child),
-                );
-              },
-              child: _isStatsLoading 
-                ? _buildLoadingStats()
-                : _buildLoadedStats(appPercent, othersPercent, freePercent),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadingStats() {
-    final theme = Theme.of(context);
-    final calculatingText = 'common_calculating'.tr();
-    
-    return ExcludeSemantics(
-      child: Column(
-        children: [
-          // 灰色的进度条占位
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              height: 28,
-              width: double.infinity,
-              color: theme.colorScheme.surfaceContainerHighest,
-              child: LinearProgressIndicator(
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                color: theme.colorScheme.primary.withAlpha(50),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          _buildUsageInfoItem('storage_usage_app'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.00'),
-          const SizedBox(height: 12),
-          _buildUsageInfoItem('storage_usage_others'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
-          const SizedBox(height: 12),
-          _buildUsageInfoItem('storage_usage_free'.tr(), calculatingText, theme.colorScheme.outlineVariant, '0.0'),
-          const Divider(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('storage_total_capacity'.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline)),
-              Text(calculatingText, style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.outline)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadedStats(double appPercent, double othersPercent, double freePercent) {
-    final theme = Theme.of(context);
-    return Column(
-      key: const ValueKey('loaded'),
-      children: [
-        // 多层堆叠进度条
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            height: 28,
-            width: double.infinity,
-            color: theme.colorScheme.surfaceContainerHighest,
-            child: Stack(
-              children: [
-                // 底层：其他应用占用 (Others + App)
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: (othersPercent + appPercent).clamp(0.0, 1.0),
-                  child: Container(color: theme.colorScheme.secondaryContainer),
-                ),
-                // 顶层：本应用占用 (App Only)
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: appPercent.clamp(0.0, 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.primary.withAlpha(120),
-                          blurRadius: 8,
-                          offset: const Offset(2, 0),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        // 详细图例
-        _buildUsageInfoItem(
-          'storage_usage_app'.tr(),
-          _formatBytes(_appTotalUsage),
-          theme.colorScheme.primary,
-          (appPercent * 100).toStringAsFixed(2),
-        ),
-        const SizedBox(height: 12),
-        _buildUsageInfoItem(
-          'storage_usage_others'.tr(),
-          _formatBytes(_systemUsedByOthers),
-          theme.colorScheme.secondaryContainer,
-          (othersPercent * 100).toStringAsFixed(1),
-        ),
-        const SizedBox(height: 12),
-        _buildUsageInfoItem(
-          'storage_usage_free'.tr(),
-          _formatBytes(_systemAvailable),
-          theme.colorScheme.surfaceContainerHighest,
-          (freePercent * 100).toStringAsFixed(1),
-        ),
-        const Divider(height: 32),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'storage_total_capacity'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
-            ),
-            Text(
-              _formatBytes(_systemTotal),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontFamily: 'JetBrainsMono',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUsageInfoItem(String label, String size, Color color, String percent) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Container(
-          width: 14,
-          height: 14,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(label, style: theme.textTheme.bodyMedium),
-        ),
-        Text(
-          _isStatsLoading ? size : '$size ($percent%)',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            fontFamily: 'JetBrainsMono',
-          ),
-        ),
-      ],
-    );
-  }
-
   /// 获取分类名称
   String _getCategoryName(CacheCategory category) {
     switch (category) {
@@ -736,6 +535,8 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         return '音频';
       case CacheCategory.image:
         return '图片';
+      case CacheCategory.timeline:
+        return '时间线';
       case CacheCategory.other:
         return '其他';
     }
@@ -758,10 +559,6 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           : ListView(
               children: [
                 const SizedBox(height: 12),
-                // 实时存储占用监控
-                _buildStorageBar(),
-                
-                const Divider(indent: 16, endIndent: 16, height: 32),
 
                 // 缓存路径设置
                 Padding(
@@ -784,14 +581,19 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                               padding: const EdgeInsets.all(12.0),
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.outlineVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outlineVariant,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
                                 _cachePath ?? '未知',
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 13),
+                                style: const TextStyle(
+                                  fontFamily: 'JetBrainsMono',
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ),
@@ -824,7 +626,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                       const SizedBox(height: 12),
                       _buildSettingRow(
                         '本应用缓存数据',
-                        _isStatsLoading ? 'common_calculating'.tr() : _formatBytes(_totalCacheSize),
+                        _isStatsLoading
+                            ? 'common_calculating'.tr()
+                            : _formatBytes(_totalCacheSize),
                       ),
                       _buildSettingRow('单类别最大上限', _formatBytes(_maxCacheSize)),
                       const SizedBox(height: 12),
@@ -897,7 +701,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Column(
@@ -905,7 +711,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                               ListTile(
                                 leading: Icon(_getCategoryIcon(category)),
                                 title: Text(_getCategoryName(category)),
-                                subtitle: Text('${_isStatsLoading ? 'common_calculating'.tr() : _formatBytes(size)} / ${maxSize != null ? _formatBytes(maxSize) : "无限制"}'),
+                                subtitle: Text(
+                                  '${_isStatsLoading ? 'common_calculating'.tr() : _formatBytes(size)} / ${maxSize != null ? _formatBytes(maxSize) : "无限制"}',
+                                ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -940,7 +748,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                           Expanded(
                             child: FilledButton.tonalIcon(
                               onPressed: _clearAllCache,
-                              icon: const Icon(Icons.cleaning_services_outlined),
+                              icon: const Icon(
+                                Icons.cleaning_services_outlined,
+                              ),
                               label: const Text('清理全部缓存'),
                             ),
                           ),
@@ -963,10 +773,11 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                     children: [
                       Text(
                         '危险区域',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -979,7 +790,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                             foregroundColor: Colors.red,
                             side: const BorderSide(color: Colors.red),
                             padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
@@ -1006,6 +819,8 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         return Icons.audiotrack_outlined;
       case CacheCategory.image:
         return Icons.image_outlined;
+      case CacheCategory.timeline:
+        return Icons.timeline_outlined;
       case CacheCategory.other:
         return Icons.more_horiz_outlined;
     }
@@ -1062,18 +877,17 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
           return ListTile(
             leading: Checkbox(
               value: isSelected,
-              onChanged:
-                  item.canBeCleared
-                      ? (value) {
-                        setState(() {
-                          if (value == true) {
-                            _selectedItems.add(item);
-                          } else {
-                            _selectedItems.remove(item);
-                          }
-                        });
-                      }
-                      : null,
+              onChanged: item.canBeCleared
+                  ? (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedItems.add(item);
+                        } else {
+                          _selectedItems.remove(item);
+                        }
+                      });
+                    }
+                  : null,
             ),
             title: Text(item.name),
             subtitle: Column(
@@ -1086,30 +900,28 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
                   const Text('不可清除', style: TextStyle(color: Colors.red)),
               ],
             ),
-            onTap:
-                item.canBeCleared
-                    ? () {
-                      setState(() {
-                        if (isSelected) {
-                          _selectedItems.remove(item);
-                        } else {
-                          _selectedItems.add(item);
-                        }
-                      });
-                    }
-                    : null,
+            onTap: item.canBeCleared
+                ? () {
+                    setState(() {
+                      if (isSelected) {
+                        _selectedItems.remove(item);
+                      } else {
+                        _selectedItems.add(item);
+                      }
+                    });
+                  }
+                : null,
           );
         },
       ),
-      bottomNavigationBar:
-          _selectedItems.isNotEmpty
-              ? BottomAppBar(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text('已选择 ${_selectedItems.length} 个文件'),
-                ),
-              )
-              : null,
+      bottomNavigationBar: _selectedItems.isNotEmpty
+          ? BottomAppBar(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text('已选择 ${_selectedItems.length} 个文件'),
+              ),
+            )
+          : null,
     );
   }
 
@@ -1120,9 +932,7 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('确认删除'),
-            content: Text(
-              '确定要删除选中的 ${_selectedItems.length} 个缓存文件吗？此操作无法撤销。',
-            ),
+            content: Text('确定要删除选中的 ${_selectedItems.length} 个缓存文件吗？此操作无法撤销。'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -1167,6 +977,8 @@ class _CacheFilesListPageState extends State<CacheFilesListPage> {
         return '音频';
       case CacheCategory.image:
         return '图片';
+      case CacheCategory.timeline:
+        return '时间线';
       case CacheCategory.other:
         return '其他';
     }

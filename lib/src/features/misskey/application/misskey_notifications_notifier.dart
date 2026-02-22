@@ -32,7 +32,20 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       return notifications;
     } catch (e, stack) {
       logger.error('Misskey通知初始化失败', e, stack);
-      rethrow;
+      
+      // 处理网络连接错误，不阻塞程序
+      if (e.toString().contains('HandshakeException') || 
+          e.toString().contains('SocketException') ||
+          e.toString().contains('DioException')) {
+        logger.warning('Misskey通知: 网络连接错误，返回空列表: $e');
+        return [];
+      }
+      
+      // 其他错误返回错误状态
+      if (ref.mounted) {
+        state = AsyncError(e, StackTrace.current);
+      }
+      return [];
     }
   }
 
@@ -46,7 +59,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey通知: 处理新通知失败', e);
     }
   }
 
@@ -71,7 +84,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey通知: 刷新失败', e);
     }
   }
 
@@ -105,7 +118,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       if (e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey通知: 加载更多失败', e);
     }
   }
 }
