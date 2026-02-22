@@ -217,10 +217,11 @@ class ResponsiveShell extends ConsumerWidget {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child:
-                isSelected
-                    ? _buildSidebarSubNavigation(context, ref, item.id, isLarge)
-                    : const SizedBox(width: double.infinity, height: 0),
+            child: isSelected 
+                ? _buildSidebarSubNavigation(context, ref, item.id, isLarge)
+                : const ExcludeSemantics(
+                    child: SizedBox(width: double.infinity, height: 0),
+                  ),
           ),
         ),
         const SizedBox(height: 4),

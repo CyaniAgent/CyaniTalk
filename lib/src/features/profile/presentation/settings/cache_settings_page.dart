@@ -561,9 +561,19 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 400),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                // 只有当前处于顶层的 child 才保留语义
+                final isTopChild = child.key == ( _isStatsLoading ? const ValueKey('loading') : const ValueKey('loaded') );
+                return FadeTransition(
+                  opacity: animation,
+                  child: isTopChild ? child : ExcludeSemantics(child: child),
+                );
+              },
               child: _isStatsLoading 
-                ? ExcludeSemantics(key: const ValueKey('loading'), child: _buildLoadingStats())
+                ? _buildLoadingStats()
                 : _buildLoadedStats(appPercent, othersPercent, freePercent),
             ),
           ),

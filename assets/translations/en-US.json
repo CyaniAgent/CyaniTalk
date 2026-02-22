@@ -126,6 +126,12 @@
   "settings_sound_misskey_emoji": "Misskey Emoji Reactions",
   "settings_sound_misskey_messages": "Misskey Messages (Private and Group Chats)",
   "settings_section_system": "System",
+  "settings_developer_title": "Developer",
+  "settings_developer_description": "Unlock new features, test our components in development",
+  "settings_developer_mode_title": "Developer Mode",
+  "settings_developer_mode_description": "Unlock new features, test our components in development",
+  "settings_developer_submit_issue": "Submit an issue",
+  "settings_developer_submit_pr": "Submit a Pull Request",
   "settings_logs_title": "Logs",
   "settings_logs_description": "View and manage application logs",
   "settings_logs_section_basic": "Basic Settings",
@@ -433,8 +439,10 @@
   "error_unknown": "Unknown error",
   "error_occurred": "An unknown error occurred",
   "cloud_download_preparing": "Preparing download",
+  "cloud_download_completed": "Download completed",
   "cloud_download_failed_count": "Download completed, but {failed} files failed to download",
   "cloud_downloading_current": "Downloading... {progress}%",
   "cloud_download_starting": "Starting download...",
-  "cloud_files_count": "files"
+  "cloud_files_count": "files",
+  "could_not_launch_url": "Could not launch {url}"
 }

@@ -11,7 +11,7 @@ import 'cache_settings_page.dart';
 import 'notification_settings_page.dart';
 import 'sound_settings_page.dart';
 import 'navigation_settings_page.dart';
-import 'log_settings_page.dart';
+import 'developer_settings_page.dart';
 import 'licenses_page.dart';
 import 'flarum_endpoints_page.dart';
 
@@ -183,13 +183,13 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildSectionHeader(context, 'settings_section_system'.tr()),
           _buildSettingsTile(
             context,
-            Icons.history,
-            'settings_logs_title'.tr(),
-            'settings_logs_description'.tr(),
+            Icons.bug_report_outlined,
+            'settings_developer_title'.tr(),
+            'settings_developer_description'.tr(),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const LogSettingsPage(),
+                  builder: (context) => const DeveloperSettingsPage(),
                 ),
               );
             },

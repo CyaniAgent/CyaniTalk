@@ -59,23 +59,19 @@ GoRouter goRouter(Ref ref) {
                   child: const MisskeyPage(),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
+                    // 重构：使用更稳健的语义控制
                     return FadeTransition(
                       opacity: animation,
                       child: SlideTransition(
                         position: animation.drive(
                           Tween<Offset>(
-                            begin: const Offset(0.0, 0.05),
+                            begin: const Offset(0.0, 0.02),
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: AnimatedBuilder(
-                          animation: secondaryAnimation,
-                          builder: (context, child) {
-                            return ExcludeSemantics(
-                              excluding: !secondaryAnimation.isDismissed,
-                              child: child!,
-                            );
-                          },
+                        child: ExcludeSemantics(
+                          // 动画进行中完全屏蔽语义，防止 Windows AXTree 报错
+                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
                           child: child,
                         ),
                       ),
@@ -99,18 +95,12 @@ GoRouter goRouter(Ref ref) {
                       child: SlideTransition(
                         position: animation.drive(
                           Tween<Offset>(
-                            begin: const Offset(0.0, 0.05),
+                            begin: const Offset(0.0, 0.02),
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: AnimatedBuilder(
-                          animation: secondaryAnimation,
-                          builder: (context, child) {
-                            return ExcludeSemantics(
-                              excluding: !secondaryAnimation.isDismissed,
-                              child: child!,
-                            );
-                          },
+                        child: ExcludeSemantics(
+                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
                           child: child,
                         ),
                       ),
@@ -134,18 +124,12 @@ GoRouter goRouter(Ref ref) {
                       child: SlideTransition(
                         position: animation.drive(
                           Tween<Offset>(
-                            begin: const Offset(0.0, 0.05),
+                            begin: const Offset(0.0, 0.02),
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: AnimatedBuilder(
-                          animation: secondaryAnimation,
-                          builder: (context, child) {
-                            return ExcludeSemantics(
-                              excluding: !secondaryAnimation.isDismissed,
-                              child: child!,
-                            );
-                          },
+                        child: ExcludeSemantics(
+                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
                           child: child,
                         ),
                       ),
@@ -169,18 +153,12 @@ GoRouter goRouter(Ref ref) {
                       child: SlideTransition(
                         position: animation.drive(
                           Tween<Offset>(
-                            begin: const Offset(0.0, 0.05),
+                            begin: const Offset(0.0, 0.02),
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: AnimatedBuilder(
-                          animation: secondaryAnimation,
-                          builder: (context, child) {
-                            return ExcludeSemantics(
-                              excluding: !secondaryAnimation.isDismissed,
-                              child: child!,
-                            );
-                          },
+                        child: ExcludeSemantics(
+                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
                           child: child,
                         ),
                       ),
@@ -204,18 +182,12 @@ GoRouter goRouter(Ref ref) {
                       child: SlideTransition(
                         position: animation.drive(
                           Tween<Offset>(
-                            begin: const Offset(0.0, 0.05),
+                            begin: const Offset(0.0, 0.02),
                             end: Offset.zero,
                           ).chain(CurveTween(curve: Curves.easeOutCubic)),
                         ),
-                        child: AnimatedBuilder(
-                          animation: secondaryAnimation,
-                          builder: (context, child) {
-                            return ExcludeSemantics(
-                              excluding: !secondaryAnimation.isDismissed,
-                              child: child!,
-                            );
-                          },
+                        child: ExcludeSemantics(
+                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
                           child: child,
                         ),
                       ),

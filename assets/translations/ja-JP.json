@@ -100,6 +100,12 @@
   "settings_sound_title": "音声",
   "settings_sound_description": "音量と効果音",
   "settings_section_system": "システム",
+  "settings_developer_title": "デベロッパー",
+  "settings_developer_description": "新機能をアンロックし、開発中のコンポーネントをテストします",
+  "settings_developer_mode_title": "デベロッパーモード",
+  "settings_developer_mode_description": "新機能をアンロックし、開発中のコンポーネントをテストします",
+  "settings_developer_submit_issue": "issueを送信する",
+  "settings_developer_submit_pr": "Pull Requestを送信する",
   "settings_logs_title": "ログ",
   "settings_logs_description": "アプリのログを表示および管理する",
   "settings_logs_section_basic": "基本設定",
@@ -349,7 +355,7 @@
   "error_certificate_error": "証明書エラー、セキュアな接続を確立できません",
   "error_server_error": "サーバーエラー",
   "error_bad_request": "リクエストパラメーターエラー",
-  "error_unauthorized": "認証されていません、もう一度ログインしてください",
+  "error_unauthorized": "未授权，请重新ログインしてください",
   "error_forbidden": "アクセス権限が不足しています",
   "error_not_found": "要求されたリソースが見つかりません",
   "error_method_not_allowed": "リクエストメソッドが許可されていません",
@@ -408,5 +414,6 @@
   "cloud_download_failed_count": "ダウンロードが完了しましたが、{failed} 個のファイルのダウンロードに失敗しました",
   "cloud_downloading_current": "ダウンロード中... {progress}%",
   "cloud_download_starting": "ダウンロードを開始しています...",
-  "cloud_files_count": "個のファイル"
+  "cloud_files_count": "個のファイル",
+  "could_not_launch_url": "{url}を起動できませんでした"
 }

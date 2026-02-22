@@ -94,6 +94,12 @@
   "settings_sound_title": "声音喵~",
   "settings_sound_description": "音量和音效喵~",
   "settings_section_system": "系统喵~",
+  "settings_developer_title": "开发者喵~",
+  "settings_developer_description": "解锁新功能，测试开发中的组件喵~",
+  "settings_developer_mode_title": "开发者模式喵~",
+  "settings_developer_mode_description": "解锁新功能，测试开发中的组件喵~",
+  "settings_developer_submit_issue": "向我们提交 issue喵~",
+  "settings_developer_submit_pr": "向我们提交 Pull Request喵~",
   "settings_logs_title": "日志喵~",
   "settings_logs_description": "查看并管理应用日志喵~",
   "settings_logs_section_basic": "基本设置喵~",
@@ -254,7 +260,7 @@
   "cloud_debug_raw_data": "调试：原始云盘数据喵~",
   "cloud_debug_check_console": "请查看控制台日志以获取来自 /api/i 和 /api/drive 的原始 JSON 响应。喵~",
   "cloud_close": "关闭喵~",
-  "cloud_folder": "文件夹喵~",
+  "cloud_folder": "文件夹",
   "note_renoted_successfully": "已转发成功！喵~",
   "note_failed_to_renote": "转发失败：{error}喵~",
   "note_reply": "回复喵~",
@@ -355,5 +361,6 @@
   "cloud_download_completed": "下载完成喵~",
   "cloud_download_failed_count": "{count}个文件下载失败喵~",
   "cloud_downloading_current": "正在下载 {current}/{total}: {filename}喵~",
-  "cloud_download_starting": "开始下载喵~"
+  "cloud_download_starting": "开始下载喵~",
+  "could_not_launch_url": "无法启动 {url}喵~"
 }

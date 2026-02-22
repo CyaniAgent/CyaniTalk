@@ -92,6 +92,12 @@
   "settings_sound_title": "Nya Nya~",
   "settings_sound_description": "Meow~",
   "settings_section_system": "Mew~",
+  "settings_developer_title": "Meow Mew~",
+  "settings_developer_description": "Nya Nya~",
+  "settings_developer_mode_title": "Meow Mew~",
+  "settings_developer_mode_description": "Nya Nya~",
+  "settings_developer_submit_issue": "Meow~",
+  "settings_developer_submit_pr": "Mew~",
   "settings_logs_title": "Nya~",
   "settings_logs_description": "Meow Meow~",
   "settings_logs_section_basic": "Mew~",
@@ -322,5 +328,6 @@
   "cloud_download_completed": "Nya Nya~",
   "cloud_download_failed_count": "Meow Mew~",
   "cloud_downloading_current": "Nya Nya~",
-  "cloud_download_starting": "Mew Mew~"
+  "cloud_download_starting": "Mew Mew~",
+  "could_not_launch_url": "Nya~"
 }
