@@ -64,13 +64,8 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   ///
   /// @param index 要滚动到的笔记索引
   void _scrollToNoteIndex(int index) {
-    // TODO: 滚动位置精度问题暂时放弃
-    // 由于 ListView.builder 的动态高度特性，精确滚动位置计算存在挑战
-    // 当前实现使用估算位置 + Scrollable.ensureVisible 的组合方案
-    // 虽然能基本满足需求，但仍可能存在位置偏差
-    // 后续考虑使用更复杂的方案，如：
-    // 1. 实现基于 SliverList 的自定义列表，支持精确的 scrollToIndex
-    // 2. 使用第三方库如 scroll_to_index 来处理动态高度列表的滚动
+    // TODO: 滚动位置错误问题暂时放弃
+    // 由于缓存问题，所以经常计算滚动笔记会出错
 
     final notes =
         ref.watch(misskeyTimelineProvider(_selectedTimeline.first)).value ?? [];

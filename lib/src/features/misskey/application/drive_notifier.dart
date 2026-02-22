@@ -108,9 +108,14 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     try {
       if (!ref.mounted) return;
 
-      state = const AsyncValue.loading();
+      final currentState = state.value ?? const DriveState();
+      
+      // 保持当前状态，只更新isLoading标志
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, errorMessage: null),
+      );
 
-      final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
+      final currentBreadcrumbs = currentState.breadcrumbs;
       final newBreadcrumbs = [...currentBreadcrumbs, folder];
 
       final result = await AsyncValue.guard<DriveState>(() async {
@@ -143,8 +148,9 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     try {
       if (!ref.mounted) return;
 
+      final currentState = state.value ?? const DriveState();
       final currentBreadcrumbs = List<DriveFolder>.from(
-        state.value?.breadcrumbs ?? [],
+        currentState.breadcrumbs,
       );
       if (currentBreadcrumbs.isEmpty) return;
 
@@ -153,7 +159,10 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
           ? null
           : currentBreadcrumbs.last.id;
 
-      state = const AsyncValue.loading();
+      // 保持当前状态，只更新isLoading标志
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, errorMessage: null),
+      );
 
       final result = await AsyncValue.guard<DriveState>(() async {
         return _fetchDriveContent(
@@ -185,10 +194,15 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     try {
       if (!ref.mounted) return;
 
+      final currentState = state.value ?? const DriveState();
+      
+      // 保持当前状态，只更新isLoading标志
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, errorMessage: null),
+      );
+
       if (index == -1) {
         // Root
-        state = const AsyncValue.loading();
-
         final result = await AsyncValue.guard<DriveState>(
           () async => _fetchDriveContent(),
         );
@@ -199,13 +213,11 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
         return;
       }
 
-      final currentBreadcrumbs = state.value?.breadcrumbs ?? [];
+      final currentBreadcrumbs = currentState.breadcrumbs;
       if (index >= currentBreadcrumbs.length) return;
 
       final targetBreadcrumbs = currentBreadcrumbs.sublist(0, index + 1);
       final targetFolder = targetBreadcrumbs.last;
-
-      state = const AsyncValue.loading();
 
       final result = await AsyncValue.guard<DriveState>(() async {
         return _fetchDriveContent(
