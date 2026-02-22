@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '/oss_licenses.dart';
 
 /// 开源许可证页面
@@ -86,9 +87,20 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
   Widget _buildDependencyTile(Package package) {
     return ListTile(
       title: Text(package.name),
-      subtitle: package.version != null
-          ? Text('Version: ${package.version}')
-          : null,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (package.version != null) Text('Version: ${package.version}'),
+          if (package.spdxIdentifiers.isNotEmpty)
+            Text(
+              '${'licenses_spdx_identifiers'.tr()}: ${package.spdxIdentifiers.first}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+        ],
+      ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => _showLicenseDetails(package),
     );
@@ -122,7 +134,7 @@ class LicenseDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (package.version != null) ...[
-              Text(
+              SelectableText(
                 'Version: ${package.version}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
@@ -131,7 +143,7 @@ class LicenseDetailPage extends StatelessWidget {
               const SizedBox(height: 8),
             ],
             if (package.description.isNotEmpty) ...[
-              Text(
+              SelectableText(
                 package.description,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -157,26 +169,6 @@ class LicenseDetailPage extends StatelessWidget {
             ],
             const Divider(),
             const SizedBox(height: 16),
-            Text(
-              'licenses_license_text'.tr(),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                package.license ?? 'licenses_not_available'.tr(),
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-              ),
-            ),
-            const SizedBox(height: 16),
             if (package.spdxIdentifiers.isNotEmpty) ...[
               Text(
                 'licenses_spdx_identifiers'.tr(),
@@ -191,7 +183,7 @@ class LicenseDetailPage extends StatelessWidget {
                 children: package.spdxIdentifiers
                     .map(
                       (id) => Chip(
-                        label: Text(id),
+                        label: SelectableText(id),
                         backgroundColor: Theme.of(
                           context,
                         ).colorScheme.primaryContainer,
@@ -202,7 +194,28 @@ class LicenseDetailPage extends StatelessWidget {
                     )
                     .toList(),
               ),
+              const SizedBox(height: 16),
             ],
+            Text(
+              'licenses_license_text'.tr(),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SelectableText(
+                package.license ?? 'licenses_not_available'.tr(),
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              ),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -217,7 +230,33 @@ class LicenseDetailPage extends StatelessWidget {
   ) {
     return InkWell(
       onTap: () {
-        // 这里可以添加打开链接的功能
+        final uri = Uri.parse(url);
+        // 立即显示对话框，不等待canLaunchUrl的结果
+        showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text('licenses_open_link_title'.tr()),
+            content: Text(
+              'licenses_open_link_description'.tr(namedArgs: {'url': url}),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text('cancel'.tr()),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop(true);
+                  // 在对话框关闭后检查并打开链接
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  }
+                },
+                child: Text('ok'.tr()),
+              ),
+            ],
+          ),
+        );
       },
       child: Row(
         children: [

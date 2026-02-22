@@ -14,10 +14,12 @@ enum DownloadStatus {
 }
 
 /// 下载进度回调
-typedef DownloadProgressCallback = void Function(int received, int total, double progress);
+typedef DownloadProgressCallback =
+    void Function(int received, int total, double progress);
 
 /// 下载状态回调
-typedef DownloadStatusCallback = void Function(DownloadStatus status, String? message);
+typedef DownloadStatusCallback =
+    void Function(DownloadStatus status, String? message);
 
 /// 下载配置类
 class DownloadConfig {
@@ -96,53 +98,64 @@ class DownloadUtils {
     ),
   );
 
+  /// 存储所有下载的CancelToken
+  static final List<CancelToken> _cancelTokens = [];
+
   /// 单文件下载
   static Future<DownloadResult> downloadFile({
     required DownloadConfig config,
     DownloadProgressCallback? onProgress,
     DownloadStatusCallback? onStatusChange,
   }) async {
+    // 通知开始下载
+    onStatusChange?.call(DownloadStatus.pending, 'download_preparing'.tr());
+
+    // 确定保存目录
+    final String saveDirectory =
+        config.saveDir ?? await _getDefaultDownloadDir();
+    if (saveDirectory.isEmpty) {
+      return DownloadResult(
+        status: DownloadStatus.failed,
+        errorMessage: 'download_no_directory'.tr(),
+      );
+    }
+
+    // 构建文件路径
+    String filePath = '$saveDirectory/${config.fileName}';
+
+    // 检查文件是否已存在
+    final File file = File(filePath);
+    if (file.existsSync() && !config.allowOverwrite) {
+      // 生成新文件名
+      final String extension = filePath.split('.').last;
+      final String baseName = filePath
+          .split('.')
+          .take(filePath.split('.').length - 1)
+          .join('.');
+      int counter = 1;
+      while (File('$baseName($counter).$extension').existsSync()) {
+        counter++;
+      }
+      filePath = '$baseName($counter).$extension';
+    }
+
+    // 确保目录存在
+    final Directory directory = Directory(saveDirectory);
+    if (!directory.existsSync()) {
+      directory.createSync(recursive: true);
+    }
+
+    // 开始下载
+    onStatusChange?.call(DownloadStatus.downloading, 'download_starting'.tr());
+
+    int retryCount = 0;
+    bool downloadSuccess = false;
+
+    // 创建CancelToken并添加到列表
+    final cancelToken = CancelToken();
+    _cancelTokens.add(cancelToken);
+
     try {
-      // 通知开始下载
-      onStatusChange?.call(DownloadStatus.pending, 'download_preparing'.tr());
-
-      // 确定保存目录
-      final String saveDirectory = config.saveDir ?? await _getDefaultDownloadDir();
-      if (saveDirectory.isEmpty) {
-        return DownloadResult(
-          status: DownloadStatus.failed,
-          errorMessage: 'download_no_directory'.tr(),
-        );
-      }
-
-      // 构建文件路径
-      String filePath = '$saveDirectory/${config.fileName}';
-
-      // 检查文件是否已存在
-      final File file = File(filePath);
-      if (file.existsSync() && !config.allowOverwrite) {
-        // 生成新文件名
-        final String extension = filePath.split('.').last;
-        final String baseName = filePath.split('.').take(filePath.split('.').length - 1).join('.');
-        int counter = 1;
-        while (File('$baseName($counter).$extension').existsSync()) {
-          counter++;
-        }
-        filePath = '$baseName($counter).$extension';
-      }
-
-      // 确保目录存在
-      final Directory directory = Directory(saveDirectory);
-      if (!directory.existsSync()) {
-        directory.createSync(recursive: true);
-      }
-
-      // 开始下载
-      onStatusChange?.call(DownloadStatus.downloading, 'download_starting'.tr());
-
-      int retryCount = 0;
-      bool downloadSuccess = false;
-
       while (retryCount <= config.maxRetries && !downloadSuccess) {
         try {
           await _dio.download(
@@ -153,6 +166,7 @@ class DownloadUtils {
               receiveTimeout: Duration(seconds: config.timeout),
             ),
             queryParameters: config.queryParams,
+            cancelToken: cancelToken,
             onReceiveProgress: (received, total) {
               if (total != -1) {
                 final double progress = received / total;
@@ -167,10 +181,12 @@ class DownloadUtils {
           if (retryCount <= config.maxRetries) {
             onStatusChange?.call(
               DownloadStatus.pending,
-              'download_retrying'.tr(namedArgs: {
-                'attempt': retryCount.toString(),
-                'max': config.maxRetries.toString(),
-              }),
+              'download_retrying'.tr(
+                namedArgs: {
+                  'attempt': retryCount.toString(),
+                  'max': config.maxRetries.toString(),
+                },
+              ),
             );
             await Future.delayed(Duration(milliseconds: config.retryInterval));
           } else {
@@ -195,11 +211,17 @@ class DownloadUtils {
         downloadedSize: file.lengthSync(),
       );
     } catch (e) {
-      onStatusChange?.call(DownloadStatus.failed, 'download_failed'.tr(namedArgs: {'message': e.toString()}));
+      onStatusChange?.call(
+        DownloadStatus.failed,
+        'download_failed'.tr(namedArgs: {'message': e.toString()}),
+      );
       return DownloadResult(
         status: DownloadStatus.failed,
         errorMessage: e.toString(),
       );
+    } finally {
+      // 从列表中移除cancelToken
+      _cancelTokens.remove(cancelToken);
     }
   }
 
@@ -218,11 +240,13 @@ class DownloadUtils {
       final config = configs[i];
       onStatusChange?.call(
         DownloadStatus.pending,
-        'download_preparing_file'.tr(namedArgs: {
-          'index': (i + 1).toString(),
-          'total': totalCount.toString(),
-          'name': config.fileName,
-        }),
+        'download_preparing_file'.tr(
+          namedArgs: {
+            'index': (i + 1).toString(),
+            'total': totalCount.toString(),
+            'name': config.fileName,
+          },
+        ),
       );
 
       final result = await downloadFile(
@@ -300,7 +324,13 @@ class DownloadUtils {
 
   /// 取消所有下载
   static void cancelAllDownloads() {
-    // TODO：Dio 的取消逻辑需要使用 CancelToken
-    // 这里简化处理，实际项目中可能需要维护一个 CancelToken 列表
+    // 取消所有下载任务
+    for (final token in _cancelTokens) {
+      if (!token.isCancelled) {
+        token.cancel('Download cancelled by user');
+      }
+    }
+    // 清空列表
+    _cancelTokens.clear();
   }
 }

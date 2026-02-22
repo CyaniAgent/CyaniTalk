@@ -11,7 +11,6 @@ import '../../flarum/presentation/pages/flarum_notifications_page.dart';
 import '../../auth/application/auth_service.dart';
 import '../../../shared/widgets/login_reminder.dart';
 
-
 class ForumPage extends ConsumerStatefulWidget {
   const ForumPage({super.key});
 
@@ -46,17 +45,19 @@ class _ForumPageState extends ConsumerState<ForumPage> {
     final endpointsAsync = ref.watch(flarumEndpointsProvider);
     final selectedIndex = ref.watch(forumSubIndexProvider);
     final flarumApi = ref.watch(flarumApiProvider);
-    
+
     // Check if the current account's host is in the endpoints list
     final bool isEndpointValid = endpointsAsync.maybeWhen(
-      data: (endpoints) => account != null && endpoints.contains('https://${account.host}'),
+      data: (endpoints) =>
+          account != null && endpoints.contains('https://${account.host}'),
       orElse: () => false,
     );
 
     final hasEndpoint = flarumApi.baseUrl != null;
 
     // Real-time detection: if account is not in valid endpoints, treat as not logged in
-    if ((account == null && !hasEndpoint) || (account != null && !isEndpointValid)) {
+    if ((account == null && !hasEndpoint) ||
+        (account != null && !isEndpointValid)) {
       return Scaffold(
         appBar: AppBar(
           leading: Breakpoints.small.isActive(context)

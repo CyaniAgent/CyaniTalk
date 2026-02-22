@@ -15,7 +15,7 @@ publish_to: "none" # 如果你想发布到 pub.dev，请删除此行
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # 在 Windows 中，build-name 用作产品和文件版本的主要、次要和补丁部分
 # 而 build-number 用作构建后缀。
-version: 1.3.1+171
+version: 1.3.1+220
 
 environment:
   sdk: ^3.10.4
@@ -47,6 +47,7 @@ dependencies:
   # 声明式路由管理库，支持嵌套路由、重定向、守卫等
   go_router: ^17.0.1
   # 自适应脚手架组件，支持不同屏幕尺寸的响应式布局
+  # TODO: 替换flutter_adaptive_scaffold，因为其已被弃用
   flutter_adaptive_scaffold: ^0.3.3+1
   # React风格的Hooks支持，允许在函数组件中使用状态和副作用
   flutter_hooks: ^0.21.3+1
@@ -89,13 +90,11 @@ dependencies:
   # 视频播放器库，支持多种视频格式和播放控制
   video_player: ^2.9.2
   # Windows平台视频播放器实现
-  video_player_win: ^2.3.11
+  video_player_win: ^3.2.2
   # 图片查看器库，支持缩放、平移等手势操作
-  photo_view: ^0.14.0
+  photo_view: ^0.15.0
   # 文件选择器库，用于选择本地文件
   file_picker: ^10.3.10
-  # 从图片中提取颜色的库，用于生成美观的颜色方案
-  palette_generator: ^0.3.3+3
   # 跨平台设备信息获取库，用于获取设备型号、操作系统等信息
   device_info_plus: ^12.0.0
   # 图片缓存库，支持图片缓存和加载优化
@@ -130,7 +129,7 @@ dev_dependencies:
   # JSON序列化代码生成器，用于生成JSON转换代码
   json_serializable: ^6.11.2
   # 应用图标生成工具，用于生成不同平台的应用图标
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.4
   mocktail: ^1.0.4
   dart_pubspec_licenses: ^3.0.15
 

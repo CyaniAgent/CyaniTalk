@@ -136,7 +136,6 @@ const allDependencies = <Package>[
   _package_config,
   _package_info_plus,
   _package_info_plus_platform_interface,
-  _palette_generator,
   _pana,
   _path,
   _path_provider,
@@ -266,7 +265,6 @@ const dependencies = <Package>[
   _video_player_win,
   _photo_view,
   _file_picker,
-  _palette_generator,
   _device_info_plus,
   _cached_network_image,
   _flutter_background_service,
@@ -537,17 +535,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// archive 4.0.7
+/// archive 4.0.9
 const _archive = Package(
     name: 'archive',
     description: 'Provides encoders and decoders for various archive and compression formats such as zip, tar, bzip2, gzip, and zlib.',
     repository: 'https://github.com/brendan-duncan/archive',
     authors: [],
-    version: '4.0.7',
+    version: '4.0.9',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('crypto'), PackageRef('path'), PackageRef('posix')],
+    dependencies: [PackageRef('path'), PackageRef('posix')],
     devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('lints'), PackageRef('test'), PackageRef('web')],
     license: '''The MIT License
 
@@ -1155,14 +1153,14 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// built_value 8.12.3
+/// built_value 8.12.4
 const _built_value = Package(
     name: 'built_value',
     description: '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
 ''',
     repository: 'https://github.com/google/built_value.dart/tree/master/built_value',
     authors: [],
-    version: '8.12.3',
+    version: '8.12.4',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -4354,14 +4352,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
   );
 
-/// flutter_launcher_icons 0.13.1
+/// flutter_launcher_icons 0.14.4
 const _flutter_launcher_icons = Package(
     name: 'flutter_launcher_icons',
     description: "A package which simplifies the task of updating your Flutter app's launcher icon.",
     homepage: 'https://github.com/fluttercommunity/flutter_launcher_icons',
     repository: 'https://github.com/fluttercommunity/flutter_launcher_icons/',
     authors: [],
-    version: '0.13.1',
+    version: '0.14.4',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
@@ -5492,13 +5490,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// image 4.7.2
+/// image 4.8.0
 const _image = Package(
     name: 'image',
     description: 'Dart Image Library provides server and web apps the ability to load, manipulate, and save images with various image file formats.',
     homepage: 'https://github.com/brendan-duncan/image',
     authors: [],
-    version: '4.7.2',
+    version: '4.8.0',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
@@ -6908,45 +6906,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// palette_generator 0.3.3+7
-const _palette_generator = Package(
-    name: 'palette_generator',
-    description: 'Flutter package for generating palette colors from a source image.',
-    repository: 'https://github.com/flutter/packages/tree/main/packages/palette_generator',
-    authors: [],
-    version: '0.3.3+7',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('flutter')],
-    devDependencies: [],
-    license: '''Copyright 2013 The Flutter Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
 /// pana 0.22.24
 const _pana = Package(
     name: 'pana',
@@ -7263,14 +7222,14 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// petitparser 7.0.1
+/// petitparser 7.0.2
 const _petitparser = Package(
     name: 'petitparser',
     description: 'A dynamic parser framework to build efficient grammars and parsers quickly.',
     homepage: 'https://petitparser.github.io',
     repository: 'https://github.com/petitparser/dart-petitparser',
     authors: [],
-    version: '7.0.1',
+    version: '7.0.2',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
@@ -7300,19 +7259,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
   );
 
-/// photo_view 0.14.0
+/// photo_view 0.15.0
 const _photo_view = Package(
     name: 'photo_view',
     description: 'Photo View provides a gesture sensitive zoomable widget. Photo View is largely used to show interactive images and other stuff such as SVG.',
     homepage: 'https://github.com/renancaraujo/photo_view',
     authors: [],
-    version: '0.14.0',
+    version: '0.15.0',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
     dependencies: [PackageRef('flutter')],
     devDependencies: [PackageRef('test')],
-    license: '''Copyright 2020 Renan C. Araújo
+    license: '''Copyright 2024 Renan C. Araújo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -10210,13 +10169,13 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// url_launcher_ios 6.4.0
+/// url_launcher_ios 6.4.1
 const _url_launcher_ios = Package(
     name: 'url_launcher_ios',
     description: 'iOS implementation of the url_launcher plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_ios',
     authors: [],
-    version: '6.4.0',
+    version: '6.4.1',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -10650,18 +10609,18 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// uuid 4.5.2
+/// uuid 4.5.3
 const _uuid = Package(
     name: 'uuid',
     description: '''RFC4122 (v1, v4, v5, v6, v7, v8) UUID Generator and Parser for Dart
 ''',
     repository: 'https://github.com/Daegalus/dart-uuid',
     authors: [],
-    version: '4.5.2',
+    version: '4.5.3',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('crypto'), PackageRef('meta'), PackageRef('fixnum')],
+    dependencies: [PackageRef('crypto'), PackageRef('fixnum')],
     devDependencies: [PackageRef('lints'), PackageRef('test')],
     license: '''Copyright (c) 2021 Yulian Kuncheff
 
@@ -10732,13 +10691,13 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.''',
   );
 
-/// video_player 2.10.1
+/// video_player 2.11.0
 const _video_player = Package(
     name: 'video_player',
     description: 'Flutter plugin for displaying inline video with other Flutter widgets on Android, iOS, macOS and web.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player',
     authors: [],
-    version: '2.10.1',
+    version: '2.11.0',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -10771,13 +10730,13 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// video_player_android 2.9.1
+/// video_player_android 2.9.4
 const _video_player_android = Package(
     name: 'video_player_android',
     description: 'Android implementation of the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_android',
     authors: [],
-    version: '2.9.1',
+    version: '2.9.4',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -10927,14 +10886,14 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// video_player_win 2.3.11
+/// video_player_win 3.2.2
 const _video_player_win = Package(
     name: 'video_player_win',
     description: 'Video player for Windows, lightweight, using Windows built-in Media Foundation API. Windows implementation of the video_player plugin.',
     homepage: 'https://github.com/jakky1/video_player_win',
     repository: 'https://github.com/jakky1/video_player_win',
     authors: [],
-    version: '2.3.11',
+    version: '3.2.2',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -11334,13 +11293,13 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// webview_flutter_wkwebview 3.23.6
+/// webview_flutter_wkwebview 3.23.7
 const _webview_flutter_wkwebview = Package(
     name: 'webview_flutter_wkwebview',
     description: "A Flutter plugin that provides a WebView widget based on Apple's WKWebView control.",
     repository: 'https://github.com/flutter/packages/tree/main/packages/webview_flutter/webview_flutter_wkwebview',
     authors: [],
-    version: '3.23.6',
+    version: '3.23.7',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -11612,13 +11571,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
   );
 
-/// yaml_edit 2.2.3
+/// yaml_edit 2.2.4
 const _yaml_edit = Package(
     name: 'yaml_edit',
     description: 'A library for YAML manipulation with comment and whitespace preservation.',
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/yaml_edit',
     authors: [],
-    version: '2.2.3',
+    version: '2.2.4',
     spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
@@ -11652,20 +11611,20 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// cyanitalk 1.2.0+170
+/// cyanitalk 1.3.1+220
 const _cyanitalk = Package(
     name: 'cyanitalk',
     description: 'A comprehensive, multi-functional social application built with Flutter, connecting Misskey and Flarum, and belonging to CyaniAgent.',
     authors: [],
-    version: '1.2.0+170',
+    version: '1.3.1+220',
     spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('audioplayers'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('webview_flutter'), PackageRef('webview_windows'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('file_picker'), PackageRef('palette_generator'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago')],
+    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('audioplayers'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('webview_flutter'), PackageRef('webview_windows'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('file_picker'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago')],
     devDependencies: [PackageRef('flutter_lints'), PackageRef('riverpod_generator'), PackageRef('build_runner'), PackageRef('custom_lint'), PackageRef('riverpod_lint'), PackageRef('freezed'), PackageRef('json_serializable'), PackageRef('flutter_launcher_icons'), PackageRef('mocktail'), PackageRef('dart_pubspec_licenses')],
     license: '''MIT License
 
-Copyright (c) 2026 CyaniAgent Group.
+Copyright (c) 2026 CyaniAgent.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

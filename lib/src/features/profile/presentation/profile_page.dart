@@ -5,8 +5,6 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import '../../../core/navigation/navigation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:async';
-import 'package:palette_generator/palette_generator.dart';
 import 'widgets/associated_accounts_section.dart';
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
@@ -24,96 +22,6 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  Color _appBarColor = Colors.transparent;
-  bool _isColorExtracted = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _extractAppBarColor();
-  }
-
-  Future<void> _extractAppBarColor() async {
-    if (_isColorExtracted) return;
-
-    try {
-      final selectedMisskey = ref
-          .watch(selectedMisskeyAccountProvider)
-          .asData
-          ?.value;
-      if (selectedMisskey == null) {
-        _isColorExtracted = true;
-        return;
-      }
-
-      final primaryAccount = selectedMisskey;
-      if (primaryAccount.platform != 'misskey') {
-        _isColorExtracted = true;
-        return;
-      }
-
-      final misskeyUserAsync = ref.watch(misskeyMeProvider);
-      if (misskeyUserAsync.isLoading) {
-        // 等待数据加载
-        await Future.delayed(const Duration(milliseconds: 100));
-        if (mounted) {
-          _extractAppBarColor();
-        }
-        return;
-      }
-
-      final misskeyUser = misskeyUserAsync.asData?.value;
-      if (misskeyUser?.bannerUrl == null) {
-        _isColorExtracted = true;
-        return;
-      }
-
-      // 图片加载和颜色提取
-      final color = await _getImageDominantColor(misskeyUser!.bannerUrl!);
-      if (mounted) {
-        setState(() {
-          _appBarColor = color;
-          _isColorExtracted = true;
-        });
-      }
-    } catch (e) {
-      // 如果颜色提取失败，使用默认颜色
-      _isColorExtracted = true;
-    }
-  }
-
-  Future<Color> _getImageDominantColor(String imageUrl) async {
-    // 先获取主题颜色，避免在异步间隙中使用BuildContext
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    try {
-      // 使用palette_generator库从图片中提取颜色
-      final paletteGenerator = await PaletteGenerator.fromImageProvider(
-        NetworkImage(imageUrl),
-        maximumColorCount: 10,
-      );
-
-      // 获取主色调
-      Color dominantColor = primaryColor;
-      if (paletteGenerator.dominantColor != null) {
-        dominantColor = paletteGenerator.dominantColor!.color;
-      } else if (paletteGenerator.lightVibrantColor != null) {
-        dominantColor = paletteGenerator.lightVibrantColor!.color;
-      } else if (paletteGenerator.vibrantColor != null) {
-        dominantColor = paletteGenerator.vibrantColor!.color;
-      }
-
-      // 确保颜色足够亮，适合作为AppBar背景
-      final hsl = HSLColor.fromColor(dominantColor);
-      final adjustedColor = hsl
-          .withLightness(hsl.lightness.clamp(0.3, 0.8))
-          .toColor();
-
-      return adjustedColor;
-    } catch (e) {
-      return primaryColor;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -153,9 +61,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         .openDrawer(),
                   )
                 : null,
-            backgroundColor: isLoggedIn
-                ? _appBarColor
-                : theme.colorScheme.primary,
             actions: [
               IconButton(
                 icon: Icon(Icons.settings, color: theme.colorScheme.onPrimary),
