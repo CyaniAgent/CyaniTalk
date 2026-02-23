@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import 'widgets/associated_accounts_section.dart';
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
 import '../../auth/presentation/widgets/add_account_dialog.dart';
@@ -114,7 +113,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                       end: Alignment.bottomCenter,
                                       colors: [
                                         Colors.transparent,
-                                        theme.colorScheme.shadow.withAlpha(128),
+                                        theme.colorScheme.surface.withAlpha(
+                                          100,
+                                        ),
                                       ],
                                       stops: const [0.6, 1.0],
                                     ),
@@ -152,16 +153,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (isLoggedIn) ...[
-                                const AssociatedAccountsSection(
-                                  showRemoveButton: false,
-                                  showTitle: true,
-                                ),
-                                const SizedBox(height: 24),
-                              ] else ...[
-                                _buildAddAccountButton(context),
-                                const SizedBox(height: 24),
-                              ],
                               _buildQuickActions(context),
                               const SizedBox(height: 32),
                             ],
@@ -259,121 +250,231 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     flarum_model.User? flarumUser,
   ) {
     final theme = Theme.of(context);
+    final isWideScreen = MediaQuery.of(context).size.width > 900;
+
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 用户信息部分，为头像留出空间
-          Padding(
-            padding: const EdgeInsets.only(left: 115), // 为头像留出空间 (头像半径45 + 左边距20 + 边框宽度3 + 间距7)
-            child: Column(
+          // 用户信息和统计信息
+          if (isWideScreen)
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
-                  children: [
-                    Text(
-                      misskeyUser?.name ??
-                          primaryAccount.name ??
-                          primaryAccount.username ??
-                          'CyaniUser',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 用户信息部分，为头像留出空间
+                      Transform.translate(
+                        offset: const Offset(0, -20), // 向上移动5像素
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 115,
+                          ), // 为头像留出空间 (头像半径45 + 左边距20 + 边框宽度3 + 间距7)
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 8,
+                                children: [
+                                  Text(
+                                    misskeyUser?.name ??
+                                        primaryAccount.name ??
+                                        primaryAccount.username ??
+                                        'CyaniUser',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  if (misskeyUser != null &&
+                                      misskeyUser.badgeRoles.isNotEmpty)
+                                    ...misskeyUser.badgeRoles.map((role) {
+                                      final name = role['name'] as String?;
+                                      if (name == null) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: theme
+                                              .colorScheme
+                                              .primaryContainer,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: theme.colorScheme.primary,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          name,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: theme
+                                                .colorScheme
+                                                .onPrimaryContainer,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                ],
+                              ),
+                              Text(
+                                '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    if (misskeyUser != null &&
-                        misskeyUser.badgeRoles.isNotEmpty)
-                      ...misskeyUser.badgeRoles.map((role) {
-                        final name = role['name'] as String?;
-                        if (name == null) {
-                          return const SizedBox.shrink();
-                        }
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          child: Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: theme.colorScheme.onPrimaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
-                      }),
-                  ],
+                    ],
+                  ),
                 ),
-                Text(
-                  '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(width: 32),
+                Expanded(
+                  child: _buildUserStats(context, misskeyUser, flarumUser),
+                ),
+              ],
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 用户信息部分，为头像留出空间
+                Transform.translate(
+                  offset: const Offset(0, -20), // 向上移动5像素
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 115,
+                    ), // 为头像留出空间 (头像半径45 + 左边距20 + 边框宽度3 + 间距7)
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Text(
+                              misskeyUser?.name ??
+                                  primaryAccount.name ??
+                                  primaryAccount.username ??
+                                  'CyaniUser',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            if (misskeyUser != null &&
+                                misskeyUser.badgeRoles.isNotEmpty)
+                              ...misskeyUser.badgeRoles.map((role) {
+                                final name = role['name'] as String?;
+                                if (name == null) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    name,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color:
+                                          theme.colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                );
+                              }),
+                          ],
+                        ),
+                        Text(
+                          '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
+
           // 个人简介
           if (misskeyUser?.description != null &&
               misskeyUser!.description!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 16, left: 4),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final text = misskeyUser.description!;
-                  final style = TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  );
-
-                  final textPainter = TextPainter(
-                    text: TextSpan(text: text, style: style),
-                    maxLines: 10,
-                    textDirection: ui.TextDirection.ltr,
-                  )..layout(maxWidth: constraints.maxWidth);
-
-                  final isOverflown = textPainter.didExceedMaxLines;
-
-                  if (isOverflown) {
-                    return InkWell(
-                      onTap: () => _showFullBioCard(context, text),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'user_details_bio_truncated'.tr(),
-                            style: style.copyWith(
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ],
-                      ),
+            Transform.translate(
+              offset: const Offset(0, -25), // 向上移动20像素
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16, left: 4),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final text = misskeyUser.description!;
+                    final style = TextStyle(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurfaceVariant,
                     );
-                  }
 
-                  return SelectableText(text, style: style);
-                },
+                    final textPainter = TextPainter(
+                      text: TextSpan(text: text, style: style),
+                      maxLines: 10,
+                      textDirection: ui.TextDirection.ltr,
+                    )..layout(maxWidth: constraints.maxWidth);
+
+                    final isOverflown = textPainter.didExceedMaxLines;
+
+                    if (isOverflown) {
+                      return InkWell(
+                        onTap: () => _showFullBioCard(context, text),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'user_details_bio_truncated'.tr(),
+                              style: style.copyWith(
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return SelectableText(text, style: style);
+                  },
+                ),
               ),
             ),
 
-          const SizedBox(height: 20),
-          // 用户统计信息
-          _buildUserStats(context, misskeyUser, flarumUser),
+          // 用户统计信息（仅在窄屏时显示）
+          if (!isWideScreen) _buildUserStats(context, misskeyUser, flarumUser),
         ],
       ),
     );
@@ -512,31 +613,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildAddAccountButton(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Text(
-            'settings_section_account'.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        Card(
-          elevation: 0,
-          child: ListTile(
-            leading: const Icon(Icons.add_circle_outline),
-            title: Text('accounts_add_account'.tr()),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showAddAccountDialog(context),
-          ),
-        ),
-      ],
-    );
-  }
 
   void _showAddAccountDialog(BuildContext context) {
     AddAccountBottomSheet.show(context);
