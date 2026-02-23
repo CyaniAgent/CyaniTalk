@@ -415,11 +415,9 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
       } catch (_) {}
     }
 
-    if (selectedAccount == null) {
-      selectedAccount = accounts
-          .where((a) => a.platform == 'misskey')
-          .firstOrNull;
-    }
+    selectedAccount ??= accounts
+        .where((a) => a.platform == 'misskey')
+        .firstOrNull;
 
     // 设置缓存管理器的当前账户ID
     if (selectedAccount != null) {

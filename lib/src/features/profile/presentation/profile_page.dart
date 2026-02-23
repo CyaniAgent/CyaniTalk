@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import '../../auth/application/auth_service.dart';
 import '../../auth/domain/account.dart';
@@ -26,6 +25,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isWideScreen = MediaQuery.of(context).size.width > 900;
+    final bannerHeight = isWideScreen ? 350.0 : 200.0;
+
     final selectedMisskey = ref
         .watch(selectedMisskeyAccountProvider)
         .asData
@@ -47,197 +49,187 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final bool isLoggedIn = primaryAccount != null;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Stack(
-                  clipBehavior: Clip.none,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Column(
                   children: [
-                    Column(
-                      children: [
-                        // 背景图片
-                        if (isLoggedIn)
-                          GestureDetector(
-                            onTap: misskeyUser?.bannerUrl != null
-                                ? () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => MediaViewerPage(
-                                          mediaItems: [
-                                            MediaItem(
-                                              url: misskeyUser!.bannerUrl!,
-                                              type: MediaType.image,
-                                              fileName: 'banner',
-                                            ),
-                                          ],
-                                          heroTag:
-                                              'profile_banner_${misskeyUser.id}',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                : null,
-                            child: Hero(
-                              tag:
-                                  'profile_banner_${misskeyUser?.id ?? 'default'}',
-                              child: Container(
-                                height: 200,
-                                decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  image: misskeyUser?.bannerUrl != null
-                                      ? DecorationImage(
-                                          image: NetworkImage(
-                                            misskeyUser!.bannerUrl!,
-                                          ),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null,
-                                  gradient: misskeyUser?.bannerUrl == null
-                                      ? LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            theme.colorScheme.primaryContainer,
-                                            theme.colorScheme.primary,
-                                          ],
-                                        )
-                                      : null,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        theme.colorScheme.surface.withAlpha(
-                                          100,
+                    // 背景图片
+                    if (isLoggedIn)
+                      GestureDetector(
+                        onTap: misskeyUser?.bannerUrl != null
+                            ? () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MediaViewerPage(
+                                      mediaItems: [
+                                        MediaItem(
+                                          url: misskeyUser!.bannerUrl!,
+                                          type: MediaType.image,
+                                          fileName: 'banner',
                                         ),
                                       ],
-                                      stops: const [0.6, 1.0],
+                                      heroTag:
+                                          'profile_banner_${misskeyUser.id}',
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          )
-                        else
-                          Container(
-                            height: 280,
+                                );
+                              }
+                            : null,
+                        child: Hero(
+                          tag: 'profile_banner_${misskeyUser?.id ?? 'default'}',
+                          child: Container(
+                            height: bannerHeight,
                             decoration: BoxDecoration(
                               color: theme.colorScheme.primary,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  theme.colorScheme.primaryContainer,
-                                  theme.colorScheme.primary,
-                                ],
+                              image: misskeyUser?.bannerUrl != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(
+                                        misskeyUser!.bannerUrl!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                              gradient: misskeyUser?.bannerUrl == null
+                                  ? LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        theme.colorScheme.primaryContainer,
+                                        theme.colorScheme.primary,
+                                      ],
+                                    )
+                                  : null,
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    theme.colorScheme.surface.withAlpha(100),
+                                  ],
+                                  stops: const [0.6, 1.0],
+                                ),
                               ),
                             ),
                           ),
-                        if (isLoggedIn)
-                          _buildLoggedInHeader(
-                            context,
-                            primaryAccount,
-                            misskeyUser,
-                            flarumUser,
-                          )
-                        else
-                          _buildLoggedOutHeader(context),
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildQuickActions(context),
-                              const SizedBox(height: 32),
+                        ),
+                      )
+                    else
+                      Container(
+                        height: bannerHeight,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              theme.colorScheme.primaryContainer,
+                              theme.colorScheme.primary,
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                    // 头像显示在最顶层
-                    if (isLoggedIn)
-                      Positioned(
-                        top: 155,
-                        left: 20,
-                        child: Hero(
-                          tag:
-                              'profile_avatar_${misskeyUser?.id ?? primaryAccount.id}',
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: theme.colorScheme.surface,
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: theme.colorScheme.shadow.withAlpha(50),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 45,
-                              backgroundColor: theme.colorScheme.surface,
-                              backgroundImage:
-                                  (misskeyUser?.avatarUrl ??
-                                          primaryAccount.avatarUrl) !=
-                                      null
-                                  ? NetworkImage(
-                                      misskeyUser?.avatarUrl ??
-                                          primaryAccount.avatarUrl!,
-                                    )
-                                  : null,
-                              child:
-                                  (misskeyUser?.avatarUrl ??
-                                          primaryAccount.avatarUrl) ==
-                                      null
-                                  ? Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: theme.colorScheme.primary,
-                                    )
-                                  : null,
-                            ),
-                          ),
-                        ),
                       ),
+                    if (isLoggedIn)
+                      _buildLoggedInHeader(
+                        context,
+                        primaryAccount,
+                        misskeyUser,
+                        flarumUser,
+                      )
+                    else
+                      _buildLoggedOutHeader(context),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          // 菜单按钮 - 仅在窄屏显示，固定在屏幕上不随滚动
-          if (Breakpoints.small.isActive(context))
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 16,
-              left: 16,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  color: theme.colorScheme.surface.withAlpha(150),
-                ),
-                child: IconButton(
-                  onPressed: () => ref
-                      .read(navigationControllerProvider.notifier)
-                      .openDrawer(),
-                  icon: const Icon(Icons.menu),
-                  style: IconButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
+                // 头像显示在最顶层
+                if (isLoggedIn)
+                  Positioned(
+                    top: bannerHeight - 45,
+                    left: 20,
+                    child: Hero(
+                      tag:
+                          'profile_avatar_${misskeyUser?.id ?? primaryAccount.id}',
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: theme.colorScheme.surface,
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.colorScheme.shadow.withAlpha(50),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 45,
+                          backgroundColor: theme.colorScheme.surface,
+                          backgroundImage:
+                              (misskeyUser?.avatarUrl ??
+                                      primaryAccount.avatarUrl) !=
+                                  null
+                              ? NetworkImage(
+                                  misskeyUser?.avatarUrl ??
+                                      primaryAccount.avatarUrl!,
+                                )
+                              : null,
+                          child:
+                              (misskeyUser?.avatarUrl ??
+                                      primaryAccount.avatarUrl) ==
+                                  null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: theme.colorScheme.primary,
+                                )
+                              : null,
+                        ),
+                      ),
                     ),
-                    padding: const EdgeInsets.all(12),
                   ),
-                ),
-              ),
+                // 菜单按钮
+                if (Breakpoints.small.isActive(context))
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 16,
+                    left: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(28),
+                        color: theme.colorScheme.surface.withAlpha(150),
+                      ),
+                      child: IconButton(
+                        onPressed: () => ref
+                            .read(navigationControllerProvider.notifier)
+                            .openDrawer(),
+                        icon: const Icon(Icons.menu),
+                        style: IconButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          padding: const EdgeInsets.all(12),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );
@@ -613,46 +605,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-
   void _showAddAccountDialog(BuildContext context) {
     AddAccountBottomSheet.show(context);
-  }
-
-  Widget _buildQuickActions(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Text(
-            'nav_me'.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        Card(
-          elevation: 0,
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: Text('settings_title'.tr()),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/settings'),
-              ),
-              const Divider(indent: 56, endIndent: 16, height: 1),
-              ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text('settings_about_title'.tr()),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/about'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _buildUserStats(

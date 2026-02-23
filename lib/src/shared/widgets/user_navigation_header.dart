@@ -396,19 +396,6 @@ class UserNavigationHeader extends ConsumerWidget {
         items.addAll([
           const PopupMenuDivider(height: 16),
           PopupMenuItem<String>(
-            value: 'settings',
-            child: Row(
-              children: [
-                Icon(
-                  Icons.settings,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                const SizedBox(width: 8),
-                Text('menu_settings'.tr()),
-              ],
-            ),
-          ),
-          PopupMenuItem<String>(
             value: 'logout',
             child: Row(
               children: [
@@ -437,35 +424,41 @@ class UserNavigationHeader extends ConsumerWidget {
           if (!context.mounted) return;
 
           if (value != null) {
-            if (value == 'settings') {
-              context.push('/settings');
-            } else if (value == 'logout') {
+            if (value == 'logout') {
               _logout(context, ref);
             } else {
-                // 切换账户
-                final account = accounts.firstWhere((a) => a.id == value);
-                if (account.platform == 'misskey') {
-                  ref.read(selectedMisskeyAccountProvider.notifier).select(account);
-                  // 刷新Misskey相关provider
-                  ref.invalidate(misskeyTimelineProvider);
-                  ref.invalidate(misskeyMeProvider);
-                  ref.invalidate(misskeyNotificationsProvider);
-                  // 刷新当前路由
-                  if (context.mounted) {
-                    final router = GoRouter.of(context);
-                    context.go(router.routeInformationProvider.value.uri.toString());
-                  }
-                } else if (account.platform == 'flarum') {
-                  ref.read(selectedFlarumAccountProvider.notifier).select(account);
-                  // 刷新Flarum相关provider
-                  ref.invalidate(flarumCurrentUserProvider);
-                  // 刷新当前路由
-                  if (context.mounted) {
-                    final router = GoRouter.of(context);
-                    context.go(router.routeInformationProvider.value.uri.toString());
-                  }
+              // 切换账户
+              final account = accounts.firstWhere((a) => a.id == value);
+              if (account.platform == 'misskey') {
+                ref
+                    .read(selectedMisskeyAccountProvider.notifier)
+                    .select(account);
+                // 刷新Misskey相关provider
+                ref.invalidate(misskeyTimelineProvider);
+                ref.invalidate(misskeyMeProvider);
+                ref.invalidate(misskeyNotificationsProvider);
+                // 刷新当前路由
+                if (context.mounted) {
+                  final router = GoRouter.of(context);
+                  context.go(
+                    router.routeInformationProvider.value.uri.toString(),
+                  );
+                }
+              } else if (account.platform == 'flarum') {
+                ref
+                    .read(selectedFlarumAccountProvider.notifier)
+                    .select(account);
+                // 刷新Flarum相关provider
+                ref.invalidate(flarumCurrentUserProvider);
+                // 刷新当前路由
+                if (context.mounted) {
+                  final router = GoRouter.of(context);
+                  context.go(
+                    router.routeInformationProvider.value.uri.toString(),
+                  );
                 }
               }
+            }
           }
         });
       },

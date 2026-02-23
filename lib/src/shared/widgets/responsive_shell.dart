@@ -62,14 +62,13 @@ class ResponsiveShell extends ConsumerWidget {
 
         return Scaffold(
           key: rootScaffoldKey,
-          drawer:
-              isSmall
-                  ? RootNavigationDrawer(
-                    selectedRootIndex: selectedRootIndex,
-                    onRootSelected:
-                        (index) => _onRootSelected(index, navigationSettings),
-                  )
-                  : null,
+          drawer: isSmall
+              ? RootNavigationDrawer(
+                  selectedRootIndex: selectedRootIndex,
+                  onRootSelected: (index) =>
+                      _onRootSelected(index, navigationSettings),
+                )
+              : null,
           body: Row(
             children: [
               if (!isSmall)
@@ -100,9 +99,13 @@ class ResponsiveShell extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
     final isMedium = Breakpoints.medium.isActive(context);
-    
+
     // 根据屏幕尺寸动态调整侧边栏宽度
-    final sidebarWidth = isLarge ? 280.0 : isMedium ? 240.0 : 80.0;
+    final sidebarWidth = isLarge
+        ? 280.0
+        : isMedium
+        ? 240.0
+        : 80.0;
 
     return Container(
       width: sidebarWidth,
@@ -138,6 +141,12 @@ class ResponsiveShell extends ConsumerWidget {
                     navigationSettings,
                   ),
                 ],
+                const SizedBox(height: 8),
+                const Divider(indent: 12, endIndent: 12),
+                _buildSettingsButton(
+                  context,
+                  !Breakpoints.small.isActive(context),
+                ),
               ],
             ),
           ),
@@ -168,48 +177,44 @@ class ResponsiveShell extends ConsumerWidget {
             height: 56,
             padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
             decoration: BoxDecoration(
-              color:
-                  isSelected
-                      ? theme.colorScheme.secondaryContainer
-                      : Colors.transparent,
+              color: isSelected
+                  ? theme.colorScheme.secondaryContainer
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
-            child:
-                isLarge
-                    ? Row(
-                      children: [
-                        Icon(
-                          isSelected ? item.selectedIcon : item.icon,
-                          color:
-                              isSelected
-                                  ? theme.colorScheme.onSecondaryContainer
-                                  : theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: TextStyle(
-                              color:
-                                  isSelected
-                                      ? theme.colorScheme.onSecondaryContainer
-                                      : theme.colorScheme.onSurfaceVariant,
-                              fontWeight:
-                                  isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                    : Center(
-                      child: Icon(
+            child: isLarge
+                ? Row(
+                    children: [
+                      Icon(
                         isSelected ? item.selectedIcon : item.icon,
-                        color:
-                            isSelected
+                        color: isSelected
+                            ? theme.colorScheme.onSecondaryContainer
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: TextStyle(
+                            color: isSelected
                                 ? theme.colorScheme.onSecondaryContainer
                                 : theme.colorScheme.onSurfaceVariant,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
                       ),
+                    ],
+                  )
+                : Center(
+                    child: Icon(
+                      isSelected ? item.selectedIcon : item.icon,
+                      color: isSelected
+                          ? theme.colorScheme.onSecondaryContainer
+                          : theme.colorScheme.onSurfaceVariant,
                     ),
+                  ),
           ),
         ),
         ClipRect(
@@ -217,7 +222,7 @@ class ResponsiveShell extends ConsumerWidget {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             alignment: Alignment.topCenter,
-            child: isSelected 
+            child: isSelected
                 ? _buildSidebarSubNavigation(context, ref, item.id, isLarge)
                 : const ExcludeSemantics(
                     child: SizedBox(width: double.infinity, height: 0),
@@ -335,51 +340,47 @@ class ResponsiveShell extends ConsumerWidget {
           height: 40,
           padding: EdgeInsets.symmetric(horizontal: isLarge ? 12 : 0),
           decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? theme.colorScheme.surfaceContainerHighest
-                    : Colors.transparent,
+            color: isSelected
+                ? theme.colorScheme.surfaceContainerHighest
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child:
-              isLarge
-                  ? Row(
-                    children: [
-                      Icon(
-                        icon,
-                        size: 18,
-                        color:
-                            isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          label,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color:
-                                isSelected
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.onSurfaceVariant,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.normal,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  )
-                  : Center(
-                    child: Icon(
+          child: isLarge
+              ? Row(
+                  children: [
+                    Icon(
                       icon,
                       size: 18,
-                      color:
-                          isSelected
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isSelected
                               ? theme.colorScheme.primary
                               : theme.colorScheme.onSurfaceVariant,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                  ],
+                )
+              : Center(
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
+                ),
         ),
       ),
     );
@@ -393,6 +394,48 @@ class ResponsiveShell extends ConsumerWidget {
     navigationShell.goBranch(
       branchIndex,
       initialLocation: branchIndex == navigationShell.currentIndex,
+    );
+  }
+
+  Widget _buildSettingsButton(BuildContext context, bool isLarge) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: () => context.push('/settings'),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 56,
+        padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: isLarge
+            ? Row(
+                children: [
+                  Icon(
+                    Icons.settings,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'settings_title'.tr(),
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Center(
+                child: Icon(
+                  Icons.settings,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+      ),
     );
   }
 }
