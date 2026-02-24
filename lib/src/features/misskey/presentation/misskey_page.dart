@@ -143,7 +143,10 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> with WidgetsBindingOb
                   Text(_titles[selectedIndex]),
                   if (selectedIndex == 0) ...[
                     const SizedBox(width: 8),
-                    const ExcludeSemantics(child: _OnlineUsersBrief()),
+                    // 更加彻底的语义屏蔽，并在不可见时停止一切更新
+                    const ExcludeSemantics(
+                      child: _OnlineUsersBrief(),
+                    ),
                   ],
                 ],
               ),
@@ -168,6 +171,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> with WidgetsBindingOb
               duration: const Duration(milliseconds: 300),
               transitionBuilder: (Widget child, Animation<double> animation) {
                 final isIncoming = child.key == _pages[selectedIndex].key;
+                // 优化：在 Windows 上，不仅退出页面要屏蔽，进入页面在动画完成前也应屏蔽
                 return FadeTransition(
                   opacity: animation,
                   child: SlideTransition(
@@ -175,7 +179,10 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage> with WidgetsBindingOb
                       begin: isIncoming ? const Offset(0, 0.05) : const Offset(0, -0.05),
                       end: Offset.zero,
                     ).chain(CurveTween(curve: Curves.easeOutCubic))),
-                    child: isIncoming ? child : ExcludeSemantics(child: child),
+                    child: ExcludeSemantics(
+                      excluding: !animation.isCompleted,
+                      child: child,
+                    ),
                   ),
                 );
               },

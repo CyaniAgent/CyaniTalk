@@ -42,7 +42,9 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     String? folderId,
     List<DriveFolder> breadcrumbs = const [],
   }) async {
-    final repository = await ref.read(misskeyRepositoryProvider.future);
+    final repositoryFuture = ref.read(misskeyRepositoryProvider.future);
+    final repository = await repositoryFuture;
+    if (!ref.mounted) return const DriveState();
 
     // 检查是否需要刷新用户和存储空间信息
     final shouldRefreshInfo =
@@ -61,6 +63,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
 
     // 执行请求
     final results = await Future.wait(requests);
+    if (!ref.mounted) return const DriveState();
 
     // 处理结果
     int resultIndex = 0;
@@ -119,6 +122,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       final newBreadcrumbs = [...currentBreadcrumbs, folder];
 
       final result = await AsyncValue.guard<DriveState>(() async {
+        if (!ref.mounted) throw Exception('disposed');
         return _fetchDriveContent(
           folderId: folder.id,
           breadcrumbs: newBreadcrumbs,
@@ -129,7 +133,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error navigating to folder', e);
@@ -165,6 +169,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       );
 
       final result = await AsyncValue.guard<DriveState>(() async {
+        if (!ref.mounted) throw Exception('disposed');
         return _fetchDriveContent(
           folderId: parentId,
           breadcrumbs: currentBreadcrumbs,
@@ -175,7 +180,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error navigating back', e);
@@ -204,7 +209,10 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       if (index == -1) {
         // Root
         final result = await AsyncValue.guard<DriveState>(
-          () async => _fetchDriveContent(),
+          () async {
+            if (!ref.mounted) throw Exception('disposed');
+            return _fetchDriveContent();
+          },
         );
 
         if (ref.mounted) {
@@ -220,6 +228,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       final targetFolder = targetBreadcrumbs.last;
 
       final result = await AsyncValue.guard<DriveState>(() async {
+        if (!ref.mounted) throw Exception('disposed');
         return _fetchDriveContent(
           folderId: targetFolder.id,
           breadcrumbs: targetBreadcrumbs,
@@ -230,7 +239,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error navigating to breadcrumb', e);
@@ -260,6 +269,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       final currentBreadcrumbs = currentState.breadcrumbs;
 
       final result = await AsyncValue.guard<DriveState>(() async {
+        if (!ref.mounted) throw Exception('disposed');
         return _fetchDriveContent(
           folderId: currentFolderId,
           breadcrumbs: currentBreadcrumbs,
@@ -270,7 +280,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error refreshing drive content', e);
@@ -303,7 +313,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       await repository.deleteDriveFile(fileId);
       await refresh();
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error deleting file', e);
@@ -325,7 +335,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       await repository.deleteDriveFolder(folderId);
       await refresh();
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error deleting folder', e);
@@ -348,7 +358,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       await repository.createDriveFolder(name, parentId: currentFolderId);
       await refresh();
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error creating folder', e);
@@ -383,7 +393,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       );
       await refresh();
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('DriveNotifier: Error uploading file', e);

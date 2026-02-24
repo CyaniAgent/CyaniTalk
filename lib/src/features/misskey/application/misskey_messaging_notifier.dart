@@ -13,15 +13,24 @@ class MisskeyMessagingHistoryNotifier
     extends _$MisskeyMessagingHistoryNotifier {
   @override
   FutureOr<List<MessagingMessage>> build() async {
+    // 1. 立即获取所有依赖，避免在 async gap 之后调用 ref.watch
+    final repositoryFuture = ref.watch(misskeyRepositoryProvider.future);
+    final streamingService = ref.watch(
+      misskeyStreamingServiceProvider.notifier,
+    );
+
     logger.info('初始化Misskey消息历史');
     try {
-      final repository = await ref.watch(misskeyRepositoryProvider.future);
+      final repository = await repositoryFuture;
+      if (!ref.mounted) return [];
 
       // 并行获取 DM 历史和已加入的群聊
       final results = await Future.wait([
         repository.getMessagingHistory(),
         repository.getJoinedChatRooms(),
       ]);
+
+      if (!ref.mounted) return [];
 
       final history = results[0] as List<MessagingMessage>;
       final rooms = results[1] as List<ChatRoom>;
@@ -74,9 +83,6 @@ class MisskeyMessagingHistoryNotifier
       combined.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       // 监听实时消息以更新历史记录
-      final streamingService = ref.watch(
-        misskeyStreamingServiceProvider.notifier,
-      );
       final subscription = streamingService.messageStream.listen((message) {
         logger.debug('消息历史Notifier收到实时消息，准备刷新');
         _handleNewMessage(message);
@@ -87,10 +93,14 @@ class MisskeyMessagingHistoryNotifier
       });
 
       logger.info('Misskey消息历史初始化完成，加载了 ${history.length} 条对话');
-      return history;
+      return combined;
     } catch (e, stack) {
+      if (e.toString().contains('disposed')) return [];
       logger.error('Misskey消息历史初始化失败', e, stack);
-      rethrow;
+      if (ref.mounted) {
+        state = AsyncError(e, stack);
+      }
+      return [];
     }
   }
 
@@ -118,10 +128,10 @@ class MisskeyMessagingHistoryNotifier
         state = AsyncValue.data(updatedMessages);
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey消息历史: 处理新消息失败', e);
     }
   }
 
@@ -133,12 +143,15 @@ class MisskeyMessagingHistoryNotifier
       state = const AsyncValue.loading();
 
       final result = await AsyncValue.guard<List<MessagingMessage>>(() async {
+        if (!ref.mounted) throw Exception('disposed');
         final repository = await ref.read(misskeyRepositoryProvider.future);
 
         final results = await Future.wait([
           repository.getMessagingHistory(),
           repository.getJoinedChatRooms(),
         ]);
+
+        if (!ref.mounted) throw Exception('disposed');
 
         final history = results[0] as List<MessagingMessage>;
         final rooms = results[1] as List<ChatRoom>;
@@ -193,10 +206,10 @@ class MisskeyMessagingHistoryNotifier
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey消息历史: 刷新失败', e);
     }
   }
 }
@@ -205,17 +218,22 @@ class MisskeyMessagingHistoryNotifier
 class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
   @override
   FutureOr<List<MessagingMessage>> build(String userId) async {
+    // 1. 立即获取所有依赖，避免在 async gap 之后调用 ref.watch
+    final repositoryFuture = ref.watch(misskeyRepositoryProvider.future);
+    final streamingService = ref.watch(
+      misskeyStreamingServiceProvider.notifier,
+    );
+
     logger.info('初始化Misskey对话，用户ID: $userId');
     try {
-      final repository = await ref.watch(misskeyRepositoryProvider.future);
+      final repository = await repositoryFuture;
+      if (!ref.mounted) return [];
 
       // 获取对话消息
       final messages = await repository.getMessagingMessages(userId: userId);
+      if (!ref.mounted) return [];
 
       // 监听实时消息
-      final streamingService = ref.watch(
-        misskeyStreamingServiceProvider.notifier,
-      );
       final subscription = streamingService.messageStream.listen((message) {
         if (message.userId == userId || message.recipientId == userId) {
           logger.debug('对话Notifier收到实时消息: ${message.id}');
@@ -232,8 +250,12 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
       logger.info('Misskey对话初始化完成，加载了 ${sortedMessages.length} 条消息');
       return sortedMessages;
     } catch (e, stack) {
+      if (e.toString().contains('disposed')) return [];
       logger.error('Misskey对话初始化失败，用户ID: $userId', e, stack);
-      rethrow;
+      if (ref.mounted) {
+        state = AsyncError(e, stack);
+      }
+      return [];
     }
   }
 
@@ -250,10 +272,10 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
         state = AsyncData([...currentMessages, message]);
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey对话: 处理新消息失败', e);
     }
   }
 
@@ -261,6 +283,7 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
     if (text.isEmpty && fileId == null) return;
 
     try {
+      if (!ref.mounted) return;
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final message = await repository.sendMessagingMessage(
         userId: userId,
@@ -270,8 +293,8 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
 
       _handleNewMessage(message);
     } catch (e) {
+      if (e.toString().contains('disposed')) return;
       logger.error('发送Misskey消息失败', e);
-      rethrow;
     }
   }
 
@@ -286,6 +309,7 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
       logger.info('加载更多Misskey消息，用户ID: $userId, 起始ID: $firstId');
 
       final result = await AsyncValue.guard<List<MessagingMessage>>(() async {
+        if (!ref.mounted) throw Exception('disposed');
         final repository = await ref.read(misskeyRepositoryProvider.future);
         final newMessages = await repository.getMessagingMessages(
           userId: userId,
@@ -302,18 +326,20 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey对话: 加载更多失败', e);
     }
   }
 
   Future<void> markAsRead(String messageId) async {
     try {
+      if (!ref.mounted) return;
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.markMessagingMessageAsRead(messageId);
     } catch (e) {
+      if (e.toString().contains('disposed')) return;
       logger.error('标记Misskey消息为已读失败: $messageId', e);
     }
   }
@@ -323,17 +349,22 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
 class MisskeyChatRoomNotifier extends _$MisskeyChatRoomNotifier {
   @override
   FutureOr<List<MessagingMessage>> build(String roomId) async {
+    // 1. 立即获取所有依赖，避免在 async gap 之后调用 ref.watch
+    final repositoryFuture = ref.watch(misskeyRepositoryProvider.future);
+    final streamingService = ref.watch(
+      misskeyStreamingServiceProvider.notifier,
+    );
+
     logger.info('初始化Misskey聊天室，房间ID: $roomId');
     try {
-      final repository = await ref.watch(misskeyRepositoryProvider.future);
+      final repository = await repositoryFuture;
+      if (!ref.mounted) return [];
 
       // 获取聊天室消息
       final messages = await repository.getChatRoomMessages(roomId: roomId);
+      if (!ref.mounted) return [];
 
-      // 监听实时消息 (聊天室消息通常也在同样的流中，或者需要特定的流)
-      final streamingService = ref.watch(
-        misskeyStreamingServiceProvider.notifier,
-      );
+      // 监听实时消息
       final subscription = streamingService.messageStream.listen((message) {
         if (message.roomId == roomId) {
           logger.debug('聊天室Notifier收到实时消息: ${message.id}');
@@ -350,8 +381,12 @@ class MisskeyChatRoomNotifier extends _$MisskeyChatRoomNotifier {
       logger.info('Misskey聊天室初始化完成，加载了 ${sortedMessages.length} 条消息');
       return sortedMessages;
     } catch (e, stack) {
+      if (e.toString().contains('disposed')) return [];
       logger.error('Misskey聊天室初始化失败，房间ID: $roomId', e, stack);
-      rethrow;
+      if (ref.mounted) {
+        state = AsyncError(e, stack);
+      }
+      return [];
     }
   }
 
@@ -366,10 +401,10 @@ class MisskeyChatRoomNotifier extends _$MisskeyChatRoomNotifier {
         state = AsyncData([...currentMessages, message]);
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
-      rethrow;
+      logger.error('Misskey聊天室: 处理新消息失败', e);
     }
   }
 
@@ -377,16 +412,16 @@ class MisskeyChatRoomNotifier extends _$MisskeyChatRoomNotifier {
     if (text.isEmpty && fileId == null) return;
 
     try {
+      if (!ref.mounted) return;
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.sendChatRoomMessage(
         roomId: roomId,
         text: text,
         fileId: fileId,
       );
-      // 注意：某些API不直接返回发送的消息，依赖流更新
     } catch (e) {
+      if (e.toString().contains('disposed')) return;
       logger.error('发送Misskey聊天室消息失败', e);
-      rethrow;
     }
   }
 }

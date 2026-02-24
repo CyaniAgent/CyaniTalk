@@ -103,12 +103,15 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   Widget _buildList(List<dynamic> notes, String timelineType) {
     if (notes.isEmpty) return _buildEmptyState(context);
     
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+
     return RefreshIndicator(
       onRefresh: () => ref.read(misskeyTimelineProvider(timelineType).notifier).refresh(),
       child: ListView.builder(
         controller: _scrollController,
         itemCount: notes.length + 1,
-        cacheExtent: 1500,
+        // 优化：在 Windows 上显著降低 cacheExtent 以减少 AXTree 压力
+        cacheExtent: isWindows ? 500 : 1500,
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemBuilder: (context, index) {
           if (index < notes.length) {
@@ -117,7 +120,10 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
               key: ValueKey(note.id),
               note: note,
               timelineType: timelineType,
-            ).animate()
+            ).animate(
+              // 关键：动画完成后停止更新，减少 AXTree 负担
+              onComplete: (controller) => controller.stop(),
+            )
              .fadeIn(duration: 400.ms, curve: Curves.easeOut)
              .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutBack);
           } else {

@@ -526,7 +526,7 @@ class MisskeyApi extends BaseApi {
   /// 获取在线用户数量
   ///
   /// 通过调用 `/api/get-online-users-count` 接口获取当前平台的在线用户数量。
-  /// 设置了 5 秒的超时时间，避免请求过慢影响用户体验。
+  /// 设置了 30 秒的超时时间，确保在系统资源紧张或网络波动时也能成功。
   ///
   /// @return 在线用户数量
   /// @throws DioException 如果请求失败或超时
@@ -537,8 +537,8 @@ class MisskeyApi extends BaseApi {
         '/api/get-online-users-count',
         data: {'i': token},
         options: Options(
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 15),
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
         ),
       );
       return response.data['count'] as int;

@@ -132,20 +132,27 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     try {
       final client = HttpClient();
       client.badCertificateCallback = (cert, host, port) => true;
-      client.connectionTimeout = const Duration(seconds: 10); // 显式设置连接超时
+      // 增加连接超时到 30s，防止后台被挂起时超时
+      client.connectionTimeout = const Duration(seconds: 30); 
+      // 显式设置闲置超时
+      client.idleTimeout = const Duration(seconds: 120);
 
       // 使用局部变量防止竞态条件
       final channel = IOWebSocketChannel.connect(
         uri,
         customClient: client,
-        headers: {'User-Agent': Constants.getUserAgent()},
+        headers: {
+          'User-Agent': Constants.getUserAgent(),
+          'Connection': 'Upgrade',
+          'Upgrade': 'websocket',
+        },
+        pingInterval: const Duration(seconds: 20), // 启用内置心跳
       );
       _channel = channel;
 
       // 显式等待并监听流，以捕获连接初始阶段的异常
       await channel.ready; 
 
-      // 关键检查：如果在此期间 _channel 已经被换掉了（比如触发了新的重连），则放弃当前逻辑
       if (_channel != channel) {
         logger.warning('MisskeyStreaming: Connection established but channel was swapped. Closing old one.');
         channel.sink.close();
@@ -158,12 +165,16 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       channel.stream.listen(
         _handleMessage,
         onDone: () {
-          logger.warning('MisskeyStreaming: Connection closed by server');
+          logger.warning('MisskeyStreaming: Connection closed');
           _updateStatus(StreamingStatus.disconnected);
           _handleDisconnect(account);
         },
         onError: (error) {
           logger.error('MisskeyStreaming: Stream error: $error');
+          // 针对 Windows "semaphore timeout" 错误加强日志
+          if (error.toString().contains('121') || error.toString().contains('semaphore')) {
+            logger.error('MisskeyStreaming: Detected Windows Semaphore Timeout (Error 121)');
+          }
           _updateStatus(StreamingStatus.error);
           _handleDisconnect(account);
         },
@@ -187,7 +198,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       return;
     }
 
-    // 更加积极的重连策略：1s, 2s, 4s, 8s, 16s
+    // 指数避退重连
     final delay = Duration(seconds: (1 << _reconnectAttempts));
     _reconnectAttempts++;
 
@@ -208,9 +219,14 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     _heartbeatTimer?.cancel();
     _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       if (_status == StreamingStatus.connected && _channel != null) {
-        // Misskey usually doesn't need heartbeats if using WebSocket PING/PONG,
-        // but explicit messages help with some proxies.
-        // For Misskey, just sending a "h" is sometimes used by web clients.
+        try {
+          // Misskey 官方网页客户端通常会发送一个简单的 "h" 作为应用层心跳
+          // 这在通过一些会超时断开连接的代理（如 Nginx/Cloudflare）时非常有效
+          _channel!.sink.add('h');
+          logger.debug('MisskeyStreaming: Sent app-level heartbeat ("h")');
+        } catch (e) {
+          logger.error('MisskeyStreaming: Heartbeat failed: $e');
+        }
       }
     });
   }
@@ -263,6 +279,9 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   }
 
   void _handleMessage(dynamic message) {
+    // 忽略心跳响应
+    if (message == 'h' || message == 'pong') return;
+    
     logger.debug('MisskeyStreaming Received: $message');
 
     try {

@@ -20,12 +20,44 @@ import '../features/profile/presentation/profile_page.dart';
 import '../features/profile/presentation/settings/about_page.dart';
 import '../features/profile/presentation/settings/settings_page.dart';
 import '../features/profile/presentation/settings/licenses_page.dart';
+import '../features/profile/presentation/settings/developer_settings_page.dart';
 import '../features/search/presentation/search_page.dart';
 import '../shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// 自定义安全转换页面，防止 Windows AXTree 报错
+Page<T> _buildSafePage<T>({
+  required LocalKey key,
+  required Widget child,
+  bool fullScreenDialog = false,
+}) {
+  return CustomTransitionPage<T>(
+    key: key,
+    child: child,
+    fullscreenDialog: fullScreenDialog,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: animation.drive(
+            Tween<Offset>(
+              begin: const Offset(0.0, 0.02),
+              end: Offset.zero,
+            ).chain(CurveTween(curve: Curves.easeOutCubic)),
+          ),
+          child: ExcludeSemantics(
+            // 动画进行中完全屏蔽语义，防止 Windows AXTree 报错
+            excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
+            child: child,
+          ),
+        ),
+      );
+    },
+  );
+}
 
 /// 提供应用程序的GoRouter实例
 ///
@@ -54,29 +86,9 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/misskey',
-                pageBuilder: (context, state) => CustomTransitionPage(
+                pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: const MisskeyPage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    // 重构：使用更稳健的语义控制
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: animation.drive(
-                          Tween<Offset>(
-                            begin: const Offset(0.0, 0.02),
-                            end: Offset.zero,
-                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                        ),
-                        child: ExcludeSemantics(
-                          // 动画进行中完全屏蔽语义，防止 Windows AXTree 报错
-                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
@@ -85,27 +97,9 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/forum',
-                pageBuilder: (context, state) => CustomTransitionPage(
+                pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: const ForumPage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: animation.drive(
-                          Tween<Offset>(
-                            begin: const Offset(0.0, 0.02),
-                            end: Offset.zero,
-                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                        ),
-                        child: ExcludeSemantics(
-                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
@@ -114,27 +108,9 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/cloud',
-                pageBuilder: (context, state) => CustomTransitionPage(
+                pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: const CloudPage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: animation.drive(
-                          Tween<Offset>(
-                            begin: const Offset(0.0, 0.02),
-                            end: Offset.zero,
-                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                        ),
-                        child: ExcludeSemantics(
-                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
@@ -143,27 +119,9 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/messaging',
-                pageBuilder: (context, state) => CustomTransitionPage(
+                pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: const ComingSoonPage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: animation.drive(
-                          Tween<Offset>(
-                            begin: const Offset(0.0, 0.02),
-                            end: Offset.zero,
-                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                        ),
-                        child: ExcludeSemantics(
-                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
@@ -172,27 +130,9 @@ GoRouter goRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: '/profile',
-                pageBuilder: (context, state) => CustomTransitionPage(
+                pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: const ProfilePage(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: animation.drive(
-                          Tween<Offset>(
-                            begin: const Offset(0.0, 0.02),
-                            end: Offset.zero,
-                          ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                        ),
-                        child: ExcludeSemantics(
-                          excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
@@ -203,53 +143,85 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/search',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const SearchPage(),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const SearchPage(),
+        ),
       ),
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const SettingsPage(),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const SettingsPage(),
+        ),
       ),
       GoRoute(
         path: '/about',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const AboutPage(),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const AboutPage(),
+        ),
       ),
       GoRoute(
         path: '/licenses',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const LicensesPage(),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const LicensesPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/developer',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const DeveloperSettingsPage(),
+        ),
       ),
       GoRoute(
         path: '/misskey/notifications',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const MisskeyNotificationsPage(),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const MisskeyNotificationsPage(),
+        ),
       ),
       GoRoute(
         path: '/misskey/user/:userId',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final userId = state.pathParameters['userId']!;
           final user = state.extra as MisskeyUser?;
-          return MisskeyUserProfilePage(userId: userId, initialUser: user);
+          return _buildSafePage(
+            key: state.pageKey,
+            child: MisskeyUserProfilePage(userId: userId, initialUser: user),
+          );
         },
       ),
       GoRoute(
         path: '/messaging/chat/:userId',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final userId = state.pathParameters['userId']!;
           final user = state.extra as MisskeyUser?;
-          return ChatPage(id: userId, type: ChatType.direct, initialData: user);
+          return _buildSafePage(
+            key: state.pageKey,
+            child: ChatPage(id: userId, type: ChatType.direct, initialData: user),
+          );
         },
       ),
       GoRoute(
         path: '/messaging/chat/room/:roomId',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final roomId = state.pathParameters['roomId']!;
           final room = state.extra as ChatRoom?;
-          return ChatPage(id: roomId, type: ChatType.room, initialData: room);
+          return _buildSafePage(
+            key: state.pageKey,
+            child: ChatPage(id: roomId, type: ChatType.room, initialData: room),
+          );
         },
       ),
     ],

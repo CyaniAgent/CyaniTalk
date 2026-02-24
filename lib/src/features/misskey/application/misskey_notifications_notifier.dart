@@ -11,15 +11,24 @@ part 'misskey_notifications_notifier.g.dart';
 class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
   @override
   FutureOr<List<MisskeyNotification>> build() async {
+    // 1. 立即获取所有依赖，避免在 async gap 之后调用 ref.watch
+    final repositoryFuture = ref.watch(misskeyRepositoryProvider.future);
+    final streamingService = ref.watch(
+      misskeyStreamingServiceProvider.notifier,
+    );
+
     logger.info('初始化Misskey通知列表');
     try {
-      final repository = await ref.watch(misskeyRepositoryProvider.future);
+      final repository = await repositoryFuture;
+      
+      // 2. 异步点之后检查 ref.mounted
+      if (!ref.mounted) return [];
+
       final notifications = await repository.getNotifications();
 
+      if (!ref.mounted) return notifications;
+
       // 监听实时通知
-      final streamingService = ref.watch(
-        misskeyStreamingServiceProvider.notifier,
-      );
       final subscription = streamingService.notificationStream.listen((event) {
         logger.debug('通知Notifier收到实时通知，准备刷新');
         _handleNewNotification(event);
@@ -31,6 +40,12 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
 
       return notifications;
     } catch (e, stack) {
+      // 如果是因为 dispose 导致的 Ref 错误，静默忽略
+      if (e.toString().contains('disposed')) {
+        logger.debug('Misskey通知: 初始化中途 Provider 已释放');
+        return [];
+      }
+
       logger.error('Misskey通知初始化失败', e, stack);
       
       // 处理网络连接错误，不阻塞程序
@@ -41,9 +56,9 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
         return [];
       }
       
-      // 其他错误返回错误状态
+      // 其他错误在挂载时返回错误状态
       if (ref.mounted) {
-        state = AsyncError(e, StackTrace.current);
+        state = AsyncError(e, stack);
       }
       return [];
     }
@@ -56,7 +71,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
       // 目前简单实现为直接刷新
       refresh();
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('Misskey通知: 处理新通知失败', e);
@@ -72,6 +87,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
 
       final result = await AsyncValue.guard<List<MisskeyNotification>>(
         () async {
+          if (!ref.mounted) throw Exception('disposed');
           final repository = await ref.read(misskeyRepositoryProvider.future);
           return await repository.getNotifications();
         },
@@ -81,7 +97,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('Misskey通知: 刷新失败', e);
@@ -100,6 +116,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
 
       final result = await AsyncValue.guard<List<MisskeyNotification>>(
         () async {
+          if (!ref.mounted) throw Exception('disposed');
           final repository = await ref.read(misskeyRepositoryProvider.future);
           final newNotifications = await repository.getNotifications(
             untilId: lastId,
@@ -115,7 +132,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
         state = result;
       }
     } catch (e) {
-      if (e.toString().contains('UnmountedRefException')) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) {
         return;
       }
       logger.error('Misskey通知: 加载更多失败', e);

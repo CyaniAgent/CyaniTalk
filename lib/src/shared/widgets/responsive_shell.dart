@@ -2,6 +2,7 @@
 //
 // 该文件包含ResponsiveShell组件，用于实现应用程序的响应式布局和导航，
 // 适配不同屏幕尺寸，在小屏幕上显示侧边抽屉，在大屏幕上显示侧边导航栏。
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
@@ -13,17 +14,46 @@ import 'root_navigation_drawer.dart';
 import 'user_navigation_header.dart';
 
 /// 应用程序的响应式布局外壳组件
-///
-/// 根据屏幕尺寸自动切换侧边抽屉或侧边导航栏，同时保持各页面的状态。
-class ResponsiveShell extends ConsumerWidget {
+class ResponsiveShell extends ConsumerStatefulWidget {
   /// 导航外壳，用于管理页面切换
   final StatefulNavigationShell navigationShell;
 
-  /// 创建一个新的ResponsiveShell实例
   const ResponsiveShell({required this.navigationShell, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResponsiveShell> createState() => _ResponsiveShellState();
+}
+
+class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
+  bool _isTransitioning = false;
+  Timer? _transitionTimer;
+
+  @override
+  void dispose() {
+    _transitionTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onRootSelected(int index, dynamic navigationSettings) {
+    // 锁定语义更新，防止 Windows AXTree 报错
+    setState(() => _isTransitioning = true);
+    _transitionTimer?.cancel();
+    _transitionTimer = Timer(const Duration(milliseconds: 500), () {
+      if (mounted) setState(() => _isTransitioning = false);
+    });
+
+    int branchIndex = NavigationService.mapDisplayIndexToBranchIndex(
+      index,
+      navigationSettings,
+    );
+    widget.navigationShell.goBranch(
+      branchIndex,
+      initialLocation: branchIndex == widget.navigationShell.currentIndex,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
 
     return navigationSettingsAsync.when(
@@ -31,7 +61,6 @@ class ResponsiveShell extends ConsumerWidget {
       error: (error, stack) =>
           Scaffold(body: Center(child: Text('Error: $error'))),
       data: (navigationSettings) {
-        // 过滤启用的导航项 (Excluding 'me' as it's in the header)
         final rootItems = navigationSettings.items
             .where((item) => item.isEnabled && item.id != 'me')
             .toList();
@@ -45,19 +74,17 @@ class ResponsiveShell extends ConsumerWidget {
         final bool isSmall = Breakpoints.small.isActive(context);
         final bool isLarge = Breakpoints.large.isActive(context);
 
-        // Map branch index to displaying root index (excluding 'me')
         int selectedRootIndex = NavigationService.mapBranchIndexToDisplayIndex(
-          navigationShell.currentIndex,
+          widget.navigationShell.currentIndex,
           navigationSettings,
         );
 
-        // Explicitly check if we are on the 'me' branch
         final bool isMeSelected =
-            navigationShell.currentIndex ==
+            widget.navigationShell.currentIndex ==
             NavigationService.getBranchIndexForItem('me');
 
         if (isMeSelected || selectedRootIndex >= rootItems.length) {
-          selectedRootIndex = -1; // Header handled selection
+          selectedRootIndex = -1;
         }
 
         return Scaffold(
@@ -70,20 +97,25 @@ class ResponsiveShell extends ConsumerWidget {
                         (index) => _onRootSelected(index, navigationSettings),
                   )
                   : null,
-          body: Row(
-            children: [
-              if (!isSmall)
-                _buildSidebar(
-                  context,
-                  ref,
-                  selectedRootIndex,
-                  rootItems,
-                  isLarge,
-                  navigationSettings,
-                ),
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(child: navigationShell),
-            ],
+          body: ExcludeSemantics(
+            // 加固：在导航切换期间完全静默整个外壳的语义树，
+            // 彻底解决 Windows 桌面端 AXTree 频繁报错的问题。
+            excluding: _isTransitioning,
+            child: Row(
+              children: [
+                if (!isSmall)
+                  _buildSidebar(
+                    context,
+                    ref,
+                    selectedRootIndex,
+                    rootItems,
+                    isLarge,
+                    navigationSettings,
+                  ),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(child: widget.navigationShell),
+              ],
+            ),
           ),
         );
       },
@@ -100,8 +132,6 @@ class ResponsiveShell extends ConsumerWidget {
   ) {
     final theme = Theme.of(context);
     final isMedium = Breakpoints.medium.isActive(context);
-    
-    // 根据屏幕尺寸动态调整侧边栏宽度
     final sidebarWidth = isLarge ? 280.0 : isMedium ? 240.0 : 80.0;
 
     return Container(
@@ -113,10 +143,17 @@ class ResponsiveShell extends ConsumerWidget {
             isExtended: !Breakpoints.small.isActive(context),
             isSelected: selectedRootIndex == -1,
             onTap: () {
+              // 同样应用转换锁定
+              setState(() => _isTransitioning = true);
+              _transitionTimer?.cancel();
+              _transitionTimer = Timer(const Duration(milliseconds: 500), () {
+                if (mounted) setState(() => _isTransitioning = false);
+              });
+
               int branchIndex = NavigationService.getBranchIndexForItem('me');
-              navigationShell.goBranch(
+              widget.navigationShell.goBranch(
                 branchIndex,
-                initialLocation: branchIndex == navigationShell.currentIndex,
+                initialLocation: branchIndex == widget.navigationShell.currentIndex,
               );
             },
           ),
@@ -251,17 +288,11 @@ class ResponsiveShell extends ConsumerWidget {
     final selectedSub = ref.watch(misskeySubIndexProvider);
     final subs = [
       {'icon': Icons.timeline, 'label': 'misskey_drawer_timeline'.tr()},
-      {
-        'icon': Icons.collections_bookmark,
-        'label': 'misskey_drawer_clips'.tr(),
-      },
+      {'icon': Icons.collections_bookmark, 'label': 'misskey_drawer_clips'.tr()},
       {'icon': Icons.satellite_alt, 'label': 'misskey_drawer_antennas'.tr()},
       {'icon': Icons.hub, 'label': 'misskey_drawer_channels'.tr()},
       {'icon': Icons.explore, 'label': 'misskey_drawer_explore'.tr()},
-      {
-        'icon': Icons.person_add,
-        'label': 'misskey_drawer_follow_requests'.tr(),
-      },
+      {'icon': Icons.person_add, 'label': 'misskey_drawer_follow_requests'.tr()},
       {'icon': Icons.campaign, 'label': 'misskey_drawer_announcements'.tr()},
       {'icon': Icons.terminal, 'label': 'misskey_drawer_aiscript_console'.tr()},
     ];
@@ -293,10 +324,7 @@ class ResponsiveShell extends ConsumerWidget {
     final subs = [
       {'icon': Icons.forum, 'label': 'flarum_drawer_discussions'.tr()},
       {'icon': Icons.label, 'label': 'flarum_drawer_tags'.tr()},
-      {
-        'icon': Icons.notifications,
-        'label': 'flarum_drawer_notifications'.tr(),
-      },
+      {'icon': Icons.notifications, 'label': 'flarum_drawer_notifications'.tr()},
     ];
 
     return Padding(
@@ -382,17 +410,6 @@ class ResponsiveShell extends ConsumerWidget {
                   ),
         ),
       ),
-    );
-  }
-
-  void _onRootSelected(int index, dynamic navigationSettings) {
-    int branchIndex = NavigationService.mapDisplayIndexToBranchIndex(
-      index,
-      navigationSettings,
-    );
-    navigationShell.goBranch(
-      branchIndex,
-      initialLocation: branchIndex == navigationShell.currentIndex,
     );
   }
 }

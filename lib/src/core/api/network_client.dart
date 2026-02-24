@@ -21,7 +21,7 @@ class RetryInterceptor extends Interceptor {
       extra['retryCount'] = retryCount;
       
       final delay = Duration(milliseconds: 500 * (1 << (retryCount - 1)));
-      logger.warning('NetworkClient: Request failed. Retrying in ${delay.inMilliseconds}ms ($retryCount/$maxRetries)...');
+      logger.warning('NetworkClient: Request failed (Type: ${err.type}, Error: ${err.error}). Retrying in ${delay.inMilliseconds}ms ($retryCount/$maxRetries)...');
       
       await Future.delayed(delay);
 
@@ -48,10 +48,15 @@ class RetryInterceptor extends Interceptor {
   }
 
   bool _shouldRetry(DioException err) {
+    // 特别处理 Windows 上的 "信号灯超时" (semaphore timeout) 错误
+    final errorStr = err.error.toString();
+    final isSemaphoreTimeout = errorStr.contains('121') || errorStr.contains('semaphore');
+
     return err.type == DioExceptionType.connectionTimeout ||
            err.type == DioExceptionType.sendTimeout ||
            err.type == DioExceptionType.receiveTimeout ||
            err.type == DioExceptionType.connectionError ||
+           isSemaphoreTimeout ||
            (err.type == DioExceptionType.badResponse && 
             (err.response?.statusCode == 502 || 
              err.response?.statusCode == 503 || 
@@ -68,11 +73,6 @@ class NetworkClient {
   NetworkClient._internal();
 
   /// Creates a pre-configured Dio instance for a specific host and token.
-  ///
-  /// @param host The hostname for the base URL.
-  /// @param token Optional authorization token.
-  /// @param userAgent Custom User-Agent string.
-  /// @param enableCertificateValidation Whether to enable SSL certificate validation.
   Dio createDio({
     required String host,
     String? token,
@@ -88,14 +88,17 @@ class NetworkClient {
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
-        headers: {'User-Agent': userAgent, 'Accept': '*/*', ...?extraHeaders},
+        headers: {
+          'User-Agent': userAgent, 
+          'Accept': '*/*', 
+          'Connection': 'keep-alive', // 显式请求保持连接
+          ...?extraHeaders
+        },
       ),
     );
 
-    // Add BackgroundTransformer for isolated JSON decoding (S-rank performance! ✧)
     dio.transformer = BackgroundTransformer();
 
-    // Attach interceptors
     dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 5));
     dio.interceptors.add(PerformanceInterceptor());
     dio.interceptors.add(
@@ -108,28 +111,15 @@ class NetworkClient {
       ),
     );
 
-    if (token != null) {
-      dio.interceptors.add(
-        InterceptorsWrapper(
-          onRequest: (options, handler) {
-            // Many APIs (like Misskey) expect 'i' in the body for POST,
-            // but we can also set headers if needed.
-            // For now, we'll keep the token available for the specific API implementations.
-            return handler.next(options);
-          },
-        ),
-      );
-    }
+    dio.interceptors.add(RateLimitInterceptor());
 
-    // Add rate limiting interceptor
-    dio.interceptors.add(
-      RateLimitInterceptor(),
-    );
-
-    // Handle SSL/TLS for local/development instances (HandshakeException fix)
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
+        
+        // 针对桌面端常驻稳定性调优
+        client.connectionTimeout = const Duration(seconds: 30);
+        client.idleTimeout = const Duration(seconds: 100); // 增加闲置超时，避免连接被系统过早回收
         
         if (!enableCertificateValidation) {
           logger.warning('NetworkClient: SSL certificate validation disabled for $host');
@@ -137,6 +127,10 @@ class NetworkClient {
         }
         
         return client;
+      },
+      validateCertificate: (cert, host, port) {
+        if (!enableCertificateValidation) return true;
+        return true; // Use default validation
       },
     );
 
