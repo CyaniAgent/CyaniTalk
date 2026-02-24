@@ -132,8 +132,6 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   ) {
     final theme = Theme.of(context);
     final isMedium = Breakpoints.medium.isActive(context);
-    
-    // 根据屏幕尺寸动态调整侧边栏宽度
     final sidebarWidth = isLarge ? 280.0 : isMedium ? 240.0 : 80.0;
 
     return Container(
@@ -187,6 +185,37 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton(BuildContext context, bool isLarge) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: InkWell(
+        onTap: () => context.push('/settings'),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 56,
+          padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
+          child: isLarge
+              ? Row(
+                  children: [
+                    Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'navigation_settings'.tr(),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                )
+              : Center(
+                  child: Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
+                ),
+        ),
       ),
     );
   }
@@ -410,17 +439,6 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                 ),
         ),
       ),
-    );
-  }
-
-  void _onRootSelected(int index, dynamic navigationSettings) {
-    int branchIndex = NavigationService.mapDisplayIndexToBranchIndex(
-      index,
-      navigationSettings,
-    );
-    navigationShell.goBranch(
-      branchIndex,
-      initialLocation: branchIndex == navigationShell.currentIndex,
     );
   }
 }
