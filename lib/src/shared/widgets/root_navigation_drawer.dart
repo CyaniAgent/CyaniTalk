@@ -64,6 +64,12 @@ class RootNavigationDrawer extends ConsumerWidget {
             effectiveSelectedRootIndex,
           ),
         ],
+
+        const Spacer(),
+
+        const Divider(indent: 12, endIndent: 12),
+
+        _buildSettingsButton(context),
       ],
     );
   }
@@ -335,6 +341,59 @@ class RootNavigationDrawer extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).pushNamed('/settings');
+          },
+          borderRadius: BorderRadius.circular(32),
+          splashColor: theme.colorScheme.primary.withAlpha(20),
+          highlightColor: theme.colorScheme.primary.withAlpha(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.settings,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'settings_title'.tr(),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

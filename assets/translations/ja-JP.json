@@ -342,6 +342,7 @@
   "search_feature_disabled_hint": "詳細についてはインスタンスの管理者にお問い合わせください",
   "common_calculating": "計算中...",
   "menu_user_profile": "ユーザープロフィール",
+  "menu_accounts": "アカウント",
   "menu_settings": "設定",
   "menu_logout": "ログアウト",
   "menu_logout_confirm": "ログアウトの確認",

@@ -412,6 +412,7 @@
   "search_feature_disabled_hint": "Please contact instance administrator for more information",
   "common_calculating": "Calculating...",
   "menu_user_profile": "User Profile",
+  "menu_accounts": "Accounts",
   "menu_settings": "Settings",
   "menu_logout": "Log Out",
   "menu_logout_confirm": "Confirm Log Out",
