@@ -411,6 +411,7 @@
   "search_feature_disabled_hint": "请联系实例管理员了解更多信息",
   "common_calculating": "计算中...",
   "menu_user_profile": "用户页面",
+  "menu_accounts": "账户",
   "menu_settings": "设置",
   "menu_logout": "退出登录",
   "menu_logout_confirm": "确认退出登录",
