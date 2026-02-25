@@ -446,5 +446,10 @@
   "cloud_download_failed_count": "下载完成，但有 {failed} 个文件下载失败",
   "cloud_downloading_current": "下载中... {progress}%",
   "cloud_download_starting": "开始下载...",
-  "cloud_files_count": "个文件"
+  "cloud_files_count": "个文件",
+  "auth_welcome": "欢迎来到 CyaniTalk",
+  "auth_welcome_subtitle": "登录或注册以开始使用",
+  "auth_terms_hint": "继续即表示您同意我们的",
+  "auth_terms_of_service": "服务条款",
+  "auth_privacy_policy": "隐私政策"
 }

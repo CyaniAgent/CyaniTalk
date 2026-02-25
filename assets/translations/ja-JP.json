@@ -419,5 +419,10 @@
   "cloud_downloading_current": "ダウンロード中... {progress}%",
   "cloud_download_starting": "ダウンロードを開始しています...",
   "cloud_files_count": "個のファイル",
-  "could_not_launch_url": "{url}を起動できませんでした"
+  "could_not_launch_url": "{url}を起動できませんでした",
+  "auth_welcome": "CyaniTalkへようこそ",
+  "auth_welcome_subtitle": "サインインまたはサインアップして始めましょう",
+  "auth_terms_hint": "続行することで、以下に同意したものとみなされます",
+  "auth_terms_of_service": "利用規約",
+  "auth_privacy_policy": "プライバシーポリシー"
 }

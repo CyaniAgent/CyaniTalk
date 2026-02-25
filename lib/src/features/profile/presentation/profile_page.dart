@@ -51,6 +51,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
+          SliverAppBar(
+            leading: Breakpoints.small.isActive(context)
+                ? IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => ref
+                        .read(navigationControllerProvider.notifier)
+                        .openDrawer(),
+                  )
+                : null,
+            title: Text('nav_me'.tr()),
+            centerTitle: true,
+            floating: true,
+            pinned: true,
+            snap: true,
+          ),
           SliverToBoxAdapter(
             child: Stack(
               clipBehavior: Clip.none,
@@ -199,30 +214,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   color: theme.colorScheme.primary,
                                 )
                               : null,
-                        ),
-                      ),
-                    ),
-                  ),
-                // 菜单按钮
-                if (Breakpoints.small.isActive(context))
-                  Positioned(
-                    top: MediaQuery.of(context).padding.top + 16,
-                    left: 16,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28),
-                        color: theme.colorScheme.surface.withAlpha(150),
-                      ),
-                      child: IconButton(
-                        onPressed: () => ref
-                            .read(navigationControllerProvider.notifier)
-                            .openDrawer(),
-                        icon: const Icon(Icons.menu),
-                        style: IconButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          padding: const EdgeInsets.all(12),
                         ),
                       ),
                     ),

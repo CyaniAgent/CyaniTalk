@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/navigation/navigation.dart';
 import '../../core/navigation/navigation_element.dart';
 import '../../core/navigation/sub_navigation_notifier.dart';
@@ -78,9 +79,8 @@ class RootNavigationDrawer extends ConsumerWidget {
 
         const Spacer(),
 
-        const Divider(indent: 12, endIndent: 12),
-
-        _buildSettingsButton(context),
+        // Render all navigation elements (dividers, settings button, etc.)
+        ..._buildNavigationElements(context, navigationSettings),
       ],
     );
   }
@@ -360,6 +360,57 @@ class RootNavigationDrawer extends ConsumerWidget {
     );
   }
 
+  /// 构建导航元素列表
+  List<Widget> _buildNavigationElements(
+    BuildContext context,
+    dynamic navigationSettings,
+  ) {
+    final widgets = <Widget>[];
+
+    for (final element in navigationSettings.elements) {
+      switch (element.type) {
+        case NavigationElementType.item:
+          // Skip items as they are already rendered in the main section
+          break;
+
+        case NavigationElementType.divider:
+          if (element is NavigationDividerElement) {
+            widgets.add(
+              Divider(indent: element.indent, endIndent: element.endIndent),
+            );
+          }
+          break;
+
+        case NavigationElementType.customWidget:
+          if (element is NavigationCustomWidgetElement) {
+            widgets.add(element.builder(context));
+          }
+          break;
+
+        case NavigationElementType.specialContent:
+          if (element is NavigationSpecialContentElement) {
+            widgets.add(_buildSpecialContentElement(context, element));
+          }
+          break;
+      }
+    }
+
+    return widgets;
+  }
+
+  /// 构建特殊内容元素
+  Widget _buildSpecialContentElement(
+    BuildContext context,
+    NavigationSpecialContentElement element,
+  ) {
+    switch (element.contentType) {
+      case 'settings':
+        return _buildSettingsButton(context);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
   Widget _buildSettingsButton(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -369,7 +420,7 @@ class RootNavigationDrawer extends ConsumerWidget {
         cursor: SystemMouseCursors.click,
         child: InkWell(
           onTap: () {
-            Navigator.of(context).pushNamed('/settings');
+            context.push('/settings');
           },
           borderRadius: BorderRadius.circular(32),
           splashColor: theme.colorScheme.primary.withAlpha(20),

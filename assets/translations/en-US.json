@@ -447,5 +447,10 @@
   "cloud_downloading_current": "Downloading... {progress}%",
   "cloud_download_starting": "Starting download...",
   "cloud_files_count": "files",
-  "could_not_launch_url": "Could not launch {url}"
+  "could_not_launch_url": "Could not launch {url}",
+  "auth_welcome": "Welcome to CyaniTalk",
+  "auth_welcome_subtitle": "Sign in or sign up to get started",
+  "auth_terms_hint": "By continuing, you agree to our",
+  "auth_terms_of_service": "Terms of Service",
+  "auth_privacy_policy": "Privacy Policy"
 }

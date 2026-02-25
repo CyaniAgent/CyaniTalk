@@ -22,6 +22,7 @@ import '../features/profile/presentation/settings/settings_page.dart';
 import '../features/profile/presentation/settings/licenses_page.dart';
 import '../features/profile/presentation/settings/developer_settings_page.dart';
 import '../features/search/presentation/search_page.dart';
+import '../features/auth/presentation/pages/login_page.dart';
 import '../shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
@@ -50,7 +51,8 @@ Page<T> _buildSafePage<T>({
           ),
           child: ExcludeSemantics(
             // 动画进行中完全屏蔽语义，防止 Windows AXTree 报错
-            excluding: !animation.isCompleted || !secondaryAnimation.isDismissed,
+            excluding:
+                !animation.isCompleted || !secondaryAnimation.isDismissed,
             child: child,
           ),
         ),
@@ -141,36 +143,34 @@ GoRouter goRouter(Ref ref) {
       ),
       // Top-level routes that don't have the navigation shell
       GoRoute(
+        path: '/login',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const LoginPage()),
+      ),
+      GoRoute(
         path: '/search',
         parentNavigatorKey: rootNavigatorKey,
-        pageBuilder: (context, state) => _buildSafePage(
-          key: state.pageKey,
-          child: const SearchPage(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const SearchPage()),
       ),
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
-        pageBuilder: (context, state) => _buildSafePage(
-          key: state.pageKey,
-          child: const SettingsPage(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const SettingsPage()),
       ),
       GoRoute(
         path: '/about',
         parentNavigatorKey: rootNavigatorKey,
-        pageBuilder: (context, state) => _buildSafePage(
-          key: state.pageKey,
-          child: const AboutPage(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const AboutPage()),
       ),
       GoRoute(
         path: '/licenses',
         parentNavigatorKey: rootNavigatorKey,
-        pageBuilder: (context, state) => _buildSafePage(
-          key: state.pageKey,
-          child: const LicensesPage(),
-        ),
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const LicensesPage()),
       ),
       GoRoute(
         path: '/developer',
@@ -208,7 +208,11 @@ GoRouter goRouter(Ref ref) {
           final user = state.extra as MisskeyUser?;
           return _buildSafePage(
             key: state.pageKey,
-            child: ChatPage(id: userId, type: ChatType.direct, initialData: user),
+            child: ChatPage(
+              id: userId,
+              type: ChatType.direct,
+              initialData: user,
+            ),
           );
         },
       ),
