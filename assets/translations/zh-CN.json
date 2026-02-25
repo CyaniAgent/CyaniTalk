@@ -401,6 +401,7 @@
   "messaging_error_description": "无法加载消息列表，请检查网络连接后重试",
   "messaging_error_retry": "重试",
   "navigation_no_items": "没有可用的导航项",
+  "navigation_settings": "设置",
   "common_loading_failed": "加载失败",
   "common_reload": "重新加载？",
   "search_misskey_posts_related": "与 {search_result} 相关的 Misskey 帖子",

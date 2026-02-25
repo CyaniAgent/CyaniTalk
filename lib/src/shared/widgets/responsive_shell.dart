@@ -194,7 +194,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: InkWell(
-        onTap: () => context.push('/settings'),
+        onTap: () => GoRouter.of(context).push('/settings'),
         borderRadius: BorderRadius.circular(12),
         child: Container(
           height: 56,

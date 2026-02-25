@@ -418,5 +418,7 @@
   "cloud_downloading_current": "ダウンロード中... {progress}%",
   "cloud_download_starting": "ダウンロードを開始しています...",
   "cloud_files_count": "個のファイル",
-  "could_not_launch_url": "{url}を起動できませんでした"
+  "could_not_launch_url": "{url}を起動できませんでした",
+  "navigation_no_items": "ナビゲーション項目がありません",
+  "navigation_settings": "設定"
 }

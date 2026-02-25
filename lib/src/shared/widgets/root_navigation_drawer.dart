@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/navigation/navigation.dart';
 import '../../core/navigation/sub_navigation_notifier.dart';
 import 'user_navigation_header.dart';
@@ -358,7 +359,9 @@ class RootNavigationDrawer extends ConsumerWidget {
         cursor: SystemMouseCursors.click,
         child: InkWell(
           onTap: () {
-            Navigator.of(context).pushNamed('/settings');
+            // 先关闭抽屉，再执行跳转，防止路由栈混乱
+            Navigator.of(context).maybePop();
+            GoRouter.of(context).push('/settings');
           },
           borderRadius: BorderRadius.circular(32),
           splashColor: theme.colorScheme.primary.withAlpha(20),
@@ -378,7 +381,7 @@ class RootNavigationDrawer extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.settings,
+                    Icons.settings_outlined,
                     color: theme.colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
@@ -386,7 +389,7 @@ class RootNavigationDrawer extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'settings_title'.tr(),
+                    'navigation_settings'.tr(),
                     style: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.normal,
