@@ -25,7 +25,7 @@ class FlarumApi extends BaseApi {
   late CookieJar _cookieJar;
   String? _token;
   String? _userId;
-  String? _baseUrl = 'https://flarum.imikufans.cn';
+  String? _baseUrl; // 移除硬编码默认值
 
   String _getEndpointKey(String endpoint, String key) {
     final endpointHash = endpoint.hashCode.toString();
@@ -61,8 +61,9 @@ class FlarumApi extends BaseApi {
 
     final headers = {...basicHeaders, ...browserHeaders};
 
+    // 如果 _baseUrl 为空，创建一个占位 Dio，防止初始化报错
     _dio = NetworkClient().createDio(
-      host: _baseUrl!.replaceFirst('https://', ''),
+      host: _baseUrl?.replaceFirst('https://', '') ?? 'placeholder.com',
       userAgent: userAgent,
       extraHeaders: headers,
     );
@@ -73,6 +74,15 @@ class FlarumApi extends BaseApi {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (_baseUrl == null) {
+            return handler.reject(
+              DioException(
+                requestOptions: options,
+                error: 'Flarum API base URL is not set.',
+              ),
+            );
+          }
+
           logger.debug('FlarumApi: 请求 - ${options.method} ${options.uri}');
           if (_token != null) {
             String header = 'Token $_token';
@@ -133,7 +143,7 @@ class FlarumApi extends BaseApi {
               statusCode == 429 ||
               statusCode == 503;
 
-          if (isWafError) {
+          if (isWafError && _baseUrl != null) {
             logger.warning('FlarumApi: 检测到WAF或相关错误 ($statusCode)');
             final requestOptions = e.requestOptions;
             final url = '${requestOptions.baseUrl}${requestOptions.path}';
@@ -190,6 +200,7 @@ class FlarumApi extends BaseApi {
   void clearToken() {
     logger.debug('FlarumApi: 清除令牌');
     _token = null;
+    _userId = null;
   }
 
   String? get token => _token;
@@ -215,7 +226,9 @@ class FlarumApi extends BaseApi {
       setBaseUrl(currentEndpoint);
       await loadToken(currentEndpoint);
     } else {
-      setBaseUrl(_baseUrl!);
+      // 如果没有保存的端点，保持 _baseUrl 为空
+      _baseUrl = null;
+      _dio.options.baseUrl = 'https://placeholder.com';
     }
   }
 
@@ -249,7 +262,7 @@ class FlarumApi extends BaseApi {
         await switchEndpoint(endpoints.first);
       } else {
         await prefs.remove(FlarumConstants.currentEndpointKey);
-        setBaseUrl(_baseUrl!);
+        _baseUrl = null; // 彻底清除
         clearToken();
       }
     }
@@ -300,8 +313,8 @@ class FlarumApi extends BaseApi {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await _cookieJar.deleteAll();
+    _baseUrl = null;
     clearToken();
-    setBaseUrl('https://flarum.imikufans.cn');
   }
 
   /// 使用用户名/邮箱和密码登录 Flarum
@@ -314,6 +327,7 @@ class FlarumApi extends BaseApi {
     String identification,
     String password,
   ) async {
+    if (_baseUrl == null) throw Exception('Flarum site URL is not set.');
     logger.info('FlarumApi: 开始登录，用户: $identification');
     try {
       final response = await post(
