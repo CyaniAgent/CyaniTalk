@@ -30,7 +30,7 @@ class _ForumPageState extends ConsumerState<ForumPage> {
   @override
   void initState() {
     super.initState();
-    // Trigger initial refresh for the first tab
+    // 初始刷新子页面数据
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final selectedIndex = ref.read(forumSubIndexProvider);
@@ -41,23 +41,29 @@ class _ForumPageState extends ConsumerState<ForumPage> {
 
   @override
   Widget build(BuildContext context) {
-    final account = ref.watch(selectedFlarumAccountProvider).asData?.value;
-    final endpointsAsync = ref.watch(flarumEndpointsProvider);
+    // 1. 获取当前选中的 Flarum 账户
+    final accountAsync = ref.watch(selectedFlarumAccountProvider);
+    final account = accountAsync.asData?.value;
+    
     final selectedIndex = ref.watch(forumSubIndexProvider);
     final flarumApi = ref.watch(flarumApiProvider);
 
-    // Check if the current account's host is in the endpoints list
-    final bool isEndpointValid = endpointsAsync.maybeWhen(
-      data: (endpoints) =>
-          account != null && endpoints.contains('https://${account.host}'),
-      orElse: () => false,
-    );
+    // 2. 核心逻辑：如果没有登录任何账户，或者 API 的端点与当前账户不一致
+    // 注意：我们将不再依赖 flarumApi 的隐藏默认值
+    final bool isLoggedOut = account == null;
+    final bool isEndpointMismatch = account != null && 
+        (flarumApi.baseUrl == null || !flarumApi.baseUrl!.contains(account.host));
 
-    final hasEndpoint = flarumApi.baseUrl != null;
+    if (isLoggedOut || isEndpointMismatch) {
+      // 如果账户存在但 API 没跟上，尝试在后台同步 API 端点（这种情况通常发生在刚刚登录或切换账户时）
+      if (account != null && isEndpointMismatch) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          flarumApi.setBaseUrl('https://${account.host}');
+          flarumApi.setToken(account.token, userId: account.id.split('@').first);
+          if (mounted) setState(() {}); // 触发重绘以进入正常页面
+        });
+      }
 
-    // Real-time detection: if account is not in valid endpoints, treat as not logged in
-    if ((account == null && !hasEndpoint) ||
-        (account != null && !isEndpointValid)) {
       return Scaffold(
         appBar: AppBar(
           leading: Breakpoints.small.isActive(context)
@@ -79,7 +85,7 @@ class _ForumPageState extends ConsumerState<ForumPage> {
       );
     }
 
-    // Auto-refresh when opening the page
+    // Auto-refresh when switching sub-tabs
     ref.listen(forumSubIndexProvider, (previous, next) {
       _refreshCurrentSubPage(next);
     });
@@ -136,6 +142,12 @@ class _ForumPageState extends ConsumerState<ForumPage> {
   }
 
   void _refreshCurrentSubPage(int index) {
+    if (!mounted) return;
+    
+    // 只有在已登录且端点正确的情况下才执行刷新
+    final account = ref.read(selectedFlarumAccountProvider).value;
+    if (account == null) return;
+
     switch (index) {
       case 0:
         ref.invalidate(discussionsProvider);

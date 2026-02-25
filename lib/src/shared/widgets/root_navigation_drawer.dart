@@ -79,8 +79,9 @@ class RootNavigationDrawer extends ConsumerWidget {
 
         const Spacer(),
 
-        // Render all navigation elements (dividers, settings button, etc.)
-        ..._buildNavigationElements(context, navigationSettings),
+        const Divider(indent: 12, endIndent: 12),
+
+        _buildSettingsButton(context),
       ],
     );
   }
@@ -360,57 +361,6 @@ class RootNavigationDrawer extends ConsumerWidget {
     );
   }
 
-  /// 构建导航元素列表
-  List<Widget> _buildNavigationElements(
-    BuildContext context,
-    dynamic navigationSettings,
-  ) {
-    final widgets = <Widget>[];
-
-    for (final element in navigationSettings.elements) {
-      switch (element.type) {
-        case NavigationElementType.item:
-          // Skip items as they are already rendered in the main section
-          break;
-
-        case NavigationElementType.divider:
-          if (element is NavigationDividerElement) {
-            widgets.add(
-              Divider(indent: element.indent, endIndent: element.endIndent),
-            );
-          }
-          break;
-
-        case NavigationElementType.customWidget:
-          if (element is NavigationCustomWidgetElement) {
-            widgets.add(element.builder(context));
-          }
-          break;
-
-        case NavigationElementType.specialContent:
-          if (element is NavigationSpecialContentElement) {
-            widgets.add(_buildSpecialContentElement(context, element));
-          }
-          break;
-      }
-    }
-
-    return widgets;
-  }
-
-  /// 构建特殊内容元素
-  Widget _buildSpecialContentElement(
-    BuildContext context,
-    NavigationSpecialContentElement element,
-  ) {
-    switch (element.contentType) {
-      case 'settings':
-        return _buildSettingsButton(context);
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
   Widget _buildSettingsButton(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -440,7 +390,7 @@ class RootNavigationDrawer extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.settings,
+                    Icons.settings_outlined,
                     color: theme.colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
@@ -448,7 +398,7 @@ class RootNavigationDrawer extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'settings_title'.tr(),
+                    'navigation_settings'.tr(),
                     style: TextStyle(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.normal,

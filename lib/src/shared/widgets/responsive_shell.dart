@@ -258,64 +258,33 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     bool isLarge,
   ) {
     final theme = Theme.of(context);
-
-    switch (element.contentType) {
-      case 'settings':
-        final data = element.data;
-        final icon = data['icon'] as IconData;
-        final route = data['route'] as String;
-        final titleKey = data['titleKey'] as String;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: () => context.push(route),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  height: 56,
-                  padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: isLarge
-                      ? Row(
-                          children: [
-                            Icon(
-                              icon,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                titleKey.tr(),
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      : Center(
-                          child: Icon(
-                            icon,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: InkWell(
+        onTap: () => GoRouter.of(context).push('/settings'),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 56,
+          padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
+          child: isLarge
+              ? Row(
+                  children: [
+                    Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'navigation_settings'.tr(),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                )
+              : Center(
+                  child: Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
                 ),
-              ),
-              const SizedBox(height: 4),
-            ],
-          ),
-        );
-
-      default:
-        return const SizedBox.shrink();
-    }
+        ),
+      ),
+    );
   }
 
   Widget _buildRootSidebarItem(

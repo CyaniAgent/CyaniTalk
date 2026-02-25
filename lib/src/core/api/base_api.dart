@@ -69,7 +69,7 @@ abstract class BaseApi {
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 3,
+    int maxRetries = 5, // 统一提升至 5 次重试
     Duration retryDelay = const Duration(seconds: 1),
   }) async {
     return apiRequestManager.execute(
@@ -79,9 +79,15 @@ abstract class BaseApi {
 
         while (true) {
           try {
-            logger.info(
-              '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
-            );
+            if (retryCount > 0) {
+              logger.info(
+                '$operationName: Retrying (attempt ${retryCount + 1}/$maxRetries)',
+              );
+            } else {
+              logger.info(
+                '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
+              );
+            }
             final response = await apiCall();
             return handleResponse(
               response,
@@ -93,9 +99,10 @@ abstract class BaseApi {
               // 检查是否是可重试的错误
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;
-                final delay = retryDelay * (retryCount * retryCount); // 指数退避
+                // 优化：更加积极的指数退避策略
+                final delay = retryDelay * (1 << (retryCount - 1)); 
                 logger.warning(
-                  '$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
+                  '$operationName: Transient error detected, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
                 );
                 await Future.delayed(delay);
                 continue;
@@ -116,11 +123,18 @@ abstract class BaseApi {
 
   /// 检查错误是否可重试
   bool _isRetryableError(DioException error) {
+    // 显式捕获 HandshakeException 和 Connection closed 错误喵！
+    final errorStr = error.toString().toLowerCase();
+    final isHandshakeError = errorStr.contains('handshake') || 
+                             errorStr.contains('terminated') ||
+                             errorStr.contains('connection closed');
+
     return error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.sendTimeout ||
         error.type == DioExceptionType.receiveTimeout ||
         error.type == DioExceptionType.connectionError ||
         error.type == DioExceptionType.unknown ||
+        isHandshakeError || // 关键：包含上述关键字即重试
         (error.response?.statusCode != null &&
             (error.response!.statusCode! >= 500 ||
                 error.response!.statusCode ==
@@ -134,7 +148,7 @@ abstract class BaseApi {
     Map<String, dynamic>? params,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 3,
+    int maxRetries = 5, // 统一提升至 5 次重试
     Duration retryDelay = const Duration(seconds: 1),
   }) async {
     await apiRequestManager.execute(
@@ -144,9 +158,15 @@ abstract class BaseApi {
 
         while (true) {
           try {
-            logger.info(
-              '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
-            );
+            if (retryCount > 0) {
+              logger.info(
+                '$operationName: Retrying (attempt ${retryCount + 1}/$maxRetries)',
+              );
+            } else {
+              logger.info(
+                '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
+              );
+            }
             final response = await apiCall();
             handleResponse(response, operationName);
             return null;
@@ -155,9 +175,9 @@ abstract class BaseApi {
               // 检查是否是可重试的错误
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;
-                final delay = retryDelay * (retryCount * retryCount); // 指数退避
+                final delay = retryDelay * (1 << (retryCount - 1));
                 logger.warning(
-                  '$operationName: Retryable error, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
+                  '$operationName: Transient error detected, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
                 );
                 await Future.delayed(delay);
                 continue;

@@ -20,6 +20,7 @@ class RetryInterceptor extends Interceptor {
       retryCount++;
       extra['retryCount'] = retryCount;
       
+      // 优化：更加稳定的指数退避
       final delay = Duration(milliseconds: 500 * (1 << (retryCount - 1)));
       logger.warning('NetworkClient: Request failed (Type: ${err.type}, Error: ${err.error}). Retrying in ${delay.inMilliseconds}ms ($retryCount/$maxRetries)...');
       
@@ -48,14 +49,21 @@ class RetryInterceptor extends Interceptor {
   }
 
   bool _shouldRetry(DioException err) {
+    // 显式捕获 HandshakeException 和 Connection closed 错误喵！
+    final errorStr = err.toString().toLowerCase();
+    final isHandshakeError = errorStr.contains('handshake') || 
+                             errorStr.contains('terminated') ||
+                             errorStr.contains('connection closed');
+
     // 特别处理 Windows 上的 "信号灯超时" (semaphore timeout) 错误
-    final errorStr = err.error.toString();
     final isSemaphoreTimeout = errorStr.contains('121') || errorStr.contains('semaphore');
 
     return err.type == DioExceptionType.connectionTimeout ||
            err.type == DioExceptionType.sendTimeout ||
            err.type == DioExceptionType.receiveTimeout ||
            err.type == DioExceptionType.connectionError ||
+           err.type == DioExceptionType.unknown ||
+           isHandshakeError ||
            isSemaphoreTimeout ||
            (err.type == DioExceptionType.badResponse && 
             (err.response?.statusCode == 502 || 

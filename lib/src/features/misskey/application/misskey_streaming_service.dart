@@ -171,9 +171,12 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
         },
         onError: (error) {
           logger.error('MisskeyStreaming: Stream error: $error');
-          // 针对 Windows "semaphore timeout" 错误加强日志
-          if (error.toString().contains('121') || error.toString().contains('semaphore')) {
+          // 针对 Windows "semaphore timeout" 或 "handshake" 错误加强日志
+          final errorStr = error.toString().toLowerCase();
+          if (errorStr.contains('121') || errorStr.contains('semaphore')) {
             logger.error('MisskeyStreaming: Detected Windows Semaphore Timeout (Error 121)');
+          } else if (errorStr.contains('handshake') || errorStr.contains('terminated')) {
+            logger.error('MisskeyStreaming: Detected SSL Handshake Failure');
           }
           _updateStatus(StreamingStatus.error);
           _handleDisconnect(account);

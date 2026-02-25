@@ -332,7 +332,6 @@
   "messaging_error_title": "読み込みに失敗",
   "messaging_error_description": "メッセージリストを読み込めませんでした。ネットワーク接続を確認して再試行してください。",
   "messaging_error_retry": "再試行",
-  "navigation_no_items": "利用可能なナビゲーションアイテムがありません",
   "common_loading_failed": "読み込みに失敗しました",
   "common_reload": "再読み込みしますか？",
   "search_misskey_posts_related": "{search_result} に関連する Misskey 投稿",
@@ -420,9 +419,6 @@
   "cloud_download_starting": "ダウンロードを開始しています...",
   "cloud_files_count": "個のファイル",
   "could_not_launch_url": "{url}を起動できませんでした",
-  "auth_welcome": "CyaniTalkへようこそ",
-  "auth_welcome_subtitle": "サインインまたはサインアップして始めましょう",
-  "auth_terms_hint": "続行することで、以下に同意したものとみなされます",
-  "auth_terms_of_service": "利用規約",
-  "auth_privacy_policy": "プライバシーポリシー"
+  "navigation_no_items": "ナビゲーション項目がありません",
+  "navigation_settings": "設定"
 }
