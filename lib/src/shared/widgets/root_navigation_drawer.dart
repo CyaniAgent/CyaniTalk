@@ -77,11 +77,10 @@ class RootNavigationDrawer extends ConsumerWidget {
           ),
         ],
 
-        const Spacer(),
-
+        const SizedBox(height: 12),
         const Divider(indent: 12, endIndent: 12),
-
         _buildSettingsButton(context),
+        const SizedBox(height: 12),
       ],
     );
   }
