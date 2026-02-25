@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/navigation/navigation.dart';
+import '../../core/navigation/navigation_element.dart';
 import '../../core/navigation/sub_navigation_notifier.dart';
 import 'user_navigation_header.dart';
 
@@ -23,8 +24,18 @@ class RootNavigationDrawer extends ConsumerWidget {
     // We only care about the first 4 roots: Misskey, Flarum, Drive, Messages
     // 'me' is now handled by the header.
     final rootItems =
-        navigationSettings?.items
-            .where((item) => item.isEnabled && item.id != 'me')
+        navigationSettings?.elements
+            .where(
+              (element) =>
+                  element.type == NavigationElementType.item &&
+                  element is NavigationItemElement,
+            )
+            .cast<NavigationItemElement>()
+            .where(
+              (itemElement) =>
+                  itemElement.item.isEnabled && itemElement.item.id != 'me',
+            )
+            .map((e) => e.item)
             .toList() ??
         [];
 

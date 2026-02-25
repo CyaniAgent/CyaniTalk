@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'navigation_settings.dart';
 import 'navigation_item.dart';
+import 'navigation_element.dart';
 
 part 'navigation_settings_notifier.g.dart';
 
@@ -86,7 +87,26 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
             }
           }
 
-          settings = NavigationSettings(items: orderedItems);
+          // 创建导航元素列表
+          final elements = <NavigationElement>[];
+          for (final item in orderedItems) {
+            elements.add(NavigationItemElement(item: item));
+          }
+          // 添加分割线和设置按钮
+          elements.add(NavigationDividerElement());
+          elements.add(
+            NavigationSpecialContentElement(
+              contentType: 'settings',
+              data: {
+                'titleKey': 'nav_settings',
+                'icon': Icons.settings_outlined,
+                'route': '/settings',
+              },
+              id: 'settings',
+            ),
+          );
+
+          settings = NavigationSettings(elements: elements);
         } catch (e) {
           // 解析失败，使用默认设置
           settings = NavigationSettings.defaultSettings();
@@ -99,18 +119,27 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
       // 检查并确保至少有两个导航项启用
       if (settings.getEnabledCount() < 2) {
         // 按照顺序尝试启用导航项
-        final List<NavigationItem> updatedItems = List.from(settings.items);
+        final updatedElements = <NavigationElement>[];
         int enabledCount = settings.getEnabledCount();
 
-        for (int i = 0; i < updatedItems.length && enabledCount < 2; i++) {
-          final item = updatedItems[i];
-          if (!item.isEnabled && item.isRemovable) {
-            updatedItems[i] = item.copyWith(isEnabled: true);
-            enabledCount++;
+        for (final element in settings.elements) {
+          if (element.type == NavigationElementType.item &&
+              element is NavigationItemElement) {
+            final item = element.item;
+            if (!item.isEnabled && item.isRemovable && enabledCount < 2) {
+              updatedElements.add(
+                NavigationItemElement(item: item.copyWith(isEnabled: true)),
+              );
+              enabledCount++;
+            } else {
+              updatedElements.add(element);
+            }
+          } else {
+            updatedElements.add(element);
           }
         }
 
-        settings = NavigationSettings(items: updatedItems);
+        settings = NavigationSettings(elements: updatedElements);
         await _saveToStorage(settings);
       }
 
@@ -126,14 +155,21 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
 
+      // 获取所有导航项元素
+      final itemElements = settings.elements
+          .where((element) => element.type == NavigationElementType.item)
+          .cast<NavigationItemElement>()
+          .toList();
+      final items = itemElements.map((e) => e.item).toList();
+
       // 保存导航项配置
-      final itemsJson = settings.items
+      final itemsJson = items
           .map((item) => _jsonToString(item.toJson()))
           .join(';');
       await prefs.setString('navigation_items', itemsJson);
 
       // 保存排序顺序
-      final orderList = settings.items.map((item) => item.id).join(',');
+      final orderList = items.map((item) => item.id).join(',');
       await prefs.setString('navigation_order', orderList);
     } catch (e) {
       // 保存失败时忽略错误
@@ -191,17 +227,17 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
     BuildContext context,
   ) async {
     // 查找要更新的导航项
-    final item = state.value!.items.firstWhere(
-      (item) => item.id == itemId,
-      orElse: () => NavigationItem(
-        id: '',
-        title: '',
-        icon: Icons.star_outline,
-        selectedIcon: Icons.star,
-      ),
-    );
+    NavigationItem? item;
+    for (final element in state.value!.elements) {
+      if (element.type == NavigationElementType.item &&
+          element is NavigationItemElement &&
+          element.item.id == itemId) {
+        item = element.item;
+        break;
+      }
+    }
 
-    if (item.id.isEmpty) {
+    if (item == null) {
       return;
     }
 
@@ -236,8 +272,13 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
 
   /// 更新导航项排序
   Future<void> updateItemOrder(List<NavigationItem> newOrder) async {
-    // 确保所有原始导航项都在新排序中
-    final originalItems = state.value!.items;
+    // 获取所有原始导航项元素
+    final originalItemElements = state.value!.elements
+        .where((element) => element.type == NavigationElementType.item)
+        .cast<NavigationItemElement>()
+        .toList();
+    final originalItems = originalItemElements.map((e) => e.item).toList();
+
     final updatedOrder = List<NavigationItem>.from(newOrder);
 
     // 添加未在新排序中的导航项
