@@ -43,10 +43,81 @@ class NavigationSettingsConfig {
     {
       'id': 'me',
       'titleKey': 'nav_me',
-      'icon': Icons.person_outline,
+      'icon': Icons.person_outlined,
       'selectedIcon': Icons.person,
       'isEnabled': true,
       'isRemovable': false, // 个人页面不可移除
+    },
+  ];
+
+  /// 默认导航元素配置
+  static const List<Map<String, dynamic>> defaultNavigationElements = [
+    // 导航项
+    {
+      'type': 'item',
+      'id': 'misskey',
+      'config': {
+        'titleKey': 'nav_misskey',
+        'icon': Icons.public_outlined,
+        'selectedIcon': Icons.public,
+        'isEnabled': true,
+        'isRemovable': true,
+      },
+    },
+    {
+      'type': 'item',
+      'id': 'flarum',
+      'config': {
+        'titleKey': 'nav_flarum',
+        'icon': Icons.forum_outlined,
+        'selectedIcon': Icons.forum,
+        'isEnabled': true,
+        'isRemovable': true,
+      },
+    },
+    {
+      'type': 'item',
+      'id': 'drive',
+      'config': {
+        'titleKey': 'nav_drive',
+        'icon': Icons.cloud_queue_outlined,
+        'selectedIcon': Icons.cloud_queue,
+        'isEnabled': true,
+        'isRemovable': true,
+      },
+    },
+    {
+      'type': 'item',
+      'id': 'messages',
+      'config': {
+        'titleKey': 'nav_messages',
+        'icon': Icons.chat_bubble_outline,
+        'selectedIcon': Icons.chat_bubble,
+        'isEnabled': true,
+        'isRemovable': true,
+      },
+    },
+    // 分割线
+    {
+      'type': 'divider',
+      'id': 'divider_before_settings',
+      'config': {
+        'indent': 12,
+        'endIndent': 12,
+      },
+    },
+    // 设置按钮
+    {
+      'type': 'specialContent',
+      'id': 'settings',
+      'config': {
+        'contentType': 'settings',
+        'data': {
+          'titleKey': 'nav_settings',
+          'icon': Icons.settings_outlined,
+          'route': '/settings',
+        },
+      },
     },
   ];
 

@@ -2,6 +2,7 @@
 //
 // 该文件包含导航相关的辅助方法，用于处理导航项的分支索引映射等功能。
 import 'navigation_settings.dart';
+import 'navigation_element.dart';
 
 /// 导航服务工具类
 class NavigationService {
@@ -31,13 +32,17 @@ class NavigationService {
   ) {
     int currentDisplayIndex = 0;
 
-    // 遍历启用的导航项
-    for (final item in navigationSettings.items) {
-      if (item.isEnabled) {
-        if (currentDisplayIndex == displayIndex) {
-          return getBranchIndexForItem(item.id);
+    // 遍历启用的导航项元素
+    for (final element in navigationSettings.elements) {
+      if (element.type == NavigationElementType.item) {
+        final itemElement = element as NavigationItemElement;
+        final item = itemElement.item;
+        if (item.isEnabled) {
+          if (currentDisplayIndex == displayIndex) {
+            return getBranchIndexForItem(item.id);
+          }
+          currentDisplayIndex++;
         }
-        currentDisplayIndex++;
       }
     }
 
@@ -56,13 +61,17 @@ class NavigationService {
   ) {
     int currentDisplayIndex = 0;
 
-    // 遍历启用的导航项
-    for (final item in navigationSettings.items) {
-      if (item.isEnabled) {
-        if (getBranchIndexForItem(item.id) == branchIndex) {
-          return currentDisplayIndex;
+    // 遍历启用的导航项元素
+    for (final element in navigationSettings.elements) {
+      if (element.type == NavigationElementType.item) {
+        final itemElement = element as NavigationItemElement;
+        final item = itemElement.item;
+        if (item.isEnabled) {
+          if (getBranchIndexForItem(item.id) == branchIndex) {
+            return currentDisplayIndex;
+          }
+          currentDisplayIndex++;
         }
-        currentDisplayIndex++;
       }
     }
 

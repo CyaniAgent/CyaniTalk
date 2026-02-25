@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/navigation/navigation.dart';
+import '../../../../core/navigation/navigation_element.dart';
 
 /// 导航设置页面组件
 ///
@@ -84,42 +85,66 @@ class _NavigationSettingsPageState
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  children: navigationSettings.items.map((item) {
-                    ValueChanged<bool>? onChanged;
-                    if (item.isRemovable) {
-                      onChanged = (value) => navigationNotifier
-                          .updateItemEnabled(item.id, value, context);
-                    }
+                  children: navigationSettings.elements
+                      .where(
+                        (element) =>
+                            element.type == NavigationElementType.item &&
+                            element is NavigationItemElement,
+                      )
+                      .cast<NavigationItemElement>()
+                      .map((itemElement) {
+                        final item = itemElement.item;
+                        ValueChanged<bool>? onChanged;
+                        if (item.isRemovable) {
+                          onChanged = (value) => navigationNotifier
+                              .updateItemEnabled(item.id, value, context);
+                        }
 
-                    return Container(
-                      key: ValueKey(item.id),
-                      child: Column(
-                        children: [
-                          ListTile(
-                            leading: Icon(item.icon),
-                            title: Text(item.title),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Switch(
-                                  value: item.isEnabled,
-                                  onChanged: onChanged,
+                        return Container(
+                          key: ValueKey(item.id),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                leading: Icon(item.icon),
+                                title: Text(item.title),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Switch(
+                                      value: item.isEnabled,
+                                      onChanged: onChanged,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                              ],
-                            ),
-                            enabled: onChanged != null,
+                                enabled: onChanged != null,
+                              ),
+                              if (itemElement !=
+                                  navigationSettings.elements
+                                      .where(
+                                        (element) =>
+                                            element.type ==
+                                                NavigationElementType.item &&
+                                            element is NavigationItemElement,
+                                      )
+                                      .last)
+                                Divider(indent: 72, height: 1, thickness: 0.5),
+                            ],
                           ),
-                          if (item != navigationSettings.items.last)
-                            Divider(indent: 72, height: 1, thickness: 0.5),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                        );
+                      })
+                      .toList(),
                   onReorder: (oldIndex, newIndex) {
-                    final newOrder = List<NavigationItem>.from(
-                      navigationSettings.items,
-                    );
+                    final itemElements = navigationSettings.elements
+                        .where(
+                          (element) =>
+                              element.type == NavigationElementType.item &&
+                              element is NavigationItemElement,
+                        )
+                        .cast<NavigationItemElement>()
+                        .toList();
+                    final newOrder = itemElements.map((e) => e.item).toList();
+
                     if (oldIndex < newIndex) {
                       newIndex -= 1;
                     }

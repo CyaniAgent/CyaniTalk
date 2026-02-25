@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/navigation/navigation.dart';
+import '../../core/navigation/navigation_element.dart';
 import '../../core/navigation/sub_navigation_notifier.dart';
 import 'root_navigation_drawer.dart';
 import 'user_navigation_header.dart';
@@ -61,9 +62,19 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
       error: (error, stack) =>
           Scaffold(body: Center(child: Text('Error: $error'))),
       data: (navigationSettings) {
-        final rootItems = navigationSettings.items
-            .where((item) => item.isEnabled && item.id != 'me')
+        // 获取所有导航项元素（排除me项和非启用项）
+        final rootItemElements = navigationSettings.elements
+            .where(
+              (element) =>
+                  element.type == NavigationElementType.item &&
+                  element is NavigationItemElement &&
+                  element.item.isEnabled &&
+                  element.item.id != 'me',
+            )
+            .cast<NavigationItemElement>()
             .toList();
+
+        final rootItems = rootItemElements.map((e) => e.item).toList();
 
         if (rootItems.isEmpty) {
           return Scaffold(
@@ -89,17 +100,14 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
         return Scaffold(
           key: rootScaffoldKey,
-          drawer:
-              isSmall
-                  ? RootNavigationDrawer(
-                    selectedRootIndex: selectedRootIndex,
-                    onRootSelected:
-                        (index) => _onRootSelected(index, navigationSettings),
-                  )
-                  : null,
+          drawer: isSmall
+              ? RootNavigationDrawer(
+                  selectedRootIndex: selectedRootIndex,
+                  onRootSelected: (index) =>
+                      _onRootSelected(index, navigationSettings),
+                )
+              : null,
           body: ExcludeSemantics(
-            // 加固：在导航切换期间完全静默整个外壳的语义树，
-            // 彻底解决 Windows 桌面端 AXTree 频繁报错的问题。
             excluding: _isTransitioning,
             child: Row(
               children: [
@@ -132,7 +140,11 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   ) {
     final theme = Theme.of(context);
     final isMedium = Breakpoints.medium.isActive(context);
-    final sidebarWidth = isLarge ? 280.0 : isMedium ? 240.0 : 80.0;
+    final sidebarWidth = isLarge
+        ? 280.0
+        : isMedium
+        ? 240.0
+        : 80.0;
 
     return Container(
       width: sidebarWidth,
@@ -153,7 +165,8 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
               int branchIndex = NavigationService.getBranchIndexForItem('me');
               widget.navigationShell.goBranch(
                 branchIndex,
-                initialLocation: branchIndex == widget.navigationShell.currentIndex,
+                initialLocation:
+                    branchIndex == widget.navigationShell.currentIndex,
               );
             },
           ),
@@ -164,21 +177,12 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                 horizontal: !Breakpoints.small.isActive(context) ? 8 : 4,
               ),
               children: [
-                for (int i = 0; i < rootItems.length; i++) ...[
-                  _buildRootSidebarItem(
-                    context,
-                    ref,
-                    rootItems[i],
-                    i,
-                    selectedRootIndex,
-                    !Breakpoints.small.isActive(context),
-                    navigationSettings,
-                  ),
-                ],
-                const SizedBox(height: 8),
-                const Divider(indent: 12, endIndent: 12),
-                _buildSettingsButton(
+                // 渲染所有导航元素
+                ..._buildNavigationElements(
                   context,
+                  ref,
+                  selectedRootIndex,
+                  navigationSettings,
                   !Breakpoints.small.isActive(context),
                 ),
               ],
@@ -189,35 +193,129 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     );
   }
 
-  Widget _buildSettingsButton(BuildContext context, bool isLarge) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: InkWell(
-        onTap: () => context.push('/settings'),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 56,
-          padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
-          child: isLarge
-              ? Row(
-                  children: [
-                    Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'navigation_settings'.tr(),
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    ),
-                  ],
-                )
-              : Center(
-                  child: Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
+  /// 构建导航元素列表
+  List<Widget> _buildNavigationElements(
+    BuildContext context,
+    WidgetRef ref,
+    int selectedRootIndex,
+    dynamic navigationSettings,
+    bool isLarge,
+  ) {
+    final widgets = <Widget>[];
+    int currentItemIndex = 0;
+
+    for (final element in navigationSettings.elements) {
+      switch (element.type) {
+        case NavigationElementType.item:
+          if (element is NavigationItemElement) {
+            final item = element.item;
+            if (item.isEnabled && item.id != 'me') {
+              widgets.add(
+                _buildRootSidebarItem(
+                  context,
+                  ref,
+                  item,
+                  currentItemIndex,
+                  selectedRootIndex,
+                  isLarge,
+                  navigationSettings,
                 ),
-        ),
-      ),
-    );
+              );
+              currentItemIndex++;
+            }
+          }
+          break;
+
+        case NavigationElementType.divider:
+          if (element is NavigationDividerElement) {
+            widgets.add(
+              Divider(indent: element.indent, endIndent: element.endIndent),
+            );
+          }
+          break;
+
+        case NavigationElementType.customWidget:
+          if (element is NavigationCustomWidgetElement) {
+            widgets.add(element.builder(context));
+          }
+          break;
+
+        case NavigationElementType.specialContent:
+          if (element is NavigationSpecialContentElement) {
+            widgets.add(_buildSpecialContentElement(context, element, isLarge));
+          }
+          break;
+      }
+    }
+
+    return widgets;
+  }
+
+  /// 构建特殊内容元素
+  Widget _buildSpecialContentElement(
+    BuildContext context,
+    NavigationSpecialContentElement element,
+    bool isLarge,
+  ) {
+    final theme = Theme.of(context);
+
+    switch (element.contentType) {
+      case 'settings':
+        final data = element.data;
+        final icon = data['icon'] as IconData;
+        final route = data['route'] as String;
+        final titleKey = data['titleKey'] as String;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () => context.push(route),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 56,
+                  padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: isLarge
+                      ? Row(
+                          children: [
+                            Icon(
+                              icon,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                titleKey.tr(),
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Center(
+                          child: Icon(
+                            icon,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 4),
+            ],
+          ),
+        );
+
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   Widget _buildRootSidebarItem(
@@ -321,11 +419,17 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     final selectedSub = ref.watch(misskeySubIndexProvider);
     final subs = [
       {'icon': Icons.timeline, 'label': 'misskey_drawer_timeline'.tr()},
-      {'icon': Icons.collections_bookmark, 'label': 'misskey_drawer_clips'.tr()},
+      {
+        'icon': Icons.collections_bookmark,
+        'label': 'misskey_drawer_clips'.tr(),
+      },
       {'icon': Icons.satellite_alt, 'label': 'misskey_drawer_antennas'.tr()},
       {'icon': Icons.hub, 'label': 'misskey_drawer_channels'.tr()},
       {'icon': Icons.explore, 'label': 'misskey_drawer_explore'.tr()},
-      {'icon': Icons.person_add, 'label': 'misskey_drawer_follow_requests'.tr()},
+      {
+        'icon': Icons.person_add,
+        'label': 'misskey_drawer_follow_requests'.tr(),
+      },
       {'icon': Icons.campaign, 'label': 'misskey_drawer_announcements'.tr()},
       {'icon': Icons.terminal, 'label': 'misskey_drawer_aiscript_console'.tr()},
     ];
@@ -333,6 +437,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     return Padding(
       padding: EdgeInsets.only(left: isLarge ? 24 : 0, top: 4),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           for (int i = 0; i < subs.length; i++)
             _buildSidebarSubItem(
@@ -357,12 +462,16 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     final subs = [
       {'icon': Icons.forum, 'label': 'flarum_drawer_discussions'.tr()},
       {'icon': Icons.label, 'label': 'flarum_drawer_tags'.tr()},
-      {'icon': Icons.notifications, 'label': 'flarum_drawer_notifications'.tr()},
+      {
+        'icon': Icons.notifications,
+        'label': 'flarum_drawer_notifications'.tr(),
+      },
     ];
 
     return Padding(
       padding: EdgeInsets.only(left: isLarge ? 24 : 0, top: 4),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           for (int i = 0; i < subs.length; i++)
             _buildSidebarSubItem(

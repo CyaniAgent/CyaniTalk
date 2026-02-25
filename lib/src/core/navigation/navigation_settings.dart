@@ -1,78 +1,144 @@
 // 导航设置管理
 //
 // 该文件包含NavigationSettings类，用于管理应用程序的导航设置，
-// 包括导航项列表、默认设置等功能。
+// 包括导航元素列表、默认设置等功能。
 import 'package:flutter/material.dart';
 import 'navigation_item.dart';
+import 'navigation_element.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../config/navigation_settings_config.dart';
 
 /// 导航设置状态
 class NavigationSettings {
-  /// 导航项列表
-  final List<NavigationItem> items;
+  /// 导航元素列表
+  final List<NavigationElement> elements;
 
   /// 创建导航设置实例
-  const NavigationSettings({this.items = const []});
+  const NavigationSettings({this.elements = const []});
 
   /// 获取默认导航设置
   factory NavigationSettings.defaultSettings([BuildContext? context]) {
-    final items = NavigationSettingsConfig.defaultNavigationItems.map((config) {
-      return NavigationItem(
-        id: config['id'] as String,
-        title: (config['titleKey'] as String).tr(),
-        icon: config['icon'] as IconData,
-        selectedIcon: config['selectedIcon'] as IconData,
-        isEnabled: config['isEnabled'] as bool,
-        isRemovable: config['isRemovable'] as bool,
-      );
-    }).toList();
+    final elements = <NavigationElement>[];
 
-    return NavigationSettings(items: items);
+    // 添加默认导航项
+    for (final config in NavigationSettingsConfig.defaultNavigationItems) {
+      if (config['isEnabled'] as bool) {
+        elements.add(
+          NavigationItemElement(
+            item: NavigationItem(
+              id: config['id'] as String,
+              title: (config['titleKey'] as String).tr(),
+              icon: config['icon'] as IconData,
+              selectedIcon: config['selectedIcon'] as IconData,
+              isEnabled: config['isEnabled'] as bool,
+              isRemovable: config['isRemovable'] as bool,
+            ),
+          ),
+        );
+      }
+    }
+
+    // 添加设置按钮之前的分割线
+    elements.add(NavigationDividerElement());
+
+    // 添加设置按钮作为特殊内容
+    elements.add(
+      NavigationSpecialContentElement(
+        contentType: 'settings',
+        data: {
+          'titleKey': 'nav_settings',
+          'icon': Icons.settings_outlined,
+          'route': '/settings',
+        },
+        id: 'settings',
+      ),
+    );
+
+    return NavigationSettings(elements: elements);
   }
 
   /// 复制并更新导航设置
-  NavigationSettings copyWith({List<NavigationItem>? items}) {
-    return NavigationSettings(items: items ?? this.items);
+  NavigationSettings copyWith({List<NavigationElement>? elements}) {
+    return NavigationSettings(elements: elements ?? this.elements);
+  }
+
+  /// 获取所有导航项元素
+  List<NavigationItemElement> getItemElements() {
+    return elements
+        .where((element) => element.type == NavigationElementType.item)
+        .cast<NavigationItemElement>()
+        .toList();
   }
 
   /// 获取启用的导航项数量
   int getEnabledCount() {
-    return items.where((item) => item.isEnabled).length;
+    return getItemElements().where((element) => element.item.isEnabled).length;
   }
 
   /// 获取可移除的导航项数量
   int getRemovableCount() {
-    return items.where((item) => item.isRemovable).length;
+    return getItemElements()
+        .where((element) => element.item.isRemovable)
+        .length;
   }
 
   /// 根据ID查找导航项
-  NavigationItem findItemById(String id) {
-    return items.firstWhere(
-      (item) => item.id == id,
-      orElse: () => NavigationItem(
-        id: '',
-        title: '',
-        icon: Icons.star_outline,
-        selectedIcon: Icons.star,
+  NavigationItem? findItemById(String id) {
+    final element = elements.firstWhere(
+      (element) =>
+          element.id == id && element.type == NavigationElementType.item,
+      orElse: () => NavigationItemElement(
+        item: NavigationItem(
+          id: '',
+          title: '',
+          icon: Icons.star_outline,
+          selectedIcon: Icons.star,
+        ),
       ),
     );
+
+    if (element is NavigationItemElement) {
+      return element.item.id.isNotEmpty ? element.item : null;
+    }
+    return null;
   }
 
   /// 更新指定ID的导航项启用状态
   NavigationSettings updateItemEnabled(String id, bool isEnabled) {
-    final updatedItems = items.map((item) {
-      if (item.id == id) {
-        return item.copyWith(isEnabled: isEnabled);
+    final updatedElements = elements.map((element) {
+      if (element.id == id && element is NavigationItemElement) {
+        return NavigationItemElement(
+          item: element.item.copyWith(isEnabled: isEnabled),
+        );
       }
-      return item;
+      return element;
     }).toList();
-    return copyWith(items: updatedItems);
+    return copyWith(elements: updatedElements);
   }
 
   /// 更新导航项排序
   NavigationSettings updateItemOrder(List<NavigationItem> newOrder) {
-    return copyWith(items: newOrder);
+    final updatedElements = <NavigationElement>[];
+    final itemMap = {
+      for (final element in elements)
+        if (element is NavigationItemElement) element.item.id: element,
+    };
+
+    // 按新顺序添加导航项
+    for (final item in newOrder) {
+      if (itemMap.containsKey(item.id)) {
+        updatedElements.add(NavigationItemElement(item: item));
+      }
+    }
+
+    // 添加非导航项元素
+    for (final element in elements) {
+      if (element.type != NavigationElementType.item) {
+        updatedElements.add(element);
+      }
+    }
+
+    return copyWith(elements: updatedElements);
   }
 
   @override
@@ -80,10 +146,10 @@ class NavigationSettings {
       identical(this, other) ||
       other is NavigationSettings &&
           runtimeType == other.runtimeType &&
-          _listEquals(items, other.items);
+          _listEquals(elements, other.elements);
 
   @override
-  int get hashCode => items.hashCode;
+  int get hashCode => elements.hashCode;
 
   /// 列表相等性检查
   bool _listEquals<T>(List<T>? a, List<T>? b) {
