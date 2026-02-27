@@ -376,10 +376,7 @@ class RootNavigationDrawer extends ConsumerWidget {
           highlightColor: theme.colorScheme.primary.withAlpha(10),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(32),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(32)),
             child: Row(
               children: [
                 Container(
