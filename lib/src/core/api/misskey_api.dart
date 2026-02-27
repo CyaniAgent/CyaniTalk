@@ -987,4 +987,35 @@ class MisskeyApi extends BaseApi {
     (response) => response.data,
     params: {'announcementId': announcementId},
   );
+
+  /// 获取笔记的反应列表
+  ///
+  /// 通过调用 `/api/notes/reactions` 接口获取指定笔记的反应列表。
+  ///
+  /// @param noteId 笔记 ID
+  /// @param type 反应类型（可选）
+  /// @param limit 返回数量限制，默认 10
+  /// @param sinceId 起始 ID（可选）
+  /// @param untilId 结束 ID（可选）
+  /// @param sinceDate 起始日期时间戳（可选）
+  /// @param untilDate 结束日期时间戳（可选）
+  /// @return 反应列表
+  /// @throws DioException 如果请求失败
+  Future<List<dynamic>> getNoteReactions(
+    String noteId, {
+    String? type,
+    int limit = 10,
+    String? sinceId,
+    String? untilId,
+    int? sinceDate,
+    int? untilDate,
+  }) => _fetchList('MisskeyApi.getNoteReactions', '/api/notes/reactions', {
+    'noteId': noteId,
+    'limit': limit,
+    'type': type,
+    'sinceId': sinceId,
+    'untilId': untilId,
+    'sinceDate': sinceDate,
+    'untilDate': untilDate,
+  });
 }
