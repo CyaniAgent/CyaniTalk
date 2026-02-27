@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/note.dart';
 import '../../domain/mfm_renderer.dart';
 import '../../data/misskey_repository.dart';
+import '../../data/misskey_repository_interface.dart';
 import '../../application/misskey_notifier.dart';
 import '../../application/timeline_jump_provider.dart';
 import 'retryable_network_image.dart';
@@ -15,6 +16,7 @@ import '../../../common/presentation/pages/media_viewer_page.dart';
 
 import '../../../common/presentation/widgets/media/media_item.dart';
 import 'emoji_picker.dart';
+import 'reaction_display.dart';
 
 /// Modern NoteCard组件
 ///
@@ -227,6 +229,97 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                     child: _buildMediaGrid(note.files),
                   ),
 
+                const SizedBox(height: 8),
+
+                // 显示表情反应
+                if (note.reactions.isNotEmpty)
+                  FutureBuilder<IMisskeyRepository>(
+                    future: ref.read(misskeyRepositoryProvider.future),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final repository = snapshot.data!;
+                        return ReactionDisplay(
+                          note: note,
+                          host: repository.host,
+                          onReactionTap: (reaction) async {
+                            try {
+                              final repository = await ref.read(
+                                misskeyRepositoryProvider.future,
+                              );
+
+                              // 检查是否是取消自己的表情反应
+                              if (note.myReaction == reaction) {
+                                await repository.removeReaction(note.id);
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'note_reaction_removed'.tr(),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                });
+                              } else if (note.myReaction != null) {
+                                // 如果已经有其他表情反应，先取消再发送新的
+                                await repository.removeReaction(note.id);
+                                await repository.addReaction(note.id, reaction);
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'note_reaction_updated'.tr(),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                });
+                              } else {
+                                // 直接发送表情反应
+                                await repository.addReaction(note.id, reaction);
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'note_reaction_added'.tr(),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                });
+                              }
+                            } catch (e) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'note_failed_to_react'.tr(
+                                          namedArgs: {'error': e.toString()},
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              });
+                            }
+                          },
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+
                 const SizedBox(height: 16),
 
                 // 交互按钮行
@@ -283,10 +376,16 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
     if (_shouldAnimate) {
       return card
-          .animate(onComplete: (controller) {
-            // 动画完成后通知组件不再需要为了动效而特殊处理
-            if (mounted) setState(() { _shouldAnimate = false; });
-          })
+          .animate(
+            onComplete: (controller) {
+              // 动画完成后通知组件不再需要为了动效而特殊处理
+              if (mounted) {
+                setState(() {
+                  _shouldAnimate = false;
+                });
+              }
+            },
+          )
           .fadeIn(duration: 400.ms)
           .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
     }
@@ -787,7 +886,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
           noteId: widget.note.id,
           onEmojiSelected: (emoji) async {
             try {
-              final repository = await ref.read(misskeyRepositoryProvider.future);
+              final repository = await ref.read(
+                misskeyRepositoryProvider.future,
+              );
               await repository.addReaction(widget.note.id, emoji);
               // 使用局部上下文变量，避免在异步操作中使用可能失效的 BuildContext
               if (dialogContext.mounted) {
@@ -800,7 +901,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 ScaffoldMessenger.of(dialogContext).showSnackBar(
                   SnackBar(
                     content: Text(
-                      'note_failed_to_react'.tr(namedArgs: {'error': e.toString()}),
+                      'note_failed_to_react'.tr(
+                        namedArgs: {'error': e.toString()},
+                      ),
                     ),
                   ),
                 );
@@ -946,6 +1049,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   height: 1.4,
                 ),
               ),
+
+              const SizedBox(height: 4),
             ],
           ),
         ),

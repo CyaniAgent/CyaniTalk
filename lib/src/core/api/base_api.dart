@@ -173,6 +173,17 @@ abstract class BaseApi {
             return null;
           } catch (e) {
             if (e is DioException) {
+              // 检查是否是 400 错误，提供更详细的错误信息
+              if (e.response?.statusCode == 400) {
+                final errorMessage =
+                    e.response?.data?['error']?['message'] ?? 'Bad request';
+                logger.error(
+                  '$operationName: 400 Bad Request: $errorMessage',
+                  e,
+                );
+                throw Exception('$operationName failed: 400 - $errorMessage');
+              }
+
               // 检查是否是可重试的错误
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;

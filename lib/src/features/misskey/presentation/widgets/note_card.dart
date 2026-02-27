@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../domain/note.dart';
 import '../../domain/mfm_renderer.dart';
 import '../../data/misskey_repository.dart';
+import '../../data/misskey_repository_interface.dart';
 import '../../application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
@@ -185,9 +186,20 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                   if (note.reactions.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
-                      child: ReactionDisplay(
-                        note: note,
-                        onReactionTap: _handleReactionTap,
+                      child: FutureBuilder<IMisskeyRepository>(
+                        future: ref.read(misskeyRepositoryProvider.future),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final repository = snapshot.data!;
+                            return ReactionDisplay(
+                              note: note,
+                              host: repository.host,
+                              onReactionTap: _handleReactionTap,
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
                       ),
                     ),
 
@@ -247,9 +259,14 @@ class _NoteCardState extends ConsumerState<NoteCard> {
 
     if (_shouldAnimate) {
       return card
-          .animate(onComplete: (controller) {
-            if (mounted) setState(() { _shouldAnimate = false; });
-          })
+          .animate(
+            onComplete: (controller) {
+              if (mounted)
+                setState(() {
+                  _shouldAnimate = false;
+                });
+            },
+          )
           .fadeIn(duration: 400.ms)
           .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
     }
@@ -701,75 +718,93 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   Future<void> _handleReaction() async {
     await showDialog(
       context: context,
-      builder: (dialogContext) => EmojiPicker(
-        noteId: widget.note.id,
-        currentReaction: widget.note.myReaction,
-        onEmojiSelected: (emoji) async {
-          try {
-            final repository = await ref.read(misskeyRepositoryProvider.future);
-            await repository.addReaction(widget.note.id, emoji);
-            if (mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text('note_reaction_added'.tr())),
+      builder: (dialogContext) {
+        return EmojiPicker(
+          noteId: widget.note.id,
+          currentReaction: widget.note.myReaction,
+          onEmojiSelected: (emoji) async {
+            try {
+              final repository = await ref.read(
+                misskeyRepositoryProvider.future,
               );
-            }
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'note_failed_to_react'.tr(
-                      namedArgs: {'error': e.toString()},
+              await repository.addReaction(widget.note.id, emoji);
+              if (dialogContext.mounted) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(content: Text('note_reaction_added'.tr())),
+                );
+              }
+            } catch (e) {
+              if (dialogContext.mounted) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'note_failed_to_react'.tr(
+                        namedArgs: {'error': e.toString()},
+                      ),
                     ),
                   ),
-                ),
-              );
+                );
+              }
             }
-          }
-        },
-        onReactionRemoved: () async {
-          try {
-            final repository = await ref.read(misskeyRepositoryProvider.future);
-            await repository.removeReaction(widget.note.id);
-            if (mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text('note_reaction_removed'.tr())),
+          },
+          onReactionRemoved: () async {
+            try {
+              final repository = await ref.read(
+                misskeyRepositoryProvider.future,
               );
-            }
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'note_failed_to_remove_reaction'.tr(
-                      namedArgs: {'error': e.toString()},
+              await repository.removeReaction(widget.note.id);
+              if (dialogContext.mounted) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(content: Text('note_reaction_removed'.tr())),
+                );
+              }
+            } catch (e) {
+              if (dialogContext.mounted) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'note_failed_to_remove_reaction'.tr(
+                        namedArgs: {'error': e.toString()},
+                      ),
                     ),
                   ),
-                ),
-              );
+                );
+              }
             }
-          }
-        },
-      ),
+          },
+        );
+      },
     );
   }
 
   Future<void> _handleReactionTap(String reaction) async {
     try {
       final repository = await ref.read(misskeyRepositoryProvider.future);
+
+      // 检查是否是取消自己的表情反应
       if (widget.note.myReaction == reaction) {
         await repository.removeReaction(widget.note.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('note_reaction_removed'.tr())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('note_reaction_removed'.tr())));
         }
-      } else {
+      } else if (widget.note.myReaction != null) {
+        // 如果已经有其他表情反应，先取消再发送新的
+        await repository.removeReaction(widget.note.id);
         await repository.addReaction(widget.note.id, reaction);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('note_reaction_added'.tr())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('note_reaction_updated'.tr())));
+        }
+      } else {
+        // 直接发送表情反应
+        await repository.addReaction(widget.note.id, reaction);
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr())));
         }
       }
     } catch (e) {
