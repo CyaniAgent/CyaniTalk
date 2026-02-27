@@ -258,6 +258,27 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                 // 直接发送表情反应
                                 await repository.addReaction(note.id, reaction);
                               }
+
+                              // 重新获取笔记信息以更新状态
+                              final updatedNote = await repository.getNote(
+                                note.id,
+                              );
+
+                              // 更新缓存中的笔记
+                              MisskeyTimelineNotifier.cacheManager.putNote(
+                                updatedNote,
+                              );
+
+                              // 通知时间线状态管理更新
+                              if (widget.timelineType != null) {
+                                // 触发时间线刷新，确保UI立即更新
+                                final timelineProvider =
+                                    misskeyTimelineProvider(
+                                      widget.timelineType!,
+                                    );
+                                ref.invalidate(timelineProvider);
+                              }
+
                               // 移除成功提示，只在错误时显示提示
                             } catch (e) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
