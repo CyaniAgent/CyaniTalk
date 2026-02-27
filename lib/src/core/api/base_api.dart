@@ -13,7 +13,7 @@ abstract class BaseApi {
     String operationName, {
     T Function(dynamic)? parser,
   }) {
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 204) {
       logger.debug('$operationName: Success');
       if (parser != null) {
         return parser(response.data);
@@ -100,7 +100,7 @@ abstract class BaseApi {
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;
                 // 优化：更加积极的指数退避策略
-                final delay = retryDelay * (1 << (retryCount - 1)); 
+                final delay = retryDelay * (1 << (retryCount - 1));
                 logger.warning(
                   '$operationName: Transient error detected, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
                 );
@@ -125,9 +125,10 @@ abstract class BaseApi {
   bool _isRetryableError(DioException error) {
     // 显式捕获 HandshakeException 和 Connection closed 错误喵！
     final errorStr = error.toString().toLowerCase();
-    final isHandshakeError = errorStr.contains('handshake') || 
-                             errorStr.contains('terminated') ||
-                             errorStr.contains('connection closed');
+    final isHandshakeError =
+        errorStr.contains('handshake') ||
+        errorStr.contains('terminated') ||
+        errorStr.contains('connection closed');
 
     return error.type == DioExceptionType.connectionTimeout ||
         error.type == DioExceptionType.sendTimeout ||
