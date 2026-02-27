@@ -55,7 +55,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   @override
   FutureOr<List<Note>> build(String type) async {
     // 1. 立即获取所有依赖，避免在 async gap 之后调用 ref.watch
-    final streamingService = ref.watch(misskeyStreamingServiceProvider.notifier);
+    final streamingService = ref.watch(
+      misskeyStreamingServiceProvider.notifier,
+    );
     final repositoryFuture = ref.watch(misskeyRepositoryProvider.future);
 
     try {
@@ -102,7 +104,8 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       }
 
       // 尝试从持久化存储加载
-      final persistentNotes = await _cacheManager.loadNotesFromPersistentStorage();
+      final persistentNotes = await _cacheManager
+          .loadNotesFromPersistentStorage();
       if (!ref.mounted) return persistentNotes;
 
       if (persistentNotes.isNotEmpty) {
@@ -415,7 +418,7 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
   }) async {
     final repositoryFuture = ref.watch(misskeyRepositoryProvider.future);
     logger.info('初始化Misskey频道列表，类型: $type, 查询: $query');
-    
+
     final repository = await repositoryFuture;
     if (!ref.mounted) return [];
 
@@ -450,7 +453,9 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
     if (state.isLoading || state.isRefreshing || !ref.mounted) return;
 
     final currentChannels = state.value ?? [];
-    if (currentChannels.isEmpty || type == MisskeyChannelListType.featured) return;
+    if (currentChannels.isEmpty || type == MisskeyChannelListType.featured) {
+      return;
+    }
 
     final lastId = currentChannels.last.id;
     final result = await AsyncValue.guard(() async {
@@ -459,16 +464,25 @@ class MisskeyChannelsNotifier extends _$MisskeyChannelsNotifier {
       if (!ref.mounted) return currentChannels;
 
       final newChannels = await switch (type) {
-        MisskeyChannelListType.favorites => repository.getFavoriteChannels(untilId: lastId),
-        MisskeyChannelListType.following => repository.getFollowingChannels(untilId: lastId),
-        MisskeyChannelListType.managing => repository.getOwnedChannels(untilId: lastId),
-        MisskeyChannelListType.search => repository.searchChannels(query ?? '', untilId: lastId),
+        MisskeyChannelListType.favorites => repository.getFavoriteChannels(
+          untilId: lastId,
+        ),
+        MisskeyChannelListType.following => repository.getFollowingChannels(
+          untilId: lastId,
+        ),
+        MisskeyChannelListType.managing => repository.getOwnedChannels(
+          untilId: lastId,
+        ),
+        MisskeyChannelListType.search => repository.searchChannels(
+          query ?? '',
+          untilId: lastId,
+        ),
         _ => Future.value(<Channel>[]),
       };
 
       return [...currentChannels, ...newChannels];
     });
-    
+
     if (ref.mounted) {
       state = result;
     }
@@ -507,7 +521,10 @@ class MisskeyChannelTimelineNotifier extends _$MisskeyChannelTimelineNotifier {
       if (!ref.mounted) return currentNotes;
       final repository = await ref.read(misskeyRepositoryProvider.future);
       if (!ref.mounted) return currentNotes;
-      final newNotes = await repository.getChannelTimeline(channelId, untilId: lastId);
+      final newNotes = await repository.getChannelTimeline(
+        channelId,
+        untilId: lastId,
+      );
       return [...currentNotes, ...newNotes];
     });
 
@@ -548,7 +565,9 @@ class MisskeyClipsNotifier extends _$MisskeyClipsNotifier {
   }
 
   Future<void> loadMore() async {
-    if (state.isLoading || state.isRefreshing || !_hasMore || !ref.mounted) return;
+    if (state.isLoading || state.isRefreshing || !_hasMore || !ref.mounted) {
+      return;
+    }
 
     final currentClips = state.value ?? [];
     if (currentClips.isEmpty) return;
@@ -600,7 +619,9 @@ class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
   }
 
   Future<void> loadMore() async {
-    if (state.isLoading || state.isRefreshing || !_hasMore || !ref.mounted) return;
+    if (state.isLoading || state.isRefreshing || !_hasMore || !ref.mounted) {
+      return;
+    }
 
     final currentNotes = state.value ?? [];
     if (currentNotes.isEmpty) return;
@@ -610,7 +631,10 @@ class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
       if (!ref.mounted) return currentNotes;
       final repository = await ref.read(misskeyRepositoryProvider.future);
       if (!ref.mounted) return currentNotes;
-      final newNotes = await repository.getClipNotes(clipId: clipId, untilId: lastId);
+      final newNotes = await repository.getClipNotes(
+        clipId: clipId,
+        untilId: lastId,
+      );
       if (newNotes.isEmpty || newNotes.length < 20) _hasMore = false;
       return [...currentNotes, ...newNotes];
     });

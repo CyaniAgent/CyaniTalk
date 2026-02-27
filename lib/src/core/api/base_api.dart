@@ -69,7 +69,7 @@ abstract class BaseApi {
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 5, // 统一提升至 5 次重试
+    int maxRetries = 5,
     Duration retryDelay = const Duration(seconds: 1),
   }) async {
     return apiRequestManager.execute(
