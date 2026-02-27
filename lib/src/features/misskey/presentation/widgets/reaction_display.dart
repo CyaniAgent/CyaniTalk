@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/note.dart';
+import '../../domain/emoji.dart';
 import '../../data/misskey_repository.dart';
 import './retryable_network_image.dart';
 
@@ -71,7 +72,7 @@ class ReactionDisplay extends ConsumerWidget {
             label: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildReactionIcon(reaction),
+                _buildReactionIcon(ref, reaction),
                 const SizedBox(width: 4),
                 Text(
                   count.toString(),
@@ -128,7 +129,7 @@ class ReactionDisplay extends ConsumerWidget {
     );
   }
 
-  Widget _buildReactionIcon(String reaction) {
+  Widget _buildReactionIcon(WidgetRef ref, String reaction) {
     // 处理带有 @ 符号的表情格式，如 :Snow_Miku_26@.:
     if (reaction.startsWith(':') && reaction.endsWith(':')) {
       // 提取表情名称和实例信息
@@ -136,26 +137,68 @@ class ReactionDisplay extends ConsumerWidget {
       final emojiName = parts[0];
       final instance = parts.length > 1 ? parts[1] : null;
 
-      // 构建表情图片 URL
-      // 注意：这是一个简化的实现，实际的表情 URL 格式可能因实例而异
-      String emojiUrl;
-      if (instance == '.' || instance == null) {
-        // 当前实例的表情，使用完整的 URL
-        emojiUrl = 'https://$host/emoji/$emojiName.png';
-      } else {
-        // 其他实例的表情，使用完整的 URL
-        emojiUrl = 'https://$instance/emoji/$emojiName.png';
-      }
-
-      // 使用 RetryableNetworkImage 加载表情图片，与图片反应使用相同的缓存逻辑
-      return SizedBox(
-        width: 20,
-        height: 20,
-        child: RetryableNetworkImage(url: emojiUrl, fit: BoxFit.contain),
+      // 使用 FutureBuilder 异步获取表情详情，包括正确的图片 URL
+      return FutureBuilder<EmojiDetail>(
+        future: _getEmojiDetail(ref, emojiName, instance),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // 使用 API 返回的正确图片 URL
+            return SizedBox(
+              width: 20,
+              height: 20,
+              child: RetryableNetworkImage(
+                url: snapshot.data!.url,
+                fit: BoxFit.contain,
+                width: 20,
+                height: 20,
+              ),
+            );
+          } else {
+            // 加载中或失败时显示占位符
+            return SizedBox(
+              width: 20,
+              height: 20,
+              child: Center(
+                child: Text(
+                  emojiName[0].toUpperCase(),
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            );
+          }
+        },
       );
     } else {
       // 普通表情符号直接显示
       return Text(reaction, style: const TextStyle(fontSize: 16));
+    }
+  }
+
+  /// 获取表情详情，包括正确的图片 URL
+  Future<EmojiDetail> _getEmojiDetail(
+    WidgetRef ref,
+    String emojiName,
+    String? instance,
+  ) async {
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      // 如果有实例信息，需要从对应的实例获取表情
+      if (instance != null && instance != '.' && instance.isNotEmpty) {
+        // 这里可以实现从其他实例获取表情的逻辑
+        // 暂时使用当前实例的API，后续可以扩展
+        return await repository.getEmoji(emojiName);
+      } else {
+        // 从当前实例获取表情
+        return await repository.getEmoji(emojiName);
+      }
+    } catch (e) {
+      // 如果获取失败，返回一个默认的表情详情
+      return EmojiDetail(
+        id: emojiName,
+        aliases: [emojiName],
+        name: emojiName,
+        url: '',
+      );
     }
   }
 }
