@@ -34,7 +34,7 @@ final class MisskeyDriveNotifierProvider
 }
 
 String _$misskeyDriveNotifierHash() =>
-    r'c87ef3c38e97b458be70b4594000c4483498c8c5';
+    r'a87310e6d9509d6c1612cba308ac9f9f1d1ccad8';
 
 abstract class _$MisskeyDriveNotifier extends $AsyncNotifier<DriveState> {
   FutureOr<DriveState> build();
