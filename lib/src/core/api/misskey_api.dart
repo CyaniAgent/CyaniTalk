@@ -951,4 +951,35 @@ class MisskeyApi extends BaseApi {
     () => _dio.post('/api/emojis', data: {'i': token}),
     (response) => Map<String, dynamic>.from(response.data),
   );
+
+  /// 获取笔记的表情反应
+  ///
+  /// 通过调用 `/api/notes/reactions` 接口获取指定笔记的表情反应列表。
+  ///
+  /// @param noteId 笔记 ID
+  /// @param type 表情类型，为空则获取所有表情
+  /// @param limit 返回的反应数量限制，默认 10
+  /// @param sinceId 分页标记，用于加载更新的反应
+  /// @param untilId 分页标记，用于加载更早的反应
+  /// @param sinceDate 时间戳，用于加载指定时间后的反应
+  /// @param untilDate 时间戳，用于加载指定时间前的反应
+  /// @return 表情反应列表
+  /// @throws DioException 如果请求失败
+  Future<List<dynamic>> getNoteReactions(
+    String noteId, {
+    String? type,
+    int limit = 10,
+    String? sinceId,
+    String? untilId,
+    int? sinceDate,
+    int? untilDate,
+  }) => _fetchList('MisskeyApi.getNoteReactions', '/api/notes/reactions', {
+    'noteId': noteId,
+    'type': ?type,
+    'limit': limit,
+    'sinceId': ?sinceId,
+    'untilId': ?untilId,
+    'sinceDate': ?sinceDate,
+    'untilDate': ?untilDate,
+  });
 }

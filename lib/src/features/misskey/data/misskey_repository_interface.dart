@@ -172,4 +172,15 @@ abstract interface class IMisskeyRepository {
 
   /// 获取单个表情详情
   Future<EmojiDetail> getEmoji(String name);
+
+  /// 获取笔记的表情反应
+  Future<List<dynamic>> getNoteReactions(
+    String noteId, {
+    String? type,
+    int limit = 10,
+    String? sinceId,
+    String? untilId,
+    int? sinceDate,
+    int? untilDate,
+  });
 }

@@ -250,53 +250,15 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                               // 检查是否是取消自己的表情反应
                               if (note.myReaction == reaction) {
                                 await repository.removeReaction(note.id);
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'note_reaction_removed'.tr(),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                });
                               } else if (note.myReaction != null) {
                                 // 如果已经有其他表情反应，先取消再发送新的
                                 await repository.removeReaction(note.id);
                                 await repository.addReaction(note.id, reaction);
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'note_reaction_updated'.tr(),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                });
                               } else {
                                 // 直接发送表情反应
                                 await repository.addReaction(note.id, reaction);
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'note_reaction_added'.tr(),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                });
                               }
+                              // 移除成功提示，只在错误时显示提示
                             } catch (e) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (mounted) {
@@ -889,13 +851,13 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               final repository = await ref.read(
                 misskeyRepositoryProvider.future,
               );
-              await repository.addReaction(widget.note.id, emoji);
-              // 使用局部上下文变量，避免在异步操作中使用可能失效的 BuildContext
-              if (dialogContext.mounted) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  SnackBar(content: Text('note_reaction_added'.tr())),
-                );
+
+              if (widget.note.myReaction != null) {
+                // 如果已经有其他表情反应，先取消再发送新的
+                await repository.removeReaction(widget.note.id);
               }
+              await repository.addReaction(widget.note.id, emoji);
+              // 移除成功提示，只在错误时显示提示
             } catch (e) {
               if (dialogContext.mounted) {
                 ScaffoldMessenger.of(dialogContext).showSnackBar(

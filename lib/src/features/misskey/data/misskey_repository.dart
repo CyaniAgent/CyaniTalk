@@ -915,6 +915,37 @@ class MisskeyRepository implements IMisskeyRepository {
     }
   }
 
+  @override
+  Future<List<dynamic>> getNoteReactions(
+    String noteId, {
+    String? type,
+    int limit = 10,
+    String? sinceId,
+    String? untilId,
+    int? sinceDate,
+    int? untilDate,
+  }) async {
+    logger.info('MisskeyRepository: Getting reactions for note $noteId');
+    try {
+      final data = await api.getNoteReactions(
+        noteId,
+        type: type,
+        limit: limit,
+        sinceId: sinceId,
+        untilId: untilId,
+        sinceDate: sinceDate,
+        untilDate: untilDate,
+      );
+      logger.info(
+        'MisskeyRepository: Successfully retrieved ${data.length} reactions for note $noteId',
+      );
+      return data;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting note reactions', e);
+      rethrow;
+    }
+  }
+
   // --- Notifications ---
 
   @override
