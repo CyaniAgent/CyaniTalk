@@ -261,10 +261,11 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       return card
           .animate(
             onComplete: (controller) {
-              if (mounted)
+              if (mounted) {
                 setState(() {
                   _shouldAnimate = false;
                 });
+              }
             },
           )
           .fadeIn(duration: 400.ms)
