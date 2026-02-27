@@ -951,4 +951,40 @@ class MisskeyApi extends BaseApi {
     () => _dio.post('/api/emojis', data: {'i': token}),
     (response) => Map<String, dynamic>.from(response.data),
   );
+
+  /// 获取当前用户的公告列表
+  ///
+  /// 通过调用 `/api/announcements` 接口获取当前用户需要查看的公告。
+  /// 包括全局公告和未读的公告。
+  ///
+  /// @param limit 返回的公告数量限制，默认 10
+  /// @param withUnreads 是否包含未读公告，默认 true
+  /// @param isActive 是否只返回活跃的公告，默认 true
+  /// @return 公告列表
+  /// @throws DioException 如果请求失败
+  Future<List<dynamic>> getAnnouncements({
+    int limit = 10,
+    bool withUnreads = true,
+    bool isActive = true,
+  }) => _fetchList('MisskeyApi.getAnnouncements', '/api/announcements', {
+    'limit': limit,
+    'withUnreads': withUnreads,
+    'isActive': isActive,
+  });
+
+  /// 标记公告为已读
+  ///
+  /// 通过调用 `/api/i/read-announcement` 接口标记指定公告为已读。
+  ///
+  /// @param announcementId 要标记为已读的公告 ID
+  /// @throws DioException 如果请求失败
+  Future<void> readAnnouncement(String announcementId) => executeApiCall(
+    'MisskeyApi.readAnnouncement',
+    () => _dio.post(
+      '/api/i/read-announcement',
+      data: {'i': token, 'announcementId': announcementId},
+    ),
+    (response) => response.data,
+    params: {'announcementId': announcementId},
+  );
 }

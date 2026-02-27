@@ -68,6 +68,8 @@
   "misskey_explore_content": "探索内容",
   "misskey_follow_requests_none": "没有关注请求",
   "misskey_announcements_none": "没有公告",
+  "misskey_announcements_error": "加载公告失败",
+  "misskey_announcement_mark_read": "我已阅读",
   "misskey_antennas_none": "没有天线",
   "misskey_online_users": "• {count} 人在线",
   "misskey_online_users_title": "在线用户",

@@ -68,6 +68,8 @@
   "misskey_explore_content": "エクスプローラーの内容",
   "misskey_follow_requests_none": "フォローリクエストがありません",
   "misskey_announcements_none": "お知らせがありません",
+  "misskey_announcements_error": "お知らせの読み込みに失敗しました",
+  "misskey_announcement_mark_read": "既読にする",
   "misskey_antennas_none": "アンテナがありません",
   "misskey_online_users": "オンラインユーザーが {count} 人",
   "notes_no_notes_found_in_global_timeline": "グローバルタイムラインにノートが見つかりません",

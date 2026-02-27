@@ -68,6 +68,8 @@
   "misskey_explore_content": "Explore Content",
   "misskey_follow_requests_none": "No follow requests",
   "misskey_announcements_none": "No announcements",
+  "misskey_announcements_error": "Failed to load announcements",
+  "misskey_announcement_mark_read": "Mark as read",
   "misskey_antennas_none": "No antennas",
   "misskey_online_users": "Online users: {count}",
   "misskey_online_users_title": "Online Users",

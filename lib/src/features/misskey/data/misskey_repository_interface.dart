@@ -7,6 +7,7 @@ import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
 import '../domain/misskey_notification.dart';
 import '../domain/chat_room.dart';
+import '../domain/announcement.dart';
 
 /// Misskey 仓库接口
 ///
@@ -165,4 +166,25 @@ abstract interface class IMisskeyRepository {
     int limit = 20,
     String? offset,
   });
+
+  /// 获取公告列表
+  ///
+  /// 获取当前用户需要查看的公告列表。
+  ///
+  /// @param limit 返回的公告数量限制，默认 10
+  /// @param withUnreads 是否包含未读公告，默认 true
+  /// @param isActive 是否只返回活跃的公告，默认 true
+  /// @return 公告列表
+  Future<List<Announcement>> getAnnouncements({
+    int limit = 10,
+    bool withUnreads = true,
+    bool isActive = true,
+  });
+
+  /// 标记公告为已读
+  ///
+  /// 标记指定公告为已读状态。
+  ///
+  /// @param announcementId 要标记为已读的公告 ID
+  Future<void> readAnnouncement(String announcementId);
 }

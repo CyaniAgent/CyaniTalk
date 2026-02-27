@@ -62,6 +62,8 @@
   "misskey_explore_content": "探索内容喵~",
   "misskey_follow_requests_none": "没有关注请求喵~",
   "misskey_announcements_none": "没有公告喵~",
+  "misskey_announcements_error": "加载公告失败喵~",
+  "misskey_announcement_mark_read": "我已阅读喵~",
   "misskey_antennas_none": "没有天线喵~",
   "misskey_online_users": "• {count} 人在线喵~",
   "notes_no_notes_found_in_global_timeline": "在全局时间线中没有找到笔记喵~",
