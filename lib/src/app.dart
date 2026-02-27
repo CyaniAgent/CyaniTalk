@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'core/core.dart';
+import 'core/theme/font_manager.dart';
+import 'core/theme/font_refresh_notifier.dart';
 import 'routing/router.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/misskey/application/misskey_notifier.dart';
@@ -133,6 +135,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     logger.debug('CyaniTalkApp: 初始化Misskey流媒体服务');
     ref.watch(misskeyStreamingServiceProvider);
 
+    // 监听字体刷新状态以触发重建
+    ref.watch(fontRefreshProvider);
+
     return appearanceSettingsAsync.when(
       loading: () => Container(color: Colors.white),
       error: (error, stack) {
@@ -145,16 +150,18 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
           primaryColor: null,
         );
         final theme = _buildTheme(defaultSettings, Brightness.light);
-        return MaterialApp.router(
-          routerConfig: goRouter,
-          title: 'CyaniTalk',
-          theme: theme,
-          darkTheme: _buildTheme(defaultSettings, Brightness.dark),
-          themeMode: defaultSettings.displayMode,
-          debugShowCheckedModeBanner: false,
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
+        return GlobalFontRefresher(
+          child: MaterialApp.router(
+            routerConfig: goRouter,
+            title: 'CyaniTalk',
+            theme: theme,
+            darkTheme: _buildTheme(defaultSettings, Brightness.dark),
+            themeMode: defaultSettings.displayMode,
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+          ),
         );
       },
       data: (appearanceSettings) {
@@ -167,16 +174,18 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         final darkTheme = _buildTheme(appearanceSettings, Brightness.dark);
 
         logger.debug('CyaniTalkApp: 构建MaterialApp');
-        return MaterialApp.router(
-          routerConfig: goRouter,
-          title: 'CyaniTalk',
-          theme: theme,
-          darkTheme: darkTheme,
-          themeMode: appearanceSettings.displayMode,
-          debugShowCheckedModeBanner: false,
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: context.supportedLocales,
-          locale: context.locale,
+        return GlobalFontRefresher(
+          child: MaterialApp.router(
+            routerConfig: goRouter,
+            title: 'CyaniTalk',
+            theme: theme,
+            darkTheme: darkTheme,
+            themeMode: appearanceSettings.displayMode,
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+          ),
         );
       },
     );
@@ -205,6 +214,52 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         ? settings.primaryColor!
         : const Color(0xFF39C5BB);
 
+    // 获取字体ID
+    // 空字符串表示系统字体
+    final fontFamilyId = settings.fontFamily ?? 'misans';
+    final isSystemFont = fontFamilyId.isEmpty || fontFamilyId == 'system';
+
+    // 获取基础 TextTheme
+    final baseTextTheme = SauceTypography.createTextTheme(Theme.of(context).platform);
+    
+    // 应用字体
+    TextTheme textTheme;
+    String? effectiveFontFamily;
+    
+    if (isSystemFont) {
+      // 系统字体：不设置 fontFamily，使用系统默认
+      textTheme = baseTextTheme.apply(
+        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+      );
+      effectiveFontFamily = null;
+    } else if (fontFamilyId == 'misans') {
+      // MiSans 内置字体
+      textTheme = baseTextTheme.apply(
+        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+      );
+      effectiveFontFamily = 'MiSans';
+    } else {
+      // 动态加载的字体
+      // 先应用颜色
+      final coloredTextTheme = baseTextTheme.apply(
+        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+      );
+      
+      // 尝试使用 FontManager 的 TextTheme
+      final dynamicTextTheme = FontManager.getTextTheme(fontFamilyId, coloredTextTheme);
+      if (dynamicTextTheme != null) {
+        textTheme = dynamicTextTheme;
+        effectiveFontFamily = fontFamilyId;
+      } else {
+        // 回退到 MiSans
+        textTheme = coloredTextTheme;
+        effectiveFontFamily = 'MiSans';
+      }
+    }
+
     final theme = ThemeData(
       colorScheme: settings.useDynamicColor
           ? ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness)
@@ -216,16 +271,8 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
               secondary: const Color(0xFF6366F1),
             ),
       useMaterial3: true,
-      fontFamily: 'MiSans',
-      textTheme: SauceTypography.createTextTheme(Theme.of(context).platform)
-          .apply(
-            bodyColor: isDark
-                ? SaucePalette.darkOnSurface
-                : SaucePalette.lightOnSurface,
-            displayColor: isDark
-                ? SaucePalette.darkOnSurface
-                : SaucePalette.lightOnSurface,
-          ),
+      fontFamily: effectiveFontFamily,
+      textTheme: textTheme,
     );
 
     // 缓存主题和设置
