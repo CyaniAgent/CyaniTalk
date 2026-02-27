@@ -5,7 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/logger.dart';
+import '../features/profile/application/developer_settings_provider.dart';
 
 import '../features/misskey/presentation/misskey_page.dart';
 import '../features/misskey/presentation/pages/misskey_user_profile_page.dart';
@@ -13,6 +15,7 @@ import '../features/misskey/presentation/pages/misskey_notifications_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
 import '../features/forum/presentation/forum_page.dart';
 import '../features/messaging/presentation/chat_page.dart';
+import '../features/messaging/presentation/messaging_page.dart';
 import '../shared/widgets/coming_soon_page.dart';
 import '../features/misskey/domain/misskey_user.dart';
 import '../features/misskey/domain/chat_room.dart';
@@ -61,6 +64,31 @@ Page<T> _buildSafePage<T>({
   );
 }
 
+/// 根据开发者模式状态返回合适的消息页面
+Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
+  // 这里需要使用 ConsumerWidget 来访问 provider
+  return Consumer(
+    builder: (context, ref, child) {
+      final developerModeAsync = ref.watch(developerSettingsProvider);
+      
+      return developerModeAsync.when(
+        data: (developerMode) {
+          if (developerMode) {
+            return const MessagingPage();
+          }
+          return const ComingSoonPage();
+        },
+        loading: () => const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        ),
+        error: (err, stack) => Scaffold(
+          body: Center(child: Text('Error: $err')),
+        ),
+      );
+    },
+  );
+}
+
 /// 提供应用程序的GoRouter实例
 ///
 /// 定义了应用程序的所有路由配置，包括初始位置和各个页面的路由路径。
@@ -72,6 +100,7 @@ Page<T> _buildSafePage<T>({
 @riverpod
 GoRouter goRouter(Ref ref) {
   logger.info('Router: Initializing GoRouter with initial location: /misskey');
+
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/misskey',
@@ -123,7 +152,7 @@ GoRouter goRouter(Ref ref) {
                 path: '/messaging',
                 pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
-                  child: const ComingSoonPage(),
+                  child: _buildMessagingPage(context, state),
                 ),
               ),
             ],
