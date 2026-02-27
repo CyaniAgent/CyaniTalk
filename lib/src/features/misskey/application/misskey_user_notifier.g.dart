@@ -51,7 +51,7 @@ final class MisskeyUserNotifierProvider
 }
 
 String _$misskeyUserNotifierHash() =>
-    r'c87c2b3ef887c2b2fe0cd406a84aeacfccf147bc';
+    r'ecadc464ec33a0a34150e23da6b02c40caf865a2';
 
 final class MisskeyUserNotifierFamily extends $Family
     with

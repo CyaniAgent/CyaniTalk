@@ -39,7 +39,7 @@ final class MisskeyMessagingHistoryNotifierProvider
 }
 
 String _$misskeyMessagingHistoryNotifierHash() =>
-    r'b93e139b65a3ebd4f83c23686ee4842ac8d2a3d9';
+    r'4e5c20e535c2a098f1a7170c24269f13f1e98a33';
 
 abstract class _$MisskeyMessagingHistoryNotifier
     extends $AsyncNotifier<List<MessagingMessage>> {
@@ -112,7 +112,7 @@ final class MisskeyMessagingNotifierProvider
 }
 
 String _$misskeyMessagingNotifierHash() =>
-    r'2ca7f6551c7eb24f0c63ee913a0065bb9d8dca17';
+    r'4f9f022e2d464b5ddfb85a180401541f79191205';
 
 final class MisskeyMessagingNotifierFamily extends $Family
     with
@@ -213,7 +213,7 @@ final class MisskeyChatRoomNotifierProvider
 }
 
 String _$misskeyChatRoomNotifierHash() =>
-    r'baec0d8951fb484d640b806b6f667f20eee5fc79';
+    r'5061a7b81a2cb134e5ae38e3695d09e55155d2b1';
 
 final class MisskeyChatRoomNotifierFamily extends $Family
     with

@@ -45,7 +45,7 @@ final class AuthServiceProvider
   AuthService create() => AuthService();
 }
 
-String _$authServiceHash() => r'618d17abd75a61a393de682ff1ea855f8a671eb8';
+String _$authServiceHash() => r'7d514495424adb70f763d833c027d236a0b02e10';
 
 /// 认证服务类
 ///
@@ -105,7 +105,7 @@ final class SelectedMisskeyAccountProvider
 }
 
 String _$selectedMisskeyAccountHash() =>
-    r'9148219d173f5c19bf18c3327a427fe61325958c';
+    r'419b8a883b4c1d0f151fe7300b970ed2bbbd77d5';
 
 /// 选中的Misskey账户提供者
 ///
@@ -164,7 +164,7 @@ final class SelectedFlarumAccountProvider
 }
 
 String _$selectedFlarumAccountHash() =>
-    r'0c24a685adc24bd9fccbfd47780ee196a3a2f3e9';
+    r'd63a6bc2c7907349a25c9576f1d50b1095f04216';
 
 /// 选中的Flarum账户提供者
 ///
