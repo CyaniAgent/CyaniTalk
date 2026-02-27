@@ -37,6 +37,23 @@ class AppLogger {
   /// 日志文件路径
   String? _logFilePath;
 
+  /// 是否已经初始化了 debugPrint 拦截
+  bool _debugPrintOverridden = false;
+
+  /// 检查消息是否为干扰噪音（如 Windows AXTree 错误）
+  static bool isNoise(String message) {
+    if (!Platform.isWindows) return false;
+
+    final noisePatterns = [
+      'AXTree',
+      'Accessibility Error',
+      'flutter/shell/platform/windows',
+      'render_accessibility_node',
+    ];
+
+    return noisePatterns.any((pattern) => message.contains(pattern));
+  }
+
   /// 初始化日志配置
   ///
   /// 配置日志输出方式，包括控制台输出和文件输出。
@@ -74,8 +91,19 @@ class AppLogger {
       }
     }
 
-    // 创建控制台输出
-    final consoleOutput = ConsoleOutput();
+    // 在 Windows 上抑制原生 AXTree 报错（这些通常通过 debugPrint 输出）
+    if (Platform.isWindows && !_debugPrintOverridden) {
+      final DebugPrintCallback originalDebugPrint = debugPrint;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null && !isNoise(message)) {
+          originalDebugPrint(message, wrapWidth: wrapWidth);
+        }
+      };
+      _debugPrintOverridden = true;
+    }
+
+    // 创建控制台输出 (使用自定义过滤输出)
+    final consoleOutput = FilteredConsoleOutput();
 
     // 创建文件输出
     _fileOutput = await _createFileOutput();
@@ -101,7 +129,7 @@ class AppLogger {
   ///
   /// 仅使用控制台输出，避免依赖 path_provider 等平台相关库。
   void setupForTesting() {
-    final consoleOutput = ConsoleOutput();
+    final consoleOutput = FilteredConsoleOutput();
     _logger = Logger(
       level: Level.error,
       output: consoleOutput,
@@ -227,7 +255,7 @@ class AppLogger {
     }
 
     // 创建控制台输出
-    final consoleOutput = ConsoleOutput();
+    final consoleOutput = FilteredConsoleOutput();
 
     // 重新创建日志器以更新级别
     _logger = Logger(
@@ -366,8 +394,7 @@ class AppLogger {
   Future<void> cleanupLogs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final maxMB = prefs.getInt('log_max_size') ?? Constants.defaultMaxLogSize;
-      final autoClear = prefs.getBool('log_auto_clear') ?? true;
+      final maxMB = prefs.getInt('log_max_size') ?? Constants.defaultMaxLogSize;      final autoClear = prefs.getBool('log_auto_clear') ?? true;
       final retentionDays = prefs.getInt('log_retention_days') ?? 7;
 
       final files = await listLogFiles();
@@ -576,6 +603,19 @@ class AppMultiOutput extends LogOutput {
   Future<void> destroy() async {
     for (var output in outputs) {
       await output.destroy();
+    }
+  }
+}
+
+/// 自定义控制台输出，支持噪音过滤
+class FilteredConsoleOutput extends LogOutput {
+  @override
+  void output(OutputEvent event) {
+    for (var line in event.lines) {
+      if (!AppLogger.isNoise(line)) {
+        // 使用 debugPrint 而不是 print，以便进一步被拦截
+        debugPrint(line);
+      }
     }
   }
 }
