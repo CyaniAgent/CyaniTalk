@@ -708,13 +708,13 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           try {
             final repository = await ref.read(misskeyRepositoryProvider.future);
             await repository.addReaction(widget.note.id, emoji);
-            if (mounted) {
+            if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 SnackBar(content: Text('note_reaction_added'.tr())),
               );
             }
           } catch (e) {
-            if (mounted) {
+            if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -731,13 +731,13 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           try {
             final repository = await ref.read(misskeyRepositoryProvider.future);
             await repository.removeReaction(widget.note.id);
-            if (mounted) {
+            if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 SnackBar(content: Text('note_reaction_removed'.tr())),
               );
             }
           } catch (e) {
-            if (mounted) {
+            if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
                 SnackBar(
                   content: Text(
