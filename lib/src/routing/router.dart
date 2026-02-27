@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../core/utils/logger.dart';
+import '../features/profile/application/developer_settings_provider.dart';
 
 import '../features/misskey/presentation/misskey_page.dart';
 import '../features/misskey/presentation/pages/misskey_user_profile_page.dart';
@@ -13,6 +14,7 @@ import '../features/misskey/presentation/pages/misskey_notifications_page.dart';
 import '../features/cloud/presentation/cloud_page.dart';
 import '../features/forum/presentation/forum_page.dart';
 import '../features/messaging/presentation/chat_page.dart';
+import '../features/messaging/presentation/messaging_page.dart';
 import '../shared/widgets/coming_soon_page.dart';
 import '../features/misskey/domain/misskey_user.dart';
 import '../features/misskey/domain/chat_room.dart';
@@ -72,6 +74,18 @@ Page<T> _buildSafePage<T>({
 @riverpod
 GoRouter goRouter(Ref ref) {
   logger.info('Router: Initializing GoRouter with initial location: /misskey');
+  
+  // Watch developer mode state
+  final developerModeAsync = ref.watch(developerSettingsProvider);
+  
+  // Determine which page to show for /messaging based on developer mode
+  Widget messagingPageWidget = const ComingSoonPage();
+  developerModeAsync.whenData((developerMode) {
+    if (developerMode) {
+      messagingPageWidget = const MessagingPage();
+    }
+  });
+  
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/misskey',
@@ -123,7 +137,7 @@ GoRouter goRouter(Ref ref) {
                 path: '/messaging',
                 pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
-                  child: const ComingSoonPage(),
+                  child: messagingPageWidget,
                 ),
               ),
             ],
