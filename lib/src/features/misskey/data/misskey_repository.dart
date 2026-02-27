@@ -12,6 +12,7 @@ import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
 import '../domain/misskey_notification.dart';
 import '../domain/chat_room.dart';
+import '../domain/emoji.dart';
 import 'misskey_repository_interface.dart';
 
 part 'misskey_repository.g.dart';
@@ -878,6 +879,38 @@ class MisskeyRepository implements IMisskeyRepository {
       }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error searching users', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Emoji>> getEmojis() async {
+    logger.info('MisskeyRepository: Getting emojis list');
+    try {
+      final data = await api.getEmojis();
+      final emojisResponse = EmojisResponse.fromJson(data);
+      logger.info(
+        'MisskeyRepository: Successfully retrieved ${emojisResponse.emojis.length} emojis',
+      );
+      return emojisResponse.emojis;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting emojis', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<EmojiDetail> getEmoji(String name) async {
+    logger.info('MisskeyRepository: Getting emoji detail: $name');
+    try {
+      final data = await api.getEmoji(name);
+      final emojiDetail = EmojiDetail.fromJson(data);
+      logger.info(
+        'MisskeyRepository: Successfully retrieved emoji detail: ${emojiDetail.name}',
+      );
+      return emojiDetail;
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting emoji detail', e);
       rethrow;
     }
   }

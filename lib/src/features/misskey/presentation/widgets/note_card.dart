@@ -11,6 +11,8 @@ import '../../application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
 import '../../../common/presentation/pages/media_viewer_page.dart';
+import 'emoji_picker.dart';
+import 'reaction_display.dart';
 
 import '../../../common/presentation/widgets/media/media_item.dart';
 
@@ -177,6 +179,15 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                       child: Semantics(
                         label: 'Attached files',
                         child: _buildMediaGrid(note.files),
+                      ),
+                    ),
+
+                  if (note.reactions.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: ReactionDisplay(
+                        note: note,
+                        onReactionTap: _handleReactionTap,
                       ),
                     ),
 
@@ -688,14 +699,78 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   }
 
   Future<void> _handleReaction() async {
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => EmojiPicker(
+        noteId: widget.note.id,
+        currentReaction: widget.note.myReaction,
+        onEmojiSelected: (emoji) async {
+          try {
+            final repository = await ref.read(misskeyRepositoryProvider.future);
+            await repository.addReaction(widget.note.id, emoji);
+            if (mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text('note_reaction_added'.tr())),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'note_failed_to_react'.tr(
+                      namedArgs: {'error': e.toString()},
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+        },
+        onReactionRemoved: () async {
+          try {
+            final repository = await ref.read(misskeyRepositoryProvider.future);
+            await repository.removeReaction(widget.note.id);
+            if (mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text('note_reaction_removed'.tr())),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'note_failed_to_remove_reaction'.tr(
+                      namedArgs: {'error': e.toString()},
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleReactionTap(String reaction) async {
     try {
-      // Default to heart for now
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      await repository.addReaction(widget.note.id, '❤️');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr())));
+      if (widget.note.myReaction == reaction) {
+        await repository.removeReaction(widget.note.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('note_reaction_removed'.tr())),
+          );
+        }
+      } else {
+        await repository.addReaction(widget.note.id, reaction);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('note_reaction_added'.tr())),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

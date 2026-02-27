@@ -102,6 +102,10 @@ class NetworkClient {
           'Connection': 'keep-alive', // 显式请求保持连接
           ...?extraHeaders
         },
+        validateStatus: (status) {
+          // 让所有状态码都通过，由 BaseApi.handleResponse 来处理
+          return true;
+        },
       ),
     );
 

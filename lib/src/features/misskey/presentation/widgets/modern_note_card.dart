@@ -14,6 +14,7 @@ import 'audio_player_widget.dart';
 import '../../../common/presentation/pages/media_viewer_page.dart';
 
 import '../../../common/presentation/widgets/media/media_item.dart';
+import 'emoji_picker.dart';
 
 /// Modern NoteCard组件
 ///
@@ -778,26 +779,37 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   }
 
   Future<void> _handleReaction() async {
-    try {
-      // Default to heart for now
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      await repository.addReaction(widget.note.id, '❤️');
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr())));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'note_failed_to_react'.tr(namedArgs: {'error': e.toString()}),
-            ),
-          ),
+    // 弹出表情选择器
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return EmojiPicker(
+          noteId: widget.note.id,
+          onEmojiSelected: (emoji) async {
+            try {
+              final repository = await ref.read(misskeyRepositoryProvider.future);
+              await repository.addReaction(widget.note.id, emoji);
+              // 使用局部上下文变量，避免在异步操作中使用可能失效的 BuildContext
+              if (dialogContext.mounted) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(content: Text('note_reaction_added'.tr())),
+                );
+              }
+            } catch (e) {
+              if (dialogContext.mounted) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'note_failed_to_react'.tr(namedArgs: {'error': e.toString()}),
+                    ),
+                  ),
+                );
+              }
+            }
+          },
         );
-      }
-    }
+      },
+    );
   }
 
   void _handleShare() {

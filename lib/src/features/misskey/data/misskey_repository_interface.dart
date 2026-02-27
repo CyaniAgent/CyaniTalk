@@ -7,6 +7,7 @@ import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
 import '../domain/misskey_notification.dart';
 import '../domain/chat_room.dart';
+import '../domain/emoji.dart';
 
 /// Misskey 仓库接口
 ///
@@ -165,4 +166,10 @@ abstract interface class IMisskeyRepository {
     int limit = 20,
     String? offset,
   });
+
+  /// 获取表情列表
+  Future<List<Emoji>> getEmojis();
+
+  /// 获取单个表情详情
+  Future<EmojiDetail> getEmoji(String name);
 }

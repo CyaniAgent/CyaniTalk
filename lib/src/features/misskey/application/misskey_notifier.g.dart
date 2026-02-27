@@ -180,7 +180,7 @@ final class MisskeyChannelsNotifierProvider
 }
 
 String _$misskeyChannelsNotifierHash() =>
-    r'6c87f10e3fd4bc9795f25a22d865a1a17d8b442f';
+    r'5607081063d555078f8613faab9899ff41aa88d3';
 
 /// Misskey频道列表状态管理类
 
@@ -378,7 +378,7 @@ final class MisskeyClipsNotifierProvider
 }
 
 String _$misskeyClipsNotifierHash() =>
-    r'1f0c00e2adf76ded09b8c4f0669a52a65a9f4873';
+    r'dc73fd1c49bde7a859065e7f41258bb3ce84221a';
 
 /// Misskey片段(Clips)列表状态管理类
 
@@ -447,7 +447,7 @@ final class MisskeyClipNotesNotifierProvider
 }
 
 String _$misskeyClipNotesNotifierHash() =>
-    r'8bbd8af649a3ddcd463b2aa4a724749398b2c1c1';
+    r'9712ec6bff11d9c4bfd6557a615a10e9af1f2133';
 
 /// Misskey片段笔记状态管理类
 
