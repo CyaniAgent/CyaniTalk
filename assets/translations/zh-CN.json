@@ -131,7 +131,7 @@
   "settings_developer_mode_title": "开发者模式",
   "settings_developer_mode_description": "解锁新功能，测试我们开发中的组件",
   "settings_developer_mode_warning_title": "启用开发者模式",
-  "settings_developer_mode_warning_message": "启用开发者模式后，应用的"消息"页面将正式使用消息页面。此功能正在开发中，可能会影响应用稳定性。是否继续？",
+  "settings_developer_mode_warning_message": "启用开发者模式后，将会解锁开发中的新功能，可能会影响 App 的稳定性。可通过本页面的反馈方式向我们提出反馈与建议。是否继续？\n\n注意：启动开发者模式后，应用将自动重启。",
   "settings_developer_mode_warning_cancel": "取消",
   "settings_developer_mode_warning_confirm": "继续",
   "settings_developer_submit_issue": "向我们提交 issue",

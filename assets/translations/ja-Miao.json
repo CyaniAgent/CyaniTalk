@@ -131,7 +131,7 @@
   "settings_developer_mode_title": "デベロッパーモードにゃ～",
   "settings_developer_mode_description": "新機能をアンロックし、開発中のコンポーネントをテストするにゃ～",
   "settings_developer_mode_warning_title": "デベロッパーモードを有効にするにゃ～",
-  "settings_developer_mode_warning_message": "デベロッパーモードを有効にすると、アプリのメッセージページが正式にメッセージページを使用するようになりますにゃ～ この機能は開発中であり、アプリの安定性に影響する可能性がありますにゃ～ 続行しますかにゃ～",
+  "settings_developer_mode_warning_message": "デベロッパーモードを有効にすると、開発中の新機能がアンロックされますにゃ～ アプリの安定性に影響する可能性がありますにゃ～ このページのフィードバックオプションを通じてフィードバックや提案を提供できますにゃ～ 続行しますかにゃ～\n\n注意：デベロッパーモードを有効にすると、アプリは自動的に再起動されますにゃ～",
   "settings_developer_mode_warning_cancel": "キャンセルにゃ～",
   "settings_developer_mode_warning_confirm": "続行にゃ～",
   "settings_developer_submit_issue": "issueを送信するにゃ～",

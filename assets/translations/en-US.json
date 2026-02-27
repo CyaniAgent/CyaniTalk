@@ -131,7 +131,7 @@
   "settings_developer_mode_title": "Developer Mode",
   "settings_developer_mode_description": "Unlock new features, test our components in development",
   "settings_developer_mode_warning_title": "Enable Developer Mode",
-  "settings_developer_mode_warning_message": "When Developer Mode is enabled, the app's Messages page will officially use the Message page. This feature is under development and may affect app stability. Do you want to continue?",
+  "settings_developer_mode_warning_message": "When Developer Mode is enabled, new features under development will be unlocked, which may affect the stability of the app. You can provide feedback and suggestions through the feedback options on this page. Do you want to continue?\n\nNote: The app will automatically restart after enabling Developer Mode.",
   "settings_developer_mode_warning_cancel": "Cancel",
   "settings_developer_mode_warning_confirm": "Continue",
   "settings_developer_submit_issue": "Submit an issue",

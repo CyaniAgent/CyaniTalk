@@ -97,7 +97,7 @@
   "settings_developer_mode_title": "Developer Mode Meow~",
   "settings_developer_mode_description": "Unlock new features, test our components in development Meow~",
   "settings_developer_mode_warning_title": "Enable Developer Mode Meow~",
-  "settings_developer_mode_warning_message": "When Developer Mode is enabled, the app's Messages page will officially use the Message page Meow~ This feature is under development and may affect app stability Meow~ Do you want to continue Meow~",
+  "settings_developer_mode_warning_message": "When Developer Mode is enabled, new features under development will be unlocked Meow~ This may affect the stability of the app Meow~ You can provide feedback and suggestions through the feedback options on this page Meow~ Do you want to continue Meow~\n\nNote: The app will automatically restart after enabling Developer Mode Meow~",
   "settings_developer_mode_warning_cancel": "Cancel Meow~",
   "settings_developer_mode_warning_confirm": "Continue Meow~",
   "settings_developer_submit_issue": "Submit an issue Meow~",
