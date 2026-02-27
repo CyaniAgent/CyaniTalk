@@ -68,6 +68,8 @@
   "misskey_explore_content": "エクスプローラーの内容にゃ～",
   "misskey_follow_requests_none": "フォローリクエストがありませんにゃ～",
   "misskey_announcements_none": "お知らせがありませんにゃ～",
+  "misskey_announcements_error": "お知らせの読み込みに失敗しましたにゃ～",
+  "misskey_announcement_mark_read": "既読にするにゃ～",
   "misskey_antennas_none": "アンテナがありませんにゃ～",
   "misskey_online_users": "オンラインユーザーが {count} 人にゃ～",
   "misskey_online_users_title": "オンラインユーザーにゃ～",

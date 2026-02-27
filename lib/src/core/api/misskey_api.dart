@@ -952,18 +952,54 @@ class MisskeyApi extends BaseApi {
     (response) => Map<String, dynamic>.from(response.data),
   );
 
-  /// 获取笔记的表情反应
+  /// 获取当前用户的公告列表
   ///
-  /// 通过调用 `/api/notes/reactions` 接口获取指定笔记的表情反应列表。
+  /// 通过调用 `/api/announcements` 接口获取当前用户需要查看的公告。
+  /// 包括全局公告和未读的公告。
+  ///
+  /// @param limit 返回的公告数量限制，默认 10
+  /// @param withUnreads 是否包含未读公告，默认 true
+  /// @param isActive 是否只返回活跃的公告，默认 true
+  /// @return 公告列表
+  /// @throws DioException 如果请求失败
+  Future<List<dynamic>> getAnnouncements({
+    int limit = 10,
+    bool withUnreads = true,
+    bool isActive = true,
+  }) => _fetchList('MisskeyApi.getAnnouncements', '/api/announcements', {
+    'limit': limit,
+    'withUnreads': withUnreads,
+    'isActive': isActive,
+  });
+
+  /// 标记公告为已读
+  ///
+  /// 通过调用 `/api/i/read-announcement` 接口标记指定公告为已读。
+  ///
+  /// @param announcementId 要标记为已读的公告 ID
+  /// @throws DioException 如果请求失败
+  Future<void> readAnnouncement(String announcementId) => executeApiCall(
+    'MisskeyApi.readAnnouncement',
+    () => _dio.post(
+      '/api/i/read-announcement',
+      data: {'i': token, 'announcementId': announcementId},
+    ),
+    (response) => response.data,
+    params: {'announcementId': announcementId},
+  );
+
+  /// 获取笔记的反应列表
+  ///
+  /// 通过调用 `/api/notes/reactions` 接口获取指定笔记的反应列表。
   ///
   /// @param noteId 笔记 ID
-  /// @param type 表情类型，为空则获取所有表情
-  /// @param limit 返回的反应数量限制，默认 10
-  /// @param sinceId 分页标记，用于加载更新的反应
-  /// @param untilId 分页标记，用于加载更早的反应
-  /// @param sinceDate 时间戳，用于加载指定时间后的反应
-  /// @param untilDate 时间戳，用于加载指定时间前的反应
-  /// @return 表情反应列表
+  /// @param type 反应类型（可选）
+  /// @param limit 返回数量限制，默认 10
+  /// @param sinceId 起始 ID（可选）
+  /// @param untilId 结束 ID（可选）
+  /// @param sinceDate 起始日期时间戳（可选）
+  /// @param untilDate 结束日期时间戳（可选）
+  /// @return 反应列表
   /// @throws DioException 如果请求失败
   Future<List<dynamic>> getNoteReactions(
     String noteId, {
@@ -975,11 +1011,11 @@ class MisskeyApi extends BaseApi {
     int? untilDate,
   }) => _fetchList('MisskeyApi.getNoteReactions', '/api/notes/reactions', {
     'noteId': noteId,
-    'type': ?type,
     'limit': limit,
-    'sinceId': ?sinceId,
-    'untilId': ?untilId,
-    'sinceDate': ?sinceDate,
-    'untilDate': ?untilDate,
+    'type': type,
+    'sinceId': sinceId,
+    'untilId': untilId,
+    'sinceDate': sinceDate,
+    'untilDate': untilDate,
   });
 }

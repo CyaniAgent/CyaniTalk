@@ -719,62 +719,56 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   Future<void> _handleReaction() async {
     await showDialog(
       context: context,
-      builder: (dialogContext) {
-        return EmojiPicker(
-          noteId: widget.note.id,
-          currentReaction: widget.note.myReaction,
-          onEmojiSelected: (emoji) async {
-            try {
-              final repository = await ref.read(
-                misskeyRepositoryProvider.future,
+      builder: (dialogContext) => EmojiPicker(
+        noteId: widget.note.id,
+        currentReaction: widget.note.myReaction,
+        onEmojiSelected: (emoji) async {
+          try {
+            final repository = await ref.read(misskeyRepositoryProvider.future);
+            await repository.addReaction(widget.note.id, emoji);
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text('note_reaction_added'.tr())),
               );
-              await repository.addReaction(widget.note.id, emoji);
-              if (dialogContext.mounted) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  SnackBar(content: Text('note_reaction_added'.tr())),
-                );
-              }
-            } catch (e) {
-              if (dialogContext.mounted) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'note_failed_to_react'.tr(
-                        namedArgs: {'error': e.toString()},
-                      ),
+            }
+          } catch (e) {
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'note_failed_to_react'.tr(
+                      namedArgs: {'error': e.toString()},
                     ),
                   ),
-                );
-              }
-            }
-          },
-          onReactionRemoved: () async {
-            try {
-              final repository = await ref.read(
-                misskeyRepositoryProvider.future,
+                ),
               );
-              await repository.removeReaction(widget.note.id);
-              if (dialogContext.mounted) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  SnackBar(content: Text('note_reaction_removed'.tr())),
-                );
-              }
-            } catch (e) {
-              if (dialogContext.mounted) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'note_failed_to_remove_reaction'.tr(
-                        namedArgs: {'error': e.toString()},
-                      ),
+            }
+          }
+        },
+        onReactionRemoved: () async {
+          try {
+            final repository = await ref.read(misskeyRepositoryProvider.future);
+            await repository.removeReaction(widget.note.id);
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(content: Text('note_reaction_removed'.tr())),
+              );
+            }
+          } catch (e) {
+            if (dialogContext.mounted) {
+              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'note_failed_to_remove_reaction'.tr(
+                      namedArgs: {'error': e.toString()},
                     ),
                   ),
-                );
-              }
+                ),
+              );
             }
-          },
-        );
-      },
+          }
+        },
+      ),
     );
   }
 

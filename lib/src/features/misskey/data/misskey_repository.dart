@@ -12,6 +12,7 @@ import '../domain/misskey_user.dart';
 import '../domain/messaging_message.dart';
 import '../domain/misskey_notification.dart';
 import '../domain/chat_room.dart';
+import '../domain/announcement.dart';
 import '../domain/emoji.dart';
 import 'misskey_repository_interface.dart';
 
@@ -883,16 +884,53 @@ class MisskeyRepository implements IMisskeyRepository {
     }
   }
 
+  // --- Announcements ---
+
+  @override
+  Future<List<Announcement>> getAnnouncements({
+    int limit = 10,
+    bool withUnreads = true,
+    bool isActive = true,
+  }) async {
+    logger.info('MisskeyRepository: Getting announcements');
+    try {
+      final data = await api.getAnnouncements(
+        limit: limit,
+        withUnreads: withUnreads,
+        isActive: isActive,
+      );
+      return await compute((List<dynamic> list) {
+        return list.map((e) => Announcement.fromJson(e as Map<String, dynamic>)).toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting announcements', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> readAnnouncement(String announcementId) async {
+    logger.info('MisskeyRepository: Reading announcement: $announcementId');
+    try {
+      await api.readAnnouncement(announcementId);
+      logger.info('MisskeyRepository: Successfully read announcement: $announcementId');
+    } catch (e) {
+      logger.error('MisskeyRepository: Error reading announcement', e);
+      rethrow;
+    }
+  }
+
+  // --- Emojis ---
+
   @override
   Future<List<Emoji>> getEmojis() async {
-    logger.info('MisskeyRepository: Getting emojis list');
+    logger.info('MisskeyRepository: Getting emojis');
     try {
       final data = await api.getEmojis();
-      final emojisResponse = EmojisResponse.fromJson(data);
-      logger.info(
-        'MisskeyRepository: Successfully retrieved ${emojisResponse.emojis.length} emojis',
-      );
-      return emojisResponse.emojis;
+      final emojis = data['emojis'] as List<dynamic>;
+      return await compute((List<dynamic> list) {
+        return list.map((e) => Emoji.fromJson(e as Map<String, dynamic>)).toList();
+      }, emojis);
     } catch (e) {
       logger.error('MisskeyRepository: Error getting emojis', e);
       rethrow;
@@ -901,16 +939,12 @@ class MisskeyRepository implements IMisskeyRepository {
 
   @override
   Future<EmojiDetail> getEmoji(String name) async {
-    logger.info('MisskeyRepository: Getting emoji detail: $name');
+    logger.info('MisskeyRepository: Getting emoji: $name');
     try {
       final data = await api.getEmoji(name);
-      final emojiDetail = EmojiDetail.fromJson(data);
-      logger.info(
-        'MisskeyRepository: Successfully retrieved emoji detail: ${emojiDetail.name}',
-      );
-      return emojiDetail;
+      return EmojiDetail.fromJson(data);
     } catch (e) {
-      logger.error('MisskeyRepository: Error getting emoji detail', e);
+      logger.error('MisskeyRepository: Error getting emoji', e);
       rethrow;
     }
   }

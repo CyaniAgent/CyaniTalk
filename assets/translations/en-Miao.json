@@ -62,6 +62,8 @@
   "misskey_explore_content": "Explore Content Meow~",
   "misskey_follow_requests_none": "No follow requests Meow~",
   "misskey_announcements_none": "No announcements Meow~",
+  "misskey_announcements_error": "Failed to load announcements Meow~",
+  "misskey_announcement_mark_read": "Mark as read Meow~",
   "misskey_antennas_none": "No antennas Meow~",
   "misskey_online_users": "Online users: {count} Meow~",
   "notes_no_notes_found_in_global_timeline": "No notes found in Global timeline Meow~",
