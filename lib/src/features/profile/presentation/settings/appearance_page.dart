@@ -8,8 +8,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/core.dart';
-import '../../../../core/theme/font_selector.dart';
+import '/src/core/core.dart';
+import '/src/core/theme/font_selector.dart';
 
 part 'appearance_page.g.dart';
 

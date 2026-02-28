@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/utils/logger.dart';
+import '/src/core/utils/logger.dart';
 
 /// 音频播放器状态
 class AudioPlayerState {
@@ -150,7 +150,8 @@ class AudioPlayerController {
         await sub.cancel();
       }
       await _audioPlayer.dispose();
-    }}
+    }
+}
 
 /// 音频播放器控制器提供者
 final audioPlayerControllerProvider =

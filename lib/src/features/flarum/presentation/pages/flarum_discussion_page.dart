@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/flarum_providers.dart';
-import '../widgets/discussion_list_item.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
+import '/src/features/flarum/presentation/widgets/discussion_list_item.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 

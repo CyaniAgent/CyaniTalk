@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/misskey/application/misskey_streaming_service.dart';
-import '../../features/profile/application/notification_settings_provider.dart';
-import '../../features/flarum/application/flarum_providers.dart';
-import '../../features/auth/application/auth_service.dart';
+import '/src/features/misskey/application/misskey_streaming_service.dart';
+import '/src/features/profile/application/notification_settings_provider.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
+import '/src/features/auth/application/auth_service.dart';
 import 'notification_service.dart';
 import 'sound_service.dart';
-import '../core.dart';
+import '/src/core/core.dart';
 
 /// 全局通知管理器
 ///

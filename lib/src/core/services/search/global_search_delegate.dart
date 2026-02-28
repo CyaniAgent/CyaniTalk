@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../utils/utils.dart';
+import '/src/core/utils/utils.dart';
 import 'global_search_service.dart';
 
 /// 全局搜索代理

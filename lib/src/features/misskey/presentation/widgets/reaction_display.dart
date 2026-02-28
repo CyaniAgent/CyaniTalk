@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/note.dart';
-import '../../domain/emoji.dart';
-import '../../data/misskey_repository.dart';
-import './retryable_network_image.dart';
+import '/src/features/misskey/domain/note.dart';
+import '/src/features/misskey/domain/emoji.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/misskey/presentation/widgets/retryable_network_image.dart';
 
 class ReactionDisplay extends ConsumerWidget {
   final Note note;

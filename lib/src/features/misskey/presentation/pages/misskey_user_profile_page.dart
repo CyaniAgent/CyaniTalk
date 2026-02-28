@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/misskey_user_notifier.dart';
-import '../../domain/misskey_user.dart';
+import '/src/features/misskey/application/misskey_user_notifier.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
 
 class MisskeyUserProfilePage extends ConsumerWidget {
   final String userId;

@@ -1,6 +1,6 @@
 import 'dart:convert';
-import '../../../core/utils/logger.dart';
-import '../data/misskey_repository_interface.dart';
+import '/src/core/utils/logger.dart';
+import '/src/features/misskey/data/misskey_repository_interface.dart';
 
 /// A local interpreter for AiScript, designed for Misskey interaction.
 ///

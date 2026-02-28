@@ -6,8 +6,8 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/utils/logger.dart';
-import '../domain/account.dart';
+import '/src/core/utils/logger.dart';
+import '/src/features/auth/domain/account.dart';
 
 part 'auth_repository.g.dart';
 

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cyanitalk/src/features/misskey/domain/note.dart';
-import '../../../core/core.dart';
+import '/src/core/core.dart';
 
 /// 笔记缓存项
 class NoteCacheItem {

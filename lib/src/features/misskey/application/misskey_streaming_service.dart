@@ -4,15 +4,15 @@ import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
-import '../domain/note.dart';
-import '../domain/note_event.dart';
-import '../domain/messaging_message.dart';
+import '/src/features/misskey/domain/note.dart';
+import '/src/features/misskey/domain/note_event.dart';
+import '/src/features/misskey/domain/messaging_message.dart';
 
-import '../../auth/application/auth_service.dart';
-import '../../auth/domain/account.dart';
-import '../../../core/utils/logger.dart';
-import '../../../core/config/constants.dart';
-import '../../../core/services/streaming/streaming_service_interface.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/features/auth/domain/account.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/config/constants.dart';
+import '/src/core/services/streaming/streaming_service_interface.dart';
 
 part 'misskey_streaming_service.g.dart';
 

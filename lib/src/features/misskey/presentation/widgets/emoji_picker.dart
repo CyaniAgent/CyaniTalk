@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../domain/emoji.dart';
-import '../../data/misskey_repository.dart';
+import '/src/features/misskey/domain/emoji.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
 import 'retryable_network_image.dart';
 
 class EmojiPicker extends ConsumerStatefulWidget {

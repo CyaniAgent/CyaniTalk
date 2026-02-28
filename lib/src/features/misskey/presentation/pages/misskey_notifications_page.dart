@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../../application/misskey_notifications_notifier.dart';
-import '../../domain/misskey_notification.dart';
+import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/features/misskey/domain/misskey_notification.dart';
 
 class MisskeyNotificationsPage extends ConsumerWidget {
   const MisskeyNotificationsPage({super.key});

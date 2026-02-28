@@ -1,5 +1,5 @@
 import 'dart:async';
-import '../utils/logger.dart';
+import '/src/core/utils/logger.dart';
 
 /// API 请求缓存项
 class ApiCacheItem<T> {

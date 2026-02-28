@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'login_form_components.dart';
-import '../../application/auth_service.dart';
-import '../../../../core/api/flarum_api.dart';
-import '../../../../core/utils/logger.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/core/api/flarum_api.dart';
+import '/src/core/utils/logger.dart';
 
 /// 统一的登录表单控件
 ///

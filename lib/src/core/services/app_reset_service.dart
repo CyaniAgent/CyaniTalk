@@ -1,8 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../utils/cache_manager.dart';
-import '../utils/logger.dart';
-import '../../features/auth/data/auth_repository.dart';
+import '/src/core/utils/cache_manager.dart';
+import '/src/core/utils/logger.dart';
+import '/src/features/auth/data/auth_repository.dart';
 
 part 'app_reset_service.g.dart';
 

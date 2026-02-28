@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../data/misskey_repository.dart';
-import '../domain/misskey_user.dart';
-import '../../../core/core.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
+import '/src/core/core.dart';
 
 part 'misskey_user_notifier.g.dart';
 

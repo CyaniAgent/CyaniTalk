@@ -1,6 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../utils/logger.dart';
+import '/src/core/utils/logger.dart';
 
 /// 全局音频引擎服务
 ///

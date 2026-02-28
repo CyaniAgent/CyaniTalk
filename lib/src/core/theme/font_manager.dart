@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../utils/logger.dart';
-import '../utils/download_utils.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/utils/download_utils.dart';
 
 /// 字体类型枚举
 enum FontType {

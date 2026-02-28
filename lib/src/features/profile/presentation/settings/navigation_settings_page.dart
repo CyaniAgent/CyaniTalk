@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../core/navigation/navigation.dart';
-import '../../../../core/navigation/navigation_element.dart';
+import '/src/core/navigation/navigation.dart';
+import '/src/core/navigation/navigation_element.dart';
 
 /// 导航设置页面组件
 ///

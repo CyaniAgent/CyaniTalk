@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core.dart';
+import '/src/core/core.dart';
 
 /// 缓存类别枚举
 ///

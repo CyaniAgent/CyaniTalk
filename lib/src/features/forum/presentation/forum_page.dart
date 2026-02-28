@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import '../../flarum/application/flarum_providers.dart';
-import '../../../core/navigation/navigation.dart';
-import '../../../core/navigation/sub_navigation_notifier.dart';
-import '../../flarum/presentation/pages/flarum_discussion_page.dart';
-import '../../flarum/presentation/pages/flarum_tags_page.dart';
-import '../../flarum/presentation/pages/flarum_notifications_page.dart';
-import '../../auth/application/auth_service.dart';
-import '../../../shared/widgets/login_reminder.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
+import '/src/core/navigation/navigation.dart';
+import '/src/core/navigation/sub_navigation_notifier.dart';
+import '/src/features/flarum/presentation/pages/flarum_discussion_page.dart';
+import '/src/features/flarum/presentation/pages/flarum_tags_page.dart';
+import '/src/features/flarum/presentation/pages/flarum_notifications_page.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/shared/widgets/login_reminder.dart';
 
 class ForumPage extends ConsumerStatefulWidget {
   const ForumPage({super.key});

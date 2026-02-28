@@ -8,9 +8,9 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/navigation/navigation.dart';
-import '../../core/navigation/navigation_element.dart';
-import '../../core/navigation/sub_navigation_notifier.dart';
+import '/src/core/navigation/navigation.dart';
+import '/src/core/navigation/navigation_element.dart';
+import '/src/core/navigation/sub_navigation_notifier.dart';
 import 'root_navigation_drawer.dart';
 import 'user_navigation_header.dart';
 

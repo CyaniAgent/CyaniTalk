@@ -1,11 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/api/flarum_api.dart';
-import '../../auth/application/auth_service.dart';
-import '../data/flarum_repository.dart';
-import '../data/models/forum_info.dart';
-import '../data/models/user.dart';
-import '../data/models/discussion.dart';
-import '../data/models/flarum_notification.dart';
+import '/src/core/api/flarum_api.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/features/flarum/data/flarum_repository.dart';
+import '/src/features/flarum/data/models/forum_info.dart';
+import '/src/features/flarum/data/models/user.dart';
+import '/src/features/flarum/data/models/discussion.dart';
+import '/src/features/flarum/data/models/flarum_notification.dart';
 
 part 'flarum_providers.g.dart';
 

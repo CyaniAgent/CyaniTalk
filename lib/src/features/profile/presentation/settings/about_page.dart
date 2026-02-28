@@ -9,9 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../core/core.dart';
-import '../../../../core/api/network_client.dart';
-import '../../../../core/services/audio_engine.dart';
+import '/src/core/core.dart';
+import '/src/core/api/network_client.dart';
+import '/src/core/services/audio_engine.dart';
 import 'sponsor_page.dart';
 
 /// 应用程序的关于页面组件

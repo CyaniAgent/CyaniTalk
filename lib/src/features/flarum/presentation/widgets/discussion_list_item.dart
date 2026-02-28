@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/discussion.dart';
+import '/src/features/flarum/data/models/discussion.dart';
 
 class DiscussionListItem extends StatelessWidget {
   final Discussion discussion;

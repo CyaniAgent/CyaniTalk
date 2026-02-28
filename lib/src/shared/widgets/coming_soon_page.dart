@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import '../../core/navigation/navigation.dart';
+import '/src/core/navigation/navigation.dart';
 
 class ComingSoonPage extends ConsumerWidget {
   const ComingSoonPage({super.key});

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/misskey_notifier.dart';
-import '../widgets/modern_note_card.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
   const MisskeyTimelinePage({super.key});

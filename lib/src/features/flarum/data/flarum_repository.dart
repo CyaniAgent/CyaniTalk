@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
-import '../../../core/api/flarum_api.dart';
+import '/src/core/api/flarum_api.dart';
 import 'models/forum_info.dart';
 import 'models/user.dart';
 import 'models/discussion.dart';

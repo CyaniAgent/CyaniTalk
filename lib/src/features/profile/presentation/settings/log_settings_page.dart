@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/log_settings_provider.dart';
-import '../../../../core/utils/logger.dart';
+import '/src/features/profile/application/log_settings_provider.dart';
+import '/src/core/utils/logger.dart';
 
 class LogSettingsPage extends ConsumerStatefulWidget {
   const LogSettingsPage({super.key});

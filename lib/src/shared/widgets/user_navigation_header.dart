@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../features/auth/application/auth_service.dart';
-import '../../features/auth/data/auth_repository.dart';
-import '../../features/auth/domain/account.dart';
-import '../../features/misskey/application/misskey_notifier.dart';
-import '../../features/misskey/application/misskey_notifications_notifier.dart';
-import '../../features/flarum/application/flarum_providers.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/features/auth/data/auth_repository.dart';
+import '/src/features/auth/domain/account.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
 
 class UserNavigationHeader extends ConsumerStatefulWidget {
   final bool isExtended;

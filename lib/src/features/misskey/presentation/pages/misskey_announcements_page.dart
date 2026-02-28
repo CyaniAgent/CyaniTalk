@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../application/misskey_announcements_notifier.dart';
-import '../../domain/announcement.dart';
-import '../widgets/retryable_network_image.dart';
-import '../../domain/mfm_renderer.dart';
+import '/src/features/misskey/application/misskey_announcements_notifier.dart';
+import '/src/features/misskey/domain/announcement.dart';
+import '/src/features/misskey/presentation/widgets/retryable_network_image.dart';
+import '/src/features/misskey/domain/mfm_renderer.dart';
 
 class MisskeyAnnouncementsPage extends ConsumerStatefulWidget {
   const MisskeyAnnouncementsPage({super.key});

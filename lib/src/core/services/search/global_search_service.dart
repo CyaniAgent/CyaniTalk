@@ -1,8 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../utils/utils.dart';
-import '../../../features/flarum/application/flarum_providers.dart';
-import '../../../features/misskey/data/misskey_repository.dart';
+import '/src/core/utils/utils.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
 
 part 'global_search_service.g.dart';
 
