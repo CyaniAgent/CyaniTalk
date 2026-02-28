@@ -61,6 +61,21 @@ class FileUpload extends _$FileUpload {
     _uploadBytes(task, bytes);
   }
 
+  /// 添加已有的 DriveFile 到上传队列（用于云盘文件）
+  void addExistingDriveFile(DriveFile file) {
+    final taskId = _uuid.v4();
+    
+    final task = UploadTask.success(
+      id: taskId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      file: file,
+    );
+
+    state = [...state, task];
+  }
+
   /// 移除上传任务
   void removeTask(String taskId) {
     state = state.where((task) => task.id != taskId).toList();

@@ -8,6 +8,7 @@ import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/file_upload_notifier.dart';
 import '/src/features/misskey/domain/upload_task.dart';
 import '/src/features/misskey/presentation/widgets/attachment_card.dart';
+import '/src/features/misskey/presentation/widgets/drive_file_picker.dart';
 
 /// Misskey 发布笔记页面组件
 ///
@@ -80,6 +81,56 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         );
       }
     }
+  }
+
+  /// 处理从云盘选择文件
+  Future<void> _pickCloudFile() async {
+    if (!mounted) return;
+
+    // 显示云盘文件选择对话框
+    await showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // 标题
+              Row(
+                children: [
+                  Text(
+                    'drive_select_files'.tr(),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const Divider(),
+              // 云盘文件选择器
+              Expanded(
+                child: DriveFilePicker(
+                  maxFiles: 10,
+                  onFilesSelected: (files) {
+                    // 将云盘文件添加到当前帖子
+                    final notifier = ref.read(fileUploadProvider.notifier);
+                    for (final file in files) {
+                      // 添加已有的 DriveFile（状态为成功）
+                      notifier.addExistingDriveFile(file);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -399,7 +450,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               _buildAttachIcon(
                 Icons.cloud_queue,
                 'post_insert_attachment_from_cloud'.tr(),
-                // TODO: 实现云盘选择
+                onPressed: _pickCloudFile,
               ),
               _buildAttachIcon(Icons.poll_outlined, 'post_poll'.tr()),
               _buildAttachIcon(
