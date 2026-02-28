@@ -15,6 +15,16 @@ class NavigationSettingsConfig {
       'selectedIcon': Icons.public,
       'isEnabled': true,
       'isRemovable': true,
+      'subItems': [
+        {'icon': Icons.timeline, 'labelKey': 'misskey_drawer_timeline'},
+        {'icon': Icons.collections_bookmark, 'labelKey': 'misskey_drawer_clips'},
+        {'icon': Icons.satellite_alt, 'labelKey': 'misskey_drawer_antennas'},
+        {'icon': Icons.hub, 'labelKey': 'misskey_drawer_channels'},
+        {'icon': Icons.explore, 'labelKey': 'misskey_drawer_explore'},
+        {'icon': Icons.person_add, 'labelKey': 'misskey_drawer_follow_requests'},
+        {'icon': Icons.campaign, 'labelKey': 'misskey_drawer_announcements'},
+        {'icon': Icons.terminal, 'labelKey': 'misskey_drawer_aiscript_console'},
+      ],
     },
     {
       'id': 'flarum',
@@ -23,6 +33,11 @@ class NavigationSettingsConfig {
       'selectedIcon': Icons.forum,
       'isEnabled': true,
       'isRemovable': true,
+      'subItems': [
+        {'icon': Icons.forum, 'labelKey': 'flarum_drawer_discussions'},
+        {'icon': Icons.label, 'labelKey': 'flarum_drawer_tags'},
+        {'icon': Icons.notifications, 'labelKey': 'flarum_drawer_notifications'},
+      ],
     },
     {
       'id': 'drive',
@@ -31,6 +46,7 @@ class NavigationSettingsConfig {
       'selectedIcon': Icons.cloud_queue,
       'isEnabled': true,
       'isRemovable': true,
+      'subItems': [],
     },
     {
       'id': 'messages',
@@ -39,6 +55,7 @@ class NavigationSettingsConfig {
       'selectedIcon': Icons.chat_bubble,
       'isEnabled': true,
       'isRemovable': true,
+      'subItems': [],
     },
     {
       'id': 'me',
@@ -47,6 +64,7 @@ class NavigationSettingsConfig {
       'selectedIcon': Icons.person,
       'isEnabled': true,
       'isRemovable': false, // 个人页面不可移除
+      'subItems': [],
     },
   ];
 
@@ -179,4 +197,14 @@ class NavigationSettingsConfig {
   static bool isItemRemovable(String itemId) {
     return itemId != 'me'; // 个人页面不可移除
   }
+
+  /// 获取指定根导航项的子导航项
+  static List<Map<String, dynamic>> getSubItems(String rootId) {
+    final rootItem = defaultNavigationItems.firstWhere(
+      (item) => item['id'] == rootId,
+      orElse: () => {},
+    );
+    return rootItem['subItems'] ?? [];
+  }
 }
+

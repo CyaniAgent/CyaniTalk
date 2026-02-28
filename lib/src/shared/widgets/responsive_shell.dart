@@ -13,6 +13,7 @@ import '/src/core/navigation/navigation_element.dart';
 import '/src/core/navigation/sub_navigation_notifier.dart';
 import 'root_navigation_drawer.dart';
 import 'user_navigation_header.dart';
+import 'sidebar/sidebar_sub_navigation_builder.dart';
 
 /// 应用程序的响应式布局外壳组件
 class ResponsiveShell extends ConsumerStatefulWidget {
@@ -260,20 +261,35 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     final theme = Theme.of(context);
     final data = element.data;
 
-    final titleKey = data['titleKey'] as String;
-    final route = data['route'] as String;
+    try {
+      final titleKey = data['titleKey'] as String;
+      final route = data['route'] as String;
+      final icon = data['icon'] as IconData;
 
-    return ListTile(
-      leading: Icon(data['icon'], color: theme.colorScheme.onSurfaceVariant),
-      title: isLarge
-          ? Text(
-              titleKey.tr(),
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            )
-          : null,
-      onTap: () => GoRouter.of(context).push(route),
-      hoverColor: theme.colorScheme.secondaryContainer.withAlpha(80),
-    );
+      return ListTile(
+        leading: Icon(icon, color: theme.colorScheme.onSurfaceVariant),
+        title: isLarge
+            ? Semantics(
+                label: '${titleKey.tr()} button',
+                child: Text(
+                  titleKey.tr(),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              )
+            : null,
+        onTap: () => GoRouter.of(context).push(route),
+        hoverColor: theme.colorScheme.secondaryContainer.withAlpha(80),
+        focusColor: theme.colorScheme.secondaryContainer,
+      );
+    } catch (e) {
+      // 处理错误，返回一个默认的占位符
+      return ListTile(
+        leading: Icon(Icons.error_outline, color: theme.colorScheme.error),
+        title: isLarge
+            ? Semantics(label: 'Error button', child: Text('Error'))
+            : null,
+      );
+    }
   }
 
   Widget _buildRootSidebarItem(
@@ -362,150 +378,24 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     bool isLarge,
   ) {
     if (rootId == 'misskey') {
-      return _buildMisskeySidebarSubs(context, ref, isLarge);
+      final selectedSub = ref.watch(misskeySubIndexProvider);
+      return SidebarSubNavigationBuilder.buildSubNavigation(
+        context,
+        rootId,
+        isLarge,
+        selectedSub,
+        (i) => ref.read(misskeySubIndexProvider.notifier).set(i),
+      );
     } else if (rootId == 'flarum') {
-      return _buildForumSidebarSubs(context, ref, isLarge);
+      final selectedSub = ref.watch(forumSubIndexProvider);
+      return SidebarSubNavigationBuilder.buildSubNavigation(
+        context,
+        rootId,
+        isLarge,
+        selectedSub,
+        (i) => ref.read(forumSubIndexProvider.notifier).set(i),
+      );
     }
     return const SizedBox.shrink();
-  }
-
-  Widget _buildMisskeySidebarSubs(
-    BuildContext context,
-    WidgetRef ref,
-    bool isLarge,
-  ) {
-    final selectedSub = ref.watch(misskeySubIndexProvider);
-    final subs = [
-      {'icon': Icons.timeline, 'label': 'misskey_drawer_timeline'.tr()},
-      {
-        'icon': Icons.collections_bookmark,
-        'label': 'misskey_drawer_clips'.tr(),
-      },
-      {'icon': Icons.satellite_alt, 'label': 'misskey_drawer_antennas'.tr()},
-      {'icon': Icons.hub, 'label': 'misskey_drawer_channels'.tr()},
-      {'icon': Icons.explore, 'label': 'misskey_drawer_explore'.tr()},
-      {
-        'icon': Icons.person_add,
-        'label': 'misskey_drawer_follow_requests'.tr(),
-      },
-      {'icon': Icons.campaign, 'label': 'misskey_drawer_announcements'.tr()},
-      {'icon': Icons.terminal, 'label': 'misskey_drawer_aiscript_console'.tr()},
-    ];
-
-    return Padding(
-      padding: EdgeInsets.only(left: isLarge ? 24 : 0, top: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (int i = 0; i < subs.length; i++)
-            _buildSidebarSubItem(
-              context,
-              icon: subs[i]['icon'] as IconData,
-              label: subs[i]['label'] as String,
-              isSelected: selectedSub == i,
-              isLarge: isLarge,
-              onTap: () => ref.read(misskeySubIndexProvider.notifier).set(i),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForumSidebarSubs(
-    BuildContext context,
-    WidgetRef ref,
-    bool isLarge,
-  ) {
-    final selectedSub = ref.watch(forumSubIndexProvider);
-    final subs = [
-      {'icon': Icons.forum, 'label': 'flarum_drawer_discussions'.tr()},
-      {'icon': Icons.label, 'label': 'flarum_drawer_tags'.tr()},
-      {
-        'icon': Icons.notifications,
-        'label': 'flarum_drawer_notifications'.tr(),
-      },
-    ];
-
-    return Padding(
-      padding: EdgeInsets.only(left: isLarge ? 24 : 0, top: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (int i = 0; i < subs.length; i++)
-            _buildSidebarSubItem(
-              context,
-              icon: subs[i]['icon'] as IconData,
-              label: subs[i]['label'] as String,
-              isSelected: selectedSub == i,
-              isLarge: isLarge,
-              onTap: () => ref.read(forumSubIndexProvider.notifier).set(i),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSidebarSubItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required bool isLarge,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          height: 40,
-          padding: EdgeInsets.symmetric(horizontal: isLarge ? 12 : 0),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colorScheme.surfaceContainerHighest
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: isLarge
-              ? Row(
-                  children: [
-                    Icon(
-                      icon,
-                      size: 18,
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isSelected
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                )
-              : Center(
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-        ),
-      ),
-    );
   }
 }
