@@ -141,6 +141,7 @@ class NotificationSettingsPage extends ConsumerWidget {
                           ? 'settings_notif_permission_granted'.tr()
                           : 'settings_notif_permission_denied'.tr(),
                     ),
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               }

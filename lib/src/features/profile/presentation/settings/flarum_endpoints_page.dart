@@ -78,7 +78,7 @@ class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('auth_flarum_endpoint_added'.tr())),
+            SnackBar(content: Text('auth_flarum_endpoint_added'.tr()), behavior: SnackBarBehavior.floating),
           );
         }
       } catch (e) {

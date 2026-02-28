@@ -168,7 +168,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                   onPressed: () {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待')));
+                    ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
                   },
                   tooltip: 'cloud_delete'.tr(),
                 ),
@@ -1006,7 +1006,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
         if (currentContext.mounted) {
           ScaffoldMessenger.of(
             currentContext,
-          ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待')));
+          ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
         }
       }
     });

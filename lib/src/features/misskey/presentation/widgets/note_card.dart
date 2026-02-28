@@ -398,7 +398,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('post_copied'.tr())));
+          ).showSnackBar(SnackBar(content: Text('post_copied'.tr()), behavior: SnackBarBehavior.floating));
         }
         break;
       case 'copy_link':
@@ -420,7 +420,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         Clipboard.setData(ClipboardData(text: widget.note.id));
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr())));
+        ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr()), behavior: SnackBarBehavior.floating));
         break;
     }
   }
@@ -465,7 +465,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('post_link_copied'.tr())));
+        ).showSnackBar(SnackBar(content: Text('post_link_copied'.tr()), behavior: SnackBarBehavior.floating));
       }
     } catch (e) {
       // Ignore
@@ -479,7 +479,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('post_bookmarked'.tr())));
+        ).showSnackBar(SnackBar(content: Text('post_bookmarked'.tr()), behavior: SnackBarBehavior.floating));
       }
     } catch (e) {
       if (mounted) {
@@ -488,6 +488,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             content: Text(
               'post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}),
             ),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -540,14 +541,14 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                   );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('post_reported'.tr())),
+                      SnackBar(content: Text('post_reported'.tr()), behavior: SnackBarBehavior.floating),
                     );
                   }
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('post_report_failed'.tr())),
+                    SnackBar(content: Text('post_report_failed'.tr()), behavior: SnackBarBehavior.floating),
                   );
                 }
               }
@@ -649,7 +650,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       await repository.renote(widget.note.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('note_renoted_successfully'.tr())),
+          SnackBar(content: Text('note_renoted_successfully'.tr()), behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
@@ -659,6 +660,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             content: Text(
               'note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}),
             ),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -692,7 +694,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('note_reply_sent'.tr())),
+                    SnackBar(content: Text('note_reply_sent'.tr()), behavior: SnackBarBehavior.floating),
                   );
                 }
               } catch (e) {
@@ -704,6 +706,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                           namedArgs: {'error': e.toString()},
                         ),
                       ),
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
@@ -728,7 +731,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             await repository.addReaction(widget.note.id, emoji);
             if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text('note_reaction_added'.tr())),
+                SnackBar(content: Text('note_reaction_added'.tr()), behavior: SnackBarBehavior.floating),
               );
             }
           } catch (e) {
@@ -740,6 +743,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                       namedArgs: {'error': e.toString()},
                     ),
                   ),
+                  behavior: SnackBarBehavior.floating,
                 ),
               );
             }
@@ -751,7 +755,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             await repository.removeReaction(widget.note.id);
             if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text('note_reaction_removed'.tr())),
+                SnackBar(content: Text('note_reaction_removed'.tr()), behavior: SnackBarBehavior.floating),
               );
             }
           } catch (e) {
@@ -763,6 +767,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                       namedArgs: {'error': e.toString()},
                     ),
                   ),
+                  behavior: SnackBarBehavior.floating,
                 ),
               );
             }
@@ -782,7 +787,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('note_reaction_removed'.tr())));
+          ).showSnackBar(SnackBar(content: Text('note_reaction_removed'.tr()), behavior: SnackBarBehavior.floating));
         }
       } else if (widget.note.myReaction != null) {
         // 如果已经有其他表情反应，先取消再发送新的
@@ -791,7 +796,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('note_reaction_updated'.tr())));
+          ).showSnackBar(SnackBar(content: Text('note_reaction_updated'.tr()), behavior: SnackBarBehavior.floating));
         }
       } else {
         // 直接发送表情反应
@@ -799,7 +804,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr())));
+          ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr()), behavior: SnackBarBehavior.floating));
         }
       }
     } catch (e) {
@@ -809,6 +814,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             content: Text(
               'note_failed_to_react'.tr(namedArgs: {'error': e.toString()}),
             ),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -819,7 +825,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     // Placeholder for share functionality
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr())));
+    ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr()), behavior: SnackBarBehavior.floating));
   }
 
   /// 构建媒体网格，根据媒体文件数量调整布局

@@ -110,7 +110,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('缓存目录已更新')));
+          ).showSnackBar(const SnackBar(content: Text('缓存目录已更新'), behavior: SnackBarBehavior.floating));
         }
       }
     } catch (e) {
@@ -118,7 +118,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('选择缓存目录失败: $e')));
+        ).showSnackBar(SnackBar(content: Text('选择缓存目录失败: $e'), behavior: SnackBarBehavior.floating));
       }
     }
   }
@@ -173,7 +173,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('重置失败: $e')));
+          ).showSnackBar(SnackBar(content: Text('重置失败: $e'), behavior: SnackBarBehavior.floating));
         }
       }
     }
@@ -211,14 +211,14 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('缓存已清除')));
+          ).showSnackBar(const SnackBar(content: Text('缓存已清除'), behavior: SnackBarBehavior.floating));
         }
       } catch (e) {
         debugPrint('Error clearing cache: $e');
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('清除缓存失败: $e')));
+          ).showSnackBar(SnackBar(content: Text('清除缓存失败: $e'), behavior: SnackBarBehavior.floating));
         }
       }
     }
@@ -254,14 +254,14 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${_getCategoryName(category)}缓存已清除')),
+            SnackBar(content: Text('${_getCategoryName(category)}缓存已清除'), behavior: SnackBarBehavior.floating),
           );
         }
       } catch (e) {
         debugPrint('Error clearing category cache: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('清除${_getCategoryName(category)}缓存失败: $e')),
+            SnackBar(content: Text('清除${_getCategoryName(category)}缓存失败: $e'), behavior: SnackBarBehavior.floating),
           );
         }
       }
@@ -317,13 +317,13 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           if (mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('最大缓存大小已更新')));
+            ).showSnackBar(const SnackBar(content: Text('最大缓存大小已更新'), behavior: SnackBarBehavior.floating));
           }
         } else {
           if (mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('请输入有效的缓存大小')));
+            ).showSnackBar(const SnackBar(content: Text('请输入有效的缓存大小'), behavior: SnackBarBehavior.floating));
           }
         }
       } catch (e) {
@@ -331,7 +331,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('设置最大缓存大小失败: $e')));
+          ).showSnackBar(SnackBar(content: Text('设置最大缓存大小失败: $e'), behavior: SnackBarBehavior.floating));
         }
       }
     }
@@ -402,7 +402,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
             if (mounted) {
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(const SnackBar(content: Text('请输入有效的缓存大小')));
+              ).showSnackBar(const SnackBar(content: Text('请输入有效的缓存大小'), behavior: SnackBarBehavior.floating));
             }
           }
         }

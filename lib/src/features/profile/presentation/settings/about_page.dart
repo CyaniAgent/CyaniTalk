@@ -246,7 +246,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
         if (mounted) {
           logger.warning('AboutPage: Failed to launch GitHub page');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('about_github_launch_error'.tr())),
+            SnackBar(content: Text('about_github_launch_error'.tr()), behavior: SnackBarBehavior.floating),
           );
         }
       } else {
@@ -277,8 +277,8 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       logger.error('AboutPage: Error launching sponsor page: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('about_sponsor_launch_error'.tr())),
-        );
+            SnackBar(content: Text('about_sponsor_launch_error'.tr()), behavior: SnackBarBehavior.floating),
+          );
       }
     }
   }

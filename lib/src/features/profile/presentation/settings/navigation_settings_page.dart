@@ -196,7 +196,7 @@ class _NavigationSettingsPageState
               notifier.resetSettings();
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('settings_navigation_reset_done'.tr())),
+                SnackBar(content: Text('settings_navigation_reset_done'.tr()), behavior: SnackBarBehavior.floating),
               );
             },
             child: Text('post_reset'.tr()),
