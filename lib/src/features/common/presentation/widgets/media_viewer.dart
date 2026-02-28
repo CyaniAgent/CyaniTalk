@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import './media/media_item.dart';
-import './media/media_preloader.dart';
-import './media/image_viewer.dart';
-import './media/video_viewer.dart';
-import './media/audio_viewer.dart';
+import '/src/features/common/presentation/widgets/media/media_item.dart';
+import '/src/features/common/presentation/widgets/media/media_preloader.dart';
+import '/src/features/common/presentation/widgets/media/image_viewer.dart';
+import '/src/features/common/presentation/widgets/media/video_viewer.dart';
+import '/src/features/common/presentation/widgets/media/audio_viewer.dart';
 
 /// 统一的媒体浏览器组件，支持图片和视频
 class MediaViewer extends StatefulWidget {

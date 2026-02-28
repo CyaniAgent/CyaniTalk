@@ -5,16 +5,16 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '/src/core/utils/logger.dart';
-import '../../domain/note.dart';
-import '../../domain/mfm_renderer.dart';
-import '../../data/misskey_repository.dart';
-import '../../data/misskey_repository_interface.dart';
-import '../../application/misskey_notifier.dart';
+import '/src/features/misskey/domain/note.dart';
+import '/src/features/misskey/domain/mfm_renderer.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/misskey/data/misskey_repository_interface.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
-import '../../../common/presentation/pages/media_viewer_page.dart';
+import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
-import '../../../common/presentation/widgets/media/media_item.dart';
+import '/src/features/common/presentation/widgets/media/media_item.dart';
 import 'emoji_picker.dart';
 import 'reaction_display.dart';
 

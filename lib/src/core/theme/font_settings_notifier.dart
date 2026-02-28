@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../utils/logger.dart';
-import '../utils/download_utils.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/utils/download_utils.dart';
 import 'font_manager.dart';
 
 part 'font_settings_notifier.g.dart';

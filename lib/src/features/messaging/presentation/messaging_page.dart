@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../../misskey/application/misskey_messaging_notifier.dart';
-import '../../misskey/application/misskey_notifications_notifier.dart';
-import '../../misskey/domain/messaging_message.dart';
-import '../../misskey/domain/misskey_user.dart';
-import '../../misskey/domain/chat_room.dart';
-import '../../misskey/domain/misskey_notification.dart';
-import '../../misskey/application/misskey_notifier.dart';
+import '/src/features/misskey/application/misskey_messaging_notifier.dart';
+import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/features/misskey/domain/messaging_message.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
+import '/src/features/misskey/domain/chat_room.dart';
+import '/src/features/misskey/domain/misskey_notification.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
 
 enum InboxFilter { all, direct, groups, notifications }
 

@@ -8,13 +8,13 @@ import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:dio/dio.dart';
 
-import '../data/auth_repository.dart';
-import '../domain/account.dart';
-import '../../../core/api/flarum_api.dart';
-import '../../../core/api/network_client.dart';
-import '../../flarum/data/flarum_repository.dart';
-import '../../../core/core.dart';
-import '../../misskey/application/misskey_notifier.dart';
+import '/src/features/auth/data/auth_repository.dart';
+import '/src/features/auth/domain/account.dart';
+import '/src/core/api/flarum_api.dart';
+import '/src/core/api/network_client.dart';
+import '/src/features/flarum/data/flarum_repository.dart';
+import '/src/core/core.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
 
 part 'auth_service.g.dart';
 

@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/core.dart';
-import '../../../auth/domain/account.dart';
-import '../../../../core/api/misskey_api.dart';
-import '../../../../core/api/flarum_api.dart';
-import '../../../misskey/domain/misskey_user.dart';
+import '/src/core/core.dart';
+import '/src/features/auth/domain/account.dart';
+import '/src/core/api/misskey_api.dart';
+import '/src/core/api/flarum_api.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
 import '../../../flarum/data/models/user.dart' as flarum;
-import '../../../misskey/data/misskey_repository.dart';
-import '../../../flarum/data/flarum_repository.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/flarum/data/flarum_repository.dart';
 
 final userDetailsProvider = FutureProvider.family<dynamic, Account>((
   ref,

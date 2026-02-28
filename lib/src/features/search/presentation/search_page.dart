@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../core/services/search/global_search_service.dart';
-import '../../../core/utils/logger.dart';
+import '/src/core/services/search/global_search_service.dart';
+import '/src/core/utils/logger.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});

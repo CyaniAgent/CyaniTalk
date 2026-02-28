@@ -6,9 +6,9 @@ import 'package:cyanitalk/src/core/services/audio_engine.dart';
 import 'package:cyanitalk/src/features/auth/application/auth_service.dart';
 import 'package:cyanitalk/src/routing/router.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_post_page.dart';
-import '../../application/misskey_notifier.dart';
-import '../../domain/clip.dart';
-import '../widgets/modern_note_card.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/misskey/domain/clip.dart';
+import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 class MisskeyClipNotesPage extends ConsumerStatefulWidget {
   final Clip clip;

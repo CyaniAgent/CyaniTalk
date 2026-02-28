@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import '../utils/logger.dart';
-import '../utils/performance_monitor.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/utils/performance_monitor.dart';
 
 /// A custom interceptor that retries failed requests up to a specified number of times.
 class RetryInterceptor extends Interceptor {

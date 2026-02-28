@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import './api_request_manager.dart';
-import '../utils/logger.dart';
-import '../utils/error_handler.dart';
+import '/src/core/api/api_request_manager.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/utils/error_handler.dart';
 
 /// 基础 API 类，用于通用错误处理和响应验证
 abstract class BaseApi {

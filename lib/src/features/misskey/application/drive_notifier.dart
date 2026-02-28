@@ -1,11 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../core/core.dart';
-import '../domain/misskey_user.dart';
-import '../data/misskey_repository.dart';
-import '../domain/drive_file.dart';
-import '../domain/drive_folder.dart';
+import '/src/core/core.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/misskey/domain/drive_file.dart';
+import '/src/features/misskey/domain/drive_folder.dart';
 
 part 'drive_notifier.freezed.dart';
 part 'drive_notifier.g.dart';

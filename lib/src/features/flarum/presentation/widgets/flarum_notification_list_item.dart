@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/flarum_notification.dart';
+import '/src/features/flarum/data/models/flarum_notification.dart';
 
 class FlarumNotificationListItem extends StatelessWidget {
   final FlarumNotification notification;

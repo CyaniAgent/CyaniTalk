@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/profile/application/sound_settings_provider.dart';
+import '/src/features/profile/application/sound_settings_provider.dart';
 import 'audio_engine.dart';
 
 class SoundService {
@@ -44,6 +44,7 @@ class SoundService {
 
     Future<void> _play(String assetPath) async {
       await ref.read(audioEngineProvider).playAsset(assetPath);
-    }}
+    }
+}
 
 final soundServiceProvider = Provider((ref) => SoundService(ref));

@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../data/misskey_repository.dart';
-import '../domain/messaging_message.dart';
-import '../domain/chat_room.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/misskey/domain/messaging_message.dart';
+import '/src/features/misskey/domain/chat_room.dart';
 import 'misskey_streaming_service.dart';
-import '../../../core/core.dart';
+import '/src/core/core.dart';
 
 part 'misskey_messaging_notifier.g.dart';
 

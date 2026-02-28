@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/misskey_repository.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
 
 /// Misskey发布笔记页面组件
 ///

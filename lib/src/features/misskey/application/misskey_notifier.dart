@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../data/misskey_repository.dart';
-import '../domain/note.dart';
-import '../domain/clip.dart';
-import '../domain/channel.dart';
-import '../domain/misskey_user.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/features/misskey/domain/note.dart';
+import '/src/features/misskey/domain/clip.dart';
+import '/src/features/misskey/domain/channel.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
 import 'misskey_streaming_service.dart';
 import 'note_cache_manager.dart';
-import '../../../core/core.dart';
+import '/src/core/core.dart';
 
 part 'misskey_notifier.g.dart';
 

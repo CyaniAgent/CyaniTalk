@@ -1,5 +1,5 @@
-import '../../../features/misskey/domain/note_event.dart';
-import '../../../features/misskey/domain/messaging_message.dart';
+import '/src/features/misskey/domain/note_event.dart';
+import '/src/features/misskey/domain/messaging_message.dart';
 
 /// 串流连接状态
 enum StreamingStatus {

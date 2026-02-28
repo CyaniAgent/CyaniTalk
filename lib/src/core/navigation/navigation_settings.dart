@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'navigation_item.dart';
 import 'navigation_element.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../config/navigation_settings_config.dart';
+import '/src/core/config/navigation_settings_config.dart';
 
 /// 导航设置状态
 class NavigationSettings {

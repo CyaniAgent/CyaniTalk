@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/sound_settings_provider.dart';
-import '../../../../core/services/audio_engine.dart';
+import '/src/features/profile/application/sound_settings_provider.dart';
+import '/src/core/services/audio_engine.dart';
 
 class SoundSettingsPage extends ConsumerWidget {
   const SoundSettingsPage({super.key});

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../application/developer_settings_provider.dart';
+import '/src/features/profile/application/developer_settings_provider.dart';
 import 'log_settings_page.dart';
 
 /// 开发者设置页面组件

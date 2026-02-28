@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config/constants.dart';
+import '/src/core/config/constants.dart';
 
 /// 日志工具类，管理应用中的所有日志输出
 ///

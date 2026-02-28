@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../routing/router.dart';
-import '../utils/logger.dart';
-import '../config/page_config.dart';
+import '/src/routing/router.dart';
+import '/src/core/utils/logger.dart';
+import '/src/core/config/page_config.dart';
 
 /// 导航服务类
 ///

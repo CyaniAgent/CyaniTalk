@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:convert';
-import '../../../auth/application/auth_service.dart';
-import '../../../auth/domain/account.dart';
-import '../../../auth/presentation/widgets/add_account_dialog.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/features/auth/domain/account.dart';
+import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
 import 'user_details_view.dart';
 
 /// 统一登录管理器组件

@@ -3,16 +3,16 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import '../../auth/application/auth_service.dart';
-import '../../auth/domain/account.dart';
-import '../../auth/presentation/widgets/add_account_dialog.dart';
-import '../../misskey/domain/misskey_user.dart';
-import '../../misskey/application/misskey_notifier.dart';
-import '../../flarum/application/flarum_providers.dart';
+import '/src/features/auth/application/auth_service.dart';
+import '/src/features/auth/domain/account.dart';
+import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
+import '/src/features/misskey/domain/misskey_user.dart';
+import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
 import '../../flarum/data/models/user.dart' as flarum_model;
-import '../../common/presentation/pages/media_viewer_page.dart';
-import '../../common/presentation/widgets/media/media_item.dart';
-import '../../../core/navigation/navigation.dart';
+import '/src/features/common/presentation/pages/media_viewer_page.dart';
+import '/src/features/common/presentation/widgets/media/media_item.dart';
+import '/src/core/navigation/navigation.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});

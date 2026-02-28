@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/flarum_providers.dart';
-import '../widgets/flarum_notification_list_item.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
+import '/src/features/flarum/presentation/widgets/flarum_notification_list_item.dart';
 
 class FlarumNotificationsPage extends ConsumerWidget {
   const FlarumNotificationsPage({super.key});

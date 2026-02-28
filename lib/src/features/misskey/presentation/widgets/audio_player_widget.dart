@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../application/audio_player_notifier.dart';
+import '/src/features/misskey/application/audio_player_notifier.dart';
 
 /// Inline audio player widget for Misskey posts using audioplayers
 class AudioPlayerWidget extends ConsumerWidget {

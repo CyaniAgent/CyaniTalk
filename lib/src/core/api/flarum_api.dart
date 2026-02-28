@@ -4,11 +4,11 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants/flarum_constants.dart';
-import '../utils/verification_window.dart';
-import '../utils/utils.dart';
-import '../utils/logger.dart';
-import '../../routing/router.dart';
+import '/src/core/constants/flarum_constants.dart';
+import '/src/core/utils/verification_window.dart';
+import '/src/core/utils/utils.dart';
+import '/src/core/utils/logger.dart';
+import '/src/routing/router.dart';
 import 'base_api.dart';
 import 'network_client.dart';
 

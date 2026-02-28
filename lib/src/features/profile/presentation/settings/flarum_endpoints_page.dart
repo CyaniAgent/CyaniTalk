@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../../core/api/flarum_api.dart';
-import '../../../../core/utils/logger.dart';
-import '../../../flarum/application/flarum_providers.dart';
+import '/src/core/api/flarum_api.dart';
+import '/src/core/utils/logger.dart';
+import '/src/features/flarum/application/flarum_providers.dart';
 
 class FlarumEndpointsPage extends ConsumerStatefulWidget {
   const FlarumEndpointsPage({super.key});
