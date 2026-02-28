@@ -827,125 +827,122 @@ class _CloudPageState extends ConsumerState<CloudPage> {
         );
 
         return GestureDetector(
-          onTap: () {
-            if (_isSelectionMode || _selectedItems.isNotEmpty) {
-              // 如果处于选择模式或已经有选中的项目，则切换当前项目的选中状态
-              _toggleSelection(item.isFolder ? item.folder!.id : item.file!.id);
-            } else {
-              // 否则执行正常的点击操作
-              if (item.isFolder) {
-                ref.read(misskeyDriveProvider.notifier).cd(item.folder!);
-              } else {
-                _openFilePreview(context, item.file!);
-              }
-            }
-          },
-          onLongPress: () {
-            // 长按切换选中状态
-            _toggleSelection(item.isFolder ? item.folder!.id : item.file!.id);
-          },
           onSecondaryTapDown: (details) {
             // 右键点击显示菜单
             _showContextMenu(context, ref, item, details.globalPosition);
           },
-          child: Container(
-            color: isSelected
-                ? Theme.of(
-                    context,
-                  ).colorScheme.secondaryContainer.withAlpha(128)
-                : Colors.transparent,
-            child: ListTile(
-              leading: SizedBox(
-                width: 48,
-                height: 48,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: item.isFolder
-                          ? Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.folder,
-                                size: 20,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                            )
-                          : _buildFileIcon(item.file!),
-                    ),
-                    if (isSelected)
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: Container(
-                          width: 16,
-                          height: 16,
+          child: ListTile(
+            tileColor: isSelected
+                ? Theme.of(context).colorScheme.secondaryContainer.withAlpha(128)
+                : null,
+            hoverColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(80),
+            onTap: () {
+              if (_isSelectionMode || _selectedItems.isNotEmpty) {
+                // 如果处于选择模式或已经有选中的项目，则切换当前项目的选中状态
+                _toggleSelection(item.isFolder ? item.folder!.id : item.file!.id);
+              } else {
+                // 否则执行正常的点击操作
+                if (item.isFolder) {
+                  ref.read(misskeyDriveProvider.notifier).cd(item.folder!);
+                } else {
+                  _openFilePreview(context, item.file!);
+                }
+              }
+            },
+            onLongPress: () {
+              // 长按切换选中状态
+              _toggleSelection(item.isFolder ? item.folder!.id : item.file!.id);
+            },
+            leading: SizedBox(
+            width: 48,
+            height: 48,
+            child: Stack(
+              children: [
+                Center(
+                  child: item.isFolder
+                      ? Container(
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
-                            Icons.check,
-                            size: 12,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            Icons.folder,
+                            size: 20,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onPrimaryContainer,
                           ),
-                        ),
-                      ),
-                  ],
+                        )
+                      : _buildFileIcon(item.file!),
                 ),
-              ),
-              title: Text(item.name),
-              subtitle: Text(item.subtitle),
-              trailing: PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 'download' && !item.isFolder) {
-                    _downloadFile(context, item.file!);
-                  } else if (value == 'delete') {
-                    if (item.isFolder) {
-                      ref
-                          .read(misskeyDriveProvider.notifier)
-                          .deleteFolder(item.folder!.id);
-                    } else {
-                      ref
-                          .read(misskeyDriveProvider.notifier)
-                          .deleteFile(item.file!.id);
-                    }
-                  }
-                },
-                itemBuilder: (context) => [
-                  if (!item.isFolder)
-                    PopupMenuItem(
-                      value: 'download',
-                      child: ListTile(
-                        leading: const Icon(Icons.download),
-                        title: Text('cloud_download'.tr()),
+                if (isSelected)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.delete,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      title: Text(
-                        'cloud_delete'.tr(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+                      child: Icon(
+                        Icons.check,
+                        size: 12,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),
-                ],
+              ],
+            ),
+          ),
+          title: Text(item.name),
+          subtitle: Text(item.subtitle),
+          trailing: PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'download' && !item.isFolder) {
+                _downloadFile(context, item.file!);
+              } else if (value == 'delete') {
+                if (item.isFolder) {
+                  ref
+                      .read(misskeyDriveProvider.notifier)
+                      .deleteFolder(item.folder!.id);
+                } else {
+                  ref
+                      .read(misskeyDriveProvider.notifier)
+                      .deleteFile(item.file!.id);
+                }
+              }
+            },
+            itemBuilder: (context) => [
+              if (!item.isFolder)
+                PopupMenuItem(
+                  value: 'download',
+                  child: ListTile(
+                    leading: const Icon(Icons.download),
+                    title: Text('cloud_download'.tr()),
+                  ),
+                ),
+              PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  title: Text(
+                    'cloud_delete'.tr(),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
               ),
+            ],
             ),
           ),
         );
@@ -1017,17 +1014,9 @@ class _CloudPageState extends ConsumerState<CloudPage> {
     if (file.thumbnailUrl != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(4),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // 先显示图标
-            Icon(icon, size: 24),
-            // 然后加载图片，加载完成后会覆盖图标
-            _CachedThumbnail(
-              thumbnailUrl: file.thumbnailUrl!,
-              icon: icon,
-            ),
-          ],
+        child: _CachedThumbnail(
+          thumbnailUrl: file.thumbnailUrl!,
+          icon: icon,
         ),
       );
     }
