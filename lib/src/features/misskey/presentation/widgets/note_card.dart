@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import '/src/core/utils/logger.dart';
 import '/src/features/misskey/domain/note.dart';
 import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
@@ -47,17 +48,53 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     super.dispose();
   }
 
-  /// 处理文本中的特殊格式
-  ///
-  /// 使用MFM渲染器处理文本中的各种特殊格式，并返回对应的TextSpan列表。
-  List<TextSpan> _processText(String text) {
-    return _mfmRenderer.processText(text, context);
-  }
+
 
   @override
   void initState() {
     super.initState();
     _shouldAnimate = false;
+    _setupMfmRenderer();
+    _loadEmojis();
+  }
+
+  /// 设置MFM渲染器
+  void _setupMfmRenderer() {
+    // 设置API表情加载器
+    _mfmRenderer.setApiEmojiLoader((emojiName) async {
+      try {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        final emojiDetail = await repository.getEmoji(emojiName);
+        return emojiDetail.url;
+      } catch (e) {
+        logger.error('Error loading emoji from API: $e');
+        return null;
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant NoteCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only rebuild if the note has actually changed
+    if (oldWidget.note.id != widget.note.id) {
+      _loadEmojis();
+    }
+  }
+
+  /// 加载笔记中的表情到MFM渲染器缓存
+  void _loadEmojis() {
+    final note = widget.note;
+    
+    // 加载笔记中的表情
+    if (note.emojis != null && note.emojis!.isNotEmpty) {
+      _mfmRenderer.addEmojisToCache(note.emojis!);
+    }
+    
+    // 加载用户的表情
+    if (note.user?.emojis != null && note.user!.emojis!.isNotEmpty) {
+      _mfmRenderer.addEmojisToCache(note.user!.emojis!);
+    }
   }
 
   @override
@@ -172,7 +209,15 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                     ),
                     const SizedBox(height: 8),
                   ] else if (text != null)
-                    SelectableText.rich(TextSpan(children: _processText(text))),
+                    _mfmRenderer.processTextToRichText(
+                      text,
+                      context,
+                      onEmojiLoaded: () {
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
 
                   if (note.files.isNotEmpty)
                     Padding(

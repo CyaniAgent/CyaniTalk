@@ -32,7 +32,8 @@ class MfmRenderer {
   static final RegExp _quoteRegex = RegExp(r'> (.*?)(?=\n|$)');
   static final RegExp _centerRegex = RegExp(r'<center>(.*?)<\/center>');
   static final RegExp _codeRegex = RegExp(r'`(.*?)`');
-  static final RegExp _emojiRegex = RegExp(r':([a-zA-Z0-9_]+):');
+  static final RegExp _emojiRegex = RegExp(r':([a-zA-Z0-9_]+(?:@[^:]+)?)\s*:');
+  static final RegExp _emojiNameRegex = RegExp(r'^([a-zA-Z0-9_]+)(?:@.*)?$');
   static final RegExp _plainRegex = RegExp(r'<plain>(.*?)<\/plain>');
   static final RegExp _rubyRegex = RegExp(r'\$\[ruby (.*?) (.*?)\]');
   static final RegExp _fontRegex = RegExp(
@@ -67,6 +68,9 @@ class MfmRenderer {
   // 表情加载回调
   Future<String?> Function(String, String)? _emojiLoader;
 
+  // 从API获取表情的回调
+  Future<String?> Function(String)? _apiEmojiLoader;
+
   // Misskey API实例
   MisskeyApi? _misskeyApi;
 
@@ -88,6 +92,16 @@ class MfmRenderer {
   void setMisskeyApi(MisskeyApi api) {
     logger.debug('MfmRenderer: Setting Misskey API instance');
     _misskeyApi = api;
+  }
+
+  /// 设置API表情加载回调
+  ///
+  /// 用于从API获取站内表情
+  ///
+  /// @param loader 表情加载回调函数，接收表情名称并返回表情URL
+  void setApiEmojiLoader(Future<String?> Function(String)? loader) {
+    logger.debug('MfmRenderer: Setting API emoji loader: ${loader != null}');
+    _apiEmojiLoader = loader;
   }
 
   /// 从API获取表情
@@ -418,8 +432,18 @@ class MfmRenderer {
         );
       } else if (_emojiRegex.hasMatch(matchText)) {
         // 自定义表情
-        final emojiName = match.group(1)!;
-        final emojiUrl = _emojiCache[emojiName];
+        String fullEmojiName = match.group(1)!;
+        // 提取纯表情名称（不包含实例信息）
+        String emojiName = fullEmojiName;
+        final nameMatch = _emojiNameRegex.firstMatch(fullEmojiName);
+        if (nameMatch != null) {
+          emojiName = nameMatch.group(1)!;
+        }
+        // 尝试从缓存中获取表情URL，先尝试完整名称，再尝试纯名称
+        String? emojiUrl = _emojiCache[fullEmojiName];
+        if (emojiUrl == null && fullEmojiName != emojiName) {
+          emojiUrl = _emojiCache[emojiName];
+        }
 
         logger.debug(
           'MfmRenderer: Found emoji: $emojiName, in cache: ${emojiUrl != null}',
@@ -440,6 +464,11 @@ class MfmRenderer {
         if (emojiUrl == null && _emojiLoader != null) {
           logger.debug('MfmRenderer: Calling emoji loader for $emojiName');
           _emojiLoader!(emojiName, '');
+        }
+        // 尝试使用API表情加载器
+        if (emojiUrl == null && _apiEmojiLoader != null) {
+          logger.debug('MfmRenderer: Calling API emoji loader for $emojiName');
+          _apiEmojiLoader!(emojiName);
         }
       } else if (_plainRegex.hasMatch(matchText)) {
         // 简化文本（禁用内部语法）
@@ -750,114 +779,168 @@ class MfmRenderer {
     final children = <InlineSpan>[];
 
     for (final span in baseSpans) {
-      if (span.text != null && _emojiRegex.hasMatch(span.text!)) {
-        // 处理表情
-        final match = _emojiRegex.firstMatch(span.text!);
-        if (match != null) {
-          final emojiName = match.group(1)!;
-          final emojiUrl = _emojiCache[emojiName];
+      if (span.text != null) {
+        final text = span.text!;
+        if (_emojiRegex.hasMatch(text)) {
+          // 处理混合文本和表情的情况
+          int currentIndex = 0;
+          final matches = _emojiRegex.allMatches(text);
 
-          logger.debug(
-            'MfmRenderer: Converting emoji to inline widget: $emojiName, in cache: ${emojiUrl != null}',
-          );
-
-          if (emojiUrl != null) {
-            // 表情已缓存，使用WidgetSpan显示表情图像
-            children.add(
-              WidgetSpan(
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 2),
-                  alignment: Alignment.center,
-                  child: Image.network(
-                    emojiUrl,
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      // 加载失败时显示原始文本
-                      logger.debug(
-                        'MfmRenderer: Error loading emoji image: $error',
-                      );
-                      return Text(span.text!, style: TextStyle(fontSize: 14));
-                    },
-                  ),
+          for (final match in matches) {
+            // 添加表情前面的普通文本
+            if (match.start > currentIndex) {
+              children.add(
+                TextSpan(
+                  text: text.substring(currentIndex, match.start),
+                  style: span.style,
                 ),
-                alignment: PlaceholderAlignment.middle,
-              ),
-            );
-          } else {
-            // 表情未缓存，尝试加载
-            logger.debug(
-              'MfmRenderer: Emoji not in cache, attempting to load: $emojiName',
-            );
-
-            // 尝试加载表情的方法
-            Future<void> loadEmoji() async {
-              String? url;
-
-              // 首先尝试使用外部加载器
-              if (_emojiLoader != null) {
-                try {
-                  logger.debug(
-                    'MfmRenderer: Calling emoji loader for $emojiName',
-                  );
-                  url = await _emojiLoader!(emojiName, '');
-                } catch (error) {
-                  logger.error(
-                    'MfmRenderer: Error with external emoji loader: $error',
-                  );
-                }
-              }
-
-              // 如果外部加载器失败或未设置，尝试从API获取
-              if (url == null && _misskeyApi != null) {
-                try {
-                  logger.debug(
-                    'MfmRenderer: Fetching emoji from API for $emojiName',
-                  );
-                  url = await _fetchEmojiFromApi(emojiName);
-                } catch (error) {
-                  logger.error(
-                    'MfmRenderer: Error fetching emoji from API: $error',
-                  );
-                }
-              }
-
-              // 如果成功获取到表情URL，添加到缓存并通知UI更新
-              if (url != null && url.isNotEmpty) {
-                logger.debug(
-                  'MfmRenderer: Emoji loaded successfully: $emojiName -> $url',
-                );
-                // 添加到缓存
-                addEmojiToCache(emojiName, url);
-                // 通知UI更新
-                if (onEmojiLoaded != null) {
-                  onEmojiLoaded();
-                }
-              } else {
-                logger.debug('MfmRenderer: Failed to load emoji: $emojiName');
-              }
+              );
             }
 
-            // 异步加载表情
-            Future.microtask(loadEmoji);
+            // 处理表情
+            String fullEmojiName = match.group(1)!;
+            // 提取纯表情名称（不包含实例信息）
+            String emojiName = fullEmojiName;
+            final nameMatch = _emojiNameRegex.firstMatch(fullEmojiName);
+            if (nameMatch != null) {
+              emojiName = nameMatch.group(1)!;
+            }
+            // 尝试从缓存中获取表情URL，先尝试完整名称，再尝试纯名称
+            String? emojiUrl = _emojiCache[fullEmojiName];
+            if (emojiUrl == null && fullEmojiName != emojiName) {
+              emojiUrl = _emojiCache[emojiName];
+            }
 
-            // 暂时显示原始文本
-            children.add(TextSpan(text: span.text));
+            logger.debug(
+              'MfmRenderer: Converting emoji to inline widget: $emojiName, in cache: ${emojiUrl != null}',
+            );
+
+            if (emojiUrl != null) {
+              // 表情已缓存，使用WidgetSpan显示表情图像
+              children.add(
+                WidgetSpan(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                    child: Image.network(
+                      emojiUrl,
+                      width: 18,
+                      height: 18,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        // 加载失败时显示原始文本
+                        logger.debug(
+                          'MfmRenderer: Error loading emoji image: $error',
+                        );
+                        return Text(
+                          match.group(0)!,
+                          style: TextStyle(fontSize: 14),
+                        );
+                      },
+                    ),
+                  ),
+                  alignment: PlaceholderAlignment.middle,
+                ),
+              );
+            } else {
+              // 表情未缓存，尝试加载
+              logger.debug(
+                'MfmRenderer: Emoji not in cache, attempting to load: $emojiName',
+              );
+
+              // 尝试加载表情的方法
+              Future<void> loadEmoji() async {
+                String? url;
+
+                // 首先尝试使用外部加载器
+                if (_emojiLoader != null) {
+                  try {
+                    logger.debug(
+                      'MfmRenderer: Calling emoji loader for $emojiName',
+                    );
+                    url = await _emojiLoader!(emojiName, '');
+                  } catch (error) {
+                    logger.error(
+                      'MfmRenderer: Error with external emoji loader: $error',
+                    );
+                  }
+                }
+
+                // 如果外部加载器失败或未设置，尝试使用API表情加载器
+                if (url == null && _apiEmojiLoader != null) {
+                  try {
+                    logger.debug(
+                      'MfmRenderer: Calling API emoji loader for $emojiName',
+                    );
+                    url = await _apiEmojiLoader!(emojiName);
+                  } catch (error) {
+                    logger.error(
+                      'MfmRenderer: Error with API emoji loader: $error',
+                    );
+                  }
+                }
+
+                // 如果API表情加载器失败或未设置，尝试从Misskey API获取
+                if (url == null && _misskeyApi != null) {
+                  try {
+                    logger.debug(
+                      'MfmRenderer: Fetching emoji from Misskey API for $emojiName',
+                    );
+                    url = await _fetchEmojiFromApi(emojiName);
+                  } catch (error) {
+                    logger.error(
+                      'MfmRenderer: Error fetching emoji from Misskey API: $error',
+                    );
+                  }
+                }
+
+                // 如果成功获取到表情URL，添加到缓存并通知UI更新
+                if (url != null && url.isNotEmpty) {
+                  logger.debug(
+                    'MfmRenderer: Emoji loaded successfully: $emojiName -> $url',
+                  );
+                  // 添加到缓存，同时添加完整名称和纯名称的映射
+                  addEmojiToCache(fullEmojiName, url);
+                  if (fullEmojiName != emojiName) {
+                    addEmojiToCache(emojiName, url);
+                  }
+                  // 通知UI更新
+                  if (onEmojiLoaded != null) {
+                    onEmojiLoaded();
+                  }
+                } else {
+                  logger.debug('MfmRenderer: Failed to load emoji: $emojiName');
+                }
+              }
+
+              // 异步加载表情
+              Future.microtask(loadEmoji);
+
+              // 暂时显示原始文本
+              children.add(TextSpan(text: match.group(0), style: span.style));
+            }
+
+            currentIndex = match.end;
+          }
+
+          // 添加表情后面的普通文本
+          if (currentIndex < text.length) {
+            children.add(
+              TextSpan(text: text.substring(currentIndex), style: span.style),
+            );
           }
         } else {
-          // 不是表情，显示普通文本
-          children.add(TextSpan(text: span.text));
+          // 没有表情，显示普通文本
+          children.add(span);
         }
       } else {
-        // 不是表情，显示普通文本
+        // 不是文本span，直接添加
         children.add(span);
       }
     }
 
-    // 创建RichText Widget
-    return RichText(
-      text: TextSpan(
+    // 创建SelectableText Widget，支持文本复制
+    return SelectableText.rich(
+      TextSpan(
         children: children,
         style: TextStyle(
           fontSize: 14,
@@ -866,8 +949,7 @@ class MfmRenderer {
         ),
       ),
       textAlign: TextAlign.left,
-      softWrap: true,
-      overflow: TextOverflow.clip,
+      enableInteractiveSelection: true,
     );
   }
 }

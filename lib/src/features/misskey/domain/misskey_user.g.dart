@@ -36,6 +36,9 @@ _MisskeyUser _$MisskeyUserFromJson(Map<String, dynamic> json) => _MisskeyUser(
   isCat: json['isCat'] as bool? ?? false,
   driveCapacityMb: (json['driveCapacityMb'] as num?)?.toInt(),
   driveUsage: (json['driveUsage'] as num?)?.toInt(),
+  emojis: (json['emojis'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
 );
 
 Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
@@ -59,4 +62,5 @@ Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
       'isCat': instance.isCat,
       'driveCapacityMb': instance.driveCapacityMb,
       'driveUsage': instance.driveUsage,
+      'emojis': instance.emojis,
     };

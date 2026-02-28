@@ -25,6 +25,7 @@ abstract class MisskeyUser with _$MisskeyUser {
     @Default(false) bool isCat,
     int? driveCapacityMb,
     int? driveUsage,
+    Map<String, String>? emojis,
   }) = _MisskeyUser;
 
   factory MisskeyUser.fromJson(Map<String, dynamic> json) =>
