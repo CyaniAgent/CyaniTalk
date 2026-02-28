@@ -258,32 +258,21 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     bool isLarge,
   ) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      child: InkWell(
-        onTap: () => GoRouter.of(context).push('/settings'),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 56,
-          padding: EdgeInsets.symmetric(horizontal: isLarge ? 16 : 0),
-          child: isLarge
-              ? Row(
-                  children: [
-                    Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'navigation_settings'.tr(),
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                    ),
-                  ],
-                )
-              : Center(
-                  child: Icon(Icons.settings_outlined, color: theme.colorScheme.onSurfaceVariant),
-                ),
-        ),
-      ),
+    final data = element.data;
+
+    final titleKey = data['titleKey'] as String;
+    final route = data['route'] as String;
+
+    return ListTile(
+      leading: Icon(data['icon'], color: theme.colorScheme.onSurfaceVariant),
+      title: isLarge
+          ? Text(
+              titleKey.tr(),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            )
+          : null,
+      onTap: () => GoRouter.of(context).push(route),
+      hoverColor: theme.colorScheme.secondaryContainer.withAlpha(80),
     );
   }
 
