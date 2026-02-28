@@ -42,9 +42,8 @@ class SoundService {
     }
   }
 
-  Future<void> _play(String assetPath) async {
-    await ref.read(audioEngineProvider).playAsset(assetPath);
-  }
-}
+    Future<void> _play(String assetPath) async {
+      await ref.read(audioEngineProvider).playAsset(assetPath);
+    }}
 
 final soundServiceProvider = Provider((ref) => SoundService(ref));

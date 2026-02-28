@@ -80,43 +80,46 @@ class _VideoViewerState extends State<VideoViewer> {
     }
   }
 
-  void _initializeVideoFromNetwork() {
-    final startTime = DateTime.now();
-    widget.mediaItem.videoController = VideoPlayerController.networkUrl(
-      Uri.parse(widget.mediaItem.url),
-    )..initialize().then((_) {
-        if (mounted) {
-          setState(() {
-            widget.mediaItem.videoController?.play();
-            _resetHideTimer();
-          });
+    void _initializeVideoFromNetwork() {
+      final startTime = DateTime.now();
+      widget.mediaItem.videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.mediaItem.url),
+      )..initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              widget.mediaItem.videoController?.play();
+              _resetHideTimer();
+            });
+            
+            // 记录网络视频加载性能
+            final duration = DateTime.now().difference(startTime);
+            performanceMonitor.trackMediaLoading(
+              widget.mediaItem.url,
+              duration,
+              'video_network',
+            );
+          }
+        }).catchError((error) {
+          logger.error('Error initializing video controller from network', error);
+          if (mounted) {
+            setState(() {
+              // Video initialization failed, handle error state
+            });
+          }
           
-          // 记录网络视频加载性能
+          // 记录网络视频加载失败性能
           final duration = DateTime.now().difference(startTime);
           performanceMonitor.trackMediaLoading(
             widget.mediaItem.url,
             duration,
             'video_network',
           );
-        }
-      }).catchError((error) {
-        logger.error('Error initializing video controller from network', error);
-        if (mounted) {
-          setState(() {
-            // Video initialization failed, handle error state
-          });
-        }
-        
-        // 记录网络视频加载失败性能
-        final duration = DateTime.now().difference(startTime);
-        performanceMonitor.trackMediaLoading(
-          widget.mediaItem.url,
-          duration,
-          'video_network',
-        );
-      });
-  }
-
+        });
+  
+      // 设置视频播放器的音频流类型为媒体类型
+      // 注意：video_player插件在Android上通常会自动使用适当的音频流类型
+      // 但我们可以尝试确保其使用正确的音频会话
+    }
   // 重置自动隐藏定时器
   void _resetHideTimer() {
     _hideControlsTimer?.cancel();

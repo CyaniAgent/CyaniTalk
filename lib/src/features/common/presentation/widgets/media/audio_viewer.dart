@@ -64,64 +64,77 @@ class _AudioViewerState extends State<AudioViewer> {
     }
   }
 
-  void _initializeAudioFromNetwork() {
-    final startTime = DateTime.now();
-    try {
-      widget.mediaItem.audioPlayer
-          ?.setSource(UrlSource(widget.mediaItem.url))
-          .then((_) {
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
+      void _initializeAudioFromNetwork() async {
+        final startTime = DateTime.now();
+        try {
+          widget.mediaItem.audioPlayer
+              ?.setSource(UrlSource(widget.mediaItem.url))
+              .then((_) async {
+                // 设置音频上下文，必须在设置源之后
+                await widget.mediaItem.audioPlayer?.setAudioContext(
+                  AudioContext(
+                    android: AudioContextAndroid(
+                      usageType: AndroidUsageType.media,
+                      contentType: AndroidContentType.music,
+                      audioFocus: AndroidAudioFocus.gain,
+                    ),
+                    iOS: AudioContextIOS(
+                      category: AVAudioSessionCategory.playback,
+                      options: {AVAudioSessionOptions.duckOthers},
+                    ),
+                  ),
+                );
+    
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  widget.mediaItem.audioPlayer?.resume();
+                  
+                  // 记录音频加载性能
+                  final duration = DateTime.now().difference(startTime);
+                  performanceMonitor.trackMediaLoading(
+                    widget.mediaItem.url,
+                    duration,
+                    'audio',
+                  );
+                }
+              })
+              .catchError((error) {
+                logger.error('Error loading audio from network', error);
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                    _errorMessage = error.toString();
+                  });
+                }
+                
+                // 记录失败的音频加载性能
+                final duration = DateTime.now().difference(startTime);
+                performanceMonitor.trackMediaLoading(
+                  widget.mediaItem.url,
+                  duration,
+                  'audio',
+                );
               });
-              widget.mediaItem.audioPlayer?.resume();
-              
-              // 记录音频加载性能
-              final duration = DateTime.now().difference(startTime);
-              performanceMonitor.trackMediaLoading(
-                widget.mediaItem.url,
-                duration,
-                'audio',
-              );
-            }
-          })
-          .catchError((error) {
-            logger.error('Error loading audio from network', error);
-            if (mounted) {
-              setState(() {
-                _isLoading = false;
-                _errorMessage = error.toString();
-              });
-            }
-            
-            // 记录失败的音频加载性能
-            final duration = DateTime.now().difference(startTime);
-            performanceMonitor.trackMediaLoading(
-              widget.mediaItem.url,
-              duration,
-              'audio',
-            );
-          });
-    } catch (error) {
-      logger.error('Exception loading audio from network', error);
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = error.toString();
-        });
-      }
-      
-      // 记录异常情况下的音频加载性能
-      final duration = DateTime.now().difference(startTime);
-      performanceMonitor.trackMediaLoading(
-        widget.mediaItem.url,
-        duration,
-        'audio',
-      );
-    }
-  }
-
-  // 格式化时间
+        } catch (error) {
+          logger.error('Exception loading audio from network', error);
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+              _errorMessage = error.toString();
+            });
+          }
+          
+          // 记录异常情况下的音频加载性能
+          final duration = DateTime.now().difference(startTime);
+          performanceMonitor.trackMediaLoading(
+            widget.mediaItem.url,
+            duration,
+            'audio',
+          );
+        }
+      }  // 格式化时间
   String formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(d.inMinutes.remainder(60));
