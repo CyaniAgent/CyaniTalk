@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/core.dart';
+import '../../../../core/theme/font_selector.dart';
 
 part 'appearance_page.g.dart';
 
@@ -26,12 +27,16 @@ class AppearanceSettings {
   /// 自定义主色调
   final Color? primaryColor;
 
+  /// 当前选中的字体ID
+  final String? fontFamily;
+
   /// 创建外观设置实例
   const AppearanceSettings({
     required this.displayMode,
     required this.useDynamicColor,
     this.useCustomColor = false,
     this.primaryColor,
+    this.fontFamily,
   });
 
   /// 方便获取实际的深色模式状态（用于主题构建）
@@ -43,12 +48,14 @@ class AppearanceSettings {
     bool? useDynamicColor,
     bool? useCustomColor,
     Color? primaryColor,
+    String? fontFamily,
   }) {
     return AppearanceSettings(
       displayMode: displayMode ?? this.displayMode,
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
       useCustomColor: useCustomColor ?? this.useCustomColor,
       primaryColor: primaryColor ?? this.primaryColor,
+      fontFamily: fontFamily ?? this.fontFamily,
     );
   }
 
@@ -60,14 +67,16 @@ class AppearanceSettings {
           displayMode == other.displayMode &&
           useDynamicColor == other.useDynamicColor &&
           useCustomColor == other.useCustomColor &&
-          primaryColor?.toARGB32() == other.primaryColor?.toARGB32();
+          primaryColor?.toARGB32() == other.primaryColor?.toARGB32() &&
+          fontFamily == other.fontFamily;
 
   @override
   int get hashCode =>
       displayMode.hashCode ^
       useDynamicColor.hashCode ^
       useCustomColor.hashCode ^
-      (primaryColor?.toARGB32().hashCode ?? 0);
+      (primaryColor?.toARGB32().hashCode ?? 0) ^
+      (fontFamily?.hashCode ?? 0);
 }
 
 /// 外观设置状态管理器
@@ -105,11 +114,15 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
           ? Color(primaryColorValue)
           : SaucePalette.mikuGreen;
 
+      // 加载字体设置
+      final fontFamily = prefs.getString('appearance_font_family') ?? 'MiSans';
+
       return AppearanceSettings(
         displayMode: displayMode,
         useDynamicColor: useDynamicColor,
         useCustomColor: useCustomColor,
         primaryColor: primaryColor,
+        fontFamily: fontFamily,
       );
     } catch (e) {
       // 加载失败时返回默认设置
@@ -119,6 +132,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         useDynamicColor: isAndroid,
         useCustomColor: !isAndroid,
         primaryColor: SaucePalette.mikuGreen,
+        fontFamily: 'MiSans',
       );
     }
   }
@@ -137,6 +151,9 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
           'appearance_primary_color',
           settings.primaryColor!.toARGB32(),
         );
+      }
+      if (settings.fontFamily != null) {
+        await prefs.setString('appearance_font_family', settings.fontFamily!);
       }
     } catch (e) {
       // 保存失败时忽略错误
@@ -185,6 +202,13 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
     await _saveToStorage(newState);
   }
 
+  /// 更新字体设置
+  Future<void> updateFontFamily(String fontFamily) async {
+    final newState = state.value!.copyWith(fontFamily: fontFamily);
+    state = AsyncData(newState);
+    await _saveToStorage(newState);
+  }
+
   /// 重置配置
   Future<void> resetSettings() async {
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
@@ -196,6 +220,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         useDynamicColor: true,
         useCustomColor: false,
         primaryColor: SaucePalette.mikuGreen,
+        fontFamily: 'MiSans',
       );
     } else {
       newState = const AppearanceSettings(
@@ -203,6 +228,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         useDynamicColor: false,
         useCustomColor: true,
         primaryColor: SaucePalette.mikuGreen,
+        fontFamily: 'MiSans',
       );
     }
 
@@ -293,6 +319,17 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   ],
                 ),
               ),
+
+              const Divider(indent: 16, endIndent: 16),
+
+              // 字体设置
+              _buildSectionHeader(
+                context,
+                'settings_font_section'.tr(),
+              ),
+
+              // 字体选择器
+              const FontSelectorButton(),
 
               const Divider(indent: 16, endIndent: 16),
 
