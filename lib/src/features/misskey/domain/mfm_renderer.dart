@@ -195,10 +195,7 @@ class MfmRenderer {
           errorBuilder: (context, error, stackTrace) {
             // 加载失败时显示原始文本
             logger.debug('MfmRenderer: Error loading emoji image: $error');
-            return Text(
-              ':$emojiName:',
-              style: style,
-            );
+            return Text(':$emojiName:', style: style);
           },
         ),
       );
@@ -227,7 +224,9 @@ class MfmRenderer {
         // 如果外部加载器失败或未设置，尝试使用 API 表情加载器
         if (url == null && _apiEmojiLoader != null) {
           try {
-            logger.debug('MfmRenderer: Calling API emoji loader for $emojiName');
+            logger.debug(
+              'MfmRenderer: Calling API emoji loader for $emojiName',
+            );
             url = await _apiEmojiLoader!(emojiName);
           } catch (error) {
             logger.error('MfmRenderer: Error with API emoji loader: $error');
@@ -264,10 +263,7 @@ class MfmRenderer {
       });
 
       // 暂时显示原始文本
-      return Text(
-        ':$emojiName:',
-        style: style,
-      );
+      return Text(':$emojiName:', style: style);
     }
   }
 
@@ -345,52 +341,39 @@ class MfmRenderer {
           margin: const EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
             border: Border(
-              left: BorderSide(
-                color: colorScheme.primary,
-                width: 3,
-              ),
+              left: BorderSide(color: colorScheme.primary, width: 3),
             ),
           ),
           child: child,
         );
       },
       smallStyleBuilder: (ctx, fontSize) {
-        return TextStyle(
-          fontSize: fontSize ?? 12,
-          color: colorScheme.outline,
-        );
+        return TextStyle(fontSize: fontSize ?? 12, color: colorScheme.outline);
       },
       lineHeight: 1.5,
-      style: TextStyle(
-        fontSize: 14,
-        color: colorScheme.onSurface,
-      ),
+      style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
       boldStyle: const TextStyle(fontWeight: FontWeight.bold),
       linkStyle: TextStyle(
         color: colorScheme.tertiary,
         decoration: TextDecoration.underline,
       ),
-      mentionStyle: TextStyle(
-        color: colorScheme.primary,
-      ),
-      hashtagStyle: TextStyle(
-        color: colorScheme.secondary,
-      ),
+      mentionStyle: TextStyle(color: colorScheme.primary),
+      hashtagStyle: TextStyle(color: colorScheme.secondary),
       serifStyle: const TextStyle(fontFamily: 'Serif'),
       monospaceStyle: const TextStyle(fontFamily: 'Monospace'),
       cursiveStyle: const TextStyle(fontFamily: 'Cursive'),
       fantasyStyle: const TextStyle(fontFamily: 'Fantasy'),
       mentionTap: (userName, host, acct) {
         logger.debug('MfmRenderer: Mention tapped: $acct');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('提及：$acct')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('提及：$acct')));
       },
       hashtagTap: (hashtag) {
         logger.debug('MfmRenderer: Hashtag tapped: $hashtag');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('话题：#$hashtag')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('话题：#$hashtag')));
       },
       linkTap: (url) async {
         logger.debug('MfmRenderer: Link tapped: $url');
@@ -409,10 +392,7 @@ class MfmRenderer {
                   Navigator.pop(dialogContext);
                   final uri = Uri.parse(url);
                   if (await canLaunchUrl(uri)) {
-                    await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
                 child: const Text('确定'),
@@ -519,20 +499,34 @@ class MfmRenderer {
   /// @param text 要处理的文本
   /// @param context BuildContext
   /// @param onEmojiLoaded 表情加载完成后的回调函数，用于通知 UI 更新
-  /// @return Widget（Mfm Widget）
+  /// @param maxLines 最大行数，用于限制文本显示行数
+  /// @param overflow 文本溢出处理方式
+  /// @param textStyle 基础文本样式
+  /// @return Widget（Mfm Widget 或 Text）
   Widget processTextToRichText(
     String text,
     BuildContext context, {
     Function()? onEmojiLoaded,
+    int? maxLines,
+    TextOverflow? overflow,
+    TextStyle? textStyle,
   }) {
     logger.debug('MfmRenderer: Converting text to RichText: $text');
 
+    // 如果需要限制行数或处理溢出，使用特殊处理
+    if (maxLines != null || overflow != null) {
+      return _createLimitedMfmWidget(
+        text,
+        context,
+        onEmojiLoaded: onEmojiLoaded,
+        maxLines: maxLines,
+        overflow: overflow,
+        textStyle: textStyle,
+      );
+    }
+
     // 创建并返回 Mfm Widget
-    return _createMfmWidget(
-      text,
-      context,
-      onEmojiLoaded: onEmojiLoaded,
-    );
+    return _createMfmWidget(text, context, onEmojiLoaded: onEmojiLoaded);
   }
 
   /// 创建 Mfm Widget
@@ -597,37 +591,24 @@ class MfmRenderer {
           margin: const EdgeInsets.symmetric(vertical: 4),
           decoration: BoxDecoration(
             border: Border(
-              left: BorderSide(
-                color: colorScheme.primary,
-                width: 3,
-              ),
+              left: BorderSide(color: colorScheme.primary, width: 3),
             ),
           ),
           child: child,
         );
       },
       smallStyleBuilder: (ctx, fontSize) {
-        return TextStyle(
-          fontSize: fontSize ?? 12,
-          color: colorScheme.outline,
-        );
+        return TextStyle(fontSize: fontSize ?? 12, color: colorScheme.outline);
       },
       lineHeight: 1.5,
-      style: TextStyle(
-        fontSize: 14,
-        color: colorScheme.onSurface,
-      ),
+      style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
       boldStyle: const TextStyle(fontWeight: FontWeight.bold),
       linkStyle: TextStyle(
         color: colorScheme.tertiary,
         decoration: TextDecoration.underline,
       ),
-      mentionStyle: TextStyle(
-        color: colorScheme.primary,
-      ),
-      hashtagStyle: TextStyle(
-        color: colorScheme.secondary,
-      ),
+      mentionStyle: TextStyle(color: colorScheme.primary),
+      hashtagStyle: TextStyle(color: colorScheme.secondary),
       serifStyle: const TextStyle(fontFamily: 'Serif'),
       monospaceStyle: const TextStyle(fontFamily: 'Monospace'),
       cursiveStyle: const TextStyle(fontFamily: 'Cursive'),
@@ -655,10 +636,7 @@ class MfmRenderer {
                   Navigator.pop(dialogContext);
                   final uri = Uri.parse(url);
                   if (await canLaunchUrl(uri)) {
-                    await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
                 },
                 child: const Text('确定'),
@@ -670,6 +648,49 @@ class MfmRenderer {
       isNyaize: false,
       isUseAnimation: true, // 启用动画效果
       defaultBorderColor: colorScheme.primary,
+    );
+  }
+
+  /// 创建带行数限制的 MFM Widget
+  ///
+  /// 用于需要限制最大行数或处理文本溢出的场景
+  ///
+  /// @param text MFM 文本
+  /// @param context BuildContext
+  /// @param onEmojiLoaded 表情加载回调
+  /// @param maxLines 最大行数
+  /// @param overflow 文本溢出处理方式
+  /// @param textStyle 基础文本样式
+  /// @return 带限制的 MFM Widget
+  Widget _createLimitedMfmWidget(
+    String text,
+    BuildContext context, {
+    Function()? onEmojiLoaded,
+    int? maxLines,
+    TextOverflow? overflow,
+    TextStyle? textStyle,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // 使用 processText 方法获取 InlineSpan
+    final inlineSpan = processText(text, context, onEmojiLoaded: onEmojiLoaded);
+
+    // 使用 SelectableText.rich 显示，支持行数限制
+    // 注意：SelectableText.rich 不直接支持 overflow，需要使用 LayoutBuilder 包裹
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SelectableText.rich(
+          TextSpan(
+            children: [inlineSpan],
+            style:
+                textStyle ??
+                TextStyle(fontSize: 14, color: colorScheme.onSurface),
+          ),
+          maxLines: maxLines,
+          enableInteractiveSelection: true,
+        );
+      },
     );
   }
 
