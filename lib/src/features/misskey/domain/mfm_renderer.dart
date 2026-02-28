@@ -106,10 +106,10 @@ class MfmRenderer {
       logger.debug('MfmRenderer: Fetching emoji from API: $emojiName');
 
       // 使用专门的表情API接口获取表情信息
-      final emojiData = await _misskeyApi!.getEmoji(emojiName);
+      final (emojiData, error) = await _misskeyApi!.getEmoji(emojiName);
 
       // 检查emoji数据结构
-      if (emojiData.containsKey('url')) {
+      if (error == null && emojiData != null && emojiData.containsKey('url')) {
         final emojiUrl = emojiData['url'] as String;
         logger.debug(
           'MfmRenderer: Found emoji from API: $emojiName -> $emojiUrl',

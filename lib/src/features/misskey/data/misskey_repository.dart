@@ -30,7 +30,15 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<MisskeyUser> getMe() async {
     logger.info('MisskeyRepository: Getting current user information');
     try {
-      final data = await api.i();
+      final (data, error) = await api.i();
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting current user info', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from /api/i');
+        throw Exception('No user data returned');
+      }
       logger.debug('MisskeyRepository: Raw /api/i response: $data');
       final user = MisskeyUser.fromJson(data);
       logger.info(
@@ -296,7 +304,7 @@ class MisskeyRepository implements IMisskeyRepository {
   }) async {
     logger.info('MisskeyRepository: Creating note');
     try {
-      await api.createNote(
+      final (_, error) = await api.createNote(
         text: text,
         replyId: replyId,
         renoteId: renoteId,
@@ -306,6 +314,10 @@ class MisskeyRepository implements IMisskeyRepository {
         localOnly: localOnly,
         cw: cw,
       );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error creating note', error);
+        throw error;
+      }
       logger.info('MisskeyRepository: Successfully created note');
     } catch (e) {
       logger.error('MisskeyRepository: Error creating note', e);
@@ -317,7 +329,11 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> renote(String noteId) async {
     logger.info('MisskeyRepository: Renoting note $noteId');
     try {
-      await api.createNote(renoteId: noteId);
+      final (_, error) = await api.createNote(renoteId: noteId);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error renoting note $noteId', error);
+        throw error;
+      }
       logger.info('MisskeyRepository: Successfully renoted note $noteId');
     } catch (e) {
       logger.error('MisskeyRepository: Error renoting note $noteId', e);
@@ -329,7 +345,11 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> reply(String noteId, String text) async {
     logger.info('MisskeyRepository: Replying to note $noteId');
     try {
-      await api.createNote(replyId: noteId, text: text);
+      final (_, error) = await api.createNote(replyId: noteId, text: text);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error replying to note $noteId', error);
+        throw error;
+      }
       logger.info('MisskeyRepository: Successfully replied to note $noteId');
     } catch (e) {
       logger.error('MisskeyRepository: Error replying to note $noteId', e);
@@ -343,7 +363,14 @@ class MisskeyRepository implements IMisskeyRepository {
       'MisskeyRepository: Adding reaction "$reaction" to note $noteId',
     );
     try {
-      await api.createReaction(noteId, reaction);
+      final (_, error) = await api.createReaction(noteId, reaction);
+      if (error != null) {
+        logger.error(
+          'MisskeyRepository: Error adding reaction to note $noteId',
+          error,
+        );
+        throw error;
+      }
       logger.info(
         'MisskeyRepository: Successfully added reaction "$reaction" to note $noteId',
       );
@@ -360,7 +387,14 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> removeReaction(String noteId) async {
     logger.info('MisskeyRepository: Removing reaction from note $noteId');
     try {
-      await api.deleteReaction(noteId);
+      final (_, error) = await api.deleteReaction(noteId);
+      if (error != null) {
+        logger.error(
+          'MisskeyRepository: Error removing reaction from note $noteId',
+          error,
+        );
+        throw error;
+      }
       logger.info(
         'MisskeyRepository: Successfully removed reaction from note $noteId',
       );
@@ -427,7 +461,13 @@ class MisskeyRepository implements IMisskeyRepository {
       'MisskeyRepository: Creating drive folder "$name", parentId=$parentId',
     );
     try {
-      final data = await api.createDriveFolder(name, parentId: parentId);
+      final (data, error) = await api.createDriveFolder(name, parentId: parentId);
+      if (error != null) {
+        throw error;
+      }
+      if (data == null) {
+        throw Exception('Failed to create drive folder: No data returned');
+      }
       return DriveFolder.fromJson(data);
     } catch (e) {
       logger.error('MisskeyRepository: Error creating drive folder', e);
@@ -463,7 +503,11 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> deleteDriveFile(String fileId) async {
     logger.info('MisskeyRepository: Deleting drive file $fileId');
     try {
-      await api.deleteDriveFile(fileId);
+      final (_, error) = await api.deleteDriveFile(fileId);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error deleting drive file', error);
+        throw error;
+      }
     } catch (e) {
       logger.error('MisskeyRepository: Error deleting drive file', e);
       rethrow;
@@ -474,7 +518,11 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> deleteDriveFolder(String folderId) async {
     logger.info('MisskeyRepository: Deleting drive folder $folderId');
     try {
-      await api.deleteDriveFolder(folderId);
+      final (_, error) = await api.deleteDriveFolder(folderId);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error deleting drive folder', error);
+        throw error;
+      }
     } catch (e) {
       logger.error('MisskeyRepository: Error deleting drive folder', e);
       rethrow;
@@ -494,11 +542,19 @@ class MisskeyRepository implements IMisskeyRepository {
       // If no folderId is specified, we try to use the CyaniTalk App Transfered folder
       final targetFolderId = folderId ?? await getOrCreateAppFolder();
 
-      final data = await api.uploadDriveFile(
+      final (data, error) = await api.uploadDriveFile(
         bytes,
         filename,
         folderId: targetFolderId,
       );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error uploading drive file', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from uploadDriveFile');
+        throw Exception('No file data returned');
+      }
       return DriveFile.fromJson(data);
     } catch (e) {
       logger.error('MisskeyRepository: Error uploading drive file', e);
@@ -510,7 +566,16 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<Map<String, dynamic>> getMeta() async {
     logger.debug('MisskeyRepository: Getting instance meta');
     try {
-      return await api.getMeta();
+      final (data, error) = await api.getMeta();
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting instance meta', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from getMeta');
+        throw Exception('No meta data returned');
+      }
+      return data;
     } catch (e) {
       logger.error('MisskeyRepository: Error getting instance meta', e);
       rethrow;
@@ -565,7 +630,15 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<List<MessagingMessage>> getMessagingHistory({int limit = 20}) async {
     logger.info('MisskeyRepository: Getting messaging history, limit=$limit');
     try {
-      final data = await api.getMessagingHistory(limit: limit);
+      final (data, error) = await api.getMessagingHistory(limit: limit);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting messaging history', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from getMessagingHistory');
+        throw Exception('No messaging history data returned');
+      }
 
       final result = await compute(_parseMessagingHistory, data);
       final messages = result.messages;
@@ -693,13 +766,21 @@ class MisskeyRepository implements IMisskeyRepository {
       'MisskeyRepository: Getting messaging messages for user $userId, limit=$limit',
     );
     try {
-      final data = await api.getMessagingMessages(
+      final (data, error) = await api.getMessagingMessages(
         userId: userId,
         limit: limit,
         sinceId: sinceId,
         untilId: untilId,
         markAsRead: markAsRead,
       );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting messaging messages', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from getMessagingMessages');
+        throw Exception('No messaging messages data returned');
+      }
 
       final result = await compute(_parseMessagingHistory, data);
       final messages = result.messages;
@@ -755,11 +836,19 @@ class MisskeyRepository implements IMisskeyRepository {
   }) async {
     logger.info('MisskeyRepository: Sending messaging message to user $userId');
     try {
-      final data = await api.createMessagingMessage(
+      final (data, error) = await api.createMessagingMessage(
         userId: userId,
         text: text,
         fileId: fileId,
       );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error sending messaging message', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from createMessagingMessage');
+        throw Exception('No messaging message data returned');
+      }
       return MessagingMessage.fromJson(data);
     } catch (e) {
       logger.error('MisskeyRepository: Error sending messaging message', e);
@@ -784,7 +873,11 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> deleteMessagingMessage(String messageId) async {
     logger.info('MisskeyRepository: Deleting messaging message $messageId');
     try {
-      await api.deleteMessagingMessage(messageId);
+      final (_, error) = await api.deleteMessagingMessage(messageId);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error deleting message', error);
+        throw error;
+      }
     } catch (e) {
       logger.error('MisskeyRepository: Error deleting message', e);
       rethrow;
@@ -912,7 +1005,11 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<void> readAnnouncement(String announcementId) async {
     logger.info('MisskeyRepository: Reading announcement: $announcementId');
     try {
-      await api.readAnnouncement(announcementId);
+      final (_, error) = await api.readAnnouncement(announcementId);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error reading announcement', error);
+        throw error;
+      }
       logger.info('MisskeyRepository: Successfully read announcement: $announcementId');
     } catch (e) {
       logger.error('MisskeyRepository: Error reading announcement', e);
@@ -926,7 +1023,15 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<List<Emoji>> getEmojis() async {
     logger.info('MisskeyRepository: Getting emojis');
     try {
-      final data = await api.getEmojis();
+      final (data, error) = await api.getEmojis();
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting emojis', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from getEmojis');
+        throw Exception('No emojis data returned');
+      }
       final emojis = data['emojis'] as List<dynamic>;
       return await compute((List<dynamic> list) {
         return list.map((e) => Emoji.fromJson(e as Map<String, dynamic>)).toList();
@@ -941,7 +1046,15 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<EmojiDetail> getEmoji(String name) async {
     logger.info('MisskeyRepository: Getting emoji: $name');
     try {
-      final data = await api.getEmoji(name);
+      final (data, error) = await api.getEmoji(name);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting emoji', error);
+        throw error;
+      }
+      if (data == null) {
+        logger.error('MisskeyRepository: No data returned from getEmoji');
+        throw Exception('No emoji data returned');
+      }
       return EmojiDetail.fromJson(data);
     } catch (e) {
       logger.error('MisskeyRepository: Error getting emoji', e);
@@ -961,7 +1074,7 @@ class MisskeyRepository implements IMisskeyRepository {
   }) async {
     logger.info('MisskeyRepository: Getting reactions for note $noteId');
     try {
-      final data = await api.getNoteReactions(
+      final (data, error) = await api.getNoteReactions(
         noteId,
         type: type,
         limit: limit,
@@ -970,13 +1083,19 @@ class MisskeyRepository implements IMisskeyRepository {
         sinceDate: sinceDate,
         untilDate: untilDate,
       );
-      logger.info(
-        'MisskeyRepository: Successfully retrieved ${data.length} reactions for note $noteId',
-      );
-      return data;
+      if (error != null) {
+        logger.error('MisskeyRepository: Error getting note reactions', error);
+        return [];
+      }
+      if (data != null) {
+        logger.info(
+          'MisskeyRepository: Successfully retrieved ${data.length} reactions for note $noteId',
+        );
+      }
+      return data ?? [];
     } catch (e) {
       logger.error('MisskeyRepository: Error getting note reactions', e);
-      rethrow;
+      return [];
     }
   }
 

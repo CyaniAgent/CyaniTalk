@@ -31,7 +31,7 @@ void main() {
         'name': 'Hatsune Miku',
         'avatarUrl': 'https://example.com/miku.png',
       };
-      when(() => mockApi.i()).thenAnswer((_) async => userData);
+      when(() => mockApi.i()).thenAnswer((_) async => (userData, null));
 
       // Act
       final result = await repository.getMe();
@@ -87,7 +87,7 @@ void main() {
           text: 'Miku Miku Ni Shite Ageru',
           visibility: 'public',
         ),
-      ).thenAnswer((_) async => {});
+      ).thenAnswer((_) async => (null, null));
 
       // Act
       await repository.createNote(
@@ -108,7 +108,7 @@ void main() {
       // Arrange
       when(
         () => mockApi.createReaction('note123', '❤️'),
-      ).thenAnswer((_) async => {});
+      ).thenAnswer((_) async => (null, null));
 
       // Act
       await repository.addReaction('note123', '❤️');

@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import '/src/core/utils/logger.dart';
 import '../../domain/note.dart';
 import '../../domain/mfm_renderer.dart';
 import '../../data/misskey_repository.dart';
 import '../../data/misskey_repository_interface.dart';
 import '../../application/misskey_notifier.dart';
-import '../../application/timeline_jump_provider.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
 import '../../../common/presentation/pages/media_viewer_page.dart';
@@ -290,6 +290,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                           namedArgs: {'error': e.toString()},
                                         ),
                                       ),
+                                      behavior: SnackBarBehavior.floating,
                                     ),
                                   );
                                 }
@@ -507,9 +508,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('post_copied'.tr())));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('post_copied'.tr()),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
         break;
       case 'copy_link':
@@ -529,9 +533,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_id_copied'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         break;
     }
   }
@@ -574,9 +581,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_link_copied'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_link_copied'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       // Ignore
@@ -588,9 +598,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_bookmarked'.tr())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_bookmarked'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -599,6 +612,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             content: Text(
               'post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}),
             ),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -651,14 +665,20 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('post_reported'.tr())),
+                      SnackBar(
+                        content: Text('post_reported'.tr()),
+                        behavior: SnackBarBehavior.floating,
+                      ),
                     );
                   }
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('post_report_failed'.tr())),
+                    SnackBar(
+                      content: Text('post_report_failed'.tr()),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               }
@@ -785,7 +805,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 await repository.renote(widget.note.id);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('note_renoted_successfully'.tr())),
+                    SnackBar(
+                      content: Text('note_renoted_successfully'.tr()),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               } catch (e) {
@@ -797,6 +820,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                           namedArgs: {'error': e.toString()},
                         ),
                       ),
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
@@ -836,7 +860,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('note_reply_sent'.tr())),
+                    SnackBar(
+                      content: Text('note_reply_sent'.tr()),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               } catch (e) {
@@ -848,6 +875,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                           namedArgs: {'error': e.toString()},
                         ),
                       ),
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
@@ -888,6 +916,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         namedArgs: {'error': e.toString()},
                       ),
                     ),
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
               }
@@ -900,9 +929,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
   void _handleShare() {
     // Placeholder for share functionality
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr())));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('note_share_coming_soon'.tr()),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   /// 构建回复原帖预览
@@ -929,12 +961,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
       child: InkWell(
         onTap: () {
-          if (widget.timelineType != null && widget.note.replyId != null) {
-            ref
-                    .read(timelineJumpProvider(widget.timelineType!).notifier)
-                    .state =
-                widget.note.replyId;
-          }
+          logger.info(
+            'ModernNoteCard: Tapped on reply preview for note ${widget.note.replyId}',
+          );
         },
 
         child: Container(

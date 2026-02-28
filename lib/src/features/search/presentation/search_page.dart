@@ -53,7 +53,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
       }
     }
   }

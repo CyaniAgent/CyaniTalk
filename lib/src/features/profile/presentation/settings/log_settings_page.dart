@@ -43,11 +43,12 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
             content: Text(
               'settings_logs_export_success'.tr(namedArgs: {'path': file.path}),
             ),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_logs_export_failed'.tr())),
+          SnackBar(content: Text('settings_logs_export_failed'.tr()), behavior: SnackBarBehavior.floating),
         );
       }
     }
@@ -80,7 +81,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       await _refreshFileList();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_logs_delete_success'.tr())),
+          SnackBar(content: Text('settings_logs_delete_success'.tr()), behavior: SnackBarBehavior.floating),
         );
       }
     }
@@ -319,7 +320,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
                   );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Copied to clipboard')),
+                      const SnackBar(content: Text('Copied to clipboard'), behavior: SnackBarBehavior.floating),
                     );
                   }
                 },

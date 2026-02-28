@@ -386,14 +386,14 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('post_post_created'.tr())));
+        ).showSnackBar(SnackBar(content: Text('post_post_created'.tr()), behavior: SnackBarBehavior.floating));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
       }
     } finally {
       if (mounted) {

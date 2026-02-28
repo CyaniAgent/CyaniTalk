@@ -129,7 +129,7 @@ class _SettingsPageState extends State<SettingsPage> {
               });
               _saveShowMiaoLanguage(newValue);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项')),
+                SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项'), behavior: SnackBarBehavior.floating),
               );
             },
             child: _buildSettingsTile(
@@ -282,6 +282,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 content: Text(
                   'settings_tapped'.tr(namedArgs: {'title': title}),
                 ),
+                behavior: SnackBarBehavior.floating,
               ),
             );
           },

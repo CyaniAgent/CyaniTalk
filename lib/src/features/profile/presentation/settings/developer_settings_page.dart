@@ -10,7 +10,8 @@ class DeveloperSettingsPage extends ConsumerStatefulWidget {
   const DeveloperSettingsPage({super.key});
 
   @override
-  ConsumerState<DeveloperSettingsPage> createState() => _DeveloperSettingsPageState();
+  ConsumerState<DeveloperSettingsPage> createState() =>
+      _DeveloperSettingsPageState();
 }
 
 class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
@@ -19,7 +20,12 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
     if (!await launchUrl(url)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('could_not_launch_url'.tr(namedArgs: {'url': urlString}))),
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              'could_not_launch_url'.tr(namedArgs: {'url': urlString}),
+            ),
+          ),
         );
       }
     }
@@ -55,9 +61,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
     final developerModeAsync = ref.watch(developerSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('settings_developer_title'.tr()),
-      ),
+      appBar: AppBar(title: Text('settings_developer_title'.tr())),
       body: developerModeAsync.when(
         data: (developerMode) => ListView(
           children: [
@@ -71,11 +75,13 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
                 if (value) {
                   _showDeveloperModeWarning();
                 } else {
-                  ref.read(developerSettingsProvider.notifier).setDeveloperMode(false);
+                  ref
+                      .read(developerSettingsProvider.notifier)
+                      .setDeveloperMode(false);
                 }
               },
             ),
-            
+
             const Divider(),
             _buildSectionHeader(context, 'settings_section_system'.tr()),
             ListTile(
@@ -85,7 +91,9 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const LogSettingsPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const LogSettingsPage(),
+                  ),
                 );
               },
             ),
@@ -95,12 +103,14 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
             ListTile(
               leading: const Icon(Icons.feedback_outlined),
               title: Text('settings_developer_submit_issue'.tr()),
-              onTap: () => _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
+              onTap: () =>
+                  _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
             ),
             ListTile(
               leading: const Icon(Icons.merge_type),
               title: Text('settings_developer_submit_pr'.tr()),
-              onTap: () => _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
+              onTap: () =>
+                  _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
             ),
           ],
         ),

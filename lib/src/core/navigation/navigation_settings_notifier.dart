@@ -258,6 +258,7 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
           SnackBar(
             content: Text('至少需要启用两个导航项'),
             duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
           ),
         );
         return;

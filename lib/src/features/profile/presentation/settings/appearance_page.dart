@@ -470,7 +470,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               notifier.resetSettings();
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('settings_appearance_reset_done'.tr())),
+                SnackBar(content: Text('settings_appearance_reset_done'.tr()), behavior: SnackBarBehavior.floating),
               );
             },
             child: Text('post_reset'.tr()),

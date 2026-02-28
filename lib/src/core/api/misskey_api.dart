@@ -33,8 +33,8 @@ class MisskeyApi extends BaseApi {
   ///
   /// 返回当前认证用户的详细信息，包括用户名、头像、个人简介等。
   ///
-  /// @return 用户信息的Map对象
-  Future<Map<String, dynamic>> i() => executeApiCall(
+  /// @return (用户信息的Map对象, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> i() => executeApiCallSafe(
     'MisskeyApi.i',
     () => _dio.post('/api/i', data: {'i': token}),
     (response) => Map<String, dynamic>.from(response.data),
@@ -339,8 +339,8 @@ class MisskeyApi extends BaseApi {
   /// @param visibility 可见性：public、home、followers、specified
   /// @param localOnly 是否仅本地可见
   /// @param cw 内容警告
-  /// @throws DioException 如果请求失败
-  Future<void> createNote({
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> createNote({
     String? text,
     String? replyId,
     String? renoteId,
@@ -349,7 +349,7 @@ class MisskeyApi extends BaseApi {
     String? visibility,
     bool? localOnly,
     String? cw,
-  }) => executeApiCallVoid(
+  }) => executeApiCallSafeVoid(
     'MisskeyApi.createNote',
     () => _dio.post(
       '/api/notes/create',
@@ -383,9 +383,9 @@ class MisskeyApi extends BaseApi {
   ///
   /// @param noteId 笔记 ID
   /// @param reaction 反应表情
-  /// @throws DioException 如果请求失败
-  Future<void> createReaction(String noteId, String reaction) =>
-      executeApiCallVoid(
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> createReaction(String noteId, String reaction) =>
+      executeApiCallSafeVoid(
         'MisskeyApi.createReaction',
         () => _dio.post(
           '/api/notes/reactions/create',
@@ -399,8 +399,8 @@ class MisskeyApi extends BaseApi {
   /// 通过调用 `/api/notes/reactions/delete` 接口删除对指定笔记的反应。
   ///
   /// @param noteId 笔记 ID
-  /// @throws DioException 如果请求失败
-  Future<void> deleteReaction(String noteId) => executeApiCallVoid(
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> deleteReaction(String noteId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteReaction',
     () => _dio.post(
       '/api/notes/reactions/delete',
@@ -453,12 +453,11 @@ class MisskeyApi extends BaseApi {
   ///
   /// @param name 文件夹名称
   /// @param parentId 父文件夹 ID，为空则在根目录创建
-  /// @return 创建的文件夹信息
-  /// @throws DioException 如果请求失败
-  Future<Map<String, dynamic>> createDriveFolder(
+  /// @return (创建的文件夹信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> createDriveFolder(
     String name, {
     String? parentId,
-  }) => executeApiCall(
+  }) => executeApiCallSafe(
     'MisskeyApi.createDriveFolder',
     () => _dio.post(
       '/api/drive/folders/create',
@@ -472,8 +471,8 @@ class MisskeyApi extends BaseApi {
   /// 通过调用 `/api/drive/files/delete` 接口删除云盘中的文件。
   ///
   /// @param fileId 要删除的文件 ID
-  /// @throws DioException 如果请求失败
-  Future<void> deleteDriveFile(String fileId) => executeApiCallVoid(
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> deleteDriveFile(String fileId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteDriveFile',
     () => _dio.post(
       '/api/drive/files/delete',
@@ -487,8 +486,8 @@ class MisskeyApi extends BaseApi {
   /// 通过调用 `/api/drive/folders/delete` 接口删除云盘中的文件夹。
   ///
   /// @param folderId 要删除的文件夹 ID
-  /// @throws DioException 如果请求失败
-  Future<void> deleteDriveFolder(String folderId) => executeApiCallVoid(
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> deleteDriveFolder(String folderId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteDriveFolder',
     () => _dio.post(
       '/api/drive/folders/delete',
@@ -504,13 +503,12 @@ class MisskeyApi extends BaseApi {
   /// @param bytes 文件字节数据
   /// @param filename 文件名
   /// @param folderId 目标文件夹 ID，为空则上传到根目录
-  /// @return 上传的文件信息
-  /// @throws DioException 如果请求失败
-  Future<Map<String, dynamic>> uploadDriveFile(
+  /// @return (上传的文件信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> uploadDriveFile(
     List<int> bytes,
     String filename, {
     String? folderId,
-  }) => executeApiCall(
+  }) => executeApiCallSafe(
     'MisskeyApi.uploadDriveFile',
     () => _dio.post(
       '/api/drive/files/create',
@@ -556,10 +554,9 @@ class MisskeyApi extends BaseApi {
   /// 首先尝试 `/api/chat/history`，如果失败则尝试 `/api/messaging/history`。
   ///
   /// @param limit 返回的消息数量限制，默认 10
-  /// @return 消息历史记录列表
-  /// @throws DioException 如果所有端点都请求失败
-  Future<List<dynamic>> getMessagingHistory({int limit = 10}) =>
-      executeApiCall('MisskeyApi.getMessagingHistory', () async {
+  /// @return (消息历史记录列表, 错误) 元组
+  Future<(List<dynamic>?, Exception?)> getMessagingHistory({int limit = 10}) =>
+      executeApiCallSafe('MisskeyApi.getMessagingHistory', () async {
         try {
           return await _dio.post(
             '/api/chat/history',
@@ -583,9 +580,8 @@ class MisskeyApi extends BaseApi {
   /// @param sinceId 分页标记，用于加载更新的消息
   /// @param untilId 分页标记，用于加载更早的消息
   /// @param markAsRead 是否标记为已读，默认 true
-  /// @return 消息列表
-  /// @throws DioException 如果所有端点都请求失败
-  Future<List<dynamic>> getMessagingMessages({
+  /// @return (消息列表, 错误) 元组
+  Future<(List<dynamic>?, Exception?)> getMessagingMessages({
     required String userId,
     int limit = 10,
     String? sinceId,
@@ -601,7 +597,7 @@ class MisskeyApi extends BaseApi {
       'markAsRead': markAsRead,
     };
 
-    return executeApiCall(
+    return executeApiCallSafe(
       'MisskeyApi.getMessagingMessages',
       () async {
         try {
@@ -626,9 +622,8 @@ class MisskeyApi extends BaseApi {
   /// @param userId 接收消息的用户 ID
   /// @param text 消息内容
   /// @param fileId 附件文件 ID
-  /// @return 创建的消息信息
-  /// @throws DioException 如果所有端点都请求失败
-  Future<Map<String, dynamic>> createMessagingMessage({
+  /// @return (创建的消息信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> createMessagingMessage({
     required String userId,
     String? text,
     String? fileId,
@@ -640,7 +635,7 @@ class MisskeyApi extends BaseApi {
       'fileId': ?fileId,
     };
 
-    return executeApiCall(
+    return executeApiCallSafe(
       'MisskeyApi.createMessagingMessage',
       () async {
         try {
@@ -690,8 +685,8 @@ class MisskeyApi extends BaseApi {
   /// 通过调用 `/api/chat/messages/delete` 接口删除指定的消息。
   ///
   /// @param messageId 要删除的消息 ID
-  /// @throws DioException 如果请求失败
-  Future<void> deleteMessagingMessage(String messageId) => executeApiCallVoid(
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> deleteMessagingMessage(String messageId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteMessagingMessage',
     () => _dio.post(
       '/api/chat/messages/delete',
@@ -900,8 +895,8 @@ class MisskeyApi extends BaseApi {
   ///
   /// 通过调用 `/api/meta` 接口获取实例的元数据信息，包括策略、功能开关等。
   ///
-  /// @return 实例元数据的 Map 对象
-  Future<Map<String, dynamic>> getMeta() => executeApiCall(
+  /// @return (实例元数据的 Map 对象, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> getMeta() => executeApiCallSafe(
     'MisskeyApi.getMeta',
     () => _dio.post('/api/meta', data: {'i': token}),
     (response) => Map<String, dynamic>.from(response.data),
@@ -931,9 +926,8 @@ class MisskeyApi extends BaseApi {
   /// 通过调用 `/api/emoji` 接口获取指定名称的表情详细信息。
   ///
   /// @param name 表情名称
-  /// @return 表情详细信息的 Map 对象
-  /// @throws DioException 如果请求失败
-  Future<Map<String, dynamic>> getEmoji(String name) => executeApiCall(
+  /// @return (表情详细信息的 Map 对象, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> getEmoji(String name) => executeApiCallSafe(
     'MisskeyApi.getEmoji',
     () => _dio.post('/api/emoji', data: {'i': token, 'name': name}),
     (response) => Map<String, dynamic>.from(response.data),
@@ -944,9 +938,8 @@ class MisskeyApi extends BaseApi {
   ///
   /// 通过调用 `/api/emojis` 接口获取实例的表情列表。
   ///
-  /// @return 表情列表的 Map 对象，包含 emojis 字段
-  /// @throws DioException 如果请求失败
-  Future<Map<String, dynamic>> getEmojis() => executeApiCall(
+  /// @return (表情列表的 Map 对象, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> getEmojis() => executeApiCallSafe(
     'MisskeyApi.getEmojis',
     () => _dio.post('/api/emojis', data: {'i': token}),
     (response) => Map<String, dynamic>.from(response.data),
@@ -977,14 +970,13 @@ class MisskeyApi extends BaseApi {
   /// 通过调用 `/api/i/read-announcement` 接口标记指定公告为已读。
   ///
   /// @param announcementId 要标记为已读的公告 ID
-  /// @throws DioException 如果请求失败
-  Future<void> readAnnouncement(String announcementId) => executeApiCall(
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> readAnnouncement(String announcementId) => executeApiCallSafeVoid(
     'MisskeyApi.readAnnouncement',
     () => _dio.post(
       '/api/i/read-announcement',
       data: {'i': token, 'announcementId': announcementId},
     ),
-    (response) => response.data,
     params: {'announcementId': announcementId},
   );
 
@@ -999,9 +991,8 @@ class MisskeyApi extends BaseApi {
   /// @param untilId 结束 ID（可选）
   /// @param sinceDate 起始日期时间戳（可选）
   /// @param untilDate 结束日期时间戳（可选）
-  /// @return 反应列表
-  /// @throws DioException 如果请求失败
-  Future<List<dynamic>> getNoteReactions(
+  /// @return (反应列表, 错误) 元组
+  Future<(List<dynamic>?, Exception?)> getNoteReactions(
     String noteId, {
     String? type,
     int limit = 10,
