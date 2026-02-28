@@ -81,16 +81,8 @@ class FontManager {
       localPath: null,
     ),
     FontInfo(
-      id: 'google_sans',
-      metadataId: 2,
-      displayName: 'Google Sans',
-      type: FontType.downloadedFont,
-      downloadUrl: 'https://bavoice.imikufans.cn/cyanitalk_data/fonts/GoogleSans-VariableFont.ttf',
-      fileName: 'GoogleSans-VariableFont.ttf',
-    ),
-    FontInfo(
       id: 'star_rail',
-      metadataId: 3,
+      metadataId: 2,
       displayName: 'Star Rail',
       type: FontType.downloadedFont,
       downloadUrl: 'https://bavoice.imikufans.cn/cyanitalk_data/fonts/StarRailFont.ttf',
@@ -98,7 +90,7 @@ class FontManager {
     ),
     FontInfo(
       id: 'gakumas_sans',
-      metadataId: 4,
+      metadataId: 3,
       displayName: 'Gakumas Sans',
       type: FontType.downloadedFont,
       downloadUrl: 'https://bavoice.imikufans.cn/cyanitalk_data/fonts/gakumas-font.ttf',

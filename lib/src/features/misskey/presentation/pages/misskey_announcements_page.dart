@@ -23,6 +23,7 @@ class _MisskeyAnnouncementsPageState
     _mfmRenderer.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final announcementsAsync = ref.watch(misskeyAnnouncementsProvider);
@@ -117,7 +118,9 @@ class _MisskeyAnnouncementsPageState
             if (announcement.text != null) ...[
               SelectableText.rich(
                 TextSpan(
-                  children: _mfmRenderer.processText(announcement.text!, context),
+                  children: [
+                    _mfmRenderer.processText(announcement.text!, context),
+                  ],
                 ),
               ),
               const SizedBox(height: 12),
@@ -178,11 +181,7 @@ class _MisskeyAnnouncementsPageState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
             Text(
               'misskey_announcements_error'.tr(),

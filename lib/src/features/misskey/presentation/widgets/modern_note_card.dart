@@ -1072,18 +1072,19 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
               const SizedBox(height: 4),
 
-              Text(
+              _mfmRenderer.processTextToRichText(
                 replyNote.text ?? replyNote.cw ?? '',
-
+                context,
+                onEmojiLoaded: () {
+                  if (mounted) {
+                    setState(() {});
+                  }
+                },
                 maxLines: 3,
-
                 overflow: TextOverflow.ellipsis,
-
-                style: TextStyle(
+                textStyle: TextStyle(
                   fontSize: 12,
-
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
-
                   height: 1.4,
                 ),
               ),
