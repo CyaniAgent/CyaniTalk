@@ -1000,31 +1000,33 @@ class MisskeyApi extends BaseApi {
     String? untilId,
     int? sinceDate,
     int? untilDate,
-  }) {
-    // 构建基础参数
-    final params = <String, dynamic>{
-      'noteId': noteId,
-      'limit': limit,
-    };
-    
-    // 对type参数进行处理，如果是自定义emoji格式（如:nacho_1@.:），只取名称部分
-    if (type != null) {
-      String processedType = type;
-      if (type.startsWith(':') && type.endsWith(':')) {
-        // 提取自定义emoji名称部分，如将 :nacho_1@.: 转换为 nacho_1
-        final content = type.substring(1, type.length - 1); // 移除首尾的冒号
-        final emojiName = content.split('@')[0]; // 取@符号前的部分
-        processedType = ':$emojiName:'; // 恢复为基本自定义emoji格式
-      }
-      params['type'] = processedType;
+  }) =>
+      executeApiCallSafe(
+        'MisskeyApi.getNoteReactions',
+        () => _dio.post(
+          '/api/notes/reactions',
+          data: {
+            'i': token,
+            'noteId': noteId,
+            'limit': limit,
+            'type': type != null ? _processReactionType(type) : null,
+            'sinceId': sinceId,
+            'untilId': untilId,
+            'sinceDate': sinceDate,
+            'untilDate': untilDate,
+          }..removeWhere((key, value) => value == null),
+        ),
+        (response) => response.data as List<dynamic>,
+      );
+
+  /// 对反应类型参数进行处理，如果是自定义emoji格式（如:nacho_1@.:），只取名称部分
+  String _processReactionType(String type) {
+    if (type.startsWith(':') && type.endsWith(':')) {
+      // 提取自定义emoji名称部分，如将 :nacho_1@.: 转换为 nacho_1
+      final content = type.substring(1, type.length - 1); // 移除首尾的冒号
+      final emojiName = content.split('@')[0]; // 取@符号前的部分
+      return ':$emojiName:'; // 恢复为基本自定义emoji格式
     }
-    
-    // 只有在值不为空时才添加其他可选参数
-    if (sinceId != null) params['sinceId'] = sinceId;
-    if (untilId != null) params['untilId'] = untilId;
-    if (sinceDate != null) params['sinceDate'] = sinceDate;
-    if (untilDate != null) params['untilDate'] = untilDate;
-    
-    return _fetchList('MisskeyApi.getNoteReactions', '/api/notes/reactions', params);
+    return type;
   }
 }
