@@ -25,6 +25,7 @@ abstract class Note with _$Note {
     String? visibility,
     @Default(false) bool localOnly,
     String? myReaction,
+    Map<String, String>? emojis,
   }) = _Note;
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);

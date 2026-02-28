@@ -41,6 +41,9 @@ _Note _$NoteFromJson(Map<String, dynamic> json) => _Note(
   visibility: json['visibility'] as String?,
   localOnly: json['localOnly'] as bool? ?? false,
   myReaction: json['myReaction'] as String?,
+  emojis: (json['emojis'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
 );
 
 Map<String, dynamic> _$NoteToJson(_Note instance) => <String, dynamic>{
@@ -62,4 +65,5 @@ Map<String, dynamic> _$NoteToJson(_Note instance) => <String, dynamic>{
   'visibility': instance.visibility,
   'localOnly': instance.localOnly,
   'myReaction': instance.myReaction,
+  'emojis': instance.emojis,
 };

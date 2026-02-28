@@ -51,17 +51,29 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     super.dispose();
   }
 
-  /// 处理文本中的特殊格式
-  ///
-  /// 使用MFM渲染器处理文本中的各种特殊格式，并返回对应的TextSpan列表。
-  List<TextSpan> _processText(String text, BuildContext context) {
-    return _mfmRenderer.processText(text, context);
-  }
+
 
   @override
   void initState() {
     super.initState();
     _shouldAnimate = false;
+    _setupMfmRenderer();
+    _loadEmojis();
+  }
+
+  /// 设置MFM渲染器
+  void _setupMfmRenderer() {
+    // 设置API表情加载器
+    _mfmRenderer.setApiEmojiLoader((emojiName) async {
+      try {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        final emojiDetail = await repository.getEmoji(emojiName);
+        return emojiDetail.url;
+      } catch (e) {
+        logger.error('Error loading emoji from API: $e');
+        return null;
+      }
+    });
   }
 
   @override
@@ -69,7 +81,22 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     super.didUpdateWidget(oldWidget);
     // Only rebuild if the note has actually changed
     if (oldWidget.note.id != widget.note.id) {
-      // 缓存管理由MfmRenderer内部处理
+      _loadEmojis();
+    }
+  }
+
+  /// 加载笔记中的表情到MFM渲染器缓存
+  void _loadEmojis() {
+    final note = widget.note;
+    
+    // 加载笔记中的表情
+    if (note.emojis != null && note.emojis!.isNotEmpty) {
+      _mfmRenderer.addEmojisToCache(note.emojis!);
+    }
+    
+    // 加载用户的表情
+    if (note.user?.emojis != null && note.user!.emojis!.isNotEmpty) {
+      _mfmRenderer.addEmojisToCache(note.user!.emojis!);
     }
   }
 
@@ -209,15 +236,14 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   ),
                   const SizedBox(height: 8),
                 ] else if (text != null) ...[
-                  SelectableText.rich(
-                    TextSpan(
-                      children: _processText(text, context),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurface,
-                        height: 1.5,
-                      ),
-                    ),
+                  _mfmRenderer.processTextToRichText(
+                    text,
+                    context,
+                    onEmojiLoaded: () {
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
                   ),
                   const SizedBox(height: 8),
                 ],
