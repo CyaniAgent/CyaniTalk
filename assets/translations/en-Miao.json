@@ -373,5 +373,17 @@
   "cloud_download_completed": "Download completed Meow~",
   "cloud_download_failed_count": "{count} files failed Meow~",
   "cloud_downloading_current": "Downloading {current}/{total}: {filename} Meow~",
-  "cloud_download_starting": "Starting download Meow~"
+  "cloud_download_starting": "Starting download Meow~",
+  "settings_network_global_section": "Global Meow~",
+  "settings_network_user_agent_selector": "User Agent Selector Meow~",
+  "settings_network_misskey_section": "Misskey Meow~",
+  "settings_network_misskey_realtime_mode": "Realtime Mode Meow~",
+  "settings_network_misskey_realtime_mode_description": "Enable real-time data updates Meow~",
+  "settings_network_misskey_load_post_duration": "Maximum Post Loading Duration Meow~",
+  "settings_network_misskey_load_emoji_duration": "Maximum Emoji Loading Duration Meow~",
+  "settings_network_websocket_reconnect_attempts": "WebSocket Reconnection Attempts Meow~",
+  "settings_network_websocket_background_duration": "WebSocket Background Max Lifetime Meow~",
+  "settings_network_flarum_section": "Flarum Meow~",
+  "settings_network_flarum_discussion_max_load_duration": "Discussion Max Loading Duration Meow~",
+  "settings_network_error_loading": "Failed to load network settings Meow~"
 }

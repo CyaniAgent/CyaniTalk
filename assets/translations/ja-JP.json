@@ -454,5 +454,17 @@
   "cloud_files_count": "個のファイル",
   "could_not_launch_url": "{url}を起動できませんでした",
   "navigation_no_items": "ナビゲーション項目がありません",
-  "navigation_settings": "設定"
+  "navigation_settings": "設定",
+  "settings_network_global_section": "グローバル",
+  "settings_network_user_agent_selector": "User Agent選択",
+  "settings_network_misskey_section": "Misskey",
+  "settings_network_misskey_realtime_mode": "リアルタイムモード",
+  "settings_network_misskey_realtime_mode_description": "リアルタイムデータ更新を有効にする",
+  "settings_network_misskey_load_post_duration": "投稿読み込みの最大時間",
+  "settings_network_misskey_load_emoji_duration": "絵文字読み込みの最大時間",
+  "settings_network_websocket_reconnect_attempts": "WebSocket 再接続回数",
+  "settings_network_websocket_background_duration": "WebSocket バックグラウンド最大存続時間",
+  "settings_network_flarum_section": "Flarum",
+  "settings_network_flarum_discussion_max_load_duration": "ディスカッション最大読み込み時間",
+  "settings_network_error_loading": "ネットワーク設定の読み込みに失敗しました"
 }

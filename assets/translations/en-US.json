@@ -487,5 +487,17 @@
   "auth_welcome_subtitle": "Sign in or sign up to get started",
   "auth_terms_hint": "By continuing, you agree to our",
   "auth_terms_of_service": "Terms of Service",
-  "auth_privacy_policy": "Privacy Policy"
+  "auth_privacy_policy": "Privacy Policy",
+  "settings_network_global_section": "Global",
+  "settings_network_user_agent_selector": "User Agent Selector",
+  "settings_network_misskey_section": "Misskey",
+  "settings_network_misskey_realtime_mode": "Realtime Mode",
+  "settings_network_misskey_realtime_mode_description": "Enable real-time data updates",
+  "settings_network_misskey_load_post_duration": "Maximum Post Loading Duration",
+  "settings_network_misskey_load_emoji_duration": "Maximum Emoji Loading Duration",
+  "settings_network_websocket_reconnect_attempts": "WebSocket Reconnection Attempts",
+  "settings_network_websocket_background_duration": "WebSocket Background Max Lifetime",
+  "settings_network_flarum_section": "Flarum",
+  "settings_network_flarum_discussion_max_load_duration": "Discussion Max Loading Duration",
+  "settings_network_error_loading": "Failed to load network settings"
 }

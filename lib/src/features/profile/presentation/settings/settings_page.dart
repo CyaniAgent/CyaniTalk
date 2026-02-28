@@ -14,6 +14,7 @@ import 'navigation_settings_page.dart';
 import 'developer_settings_page.dart';
 import 'licenses_page.dart';
 import 'flarum_endpoints_page.dart';
+import 'network_settings_page.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -107,6 +108,11 @@ class _SettingsPageState extends State<SettingsPage> {
             Icons.wifi,
             'settings_network_title'.tr(),
             'settings_network_description'.tr(),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const NetworkSettingsPage()),
+              );
+            },
           ),
 
           _buildSectionHeader(context, 'settings_section_interface'.tr()),

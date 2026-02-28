@@ -412,5 +412,17 @@
   "cloud_downloading_current": "ダウンロード中 {current}/{total}: {filename}にゃ～",
   "cloud_download_starting": "ダウンロード開始にゃ～",
   "could_not_launch_url": "{url}を起動できませんでしたにゃ～",
-  "auth_or": "またはにゃ～"
+  "auth_or": "またはにゃ～",
+  "settings_network_global_section": "グローバルにゃ～",
+  "settings_network_user_agent_selector": "User Agent選択にゃ～",
+  "settings_network_misskey_section": "Misskeyにゃ～",
+  "settings_network_misskey_realtime_mode": "リアルタイムモードにゃ～",
+  "settings_network_misskey_realtime_mode_description": "リアルタイムデータ更新を有効にするにゃ～",
+  "settings_network_misskey_load_post_duration": "投稿読み込みの最大時間にゃ～",
+  "settings_network_misskey_load_emoji_duration": "絵文字読み込みの最大時間にゃ～",
+  "settings_network_websocket_reconnect_attempts": "WebSocket 再接続回数にゃ～",
+  "settings_network_websocket_background_duration": "WebSocket バックグラウンド最大存続時間にゃ～",
+  "settings_network_flarum_section": "Flarumにゃ～",
+  "settings_network_flarum_discussion_max_load_duration": "ディスカッション最大読み込み時間にゃ～",
+  "settings_network_error_loading": "ネットワーク設定の読み込みに失敗しましたにゃ～"
 }
