@@ -33,7 +33,7 @@ class AudioEngine {
             ),
             iOS: AudioContextIOS(
               category: AVAudioSessionCategory.ambient, // 使用 ambient 避免干扰其他音频
-              options: {AVAudioSessionOptions.duckOthers},
+              options: {}, // ambient 类别不支持 duckOthers 选项
             ),
           ),
         );
@@ -66,7 +66,7 @@ class AudioEngine {
             ),
             iOS: AudioContextIOS(
               category: AVAudioSessionCategory.playback, // 使用 playback 获取音频焦点
-              options: {AVAudioSessionOptions.duckOthers},
+              options: {AVAudioSessionOptions.duckOthers}, // playback 类别支持 duckOthers 选项
             ),
           ),
         );

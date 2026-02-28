@@ -493,5 +493,17 @@
   "auth_welcome_subtitle": "登录或注册以开始使用",
   "auth_terms_hint": "继续即表示您同意我们的",
   "auth_terms_of_service": "服务条款",
-  "auth_privacy_policy": "隐私政策"
+  "auth_privacy_policy": "隐私政策",
+  "settings_network_global_section": "全局",
+  "settings_network_user_agent_selector": "User Agent 选择器",
+  "settings_network_misskey_section": "Misskey",
+  "settings_network_misskey_realtime_mode": "实时模式",
+  "settings_network_misskey_realtime_mode_description": "启用实时数据更新",
+  "settings_network_misskey_load_post_duration": "加载帖子最大时长",
+  "settings_network_misskey_load_emoji_duration": "加载表情最大时长",
+  "settings_network_websocket_reconnect_attempts": "WebSocket 断线重连次数",
+  "settings_network_websocket_background_duration": "WebSocket 后台最大存活时长",
+  "settings_network_flarum_section": "Flarum",
+  "settings_network_flarum_discussion_max_load_duration": "讨论最大加载时长",
+  "settings_network_error_loading": "加载网络设置失败"
 }

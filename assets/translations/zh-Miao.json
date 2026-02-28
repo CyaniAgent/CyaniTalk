@@ -401,5 +401,17 @@
   "cloud_download_failed_count": "{count}个文件下载失败喵~",
   "cloud_downloading_current": "正在下载 {current}/{total}: {filename}喵~",
   "cloud_download_starting": "开始下载喵~",
-  "could_not_launch_url": "无法启动 {url}喵~"
+  "could_not_launch_url": "无法启动 {url}喵~",
+  "settings_network_global_section": "全局喵~",
+  "settings_network_user_agent_selector": "User Agent 选择器喵~",
+  "settings_network_misskey_section": "Misskey喵~",
+  "settings_network_misskey_realtime_mode": "实时模式喵~",
+  "settings_network_misskey_realtime_mode_description": "启用实时数据更新喵~",
+  "settings_network_misskey_load_post_duration": "加载帖子最大时长喵~",
+  "settings_network_misskey_load_emoji_duration": "加载表情最大时长喵~",
+  "settings_network_websocket_reconnect_attempts": "WebSocket 断线重连次数喵~",
+  "settings_network_websocket_background_duration": "WebSocket 后台最大存活时长喵~",
+  "settings_network_flarum_section": "Flarum喵~",
+  "settings_network_flarum_discussion_max_load_duration": "讨论最大加载时长喵~",
+  "settings_network_error_loading": "加载网络设置失败喵~"
 }
