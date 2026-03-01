@@ -88,7 +88,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       logger.info('AboutPage: Playing entrance sound');
       await ref
           .read(audioEngineProvider)
-          .playAsset('sounds/AboutPageEntrance.mp3');
+          .playAsset('sounds/AboutPageEntrance.wav');
       logger.info('AboutPage: Entrance sound played successfully');
     } catch (e) {
       logger.error('AboutPage: Error playing sound: $e');

@@ -114,22 +114,15 @@ class _DriveFilePickerSheetState extends ConsumerState<DriveFilePickerSheet> {
             size: 24,
           ),
           const SizedBox(width: 12),
-          Text(
-            'drive_select_files'.tr(args: [widget.maxFiles.toString()]),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
+          Expanded(
+            child: Text(
+              'drive_select_files'.tr(),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const Spacer(),
-          // 关闭按钮
-          IconButton(
-            icon: Icon(
-              Icons.close_rounded,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-            tooltip: 'drive_cancel'.tr(),
           ),
         ],
       ),

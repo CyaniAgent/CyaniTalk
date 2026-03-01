@@ -43,6 +43,7 @@
   "drive_load_failed": "Failed to load cloud drive",
   "drive_cancel": "Cancel",
   "drive_confirm": "Confirm",
+  "drive_folder": "Folder",
   "timeline_home": "Home",
   "timeline_local": "Local",
   "timeline_social": "Social",
