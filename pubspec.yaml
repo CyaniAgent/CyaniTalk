@@ -106,6 +106,7 @@ dependencies:
   # 时间格式化库，将时间戳转换为“几分钟前”等友好格式
   timeago: ^3.7.1
   mfm: ^1.0.9
+  haptic_feedback: ^0.6.4+3
 
 dev_dependencies:
   flutter_test:

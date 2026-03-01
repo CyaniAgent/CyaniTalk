@@ -115,7 +115,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               // 云盘文件选择器
               Expanded(
                 child: DriveFilePicker(
-                  maxFiles: 10,
+                  maxFiles: 16,
                   onFilesSelected: (files) {
                     // 将云盘文件添加到当前帖子
                     final notifier = ref.read(fileUploadProvider.notifier);
