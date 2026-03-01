@@ -8,7 +8,8 @@ import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/file_upload_notifier.dart';
 import '/src/features/misskey/domain/upload_task.dart';
 import '/src/features/misskey/presentation/widgets/attachment_card.dart';
-import '/src/features/misskey/presentation/widgets/drive_file_picker.dart';
+import '/src/features/misskey/presentation/widgets/drive_file_picker.dart'
+    show showDriveFilePicker;
 
 /// Misskey 发布笔记页面组件
 ///
@@ -87,50 +88,20 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   Future<void> _pickCloudFile() async {
     if (!mounted) return;
 
-    // 显示云盘文件选择对话框
-    await showDialog<void>(
+    // 使用 MD3 Bottom Sheet 显示云盘文件选择器
+    final selectedFiles = await showDriveFilePicker(
       context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          width: double.infinity,
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // 标题
-              Row(
-                children: [
-                  Text(
-                    'drive_select_files'.tr(),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const Divider(),
-              // 云盘文件选择器
-              Expanded(
-                child: DriveFilePicker(
-                  maxFiles: 16,
-                  onFilesSelected: (files) {
-                    // 将云盘文件添加到当前帖子
-                    final notifier = ref.read(fileUploadProvider.notifier);
-                    for (final file in files) {
-                      // 添加已有的 DriveFile（状态为成功）
-                      notifier.addExistingDriveFile(file);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      maxFiles: 16,
     );
+
+    // 处理选中的文件
+    if (selectedFiles != null && selectedFiles.isNotEmpty) {
+      final notifier = ref.read(fileUploadProvider.notifier);
+      for (final file in selectedFiles) {
+        // 添加已有的 DriveFile（状态为成功）
+        notifier.addExistingDriveFile(file);
+      }
+    }
   }
 
   @override
@@ -435,7 +406,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       children: [
         // 附件列表
         _buildAttachmentList(context),
-        
+
         // 工具栏按钮
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -459,7 +430,10 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               ),
               _buildAttachIcon(Icons.tag, 'post_tags'.tr()),
               _buildAttachIcon(Icons.alternate_email, 'post_mention'.tr()),
-              _buildAttachIcon(Icons.emoji_emotions_outlined, 'post_emoji'.tr()),
+              _buildAttachIcon(
+                Icons.emoji_emotions_outlined,
+                'post_emoji'.tr(),
+              ),
               _buildAttachIcon(Icons.code, 'post_mfm_format'.tr()),
             ],
           ),
@@ -471,7 +445,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   /// 附件列表显示区域
   Widget _buildAttachmentList(BuildContext context) {
     final uploadTasks = ref.watch(fileUploadProvider);
-    
+
     if (uploadTasks.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -499,7 +473,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   }
 
   Widget _buildAttachIcon(
-    IconData icon, 
+    IconData icon,
     String tooltip, {
     VoidCallback? onPressed,
   }) {
@@ -516,10 +490,10 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     // 检查是否有上传失败的任务
     final uploadTasks = ref.read(fileUploadProvider);
-    final failedTasks = uploadTasks.where((task) => 
-      task.status == UploadStatus.failed
-    ).toList();
-    
+    final failedTasks = uploadTasks
+        .where((task) => task.status == UploadStatus.failed)
+        .toList();
+
     if (failedTasks.isNotEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -541,12 +515,15 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
     }
 
     // 检查是否有正在上传的任务
-    final uploadingTasks = uploadTasks.where((task) => 
-      task.status == UploadStatus.uploading || 
-      task.status == UploadStatus.pending ||
-      task.status == UploadStatus.retrying
-    ).toList();
-    
+    final uploadingTasks = uploadTasks
+        .where(
+          (task) =>
+              task.status == UploadStatus.uploading ||
+              task.status == UploadStatus.pending ||
+              task.status == UploadStatus.retrying,
+        )
+        .toList();
+
     if (uploadingTasks.isNotEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -563,10 +540,12 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     try {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      
+
       // 获取已上传成功的文件 ID
-      final fileIds = ref.read(fileUploadProvider.notifier).getUploadedFileIds();
-      
+      final fileIds = ref
+          .read(fileUploadProvider.notifier)
+          .getUploadedFileIds();
+
       await repository.createNote(
         text: text,
         visibility: _visibility,
@@ -576,20 +555,26 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_post_created'.tr()), behavior: SnackBarBehavior.floating));
-        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_post_created'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
         // 清除已完成的上传任务
         ref.read(fileUploadProvider.notifier).clearCompletedTasks();
-        
+
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } finally {
       if (mounted) {
