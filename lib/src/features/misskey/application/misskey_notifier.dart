@@ -406,6 +406,18 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       logger.error('Misskey时间线: 加载更多失败', e);
     }
   }
+
+  /// 更新时间线中的单个笔记
+  void updateNote(Note updatedNote) {
+    if (!ref.mounted) return;
+    final currentNotes = state.value ?? [];
+    if (!currentNotes.any((n) => n.id == updatedNote.id)) return;
+
+    state = AsyncData(
+      currentNotes.map((n) => n.id == updatedNote.id ? updatedNote : n).toList(),
+    );
+    _cacheManager.putNote(updatedNote);
+  }
 }
 
 /// Misskey频道列表状态管理类

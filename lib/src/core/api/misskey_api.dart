@@ -1033,4 +1033,21 @@ class MisskeyApi extends BaseApi {
     }
     return type;
   }
+
+  /// 投票
+  ///
+  /// 通过调用 `/api/notes/polls/vote` 接口为指定笔记的投票选项投票。
+  ///
+  /// @param noteId 笔记 ID
+  /// @param choice 选项索引（从 0 开始）
+  /// @return (void, 错误) 元组
+  Future<(void, Exception?)> votePoll(String noteId, int choice) =>
+      executeApiCallSafeVoid(
+        'MisskeyApi.votePoll',
+        () => _dio.post(
+          '/api/notes/polls/vote',
+          data: {'i': token, 'noteId': noteId, 'choice': choice},
+        ),
+        params: {'noteId': noteId, 'choice': choice},
+      );
 }

@@ -18,14 +18,14 @@ class NetworkSettingsPage extends ConsumerWidget {
           return ListView(
             children: [
               _buildSectionHeader(context, 'settings_network_global_section'.tr()),
-              
+
               // User Agent 选择器
               _buildUserAgentSelector(context, ref, settings),
-              
+
               const Divider(indent: 16, endIndent: 16),
-              
+
               _buildSectionHeader(context, 'settings_network_misskey_section'.tr()),
-              
+
               // Misskey 实时模式开关
               _buildSwitchTile(
                 context,
@@ -35,7 +35,7 @@ class NetworkSettingsPage extends ConsumerWidget {
                 settings.misskeyRealtimeMode,
                 (value) => ref.read(networkSettingsProvider.notifier).toggleMisskeyRealtimeMode(value),
               ),
-              
+
               // 加载帖子最大时长
               _buildDurationTile(
                 context,
@@ -45,7 +45,7 @@ class NetworkSettingsPage extends ConsumerWidget {
                 (value) => ref.read(networkSettingsProvider.notifier).updateLoadPostMaxDuration(value),
                 5, 60, // 5-60秒范围
               ),
-              
+
               // 加载表情最大时长
               _buildDurationTile(
                 context,
@@ -55,7 +55,7 @@ class NetworkSettingsPage extends ConsumerWidget {
                 (value) => ref.read(networkSettingsProvider.notifier).updateLoadEmojiMaxDuration(value),
                 5, 60, // 5-60秒范围
               ),
-              
+
               // WebSocket 断线重连次数
               _buildNumberTile(
                 context,
@@ -65,7 +65,7 @@ class NetworkSettingsPage extends ConsumerWidget {
                 (value) => ref.read(networkSettingsProvider.notifier).updateWebSocketReconnectAttempts(value),
                 1, 20, // 1-20次范围
               ),
-              
+
               // WebSocket 后台最大存活时长
               _buildDurationTile(
                 context,
@@ -75,11 +75,11 @@ class NetworkSettingsPage extends ConsumerWidget {
                 (value) => ref.read(networkSettingsProvider.notifier).updateWebSocketBackgroundMaxDuration(value),
                 300, 7200, // 5分钟-2小时范围
               ),
-              
+
               const Divider(indent: 16, endIndent: 16),
-              
+
               _buildSectionHeader(context, 'settings_network_flarum_section'.tr()),
-              
+
               // Flarum 讨论最大加载时长
               _buildDurationTile(
                 context,
@@ -149,23 +149,25 @@ class NetworkSettingsPage extends ConsumerWidget {
           title: Text('settings_network_user_agent_selector'.tr()),
           content: SizedBox(
             width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: options.length,
-              itemBuilder: (context, index) {
-                final option = options[index];
-                return RadioListTile<String>(
-                  title: Text(option.displayName),
-                  value: option.name,
-                  groupValue: currentType.name,
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref.read(networkSettingsProvider.notifier).updateUserAgentType(value);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                );
+            child: RadioGroup<String>(
+              groupValue: currentType.name,
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(networkSettingsProvider.notifier).updateUserAgentType(value);
+                  Navigator.of(context).pop();
+                }
               },
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options[index];
+                  return RadioListTile<String>(
+                    title: Text(option.displayName),
+                    value: option.name,
+                  );
+                },
+              ),
             ),
           ),
         );
@@ -281,7 +283,7 @@ class NetworkSettingsPage extends ConsumerWidget {
     int maxValue,
   ) {
     final controller = TextEditingController(text: currentValue.toString());
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -297,7 +299,7 @@ class NetworkSettingsPage extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.pop(context),
               child: Text('Cancel'.tr()),
             ),
             ElevatedButton(
@@ -305,7 +307,7 @@ class NetworkSettingsPage extends ConsumerWidget {
                 final value = int.tryParse(controller.text);
                 if (value != null && value >= minValue && value <= maxValue) {
                   onChanged(value);
-                  Navigator.of(context).pop();
+                  Navigator.pop(context);
                 }
               },
               child: Text('OK'.tr()),
@@ -326,7 +328,7 @@ class NetworkSettingsPage extends ConsumerWidget {
     int maxValue,
   ) {
     final controller = TextEditingController(text: currentValue.toString());
-    
+
     showDialog(
       context: context,
       builder: (context) {
@@ -342,7 +344,7 @@ class NetworkSettingsPage extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.pop(context),
               child: Text('Cancel'.tr()),
             ),
             ElevatedButton(
@@ -350,7 +352,7 @@ class NetworkSettingsPage extends ConsumerWidget {
                 final value = int.tryParse(controller.text);
                 if (value != null && value >= minValue && value <= maxValue) {
                   onChanged(value);
-                  Navigator.of(context).pop();
+                  Navigator.pop(context);
                 }
               },
               child: Text('OK'.tr()),

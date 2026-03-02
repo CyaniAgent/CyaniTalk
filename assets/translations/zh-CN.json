@@ -559,5 +559,14 @@
   "settings_network_websocket_background_duration": "WebSocket 后台最大存活时长",
   "settings_network_flarum_section": "Flarum",
   "settings_network_flarum_discussion_max_load_duration": "讨论最大加载时长",
-  "settings_network_error_loading": "加载网络设置失败"
+  "settings_network_error_loading": "加载网络设置失败",
+  "poll_expired": "已截止",
+  "poll_ends_in_days": "还有 {} 天截止",
+  "poll_ends_in_hours": "还有 {} 小时截止",
+  "poll_ends_soon": "即将截止",
+  "poll_permanent": "永久投票",
+  "poll_total_votes": "累计 {} 票",
+  "poll_submit": "投票",
+  "poll_voted_successfully": "投票成功！",
+  "poll_vote_failed": "投票失败：{error}"
 }

@@ -9,6 +9,7 @@ import '/src/features/misskey/domain/note.dart';
 import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/data/misskey_repository_interface.dart';
+import '/src/features/misskey/presentation/widgets/poll_card.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
@@ -253,6 +254,17 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: _buildMediaGrid(note.files),
+                  ),
+
+                // 投票卡片
+                if (note.poll != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12.0),
+                    child: PollCard(
+                      noteId: note.id,
+                      poll: note.poll!,
+                      timelineType: widget.timelineType,
+                    ),
                   ),
 
                 const SizedBox(height: 8),

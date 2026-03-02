@@ -1126,6 +1126,22 @@ class MisskeyRepository implements IMisskeyRepository {
     }
   }
 
+  @override
+  Future<void> votePoll(String noteId, int choice) async {
+    logger.info('MisskeyRepository: Voting for choice $choice in note $noteId');
+    try {
+      final (_, error) = await api.votePoll(noteId, choice);
+      if (error != null) {
+        logger.error('MisskeyRepository: Error voting for note $noteId', error);
+        throw error;
+      }
+      logger.info('MisskeyRepository: Successfully voted for note $noteId');
+    } catch (e) {
+      logger.error('MisskeyRepository: Error voting for note $noteId', e);
+      rethrow;
+    }
+  }
+
   static _MessagingParsingResult _parseMessagingHistory(List<dynamic> data) {
     final messages = <MessagingMessage>[];
     final missingUserIds = <String>{};

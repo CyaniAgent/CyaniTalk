@@ -553,5 +553,14 @@
   "settings_network_websocket_background_duration": "WebSocket Background Max Lifetime",
   "settings_network_flarum_section": "Flarum",
   "settings_network_flarum_discussion_max_load_duration": "Discussion Max Loading Duration",
-  "settings_network_error_loading": "Failed to load network settings"
+  "settings_network_error_loading": "Failed to load network settings",
+  "poll_expired": "Closed",
+  "poll_ends_in_days": "Ends in {} days",
+  "poll_ends_in_hours": "Ends in {} hours",
+  "poll_ends_soon": "Ends soon",
+  "poll_permanent": "Permanent",
+  "poll_total_votes": "{} votes",
+  "poll_submit": "Vote",
+  "poll_voted_successfully": "Voted successfully!",
+  "poll_vote_failed": "Failed to vote: {error}"
 }

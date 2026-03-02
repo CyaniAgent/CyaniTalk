@@ -206,4 +206,7 @@ abstract interface class IMisskeyRepository {
     int? sinceDate,
     int? untilDate,
   });
+
+  /// 为笔记投票
+  Future<void> votePoll(String noteId, int choice);
 }

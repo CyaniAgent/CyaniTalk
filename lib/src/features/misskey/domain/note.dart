@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'misskey_user.dart';
+import 'poll.dart';
 
 part 'note.freezed.dart';
 part 'note.g.dart';
@@ -26,6 +27,7 @@ abstract class Note with _$Note {
     @Default(false) bool localOnly,
     String? myReaction,
     Map<String, String>? emojis,
+    PollResult? poll,
   }) = _Note;
 
   factory Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);
