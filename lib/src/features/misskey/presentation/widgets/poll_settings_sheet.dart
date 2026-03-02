@@ -329,6 +329,14 @@ class _PollSettingsSheetState extends ConsumerState<PollSettingsSheet> {
           relativeUnit: _relativeUnit,
           onModeChanged: (mode) {
             setState(() {
+              // 切换模式时清理旧数据
+              if (mode != PollMode.date) {
+                _expiresAt = null;
+              }
+              if (mode != PollMode.relative) {
+                _relativeValue = null;
+                _relativeUnit = null;
+              }
               _mode = mode;
             });
           },
@@ -475,17 +483,16 @@ class _PollSettingsSheetState extends ConsumerState<PollSettingsSheet> {
       return false;
     }
 
-    // 如果是 date 模式，必须有截止日期且至少 24 小时后
+    // 如果是 date 模式，必须有截止日期且不能是过去时间
     if (_mode == PollMode.date) {
       if (_expiresAt == null) {
         _errorMessage = 'poll_no_expires_at'.tr();
         return false;
       }
-      // 检查截止时间与当前时间的差是否至少为 24 小时
+      // 检查截止时间是否是过去时间
       final now = DateTime.now();
-      final difference = _expiresAt!.difference(now);
-      if (difference.inHours < 24) {
-        _errorMessage = 'poll_expires_at_too_soon'.tr();
+      if (_expiresAt!.isBefore(now)) {
+        _errorMessage = 'poll_expires_at_in_past'.tr();
         return false;
       }
     }

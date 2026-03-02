@@ -71,7 +71,7 @@
   "poll_empty_choice": "Please fill in all choice content",
   "poll_duplicate_choice": "Choice content cannot be duplicated",
   "poll_no_expires_at": "Please select an end date",
-  "poll_expires_at_too_soon": "End time must be at least 24 hours from now",
+  "poll_expires_at_in_past": "End time cannot be in the past",
   "poll_invalid_relative_time": "Please set relative time",
   "poll_remove": "Remove Poll",
   "poll_preview_title": "Poll Preview",

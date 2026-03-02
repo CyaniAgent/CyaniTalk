@@ -33,9 +33,7 @@ enum PollTimeUnit {
 /// 投票选项
 @freezed
 abstract class PollChoice with _$PollChoice {
-  const factory PollChoice({
-    required String text,
-  }) = _PollChoice;
+  const factory PollChoice({required String text}) = _PollChoice;
 
   factory PollChoice.fromJson(Map<String, dynamic> json) =>
       _$PollChoiceFromJson(json);
@@ -150,9 +148,15 @@ bool isValidPoll(Poll poll) {
     return false;
   }
 
-  // 如果是 date 模式，必须有截止日期
-  if (poll.mode == PollMode.date && poll.expiresAt == null) {
-    return false;
+  // 如果是 date 模式，必须有截止日期且不能是过去时间
+  if (poll.mode == PollMode.date) {
+    if (poll.expiresAt == null) {
+      return false;
+    }
+    // 检查是否是过去时间
+    if (poll.expiresAt!.isBefore(DateTime.now())) {
+      return false;
+    }
   }
 
   // 如果是 relative 模式，必须有相对时间设置
@@ -174,7 +178,17 @@ int? getPollExpiresAtMs(Poll poll) {
     if (poll.relativeValue == null || poll.relativeUnit == null) {
       return null;
     }
-    return convertRelativeTimeToMs(poll.relativeValue!, poll.relativeUnit!);
+    // relative 模式返回从当前时间开始的相对时间戳
+    final now = DateTime.now();
+    final expiresAt = now.add(
+      Duration(
+        milliseconds: convertRelativeTimeToMs(
+          poll.relativeValue!,
+          poll.relativeUnit!,
+        ),
+      ),
+    );
+    return expiresAt.millisecondsSinceEpoch;
   }
   return null;
 }

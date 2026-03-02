@@ -82,6 +82,13 @@ class _PollTimeSelectorState extends State<PollTimeSelector> {
       ],
       selected: {widget.mode},
       onSelectionChanged: (Set<PollMode> selected) {
+        // 切换模式时清理旧数据
+        if (selected.first != PollMode.date) {
+          widget.onExpiresAtChanged(null);
+        }
+        if (selected.first != PollMode.relative) {
+          widget.onRelativeTimeChanged(1, PollTimeUnit.hours);
+        }
         widget.onModeChanged(selected.first);
       },
       showSelectedIcon: false,
