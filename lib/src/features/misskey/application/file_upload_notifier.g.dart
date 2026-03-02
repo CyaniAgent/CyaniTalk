@@ -50,7 +50,7 @@ final class FileUploadProvider
   }
 }
 
-String _$fileUploadHash() => r'22b006e9cef6091a757f1db20fbaa9922744b909';
+String _$fileUploadHash() => r'3ce2ad1d1e873ace312192a1454c79ef44ee1034';
 
 /// 文件上传状态管理类
 ///

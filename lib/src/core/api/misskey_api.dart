@@ -339,6 +339,7 @@ class MisskeyApi extends BaseApi {
   /// @param visibility 可见性：public、home、followers、specified
   /// @param localOnly 是否仅本地可见
   /// @param cw 内容警告
+  /// @param poll 投票参数
   /// @return (void, 错误) 元组
   Future<(void, Exception?)> createNote({
     String? text,
@@ -349,6 +350,7 @@ class MisskeyApi extends BaseApi {
     String? visibility,
     bool? localOnly,
     String? cw,
+    Map<String, dynamic>? poll,
   }) => executeApiCallSafeVoid(
     'MisskeyApi.createNote',
     () => _dio.post(
@@ -363,6 +365,7 @@ class MisskeyApi extends BaseApi {
         'visibility': ?visibility,
         'localOnly': ?localOnly,
         'cw': ?cw,
+        'poll': ?poll,
       },
     ),
     params: {
@@ -374,6 +377,7 @@ class MisskeyApi extends BaseApi {
       'visibility': visibility,
       'localOnly': localOnly,
       'cw': cw,
+      'poll': poll,
     },
   );
 

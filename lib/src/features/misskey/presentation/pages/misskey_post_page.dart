@@ -7,9 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/file_upload_notifier.dart';
 import '/src/features/misskey/domain/upload_task.dart';
+import '/src/features/misskey/domain/poll.dart';
 import '/src/features/misskey/presentation/widgets/attachment_card.dart';
 import '/src/features/misskey/presentation/widgets/drive_file_picker.dart'
     show showDriveFilePicker;
+import '/src/features/misskey/presentation/widgets/poll_settings_sheet.dart'
+    show showPollSettings;
 
 /// Misskey 发布笔记页面组件
 ///
@@ -36,6 +39,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   bool _localOnly = false;
   String _visibility = 'public';
   bool _isPosting = false;
+  Poll? _poll;
 
   @override
   void dispose() {
@@ -101,6 +105,19 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         // 添加已有的 DriveFile（状态为成功）
         notifier.addExistingDriveFile(file);
       }
+    }
+  }
+
+  /// 处理投票设置
+  Future<void> _handlePoll() async {
+    if (!mounted) return;
+
+    final poll = await showPollSettings(context: context, initialPoll: _poll);
+
+    if (poll != null && mounted) {
+      setState(() {
+        _poll = poll;
+      });
     }
   }
 
@@ -347,6 +364,11 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
             const Divider(),
             _buildPreviewArea(context),
           ],
+          if (_poll != null) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            _buildPollPreview(context),
+          ],
         ],
       ),
     );
@@ -399,6 +421,152 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
     ).animate().fadeIn();
   }
 
+  /// 投票预览区域
+  Widget _buildPollPreview(BuildContext context) {
+    if (_poll == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.poll_rounded,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'poll_preview_title'.tr(),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 18),
+                onPressed: () {
+                  setState(() {
+                    _poll = null;
+                  });
+                },
+                tooltip: 'post_poll_remove'.tr(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // 选项列表
+          ..._poll!.choices.asMap().entries.map((entry) {
+            final index = entry.key;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${index + 1}',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      entry.value,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
+          // 多选提示
+          Row(
+            children: [
+              Icon(
+                _poll!.multiple
+                    ? Icons.check_box_rounded
+                    : Icons.check_box_outline_blank_rounded,
+                size: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'poll_preview_multiple'.tr() + (_poll!.multiple ? '是' : '否'),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(
+                Icons.schedule_rounded,
+                size: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'poll_preview_expires'.tr() + _getPollExpiresText(),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn();
+  }
+
+  /// 获取投票截止时间的文本描述
+  String _getPollExpiresText() {
+    if (_poll == null) return '';
+
+    switch (_poll!.mode) {
+      case PollMode.permanent:
+        return 'poll_preview_permanent'.tr();
+      case PollMode.date:
+        if (_poll!.expiresAt == null) return '';
+        final date = _poll!.expiresAt!;
+        return '${date.month}/${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+      case PollMode.relative:
+        final value = _poll!.relativeValue ?? 0;
+        final unit = _poll!.relativeUnit;
+        if (unit == null) return '';
+        final unitText = switch (unit) {
+          PollTimeUnit.seconds => 'poll_unit_seconds'.tr(),
+          PollTimeUnit.minutes => 'poll_unit_minutes'.tr(),
+          PollTimeUnit.hours => 'poll_unit_hours'.tr(),
+          PollTimeUnit.days => 'poll_unit_days'.tr(),
+        };
+        return '$value $unitText';
+    }
+  }
+
   /// 底部附件栏
   Widget _buildAttachmentBar(BuildContext context) {
     return Column(
@@ -423,7 +591,12 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
                 'post_insert_attachment_from_cloud'.tr(),
                 onPressed: _pickCloudFile,
               ),
-              _buildAttachIcon(Icons.poll_outlined, 'post_poll'.tr()),
+              _buildAttachIcon(
+                Icons.poll_outlined,
+                'post_poll'.tr(),
+                onPressed: _handlePoll,
+                isSelected: _poll != null,
+              ),
               _buildAttachIcon(
                 Icons.visibility_off_outlined,
                 'post_hide_content'.tr(),
@@ -476,9 +649,14 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
     IconData icon,
     String tooltip, {
     VoidCallback? onPressed,
+    bool isSelected = false,
   }) {
     return IconButton(
-      icon: Icon(icon, size: 22),
+      icon: Icon(
+        icon,
+        size: 22,
+        color: isSelected ? Theme.of(context).colorScheme.primary : null,
+      ),
       tooltip: tooltip,
       onPressed: _isPosting || onPressed == null ? null : onPressed,
     );
@@ -546,12 +724,19 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
           .read(fileUploadProvider.notifier)
           .getUploadedFileIds();
 
+      // 转换投票为 API 参数
+      Map<String, dynamic>? pollParams;
+      if (_poll != null) {
+        pollParams = pollToApiParams(_poll!);
+      }
+
       await repository.createNote(
         text: text,
         visibility: _visibility,
         localOnly: _localOnly,
         channelId: widget.channelId,
         fileIds: fileIds.isNotEmpty ? fileIds : null,
+        poll: pollParams,
       );
 
       if (mounted) {

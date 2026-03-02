@@ -66,6 +66,7 @@ abstract interface class IMisskeyRepository {
     String? visibility,
     bool? localOnly,
     String? cw,
+    Map<String, dynamic>? poll,
   });
 
   Future<void> renote(String noteId);

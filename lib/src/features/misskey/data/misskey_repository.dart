@@ -301,6 +301,7 @@ class MisskeyRepository implements IMisskeyRepository {
     String? visibility,
     bool? localOnly,
     String? cw,
+    Map<String, dynamic>? poll,
   }) async {
     logger.info('MisskeyRepository: Creating note');
     try {
@@ -313,6 +314,7 @@ class MisskeyRepository implements IMisskeyRepository {
         visibility: visibility,
         localOnly: localOnly,
         cw: cw,
+        poll: poll,
       );
       if (error != null) {
         logger.error('MisskeyRepository: Error creating note', error);
