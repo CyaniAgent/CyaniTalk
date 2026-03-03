@@ -36,10 +36,64 @@ abstract class Announcement with _$Announcement {
     /// 用户阅读此公告的时间
     DateTime? reads,
 
-    /// 用户的阅读时间记录（每个用户的阅读时间）
-    List<DateTime>? userIds,
+    /// 已阅读此公告的用户 ID 列表
+    List<String>? userIds,
   }) = _Announcement;
 
-  factory Announcement.fromJson(Map<String, dynamic> json) =>
-      _$AnnouncementFromJson(json);
+  factory Announcement.fromJson(Map<String, dynamic> json) {
+    // 安全处理可能为 null 的字段
+    final id = json['id'] as String? ?? '';
+    final createdAtStr =
+        json['createdAt'] as String? ?? DateTime.now().toIso8601String();
+    final updatedAtStr =
+        json['updatedAt'] as String? ?? DateTime.now().toIso8601String();
+
+    // 安全解析日期
+    DateTime createdAt;
+    DateTime updatedAt;
+    try {
+      createdAt = DateTime.parse(createdAtStr);
+    } catch (_) {
+      createdAt = DateTime.now();
+    }
+    try {
+      updatedAt = DateTime.parse(updatedAtStr);
+    } catch (_) {
+      updatedAt = DateTime.now();
+    }
+
+    // 安全处理 reads 字段
+    DateTime? reads;
+    final readsStr = json['reads'] as String?;
+    if (readsStr != null) {
+      try {
+        reads = DateTime.parse(readsStr);
+      } catch (_) {
+        reads = null;
+      }
+    }
+
+    // 安全处理 userIds 字段
+    List<String>? userIds;
+    final userIdsList = json['userIds'] as List<dynamic>?;
+    if (userIdsList != null) {
+      userIds = userIdsList
+          .map((e) => e as String? ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    return Announcement(
+      id: id,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      title: json['title'] as String?,
+      text: json['text'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      needConfirmationToRead: json['needConfirmationToRead'] as bool? ?? false,
+      isRead: json['isRead'] as bool? ?? false,
+      reads: reads,
+      userIds: userIds,
+    );
+  }
 }

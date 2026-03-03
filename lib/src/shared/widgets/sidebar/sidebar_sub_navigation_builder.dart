@@ -3,7 +3,7 @@
 // 该文件包含根据配置动态生成子导航项的工具方法
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../../core/config/navigation_settings_config.dart';
+import '/src/core/config/navigation_settings_config.dart';
 
 /// 子导航项类
 class SubNavigationItem {

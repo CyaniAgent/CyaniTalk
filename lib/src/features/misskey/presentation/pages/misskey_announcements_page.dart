@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/features/misskey/application/misskey_announcements_notifier.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/domain/announcement.dart';
 import '/src/features/misskey/presentation/widgets/retryable_network_image.dart';
 import '/src/features/misskey/domain/mfm_renderer.dart';
+import '/src/core/utils/logger.dart';
 
 class MisskeyAnnouncementsPage extends ConsumerStatefulWidget {
   const MisskeyAnnouncementsPage({super.key});
@@ -17,6 +19,23 @@ class MisskeyAnnouncementsPage extends ConsumerStatefulWidget {
 class _MisskeyAnnouncementsPageState
     extends ConsumerState<MisskeyAnnouncementsPage> {
   final MfmRenderer _mfmRenderer = MfmRenderer();
+
+  @override
+  void initState() {
+    super.initState();
+    // 初始化 MfmRenderer 并设置 Misskey API 实例
+    _initializeMfmRenderer();
+  }
+
+  Future<void> _initializeMfmRenderer() async {
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      // 设置 Misskey API 实例到 MfmRenderer
+      _mfmRenderer.setMisskeyApi(repository.apiInstance);
+    } catch (e) {
+      logger.error('MisskeyAnnouncementsPage: Error initializing MfmRenderer', e);
+    }
+  }
 
   @override
   void dispose() {
@@ -116,12 +135,13 @@ class _MisskeyAnnouncementsPageState
               const SizedBox(height: 12),
             ],
             if (announcement.text != null) ...[
-              SelectableText.rich(
-                TextSpan(
-                  children: [
-                    _mfmRenderer.processText(announcement.text!, context),
-                  ],
-                ),
+              _mfmRenderer.processTextToRichText(
+                announcement.text!,
+                context,
+                enableCollapse: true, // 启用折叠功能
+                collapseMaxLines: 3,   // 折叠时显示 3 行
+                showExpandButton: true, // 显示展开/折叠按钮
+                initiallyExpanded: false, // 初始状态为折叠
               ),
               const SizedBox(height: 12),
             ],

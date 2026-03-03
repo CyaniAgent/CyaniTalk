@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:mfm/mfm.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/api/misskey_api.dart';
+import '/src/features/misskey/presentation/widgets/safe_mfm_widget.dart';
 
 /// MFM 渲染器（基于 mfm 包重构版本）
 ///
@@ -294,8 +294,8 @@ class MfmRenderer {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // 创建 Mfm Widget 并获取其内部内容
-    final mfmWidget = Mfm(
+    // 创建 SafeMfmWidget 并获取其内部内容
+    final mfmWidget = SafeMfmWidget(
       mfmText: text,
       emojiBuilder: (ctx, emojiName, style) {
         return _buildEmojiWidget(
@@ -428,33 +428,33 @@ class MfmRenderer {
     return result;
   }
 
-  /// 从 Mfm Widget 提取 InlineSpan
+  /// 从 MFM Widget 提取 InlineSpan
   ///
-  /// 这是一个辅助方法，用于从 Mfm Widget 中提取可复用的 InlineSpan
+  /// 这是一个辅助方法，用于从 MFM Widget 中提取可复用的 InlineSpan
   ///
-  /// @param mfmWidget Mfm Widget
+  /// @param mfmWidget MFM Widget (Mfm 或 SafeMfmWidget)
   /// @param context BuildContext
   /// @param originalText 原始文本
   /// @param onEmojiLoaded 表情加载回调
   /// @return InlineSpan
   InlineSpan _extractInlineSpanFromMfmWidget(
-    Mfm mfmWidget,
+    Widget mfmWidget,
     BuildContext context,
     String originalText,
     Function()? onEmojiLoaded,
   ) {
     // 由于 mfm 包不直接暴露 InlineSpan，我们创建一个包装器
-    // 使用 TextSpan 作为容器，将 Mfm Widget 作为 WidgetSpan 嵌入
+    // 使用 TextSpan 作为容器，将 MFM Widget 作为 WidgetSpan 嵌入
     // 这样可以保持与现有代码的兼容性
 
     // 对于简单的文本，直接返回 TextSpan
-    // 对于复杂的 MFM，返回包含 Mfm Widget 的 WidgetSpan
+    // 对于复杂的 MFM，返回包含 MFM Widget 的 WidgetSpan
 
     // 这里我们采用一种更直接的方法：
-    // 创建一个 SelectableText.rich，内部使用 Mfm 的内容
-    // 但由于 Mfm 已经是 Widget，我们需要换一种方式
+    // 创建一个 SelectableText.rich，内部使用 MFM 的内容
+    // 但由于 MFM 已经是 Widget，我们需要换一种方式
 
-    // 最佳实践：直接使用 Mfm Widget，而不是提取 spans
+    // 最佳实践：直接使用 MFM Widget，而不是提取 spans
     // 因此，这个方法将返回一个占位 TextSpan
     // 实际的渲染由 processTextToRichText 方法处理
 
@@ -502,6 +502,11 @@ class MfmRenderer {
   /// @param maxLines 最大行数，用于限制文本显示行数
   /// @param overflow 文本溢出处理方式
   /// @param textStyle 基础文本样式
+  /// @param enableCollapse 是否启用折叠功能
+  /// @param collapseMaxLines 折叠时显示的最大行数
+  /// @param showExpandButton 是否显示展开/折叠按钮
+  /// @param initiallyExpanded 是否初始状态为展开
+  /// @param onExpandedChange 展开状态变化回调
   /// @return Widget（Mfm Widget 或 Text）
   Widget processTextToRichText(
     String text,
@@ -510,6 +515,11 @@ class MfmRenderer {
     int? maxLines,
     TextOverflow? overflow,
     TextStyle? textStyle,
+    bool enableCollapse = false,
+    int collapseMaxLines = 3,
+    bool showExpandButton = true,
+    bool initiallyExpanded = false,
+    Function(bool)? onExpandedChange,
   }) {
     logger.debug('MfmRenderer: Converting text to RichText: $text');
 
@@ -526,7 +536,16 @@ class MfmRenderer {
     }
 
     // 创建并返回 Mfm Widget
-    return _createMfmWidget(text, context, onEmojiLoaded: onEmojiLoaded);
+    return _createMfmWidget(
+      text,
+      context,
+      onEmojiLoaded: onEmojiLoaded,
+      enableCollapse: enableCollapse,
+      maxLines: collapseMaxLines,
+      showExpandButton: showExpandButton,
+      initiallyExpanded: initiallyExpanded,
+      onExpandedChange: onExpandedChange,
+    );
   }
 
   /// 创建 Mfm Widget
@@ -536,16 +555,26 @@ class MfmRenderer {
   /// @param text MFM 文本
   /// @param context BuildContext
   /// @param onEmojiLoaded 表情加载回调
+  /// @param enableCollapse 是否启用折叠功能
+  /// @param maxLines 折叠时显示的最大行数
+  /// @param showExpandButton 是否显示展开/折叠按钮
+  /// @param initiallyExpanded 是否初始状态为展开
+  /// @param onExpandedChange 展开状态变化回调
   /// @return Mfm Widget
   Widget _createMfmWidget(
     String text,
     BuildContext context, {
     Function()? onEmojiLoaded,
+    bool enableCollapse = false,
+    int maxLines = 3,
+    bool showExpandButton = true,
+    bool initiallyExpanded = false,
+    Function(bool)? onExpandedChange,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Mfm(
+    return SafeMfmWidget(
       mfmText: text,
       emojiBuilder: (ctx, emojiName, style) {
         return _buildEmojiWidget(
@@ -648,6 +677,11 @@ class MfmRenderer {
       isNyaize: false,
       isUseAnimation: true, // 启用动画效果
       defaultBorderColor: colorScheme.primary,
+      enableCollapse: enableCollapse,
+      maxLines: maxLines,
+      showExpandButton: showExpandButton,
+      initiallyExpanded: initiallyExpanded,
+      onExpandedChange: onExpandedChange,
     );
   }
 
@@ -661,6 +695,11 @@ class MfmRenderer {
   /// @param maxLines 最大行数
   /// @param overflow 文本溢出处理方式
   /// @param textStyle 基础文本样式
+  /// @param enableCollapse 是否启用折叠功能
+  /// @param collapseMaxLines 折叠时显示的最大行数
+  /// @param showExpandButton 是否显示展开/折叠按钮
+  /// @param initiallyExpanded 是否初始状态为展开
+  /// @param onExpandedChange 展开状态变化回调
   /// @return 带限制的 MFM Widget
   Widget _createLimitedMfmWidget(
     String text,
@@ -669,28 +708,23 @@ class MfmRenderer {
     int? maxLines,
     TextOverflow? overflow,
     TextStyle? textStyle,
+    bool enableCollapse = false,
+    int collapseMaxLines = 3,
+    bool showExpandButton = true,
+    bool initiallyExpanded = false,
+    Function(bool)? onExpandedChange,
   }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    // 使用 processText 方法获取 InlineSpan
-    final inlineSpan = processText(text, context, onEmojiLoaded: onEmojiLoaded);
-
-    // 使用 SelectableText.rich 显示，支持行数限制
-    // 注意：SelectableText.rich 不直接支持 overflow，需要使用 LayoutBuilder 包裹
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SelectableText.rich(
-          TextSpan(
-            children: [inlineSpan],
-            style:
-                textStyle ??
-                TextStyle(fontSize: 14, color: colorScheme.onSurface),
-          ),
-          maxLines: maxLines,
-          enableInteractiveSelection: true,
-        );
-      },
+    // 直接使用 SafeMfmWidget，不限制行数和溢出
+    // 注意：mfm 包不直接支持 maxLines 和 overflow
+    return _createMfmWidget(
+      text,
+      context,
+      onEmojiLoaded: onEmojiLoaded,
+      enableCollapse: enableCollapse,
+      maxLines: collapseMaxLines,
+      showExpandButton: showExpandButton,
+      initiallyExpanded: initiallyExpanded,
+      onExpandedChange: onExpandedChange,
     );
   }
 

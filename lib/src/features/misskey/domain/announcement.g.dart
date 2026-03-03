@@ -20,7 +20,7 @@ _Announcement _$AnnouncementFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['reads'] as String),
       userIds: (json['userIds'] as List<dynamic>?)
-          ?.map((e) => DateTime.parse(e as String))
+          ?.map((e) => e as String)
           .toList(),
     );
 
@@ -35,5 +35,5 @@ Map<String, dynamic> _$AnnouncementToJson(_Announcement instance) =>
       'needConfirmationToRead': instance.needConfirmationToRead,
       'isRead': instance.isRead,
       'reads': instance.reads?.toIso8601String(),
-      'userIds': instance.userIds?.map((e) => e.toIso8601String()).toList(),
+      'userIds': instance.userIds,
     };

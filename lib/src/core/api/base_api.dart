@@ -44,8 +44,9 @@ abstract class BaseApi {
     }
     // 服务器错误 (5xx)
     else if (response.statusCode! >= 500) {
-      logger.error('$operationName: 服务器错误 ${response.statusCode}');
-      return (null, Exception('$operationName 服务器错误: ${response.statusCode}'));
+      final errorMessage = response.data?['error']?['message'] ?? '服务器错误';
+      logger.error('$operationName: 服务器错误 ${response.statusCode}: $errorMessage');
+      return (null, Exception('$operationName 服务器错误: ${response.statusCode}: $errorMessage'));
     }
     // 其他状态码
     else {

@@ -17,11 +17,17 @@ class NavigationSettingsConfig {
       'isRemovable': true,
       'subItems': [
         {'icon': Icons.timeline, 'labelKey': 'misskey_drawer_timeline'},
-        {'icon': Icons.collections_bookmark, 'labelKey': 'misskey_drawer_clips'},
+        {
+          'icon': Icons.collections_bookmark,
+          'labelKey': 'misskey_drawer_clips',
+        },
         {'icon': Icons.satellite_alt, 'labelKey': 'misskey_drawer_antennas'},
         {'icon': Icons.hub, 'labelKey': 'misskey_drawer_channels'},
         {'icon': Icons.explore, 'labelKey': 'misskey_drawer_explore'},
-        {'icon': Icons.person_add, 'labelKey': 'misskey_drawer_follow_requests'},
+        {
+          'icon': Icons.person_add,
+          'labelKey': 'misskey_drawer_follow_requests',
+        },
         {'icon': Icons.campaign, 'labelKey': 'misskey_drawer_announcements'},
         {'icon': Icons.terminal, 'labelKey': 'misskey_drawer_aiscript_console'},
       ],
@@ -36,7 +42,10 @@ class NavigationSettingsConfig {
       'subItems': [
         {'icon': Icons.forum, 'labelKey': 'flarum_drawer_discussions'},
         {'icon': Icons.label, 'labelKey': 'flarum_drawer_tags'},
-        {'icon': Icons.notifications, 'labelKey': 'flarum_drawer_notifications'},
+        {
+          'icon': Icons.notifications,
+          'labelKey': 'flarum_drawer_notifications',
+        },
       ],
     },
     {
@@ -119,10 +128,7 @@ class NavigationSettingsConfig {
     {
       'type': 'divider',
       'id': 'divider_before_settings',
-      'config': {
-        'indent': 12,
-        'endIndent': 12,
-      },
+      'config': {'indent': 12, 'endIndent': 12},
     },
     // 设置按钮
     {
@@ -207,4 +213,3 @@ class NavigationSettingsConfig {
     return rootItem['subItems'] ?? [];
   }
 }
-
