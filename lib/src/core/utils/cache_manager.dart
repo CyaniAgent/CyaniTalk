@@ -455,7 +455,7 @@ class CacheManager {
   }
 
   /// 缓存文件
-  Future<String> cacheFile(
+  Future<String?> cacheFile(
     String url,
     CacheCategory category, {
     AudioCacheType? audioCacheType,
@@ -463,7 +463,12 @@ class CacheManager {
     // 检查是否已有相同的下载任务正在进行
     if (_activeDownloads.containsKey(url)) {
       logger.debug('使用活动下载任务: $url');
-      return _activeDownloads[url]!;
+      try {
+        return await _activeDownloads[url];
+      } catch (e) {
+        logger.warning('活动下载任务失败: $url: $e');
+        return null;
+      }
     }
 
     final downloadFuture = _doCacheFile(url, category, audioCacheType);
@@ -472,6 +477,9 @@ class CacheManager {
     try {
       final result = await downloadFuture;
       return result;
+    } catch (e) {
+      logger.warning('缓存文件失败: $url: $e');
+      return null;
     } finally {
       _activeDownloads.remove(url);
     }

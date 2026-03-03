@@ -1,3 +1,4 @@
+import '/src/core/api/misskey_api.dart';
 import '/src/features/misskey/domain/note.dart';
 import '/src/features/misskey/domain/clip.dart';
 import '/src/features/misskey/domain/channel.dart';
@@ -15,6 +16,11 @@ import '/src/features/misskey/domain/emoji.dart';
 /// 定义了与 Misskey 实例交互的所有核心方法。
 abstract interface class IMisskeyRepository {
   String get host;
+  
+  /// 获取 MisskeyApi 实例
+  ///
+  /// 用于需要直接访问 API 的场景，如 MFM 渲染器
+  MisskeyApi get apiInstance;
   Future<MisskeyUser> getMe();
 
   Future<Map<String, dynamic>> getDriveInfo();

@@ -26,6 +26,12 @@ class MisskeyRepository implements IMisskeyRepository {
   @override
   String get host => api.host;
 
+  /// 获取 MisskeyApi 实例
+  ///
+  /// 用于需要直接访问 API 的场景，如 MFM 渲染器
+  @override
+  MisskeyApi get apiInstance => api;
+
   @override
   Future<MisskeyUser> getMe() async {
     logger.info('MisskeyRepository: Getting current user information');

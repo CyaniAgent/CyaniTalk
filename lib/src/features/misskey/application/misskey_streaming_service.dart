@@ -163,7 +163,14 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       _reconnectAttempts = 0;
 
       channel.stream.listen(
-        _handleMessage,
+        (message) {
+          try {
+            _handleMessage(message);
+          } catch (e) {
+            logger.error('MisskeyStreaming: Error handling message: $e');
+            // 消息处理错误不应导致连接断开
+          }
+        },
         onDone: () {
           logger.warning('MisskeyStreaming: Connection closed');
           _updateStatus(StreamingStatus.disconnected);
@@ -177,10 +184,13 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
             logger.error('MisskeyStreaming: Detected Windows Semaphore Timeout (Error 121)');
           } else if (errorStr.contains('handshake') || errorStr.contains('terminated')) {
             logger.error('MisskeyStreaming: Detected SSL Handshake Failure');
+          } else if (errorStr.contains('connection reset by peer') || errorStr.contains('socket closed')) {
+            logger.error('MisskeyStreaming: Detected connection reset or socket closed');
           }
           _updateStatus(StreamingStatus.error);
           _handleDisconnect(account);
         },
+        cancelOnError: false, // 即使发生错误也不取消订阅，让onError处理
       );
 
       _startHeartbeat();
@@ -229,6 +239,11 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
           logger.debug('MisskeyStreaming: Sent app-level heartbeat ("h")');
         } catch (e) {
           logger.error('MisskeyStreaming: Heartbeat failed: $e');
+          // 心跳失败可能表示连接已断开，尝试重连
+          final account = ref.read(selectedMisskeyAccountProvider).value;
+          if (account != null) {
+            _handleDisconnect(account);
+          }
         }
       }
     });
@@ -288,53 +303,79 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     logger.debug('MisskeyStreaming Received: $message');
 
     try {
-      final Map<String, dynamic> data = jsonDecode(message as String);
+      // 确保消息是字符串类型
+      if (message is! String) {
+        logger.warning('MisskeyStreaming: Received non-string message: $message');
+        return;
+      }
+
+      final Map<String, dynamic> data = jsonDecode(message);
       final type = data['type'];
       final body = data['body'];
 
       if (type == 'channel' && body != null) {
-        final channelId = body['id'] as String;
-        final eventType = body['type'];
-        final eventBody = body['body'];
+        try {
+          final channelId = body['id'] as String;
+          final eventType = body['type'];
+          final eventBody = body['body'];
 
-        if (eventType == 'note' && eventBody != null) {
-          final note = Note.fromJson(eventBody as Map<String, dynamic>);
-          String? timelineType;
+          if (eventType == 'note' && eventBody != null) {
+            try {
+              final note = Note.fromJson(eventBody as Map<String, dynamic>);
+              String? timelineType;
 
-          if (channelId.startsWith('timeline-')) {
-            final misskeyChannel = channelId.substring(9);
-            timelineType = switch (misskeyChannel) {
-              'homeTimeline' => 'Home',
-              'localTimeline' => 'Local',
-              'hybridTimeline' => 'Social',
-              'globalTimeline' => 'Global',
-              _ => null,
-            };
+              if (channelId.startsWith('timeline-')) {
+                final misskeyChannel = channelId.substring(9);
+                timelineType = switch (misskeyChannel) {
+                  'homeTimeline' => 'Home',
+                  'localTimeline' => 'Local',
+                  'hybridTimeline' => 'Social',
+                  'globalTimeline' => 'Global',
+                  _ => null,
+                };
+              }
+
+              if (timelineType != null && !_noteController.isClosed) {
+                _noteController.add(
+                  NoteEvent(note: note, timelineType: timelineType),
+                );
+              }
+            } catch (e) {
+              logger.error('MisskeyStreaming: Error parsing note event: $e');
+            }
+          } else if (eventType == 'notification' && eventBody != null) {
+            if (!_notificationController.isClosed) {
+              _notificationController.add(eventBody as Map<String, dynamic>);
+            }
+          } else if ((eventType == 'chatMessage' ||
+                  eventType == 'messagingMessage') &&
+              eventBody != null) {
+            try {
+              final message = MessagingMessage.fromJson(
+                eventBody as Map<String, dynamic>,
+              );
+              if (!_messageController.isClosed) {
+                _messageController.add(message);
+              }
+            } catch (e) {
+              logger.error('MisskeyStreaming: Error parsing messaging message: $e');
+            }
+          } else if (eventType == 'noteDeleted') {
+            try {
+              final noteId =
+                  eventBody?['deletedId'] as String? ??
+                  eventBody?['id'] as String? ??
+                  eventBody?['noteId'] as String?;
+
+              if (noteId != null && !_noteController.isClosed) {
+                _noteController.add(NoteEvent(noteId: noteId, isDelete: true));
+              }
+            } catch (e) {
+              logger.error('MisskeyStreaming: Error parsing note deleted event: $e');
+            }
           }
-
-          if (timelineType != null) {
-            _noteController.add(
-              NoteEvent(note: note, timelineType: timelineType),
-            );
-          }
-        } else if (eventType == 'notification' && eventBody != null) {
-          _notificationController.add(eventBody as Map<String, dynamic>);
-        } else if ((eventType == 'chatMessage' ||
-                eventType == 'messagingMessage') &&
-            eventBody != null) {
-          final message = MessagingMessage.fromJson(
-            eventBody as Map<String, dynamic>,
-          );
-          _messageController.add(message);
-        } else if (eventType == 'noteDeleted') {
-          final noteId =
-              eventBody?['deletedId'] as String? ??
-              eventBody?['id'] as String? ??
-              eventBody?['noteId'] as String?;
-
-          if (noteId != null) {
-            _noteController.add(NoteEvent(noteId: noteId, isDelete: true));
-          }
+        } catch (e) {
+          logger.error('MisskeyStreaming: Error processing channel event: $e');
         }
       }
     } catch (e) {
@@ -345,7 +386,16 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   @override
   void sendMessage(Map<String, dynamic> data) {
     if (_channel != null) {
-      _channel!.sink.add(jsonEncode(data));
+      try {
+        _channel!.sink.add(jsonEncode(data));
+      } catch (e) {
+        logger.error('MisskeyStreaming: Error sending message: $e');
+        // 发送失败不应导致应用崩溃，尝试重连
+        final account = ref.read(selectedMisskeyAccountProvider).value;
+        if (account != null) {
+          _handleDisconnect(account);
+        }
+      }
     }
   }
 }

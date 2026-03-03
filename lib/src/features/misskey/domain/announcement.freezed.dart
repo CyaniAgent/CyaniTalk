@@ -24,8 +24,8 @@ mixin _$Announcement {
  String? get imageUrl;/// 是否需要显示"我已阅读"按钮
  bool get needConfirmationToRead;/// 用户是否已阅读此公告
  bool get isRead;/// 用户阅读此公告的时间
- DateTime? get reads;/// 用户的阅读时间记录（每个用户的阅读时间）
- List<DateTime>? get userIds;
+ DateTime? get reads;/// 已阅读此公告的用户 ID 列表
+ List<String>? get userIds;
 /// Create a copy of Announcement
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -58,7 +58,7 @@ abstract mixin class $AnnouncementCopyWith<$Res>  {
   factory $AnnouncementCopyWith(Announcement value, $Res Function(Announcement) _then) = _$AnnouncementCopyWithImpl;
 @useResult
 $Res call({
- String id, DateTime createdAt, DateTime updatedAt, String? title, String? text, String? imageUrl, bool needConfirmationToRead, bool isRead, DateTime? reads, List<DateTime>? userIds
+ String id, DateTime createdAt, DateTime updatedAt, String? title, String? text, String? imageUrl, bool needConfirmationToRead, bool isRead, DateTime? reads, List<String>? userIds
 });
 
 
@@ -87,7 +87,7 @@ as String?,needConfirmationToRead: null == needConfirmationToRead ? _self.needCo
 as bool,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
 as bool,reads: freezed == reads ? _self.reads : reads // ignore: cast_nullable_to_non_nullable
 as DateTime?,userIds: freezed == userIds ? _self.userIds : userIds // ignore: cast_nullable_to_non_nullable
-as List<DateTime>?,
+as List<String>?,
   ));
 }
 
@@ -172,7 +172,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  DateTime updatedAt,  String? title,  String? text,  String? imageUrl,  bool needConfirmationToRead,  bool isRead,  DateTime? reads,  List<DateTime>? userIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  DateTime updatedAt,  String? title,  String? text,  String? imageUrl,  bool needConfirmationToRead,  bool isRead,  DateTime? reads,  List<String>? userIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Announcement() when $default != null:
 return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,_that.imageUrl,_that.needConfirmationToRead,_that.isRead,_that.reads,_that.userIds);case _:
@@ -193,7 +193,7 @@ return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  DateTime updatedAt,  String? title,  String? text,  String? imageUrl,  bool needConfirmationToRead,  bool isRead,  DateTime? reads,  List<DateTime>? userIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime createdAt,  DateTime updatedAt,  String? title,  String? text,  String? imageUrl,  bool needConfirmationToRead,  bool isRead,  DateTime? reads,  List<String>? userIds)  $default,) {final _that = this;
 switch (_that) {
 case _Announcement():
 return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,_that.imageUrl,_that.needConfirmationToRead,_that.isRead,_that.reads,_that.userIds);case _:
@@ -213,7 +213,7 @@ return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime createdAt,  DateTime updatedAt,  String? title,  String? text,  String? imageUrl,  bool needConfirmationToRead,  bool isRead,  DateTime? reads,  List<DateTime>? userIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime createdAt,  DateTime updatedAt,  String? title,  String? text,  String? imageUrl,  bool needConfirmationToRead,  bool isRead,  DateTime? reads,  List<String>? userIds)?  $default,) {final _that = this;
 switch (_that) {
 case _Announcement() when $default != null:
 return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,_that.imageUrl,_that.needConfirmationToRead,_that.isRead,_that.reads,_that.userIds);case _:
@@ -228,7 +228,7 @@ return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,
 @JsonSerializable()
 
 class _Announcement implements Announcement {
-  const _Announcement({required this.id, required this.createdAt, required this.updatedAt, this.title, this.text, this.imageUrl, this.needConfirmationToRead = false, this.isRead = false, this.reads, final  List<DateTime>? userIds}): _userIds = userIds;
+  const _Announcement({required this.id, required this.createdAt, required this.updatedAt, this.title, this.text, this.imageUrl, this.needConfirmationToRead = false, this.isRead = false, this.reads, final  List<String>? userIds}): _userIds = userIds;
   factory _Announcement.fromJson(Map<String, dynamic> json) => _$AnnouncementFromJson(json);
 
 /// 公告 ID
@@ -249,10 +249,10 @@ class _Announcement implements Announcement {
 @override@JsonKey() final  bool isRead;
 /// 用户阅读此公告的时间
 @override final  DateTime? reads;
-/// 用户的阅读时间记录（每个用户的阅读时间）
- final  List<DateTime>? _userIds;
-/// 用户的阅读时间记录（每个用户的阅读时间）
-@override List<DateTime>? get userIds {
+/// 已阅读此公告的用户 ID 列表
+ final  List<String>? _userIds;
+/// 已阅读此公告的用户 ID 列表
+@override List<String>? get userIds {
   final value = _userIds;
   if (value == null) return null;
   if (_userIds is EqualUnmodifiableListView) return _userIds;
@@ -294,7 +294,7 @@ abstract mixin class _$AnnouncementCopyWith<$Res> implements $AnnouncementCopyWi
   factory _$AnnouncementCopyWith(_Announcement value, $Res Function(_Announcement) _then) = __$AnnouncementCopyWithImpl;
 @override @useResult
 $Res call({
- String id, DateTime createdAt, DateTime updatedAt, String? title, String? text, String? imageUrl, bool needConfirmationToRead, bool isRead, DateTime? reads, List<DateTime>? userIds
+ String id, DateTime createdAt, DateTime updatedAt, String? title, String? text, String? imageUrl, bool needConfirmationToRead, bool isRead, DateTime? reads, List<String>? userIds
 });
 
 
@@ -323,7 +323,7 @@ as String?,needConfirmationToRead: null == needConfirmationToRead ? _self.needCo
 as bool,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
 as bool,reads: freezed == reads ? _self.reads : reads // ignore: cast_nullable_to_non_nullable
 as DateTime?,userIds: freezed == userIds ? _self._userIds : userIds // ignore: cast_nullable_to_non_nullable
-as List<DateTime>?,
+as List<String>?,
   ));
 }
 
