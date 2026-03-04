@@ -22,19 +22,70 @@ class RetryableNetworkImage extends StatefulWidget {
   State<RetryableNetworkImage> createState() => _RetryableNetworkImageState();
 }
 
-class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
+class _RetryableNetworkImageState extends State<RetryableNetworkImage> with WidgetsBindingObserver {
   String? _cachedPath;
   int _retryCount = 0;
   static const int _maxRetries = 3;
+  bool _forceNetwork = false;
 
   @override
   void initState() {
     super.initState();
-    // 异步进行缓存检查和下载
+    WidgetsBinding.instance.addObserver(this);
+    
+    // 首次加载逻辑：如果不是强制网络模式，则尝试缓存
+    // 这里我们默认进入页面时为了稳定性，可以先检查一下缓存，
+    // 但根据用户指令，如果是“进入时间线页面”这种场景，我们通过标志位控制。
+    // 为了简单起见，我们直接按照指令：进入页面时直接执行第二次重点加载（网络）
+    _forceNetwork = true;
     _checkAndCacheImage();
   }
 
+  @override
+  void didUpdateWidget(RetryableNetworkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 如果 URL 发生了变化（例如列表滚动复用或实时推送到新内容）
+    if (oldWidget.url != widget.url) {
+      if (mounted) {
+        setState(() {
+          _cachedPath = null;
+          _retryCount = 0;
+          _forceNetwork = true; // 新内容到来，直接全盘走网络
+        });
+        _checkAndCacheImage();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 当 App 从后台切回前台时，强制使用网络加载，跳过缓存
+    if (state == AppLifecycleState.resumed) {
+      if (mounted) {
+        setState(() {
+          _forceNetwork = true;
+          _retryCount = 0; // 重置重试次数
+        });
+        _checkAndCacheImage();
+      }
+    }
+  }
+
   Future<void> _checkAndCacheImage() async {
+    // 如果已经开启了强制网络模式，我们仍然可以在后台悄悄下载缓存，
+    // 但 UI 层将由 build 方法根据 _forceNetwork 决定渲染哪个
+    if (_forceNetwork) {
+      // 在强制网络模式下，我们也可以尝试异步更新一下缓存，但不等待它
+      _updateCacheInBackground();
+      return;
+    }
+
     try {
       // 检查是否已缓存
       final isCached = await cacheManager.isFileCachedAndValid(
@@ -54,48 +105,73 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
           });
         }
       } else {
-        // 下载并缓存
-        final cachedPath = await cacheManager.cacheFile(
-          widget.url,
-          CacheCategory.image,
-        );
-        if (mounted) {
-          setState(() {
-            _cachedPath = cachedPath;
-          });
-        }
+        await _updateCacheInBackground();
       }
     } catch (e) {
-      logger.error('缓存图片失败: ${widget.url}', e);
+      logger.error('缓存图片基础检查失败: ${widget.url}', e);
+      if (mounted) {
+        setState(() {
+          _forceNetwork = true;
+        });
+      }
+    }
+  }
+
+  Future<void> _updateCacheInBackground() async {
+    try {
+      final cachedPath = await cacheManager.cacheFile(
+        widget.url,
+        CacheCategory.image,
+      );
+      if (mounted && !_forceNetwork) {
+        setState(() {
+          _cachedPath = cachedPath;
+        });
+      }
+    } catch (e) {
+      // 这里的错误不再弹出，因为我们有网络加载保底
+      logger.warning('后台更新缓存失败 (不影响显示): ${widget.url}');
     }
   }
 
   Future<void> _retryLoading() async {
     if (_retryCount < _maxRetries) {
       _retryCount++;
-      logger.info('重试加载图片 ($_retryCount/$_maxRetries): ${widget.url}');
-      await _checkAndCacheImage();
+      logger.info('触发第二次重点加载 (重试 $_retryCount/$_maxRetries): ${widget.url}');
+      if (mounted) {
+        setState(() {
+          _forceNetwork = true;
+          _cachedPath = null; // 清除缓存路径尝试，全盘走网络
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 如果有缓存，使用缓存加载
-    if (_cachedPath != null) {
-      return Image.file(
-        File(_cachedPath!),
-        fit: widget.fit,
-        width: widget.width,
-        height: widget.height,
-        errorBuilder: (context, error, stackTrace) {
-          // 如果缓存加载失败，回退到网络加载
-          return _buildNetworkImage();
-        },
-      );
+    // 如果强制使用网络，或者缓存路径为空，执行第二次重点加载（网络）
+    if (_forceNetwork || _cachedPath == null) {
+      return _buildNetworkImage();
     }
 
-    // 否则直接从网络加载
-    return _buildNetworkImage();
+    // 否则尝试使用缓存加载（第一次尝试）
+    return Image.file(
+      File(_cachedPath!),
+      fit: widget.fit,
+      width: widget.width,
+      height: widget.height,
+      errorBuilder: (context, error, stackTrace) {
+        // 如果缓存加载失败（例如信号灯超时或文件损坏），立即切到网络加载
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && !_forceNetwork) {
+            setState(() {
+              _forceNetwork = true;
+            });
+          }
+        });
+        return _buildNetworkImage();
+      },
+    );
   }
 
   Widget _buildNetworkImage() {

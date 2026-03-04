@@ -38,8 +38,9 @@ class NoteCard extends ConsumerStatefulWidget {
 
 class _NoteCardState extends ConsumerState<NoteCard> {
   bool _shouldAnimate = false;
+  bool _isCwExpanded = false;
 
-  // MFM渲染器
+  // MFM 渲染器
   final MfmRenderer _mfmRenderer = MfmRenderer();
 
   @override
@@ -47,8 +48,6 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     _mfmRenderer.dispose();
     super.dispose();
   }
-
-
 
   @override
   void initState() {
@@ -85,12 +84,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
   /// 加载笔记中的表情到MFM渲染器缓存
   void _loadEmojis() {
     final note = widget.note;
-    
+
     // 加载笔记中的表情
     if (note.emojis != null && note.emojis!.isNotEmpty) {
       _mfmRenderer.addEmojisToCache(note.emojis!);
     }
-    
+
     // 加载用户的表情
     if (note.user?.emojis != null && note.user!.emojis!.isNotEmpty) {
       _mfmRenderer.addEmojisToCache(note.user!.emojis!);
@@ -190,24 +189,9 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  // CW 折叠内容区域
                   if (cw != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.warning_amber_rounded, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(child: SelectableText(cw)),
-                          const Icon(Icons.keyboard_arrow_down, size: 16),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    _buildCwContent(context, cw, text),
                   ] else if (text != null)
                     _mfmRenderer.processTextToRichText(
                       text,
@@ -441,9 +425,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('post_copied'.tr()), behavior: SnackBarBehavior.floating));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('post_copied'.tr()),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
         break;
       case 'copy_link':
@@ -463,9 +450,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr()), behavior: SnackBarBehavior.floating));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_id_copied'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
         break;
     }
   }
@@ -508,9 +498,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_link_copied'.tr()), behavior: SnackBarBehavior.floating));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_link_copied'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       // Ignore
@@ -522,9 +515,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('post_bookmarked'.tr()), behavior: SnackBarBehavior.floating));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('post_bookmarked'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -586,14 +582,20 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                   );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('post_reported'.tr()), behavior: SnackBarBehavior.floating),
+                      SnackBar(
+                        content: Text('post_reported'.tr()),
+                        behavior: SnackBarBehavior.floating,
+                      ),
                     );
                   }
                 }
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('post_report_failed'.tr()), behavior: SnackBarBehavior.floating),
+                    SnackBar(
+                      content: Text('post_report_failed'.tr()),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               }
@@ -695,7 +697,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       await repository.renote(widget.note.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('note_renoted_successfully'.tr()), behavior: SnackBarBehavior.floating),
+          SnackBar(
+            content: Text('note_renoted_successfully'.tr()),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } catch (e) {
@@ -739,7 +744,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('note_reply_sent'.tr()), behavior: SnackBarBehavior.floating),
+                    SnackBar(
+                      content: Text('note_reply_sent'.tr()),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               } catch (e) {
@@ -776,7 +784,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             await repository.addReaction(widget.note.id, emoji);
             if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text('note_reaction_added'.tr()), behavior: SnackBarBehavior.floating),
+                SnackBar(
+                  content: Text('note_reaction_added'.tr()),
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             }
           } catch (e) {
@@ -800,7 +811,10 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             await repository.removeReaction(widget.note.id);
             if (dialogContext.mounted) {
               ScaffoldMessenger.of(dialogContext).showSnackBar(
-                SnackBar(content: Text('note_reaction_removed'.tr()), behavior: SnackBarBehavior.floating),
+                SnackBar(
+                  content: Text('note_reaction_removed'.tr()),
+                  behavior: SnackBarBehavior.floating,
+                ),
               );
             }
           } catch (e) {
@@ -830,26 +844,35 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       if (widget.note.myReaction == reaction) {
         await repository.removeReaction(widget.note.id);
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('note_reaction_removed'.tr()), behavior: SnackBarBehavior.floating));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('note_reaction_removed'.tr()),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       } else if (widget.note.myReaction != null) {
         // 如果已经有其他表情反应，先取消再发送新的
         await repository.removeReaction(widget.note.id);
         await repository.addReaction(widget.note.id, reaction);
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('note_reaction_updated'.tr()), behavior: SnackBarBehavior.floating));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('note_reaction_updated'.tr()),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       } else {
         // 直接发送表情反应
         await repository.addReaction(widget.note.id, reaction);
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('note_reaction_added'.tr()), behavior: SnackBarBehavior.floating));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('note_reaction_added'.tr()),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       }
     } catch (e) {
@@ -868,9 +891,12 @@ class _NoteCardState extends ConsumerState<NoteCard> {
 
   void _handleShare() {
     // Placeholder for share functionality
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('note_share_coming_soon'.tr()), behavior: SnackBarBehavior.floating));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('note_share_coming_soon'.tr()),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   /// 构建媒体网格，根据媒体文件数量调整布局
@@ -1347,5 +1373,190 @@ class _NoteCardState extends ConsumerState<NoteCard> {
     }
 
     return const SizedBox.shrink();
+  }
+
+  /// 构建 CW 折叠内容区域
+  Widget _buildCwContent(BuildContext context, String cw, String? text) {
+    // 检测是否有隐藏内容（通过两个换行符分隔）
+    String? visibleContent;
+    String? hiddenContent;
+
+    if (text != null && text.contains('\n\n')) {
+      final parts = text.split('\n\n');
+      visibleContent = parts.first.trim();
+      hiddenContent = parts.skip(1).join('\n\n').trim();
+    } else {
+      visibleContent = text;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        // CW 警告栏
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.secondaryContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Theme.of(
+                context,
+              ).colorScheme.secondary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 18,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  cw,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // 展开/收起按钮
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isCwExpanded = !_isCwExpanded;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _isCwExpanded
+                              ? 'note_cw_collapse'.tr()
+                              : 'note_cw_expand'.tr(),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const SizedBox(width: 4),
+                        AnimatedRotation(
+                          turns: _isCwExpanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Icon(
+                            Icons.expand_more,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // 隐藏内容区域（使用 AnimatedCrossFade 实现平滑动画）
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(top: 10),
+            decoration: BoxDecoration(
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 隐藏内容标签
+                Row(
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'note_hidden_content'.tr(),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // 隐藏的内容
+                if (hiddenContent != null && hiddenContent.isNotEmpty)
+                  _mfmRenderer.processTextToRichText(
+                    hiddenContent,
+                    context,
+                    onEmojiLoaded: () {
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
+                  )
+                else if (visibleContent != null && visibleContent.isNotEmpty)
+                  _mfmRenderer.processTextToRichText(
+                    visibleContent,
+                    context,
+                    onEmojiLoaded: () {
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
+                  ),
+              ],
+            ),
+          ),
+          crossFadeState: _isCwExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 250),
+          alignment: Alignment.topLeft,
+        ),
+        // 可见内容区域（如果 CW 未展开则显示）
+        if (!_isCwExpanded &&
+            visibleContent != null &&
+            visibleContent.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _mfmRenderer.processTextToRichText(
+            visibleContent,
+            context,
+            onEmojiLoaded: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ],
+      ],
+    );
   }
 }

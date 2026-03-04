@@ -35,15 +35,21 @@ class MisskeyPostPage extends ConsumerStatefulWidget {
 /// MisskeyPostPage 的状态管理类
 class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _cwController = TextEditingController();
+  final TextEditingController _hiddenContentController =
+      TextEditingController();
   bool _showPreview = false;
   bool _localOnly = false;
   String _visibility = 'public';
   bool _isPosting = false;
   Poll? _poll;
+  bool _showHiddenContentPanel = false;
 
   @override
   void dispose() {
     _controller.dispose();
+    _cwController.dispose();
+    _hiddenContentController.dispose();
     super.dispose();
   }
 
@@ -343,6 +349,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // 主文本输入框
           TextField(
             controller: _controller,
             maxLines: null,
@@ -359,6 +366,11 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               if (_showPreview) setState(() {});
             },
           ),
+          // 隐藏内容输入面板
+          if (_showHiddenContentPanel) ...[
+            const SizedBox(height: 16),
+            _buildHiddenContentInputPanel(context),
+          ],
           if (_showPreview) ...[
             const SizedBox(height: 16),
             const Divider(),
@@ -417,6 +429,102 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
+      ),
+    ).animate().fadeIn();
+  }
+
+  /// 隐藏内容输入面板
+  Widget _buildHiddenContentInputPanel(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(
+          context,
+        ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 标题栏
+            Row(
+              children: [
+                Icon(
+                  Icons.folder_special_outlined,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'post_hide_content'.tr(),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.secondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // CW 警告语输入框
+            TextField(
+              controller: _cwController,
+              decoration: InputDecoration(
+                labelText: 'post_cw_warning_text'.tr(),
+                hintText: 'post_cw_warning_hint'.tr(),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.warning_amber_outlined),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 12),
+            // 隐藏内容输入框
+            TextField(
+              controller: _hiddenContentController,
+              decoration: InputDecoration(
+                labelText: 'post_hidden_content'.tr(),
+                hintText: 'post_hidden_content_hint'.tr(),
+                border: const OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.visibility_off_outlined),
+              ),
+              maxLines: 5,
+            ),
+            const SizedBox(height: 8),
+            // 提示信息
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.tertiaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'post_hide_content_hint'.tr(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     ).animate().fadeIn();
   }
@@ -598,8 +706,16 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
                 isSelected: _poll != null,
               ),
               _buildAttachIcon(
-                Icons.visibility_off_outlined,
+                _showHiddenContentPanel
+                    ? Icons.visibility_off
+                    : Icons.visibility_off_outlined,
                 'post_hide_content'.tr(),
+                onPressed: () {
+                  setState(() {
+                    _showHiddenContentPanel = !_showHiddenContentPanel;
+                  });
+                },
+                isSelected: _showHiddenContentPanel,
               ),
               _buildAttachIcon(Icons.tag, 'post_tags'.tr()),
               _buildAttachIcon(Icons.alternate_email, 'post_mention'.tr()),
@@ -730,8 +846,22 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         pollParams = pollToApiParams(_poll!);
       }
 
+      // 处理 CW 和隐藏内容
+      String? cw;
+      String finalText = text;
+
+      if (_showHiddenContentPanel && _hiddenContentController.text.isNotEmpty) {
+        // 如果使用了隐藏内容，将可见内容和隐藏内容用两个换行符分隔
+        cw = _cwController.text.isNotEmpty ? _cwController.text.trim() : null;
+        final visibleContent = text.trim();
+        final hiddenContent = _hiddenContentController.text.trim();
+        // 使用两个换行符分隔可见内容和隐藏内容
+        finalText = '$visibleContent\n\n$hiddenContent';
+      }
+
       await repository.createNote(
-        text: text,
+        text: finalText,
+        cw: cw,
         visibility: _visibility,
         localOnly: _localOnly,
         channelId: widget.channelId,
@@ -749,6 +879,13 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
         // 清除已完成的上传任务
         ref.read(fileUploadProvider.notifier).clearCompletedTasks();
+
+        // 重置隐藏内容相关状态
+        setState(() {
+          _cwController.clear();
+          _hiddenContentController.clear();
+          _showHiddenContentPanel = false;
+        });
 
         Navigator.of(context).pop();
       }
