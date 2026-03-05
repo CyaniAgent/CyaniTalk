@@ -292,122 +292,164 @@ class _AboutPageState extends ConsumerState<AboutPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('about_title'.tr())),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            // Logo
-            Image.asset(
-              'assets/icons/logo/desktop/logo-desktop-transparent.png',
-              width: 100,
-              height: 100,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.error, size: 100),
+      body: ListView(
+        children: [
+          // 应用信息部分
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // Logo
+                Image.asset(
+                  'assets/icons/logo/desktop/logo-desktop-transparent.png',
+                  width: 80,
+                  height: 80,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.error, size: 80),
+                ),
+                const SizedBox(height: 16),
+                // App Name
+                Text(
+                  _appName,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                // Version
+                Text(
+                  'Version $_version',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            // App Name
-            Text(
-              _appName,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            // Version
-            Text(
-              'Version $_version',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-            const SizedBox(height: 24),
-            // GitHub Button
-            FilledButton.icon(
-              onPressed: _launchGitHub,
-              icon: const Icon(Icons.code),
-              label: Text('about_github'.tr()),
-            ),
-            const SizedBox(height: 16),
-            // Sponsor Button
-            FilledButton.icon(
-              onPressed: _launchSponsorPage,
-              icon: const Icon(Icons.favorite),
-              label: Text('about_sponsor'.tr()),
-            ),
-            const SizedBox(height: 32),
-            const Divider(),
-            const SizedBox(height: 16),
-            // Contributors Header
+          ),
+          
+          // 链接部分
+          _buildSectionHeader(context, 'about_links'.tr()),
+          _buildSettingsTile(
+            context,
+            Icons.code,
+            'about_github'.tr(),
+            'about_github_description'.tr(),
+            onTap: _launchGitHub,
+          ),
+          _buildSettingsTile(
+            context,
+            Icons.favorite,
+            'about_sponsor'.tr(),
+            'about_sponsor_description'.tr(),
+            onTap: _launchSponsorPage,
+          ),
+          
+          // 贡献者部分
+          _buildSectionHeader(context, 'about_contributors'.tr()),
+          if (_isLoadingContributors)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_contributors.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'about_contributors'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge,
+              padding: const EdgeInsets.all(16),
+              child: Text('about_no_contributors'.tr()),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
                 ),
+                itemCount: _contributors.length,
+                itemBuilder: (context, index) {
+                  final contributor = _contributors[index];
+                  return Column(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          contributor['avatar_url'],
+                        ),
+                        radius: 30,
+                        onBackgroundImageError: (_, _) {},
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        contributor['login'],
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 8),
-            // Contributors List
-            if (_isLoadingContributors)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (_contributors.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text('about_no_contributors'.tr()),
-              )
-            else
-              SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _contributors.length,
-                  itemBuilder: (context, index) {
-                    final contributor = _contributors[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: NetworkImage(
-                              contributor['avatar_url'],
-                            ),
-                            radius: 30,
-                            onBackgroundImageError: (_, _) {},
-                            child: const Icon(
-                              Icons.person,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            contributor['login'],
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height: 32),
-            // Copyright
-            Text(
+          
+          // 版权信息
+          _buildSectionHeader(context, 'about_legal'.tr()),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
               'about_copyright'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建页面的分区标题
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [title] - 分区标题文本
+  ///
+  /// 返回一个显示分区标题的Widget
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
+    );
+  }
+
+  /// 构建设置选项瓦片
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [icon] - 选项图标
+  /// [title] - 选项标题
+  /// [subtitle] - 选项描述
+  /// [onTap] - 点击事件回调
+  ///
+  /// 返回一个显示设置选项的ListTile组件
+  Widget _buildSettingsTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String? subtitle, {
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      onTap: onTap,
     );
   }
 }

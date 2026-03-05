@@ -20,66 +20,95 @@ class SponsorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('sponsor_title'.tr())),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            // 说明内容
-            Center(
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.favorite,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '暂无赞助渠道',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Text(
-                      '但是你可以赞助iMikufans，因为iMikufans才让我们聚集在一起开发了这个应用',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 48),
-            // iMikufans赞助选项
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+      body: ListView(
+        children: [
+          // 说明内容
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.favorite,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                child: ListTile(
-                  leading: const Icon(Icons.favorite),
-                  title: const Text('赞助iMikufans'),
-                  subtitle: const Text('访问iMikufans赞助页面'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const IMikufansDonatePage(),
-                      ),
-                    );
-                  },
+                const SizedBox(height: 16),
+                Text(
+                  'sponsor_coming_soon'.tr(),
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: 16),
+                Text(
+                  'sponsor_reserved'.tr(),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 32),
-          ],
+          ),
+          
+          // 赞助选项
+          _buildSectionHeader(context, 'sponsor_options'.tr()),
+          _buildSettingsTile(
+            context,
+            Icons.favorite,
+            'sponsor_imikufans'.tr(),
+            'sponsor_imikufans_description'.tr(),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const IMikufansDonatePage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建页面的分区标题
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [title] - 分区标题文本
+  ///
+  /// 返回一个显示分区标题的Widget
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
+    );
+  }
+
+  /// 构建设置选项瓦片
+  ///
+  /// [context] - 构建上下文，包含组件树的信息
+  /// [icon] - 选项图标
+  /// [title] - 选项标题
+  /// [subtitle] - 选项描述
+  /// [onTap] - 点击事件回调
+  ///
+  /// 返回一个显示设置选项的ListTile组件
+  Widget _buildSettingsTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String? subtitle, {
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle) : null,
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 }
