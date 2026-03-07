@@ -1,22 +1,22 @@
-// Misskey时间线内容页面
-//
-// 重构说明：引入了数据保留机制防止刷新白屏，并使用 flutter_animate 实现阶梯入场。
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/core/theme/desktop_semantic_colors.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
-  const MisskeyTimelinePage({super.key});
+  const MisskeyTimelinePage({super.key, required this.timelineType});
+
+  final String timelineType;
 
   @override
-  ConsumerState<MisskeyTimelinePage> createState() => _MisskeyTimelinePageState();
+  ConsumerState<MisskeyTimelinePage> createState() =>
+      _MisskeyTimelinePageState();
 }
 
 class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
-  Set<String> _selectedTimeline = {'Global'};
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
 
@@ -34,7 +34,8 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
 
   void _onScroll() {
     if (_isLoadingMore) return;
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 400) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 400) {
       _loadMore();
     }
   }
@@ -43,7 +44,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
     if (_isLoadingMore) return;
     setState(() => _isLoadingMore = true);
     try {
-      await ref.read(misskeyTimelineProvider(_selectedTimeline.first).notifier).loadMore();
+      await ref
+          .read(misskeyTimelineProvider(widget.timelineType).notifier)
+          .loadMore();
     } finally {
       if (mounted) setState(() => _isLoadingMore = false);
     }
@@ -51,84 +54,98 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
 
   @override
   Widget build(BuildContext context) {
-    final timelineType = _selectedTimeline.first;
-    final timelineAsync = ref.watch(misskeyTimelineProvider(timelineType));
+    final timelineAsync = ref.watch(
+      misskeyTimelineProvider(widget.timelineType),
+    );
+    final desktopColors = context.desktopSemanticColors;
 
-    return Column(
+    return Stack(
       children: [
-        // 时间线切换器
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: SizedBox(
-            width: double.infinity,
-            child: SegmentedButton<String>(
-              segments: [
-                ButtonSegment<String>(value: 'Global', label: Text('timeline_global'.tr()), icon: const Icon(Icons.public)),
-                ButtonSegment<String>(value: 'Local', label: Text('timeline_local'.tr()), icon: const Icon(Icons.location_city)),
-                ButtonSegment<String>(value: 'Social', label: Text('timeline_social'.tr()), icon: const Icon(Icons.group_outlined)),
-              ],
-              selected: _selectedTimeline,
-              onSelectionChanged: (newSelection) {
-                setState(() => _selectedTimeline = newSelection);
-                ref.read(misskeyTimelineProvider(newSelection.first).notifier).refresh();
-              },
-            ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: desktopColors.timelineBackground),
           ),
         ),
-        
-        // 列表区域
-        Expanded(
-          child: timelineAsync.maybeWhen(
-            data: (notes) => _buildList(notes, timelineType),
-            loading: () {
-              // [关键修复] 如果原本有数据，加载时不显示全屏加载器，防止白屏
-              if (timelineAsync.hasValue) {
-                return _buildList(timelineAsync.value!, timelineType);
-              }
-              return const Center(child: CircularProgressIndicator());
-            },
-            error: (err, stack) {
-              if (timelineAsync.hasValue) {
-                return _buildList(timelineAsync.value!, timelineType);
-              }
-              return _buildErrorState(err);
-            },
-            orElse: () => const Center(child: CircularProgressIndicator()),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: desktopColors.timelineContainerBackground,
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(color: desktopColors.timelineBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: desktopColors.timelineShadow,
+                  blurRadius: 24,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: timelineAsync.maybeWhen(
+                data: (notes) => _buildList(notes),
+                loading: () {
+                  if (timelineAsync.hasValue) {
+                    return _buildList(timelineAsync.value!);
+                  }
+                  return const Center(child: CircularProgressIndicator());
+                },
+                error: (err, stack) {
+                  if (timelineAsync.hasValue) {
+                    return _buildList(timelineAsync.value!);
+                  }
+                  return _buildErrorState(err);
+                },
+                orElse: () => const Center(child: CircularProgressIndicator()),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildList(List<dynamic> notes, String timelineType) {
+  Widget _buildList(List<dynamic> notes) {
     if (notes.isEmpty) return _buildEmptyState(context);
-    
+
     final isWindows = Theme.of(context).platform == TargetPlatform.windows;
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(misskeyTimelineProvider(timelineType).notifier).refresh(),
+      onRefresh: () => ref
+          .read(misskeyTimelineProvider(widget.timelineType).notifier)
+          .refresh(),
       child: ListView.builder(
         controller: _scrollController,
         itemCount: notes.length + 1,
-        // 优化：在 Windows 上显著降低 cacheExtent 以减少 AXTree 压力
         cacheExtent: isWindows ? 500 : 1500,
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemBuilder: (context, index) {
           if (index < notes.length) {
             final note = notes[index];
-            return ModernNoteCard(
-              key: ValueKey(note.id),
-              note: note,
-              timelineType: timelineType,
-            ).animate(
-              // 关键：动画完成后停止更新，减少 AXTree 负担
-              onComplete: (controller) => controller.stop(),
-            )
-             .fadeIn(duration: 400.ms, curve: Curves.easeOut)
-             .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutBack);
-          } else {
-            return _buildLoadMoreIndicator();
+            return Column(
+              children: [
+                ModernNoteCard(
+                      key: ValueKey(note.id),
+                      note: note,
+                      timelineType: widget.timelineType,
+                      useListLayout: true,
+                    )
+                    .animate(onComplete: (controller) => controller.stop())
+                    .fadeIn(duration: 280.ms, curve: Curves.easeOut),
+                if (index != notes.length - 1)
+                  Divider(
+                    height: 1,
+                    indent: 72,
+                    endIndent: 16,
+                    thickness: 0.6,
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+              ],
+            );
           }
+          return _buildLoadMoreIndicator();
         },
       ),
     );
@@ -139,9 +156,18 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.auto_awesome_motion_outlined, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
+          Icon(
+            Icons.auto_awesome_motion_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
           const SizedBox(height: 16),
-          Text('timeline_no_notes_found'.tr(), style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+          Text(
+            'timeline_no_notes_found'.tr(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
         ],
       ),
     );
@@ -159,7 +185,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             Text('Error: $err', textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref.read(misskeyTimelineProvider(_selectedTimeline.first).notifier).refresh(),
+              onPressed: () => ref
+                  .read(misskeyTimelineProvider(widget.timelineType).notifier)
+                  .refresh(),
               child: Text('common_reload'.tr()),
             ),
           ],
@@ -169,8 +197,11 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   }
 
   Widget _buildLoadMoreIndicator() {
-    return _isLoadingMore 
-      ? const Padding(padding: EdgeInsets.all(16.0), child: Center(child: CircularProgressIndicator(strokeWidth: 2)))
-      : const SizedBox(height: 80);
+    return _isLoadingMore
+        ? const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          )
+        : const SizedBox(height: 80);
   }
 }

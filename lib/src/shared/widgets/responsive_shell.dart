@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/navigation_element.dart';
 import '/src/core/navigation/sub_navigation_notifier.dart';
+import '/src/core/theme/desktop_semantic_colors.dart';
 import 'root_navigation_drawer.dart';
 import 'user_navigation_header.dart';
 import 'sidebar/sidebar_sub_navigation_builder.dart';
@@ -101,6 +102,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
         return Scaffold(
           key: rootScaffoldKey,
+          backgroundColor: context.desktopSemanticColors.appBackground,
           drawer: isSmall
               ? RootNavigationDrawer(
                   selectedRootIndex: selectedRootIndex,
@@ -122,7 +124,12 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                     navigationSettings,
                   ),
                 const VerticalDivider(thickness: 1, width: 1),
-                Expanded(child: widget.navigationShell),
+                Expanded(
+                  child: ColoredBox(
+                    color: context.desktopSemanticColors.contentBackground,
+                    child: widget.navigationShell,
+                  ),
+                ),
               ],
             ),
           ),
@@ -139,7 +146,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
     bool isLarge,
     dynamic navigationSettings,
   ) {
-    final theme = Theme.of(context);
+    final desktopColors = context.desktopSemanticColors;
     final isMedium = Breakpoints.medium.isActive(context);
     final sidebarWidth = isLarge
         ? 280.0
@@ -149,7 +156,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
 
     return Container(
       width: sidebarWidth,
-      color: theme.colorScheme.surface,
+      color: desktopColors.paneBackground,
       child: Column(
         children: [
           UserNavigationHeader(

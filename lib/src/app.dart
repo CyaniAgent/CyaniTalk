@@ -220,36 +220,53 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     final isSystemFont = fontFamilyId.isEmpty || fontFamilyId == 'system';
 
     // 获取基础 TextTheme
-    final baseTextTheme = SauceTypography.createTextTheme(Theme.of(context).platform);
-    
+    final baseTextTheme = SauceTypography.createTextTheme(
+      Theme.of(context).platform,
+    );
+
     // 应用字体
     TextTheme textTheme;
     String? effectiveFontFamily;
-    
+
     if (isSystemFont) {
       // 系统字体：不设置 fontFamily，使用系统默认
       textTheme = baseTextTheme.apply(
-        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
-        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        bodyColor: isDark
+            ? SaucePalette.darkOnSurface
+            : SaucePalette.lightOnSurface,
+        displayColor: isDark
+            ? SaucePalette.darkOnSurface
+            : SaucePalette.lightOnSurface,
       );
       effectiveFontFamily = null;
     } else if (fontFamilyId == 'misans') {
       // MiSans 内置字体
       textTheme = baseTextTheme.apply(
-        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
-        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        bodyColor: isDark
+            ? SaucePalette.darkOnSurface
+            : SaucePalette.lightOnSurface,
+        displayColor: isDark
+            ? SaucePalette.darkOnSurface
+            : SaucePalette.lightOnSurface,
       );
       effectiveFontFamily = 'MiSans';
     } else {
       // 动态加载的字体
       // 先应用颜色
       final coloredTextTheme = baseTextTheme.apply(
-        bodyColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
-        displayColor: isDark ? SaucePalette.darkOnSurface : SaucePalette.lightOnSurface,
+        bodyColor: isDark
+            ? SaucePalette.darkOnSurface
+            : SaucePalette.lightOnSurface,
+        displayColor: isDark
+            ? SaucePalette.darkOnSurface
+            : SaucePalette.lightOnSurface,
       );
-      
+
       // 尝试使用 FontManager 的 TextTheme
-      final dynamicTextTheme = FontManager.getTextTheme(fontFamilyId, coloredTextTheme);
+      final dynamicTextTheme = FontManager.getTextTheme(
+        fontFamilyId,
+        coloredTextTheme,
+      );
       if (dynamicTextTheme != null) {
         textTheme = dynamicTextTheme;
         effectiveFontFamily = fontFamilyId;
@@ -275,16 +292,41 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       textTheme: textTheme,
     );
 
+    final platform = Theme.of(context).platform;
+    final isDesktop =
+        platform == TargetPlatform.windows ||
+        platform == TargetPlatform.macOS ||
+        platform == TargetPlatform.linux;
+    final semanticColors = DesktopSemanticColors.fromColorScheme(
+      theme.colorScheme,
+      isDesktop: isDesktop,
+    );
+    final adjustedTheme = isDesktop
+        ? theme.copyWith(
+            scaffoldBackgroundColor: semanticColors.appBackground,
+            canvasColor: semanticColors.appBackground,
+            extensions: [
+              ...theme.extensions.values,
+              semanticColors,
+            ],
+          )
+        : theme.copyWith(
+            extensions: [
+              ...theme.extensions.values,
+              semanticColors,
+            ],
+          );
+
     // 缓存主题和设置
 
     if (isDark) {
-      _cachedDarkTheme = theme;
+      _cachedDarkTheme = adjustedTheme;
     } else {
-      _cachedLightTheme = theme;
+      _cachedLightTheme = adjustedTheme;
     }
 
     _cachedSettings = settings;
 
-    return theme;
+    return adjustedTheme;
   }
 }

@@ -28,13 +28,19 @@ import 'reaction_display.dart';
 class ModernNoteCard extends ConsumerStatefulWidget {
   final Note note;
   final String? timelineType;
+  final bool useListLayout;
 
   /// 创建ModernNoteCard组件
   ///
   /// @param key 组件的键
   /// @param note 要显示的笔记对象
   /// @param timelineType 可选的时间线类型，用于跳转功能
-  const ModernNoteCard({super.key, required this.note, this.timelineType});
+  const ModernNoteCard({
+    super.key,
+    required this.note,
+    this.timelineType,
+    this.useListLayout = false,
+  });
 
   @override
   ConsumerState<ModernNoteCard> createState() => _ModernNoteCardState();
@@ -51,8 +57,6 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     _mfmRenderer.dispose();
     super.dispose();
   }
-
-
 
   @override
   void initState() {
@@ -89,12 +93,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   /// 加载笔记中的表情到MFM渲染器缓存
   void _loadEmojis() {
     final note = widget.note;
-    
+
     // 加载笔记中的表情
     if (note.emojis != null && note.emojis!.isNotEmpty) {
       _mfmRenderer.addEmojisToCache(note.emojis!);
     }
-    
+
     // 加载用户的表情
     if (note.user?.emojis != null && note.user!.emojis!.isNotEmpty) {
       _mfmRenderer.addEmojisToCache(note.user!.emojis!);
@@ -115,9 +119,18 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             _showContextMenu(details.globalPosition),
         onLongPressStart: (details) => _showContextMenu(details.globalPosition),
         child: Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: widget.useListLayout
+              ? EdgeInsets.zero
+              : const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: widget.useListLayout ? 0 : null,
+          color: widget.useListLayout ? theme.colorScheme.surface : null,
+          shape: widget.useListLayout
+              ? const RoundedRectangleBorder(borderRadius: BorderRadius.zero)
+              : null,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: widget.useListLayout
+                ? const EdgeInsets.fromLTRB(16, 14, 16, 12)
+                : const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

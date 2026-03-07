@@ -13,6 +13,7 @@ import '../../flarum/data/models/user.dart' as flarum_model;
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import '/src/core/navigation/navigation.dart';
+import '/src/features/profile/presentation/widgets/profile_login_reminder.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -66,14 +67,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             pinned: true,
             snap: true,
           ),
-          SliverToBoxAdapter(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Column(
-                  children: [
-                    // 背景图片
-                    if (isLoggedIn)
+          if (!isLoggedIn)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: ProfileLoginReminder(
+                onLoginPressed: () => _showAddAccountDialog(context),
+              ),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Column(
+                    children: [
+                      // 背景图片
                       GestureDetector(
                         onTap: misskeyUser?.bannerUrl != null
                             ? () {
@@ -135,42 +143,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ),
                           ),
                         ),
-                      )
-                    else
-                      Container(
-                        height: bannerHeight,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.colorScheme.primaryContainer,
-                              theme.colorScheme.primary,
-                            ],
-                          ),
-                        ),
                       ),
-                    if (isLoggedIn)
                       _buildLoggedInHeader(
                         context,
                         primaryAccount,
                         misskeyUser,
                         flarumUser,
-                      )
-                    else
-                      _buildLoggedOutHeader(context),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [],
                       ),
-                    ),
-                  ],
-                ),
-                // 头像显示在最顶层
-                if (isLoggedIn)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [],
+                        ),
+                      ),
+                    ],
+                  ),
+                  // 头像显示在最顶层
                   Positioned(
                     top: bannerHeight - 45,
                     left: 20,
@@ -218,9 +207,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -528,70 +517,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLoggedOutHeader(BuildContext context) {
-    return Positioned(
-      bottom: 40,
-      left: 20,
-      right: 20,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'misskey_page_no_account_title'.tr(),
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onPrimary,
-              shadows: [
-                Shadow(
-                  blurRadius: 4,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.shadow.withValues(alpha: 0.2),
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'misskey_page_no_account_subtitle'.tr(),
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(
-                context,
-              ).colorScheme.onPrimary.withValues(alpha: 0.9),
-              shadows: [
-                Shadow(
-                  blurRadius: 2,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.shadow.withAlpha(51), // 0.2 * 255
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => _showAddAccountDialog(context),
-            icon: const Icon(Icons.login),
-            label: Text('misskey_page_login_now'.tr()),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              foregroundColor: Theme.of(context).colorScheme.primary,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -6,12 +6,14 @@ class LoginReminder extends StatelessWidget {
   final String title;
   final String message;
   final IconData icon;
+  final VoidCallback? onLoginPressed;
 
   const LoginReminder({
     super.key,
     required this.title,
     required this.message,
     this.icon = Icons.account_circle_outlined,
+    this.onLoginPressed,
   });
 
   @override
@@ -52,7 +54,7 @@ class LoginReminder extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
-              onPressed: () => context.go('/profile'),
+              onPressed: onLoginPressed ?? () => context.go('/profile'),
               style: FilledButton.styleFrom(
                 backgroundColor: primaryColor,
                 foregroundColor: theme.colorScheme.onPrimary,
