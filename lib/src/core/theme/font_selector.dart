@@ -5,6 +5,7 @@ import '/src/features/profile/presentation/settings/appearance_page.dart';
 import 'font_manager.dart';
 import 'font_settings_notifier.dart';
 import 'font_refresh_notifier.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 字体选择器对话框
 class FontSelectorDialog extends ConsumerStatefulWidget {
@@ -111,13 +112,13 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
   Future<void> _handleDownload(FontInfo font) async {
     final success = await ref.read(fontSettingsProvider.notifier).downloadFont(font.id);
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showTopSnackBar(
         SnackBar(
           content: Text('settings_font_downloaded'.tr(namedArgs: {'font': font.displayName})),
         ),
       );
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showTopSnackBar(
         SnackBar(
           content: Text('settings_font_download_failed'.tr(namedArgs: {'font': font.displayName})),
           backgroundColor: Theme.of(context).colorScheme.error,
@@ -161,7 +162,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
     // 延迟一点时间再显示成功提示
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('settings_font_change_success'.tr(namedArgs: {'font': fontName})),
           ),

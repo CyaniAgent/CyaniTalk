@@ -290,6 +290,16 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       useMaterial3: true,
       fontFamily: effectiveFontFamily,
       textTheme: textTheme,
+      snackBarTheme: const SnackBarThemeData(
+        backgroundColor: Colors.white,
+        behavior: SnackBarBehavior.floating,
+        elevation: 2,
+      ),
+      bannerTheme: const MaterialBannerThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        elevation: 2,
+      ),
     );
 
     final platform = Theme.of(context).platform;

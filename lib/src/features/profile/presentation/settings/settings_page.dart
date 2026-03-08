@@ -15,6 +15,7 @@ import 'developer_settings_page.dart';
 import 'licenses_page.dart';
 import 'flarum_endpoints_page.dart';
 import 'network_settings_page.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -134,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 showMiaoLanguage = newValue;
               });
               _saveShowMiaoLanguage(newValue);
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(context).showTopSnackBar(
                 SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项'), behavior: SnackBarBehavior.floating),
               );
             },
@@ -283,7 +284,7 @@ class _SettingsPageState extends State<SettingsPage> {
       onTap:
           onTap ??
           () {
-            ScaffoldMessenger.of(context).showSnackBar(
+            ScaffoldMessenger.of(context).showTopSnackBar(
               SnackBar(
                 content: Text(
                   'settings_tapped'.tr(namedArgs: {'title': title}),

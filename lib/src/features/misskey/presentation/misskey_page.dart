@@ -20,6 +20,7 @@ import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 class MisskeyPage extends ConsumerStatefulWidget {
   const MisskeyPage({super.key});
@@ -234,7 +235,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
       await ref.read(audioEngineProvider).playAsset(soundPath);
       if (mounted) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('misskey_page_please_login'.tr()),
             behavior: SnackBarBehavior.floating,

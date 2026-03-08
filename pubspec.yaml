@@ -107,6 +107,7 @@ dependencies:
   timeago: ^3.7.1
   mfm: ^1.0.9
   haptic_feedback: ^0.6.4+3
+  another_flushbar: ^1.12.32
 
 dev_dependencies:
   flutter_test:

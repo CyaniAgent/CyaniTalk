@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/api/misskey_api.dart';
 import '/src/features/misskey/presentation/widgets/safe_mfm_widget.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// MFM 渲染器（基于 mfm 包重构版本）
 ///
@@ -367,13 +368,13 @@ class MfmRenderer {
         logger.debug('MfmRenderer: Mention tapped: $acct');
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('提及：$acct')));
+        ).showTopSnackBar(SnackBar(content: Text('提及：$acct')));
       },
       hashtagTap: (hashtag) {
         logger.debug('MfmRenderer: Hashtag tapped: $hashtag');
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('话题：#$hashtag')));
+        ).showTopSnackBar(SnackBar(content: Text('话题：#$hashtag')));
       },
       linkTap: (url) async {
         logger.debug('MfmRenderer: Link tapped: $url');

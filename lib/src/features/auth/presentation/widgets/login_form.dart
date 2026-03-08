@@ -5,6 +5,7 @@ import 'login_form_components.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/core/api/flarum_api.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 统一的登录表单控件
 ///
@@ -202,7 +203,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   void _showError(String error) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showTopSnackBar(
       SnackBar(
         content: Text('auth_error'.tr(namedArgs: {'error': error})),
         behavior: SnackBarBehavior.floating,

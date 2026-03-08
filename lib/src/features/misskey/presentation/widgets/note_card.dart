@@ -17,6 +17,7 @@ import 'emoji_picker.dart';
 import 'reaction_display.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// NoteCard组件
 ///
@@ -425,7 +426,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(
               content: Text('post_copied'.tr()),
               behavior: SnackBarBehavior.floating,
@@ -450,7 +451,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('post_id_copied'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -498,7 +499,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('post_link_copied'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -515,7 +516,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('post_bookmarked'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -524,7 +525,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text(
               'post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}),
@@ -581,7 +582,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                     reason,
                   );
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    ScaffoldMessenger.of(context).showTopSnackBar(
                       SnackBar(
                         content: Text('post_reported'.tr()),
                         behavior: SnackBarBehavior.floating,
@@ -591,7 +592,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(context).showTopSnackBar(
                     SnackBar(
                       content: Text('post_report_failed'.tr()),
                       behavior: SnackBarBehavior.floating,
@@ -696,7 +697,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.renote(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('note_renoted_successfully'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -705,7 +706,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text(
               'note_failed_to_renote'.tr(namedArgs: {'error': e.toString()}),
@@ -743,7 +744,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 );
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(context).showTopSnackBar(
                     SnackBar(
                       content: Text('note_reply_sent'.tr()),
                       behavior: SnackBarBehavior.floating,
@@ -752,7 +753,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(context).showTopSnackBar(
                     SnackBar(
                       content: Text(
                         'note_failed_to_reply'.tr(
@@ -783,7 +784,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             final repository = await ref.read(misskeyRepositoryProvider.future);
             await repository.addReaction(widget.note.id, emoji);
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
+              ScaffoldMessenger.of(dialogContext).showTopSnackBar(
                 SnackBar(
                   content: Text('note_reaction_added'.tr()),
                   behavior: SnackBarBehavior.floating,
@@ -792,7 +793,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             }
           } catch (e) {
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
+              ScaffoldMessenger.of(dialogContext).showTopSnackBar(
                 SnackBar(
                   content: Text(
                     'note_failed_to_react'.tr(
@@ -810,7 +811,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             final repository = await ref.read(misskeyRepositoryProvider.future);
             await repository.removeReaction(widget.note.id);
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
+              ScaffoldMessenger.of(dialogContext).showTopSnackBar(
                 SnackBar(
                   content: Text('note_reaction_removed'.tr()),
                   behavior: SnackBarBehavior.floating,
@@ -819,7 +820,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
             }
           } catch (e) {
             if (dialogContext.mounted) {
-              ScaffoldMessenger.of(dialogContext).showSnackBar(
+              ScaffoldMessenger.of(dialogContext).showTopSnackBar(
                 SnackBar(
                   content: Text(
                     'note_failed_to_remove_reaction'.tr(
@@ -844,7 +845,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       if (widget.note.myReaction == reaction) {
         await repository.removeReaction(widget.note.id);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(
               content: Text('note_reaction_removed'.tr()),
               behavior: SnackBarBehavior.floating,
@@ -856,7 +857,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         await repository.removeReaction(widget.note.id);
         await repository.addReaction(widget.note.id, reaction);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(
               content: Text('note_reaction_updated'.tr()),
               behavior: SnackBarBehavior.floating,
@@ -867,7 +868,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
         // 直接发送表情反应
         await repository.addReaction(widget.note.id, reaction);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(
               content: Text('note_reaction_added'.tr()),
               behavior: SnackBarBehavior.floating,
@@ -877,7 +878,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text(
               'note_failed_to_react'.tr(namedArgs: {'error': e.toString()}),
@@ -891,7 +892,7 @@ class _NoteCardState extends ConsumerState<NoteCard> {
 
   void _handleShare() {
     // Placeholder for share functionality
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(context).showTopSnackBar(
       SnackBar(
         content: Text('note_share_coming_soon'.tr()),
         behavior: SnackBarBehavior.floating,

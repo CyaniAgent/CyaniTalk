@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/log_settings_provider.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 class LogSettingsPage extends ConsumerStatefulWidget {
   const LogSettingsPage({super.key});
@@ -38,7 +39,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     final file = await logger.exportLogs();
     if (mounted) {
       if (file != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text(
               'settings_logs_export_success'.tr(namedArgs: {'path': file.path}),
@@ -47,7 +48,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(content: Text('settings_logs_export_failed'.tr()), behavior: SnackBarBehavior.floating),
         );
       }
@@ -80,7 +81,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       await logger.deleteLogs();
       await _refreshFileList();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(content: Text('settings_logs_delete_success'.tr()), behavior: SnackBarBehavior.floating),
         );
       }
@@ -319,7 +320,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
                     ClipboardData(text: content.join('\n')),
                   );
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    ScaffoldMessenger.of(context).showTopSnackBar(
                       const SnackBar(content: Text('Copied to clipboard'), behavior: SnackBarBehavior.floating),
                     );
                   }

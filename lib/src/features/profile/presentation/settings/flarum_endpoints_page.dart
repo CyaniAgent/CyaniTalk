@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '/src/core/api/flarum_api.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/flarum/application/flarum_providers.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 class FlarumEndpointsPage extends ConsumerStatefulWidget {
   const FlarumEndpointsPage({super.key});
@@ -77,7 +78,7 @@ class _FlarumEndpointsPageState extends ConsumerState<FlarumEndpointsPage> {
         await _loadEndpoints();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(content: Text('auth_flarum_endpoint_added'.tr()), behavior: SnackBarBehavior.floating),
           );
         }

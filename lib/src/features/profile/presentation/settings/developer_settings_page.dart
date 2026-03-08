@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/features/profile/application/developer_settings_provider.dart';
 import 'log_settings_page.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 开发者设置页面组件
 class DeveloperSettingsPage extends ConsumerStatefulWidget {
@@ -19,7 +20,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             behavior: SnackBarBehavior.floating,
             content: Text(

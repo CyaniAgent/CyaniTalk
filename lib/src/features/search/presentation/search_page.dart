@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/services/search/global_search_service.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -53,7 +54,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
+        ).showTopSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
       }
     }
   }

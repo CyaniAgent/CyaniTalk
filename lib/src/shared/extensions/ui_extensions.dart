@@ -1,79 +1,190 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import '/src/routing/router.dart' show rootNavigatorKey;
 
-/// UI 工具扩展
-/// 提供常用的UI操作快捷方式
+enum AppNoticeType { info, success, warning, error }
+
+String _extractSnackBarMessage(Widget content) {
+  if (content is Text) {
+    return content.data ?? content.textSpan?.toPlainText() ?? '';
+  }
+  return content.toStringShort();
+}
+
+AppNoticeType _inferNoticeType(BuildContext context, SnackBar snackBar) {
+  final bg = snackBar.backgroundColor;
+  if (bg != null) {
+    final error = Theme.of(context).colorScheme.error;
+    final diff =
+        ((bg.r - error.r) * 255).abs() +
+        ((bg.g - error.g) * 255).abs() +
+        ((bg.b - error.b) * 255).abs();
+    if (diff < 40) return AppNoticeType.error;
+  }
+  return AppNoticeType.info;
+}
+
+void _showTopNotice(
+  BuildContext context,
+  String message, {
+  Duration duration = const Duration(seconds: 2),
+  AppNoticeType type = AppNoticeType.info,
+  SnackBarAction? action,
+}) {
+  final navigatorContext =
+      rootNavigatorKey.currentContext ??
+      Navigator.maybeOf(context, rootNavigator: true)?.context ??
+      Navigator.maybeOf(context)?.context;
+  if (navigatorContext == null) return;
+
+  final theme = Theme.of(navigatorContext);
+  final isDark = theme.brightness == Brightness.dark;
+  final media = MediaQuery.of(navigatorContext);
+
+  final (icon, accentColor) = switch (type) {
+    AppNoticeType.success => (Icons.check_circle_rounded, Colors.green),
+    AppNoticeType.warning => (Icons.warning_rounded, Colors.orange),
+    AppNoticeType.error => (Icons.error_rounded, theme.colorScheme.error),
+    AppNoticeType.info => (Icons.info_rounded, theme.colorScheme.primary),
+  };
+
+  final bgColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
+  final textColor = isDark ? const Color(0xFFEDEDED) : Colors.black;
+  final borderColor = isDark
+      ? Colors.white.withValues(alpha: 0.18)
+      : Colors.black.withValues(alpha: 0.10);
+
+  final maxWidth = (media.size.width - 24).clamp(240.0, 680.0);
+
+  Flushbar<void>(
+    flushbarPosition: FlushbarPosition.TOP,
+    flushbarStyle: FlushbarStyle.FLOATING,
+    margin: EdgeInsets.only(
+      top: media.padding.top + 8,
+      left: 12,
+      right: 12,
+    ),
+    borderRadius: BorderRadius.circular(24),
+    borderColor: borderColor,
+    borderWidth: 1,
+    maxWidth: maxWidth,
+    backgroundColor: bgColor,
+    boxShadows: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.10),
+        blurRadius: 14,
+        spreadRadius: 0,
+        offset: const Offset(0, 4),
+      ),
+    ],
+    isDismissible: true,
+    animationDuration: const Duration(milliseconds: 220),
+    forwardAnimationCurve: Curves.easeOutQuart,
+    reverseAnimationCurve: Curves.easeInQuart,
+    duration: duration,
+    icon: Icon(icon, color: accentColor, size: 20),
+    shouldIconPulse: false,
+    messageText: Text(
+      message,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: textColor,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    mainButton: action == null
+        ? null
+        : TextButton(
+            onPressed: action.onPressed,
+            style: TextButton.styleFrom(
+              foregroundColor: accentColor,
+              visualDensity: VisualDensity.compact,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            ),
+            child: Text(action.label),
+          ),
+  ).show(navigatorContext);
+}
 
 extension BuildContextExtension on BuildContext {
-  /// 获取媒体查询数据
   MediaQueryData get mediaQuery => MediaQuery.of(this);
-
-  /// 获取屏幕宽度
   double get screenWidth => mediaQuery.size.width;
-
-  /// 获取屏幕高度
   double get screenHeight => mediaQuery.size.height;
-
-  /// 获取屏幕是否为横屏
   bool get isLandscape => mediaQuery.orientation == Orientation.landscape;
-
-  /// 获取屏幕是否为竖屏
   bool get isPortrait => mediaQuery.orientation == Orientation.portrait;
-
-  /// 获取键盘高度
   double get keyboardHeight => mediaQuery.viewInsets.bottom;
-
-  /// 判断是否有键盘打开
   bool get hasKeyboard => keyboardHeight > 0;
-
-  /// 获取应用的主题
   ThemeData get theme => Theme.of(this);
-
-  /// 获取应用的配色方案
   ColorScheme get colorScheme => theme.colorScheme;
-
-  /// 获取应用的文本主题
   TextTheme get textTheme => theme.textTheme;
-
-  /// 判断是否为深色主题
   bool get isDarkMode => theme.brightness == Brightness.dark;
 
-  /// 显示 SnackBar
+  void showTopNotice(
+    String message, {
+    Duration duration = const Duration(seconds: 2),
+    AppNoticeType type = AppNoticeType.info,
+    SnackBarAction? action,
+  }) {
+    if (!mounted) return;
+    _showTopNotice(
+      this,
+      message,
+      duration: duration,
+      type: type,
+      action: action,
+    );
+  }
+
+  void showTopSnackBar(SnackBar snackBar) {
+    if (!mounted) return;
+    _showTopNotice(
+      this,
+      _extractSnackBarMessage(snackBar.content),
+      duration: snackBar.duration,
+      type: _inferNoticeType(this, snackBar),
+      action: snackBar.action,
+    );
+  }
+
   void showSnackBar(
     String message, {
     Duration duration = const Duration(seconds: 2),
     SnackBarAction? action,
   }) {
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(content: Text(message), duration: duration, action: action),
+    showTopNotice(
+      message,
+      duration: duration,
+      type: AppNoticeType.info,
+      action: action,
     );
   }
 
-  /// 显示错误 SnackBar
   void showErrorSnackBar(String message) {
-    showSnackBar(message, duration: const Duration(seconds: 3));
+    showTopNotice(
+      message,
+      duration: const Duration(seconds: 3),
+      type: AppNoticeType.error,
+    );
   }
 
-  /// 推送新页面
   Future<T?> pushNamed<T>(String routeName, {Object? arguments}) {
     return Navigator.of(this).pushNamed(routeName, arguments: arguments);
   }
 
-  /// 替换当前页面
   Future<T?> pushReplacementNamed<T>(String routeName, {Object? arguments}) {
     return Navigator.of(
       this,
     ).pushReplacementNamed(routeName, arguments: arguments);
   }
 
-  /// 弹出当前页面
   void pop<T>([T? result]) {
     Navigator.of(this).pop(result);
   }
 
-  /// 获取设备像素比
   double get devicePixelRatio => mediaQuery.devicePixelRatio;
 
-  /// 响应式设计：根据宽度返回值
   T responsiveValue<T>(
     T mobile,
     T tablet,
@@ -91,43 +202,45 @@ extension BuildContextExtension on BuildContext {
   }
 }
 
-/// Widget 扩展
+extension ScaffoldMessengerNoticeExtension on ScaffoldMessengerState {
+  void showTopSnackBar(SnackBar snackBar) {
+    _showTopNotice(
+      context,
+      _extractSnackBarMessage(snackBar.content),
+      duration: snackBar.duration,
+      type: _inferNoticeType(context, snackBar),
+      action: snackBar.action,
+    );
+  }
+}
+
 extension WidgetExtension on Widget {
-  /// 为 Widget 添加填充
   Padding padding(EdgeInsetsGeometry insets) =>
       Padding(padding: insets, child: this);
 
-  /// 为 Widget 添加居中
   Center centered() => Center(child: this);
 
-  /// 为 Widget 添加阴影效果
   Material withShadow({double elevation = 4, ShapeBorder? shape}) =>
       Material(elevation: elevation, shape: shape, child: this);
 
-  /// 为 Widget 添加单击处理
   GestureDetector onTap(VoidCallback onTap) =>
       GestureDetector(onTap: onTap, child: this);
 
-  /// 为 Widget 添加透明度
   Opacity withOpacity(double opacity) => Opacity(opacity: opacity, child: this);
 
-  /// 为 Widget 限制宽度
   ConstrainedBox withMaxWidth(double maxWidth) => ConstrainedBox(
     constraints: BoxConstraints(maxWidth: maxWidth),
     child: this,
   );
 
-  /// 为 Widget 限制高度
   ConstrainedBox withMaxHeight(double maxHeight) => ConstrainedBox(
     constraints: BoxConstraints(maxHeight: maxHeight),
     child: this,
   );
 
-  /// 为 Widget 添加背景色
   Container withBackgroundColor(Color color) =>
       Container(color: color, child: this);
 
-  /// 为 Widget 添加边框
   Container withBorder({
     Color color = const Color(0xFF000000),
     double width = 1.0,
@@ -139,7 +252,6 @@ extension WidgetExtension on Widget {
   );
 }
 
-/// 响应式布局助手
 class ResponsiveBuilder extends StatelessWidget {
   final Widget Function(BuildContext, ScreenType) builder;
 
@@ -163,22 +275,3 @@ class ResponsiveBuilder extends StatelessWidget {
 }
 
 enum ScreenType { mobile, tablet, desktop }
-
-// 使用示例:
-//
-// // BuildContext 扩展
-// context.showSnackBar('Hello');
-// bool isDark = context.isDarkMode;
-// double width = context.screenWidth;
-//
-// // Widget 扩展
-// Text('Hello').padding(EdgeInsets.all(16)).centered();
-// Button().onTap(() => print('Clicked'));
-// Image.network(url).withOpacity(0.5);
-//
-// // 响应式设计
-// child: context.responsiveValue(
-//   mobile: MobileLayout(),
-//   tablet: TabletLayout(),
-//   desktop: DesktopLayout(),
-// );

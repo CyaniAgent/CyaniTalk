@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'navigation_settings.dart';
 import 'navigation_item.dart';
 import 'navigation_element.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 part 'navigation_settings_notifier.g.dart';
 
@@ -254,7 +255,7 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
       final tempState = state.value!.updateItemEnabled(itemId, false);
       if (tempState.getEnabledCount() < 2) {
         // 至少需要两个导航项启用，显示提示并取消禁用操作
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
             content: Text('至少需要启用两个导航项'),
             duration: const Duration(seconds: 2),

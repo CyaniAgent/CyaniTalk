@@ -6,6 +6,7 @@ import '/src/features/misskey/domain/poll.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 投票卡片组件
 /// 
@@ -340,14 +341,14 @@ class _PollCardState extends ConsumerState<PollCard> {
       }
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(content: Text('poll_voted_successfully'.tr()), behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
       logger.error('Error voting: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(content: Text('poll_vote_failed'.tr(namedArgs: {'error': e.toString()})), behavior: SnackBarBehavior.floating),
         );
       }

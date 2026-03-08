@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/navigation_element.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 导航设置页面组件
 ///
@@ -195,7 +196,7 @@ class _NavigationSettingsPageState
             onPressed: () {
               notifier.resetSettings();
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(context).showTopSnackBar(
                 SnackBar(
                   content: Text('settings_navigation_reset_done'.tr()),
                   behavior: SnackBarBehavior.floating,

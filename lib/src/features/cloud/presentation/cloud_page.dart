@@ -17,6 +17,7 @@ import '/src/shared/widgets/login_reminder.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 class CloudPage extends ConsumerStatefulWidget {
   const CloudPage({super.key});
@@ -168,7 +169,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                   onPressed: () {
                     ScaffoldMessenger.of(
                       context,
-                    ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
+                    ).showTopSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
                   },
                   tooltip: 'cloud_delete'.tr(),
                 ),
@@ -1003,7 +1004,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
         if (currentContext.mounted) {
           ScaffoldMessenger.of(
             currentContext,
-          ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
+          ).showTopSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
         }
       }
     });

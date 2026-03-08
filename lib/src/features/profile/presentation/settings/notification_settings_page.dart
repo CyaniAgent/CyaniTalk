@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/notification_settings_provider.dart';
 import '/src/core/services/notification_service.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
@@ -134,7 +135,7 @@ class NotificationSettingsPage extends ConsumerWidget {
           : () async {
               final granted = await NotificationService().requestPermissions();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                ScaffoldMessenger.of(context).showTopSnackBar(
                   SnackBar(
                     content: Text(
                       granted

@@ -13,6 +13,7 @@ import '/src/core/core.dart';
 import '/src/core/api/network_client.dart';
 import '/src/core/services/audio_engine.dart';
 import 'sponsor_page.dart';
+import '/src/shared/extensions/ui_extensions.dart';
 
 /// 应用程序的关于页面组件
 ///
@@ -245,7 +246,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         if (mounted) {
           logger.warning('AboutPage: Failed to launch GitHub page');
-          ScaffoldMessenger.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(content: Text('about_github_launch_error'.tr()), behavior: SnackBarBehavior.floating),
           );
         }
@@ -255,7 +256,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     } catch (e) {
       logger.error('AboutPage: Error launching GitHub page: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(content: Text('about_github_launch_error'.tr())),
         );
       }
@@ -276,7 +277,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     } catch (e) {
       logger.error('AboutPage: Error launching sponsor page: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showTopSnackBar(
             SnackBar(content: Text('about_sponsor_launch_error'.tr()), behavior: SnackBarBehavior.floating),
           );
       }
