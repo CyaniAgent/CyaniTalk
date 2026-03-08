@@ -1,21 +1,13 @@
-// 导航设置页面
-//
-// 该文件包含NavigationSettingsPage组件，用于管理应用程序的导航设置，
-// 包括底栏（侧栏）选项的显示/隐藏功能。
+﻿import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easy_localization/easy_localization.dart';
+
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/navigation_element.dart';
+import '/src/core/theme/desktop_semantic_colors.dart';
 import '/src/shared/extensions/ui_extensions.dart';
 
-/// 导航设置页面组件
-///
-/// 显示应用程序的导航设置选项，包括底栏（侧栏）选项的显示/隐藏切换。
 class NavigationSettingsPage extends ConsumerStatefulWidget {
-  /// 创建一个新的NavigationSettingsPage实例
-  ///
-  /// [key] - 组件的键，用于唯一标识组件
   const NavigationSettingsPage({super.key});
 
   @override
@@ -23,17 +15,12 @@ class NavigationSettingsPage extends ConsumerStatefulWidget {
       _NavigationSettingsPageState();
 }
 
-class _NavigationSettingsPageState
-    extends ConsumerState<NavigationSettingsPage> {
-  /// 构建导航设置页面的UI界面
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  ///
-  /// 返回一个包含导航设置选项的Scaffold组件
+class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
     final navigationNotifier = ref.read(navigationSettingsProvider.notifier);
+    final desktopColors = context.desktopSemanticColors;
 
     return Scaffold(
       appBar: AppBar(title: Text('settings_navigation_title'.tr())),
@@ -42,122 +29,85 @@ class _NavigationSettingsPageState
         error: (error, stack) =>
             Center(child: Text('settings_navigation_error_loading'.tr())),
         data: (navigationSettings) {
+          final itemElements = navigationSettings.elements
+              .where(
+                (element) =>
+                    element.type == NavigationElementType.item &&
+                    element is NavigationItemElement &&
+                    element.item.id != 'me',
+              )
+              .cast<NavigationItemElement>()
+              .toList();
+
           return ListView(
+            padding: const EdgeInsets.only(bottom: 32),
             children: [
               _buildSectionHeader(
                 context,
                 'settings_navigation_section_items'.tr(),
               ),
-
-              // 导航项排序
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '排序顺序',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '长按并拖动可以调整导航项的显示顺序',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                child: Text(
+                  '样式已对齐正式侧栏。拖拽调整顺序，非“用户”项用 +/- 控制显示。',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
               ),
-
-              // 可拖动排序的导航项列表
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
+                  color: desktopColors.paneBackground,
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.outlineVariant,
                   ),
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: ReorderableListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  children: navigationSettings.elements
-                      .where(
-                        (element) =>
-                            element.type == NavigationElementType.item &&
-                            element is NavigationItemElement,
-                      )
-                      .cast<NavigationItemElement>()
-                      .map((itemElement) {
+                child: Column(
+                  children: [
+                    _buildUserHeaderPreview(context),
+                    const Divider(indent: 12, endIndent: 12),
+                    ReorderableListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: itemElements.length,
+                      buildDefaultDragHandles: false,
+                      padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+                      itemBuilder: (context, index) {
+                        final itemElement = itemElements[index];
                         final item = itemElement.item;
-                        ValueChanged<bool>? onChanged;
-                        if (item.isRemovable) {
-                          onChanged = (value) => navigationNotifier
-                              .updateItemEnabled(item.id, value, context);
-                        }
-
-                        return Container(
+                        return _buildNavigationRow(
+                          context: context,
                           key: ValueKey(item.id),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                leading: Icon(item.icon),
-                                title: Text(item.title),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Switch(
-                                      value: item.isEnabled,
-                                      onChanged: onChanged,
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                ),
-                                enabled: onChanged != null,
-                              ),
-                              if (itemElement !=
-                                  navigationSettings.elements
-                                      .where(
-                                        (element) =>
-                                            element.type ==
-                                                NavigationElementType.item &&
-                                            element is NavigationItemElement,
-                                      )
-                                      .last)
-                                Divider(indent: 72, height: 1, thickness: 0.5),
-                            ],
-                          ),
+                          item: item,
+                          index: index,
+                          onToggle: item.isRemovable
+                              ? () => navigationNotifier.updateItemEnabled(
+                                    item.id,
+                                    !item.isEnabled,
+                                    context,
+                                  )
+                              : null,
                         );
-                      })
-                      .toList(),
-                  onReorder: (oldIndex, newIndex) {
-                    final itemElements = navigationSettings.elements
-                        .where(
-                          (element) =>
-                              element.type == NavigationElementType.item &&
-                              element is NavigationItemElement,
-                        )
-                        .cast<NavigationItemElement>()
-                        .toList();
-                    final newOrder = itemElements.map((e) => e.item).toList();
-
-                    if (oldIndex < newIndex) {
-                      newIndex -= 1;
-                    }
-                    final item = newOrder.removeAt(oldIndex);
-                    newOrder.insert(newIndex, item);
-                    navigationNotifier.updateItemOrder(newOrder);
-                  },
+                      },
+                      onReorder: (oldIndex, newIndex) {
+                        final newOrder = itemElements.map((e) => e.item).toList();
+                        if (oldIndex < newIndex) {
+                          newIndex -= 1;
+                        }
+                        final moved = newOrder.removeAt(oldIndex);
+                        newOrder.insert(newIndex, moved);
+                        navigationNotifier.updateItemOrder(newOrder);
+                      },
+                    ),
+                    const Divider(indent: 12, endIndent: 12),
+                    _buildSettingsPreviewRow(context),
+                    const SizedBox(height: 8),
+                  ],
                 ),
               ),
-
-              const SizedBox(height: 24),
-              // 重置导航配置按钮
+              const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: FilledButton.tonalIcon(
@@ -170,11 +120,136 @@ class _NavigationSettingsPageState
                   ),
                 ),
               ),
-              const SizedBox(height: 48),
             ],
           );
         },
       ),
+    );
+  }
+
+  Widget _buildUserHeaderPreview(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
+      child: Container(
+        height: 64,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 8),
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              child: Icon(
+                Icons.person,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '用户（固定）',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 18,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            const SizedBox(width: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationRow({
+    required BuildContext context,
+    required Key key,
+    required NavigationItem item,
+    required int index,
+    required VoidCallback? onToggle,
+  }) {
+    final isLocked = !item.isRemovable;
+
+    return Container(
+      key: key,
+      margin: const EdgeInsets.only(bottom: 4),
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: item.isEnabled
+              ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.75)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              item.isEnabled ? item.selectedIcon : item.icon,
+              color: item.isEnabled
+                  ? Theme.of(context).colorScheme.onSecondaryContainer
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                item.title,
+                style: TextStyle(
+                  color: item.isEnabled
+                      ? Theme.of(context).colorScheme.onSecondaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: item.isEnabled ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ),
+            if (isLocked)
+              Icon(
+                Icons.lock_outline_rounded,
+                size: 18,
+                color: Theme.of(context).colorScheme.outline,
+              )
+            else
+              IconButton.filledTonal(
+                tooltip: item.isEnabled ? '删除该导航项' : '添加该导航项',
+                onPressed: onToggle,
+                icon: Icon(item.isEnabled ? Icons.remove_rounded : Icons.add_rounded),
+                visualDensity: VisualDensity.compact,
+              ),
+            const SizedBox(width: 2),
+            ReorderableDragStartListener(
+              index: index,
+              child: Icon(
+                Icons.drag_handle_rounded,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsPreviewRow(BuildContext context) {
+    return ListTile(
+      leading: Icon(
+        Icons.settings_outlined,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      title: Text(
+        'nav_settings'.tr(),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: Theme.of(context).colorScheme.outline,
+      ),
+      enabled: false,
     );
   }
 
@@ -210,20 +285,14 @@ class _NavigationSettingsPageState
     );
   }
 
-  /// 构建设置页面的分区标题
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [title] - 分区标题文本
-  ///
-  /// 返回一个显示分区标题的Widget
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-        ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
       ),
     );
   }

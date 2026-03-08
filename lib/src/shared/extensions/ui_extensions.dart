@@ -1,8 +1,29 @@
+import 'dart:collection';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import '/src/routing/router.dart' show rootNavigatorKey;
 
 enum AppNoticeType { info, success, warning, error }
+
+class _QueuedNotice {
+  const _QueuedNotice({
+    required this.context,
+    required this.message,
+    required this.duration,
+    required this.type,
+    this.action,
+  });
+
+  final BuildContext context;
+  final String message;
+  final Duration duration;
+  final AppNoticeType type;
+  final SnackBarAction? action;
+}
+
+final ListQueue<_QueuedNotice> _noticeQueue = ListQueue<_QueuedNotice>();
+bool _isShowingNotice = false;
 
 String _extractSnackBarMessage(Widget content) {
   if (content is Text) {
@@ -24,24 +45,46 @@ AppNoticeType _inferNoticeType(BuildContext context, SnackBar snackBar) {
   return AppNoticeType.info;
 }
 
-void _showTopNotice(
-  BuildContext context,
-  String message, {
-  Duration duration = const Duration(seconds: 2),
-  AppNoticeType type = AppNoticeType.info,
-  SnackBarAction? action,
-}) {
-  final navigatorContext =
-      rootNavigatorKey.currentContext ??
-      Navigator.maybeOf(context, rootNavigator: true)?.context ??
-      Navigator.maybeOf(context)?.context;
-  if (navigatorContext == null) return;
+double _adaptiveNoticeMaxWidth(MediaQueryData media, String message) {
+  final maxAllowed = (media.size.width - 24).clamp(260.0, 680.0);
+  final charCount = message.runes.length;
 
+  // Vue-style: width is driven by text length buckets, not per-pixel estimation.
+  final targetWidth = switch (charCount) {
+    <= 8 => 260.0,
+    <= 14 => 320.0,
+    <= 22 => 400.0,
+    <= 30 => 480.0,
+    <= 42 => 560.0,
+    _ => 640.0,
+  };
+
+  return targetWidth.clamp(260.0, maxAllowed);
+}
+
+Future<void> _processNoticeQueue() async {
+  if (_isShowingNotice || _noticeQueue.isEmpty) return;
+  _isShowingNotice = true;
+
+  final notice = _noticeQueue.removeFirst();
+  final resolvedContext =
+      rootNavigatorKey.currentContext ??
+      Navigator.maybeOf(notice.context, rootNavigator: true)?.context ??
+      Navigator.maybeOf(notice.context)?.context;
+  if (resolvedContext == null) {
+    _isShowingNotice = false;
+    if (_noticeQueue.isNotEmpty) {
+      _processNoticeQueue();
+    }
+    return;
+  }
+
+  final navigatorContext = resolvedContext;
   final theme = Theme.of(navigatorContext);
   final isDark = theme.brightness == Brightness.dark;
   final media = MediaQuery.of(navigatorContext);
 
-  final (icon, accentColor) = switch (type) {
+  final (icon, accentColor) = switch (notice.type) {
     AppNoticeType.success => (Icons.check_circle_rounded, Colors.green),
     AppNoticeType.warning => (Icons.warning_rounded, Colors.orange),
     AppNoticeType.error => (Icons.error_rounded, theme.colorScheme.error),
@@ -54,9 +97,9 @@ void _showTopNotice(
       ? Colors.white.withValues(alpha: 0.18)
       : Colors.black.withValues(alpha: 0.10);
 
-  final maxWidth = (media.size.width - 24).clamp(240.0, 680.0);
+  final maxWidth = _adaptiveNoticeMaxWidth(media, notice.message);
 
-  Flushbar<void>(
+  final flushbar = Flushbar<void>(
     flushbarPosition: FlushbarPosition.TOP,
     flushbarStyle: FlushbarStyle.FLOATING,
     margin: EdgeInsets.only(
@@ -81,11 +124,11 @@ void _showTopNotice(
     animationDuration: const Duration(milliseconds: 220),
     forwardAnimationCurve: Curves.easeOutQuart,
     reverseAnimationCurve: Curves.easeInQuart,
-    duration: duration,
+    duration: notice.duration,
     icon: Icon(icon, color: accentColor, size: 20),
     shouldIconPulse: false,
     messageText: Text(
-      message,
+      notice.message,
       maxLines: 3,
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.bodyMedium?.copyWith(
@@ -93,19 +136,47 @@ void _showTopNotice(
         fontWeight: FontWeight.w600,
       ),
     ),
-    mainButton: action == null
+    mainButton: notice.action == null
         ? null
         : TextButton(
-            onPressed: action.onPressed,
+            onPressed: notice.action!.onPressed,
             style: TextButton.styleFrom(
               foregroundColor: accentColor,
               visualDensity: VisualDensity.compact,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             ),
-            child: Text(action.label),
+            child: Text(notice.action!.label),
           ),
-  ).show(navigatorContext);
+  );
+
+  try {
+    await flushbar.show(navigatorContext);
+  } finally {
+    _isShowingNotice = false;
+    if (_noticeQueue.isNotEmpty) {
+      _processNoticeQueue();
+    }
+  }
+}
+
+void _showTopNotice(
+  BuildContext context,
+  String message, {
+  Duration duration = const Duration(seconds: 2),
+  AppNoticeType type = AppNoticeType.info,
+  SnackBarAction? action,
+}) {
+  _noticeQueue.add(
+    _QueuedNotice(
+      context: context,
+      message: message,
+      duration: duration,
+      type: type,
+      action: action,
+    ),
+  );
+  _processNoticeQueue();
 }
 
 extension BuildContextExtension on BuildContext {

@@ -254,10 +254,10 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
     if (!isEnabled) {
       final tempState = state.value!.updateItemEnabled(itemId, false);
       if (tempState.getEnabledCount() < 2) {
-        // 至少需要两个导航项启用，显示提示并取消禁用操作
+        // Keep at least one non-user nav item (plus the fixed user item).
         ScaffoldMessenger.of(context).showTopSnackBar(
           SnackBar(
-            content: Text('至少需要启用两个导航项'),
+            content: Text('??????????? 1 ????'),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
