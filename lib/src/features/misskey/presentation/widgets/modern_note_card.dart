@@ -18,7 +18,6 @@ import '/src/features/common/presentation/pages/media_viewer_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import 'emoji_picker.dart';
 import 'reaction_display.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 /// Modern NoteCard组件
 ///
@@ -335,7 +334,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                             } catch (e) {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showTopSnackBar(
+                                  ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
                                         'note_failed_to_react'.tr(
@@ -560,7 +559,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          ScaffoldMessenger.of(context).showTopSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('post_copied'.tr()),
               behavior: SnackBarBehavior.floating,
@@ -585,7 +584,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('post_id_copied'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -633,7 +632,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('post_link_copied'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -650,7 +649,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('post_bookmarked'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -659,7 +658,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'post_bookmark_failed'.tr(namedArgs: {'error': e.toString()}),
@@ -716,7 +715,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                     reason,
                   );
                   if (mounted) {
-                    ScaffoldMessenger.of(context).showTopSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('post_reported'.tr()),
                         behavior: SnackBarBehavior.floating,
@@ -726,7 +725,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showTopSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('post_report_failed'.tr()),
                       behavior: SnackBarBehavior.floating,
@@ -856,7 +855,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 );
                 await repository.renote(widget.note.id);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showTopSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('note_renoted_successfully'.tr()),
                       behavior: SnackBarBehavior.floating,
@@ -865,7 +864,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showTopSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         'note_failed_to_renote'.tr(
@@ -911,7 +910,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 );
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showTopSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('note_reply_sent'.tr()),
                       behavior: SnackBarBehavior.floating,
@@ -920,7 +919,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showTopSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         'note_failed_to_reply'.tr(
@@ -961,7 +960,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               // 移除成功提示，只在错误时显示提示
             } catch (e) {
               if (dialogContext.mounted) {
-                ScaffoldMessenger.of(dialogContext).showTopSnackBar(
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
                   SnackBar(
                     content: Text(
                       'note_failed_to_react'.tr(
@@ -981,7 +980,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
   void _handleShare() {
     // Placeholder for share functionality
-    ScaffoldMessenger.of(context).showTopSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('note_share_coming_soon'.tr()),
         behavior: SnackBarBehavior.floating,

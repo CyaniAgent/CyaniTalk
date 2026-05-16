@@ -11,7 +11,7 @@ import 'global_search_service.dart';
 /// 全局搜索代理
 ///
 /// 继承自Flutter的SearchDelegate，负责处理应用程序的全局搜索功能，
-/// 支持跨Misskey和Flarum平台搜索内容。
+/// 支持搜索Misskey平台内容。
 class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
   /// Riverpod WidgetRef
   final WidgetRef ref;
@@ -85,15 +85,11 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
           itemCount: results.length,
           itemBuilder: (context, index) {
             final result = results[index];
-            final sourceText = result.source == 'misskey'
-                ? 'search_source_misskey'.tr()
-                : 'search_source_flarum'.tr();
+            final sourceText = 'search_source_misskey'.tr();
             return ListTile(
               leading: Icon(
-                result.source == 'misskey' ? Icons.public : Icons.forum,
-                color: result.source == 'misskey'
-                    ? Colors.green
-                    : Colors.orange,
+                Icons.public,
+                color: Colors.green,
               ),
               title: Text(result.title),
               subtitle: Text(

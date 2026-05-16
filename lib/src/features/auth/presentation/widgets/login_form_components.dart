@@ -6,8 +6,6 @@ import 'package:easy_localization/easy_localization.dart';
 enum LoginStep {
   select,
   misskeyLogin,
-  flarumLogin,
-  flarumEndpoint,
   misskeyCheckAuth,
 }
 
@@ -15,39 +13,19 @@ enum LoginStep {
 class LoginFormData {
   String? misskeyHost;
   String? misskeySession;
-  String flarumHost;
-  String flarumUsername;
-  String flarumPassword;
-  String flarumEndpoint;
-  bool isQuickLogin;
 
   LoginFormData({
     this.misskeyHost,
     this.misskeySession,
-    this.flarumHost = '',
-    this.flarumUsername = '',
-    this.flarumPassword = '',
-    this.flarumEndpoint = '',
-    this.isQuickLogin = false,
   });
 
   LoginFormData copyWith({
     String? misskeyHost,
     String? misskeySession,
-    String? flarumHost,
-    String? flarumUsername,
-    String? flarumPassword,
-    String? flarumEndpoint,
-    bool? isQuickLogin,
   }) {
     return LoginFormData(
       misskeyHost: misskeyHost ?? this.misskeyHost,
       misskeySession: misskeySession ?? this.misskeySession,
-      flarumHost: flarumHost ?? this.flarumHost,
-      flarumUsername: flarumUsername ?? this.flarumUsername,
-      flarumPassword: flarumPassword ?? this.flarumPassword,
-      flarumEndpoint: flarumEndpoint ?? this.flarumEndpoint,
-      isQuickLogin: isQuickLogin ?? this.isQuickLogin,
     );
   }
 }
@@ -202,14 +180,10 @@ class PlatformSelectionCard extends StatelessWidget {
 /// 平台选择步骤
 class PlatformSelectionStep extends StatelessWidget {
   final VoidCallback onMisskeySelected;
-  final VoidCallback onFlarumLoginSelected;
-  final VoidCallback onFlarumEndpointSelected;
 
   const PlatformSelectionStep({
     super.key,
     required this.onMisskeySelected,
-    required this.onFlarumLoginSelected,
-    required this.onFlarumEndpointSelected,
   });
 
   @override
@@ -255,37 +229,6 @@ class PlatformSelectionStep extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
             onTap: onMisskeySelected,
             isVertical: false,
-          ),
-          const SizedBox(height: 16),
-
-          Row(
-            children: [
-              Expanded(
-                child: PlatformSelectionCard(
-                  icon: Image.asset(
-                    'assets/icons/flarum.png',
-                    width: 32,
-                    height: 32,
-                  ),
-                  title: 'Flarum',
-                  subtitle: 'Login',
-                  color: Colors.deepOrange,
-                  onTap: onFlarumLoginSelected,
-                  isVertical: true,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: PlatformSelectionCard(
-                  icon: const Icon(Icons.api, color: Colors.blue, size: 32),
-                  title: 'Flarum',
-                  subtitle: 'Endpoint',
-                  color: Colors.blue,
-                  onTap: onFlarumEndpointSelected,
-                  isVertical: true,
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -428,170 +371,6 @@ class MisskeyCheckAuthStep extends StatelessWidget {
   }
 }
 
-/// Flarum登录步骤
-class FlarumLoginStep extends StatelessWidget {
-  final TextEditingController hostController;
-  final TextEditingController usernameController;
-  final TextEditingController passwordController;
-  final bool loading;
-  final bool isQuickLogin;
-  final VoidCallback onLogin;
-  final VoidCallback onQuickLogin;
-
-  const FlarumLoginStep({
-    super.key,
-    required this.hostController,
-    required this.usernameController,
-    required this.passwordController,
-    required this.loading,
-    required this.isQuickLogin,
-    required this.onLogin,
-    required this.onQuickLogin,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      key: const ValueKey('flarum'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextField(
-            controller: hostController,
-            decoration: InputDecoration(
-              labelText: 'auth_flarum_host'.tr(),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              prefixIcon: const Icon(Icons.language_outlined),
-              hintText: 'discuss.flarum.org',
-              suffixIcon: isQuickLogin
-                  ? IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        hostController.clear();
-                      },
-                    )
-                  : null,
-            ),
-            readOnly: isQuickLogin,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: usernameController,
-            decoration: InputDecoration(
-              labelText: 'auth_username_email'.tr(),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              prefixIcon: const Icon(Icons.person_outline),
-              hintText: '用户名或邮箱',
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              labelText: 'auth_password'.tr(),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              prefixIcon: const Icon(Icons.lock_outline),
-            ),
-            obscureText: true,
-          ),
-          const SizedBox(height: 24),
-          FilledButton.icon(
-            onPressed: loading ? null : onLogin,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: loading ? const SizedBox.shrink() : const Icon(Icons.login),
-            label: loading
-                ? SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  )
-                : Text('auth_login'.tr()),
-          ),
-          const SizedBox(height: 24),
-
-          OutlinedButton.icon(
-            onPressed: loading ? null : onQuickLogin,
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              side: BorderSide(color: Colors.deepOrange.withValues(alpha: 0.5)),
-              foregroundColor: Colors.deepOrange,
-            ),
-            icon: Image.asset('assets/icons/flarum.png', width: 20, height: 20),
-            label: const Text('快速填充 iMikufans 域名'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Flarum端点步骤
-class FlarumEndpointStep extends StatelessWidget {
-  final TextEditingController endpointController;
-  final bool loading;
-  final VoidCallback onAdd;
-
-  const FlarumEndpointStep({
-    super.key,
-    required this.endpointController,
-    required this.loading,
-    required this.onAdd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      key: const ValueKey('endpoint'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextField(
-            controller: endpointController,
-            decoration: InputDecoration(
-              labelText: 'auth_flarum_server_url'.tr(),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              prefixIcon: const Icon(Icons.link),
-            ),
-            autofocus: true,
-          ),
-          const SizedBox(height: 32),
-          FilledButton.icon(
-            onPressed: loading ? null : onAdd,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-            icon: const Icon(Icons.add_link),
-            label: Text('auth_add_endpoint'.tr()),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-}
-
 /// 登录表单头部
 class LoginFormHeader extends StatelessWidget {
   final LoginStep currentStep;
@@ -614,12 +393,6 @@ class LoginFormHeader extends StatelessWidget {
         break;
       case LoginStep.misskeyCheckAuth:
         title = 'auth_waiting_authorization'.tr();
-        break;
-      case LoginStep.flarumLogin:
-        title = 'auth_add_account_flarum_title'.tr();
-        break;
-      case LoginStep.flarumEndpoint:
-        title = 'auth_add_account_flarum_endpoint_title'.tr();
         break;
     }
 

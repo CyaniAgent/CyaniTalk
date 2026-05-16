@@ -13,7 +13,6 @@ import '/src/features/misskey/presentation/widgets/drive_file_picker.dart'
     show showDriveFilePicker;
 import '/src/features/misskey/presentation/widgets/poll_settings_sheet.dart'
     show showPollSettings;
-import '/src/shared/extensions/ui_extensions.dart';
 
 /// Misskey 发布笔记页面组件
 ///
@@ -85,7 +84,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('attachment_pick_failed'.tr(args: [e.toString()])),
             behavior: SnackBarBehavior.floating,
@@ -791,7 +790,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     if (failedTasks.isNotEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('attachment_upload_failed_warning'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -821,7 +820,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     if (uploadingTasks.isNotEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('attachment_still_uploading'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -871,7 +870,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('post_post_created'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -892,7 +891,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
             behavior: SnackBarBehavior.floating,

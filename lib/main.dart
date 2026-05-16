@@ -14,6 +14,7 @@ import '/src/core/services/notification_service.dart';
 import '/src/core/services/notification_manager.dart';
 import '/src/core/services/audio_engine.dart';
 import 'dart:io';
+import 'package:window_manager/window_manager.dart';
 
 /// 应用程序的入口点
 ///
@@ -33,6 +34,24 @@ import 'dart:io';
 /// @return 无返回值，应用程序启动后会持续运行
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux) {
+    await windowManager.ensureInitialized();
+    windowManager.waitUntilReadyToShow(
+      const WindowOptions(
+        size: Size(1280, 720),
+        minimumSize: Size(400, 600),
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.hidden,
+      ),
+      () async {
+        await windowManager.show();
+        await windowManager.focus();
+      },
+    );
+  }
 
   // 设置全局 HTTP 覆盖以处理自签名证书 (HandshakeException fix)
   HttpOverrides.global = CyaniHttpOverrides();

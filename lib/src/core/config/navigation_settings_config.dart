@@ -33,22 +33,6 @@ class NavigationSettingsConfig {
       ],
     },
     {
-      'id': 'flarum',
-      'titleKey': 'nav_flarum',
-      'icon': Icons.forum_outlined,
-      'selectedIcon': Icons.forum,
-      'isEnabled': true,
-      'isRemovable': true,
-      'subItems': [
-        {'icon': Icons.forum, 'labelKey': 'flarum_drawer_discussions'},
-        {'icon': Icons.label, 'labelKey': 'flarum_drawer_tags'},
-        {
-          'icon': Icons.notifications,
-          'labelKey': 'flarum_drawer_notifications',
-        },
-      ],
-    },
-    {
       'id': 'drive',
       'titleKey': 'nav_drive',
       'icon': Icons.cloud_queue_outlined,
@@ -87,17 +71,6 @@ class NavigationSettingsConfig {
         'titleKey': 'nav_misskey',
         'icon': Icons.public_outlined,
         'selectedIcon': Icons.public,
-        'isEnabled': true,
-        'isRemovable': true,
-      },
-    },
-    {
-      'type': 'item',
-      'id': 'flarum',
-      'config': {
-        'titleKey': 'nav_flarum',
-        'icon': Icons.forum_outlined,
-        'selectedIcon': Icons.forum,
         'isEnabled': true,
         'isRemovable': true,
       },
@@ -148,7 +121,6 @@ class NavigationSettingsConfig {
   /// 导航项ID与图标的映射
   static const Map<String, IconData> navigationItemIcons = {
     'misskey': Icons.public_outlined,
-    'flarum': Icons.forum_outlined,
     'drive': Icons.cloud_queue_outlined,
     'messages': Icons.chat_bubble_outline,
     'me': Icons.person_outline,
@@ -157,7 +129,6 @@ class NavigationSettingsConfig {
   /// 导航项ID与选中图标的映射
   static const Map<String, IconData> navigationItemSelectedIcons = {
     'misskey': Icons.public,
-    'flarum': Icons.forum,
     'drive': Icons.cloud_queue,
     'messages': Icons.chat_bubble,
     'me': Icons.person,
@@ -166,7 +137,6 @@ class NavigationSettingsConfig {
   /// 导航项ID与标题键的映射
   static const Map<String, String> navigationItemTitleKeys = {
     'misskey': 'nav_misskey',
-    'flarum': 'nav_flarum',
     'drive': 'nav_drive',
     'messages': 'nav_messages',
     'me': 'nav_me',

@@ -6,11 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '/src/core/core.dart';
 import '/src/features/auth/domain/account.dart';
 import '/src/core/api/misskey_api.dart';
-import '/src/core/api/flarum_api.dart';
 import '/src/features/misskey/domain/misskey_user.dart';
-import '../../../flarum/data/models/user.dart' as flarum;
 import '/src/features/misskey/data/misskey_repository.dart';
-import '/src/features/flarum/data/flarum_repository.dart';
 
 final userDetailsProvider = FutureProvider.family<dynamic, Account>((
   ref,
@@ -25,13 +22,6 @@ final userDetailsProvider = FutureProvider.family<dynamic, Account>((
         MisskeyApi(host: account.host, token: account.token),
       );
       return await repo.getMe();
-    } else if (account.platform == 'flarum') {
-      final api = FlarumApi();
-      api.setBaseUrl('https://${account.host}');
-      final userId = account.id.split('@').first;
-      api.setToken(account.token, userId: userId);
-      final repo = FlarumRepository(api);
-      return await repo.getCurrentUser();
     }
     throw Exception('Unknown platform');
   } catch (e) {
@@ -165,61 +155,8 @@ class UserDetailsView extends ConsumerWidget {
           ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
         ],
       );
-    } else {
-      // Flarum
-      final user = data as flarum.User;
-      return Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  'user_details_discussions'.tr(),
-                  user.discussionCount.toString(),
-                  Icons.chat_bubble_outline,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildStatCard(
-                  context,
-                  'user_details_comments'.tr(),
-                  user.commentCount.toString(),
-                  Icons.comment_outlined,
-                ),
-              ),
-            ],
-          ).animate().fadeIn(delay: 100.ms).slideX(begin: 0.1, end: 0),
-          const SizedBox(height: 16),
-          Card(
-            elevation: 0,
-            color: theme.colorScheme.surfaceContainer,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildDetailRow(
-                    context,
-                    'user_details_display_name'.tr(),
-                    user.displayName,
-                  ),
-                  const Divider(height: 24),
-                  _buildDetailRow(
-                    context,
-                    'user_details_username'.tr(),
-                    user.username,
-                  ),
-                ],
-              ),
-            ),
-          ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1, end: 0),
-        ],
-      );
     }
+    return const SizedBox.shrink();
   }
 
   Widget _buildStatCard(
@@ -288,13 +225,6 @@ class UserDetailsView extends ConsumerWidget {
       if (user.isAdmin) roles.add('user_details_admin'.tr());
       if (user.isModerator) roles.add('user_details_moderator'.tr());
       if (roles.isEmpty) roles.add('user_details_standard_user'.tr());
-    } else {
-      // Flarum
-      final user = data as flarum.User;
-      for (var group in user.groups) {
-        roles.add(group.nameSingular);
-      }
-      if (roles.isEmpty) roles.add('user_details_member'.tr());
     }
 
     return Card(

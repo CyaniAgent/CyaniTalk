@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/services/search/global_search_service.dart';
 import '/src/core/utils/logger.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -54,7 +53,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         });
         ScaffoldMessenger.of(
           context,
-        ).showTopSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
+        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
       }
     }
   }
@@ -67,9 +66,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         .toList();
     final misskeyNotes = _results
         .where((r) => r.source == 'misskey' && r.type == 'Note')
-        .toList();
-    final flarumDiscussions = _results
-        .where((r) => r.source == 'flarum' && r.type == 'Discussion')
         .toList();
 
     return Scaffold(
@@ -131,15 +127,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ),
                   ...misskeyNotes.map((r) => _buildResultTile(context, r)),
                 ],
-                if (flarumDiscussions.isNotEmpty) ...[
-                  _buildSectionHeader(
-                    context,
-                    'search_flarum_discussions_related'.tr(
-                      namedArgs: {'search_result': query},
-                    ),
-                  ),
-                  ...flarumDiscussions.map((r) => _buildResultTile(context, r)),
-                ],
               ],
             ),
     );
@@ -171,27 +158,19 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       );
     }
 
-    final sourceText = result.source == 'misskey'
-        ? 'search_source_misskey'.tr()
-        : 'search_source_flarum'.tr();
+    final sourceText = 'search_source_misskey'.tr();
 
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: result.source == 'misskey'
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.secondaryContainer,
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
-          result.source == 'misskey'
-              ? (result.type == 'User' ? Icons.person : Icons.public)
-              : Icons.forum,
+          result.type == 'User' ? Icons.person : Icons.public,
           size: 20,
-          color: result.source == 'misskey'
-              ? Theme.of(context).colorScheme.onPrimaryContainer
-              : Theme.of(context).colorScheme.onSecondaryContainer,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),
       ),
       title: Text(result.title),

@@ -8,17 +8,15 @@ class NavigationConfig {
   /// 导航项ID与分支索引的映射
   static const Map<String, int> navigationItemToBranchIndex = {
     'misskey': 0,
-    'flarum': 1,
-    'drive': 2,
-    'messages': 3,
-    'me': 4,
+    'drive': 1,
+    'messages': 2,
+    'me': 3,
   };
 
   /// 页面ID与路由的映射关系
   static const Map<String, String> pageIdToRoute = {
     'home': '/misskey',
     'misskey': '/misskey',
-    'flarum': '/forum',
     'drive': '/cloud',
     'messages': '/messaging',
     'me': '/profile',
@@ -93,8 +91,6 @@ class NavigationConfig {
     switch (itemId) {
       case 'misskey':
         return Icons.public_outlined;
-      case 'flarum':
-        return Icons.forum_outlined;
       case 'drive':
         return Icons.cloud_queue_outlined;
       case 'messages':
@@ -114,8 +110,6 @@ class NavigationConfig {
     switch (itemId) {
       case 'misskey':
         return Icons.public;
-      case 'flarum':
-        return Icons.forum;
       case 'drive':
         return Icons.cloud_queue;
       case 'messages':

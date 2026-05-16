@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/utils/utils.dart';
-import '/src/features/flarum/application/flarum_providers.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 
 part 'global_search_service.g.dart';
@@ -16,7 +15,7 @@ class SearchResult {
   /// 搜索结果的副标题或描述
   final String subtitle;
 
-  /// 搜索结果的来源平台，如'Misskey'或'Flarum'
+  /// 搜索结果的来源平台，如'Misskey'
   final String source;
 
   /// 搜索结果的类型，如'User'、'Post'、'Tag'、'Error'等
@@ -40,7 +39,7 @@ class SearchResult {
 
 /// 全局搜索服务
 ///
-/// 提供跨平台搜索功能，支持在Misskey和Flarum平台上搜索内容。
+/// 提供跨平台搜索功能，支持在Misskey平台上搜索内容。
 @riverpod
 class GlobalSearch extends _$GlobalSearch {
   @override
@@ -121,27 +120,6 @@ class GlobalSearch extends _$GlobalSearch {
       }
     } catch (e) {
       logger.warning('GlobalSearch: Misskey search failed: $e');
-    }
-
-    // Search Flarum (if available)
-    try {
-      final flarumRepo = ref.read(flarumRepositoryProvider);
-      final discussions = await flarumRepo.searchDiscussions(query);
-      results.addAll(
-        discussions
-            .take(5)
-            .map(
-              (d) => SearchResult(
-                title: d.title,
-                subtitle: 'Discussions about ${d.title}',
-                source: 'flarum',
-                type: 'Discussion',
-                originalData: d,
-              ),
-            ),
-      );
-    } catch (e) {
-      logger.warning('GlobalSearch: Flarum search failed: $e');
     }
 
     logger.info('GlobalSearch: Found ${results.length} results');

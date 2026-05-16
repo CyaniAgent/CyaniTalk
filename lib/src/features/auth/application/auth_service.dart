@@ -1,7 +1,3 @@
-// 认证相关的应用服务
-//
-// 该文件包含AuthService类，负责处理认证流程，包括Misskey的MiAuth流程
-// 和Flarum的账户链接功能。
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
@@ -10,9 +6,7 @@ import 'package:dio/dio.dart';
 
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/auth/domain/account.dart';
-import '/src/core/api/flarum_api.dart';
 import '/src/core/api/network_client.dart';
-import '/src/features/flarum/data/flarum_repository.dart';
 import '/src/core/core.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 
@@ -20,7 +14,7 @@ part 'auth_service.g.dart';
 
 /// 认证服务类
 ///
-/// 负责处理用户认证流程，包括Misskey的MiAuth流程和Flarum的账户链接功能，
+/// 负责处理用户认证流程，包括Misskey的MiAuth流程，
 /// 管理认证状态和账户信息。
 @Riverpod(keepAlive: true)
 class AuthService extends _$AuthService {
@@ -225,120 +219,6 @@ class AuthService extends _$AuthService {
     logger.info('Misskey MiAuth认证流程完成');
   }
 
-  /// 登录 Flarum 账户
-  ///
-  /// 使用用户名/邮箱和密码登录Flarum论坛实例，验证成功后保存账户信息并刷新状态。
-  /// 会检查账户数量限制，最多支持10个Flarum账户。
-  ///
-  /// @param host Flarum实例的主机地址
-  /// @param identification 用户名或电子邮箱
-  /// @param password 密码
-  /// @return 无返回值，成功时保存账户信息，失败时抛出异常
-  Future<void> loginToFlarum(
-    String host,
-    String identification,
-    String password,
-  ) async {
-    logger.info('开始Flarum登录流程，主机: $host, 用户: $identification');
-    final api = FlarumApi();
-
-    final originalBaseUrl = api.baseUrl;
-    logger.debug('原始基础URL: $originalBaseUrl');
-
-    try {
-      // 临时设置 BaseUrl 进行登录验证
-      logger.debug('设置基础URL为: https://$host');
-      api.setBaseUrl('https://$host');
-
-      logger.debug('发送Flarum登录请求');
-      final loginData = await api.login(identification, password);
-      logger.debug('收到Flarum登录响应: $loginData');
-
-      final token = loginData['token'];
-      final userId = loginData['userId'].toString();
-
-      if (token == null) {
-        logger.error('Flarum登录响应缺少必要字段 (token)');
-        throw Exception('Flarum登录响应缺少必要字段 (token)');
-      }
-
-      // 获取用户信息以填充头像和准确的用户名
-      logger.info('正在获取Flarum用户详细资料');
-      api.setToken(token, userId: userId);
-      final repo = FlarumRepository(api);
-      final user = await repo.getCurrentUser();
-
-      if (user == null) {
-        logger.error('无法获取Flarum用户信息');
-        throw Exception('无法获取Flarum用户信息');
-      }
-
-      final displayName = user.displayName;
-      final username = user.username;
-      final avatarUrl = user.avatarUrl;
-
-      final accountId = '$userId@$host';
-      logger.info('Flarum登录成功，用户ID: $userId, 账户ID: $accountId');
-
-      final repository = ref.read(authRepositoryProvider);
-      final accounts = await repository.getAccounts();
-      final existingAccount = accounts
-          .where((a) => a.id == accountId)
-          .firstOrNull;
-
-      if (existingAccount == null) {
-        final flarumAccounts = accounts
-            .where((a) => a.platform == 'flarum')
-            .length;
-
-        logger.info('当前Flarum账户数量: $flarumAccounts');
-        if (flarumAccounts >= 10) {
-          logger.warning('Flarum账户数量达到上限 (10个)');
-          throw Exception('You have reached the limit of 10 Flarum accounts.');
-        }
-        logger.info('创建新的Flarum账户');
-      } else {
-        logger.info('更新现有Flarum账户');
-      }
-
-      final account = Account(
-        id: accountId,
-        platform: 'flarum',
-        host: host,
-        username: username,
-        name: displayName,
-        avatarUrl: avatarUrl,
-        token: token,
-      );
-
-      logger.debug('保存Flarum账户信息');
-      await repository.saveAccount(account);
-
-      // Automatically select the new account
-      logger.debug('自动选择新Flarum账户');
-      await repository.saveSelectedFlarumId(account.id);
-
-      // 保存到 FlarumApi 的持久化存储中
-      logger.debug('保存Flarum端点和令牌');
-      await api.saveEndpoint('https://$host');
-      await api.saveToken('https://$host', token);
-
-      logger.debug('更新认证服务状态');
-      final updatedAccounts = await repository.getAccounts();
-      state = AsyncData(updatedAccounts);
-
-      logger.info('Flarum登录流程完成');
-    } catch (e) {
-      // 还原 BaseUrl
-      if (originalBaseUrl != null) {
-        logger.debug('还原基础URL为: $originalBaseUrl');
-        api.setBaseUrl(originalBaseUrl);
-      }
-      logger.error('Flarum登录失败: $e', e);
-      throw Exception('Flarum 登录失败: $e');
-    }
-  }
-
   /// 删除指定ID的账户
   ///
   /// 删除指定ID的账户信息，删除后会刷新认证服务的状态。
@@ -454,68 +334,6 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
     MisskeyTimelineNotifier.cacheManager.setCurrentAccountId(account.id);
   }
 }
-
-/// 选中的Flarum账户提供者
-///
-/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
-@Riverpod(keepAlive: true)
-class SelectedFlarumAccount extends _$SelectedFlarumAccount {
-  /// 初始化选中的Flarum账户
-  ///
-  /// 从存储中获取上次选中的Flarum账户ID，如果存在则返回对应的账户，
-  /// 否则返回第一个可用的Flarum账户。
-  /// 初始化时同时设置缓存管理器的当前账户ID。
-  ///
-  /// @return 返回选中的Flarum账户，如果没有则返回null
-  @override
-  FutureOr<Account?> build() async {
-    final accounts = await ref.watch(authServiceProvider.future);
-
-    final repository = ref.read(authRepositoryProvider);
-
-    final selectedId = await repository.getSelectedFlarumId();
-
-    Account? selectedAccount;
-    if (selectedId != null) {
-      try {
-        selectedAccount = accounts.firstWhere((a) => a.id == selectedId);
-      } catch (_) {}
-    }
-
-    selectedAccount ??= accounts
-        .where((a) => a.platform == 'flarum')
-        .firstOrNull;
-
-    // 设置缓存管理器的当前账户ID
-    if (selectedAccount != null) {
-      cacheManager.setCurrentAccountId(selectedAccount.id);
-    } else {
-      cacheManager.setCurrentAccountId(null);
-    }
-
-    return selectedAccount;
-  }
-
-  /// 选择Flarum账户
-  ///
-  /// 选择指定的Flarum账户作为当前活动账户，并保存选择状态。
-  /// 同时更新缓存管理器的当前账户ID以实现缓存隔离。
-  ///
-  /// @param account 要选择的账户，必须是Flarum平台的账户
-  /// @return 无返回值
-  Future<void> select(Account account) async {
-    if (account.platform != 'flarum') return;
-
-    state = AsyncData(account);
-
-    await ref.read(authRepositoryProvider).saveSelectedFlarumId(account.id);
-
-    // 设置缓存管理器的当前账户ID
-    cacheManager.setCurrentAccountId(account.id);
-  }
-}
-
-/// Deprecated: Use selectedMisskeyAccountProvider or selectedFlarumAccountProvider
 
 final selectedAccountProvider = StateProvider<Account?>((ref) {
   final accountsAsync = ref.watch(authServiceProvider);

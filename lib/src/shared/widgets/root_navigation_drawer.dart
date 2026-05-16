@@ -21,7 +21,7 @@ class RootNavigationDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final navigationSettings = ref.watch(navigationSettingsProvider).value;
 
-    // We only care about the first 4 roots: Misskey, Flarum, Drive, Messages
+    // We only care about the first 3 roots: Misskey, Drive, Messages
     // 'me' is now handled by the header.
     final rootItems =
         navigationSettings?.elements
@@ -201,8 +201,6 @@ class RootNavigationDrawer extends ConsumerWidget {
   ) {
     if (rootId == 'misskey') {
       return _buildMisskeySubs(context, ref);
-    } else if (rootId == 'flarum') {
-      return _buildForumSubs(context, ref);
     }
     return const SizedBox.shrink();
   }
@@ -239,38 +237,6 @@ class RootNavigationDrawer extends ConsumerWidget {
               isSelected: selectedSub == i,
               onTap: () {
                 ref.read(misskeySubIndexProvider.notifier).set(i);
-                Navigator.of(context).maybePop();
-              },
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForumSubs(BuildContext context, WidgetRef ref) {
-    final selectedSub = ref.watch(forumSubIndexProvider);
-
-    final subs = [
-      {'icon': Icons.forum, 'label': 'flarum_drawer_discussions'.tr()},
-      {'icon': Icons.label, 'label': 'flarum_drawer_tags'.tr()},
-      {
-        'icon': Icons.notifications,
-        'label': 'flarum_drawer_notifications'.tr(),
-      },
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 32, right: 12),
-      child: Column(
-        children: [
-          for (int i = 0; i < subs.length; i++)
-            _buildSubItem(
-              context,
-              icon: subs[i]['icon'] as IconData,
-              label: subs[i]['label'] as String,
-              isSelected: selectedSub == i,
-              onTap: () {
-                ref.read(forumSubIndexProvider.notifier).set(i);
                 Navigator.of(context).maybePop();
               },
             ),

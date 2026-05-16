@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 
 import '/src/core/utils/download_utils.dart';
 import '/src/core/utils/file_icon_manager.dart';
@@ -17,7 +16,6 @@ import '/src/shared/widgets/login_reminder.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class CloudPage extends ConsumerStatefulWidget {
   const CloudPage({super.key});
@@ -110,14 +108,12 @@ class _CloudPageState extends ConsumerState<CloudPage> {
     if (account == null) {
       return Scaffold(
         appBar: AppBar(
-          leading: Breakpoints.small.isActive(context)
-              ? IconButton(
+          leading: IconButton(
                   icon: const Icon(Icons.menu),
                   onPressed: () => ref
                       .read(navigationControllerProvider.notifier)
                       .openDrawer(),
-                )
-              : null,
+                ),
           title: Text('cloud_storage_title'.tr()),
         ),
         body: LoginReminder(
@@ -133,14 +129,12 @@ class _CloudPageState extends ConsumerState<CloudPage> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: Breakpoints.small.isActive(context)
-            ? IconButton(
+        leading: IconButton(
                 icon: const Icon(Icons.menu),
                 onPressed: () => ref
                     .read(navigationControllerProvider.notifier)
                     .openDrawer(),
-              )
-            : null,
+              ),
         title: (_isSelectionMode || _selectedItems.isNotEmpty)
             ? Text(
                 'cloud_selected_items'.tr(
@@ -169,7 +163,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                   onPressed: () {
                     ScaffoldMessenger.of(
                       context,
-                    ).showTopSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
+                    ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
                   },
                   tooltip: 'cloud_delete'.tr(),
                 ),
@@ -1004,7 +998,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
         if (currentContext.mounted) {
           ScaffoldMessenger.of(
             currentContext,
-          ).showTopSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
+          ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
         }
       }
     });

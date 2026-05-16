@@ -9,10 +9,9 @@ class NavigationService {
   /// 导航项分支索引映射
   static final Map<String, int> _itemBranchIndexMap = {
     'misskey': 0,
-    'flarum': 1,
-    'drive': 2,
-    'messages': 3,
-    'me': 4,
+    'drive': 1,
+    'messages': 2,
+    'me': 3,
   };
 
   /// 获取导航项对应的分支索引

@@ -13,9 +13,7 @@ import 'sound_settings_page.dart';
 import 'navigation_settings_page.dart';
 import 'developer_settings_page.dart';
 import 'licenses_page.dart';
-import 'flarum_endpoints_page.dart';
 import 'network_settings_page.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -93,19 +91,6 @@ class _SettingsPageState extends State<SettingsPage> {
           _buildSectionHeader(context, 'settings_section_connections'.tr()),
           _buildSettingsTile(
             context,
-            Icons.api,
-            'settings_flarum_endpoint_title'.tr(),
-            'settings_flarum_endpoint_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const FlarumEndpointsPage(),
-                ),
-              );
-            },
-          ),
-          _buildSettingsTile(
-            context,
             Icons.wifi,
             'settings_network_title'.tr(),
             'settings_network_description'.tr(),
@@ -135,7 +120,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 showMiaoLanguage = newValue;
               });
               _saveShowMiaoLanguage(newValue);
-              ScaffoldMessenger.of(context).showTopSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项'), behavior: SnackBarBehavior.floating),
               );
             },
@@ -284,7 +269,7 @@ class _SettingsPageState extends State<SettingsPage> {
       onTap:
           onTap ??
           () {
-            ScaffoldMessenger.of(context).showTopSnackBar(
+            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
                   'settings_tapped'.tr(namedArgs: {'title': title}),

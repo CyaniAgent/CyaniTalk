@@ -9,7 +9,6 @@ import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_post_p
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/domain/clip.dart';
 import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class MisskeyClipNotesPage extends ConsumerStatefulWidget {
   final Clip clip;
@@ -95,7 +94,7 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
             }
 
             if (isMounted) {
-              scaffoldMessenger.showTopSnackBar(
+              scaffoldMessenger.showSnackBar(
                 SnackBar(
                   content: Text('misskey_page_please_login'.tr()),
                   behavior: SnackBarBehavior.floating,

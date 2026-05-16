@@ -23,8 +23,8 @@ class NetworkSettings {
   /// WebSocket 后台最大存活时长（秒）
   final int webSocketBackgroundMaxDuration;
 
-  /// Flarum 讨论最大加载时长（秒）
-  final int flarumDiscussionMaxLoadDuration;
+  /// HTTP 请求超时（秒）
+  final int httpRequestTimeout;
 
   const NetworkSettings({
     required this.userAgentType,
@@ -33,8 +33,18 @@ class NetworkSettings {
     required this.loadEmojiMaxDuration,
     required this.webSocketReconnectAttempts,
     required this.webSocketBackgroundMaxDuration,
-    required this.flarumDiscussionMaxLoadDuration,
+    required this.httpRequestTimeout,
   });
+
+  static const NetworkSettings defaults = NetworkSettings(
+    userAgentType: 'default',
+    misskeyRealtimeMode: true,
+    loadPostMaxDuration: 15,
+    loadEmojiMaxDuration: 15,
+    webSocketReconnectAttempts: 5,
+    webSocketBackgroundMaxDuration: 3600,
+    httpRequestTimeout: 30,
+  );
 
   NetworkSettings copyWith({
     String? userAgentType,
@@ -43,7 +53,7 @@ class NetworkSettings {
     int? loadEmojiMaxDuration,
     int? webSocketReconnectAttempts,
     int? webSocketBackgroundMaxDuration,
-    int? flarumDiscussionMaxLoadDuration,
+    int? httpRequestTimeout,
   }) {
     return NetworkSettings(
       userAgentType: userAgentType ?? this.userAgentType,
@@ -52,7 +62,7 @@ class NetworkSettings {
       loadEmojiMaxDuration: loadEmojiMaxDuration ?? this.loadEmojiMaxDuration,
       webSocketReconnectAttempts: webSocketReconnectAttempts ?? this.webSocketReconnectAttempts,
       webSocketBackgroundMaxDuration: webSocketBackgroundMaxDuration ?? this.webSocketBackgroundMaxDuration,
-      flarumDiscussionMaxLoadDuration: flarumDiscussionMaxLoadDuration ?? this.flarumDiscussionMaxLoadDuration,
+      httpRequestTimeout: httpRequestTimeout ?? this.httpRequestTimeout,
     );
   }
 
@@ -67,7 +77,7 @@ class NetworkSettings {
           loadEmojiMaxDuration == other.loadEmojiMaxDuration &&
           webSocketReconnectAttempts == other.webSocketReconnectAttempts &&
           webSocketBackgroundMaxDuration == other.webSocketBackgroundMaxDuration &&
-          flarumDiscussionMaxLoadDuration == other.flarumDiscussionMaxLoadDuration;
+          httpRequestTimeout == other.httpRequestTimeout;
 
   @override
   int get hashCode =>
@@ -77,7 +87,7 @@ class NetworkSettings {
       loadEmojiMaxDuration.hashCode ^
       webSocketReconnectAttempts.hashCode ^
       webSocketBackgroundMaxDuration.hashCode ^
-      flarumDiscussionMaxLoadDuration.hashCode;
+      httpRequestTimeout.hashCode;
 }
 
 /// 网络设置状态管理器
@@ -89,20 +99,20 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
   static const String _loadEmojiMaxDurationKey = 'network_load_emoji_max_duration';
   static const String _webSocketReconnectAttemptsKey = 'network_websocket_reconnect_attempts';
   static const String _webSocketBackgroundMaxDurationKey = 'network_websocket_background_max_duration';
-  static const String _flarumDiscussionMaxLoadDurationKey = 'network_flarum_discussion_max_load_duration';
+  static const String _httpRequestTimeoutKey = 'network_http_request_timeout';
 
   @override
   Future<NetworkSettings> build() async {
     final prefs = await SharedPreferences.getInstance();
 
     return NetworkSettings(
-      userAgentType: prefs.getString(_userAgentTypeKey) ?? 'default',
-      misskeyRealtimeMode: prefs.getBool(_misskeyRealtimeModeKey) ?? true,
-      loadPostMaxDuration: prefs.getInt(_loadPostMaxDurationKey) ?? 15,
-      loadEmojiMaxDuration: prefs.getInt(_loadEmojiMaxDurationKey) ?? 15,
-      webSocketReconnectAttempts: prefs.getInt(_webSocketReconnectAttemptsKey) ?? 5,
-      webSocketBackgroundMaxDuration: prefs.getInt(_webSocketBackgroundMaxDurationKey) ?? 3600,
-      flarumDiscussionMaxLoadDuration: prefs.getInt(_flarumDiscussionMaxLoadDurationKey) ?? 15,
+      userAgentType: prefs.getString(_userAgentTypeKey) ?? NetworkSettings.defaults.userAgentType,
+      misskeyRealtimeMode: prefs.getBool(_misskeyRealtimeModeKey) ?? NetworkSettings.defaults.misskeyRealtimeMode,
+      loadPostMaxDuration: prefs.getInt(_loadPostMaxDurationKey) ?? NetworkSettings.defaults.loadPostMaxDuration,
+      loadEmojiMaxDuration: prefs.getInt(_loadEmojiMaxDurationKey) ?? NetworkSettings.defaults.loadEmojiMaxDuration,
+      webSocketReconnectAttempts: prefs.getInt(_webSocketReconnectAttemptsKey) ?? NetworkSettings.defaults.webSocketReconnectAttempts,
+      webSocketBackgroundMaxDuration: prefs.getInt(_webSocketBackgroundMaxDurationKey) ?? NetworkSettings.defaults.webSocketBackgroundMaxDuration,
+      httpRequestTimeout: prefs.getInt(_httpRequestTimeoutKey) ?? NetworkSettings.defaults.httpRequestTimeout,
     );
   }
 
@@ -148,11 +158,24 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     state = AsyncData(state.value!.copyWith(webSocketBackgroundMaxDuration: duration));
   }
 
-  /// 更新 Flarum 讨论最大加载时长
-  Future<void> updateFlarumDiscussionMaxLoadDuration(int duration) async {
+  /// 更新 HTTP 请求超时
+  Future<void> updateHttpRequestTimeout(int duration) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_flarumDiscussionMaxLoadDurationKey, duration);
-    state = AsyncData(state.value!.copyWith(flarumDiscussionMaxLoadDuration: duration));
+    await prefs.setInt(_httpRequestTimeoutKey, duration);
+    state = AsyncData(state.value!.copyWith(httpRequestTimeout: duration));
+  }
+
+  /// 恢复默认设置
+  Future<void> restoreDefaults() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_userAgentTypeKey);
+    await prefs.remove(_misskeyRealtimeModeKey);
+    await prefs.remove(_loadPostMaxDurationKey);
+    await prefs.remove(_loadEmojiMaxDurationKey);
+    await prefs.remove(_webSocketReconnectAttemptsKey);
+    await prefs.remove(_webSocketBackgroundMaxDurationKey);
+    await prefs.remove(_httpRequestTimeoutKey);
+    state = const AsyncData(NetworkSettings.defaults);
   }
 }
 

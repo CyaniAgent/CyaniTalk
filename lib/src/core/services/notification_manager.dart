@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/features/misskey/application/misskey_streaming_service.dart';
 import '/src/features/profile/application/notification_settings_provider.dart';
-import '/src/features/flarum/application/flarum_providers.dart';
 import '/src/features/auth/application/auth_service.dart';
 import 'notification_service.dart';
 import 'sound_service.dart';
@@ -10,8 +9,7 @@ import '/src/core/core.dart';
 
 /// 全局通知管理器
 ///
-/// 监听各个平台的实时事件并根据用户设置触发系统通知和声音
-/// 支持Misskey的实时流事件和Flarum的轮询通知。
+/// 监听Misskey平台的实时事件并根据用户设置触发系统通知和声音。
 class NotificationManager {
   /// Riverpod的引用，用于获取其他Provider
   final Ref ref;
@@ -25,35 +23,27 @@ class NotificationManager {
   /// Misskey通知事件订阅
   StreamSubscription? _misskeyNotificationSubscription;
 
-  /// Flarum轮询定时器
-  Timer? _flarumTimer;
-
-  /// 上次检查Flarum通知的时间
-  DateTime? _lastFlarumCheck;
-
   NotificationManager(this.ref);
 
   /// 启动监听
   ///
-  /// 启动所有平台的通知监听，包括Misskey的实时流监听和Flarum的轮询检查。
+  /// 启动Misskey平台的实时流监听。
   ///
   /// @return 无返回值
   void start() {
     _setupMisskeyListeners();
-    _setupFlarumPolling();
     logger.info('NotificationManager: Started real-time listeners');
   }
 
   /// 停止监听
   ///
-  /// 停止所有平台的通知监听，取消所有订阅和定时器。
+  /// 停止Misskey平台的监听，取消所有订阅。
   ///
   /// @return 无返回值
   void stop() {
     _misskeyNoteSubscription?.cancel();
     _misskeyMessageSubscription?.cancel();
     _misskeyNotificationSubscription?.cancel();
-    _flarumTimer?.cancel();
     logger.info('NotificationManager: Stopped real-time listeners');
   }
 
@@ -133,46 +123,7 @@ class NotificationManager {
         });
   }
 
-  /// 设置Flarum轮询
-  ///
-  /// 设置Flarum平台的通知轮询检查，每2分钟检查一次新通知。
-  /// 如果有新通知，根据用户设置显示系统通知。
-  ///
-  /// @return 无返回值
-  void _setupFlarumPolling() {
-    _lastFlarumCheck = DateTime.now();
-
-    // 每 2 分钟检查一次 Flarum 通知
-    _flarumTimer = Timer.periodic(const Duration(minutes: 2), (timer) async {
-      final settings = ref.read(notificationSettingsProvider).value;
-      if (settings?.flarumNotifications != true) return;
-
-      try {
-        final notificationsAsync = ref.read(flarumNotificationsProvider);
-        notificationsAsync.whenData((notifications) {
-          if (notifications.isEmpty) return;
-
-          final latest = notifications.first;
-          final createdAt = DateTime.tryParse(latest.createdAt);
-          if (createdAt == null) return;
-
-          if (createdAt.isAfter(_lastFlarumCheck!)) {
-            NotificationService().showNotification(
-              id: latest.id.hashCode,
-              title: 'Flarum Notification',
-              body:
-                  latest.contentType ?? 'You have a new notification on Flarum',
-              groupKey: 'flarum_notifications',
-            );
-            _lastFlarumCheck = createdAt;
-          }
-        });
-      } catch (e) {
-        logger.error('Flarum notification poll failed', e);
-      }
-    });
   }
-}
 
 /// 提供 NotificationManager 的 Provider
 final notificationManagerProvider = Provider((ref) => NotificationManager(ref));

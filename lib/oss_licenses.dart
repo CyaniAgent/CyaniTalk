@@ -11864,7 +11864,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
 /// cyanitalk 1.3.4+224
 const _cyanitalk = Package(
     name: 'cyanitalk',
-    description: 'A comprehensive, multi-functional social application built with Flutter, connecting Misskey and Flarum, and belonging to CyaniAgent.',
+    description: 'A comprehensive, multi-functional social application built with Flutter, connecting to Misskey, and belonging to CyaniAgent.',
     authors: [],
     version: '1.3.4+224',
     spdxIdentifiers: ['AGPL-3.0'],

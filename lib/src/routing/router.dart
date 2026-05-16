@@ -13,7 +13,6 @@ import '/src/features/misskey/presentation/misskey_page.dart';
 import '/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
 import '/src/features/misskey/presentation/pages/misskey_notifications_page.dart';
 import '/src/features/cloud/presentation/cloud_page.dart';
-import '/src/features/forum/presentation/forum_page.dart';
 import '/src/features/messaging/presentation/chat_page.dart';
 import '/src/features/messaging/presentation/messaging_page.dart';
 import '/src/shared/widgets/coming_soon_page.dart';
@@ -120,17 +119,6 @@ GoRouter goRouter(Ref ref) {
                 pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: const MisskeyPage(),
-                ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/forum',
-                pageBuilder: (context, state) => _buildSafePage(
-                  key: state.pageKey,
-                  child: const ForumPage(),
                 ),
               ),
             ],

@@ -10,7 +10,6 @@ import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart
 import 'package:cyanitalk/src/features/misskey/application/timeline_jump_provider.dart';
 import 'package:cyanitalk/src/features/misskey/domain/channel.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class MisskeyChannelDetailsPage extends ConsumerStatefulWidget {
   final Channel channel;
@@ -122,7 +121,7 @@ class _MisskeyChannelDetailsPageState
             }
 
             if (isMounted) {
-              scaffoldMessenger.showTopSnackBar(
+              scaffoldMessenger.showSnackBar(
                 SnackBar(
                   content: Text('misskey_page_please_login'.tr()),
                   behavior: SnackBarBehavior.floating,

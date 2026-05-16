@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '/src/core/navigation/navigation.dart';
@@ -20,7 +19,6 @@ import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class MisskeyPage extends ConsumerStatefulWidget {
   const MisskeyPage({super.key});
@@ -73,14 +71,6 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
         logger.warning('MisskeyPage: Manual refresh failed: $e');
       }
     }
-  }
-
-  String _timelineLabel(String timelineType) {
-    return switch (timelineType) {
-      'Local' => 'timeline_local'.tr(),
-      'Social' => 'timeline_social'.tr(),
-      _ => 'timeline_global'.tr(),
-    };
   }
 
   void _onTimelineTypeChanged(String timelineType) {
@@ -147,22 +137,19 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               shadowColor: Colors.transparent,
               elevation: 0,
               scrolledUnderElevation: 0,
-              leading: Breakpoints.small.isActive(context)
-                  ? IconButton(
+              leading: IconButton(
                       icon: const Icon(Icons.menu),
                       onPressed: () => ref
                           .read(navigationControllerProvider.notifier)
                           .openDrawer(),
-                    )
-                  : null,
+                    ),
               title: selectedIndex == 0
-                  ? _TimelineTopBar(
+                  ? _TimelineIconBar(
                       timelineType: _timelineType,
-                      timelineLabel: _timelineLabel(_timelineType),
                       onTimelineTypeChanged: _onTimelineTypeChanged,
                     )
                   : Text(_titles[selectedIndex]),
-              titleSpacing: Breakpoints.small.isActive(context) ? 4 : 12,
+              titleSpacing: 4,
               centerTitle: false,
               floating: true,
               pinned: true,
@@ -235,7 +222,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
       await ref.read(audioEngineProvider).playAsset(soundPath);
       if (mounted) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('misskey_page_please_login'.tr()),
             behavior: SnackBarBehavior.floating,
@@ -287,16 +274,30 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
   }
 }
 
-class _TimelineTopBar extends ConsumerWidget {
-  const _TimelineTopBar({
+class _TimelineIconBar extends ConsumerWidget {
+  const _TimelineIconBar({
     required this.timelineType,
-    required this.timelineLabel,
     required this.onTimelineTypeChanged,
   });
 
   final String timelineType;
-  final String timelineLabel;
   final ValueChanged<String> onTimelineTypeChanged;
+
+  IconData _getIcon(String type) {
+    return switch (type) {
+      'Local' => Icons.language_rounded,
+      'Social' => Icons.group_rounded,
+      _ => Icons.public_rounded,
+    };
+  }
+
+  Color _getIconColor(String type) {
+    return switch (type) {
+      'Local' => const Color(0xFF4CAF50),
+      'Social' => const Color(0xFF2196F3),
+      _ => const Color(0xFFFF9800),
+    };
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -315,29 +316,20 @@ class _TimelineTopBar extends ConsumerWidget {
             PopupMenuItem(value: 'Social', child: Text('timeline_social'.tr())),
           ],
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${'misskey_page_timeline'.tr()} · $timelineLabel',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
-              ],
+            child: Icon(
+              _getIcon(timelineType),
+              color: _getIconColor(timelineType),
+              size: 22,
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         ref
             .watch(misskeyOnlineUsersProvider)
             .when(

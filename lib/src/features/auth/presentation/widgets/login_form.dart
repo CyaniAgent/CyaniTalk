@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'login_form_components.dart';
 import '/src/features/auth/application/auth_service.dart';
-import '/src/core/api/flarum_api.dart';
 import '/src/core/utils/logger.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 /// 统一的登录表单控件
 ///
@@ -34,13 +32,8 @@ class LoginForm extends ConsumerStatefulWidget {
 class _LoginFormState extends ConsumerState<LoginForm> {
   LoginStep _currentStep = LoginStep.select;
   bool _loading = false;
-  bool _isQuickLogin = false;
 
   final _misskeyHostController = TextEditingController();
-  final _flarumHostController = TextEditingController();
-  final _flarumUsernameController = TextEditingController();
-  final _flarumPasswordController = TextEditingController();
-  final _flarumEndpointController = TextEditingController();
 
   String? _misskeyHost;
   String? _misskeySession;
@@ -56,10 +49,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   @override
   void dispose() {
     _misskeyHostController.dispose();
-    _flarumHostController.dispose();
-    _flarumUsernameController.dispose();
-    _flarumPasswordController.dispose();
-    _flarumEndpointController.dispose();
     super.dispose();
   }
 
@@ -78,8 +67,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         break;
       default:
         _setStep(LoginStep.select);
-        _isQuickLogin = false;
-        _flarumHostController.clear();
         break;
     }
   }
@@ -147,63 +134,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     }
   }
 
-  Future<void> _loginToFlarum() async {
-    final host = _flarumHostController.text.trim();
-    final user = _flarumUsernameController.text.trim();
-    final password = _flarumPasswordController.text;
-
-    if (host.isEmpty || user.isEmpty || password.isEmpty) return;
-
-    logger.info(
-      'LoginForm: Starting Flarum login for host: $host, user: $user',
-    );
-    setState(() => _loading = true);
-    try {
-      await ref
-          .read(authServiceProvider.notifier)
-          .loginToFlarum(host, user, password);
-      if (mounted) {
-        setState(() => _loading = false);
-        widget.onLoginSuccess?.call();
-        if (widget.isBottomSheet) {
-          Navigator.pop(context);
-        }
-      }
-    } catch (e) {
-      logger.error('LoginForm: Flarum login failed', e);
-      if (mounted) {
-        setState(() => _loading = false);
-        _showError(e.toString());
-      }
-    }
-  }
-
-  Future<void> _addFlarumEndpoint() async {
-    final endpoint = _flarumEndpointController.text.trim();
-    if (endpoint.isEmpty) return;
-
-    logger.info('LoginForm: Adding Flarum endpoint: $endpoint');
-    setState(() => _loading = true);
-    try {
-      await FlarumApi().saveEndpoint(endpoint);
-      if (mounted) {
-        setState(() => _loading = false);
-        widget.onLoginSuccess?.call();
-        if (widget.isBottomSheet) {
-          Navigator.pop(context);
-        }
-      }
-    } catch (e) {
-      logger.error('LoginForm: Add Flarum endpoint failed', e);
-      if (mounted) {
-        setState(() => _loading = false);
-        _showError(e.toString());
-      }
-    }
-  }
-
   void _showError(String error) {
-    ScaffoldMessenger.of(context).showTopSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('auth_error'.tr(namedArgs: {'error': error})),
         behavior: SnackBarBehavior.floating,
@@ -239,12 +171,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         if (widget.showPlatformSelection) {
           return PlatformSelectionStep(
             onMisskeySelected: () => _setStep(LoginStep.misskeyLogin),
-            onFlarumLoginSelected: () {
-              _flarumHostController.clear();
-              _isQuickLogin = false;
-              _setStep(LoginStep.flarumLogin);
-            },
-            onFlarumEndpointSelected: () => _setStep(LoginStep.flarumEndpoint),
           );
         } else {
           return const SizedBox.shrink();
@@ -259,27 +185,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         return MisskeyCheckAuthStep(
           loading: _loading,
           onCheck: _checkMisskeyAuth,
-        );
-      case LoginStep.flarumLogin:
-        return FlarumLoginStep(
-          hostController: _flarumHostController,
-          usernameController: _flarumUsernameController,
-          passwordController: _flarumPasswordController,
-          loading: _loading,
-          isQuickLogin: _isQuickLogin,
-          onLogin: _loginToFlarum,
-          onQuickLogin: () {
-            setState(() {
-              _flarumHostController.text = 'flarum.imikufans.cn';
-              _isQuickLogin = true;
-            });
-          },
-        );
-      case LoginStep.flarumEndpoint:
-        return FlarumEndpointStep(
-          endpointController: _flarumEndpointController,
-          loading: _loading,
-          onAdd: _addFlarumEndpoint,
         );
     }
   }

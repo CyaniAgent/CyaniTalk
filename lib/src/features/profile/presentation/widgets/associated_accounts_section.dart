@@ -38,10 +38,6 @@ class _AssociatedAccountsSectionState
         .watch(selectedMisskeyAccountProvider)
         .asData
         ?.value;
-    final selectedFlarum = ref
-        .watch(selectedFlarumAccountProvider)
-        .asData
-        ?.value;
 
     return accountsAsync.when(
       data: (accounts) {
@@ -52,7 +48,7 @@ class _AssociatedAccountsSectionState
         // Ensure focused account is valid
         if (_focusedAccount == null || !accounts.contains(_focusedAccount)) {
           // Default to one of the active accounts or the first one
-          _focusedAccount = selectedMisskey ?? selectedFlarum ?? accounts.first;
+          _focusedAccount = selectedMisskey ?? accounts.first;
         }
 
         return _buildManagerLayout(
@@ -60,7 +56,6 @@ class _AssociatedAccountsSectionState
           ref,
           accounts,
           selectedMisskey,
-          selectedFlarum,
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -97,7 +92,6 @@ class _AssociatedAccountsSectionState
     WidgetRef ref,
     List<Account> accounts,
     Account? selectedMisskey,
-    Account? selectedFlarum,
   ) {
     final theme = Theme.of(context);
 
@@ -139,8 +133,7 @@ class _AssociatedAccountsSectionState
 
               final account = accounts[index];
               final isMisskeyActive = account.id == selectedMisskey?.id;
-              final isFlarumActive = account.id == selectedFlarum?.id;
-              final isActive = isMisskeyActive || isFlarumActive;
+              final isActive = isMisskeyActive;
               final isFocused = account.id == _focusedAccount?.id;
 
               return Padding(
@@ -151,9 +144,7 @@ class _AssociatedAccountsSectionState
                       isFocused: isFocused,
                       activeColor: isMisskeyActive
                           ? theme.colorScheme.primary
-                          : (isFlarumActive
-                                ? Colors.orange
-                                : theme.colorScheme.onSurfaceVariant),
+                          : theme.colorScheme.onSurfaceVariant,
                       onTap: () {
                         setState(() {
                           _focusedAccount = account;
@@ -161,10 +152,6 @@ class _AssociatedAccountsSectionState
                         if (account.platform == 'misskey') {
                           ref
                               .read(selectedMisskeyAccountProvider.notifier)
-                              .select(account);
-                        } else if (account.platform == 'flarum') {
-                          ref
-                              .read(selectedFlarumAccountProvider.notifier)
                               .select(account);
                         }
                       },
@@ -232,7 +219,6 @@ class _AssociatedAccountsSectionState
   }
 
   Widget _buildSelectedHeader(BuildContext context, Account account) {
-    final isMisskey = account.platform == 'misskey';
     final primaryName = (account.name != null && account.name!.isNotEmpty)
         ? account.name!
         : (account.username ?? 'Unknown');
@@ -284,9 +270,7 @@ class _AssociatedAccountsSectionState
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Image.asset(
-                      isMisskey
-                          ? 'assets/icons/misskey.png'
-                          : 'assets/icons/flarum.png',
+                      'assets/icons/misskey.png',
                       width: 16,
                       height: 16,
                     ),

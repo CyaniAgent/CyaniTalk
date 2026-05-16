@@ -8,7 +8,6 @@ class PageConfig {
   static const Map<String, String> pageIdToRoute = {
     'home': '/misskey',
     'misskey': '/misskey',
-    'flarum': '/forum',
     'drive': '/cloud',
     'messages': '/messaging',
     'me': '/profile',
@@ -25,7 +24,6 @@ class PageConfig {
   /// 导航项ID列表（与navigation_settings.dart保持一致）
   static const List<String> navigationItemIds = [
     'misskey',
-    'flarum',
     'drive',
     'messages',
     'me',

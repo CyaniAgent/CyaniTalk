@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/notification_settings_provider.dart';
 import '/src/core/services/notification_service.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
@@ -90,19 +89,6 @@ class NotificationSettingsPage extends ConsumerWidget {
                         .read(notificationSettingsProvider.notifier)
                         .toggleMisskeyMessages(value),
             ),
-            const Divider(),
-            _buildSectionHeader(context, 'Flarum'),
-            SwitchListTile(
-              secondary: const Icon(Icons.forum_outlined),
-              title: Text('settings_notif_flarum'.tr()),
-              subtitle: Text('settings_notif_flarum_desc'.tr()),
-              value: settings.flarumNotifications,
-              onChanged: isDesktop
-                  ? null
-                  : (value) => ref
-                        .read(notificationSettingsProvider.notifier)
-                        .toggleFlarumNotifications(value),
-            ),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -135,7 +121,7 @@ class NotificationSettingsPage extends ConsumerWidget {
           : () async {
               final granted = await NotificationService().requestPermissions();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showTopSnackBar(
+                ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
                       granted

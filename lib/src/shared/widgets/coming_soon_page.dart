@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import '/src/core/navigation/navigation.dart';
 
 class ComingSoonPage extends ConsumerWidget {
@@ -16,14 +15,12 @@ class ComingSoonPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: Breakpoints.small.isActive(context)
-            ? IconButton(
+        leading: IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white),
                 onPressed: () => ref
                     .read(navigationControllerProvider.notifier)
                     .openDrawer(),
-              )
-            : null,
+              ),
       ),
       body: Stack(
         fit: StackFit.expand,

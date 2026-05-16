@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Account {
 
- String get id; String get platform;// 'misskey' or 'flarum'
+ String get id; String get platform;
  String get host; String? get username; String? get name; String? get avatarUrl; String get token;
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
@@ -221,7 +221,6 @@ class _Account implements Account {
 
 @override final  String id;
 @override final  String platform;
-// 'misskey' or 'flarum'
 @override final  String host;
 @override final  String? username;
 @override final  String? name;

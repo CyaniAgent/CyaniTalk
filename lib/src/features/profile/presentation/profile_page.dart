@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/auth/domain/account.dart';
 import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
 import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
-import '/src/features/flarum/application/flarum_providers.dart';
-import '../../flarum/data/models/user.dart' as flarum_model;
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import '/src/core/navigation/navigation.dart';
@@ -33,18 +30,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         .watch(selectedMisskeyAccountProvider)
         .asData
         ?.value;
-    final selectedFlarum = ref
-        .watch(selectedFlarumAccountProvider)
-        .asData
-        ?.value;
-    final primaryAccount = selectedMisskey ?? selectedFlarum;
+    final primaryAccount = selectedMisskey;
 
     final misskeyUser = primaryAccount?.platform == 'misskey'
         ? ref.watch(misskeyMeProvider).asData?.value
-        : null;
-
-    final flarumUser = primaryAccount?.platform == 'flarum'
-        ? ref.watch(flarumCurrentUserProvider).asData?.value
         : null;
 
     final bool isLoggedIn = primaryAccount != null;
@@ -53,14 +42,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            leading: Breakpoints.small.isActive(context)
-                ? IconButton(
+            leading: IconButton(
                     icon: const Icon(Icons.menu),
                     onPressed: () => ref
                         .read(navigationControllerProvider.notifier)
                         .openDrawer(),
-                  )
-                : null,
+                  ),
             title: Text('nav_me'.tr()),
             centerTitle: true,
             floating: true,
@@ -148,7 +135,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         context,
                         primaryAccount,
                         misskeyUser,
-                        flarumUser,
                       ),
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -219,7 +205,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     BuildContext context,
     Account primaryAccount,
     MisskeyUser? misskeyUser,
-    flarum_model.User? flarumUser,
   ) {
     final theme = Theme.of(context);
     final isWideScreen = MediaQuery.of(context).size.width > 900;
@@ -318,7 +303,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 const SizedBox(width: 32),
                 Expanded(
-                  child: _buildUserStats(context, misskeyUser, flarumUser),
+                  child: _buildUserStats(context, misskeyUser),
                 ),
               ],
             )
@@ -446,7 +431,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
 
           // 用户统计信息（仅在窄屏时显示）
-          if (!isWideScreen) _buildUserStats(context, misskeyUser, flarumUser),
+          if (!isWideScreen) _buildUserStats(context, misskeyUser),
         ],
       ),
     );
@@ -528,78 +513,46 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildUserStats(
     BuildContext context,
     MisskeyUser? misskeyUser,
-    flarum_model.User? flarumUser,
   ) {
-    if (misskeyUser == null && flarumUser == null) {
+    if (misskeyUser == null) {
       return const SizedBox.shrink();
     }
 
     final List<Widget> stats = [];
 
-    if (misskeyUser != null) {
-      // Misskey Stats
-      if (misskeyUser.createdAt != null) {
-        stats.add(
-          _buildStatItem(
-            context,
-            'Joined',
-            DateFormat.yMMMd().format(misskeyUser.createdAt!),
-          ),
-        );
-      }
-      if (misskeyUser.notesCount != null) {
-        stats.add(
-          _buildStatItem(
-            context,
-            'user_details_notes_count'.tr(),
-            _formatCount(misskeyUser.notesCount!),
-          ),
-        );
-      }
-      if (misskeyUser.followingCount != null) {
-        stats.add(
-          _buildStatItem(
-            context,
-            'user_details_following'.tr(),
-            _formatCount(misskeyUser.followingCount!),
-          ),
-        );
-      }
-      if (misskeyUser.followersCount != null) {
-        stats.add(
-          _buildStatItem(
-            context,
-            'user_details_followers'.tr(),
-            _formatCount(misskeyUser.followersCount!),
-          ),
-        );
-      }
-    } else if (flarumUser != null) {
-      // Flarum Stats
-      // Join Time
+    if (misskeyUser.createdAt != null) {
       stats.add(
         _buildStatItem(
           context,
           'Joined',
-          DateFormat.yMMMd().format(DateTime.parse(flarumUser.joinTime)),
+          DateFormat.yMMMd().format(misskeyUser.createdAt!),
         ),
       );
-
-      // Posts (Discussions)
+    }
+    if (misskeyUser.notesCount != null) {
       stats.add(
         _buildStatItem(
           context,
-          'user_details_discussions'.tr(),
-          _formatCount(flarumUser.discussionCount),
+          'user_details_notes_count'.tr(),
+          _formatCount(misskeyUser.notesCount!),
         ),
       );
-
-      // Recovered (Comments)
+    }
+    if (misskeyUser.followingCount != null) {
       stats.add(
         _buildStatItem(
           context,
-          'user_details_comments'.tr(),
-          _formatCount(flarumUser.commentCount),
+          'user_details_following'.tr(),
+          _formatCount(misskeyUser.followingCount!),
+        ),
+      );
+    }
+    if (misskeyUser.followersCount != null) {
+      stats.add(
+        _buildStatItem(
+          context,
+          'user_details_followers'.tr(),
+          _formatCount(misskeyUser.followersCount!),
         ),
       );
     }

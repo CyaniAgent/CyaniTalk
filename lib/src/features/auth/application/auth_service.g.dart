@@ -10,7 +10,7 @@ part of 'auth_service.dart';
 // ignore_for_file: type=lint, type=warning
 /// 认证服务类
 ///
-/// 负责处理用户认证流程，包括Misskey的MiAuth流程和Flarum的账户链接功能，
+/// 负责处理用户认证流程，包括Misskey的MiAuth流程，
 /// 管理认证状态和账户信息。
 
 @ProviderFor(AuthService)
@@ -18,13 +18,13 @@ final authServiceProvider = AuthServiceProvider._();
 
 /// 认证服务类
 ///
-/// 负责处理用户认证流程，包括Misskey的MiAuth流程和Flarum的账户链接功能，
+/// 负责处理用户认证流程，包括Misskey的MiAuth流程，
 /// 管理认证状态和账户信息。
 final class AuthServiceProvider
     extends $AsyncNotifierProvider<AuthService, List<Account>> {
   /// 认证服务类
   ///
-  /// 负责处理用户认证流程，包括Misskey的MiAuth流程和Flarum的账户链接功能，
+  /// 负责处理用户认证流程，包括Misskey的MiAuth流程，
   /// 管理认证状态和账户信息。
   AuthServiceProvider._()
     : super(
@@ -49,7 +49,7 @@ String _$authServiceHash() => r'7d514495424adb70f763d833c027d236a0b02e10';
 
 /// 认证服务类
 ///
-/// 负责处理用户认证流程，包括Misskey的MiAuth流程和Flarum的账户链接功能，
+/// 负责处理用户认证流程，包括Misskey的MiAuth流程，
 /// 管理认证状态和账户信息。
 
 abstract class _$AuthService extends $AsyncNotifier<List<Account>> {
@@ -112,65 +112,6 @@ String _$selectedMisskeyAccountHash() =>
 /// 管理当前选中的Misskey账户，支持账户切换和自动选择逻辑。
 
 abstract class _$SelectedMisskeyAccount extends $AsyncNotifier<Account?> {
-  FutureOr<Account?> build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<Account?>, Account?>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<Account?>, Account?>,
-              AsyncValue<Account?>,
-              Object?,
-              Object?
-            >;
-    element.handleCreate(ref, build);
-  }
-}
-
-/// 选中的Flarum账户提供者
-///
-/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
-
-@ProviderFor(SelectedFlarumAccount)
-final selectedFlarumAccountProvider = SelectedFlarumAccountProvider._();
-
-/// 选中的Flarum账户提供者
-///
-/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
-final class SelectedFlarumAccountProvider
-    extends $AsyncNotifierProvider<SelectedFlarumAccount, Account?> {
-  /// 选中的Flarum账户提供者
-  ///
-  /// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
-  SelectedFlarumAccountProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'selectedFlarumAccountProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$selectedFlarumAccountHash();
-
-  @$internal
-  @override
-  SelectedFlarumAccount create() => SelectedFlarumAccount();
-}
-
-String _$selectedFlarumAccountHash() =>
-    r'd63a6bc2c7907349a25c9576f1d50b1095f04216';
-
-/// 选中的Flarum账户提供者
-///
-/// 管理当前选中的Flarum账户，支持账户切换和自动选择逻辑。
-
-abstract class _$SelectedFlarumAccount extends $AsyncNotifier<Account?> {
   FutureOr<Account?> build();
   @$mustCallSuper
   @override

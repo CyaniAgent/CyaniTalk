@@ -8,6 +8,7 @@ import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
 import 'routing/router.dart';
+import 'shared/widgets/custom_title_bar.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/misskey/application/misskey_notifier.dart';
 import 'features/misskey/application/misskey_notifications_notifier.dart';
@@ -161,6 +162,12 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
+            builder: (context, child) => Column(
+              children: [
+                const CustomTitleBar(),
+                Expanded(child: child!),
+              ],
+            ),
           ),
         );
       },
@@ -185,6 +192,12 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
             localizationsDelegates: context.localizationDelegates,
             supportedLocales: context.supportedLocales,
             locale: context.locale,
+            builder: (context, child) => Column(
+              children: [
+                const CustomTitleBar(),
+                Expanded(child: child!),
+              ],
+            ),
           ),
         );
       },

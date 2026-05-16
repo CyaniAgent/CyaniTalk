@@ -8,13 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'navigation_settings.dart';
 import 'navigation_item.dart';
 import 'navigation_element.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 part 'navigation_settings_notifier.g.dart';
 
 /// 导航设置状态管理器
 @Riverpod(keepAlive: true)
 class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
+  static const Set<String> _deprecatedItemIds = {'flarum', 'forum'};
+
   /// 初始化导航设置状态
   @override
   Future<NavigationSettings> build() async {
@@ -44,6 +45,10 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
             if (itemJson.isNotEmpty) {
               try {
                 final Map<String, dynamic> itemMap = _parseJsonString(itemJson);
+                final itemId = itemMap['id'] as String;
+                if (_deprecatedItemIds.contains(itemId)) {
+                  continue;
+                }
                 final item = NavigationItem(
                   id: itemMap['id'] as String,
                   title: itemMap['title'] as String,
@@ -255,7 +260,7 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
       final tempState = state.value!.updateItemEnabled(itemId, false);
       if (tempState.getEnabledCount() < 2) {
         // Keep at least one non-user nav item (plus the fixed user item).
-        ScaffoldMessenger.of(context).showTopSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('??????????? 1 ????'),
             duration: const Duration(seconds: 2),

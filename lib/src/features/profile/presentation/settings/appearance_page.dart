@@ -10,7 +10,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/src/core/core.dart';
 import '/src/core/theme/font_selector.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 part 'appearance_page.g.dart';
 
@@ -470,7 +469,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             onPressed: () {
               notifier.resetSettings();
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showTopSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('settings_appearance_reset_done'.tr()), behavior: SnackBarBehavior.floating),
               );
             },

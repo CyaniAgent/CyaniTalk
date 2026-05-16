@@ -1,11 +1,10 @@
-﻿import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/navigation_element.dart';
 import '/src/core/theme/desktop_semantic_colors.dart';
-import '/src/shared/extensions/ui_extensions.dart';
 
 class NavigationSettingsPage extends ConsumerStatefulWidget {
   const NavigationSettingsPage({super.key});
@@ -271,7 +270,7 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
             onPressed: () {
               notifier.resetSettings();
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showTopSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('settings_navigation_reset_done'.tr()),
                   behavior: SnackBarBehavior.floating,

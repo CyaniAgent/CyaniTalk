@@ -8,7 +8,6 @@ import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/auth/domain/account.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
-import '/src/features/flarum/application/flarum_providers.dart';
 
 class UserNavigationHeader extends ConsumerStatefulWidget {
   final bool isExtended;
@@ -43,19 +42,12 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
         .watch(selectedMisskeyAccountProvider)
         .asData
         ?.value;
-    final flarumAccount = ref
-        .watch(selectedFlarumAccountProvider)
-        .asData
-        ?.value;
 
     final misskeyUser = misskeyAccount != null
         ? ref.watch(misskeyMeProvider).asData?.value
         : null;
-    final flarumUser = flarumAccount != null
-        ? ref.watch(flarumCurrentUserProvider).asData?.value
-        : null;
 
-    final bool isLoggedIn = misskeyAccount != null || flarumAccount != null;
+    final bool isLoggedIn = misskeyAccount != null;
     final theme = Theme.of(context);
 
     if (!widget.isExtended && !widget.isDrawer) {
@@ -79,8 +71,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
               context,
               misskeyAccount,
               misskeyUser,
-              flarumAccount,
-              flarumUser,
               radius: radius,
             ),
           ),
@@ -117,8 +107,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                       context,
                       misskeyAccount,
                       misskeyUser,
-                      flarumAccount,
-                      flarumUser,
                       radius: 18,
                     ),
                     const SizedBox(width: 12),
@@ -128,8 +116,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                             ? _getUserName(
                                 misskeyAccount,
                                 misskeyUser,
-                                flarumAccount,
-                                flarumUser,
                               )
                             : 'nav_no_account'.tr(),
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -204,19 +190,12 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
         .watch(selectedMisskeyAccountProvider)
         .asData
         ?.value;
-    final flarumAccount = ref
-        .watch(selectedFlarumAccountProvider)
-        .asData
-        ?.value;
 
     final misskeyUser = misskeyAccount != null
         ? ref.watch(misskeyMeProvider).asData?.value
         : null;
-    final flarumUser = flarumAccount != null
-        ? ref.watch(flarumCurrentUserProvider).asData?.value
-        : null;
 
-    final Account? primaryAccount = misskeyAccount ?? flarumAccount;
+    final Account? primaryAccount = misskeyAccount;
 
     return InkWell(
       onTap: widget.onTap,
@@ -236,8 +215,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                   context,
                   misskeyAccount,
                   misskeyUser,
-                  flarumAccount,
-                  flarumUser,
                   radius: 24,
                 ),
                 const SizedBox(width: 12),
@@ -250,8 +227,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                             ? _getUserName(
                                 misskeyAccount,
                                 misskeyUser,
-                                flarumAccount,
-                                flarumUser,
                               )
                             : 'nav_no_account'.tr(),
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -307,10 +282,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
             .read(selectedMisskeyAccountProvider)
             .asData
             ?.value;
-        final selectedFlarum = ref
-            .read(selectedFlarumAccountProvider)
-            .asData
-            ?.value;
 
         return Container(
           margin: const EdgeInsets.only(top: 8, left: 8, right: 8),
@@ -322,8 +293,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
             children: [
               ...accounts.map((account) {
                 final isMisskeyActive = account.id == selectedMisskey?.id;
-                final isFlarumActive = account.id == selectedFlarum?.id;
-                final isActive = isMisskeyActive || isFlarumActive;
+                final isActive = isMisskeyActive;
 
                 return InkWell(
                   onTap: isActive
@@ -444,9 +414,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
       ref.invalidate(misskeyTimelineProvider);
       ref.invalidate(misskeyMeProvider);
       ref.invalidate(misskeyNotificationsProvider);
-    } else if (account.platform == 'flarum') {
-      ref.read(selectedFlarumAccountProvider.notifier).select(account);
-      ref.invalidate(flarumCurrentUserProvider);
     }
 
     if (!context.mounted) return;
@@ -462,19 +429,12 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
   String _getUserName(
     Account? misskeyAccount,
     dynamic misskeyUser,
-    Account? flarumAccount,
-    dynamic flarumUser,
   ) {
     if (misskeyAccount != null) {
       return misskeyUser?.name ??
           misskeyAccount.name ??
           misskeyAccount.username ??
           'Misskey User';
-    } else if (flarumAccount != null) {
-      return flarumUser?.displayName ??
-          flarumAccount.name ??
-          flarumAccount.username ??
-          'Flarum User';
     }
     return 'CyaniUser';
   }
@@ -482,16 +442,12 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
   Widget _buildAvatar(
     BuildContext context,
     Account? misskeyAccount,
-    dynamic misskeyUser,
-    Account? flarumAccount,
-    dynamic flarumUser, {
+    dynamic misskeyUser, {
     double radius = 32,
   }) {
     final avatarUrl =
         misskeyUser?.avatarUrl ??
-        misskeyAccount?.avatarUrl ??
-        flarumUser?.avatarUrl ??
-        flarumAccount?.avatarUrl;
+        misskeyAccount?.avatarUrl;
 
     if (avatarUrl != null) {
       return ClipRRect(
@@ -614,10 +570,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
             .read(selectedMisskeyAccountProvider)
             .asData
             ?.value;
-        final selectedFlarum = ref
-            .read(selectedFlarumAccountProvider)
-            .asData
-            ?.value;
 
         // 按主机分组账户
         final Map<String, List<Account>> accountsByHost = {};
@@ -650,7 +602,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
             context,
             accounts,
             selectedMisskey,
-            selectedFlarum,
             accountsByHost,
           ),
         ).then((value) {
@@ -677,19 +628,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                     router.routeInformationProvider.value.uri.toString(),
                   );
                 }
-              } else if (account.platform == 'flarum') {
-                ref
-                    .read(selectedFlarumAccountProvider.notifier)
-                    .select(account);
-                // 刷新Flarum相关provider
-                ref.invalidate(flarumCurrentUserProvider);
-                // 刷新当前路由
-                if (context.mounted) {
-                  final router = GoRouter.of(context);
-                  context.go(
-                    router.routeInformationProvider.value.uri.toString(),
-                  );
-                }
               }
             }
           }
@@ -705,7 +643,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
     BuildContext context,
     List<Account> accounts,
     Account? selectedMisskey,
-    Account? selectedFlarum,
     Map<String, List<Account>> accountsByHost,
   ) {
     final theme = Theme.of(context);
@@ -736,8 +673,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
       // 添加该主机的账户
       for (final account in hostAccounts) {
         final isMisskeyActive = account.id == selectedMisskey?.id;
-        final isFlarumActive = account.id == selectedFlarum?.id;
-        final isActive = isMisskeyActive || isFlarumActive;
+        final isActive = isMisskeyActive;
 
         items.add(
           PopupMenuItem<String>(
@@ -845,7 +781,6 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
               // 清除选中的账户ID
               final prefs = ref.read(sharedPreferencesProvider);
               await prefs.remove('cyani_selected_misskey_id');
-              await prefs.remove('cyani_selected_flarum_id');
 
               // 刷新认证服务状态
               await ref.read(authServiceProvider.future);

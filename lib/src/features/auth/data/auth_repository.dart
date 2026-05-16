@@ -21,7 +21,6 @@ class AuthRepository {
   /// 存储账户信息的密钥
   static const _kAccountsKey = 'cyani_accounts';
   static const _kSelectedMisskeyIdKey = 'cyani_selected_misskey_id';
-  static const _kSelectedFlarumIdKey = 'cyani_selected_flarum_id';
 
   /// 创建一个新的AuthRepository实例
   ///
@@ -65,21 +64,6 @@ class AuthRepository {
     await _prefs.setString(_kSelectedMisskeyIdKey, id);
     logger.info(
       'AuthRepository: Successfully saved selected Misskey account ID',
-    );
-  }
-
-  Future<String?> getSelectedFlarumId() async {
-    logger.info('AuthRepository: Getting selected Flarum account ID');
-    final id = _prefs.getString(_kSelectedFlarumIdKey);
-    logger.info('AuthRepository: Selected Flarum account ID: $id');
-    return id;
-  }
-
-  Future<void> saveSelectedFlarumId(String id) async {
-    logger.info('AuthRepository: Saving selected Flarum account ID: $id');
-    await _prefs.setString(_kSelectedFlarumIdKey, id);
-    logger.info(
-      'AuthRepository: Successfully saved selected Flarum account ID',
     );
   }
 

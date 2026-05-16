@@ -89,8 +89,6 @@ class NavigationItem {
     switch (id) {
       case 'misskey':
         return Icons.public_outlined;
-      case 'flarum':
-        return Icons.forum_outlined;
       case 'drive':
         return Icons.cloud_queue_outlined;
       case 'messages':
@@ -107,8 +105,6 @@ class NavigationItem {
     switch (id) {
       case 'misskey':
         return Icons.public;
-      case 'flarum':
-        return Icons.forum;
       case 'drive':
         return Icons.cloud_queue;
       case 'messages':
