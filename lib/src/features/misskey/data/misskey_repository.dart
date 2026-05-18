@@ -72,13 +72,14 @@ class MisskeyRepository implements IMisskeyRepository {
   Future<List<Note>> getTimeline(
     String type, {
     int limit = 20,
+    String? sinceId,
     String? untilId,
   }) async {
     logger.info(
-      'MisskeyRepository: Getting $type timeline, limit=$limit, untilId=$untilId',
+      'MisskeyRepository: Getting $type timeline, limit=$limit, sinceId=$sinceId, untilId=$untilId',
     );
     try {
-      final data = await api.getTimeline(type, limit: limit, untilId: untilId);
+      final data = await api.getTimeline(type, limit: limit, sinceId: sinceId, untilId: untilId);
       final notes = await compute((List<dynamic> list) {
         return list.map((e) => Note.fromJson(e)).toList();
       }, data);

@@ -28,6 +28,7 @@ abstract interface class IMisskeyRepository {
   Future<List<Note>> getTimeline(
     String type, {
     int limit = 20,
+    String? sinceId,
     String? untilId,
   });
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,8 @@ import 'reaction_display.dart';
 class ModernNoteCard extends ConsumerStatefulWidget {
   final Note note;
   final String? timelineType;
-  final bool useListLayout;
+  final bool isHighlighted;
+  final VoidCallback? onHighlightEnd;
 
   /// 创建ModernNoteCard组件
   ///
@@ -39,7 +41,8 @@ class ModernNoteCard extends ConsumerStatefulWidget {
     super.key,
     required this.note,
     this.timelineType,
-    this.useListLayout = false,
+    this.isHighlighted = false,
+    this.onHighlightEnd,
   });
 
   @override
@@ -47,13 +50,15 @@ class ModernNoteCard extends ConsumerStatefulWidget {
 }
 
 class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
-  bool _shouldAnimate = false;
+  Timer? _highlightTimer;
+  bool _isCwExpanded = false;
 
   // MFM渲染器
   final MfmRenderer _mfmRenderer = MfmRenderer();
 
   @override
   void dispose() {
+    _highlightTimer?.cancel();
     _mfmRenderer.dispose();
     super.dispose();
   }
@@ -61,9 +66,29 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   @override
   void initState() {
     super.initState();
-    _shouldAnimate = false;
     _setupMfmRenderer();
     _loadEmojis();
+    _scheduleHighlightEnd();
+  }
+
+  @override
+  void didUpdateWidget(covariant ModernNoteCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.note.id != widget.note.id) {
+      _loadEmojis();
+    }
+    if (oldWidget.isHighlighted != widget.isHighlighted) {
+      _scheduleHighlightEnd();
+    }
+  }
+
+  void _scheduleHighlightEnd() {
+    if (widget.isHighlighted && widget.onHighlightEnd != null) {
+      _highlightTimer?.cancel();
+      _highlightTimer = Timer(const Duration(seconds: 3), () {
+        widget.onHighlightEnd?.call();
+      });
+    }
   }
 
   /// 设置MFM渲染器
@@ -79,15 +104,6 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         return null;
       }
     });
-  }
-
-  @override
-  void didUpdateWidget(covariant ModernNoteCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Only rebuild if the note has actually changed
-    if (oldWidget.note.id != widget.note.id) {
-      _loadEmojis();
-    }
   }
 
   /// 加载笔记中的表情到MFM渲染器缓存
@@ -119,18 +135,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             _showContextMenu(details.globalPosition),
         onLongPressStart: (details) => _showContextMenu(details.globalPosition),
         child: Card(
-          margin: widget.useListLayout
-              ? EdgeInsets.zero
-              : const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          elevation: widget.useListLayout ? 0 : null,
-          color: widget.useListLayout ? theme.colorScheme.surface : null,
-          shape: widget.useListLayout
-              ? const RoundedRectangleBorder(borderRadius: BorderRadius.zero)
-              : null,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Padding(
-            padding: widget.useListLayout
-                ? const EdgeInsets.fromLTRB(16, 14, 16, 12)
-                : const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -229,25 +236,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   const SizedBox(height: 12),
                 ],
 
-                // CW (Content Warning) 或正文内容
+                // CW (Content Warning) 可展开区域
                 if (cw != null) ...[
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.warning_amber_rounded, size: 16),
-                        const SizedBox(width: 8),
-                        Expanded(child: SelectableText(cw)),
-                        const Icon(Icons.keyboard_arrow_down, size: 16),
-                      ],
-                    ),
-                  ),
+                  _buildCwContent(cw, text),
                   const SizedBox(height: 8),
                 ] else if (text != null) ...[
                   _mfmRenderer.processTextToRichText(
@@ -409,23 +400,27 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       ),
     );
 
-    if (_shouldAnimate) {
-      return card
-          .animate(
-            onComplete: (controller) {
-              // 动画完成后通知组件不再需要为了动效而特殊处理
-              if (mounted) {
-                setState(() {
-                  _shouldAnimate = false;
-                });
-              }
-            },
-          )
-          .fadeIn(duration: 400.ms)
-          .slideY(begin: 0.1, end: 0, curve: Curves.easeOutQuad);
+    Widget result = card;
+
+    if (widget.isHighlighted) {
+      final colorScheme = Theme.of(context).colorScheme;
+      result = AnimatedContainer(
+        duration: 600.ms,
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: colorScheme.primary,
+              width: 3,
+            ),
+          ),
+          color: colorScheme.primaryContainer.withValues(alpha: 0.25),
+        ),
+        child: result,
+      );
     }
 
-    return card;
+    return result;
   }
 
   void _showContextMenuFromButton() {
@@ -798,6 +793,87 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final years = (diff.inDays / 365).floor();
       return '$years年前';
     }
+  }
+
+  Widget _buildCwContent(String cw, String? text) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.secondaryContainer.withAlpha(128),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: theme.colorScheme.secondary.withAlpha(77),
+            ),
+          ),
+          child: InkWell(
+            onTap: () => setState(() => _isCwExpanded = !_isCwExpanded),
+            borderRadius: BorderRadius.circular(10),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 18,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    cw,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AnimatedRotation(
+                  turns: _isCwExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.expand_more,
+                    size: 20,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedCrossFade(
+          firstChild: const SizedBox.shrink(),
+          secondChild: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(top: 10),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(77),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: theme.colorScheme.outlineVariant.withAlpha(128),
+              ),
+            ),
+            child: text != null
+                ? _mfmRenderer.processTextToRichText(
+                    text,
+                    context,
+                    onEmojiLoaded: () {
+                      if (mounted) setState(() {});
+                    },
+                  )
+                : const SizedBox.shrink(),
+          ),
+          crossFadeState: _isCwExpanded
+              ? CrossFadeState.showSecond
+              : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 250),
+          alignment: Alignment.topLeft,
+        ),
+      ],
+    );
   }
 
   bool _isImageFile(String? mimeType, String url) {
@@ -1192,60 +1268,11 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: GestureDetector(
-            onTap: () {
-              // 收集笔记中的所有媒体文件
-              final mediaItems = <MediaItem>[];
-              int initialIndex = 0;
-
-              for (int i = 0; i < widget.note.files.length; i++) {
-                final file = widget.note.files[i];
-                final fileUrl = file['url'] as String;
-                final fileType = file['type'] as String;
-                final isImage = fileType.startsWith('image/');
-                final isVideo = fileType.startsWith('video/');
-                final isAudio = fileType.startsWith('audio/');
-
-                if (isImage) {
-                  mediaItems.add(
-                    MediaItem(
-                      url: fileUrl,
-                      type: MediaType.image,
-                      fileName: file['name'] as String?,
-                    ),
-                  );
-                  if (fileUrl == url) {
-                    initialIndex = mediaItems.length - 1;
-                  }
-                } else if (isVideo) {
-                  mediaItems.add(
-                    MediaItem(
-                      url: fileUrl,
-                      type: MediaType.video,
-                      fileName: file['name'] as String?,
-                    ),
-                  );
-                  if (fileUrl == url) {
-                    initialIndex = mediaItems.length - 1;
-                  }
-                } else if (isAudio) {
-                  mediaItems.add(
-                    MediaItem(url: fileUrl, type: MediaType.audio),
-                  );
-                  if (fileUrl == url) {
-                    initialIndex = mediaItems.length - 1;
-                  }
-                }
-              }
-
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => MediaViewerPage(
-                    mediaItems: mediaItems,
-                    initialIndex: initialIndex,
-                  ),
-                ),
-              );
-            },
+            onTap: () => _openMediaViewer(
+              context,
+              widget.note.files,
+              url,
+            ),
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -1279,61 +1306,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: GestureDetector(
-            onTap: () {
-              // 收集笔记中的所有图片
-              final mediaItems = <MediaItem>[];
-              int initialIndex = 0;
-
-              for (int i = 0; i < widget.note.files.length; i++) {
-                final file = widget.note.files[i];
-                final fileUrl = file['url'] as String;
-                final fileType = file['type'] as String;
-                final isImage = fileType.startsWith('image/');
-                final isVideo = fileType.startsWith('video/');
-                final isAudio = fileType.startsWith('audio/');
-
-                if (isImage) {
-                  mediaItems.add(
-                    MediaItem(
-                      url: fileUrl,
-                      type: MediaType.image,
-                      fileName: file['name'] as String?,
-                    ),
-                  );
-                  if (fileUrl == url) {
-                    initialIndex = mediaItems.length - 1;
-                  }
-                } else if (isVideo) {
-                  mediaItems.add(
-                    MediaItem(
-                      url: fileUrl,
-                      type: MediaType.video,
-                      fileName: file['name'] as String?,
-                    ),
-                  );
-                  if (fileUrl == url) {
-                    initialIndex = mediaItems.length - 1;
-                  }
-                } else if (isAudio) {
-                  mediaItems.add(
-                    MediaItem(url: fileUrl, type: MediaType.audio),
-                  );
-                  if (fileUrl == url) {
-                    initialIndex = mediaItems.length - 1;
-                  }
-                }
-              }
-
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => MediaViewerPage(
-                    mediaItems: mediaItems,
-                    initialIndex: initialIndex,
-                    heroTag: heroTag,
-                  ),
-                ),
-              );
-            },
+            onTap: () => _openMediaViewer(
+              context,
+              widget.note.files,
+              url,
+              heroTag: heroTag,
+            ),
             child: Hero(
               tag: heroTag,
               child: RetryableNetworkImage(
@@ -1466,52 +1444,11 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: GestureDetector(
-          onTap: () {
-            // 收集笔记中的所有媒体文件
-            final mediaItems = <MediaItem>[];
-            int initialIndex = 0;
-
-            for (int i = 0; i < widget.note.files.length; i++) {
-              final file = widget.note.files[i];
-              final fileUrl = file['url'] as String;
-              final fileType = file['type'] as String;
-              final isImage = fileType.startsWith('image/');
-              final isVideo = fileType.startsWith('video/');
-              final isAudio = fileType.startsWith('audio/');
-
-              if (isImage) {
-                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image));
-                if (fileUrl == url) {
-                  initialIndex = mediaItems.length - 1;
-                }
-              } else if (isVideo) {
-                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video));
-                if (fileUrl == url) {
-                  initialIndex = mediaItems.length - 1;
-                }
-              } else if (isAudio) {
-                mediaItems.add(
-                  MediaItem(
-                    url: fileUrl,
-                    type: MediaType.audio,
-                    fileName: file['name'] as String?,
-                  ),
-                );
-                if (fileUrl == url) {
-                  initialIndex = mediaItems.length - 1;
-                }
-              }
-            }
-
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MediaViewerPage(
-                  mediaItems: mediaItems,
-                  initialIndex: initialIndex,
-                ),
-              ),
-            );
-          },
+          onTap: () => _openMediaViewer(
+            context,
+            widget.note.files,
+            url,
+          ),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -1542,53 +1479,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: GestureDetector(
-          onTap: () {
-            // 收集笔记中的所有图片
-            final mediaItems = <MediaItem>[];
-            int initialIndex = 0;
-
-            for (int i = 0; i < widget.note.files.length; i++) {
-              final file = widget.note.files[i];
-              final fileUrl = file['url'] as String;
-              final fileType = file['type'] as String;
-              final isImage = fileType.startsWith('image/');
-              final isVideo = fileType.startsWith('video/');
-              final isAudio = fileType.startsWith('audio/');
-
-              if (isImage) {
-                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.image));
-                if (fileUrl == url) {
-                  initialIndex = mediaItems.length - 1;
-                }
-              } else if (isVideo) {
-                mediaItems.add(MediaItem(url: fileUrl, type: MediaType.video));
-                if (fileUrl == url) {
-                  initialIndex = mediaItems.length - 1;
-                }
-              } else if (isAudio) {
-                mediaItems.add(
-                  MediaItem(
-                    url: fileUrl,
-                    type: MediaType.audio,
-                    fileName: file['name'] as String?,
-                  ),
-                );
-                if (fileUrl == url) {
-                  initialIndex = mediaItems.length - 1;
-                }
-              }
-            }
-
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MediaViewerPage(
-                  mediaItems: mediaItems,
-                  initialIndex: initialIndex,
-                  heroTag: heroTag,
-                ),
-              ),
-            );
-          },
+          onTap: () => _openMediaViewer(
+            context,
+            widget.note.files,
+            url,
+            heroTag: heroTag,
+          ),
           child: Hero(
             tag: heroTag,
             child: RetryableNetworkImage(
@@ -1603,5 +1499,65 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     }
 
     return const SizedBox.shrink();
+  }
+
+  static void _openMediaViewer(
+    BuildContext context,
+    List<Map<String, dynamic>> allFiles,
+    String targetUrl, {
+    String? heroTag,
+  }) {
+    final mediaItems = <MediaItem>[];
+    int initialIndex = 0;
+
+    for (int i = 0; i < allFiles.length; i++) {
+      final file = allFiles[i];
+      final fileUrl = file['url'] as String?;
+      final fileType = file['type'] as String? ?? '';
+      if (fileUrl == null) continue;
+
+      final isImage = fileType.startsWith('image/');
+      final isVideo = fileType.startsWith('video/');
+      final isAudio = fileType.startsWith('audio/');
+
+      if (isImage) {
+        mediaItems.add(
+          MediaItem(
+            url: fileUrl,
+            type: MediaType.image,
+            fileName: file['name'] as String?,
+          ),
+        );
+        if (fileUrl == targetUrl) initialIndex = mediaItems.length - 1;
+      } else if (isVideo) {
+        mediaItems.add(
+          MediaItem(
+            url: fileUrl,
+            type: MediaType.video,
+            fileName: file['name'] as String?,
+          ),
+        );
+        if (fileUrl == targetUrl) initialIndex = mediaItems.length - 1;
+      } else if (isAudio) {
+        mediaItems.add(
+          MediaItem(
+            url: fileUrl,
+            type: MediaType.audio,
+            fileName: file['name'] as String?,
+          ),
+        );
+        if (fileUrl == targetUrl) initialIndex = mediaItems.length - 1;
+      }
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MediaViewerPage(
+          mediaItems: mediaItems,
+          initialIndex: initialIndex,
+          heroTag: heroTag,
+        ),
+      ),
+    );
   }
 }

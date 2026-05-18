@@ -2,8 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/src/core/theme/desktop_semantic_colors.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/misskey/application/timeline_animation_state.dart';
 import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
@@ -32,6 +32,21 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
     super.dispose();
   }
 
+  void _autoScrollToTop() {
+    if (!_scrollController.hasClients || _scrollController.offset <= 0) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: 400.ms,
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+  }
+
   void _onScroll() {
     if (_isLoadingMore) return;
     if (_scrollController.position.pixels >=
@@ -57,53 +72,28 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
     final timelineAsync = ref.watch(
       misskeyTimelineProvider(widget.timelineType),
     );
-    final desktopColors = context.desktopSemanticColors;
+    final animState = ref.watch(timelineAnimationProvider);
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(color: desktopColors.timelineBackground),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: desktopColors.timelineContainerBackground,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: desktopColors.timelineBorder),
-              boxShadow: [
-                BoxShadow(
-                  color: desktopColors.timelineShadow,
-                  blurRadius: 24,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: timelineAsync.maybeWhen(
-                data: (notes) => _buildList(notes),
-                loading: () {
-                  if (timelineAsync.hasValue) {
-                    return _buildList(timelineAsync.value!);
-                  }
-                  return const Center(child: CircularProgressIndicator());
-                },
-                error: (err, stack) {
-                  if (timelineAsync.hasValue) {
-                    return _buildList(timelineAsync.value!);
-                  }
-                  return _buildErrorState(err);
-                },
-                orElse: () => const Center(child: CircularProgressIndicator()),
-              ),
-            ),
-          ),
-        ),
-      ],
+    // 检测刚发布的帖子，自动滚动到顶部
+    if (animState.highlightedNoteIds.isNotEmpty) {
+      _autoScrollToTop();
+    }
+
+    return timelineAsync.maybeWhen(
+      data: (notes) => _buildList(notes),
+      loading: () {
+        if (timelineAsync.hasValue) {
+          return _buildList(timelineAsync.value!);
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
+      error: (err, stack) {
+        if (timelineAsync.hasValue) {
+          return _buildList(timelineAsync.value!);
+        }
+        return _buildErrorState(err);
+      },
+      orElse: () => const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -111,11 +101,15 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
     if (notes.isEmpty) return _buildEmptyState(context);
 
     final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+    final animNotifier = ref.read(timelineAnimationProvider.notifier);
 
     return RefreshIndicator(
-      onRefresh: () => ref
-          .read(misskeyTimelineProvider(widget.timelineType).notifier)
-          .refresh(),
+      onRefresh: () {
+        animNotifier.reset();
+        return ref
+            .read(misskeyTimelineProvider(widget.timelineType).notifier)
+            .refresh();
+      },
       child: ListView.builder(
         controller: _scrollController,
         itemCount: notes.length + 1,
@@ -124,26 +118,31 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
         itemBuilder: (context, index) {
           if (index < notes.length) {
             final note = notes[index];
-            return Column(
-              children: [
-                ModernNoteCard(
-                      key: ValueKey(note.id),
-                      note: note,
-                      timelineType: widget.timelineType,
-                      useListLayout: true,
-                    )
-                    .animate(onComplete: (controller) => controller.stop())
-                    .fadeIn(duration: 280.ms, curve: Curves.easeOut),
-                if (index != notes.length - 1)
-                  Divider(
-                    height: 1,
-                    indent: 72,
-                    endIndent: 16,
-                    thickness: 0.6,
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-              ],
+            final isRecent = animNotifier.isRecent(note.id);
+            final isHighlighted = animNotifier.isHighlighted(note.id);
+
+            Widget card = ModernNoteCard(
+              key: ValueKey(note.id),
+              note: note,
+              timelineType: widget.timelineType,
+              isHighlighted: isHighlighted,
+              onHighlightEnd: () {
+                animNotifier.clearHighlight(note.id);
+              },
             );
+
+            if (isRecent) {
+              card = card
+                  .animate(onComplete: (c) => c.stop())
+                  .slideY(begin: -0.4, end: 0, duration: 350.ms,
+                      curve: Curves.easeOutCubic)
+                  .fadeIn(duration: 350.ms, curve: Curves.easeOut);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                animNotifier.dismissRecent(note.id);
+              });
+            }
+
+            return card;
           }
           return _buildLoadMoreIndicator();
         },
@@ -185,9 +184,12 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             Text('Error: $err', textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => ref
-                  .read(misskeyTimelineProvider(widget.timelineType).notifier)
-                  .refresh(),
+              onPressed: () {
+                ref.read(timelineAnimationProvider.notifier).reset();
+                ref
+                    .read(misskeyTimelineProvider(widget.timelineType).notifier)
+                    .refresh();
+              },
               child: Text('common_reload'.tr()),
             ),
           ],
