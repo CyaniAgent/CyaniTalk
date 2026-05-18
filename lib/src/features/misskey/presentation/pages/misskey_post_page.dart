@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/file_upload_notifier.dart';
+import '/src/features/misskey/application/timeline_animated_list_controller.dart';
 import '/src/features/misskey/domain/upload_task.dart';
 import '/src/features/misskey/domain/poll.dart';
 import '/src/features/misskey/presentation/widgets/attachment_card.dart';
@@ -868,6 +869,8 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         fileIds: fileIds.isNotEmpty ? fileIds : null,
         poll: pollParams,
       );
+
+      ref.read(postCreationProvider.notifier).state = DateTime.now();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

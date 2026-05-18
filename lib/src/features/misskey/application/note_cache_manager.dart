@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:cyanitalk/src/features/misskey/domain/note.dart';
 import '/src/core/core.dart';
 
@@ -32,8 +33,10 @@ class NoteCacheItem {
 /// 负责管理笔记数据的缓存，支持后台比对和自动更新。
 /// 使用混合缓存策略：内存中保留最近访问的笔记，超过限制时将旧笔记移到持久化存储。
 /// 最大内存缓存 100 条笔记，持久化存储最多 1000 条笔记。
-/// 支持持久化存储，应用重启后缓存依然有效。
-/// 支持按账户隔离缓存，每个账户有独立的缓存数据。
+/// 支持持久化存储（文件系统），应用重启后缓存依然有效。
+/// 支持按账户隔离缓存，每个账户有独立的缓存文件。
+///
+/// ⚠️ 写入策略：仅在应用进入后台或退出时保存，不实时写入。
 class NoteCacheManager {
   /// 内存缓存存储，key为笔记ID
   final Map<String, NoteCacheItem> _cache = {};
@@ -53,27 +56,41 @@ class NoteCacheManager {
   /// 最后比对时间
   DateTime _lastValidation = DateTime.now();
 
-  /// 最后保存时间
-  DateTime _lastSaveTime = DateTime.now();
-
   /// 最小比对间隔（30秒）
   static const Duration _minValidationInterval = Duration(seconds: 30);
 
-  /// 最小保存间隔（5秒）
-  static const Duration _minSaveInterval = Duration(seconds: 5);
+  /// 缓存文件
+  File? _cacheFile;
 
-  /// SharedPreferences 实例
-  SharedPreferences? _prefs;
+  /// 缓存目录
+  String? _cacheDirectoryPath;
 
   /// 当前账户ID
   String? _currentAccountId;
 
-  /// 获取持久化缓存存储的key
-  String get _persistentCacheKey {
+  /// 已删除笔记ID黑名单（持久化，防残留）
+  final Set<String> _deletedIds = {};
+
+  /// 已删除笔记黑名单文件
+  File? _deletedIdsFile;
+
+  /// 黑名单条目 TTL
+  static const Duration _deletedIdsTtl = Duration(days: 7);
+
+  /// 获取持久化缓存文件名
+  String get _cacheFileName {
     if (_currentAccountId != null && _currentAccountId!.isNotEmpty) {
-      return 'misskey_note_persistent_cache_$_currentAccountId';
+      return 'note_cache_$_currentAccountId.json';
     }
-    return 'misskey_note_persistent_cache';
+    return 'note_cache_default.json';
+  }
+
+  /// 获取删除黑名单文件名
+  String get _deletedIdsFileName {
+    if (_currentAccountId != null && _currentAccountId!.isNotEmpty) {
+      return 'deleted_ids_$_currentAccountId.json';
+    }
+    return 'deleted_ids_default.json';
   }
 
   /// 是否已初始化
@@ -81,12 +98,19 @@ class NoteCacheManager {
 
   /// 初始化缓存管理器
   ///
-  /// 从持久化存储加载缓存数据
+  /// 从持久化存储加载缓存数据，并清理过期项。
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    _prefs = await SharedPreferences.getInstance();
+    final dir = await getApplicationDocumentsDirectory();
+    _cacheDirectoryPath = dir.path;
+    _cacheFile = File('$dir.path/$_cacheFileName');
+    _deletedIdsFile = File('$dir.path/$_deletedIdsFileName');
+
+    await _loadDeletedIds();
     await _loadFromStorage();
+    await _filterDeletedFromCache();
+    cleanupExpiredCache();
     _isInitialized = true;
   }
 
@@ -101,10 +125,17 @@ class NoteCacheManager {
     _currentAccountId = accountId;
     logger.debug('NoteCacheManager: Current account ID set to $accountId');
 
-    // 清空当前缓存并重新加载新账户的缓存
     _cache.clear();
     _accessOrder.clear();
+    _deletedIds.clear();
+    _cacheFile = _cacheDirectoryPath != null
+        ? File('$_cacheDirectoryPath/$_cacheFileName')
+        : null;
+    _deletedIdsFile = _cacheDirectoryPath != null
+        ? File('$_cacheDirectoryPath/$_deletedIdsFileName')
+        : null;
     _loadFromStorage();
+    _loadDeletedIds();
   }
 
   /// 获取当前账户ID
@@ -114,16 +145,17 @@ class NoteCacheManager {
 
   /// 从持久化存储加载缓存
   Future<void> _loadFromStorage() async {
-    if (_prefs == null) return;
+    if (_cacheFile == null) return;
 
     try {
-      final persistentCacheJson = _prefs!.getString(_persistentCacheKey);
+      if (!await _cacheFile!.exists()) return;
+      final cacheJson = await _cacheFile!.readAsString();
 
-      if (persistentCacheJson != null && persistentCacheJson.isNotEmpty) {
-        await _loadCacheFromJson(persistentCacheJson);
+      if (cacheJson.isNotEmpty) {
+        await _loadCacheFromJson(cacheJson);
       }
     } catch (e) {
-      logger.warning('NoteCacheManager: Failed to load cache from storage: $e');
+      logger.warning('NoteCacheManager: Failed to load cache from file: $e');
       _cache.clear();
       _accessOrder.clear();
     }
@@ -163,29 +195,77 @@ class NoteCacheManager {
     }
   }
 
-  /// 保存所有笔记到持久化存储
-  ///
-  /// 确保所有笔记都被保存，防止应用被强制关闭导致数据丢失。
-  /// 添加了节流机制，避免频繁保存影响性能。
-  ///
-  /// @param force 是否强制保存，忽略节流机制
-  Future<void> saveAllToStorage({bool force = false}) async {
-    if (_prefs == null) return;
+  /// 从持久化存储加载删除黑名单
+  Future<void> _loadDeletedIds() async {
+    if (_deletedIdsFile == null) return;
 
-    // 节流机制，避免频繁保存
-    final now = DateTime.now();
-    final timeSinceLastSave = now.difference(_lastSaveTime);
+    try {
+      if (!await _deletedIdsFile!.exists()) return;
+      final content = await _deletedIdsFile!.readAsString();
+      if (content.isEmpty) return;
 
-    if (!force && timeSinceLastSave < _minSaveInterval) {
-      logger.debug('NoteCacheManager: Skipping save due to throttle');
-      return;
+      final data = jsonDecode(content) as Map<String, dynamic>;
+      final ids = data['ids'] as List<dynamic>?;
+      if (ids == null) return;
+
+      final cutoff = DateTime.now().subtract(_deletedIdsTtl);
+
+      for (final id in ids) {
+        final entry = id as Map<String, dynamic>;
+        final deletedAt = DateTime.parse(entry['deletedAt'] as String);
+        if (deletedAt.isAfter(cutoff)) {
+          _deletedIds.add(entry['id'] as String);
+        }
+      }
+
+      logger.debug(
+        'NoteCacheManager: Loaded ${_deletedIds.length} deleted note IDs',
+      );
+    } catch (e) {
+      logger.warning('NoteCacheManager: Failed to load deleted IDs: $e');
     }
+  }
+
+  /// 从缓存中过滤掉已被删除的笔记
+  Future<void> _filterDeletedFromCache() async {
+    if (_deletedIds.isEmpty || _cache.isEmpty) return;
+
+    int removedCount = 0;
+    for (final noteId in _deletedIds) {
+      if (_cache.containsKey(noteId)) {
+        _cache.remove(noteId);
+        _accessOrder.remove(noteId);
+        removedCount++;
+      }
+    }
+
+    if (removedCount > 0) {
+      logger.info(
+        'NoteCacheManager: Removed $removedCount deleted notes from cache',
+      );
+    }
+  }
+
+  /// 将笔记ID加入删除黑名单
+  void addToDeletedIds(String noteId) {
+    _deletedIds.add(noteId);
+  }
+
+  /// 检查笔记ID是否在删除黑名单中
+  bool isDeleted(String noteId) {
+    return _deletedIds.contains(noteId);
+  }
+
+  /// 保存所有内容到持久化存储
+  ///
+  /// 包括缓存笔记和删除黑名单。
+  Future<void> saveAllToStorage() async {
+    if (_cacheFile == null) return;
 
     try {
       final allCacheData = <String, dynamic>{};
       final allAccessOrder = <String>[];
 
-      // 限制保存的笔记数量，只保存最近的笔记
       final notesToSave = _accessOrder.length > _maxPersistentCacheSize
           ? _accessOrder.sublist(_accessOrder.length - _maxPersistentCacheSize)
           : _accessOrder;
@@ -210,16 +290,40 @@ class NoteCacheManager {
         'accessOrder': allAccessOrder,
       };
 
-      await _prefs!.setString(_persistentCacheKey, jsonEncode(allCacheJson));
-      _lastSaveTime = now;
+      await _cacheFile!.parent.create();
+      await _cacheFile!.writeAsString(jsonEncode(allCacheJson));
 
       logger.debug(
-        'NoteCacheManager: Saved ${allCacheData.length} notes to persistent storage',
+        'NoteCacheManager: Saved ${allCacheData.length} notes to file',
       );
+
+      await _saveDeletedIds();
     } catch (e) {
       logger.warning(
-        'NoteCacheManager: Failed to save all notes to storage: $e',
+        'NoteCacheManager: Failed to save all notes to file: $e',
       );
+    }
+  }
+
+  /// 保存删除黑名单到文件
+  Future<void> _saveDeletedIds() async {
+    if (_deletedIdsFile == null || _deletedIds.isEmpty) return;
+
+    try {
+      final now = DateTime.now();
+      final entries = _deletedIds
+          .map((id) => {'id': id, 'deletedAt': now.toIso8601String()})
+          .toList();
+
+      final data = {
+        'ids': entries,
+        'savedAt': now.toIso8601String(),
+      };
+
+      await _deletedIdsFile!.parent.create();
+      await _deletedIdsFile!.writeAsString(jsonEncode(data));
+    } catch (e) {
+      logger.warning('NoteCacheManager: Failed to save deleted IDs: $e');
     }
   }
 
@@ -253,13 +357,14 @@ class NoteCacheManager {
 
   /// 从持久化存储加载笔记
   Future<List<Note>> loadNotesFromPersistentStorage() async {
-    if (_prefs == null) return [];
+    if (_cacheFile == null) return [];
 
     try {
-      final persistentCacheJson = _prefs!.getString(_persistentCacheKey);
-      if (persistentCacheJson == null || persistentCacheJson.isEmpty) return [];
+      if (!await _cacheFile!.exists()) return [];
+      final cacheJson = await _cacheFile!.readAsString();
+      if (cacheJson.isEmpty) return [];
 
-      final cacheData = jsonDecode(persistentCacheJson) as Map<String, dynamic>;
+      final cacheData = jsonDecode(cacheJson) as Map<String, dynamic>;
       final notesData = cacheData['notes'] as Map<String, dynamic>?;
       final accessOrderData = cacheData['accessOrder'] as List<dynamic>?;
 
@@ -318,15 +423,9 @@ class NoteCacheManager {
     }
 
     _updateAccessOrder(noteId);
-
-    saveAllToStorage();
   }
 
   /// 批量添加笔记到缓存
-  ///
-  /// 批量添加笔记到缓存，只在全部添加完成后保存一次，提高性能。
-  ///
-  /// @param notes 要添加的笔记列表
   void putNotes(List<Note> notes) {
     for (final note in notes) {
       final noteId = note.id;
@@ -343,23 +442,43 @@ class NoteCacheManager {
 
       _updateAccessOrder(noteId);
     }
-
-    // 批量添加完成后只保存一次，提高性能
-    saveAllToStorage();
   }
 
   /// 从缓存中移除笔记
   void removeNote(String noteId) {
     _cache.remove(noteId);
     _accessOrder.remove(noteId);
-    saveAllToStorage();
+  }
+
+  /// 仅保留指定 ID 集合中的缓存笔记，移除其余所有条目
+  ///
+  /// 用于在获取最新时间线数据后，清除已被服务器删除的残留缓存。
+  void retainOnly(Set<String> noteIds) {
+    final toRemove = _cache.keys.where((id) => !noteIds.contains(id)).toList();
+    for (final id in toRemove) {
+      _cache.remove(id);
+      _accessOrder.remove(id);
+    }
+  }
+
+  /// 将不在指定活跃集合中的缓存笔记标记为未验证并过期
+  ///
+  /// 用于在获取最新时间线数据后，标记那些未出现在返回结果中的笔记，
+  /// 让后续的 `_validateAllCachedNotes` 能捕获并验证它们（遇到 404 即删除）。
+  void invalidateAbsentNotes(Set<String> activeIds) {
+    for (final entry in _cache.entries) {
+      if (!activeIds.contains(entry.key)) {
+        entry.value.isValidated = false;
+        entry.value.cachedAt =
+            DateTime.now().subtract(const Duration(minutes: 10));
+      }
+    }
   }
 
   /// 清空所有缓存
   void clear() {
     _cache.clear();
     _accessOrder.clear();
-    saveAllToStorage();
   }
 
   /// 获取缓存大小
@@ -371,8 +490,6 @@ class NoteCacheManager {
   }
 
   /// 获取需要验证的笔记列表
-  ///
-  /// 返回缓存中未验证或已过期的笔记ID列表
   List<String> getNotesToValidate() {
     final notesToValidate = <String>[];
 
@@ -410,13 +527,9 @@ class NoteCacheManager {
   }
 
   /// 淘汰最近最少使用的缓存项
-  ///
-  /// 淘汰最近最少使用的缓存项，确保缓存大小不超过限制。
-  /// 优先淘汰已过期的缓存项，如果没有过期项，则淘汰最早访问的项。
   void _evictLRU() {
     if (_accessOrder.isEmpty) return;
 
-    // 优先淘汰已过期的缓存项
     for (int i = 0; i < _accessOrder.length; i++) {
       final noteId = _accessOrder[i];
       final cacheItem = _cache[noteId];
@@ -429,16 +542,12 @@ class NoteCacheManager {
       }
     }
 
-    // 如果没有过期项，淘汰最早访问的项
     final lruNoteId = _accessOrder.removeAt(0);
     _cache.remove(lruNoteId);
     logger.debug('NoteCacheManager: Evicted LRU note: $lruNoteId');
   }
 
   /// 启动后台比对定时器
-  ///
-  /// 每60秒执行一次比对，检查缓存的笔记是否有更新
-  /// @param validationCallback 比对回调函数，接收需要验证的笔记ID列表
   void startValidationTimer(
     Future<void> Function(List<String> noteIds) validationCallback,
   ) {
@@ -461,9 +570,7 @@ class NoteCacheManager {
     final now = DateTime.now();
     final timeSinceLastValidation = now.difference(_lastValidation);
 
-    if (timeSinceLastValidation < _minValidationInterval) {
-      return;
-    }
+    if (timeSinceLastValidation < _minValidationInterval) return;
 
     _lastValidation = now;
 
@@ -478,8 +585,6 @@ class NoteCacheManager {
   }
 
   /// 清理过期缓存
-  ///
-  /// 移除所有已过期的缓存项
   void cleanupExpiredCache() {
     final expiredNoteIds = <String>[];
 
@@ -492,6 +597,17 @@ class NoteCacheManager {
     for (final noteId in expiredNoteIds) {
       removeNote(noteId);
     }
+
+    if (expiredNoteIds.isNotEmpty) {
+      logger.debug(
+        'NoteCacheManager: Cleaned up ${expiredNoteIds.length} expired notes',
+      );
+    }
+  }
+
+  /// 启动时清理过期项
+  void cleanupStartup() {
+    cleanupExpiredCache();
   }
 
   /// 获取缓存统计信息

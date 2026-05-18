@@ -7,6 +7,8 @@ import '/src/features/misskey/domain/channel.dart';
 import '/src/features/misskey/domain/misskey_user.dart';
 import 'misskey_streaming_service.dart';
 import 'note_cache_manager.dart';
+import 'timeline_animation_state.dart';
+import 'timeline_animated_list_controller.dart';
 import '/src/core/core.dart';
 
 part 'misskey_notifier.g.dart';
@@ -47,6 +49,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
   /// 验证定时器，用于定期检测已删除的笔记
   Timer? _validationTimer;
+
+  /// 最后已知笔记 ID（用于增量同步 sinceId）
+  String? _latestNoteId;
 
   /// 获取缓存管理器实例
   static NoteCacheManager get cacheManager => _cacheManager;
@@ -90,10 +95,12 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       if (cachedNotes.isNotEmpty) {
         logger.info('Misskey时间线: 从内存缓存加载了 ${cachedNotes.length} 条笔记');
 
-        // 延迟获取最新数据，避免阻塞UI
+        // 延迟获取最新数据并启动验证，避免阻塞UI
         Future.delayed(const Duration(seconds: 2), () async {
           if (!ref.mounted) return;
           await _loadLatestData(type);
+          if (!ref.mounted) return;
+          await _validateAllCachedNotes();
         });
 
         // Start periodic validation to detect deleted notes
@@ -118,6 +125,8 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         Future.delayed(const Duration(seconds: 2), () async {
           if (!ref.mounted) return;
           await _loadLatestData(type);
+          if (!ref.mounted) return;
+          await _validateAllCachedNotes();
         });
 
         // Start periodic validation to detect deleted notes
@@ -174,9 +183,16 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       final latestNotes = await repository.getTimeline(type);
       if (!ref.mounted) return;
 
+      // 更新最后已知笔记 ID
+      if (latestNotes.isNotEmpty) {
+        _latestNoteId = latestNotes.first.id;
+      }
+
       // 直接替换缓存数据
       logger.info('Misskey时间线: 获取到 ${latestNotes.length} 条最新笔记，替换缓存');
+      final latestNoteIds = latestNotes.map((n) => n.id).toSet();
       _cacheManager.putNotes(latestNotes);
+      _cacheManager.invalidateAbsentNotes(latestNoteIds);
 
       // 更新UI
       if (ref.mounted) {
@@ -203,70 +219,97 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     }
   }
 
-  /// 启动定期验证
+  /// 启动定期验证 — 每 60 秒全量扫描所有未验证/过期缓存笔记
   void _startPeriodicValidation() {
     _cacheManager.startValidationTimer((noteIds) async {
-      await _validateCachedNotes(noteIds);
+      await _validateAllCachedNotes();
     });
   }
 
-  /// 验证缓存的笔记
-  Future<void> _validateCachedNotes(List<String> noteIds) async {
+  /// 启动时全量验证：验证所有缓存中未验证/过期的笔记
+  ///
+  /// 分批次执行，每批 10 条，避免阻塞 UI。
+  Future<void> _validateAllCachedNotes() async {
     try {
       if (!ref.mounted) return;
 
-      final currentNotes = state.value ?? [];
-      if (currentNotes.isEmpty) return;
+      final noteIds = _cacheManager.getNotesToValidate();
+      if (noteIds.isEmpty) return;
 
-      final notesToCheck = <String>[];
-      for (final note in currentNotes.take(10)) {
-        if (noteIds.contains(note.id)) {
-          notesToCheck.add(note.id);
-        }
+      logger.info('Misskey时间线: 启动全量验证，共 ${noteIds.length} 条笔记');
+
+      const batchSize = 10;
+      for (var i = 0; i < noteIds.length; i += batchSize) {
+        if (!ref.mounted) return;
+
+        final batch = noteIds.skip(i).take(batchSize).toList();
+        await _performNoteValidation(batch);
       }
 
-      if (notesToCheck.isEmpty) return;
-
-      logger.debug('Misskey时间线: 开始验证 ${notesToCheck.length} 条笔记');
-
-      final repository = await ref.read(misskeyRepositoryProvider.future);
-      if (!ref.mounted) return;
-
-      final updatedNotes = <Note>[];
-
-      for (final noteId in notesToCheck) {
-        if (!ref.mounted) break;
-
-        try {
-          final latestNote = await repository.getNote(noteId);
-          if (!ref.mounted) break;
-
-          final cachedNote = _cacheManager.getNote(noteId);
-          if (cachedNote == null || _hasNoteChanged(cachedNote, latestNote)) {
-            updatedNotes.add(latestNote);
-          }
-        } catch (e) {
-          if (!ref.mounted) break;
-          final errorStr = e.toString();
-          if (errorStr.contains('404') ||
-              errorStr.contains('400') ||
-              errorStr.contains('Note not found')) {
-            _handleDeleteNote(noteId);
-          }
-        }
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-
-      if (ref.mounted && updatedNotes.isNotEmpty) {
-        for (final note in updatedNotes) {
-          _cacheManager.putNote(note);
-        }
-        final newNotes = _updateNotesInList(currentNotes, updatedNotes);
-        state = AsyncData(newNotes);
-      }
+      logger.info('Misskey时间线: 全量验证完成');
     } catch (e) {
       if (e.toString().contains('disposed')) return;
-      logger.error('Misskey时间线: 验证缓存失败', e);
+      logger.error('Misskey时间线: 启动全量验证失败', e);
+    }
+  }
+
+  /// 执行单条笔记验证
+  Future<void> _performNoteValidation(List<String> noteIds) async {
+    if (!ref.mounted) return;
+
+    final currentNotes = state.value ?? [];
+    final repository = await ref.read(misskeyRepositoryProvider.future);
+    if (!ref.mounted) return;
+
+    final updatedNotes = <Note>[];
+    final deletedIds = <String>[];
+
+    for (final noteId in noteIds) {
+      if (!ref.mounted) break;
+
+      try {
+        final latestNote = await repository.getNote(noteId);
+        if (!ref.mounted) break;
+
+        final cachedNote = _cacheManager.getNote(noteId);
+        if (cachedNote == null || _hasNoteChanged(cachedNote, latestNote)) {
+          updatedNotes.add(latestNote);
+        }
+        _cacheManager.markAsValidated(noteId);
+      } catch (e) {
+        if (!ref.mounted) break;
+        final errorStr = e.toString();
+        if (errorStr.contains('404') ||
+            errorStr.contains('400') ||
+            errorStr.contains('Note not found') ||
+            (errorStr.contains('Null') && errorStr.contains('subtype'))) {
+          logger.info('Misskey时间线: 验证发现笔记已删除: $noteId');
+          deletedIds.add(noteId);
+          _cacheManager.removeNote(noteId);
+          _cacheManager.addToDeletedIds(noteId);
+        }
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (!ref.mounted) return;
+
+    // 从状态中移除已删除的笔记
+    var newNotes = currentNotes;
+    if (deletedIds.isNotEmpty) {
+      newNotes = currentNotes.where((n) => !deletedIds.contains(n.id)).toList();
+    }
+
+    // 更新发生变化的笔记
+    if (updatedNotes.isNotEmpty) {
+      for (final note in updatedNotes) {
+        _cacheManager.putNote(note);
+      }
+      newNotes = _updateNotesInList(newNotes, updatedNotes);
+    }
+
+    if (deletedIds.isNotEmpty || updatedNotes.isNotEmpty) {
+      state = AsyncData(newNotes);
     }
   }
 
@@ -305,6 +348,24 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
       state = AsyncData([note, ...currentNotes]);
       _cacheManager.putNote(note);
+
+      // 标记动画状态
+      final animNotifier = ref.read(timelineAnimationProvider.notifier);
+      animNotifier.markRecent(note.id);
+
+      // 检测是否刚发布的帖子（本人发帖后由 streaming 返回）
+      final pendingPostTime = ref.read(postCreationProvider);
+      if (pendingPostTime != null) {
+        final currentUserId = ref.read(misskeyMeProvider).value?.id;
+        if (currentUserId != null && note.userId == currentUserId) {
+          final diff =
+              note.createdAt.difference(pendingPostTime).inSeconds.abs();
+          if (diff < 5) {
+            animNotifier.markJustPosted(note.id);
+            ref.read(postCreationProvider.notifier).state = null;
+          }
+        }
+      }
     } catch (e) {
       if (e.toString().contains('disposed')) return;
       logger.error('Misskey时间线: 处理新笔记失败', e);
@@ -314,6 +375,10 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   void _handleDeleteNote(String noteId) {
     try {
       if (!ref.mounted) return;
+
+      // 持久化到删除黑名单，防止冷启动后残留
+      _cacheManager.addToDeletedIds(noteId);
+
       final currentNotes = state.value ?? [];
       if (!currentNotes.any((n) => n.id == noteId)) return;
 
@@ -341,15 +406,43 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       if (!ref.mounted) return;
 
-      final latestNotes = await repository.getTimeline(type);
+      final latestNotes = await repository.getTimeline(
+        type,
+        sinceId: _latestNoteId,
+      );
+      if (!ref.mounted) return;
+
+      // 增量模式（sinceId 非空）：无新帖则保持现状
+      if (_latestNoteId != null && latestNotes.isEmpty) return;
+
+      // 更新最后已知笔记 ID
+      if (latestNotes.isNotEmpty) {
+        _latestNoteId = latestNotes.first.id;
+      }
+
+      // 标记不在返回中的缓存笔记为未验证（增量检测删除）
+      if (latestNotes.isNotEmpty) {
+        final latestIds = latestNotes.map((n) => n.id).toSet();
+        _cacheManager.invalidateAbsentNotes(latestIds);
+      }
+
+      _cacheManager.putNotes(latestNotes);
       if (!ref.mounted) return;
 
       final currentNotes = state.value ?? [];
-      if (_hasNotesChanged(currentNotes, latestNotes)) {
-        _cacheManager.putNotes(latestNotes);
-        if (ref.mounted) {
-          state = AsyncData(latestNotes);
+
+      if (_latestNoteId != null && currentNotes.isNotEmpty) {
+        // 增量模式：将新帖插入已有列表前部，避免重复
+        final existingIds = currentNotes.map((n) => n.id).toSet();
+        final trulyNew = latestNotes
+            .where((n) => !existingIds.contains(n.id))
+            .toList();
+        if (trulyNew.isNotEmpty) {
+          state = AsyncData([...trulyNew, ...currentNotes]);
         }
+      } else if (_hasNotesChanged(currentNotes, latestNotes)) {
+        // 全量模式（首次 refresh）：直接替换
+        state = AsyncData(latestNotes);
       }
     } catch (e, stack) {
       if (e.toString().contains('disposed')) return;
