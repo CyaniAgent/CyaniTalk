@@ -37,38 +37,13 @@ class DesktopSemanticColors extends ThemeExtension<DesktopSemanticColors> {
     }
 
     final isDark = scheme.brightness == Brightness.dark;
-    final appBackground = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      isDark ? 0.20 : 0.24,
-    )!;
-    final paneBackground = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      isDark ? 0.14 : 0.18,
-    )!;
-    final contentBackground = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      isDark ? 0.09 : 0.12,
-    )!;
-    final timelineBackground = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      isDark ? 0.16 : 0.20,
-    )!;
-    final timelineContainerBackground = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      isDark ? 0.03 : 0.05,
-    )!;
 
     return DesktopSemanticColors(
-      appBackground: appBackground,
-      paneBackground: paneBackground,
-      contentBackground: contentBackground,
-      timelineBackground: timelineBackground,
-      timelineContainerBackground: timelineContainerBackground,
+      appBackground: scheme.surface,
+      paneBackground: scheme.surfaceContainerLow,
+      contentBackground: scheme.surface,
+      timelineBackground: scheme.surfaceContainer,
+      timelineContainerBackground: scheme.surfaceContainerHigh,
       timelineBorder: scheme.outlineVariant.withValues(
         alpha: isDark ? 0.72 : 0.78,
       ),

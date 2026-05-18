@@ -164,6 +164,7 @@ class MisskeyApi extends BaseApi {
   Future<List<dynamic>> getTimeline(
     String type, {
     int limit = 20,
+    String? sinceId,
     String? untilId,
   }) {
     final endpoint = switch (type) {
@@ -176,6 +177,7 @@ class MisskeyApi extends BaseApi {
 
     return _fetchList('MisskeyApi.getTimeline', endpoint, {
       'limit': limit,
+      'sinceId': ?sinceId,
       'untilId': ?untilId,
     });
   }
