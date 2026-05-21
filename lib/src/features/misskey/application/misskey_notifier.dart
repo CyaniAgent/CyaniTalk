@@ -427,6 +427,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       }
 
       _cacheManager.putNotes(latestNotes);
+      await _cacheManager.saveAllToStorage();
       if (!ref.mounted) return;
 
       final currentNotes = state.value ?? [];
@@ -443,6 +444,13 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       } else if (_hasNotesChanged(currentNotes, latestNotes)) {
         // 全量模式（首次 refresh）：直接替换
         state = AsyncData(latestNotes);
+      }
+      // 刷新的同时，异步执行删帖检测（API对接），以清除已经删帖的帖子
+      final mergedNotes = state.value ?? [];
+      if (mergedNotes.isNotEmpty) {
+        final validateIds = mergedNotes.take(30).map((n) => n.id).toList();
+        // 异步后台运行，不需要 await 阻塞刷新结果在 UI 的立即渲染
+        _performNoteValidation(validateIds);
       }
     } catch (e, stack) {
       if (e.toString().contains('disposed')) return;

@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'announcement.freezed.dart';
-part 'announcement.g.dart';
 
 /// Misskey 公告模型
 ///

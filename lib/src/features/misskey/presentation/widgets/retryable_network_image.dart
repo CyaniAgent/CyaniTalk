@@ -2,13 +2,32 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/core.dart';
+import '/src/core/services/misskey_image_cache_service.dart';
+import '/src/core/services/misskey_image_cache_database.dart';
 
 /// A network image widget with caching support and retry mechanism
+/// 
+/// 集成 SQLite 元数据缓存，支持：
+/// - 本地文件缓存（使用现有 cacheManager）
+/// - SQLite 元数据记录（URL、本地路径、关联UID、访问时间等）
+/// - 可选的 UID 关联（用于发帖人标记和互动关系比对）
 class RetryableNetworkImage extends StatefulWidget {
   final String url;
   final BoxFit fit;
   final double? width;
   final double? height;
+  
+  /// 可选的关联用户UID（用于头像等场景）
+  final String? associatedUserId;
+  
+  /// 可选的关联帖子ID（用于帖子图片场景）
+  final String? associatedNoteId;
+  
+  /// 可选的关联主机（用于多实例场景）
+  final String? associatedHost;
+  
+  /// 缓存类型（默认为 postImage）
+  final ImageCacheType cacheType;
 
   const RetryableNetworkImage({
     super.key,
@@ -16,6 +35,10 @@ class RetryableNetworkImage extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.width,
     this.height,
+    this.associatedUserId,
+    this.associatedNoteId,
+    this.associatedHost,
+    this.cacheType = ImageCacheType.postImage,
   });
 
   @override
@@ -123,6 +146,12 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
         widget.url,
         CacheCategory.image,
       );
+      
+      // 记录到 SQLite 元数据（完全异步，不阻塞）
+      if (cachedPath != null && mounted) {
+        _recordToSQLite(cachedPath);
+      }
+      
       if (mounted && !_forceNetwork) {
         setState(() {
           _cachedPath = cachedPath;
@@ -132,6 +161,26 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
       // 这里的错误不再弹出，因为我们有网络加载保底
       logger.warning('后台更新缓存失败 (不影响显示): ${widget.url}');
     }
+  }
+
+  /// 记录缓存元数据到 SQLite（完全异步，不阻塞渲染）
+  void _recordToSQLite(String localPath) {
+    // 使用 Future.microtask 确保不阻塞当前帧渲染
+    // SQLite 写入完全在后台执行，失败也不影响图片显示
+    Future.microtask(() async {
+      try {
+        final cacheService = MisskeyImageCacheService();
+        await cacheService.cacheImage(
+          imageUrl: widget.url,
+          cacheType: widget.cacheType,
+          associatedUserId: widget.associatedUserId,
+          associatedNoteId: widget.associatedNoteId,
+          associatedHost: widget.associatedHost,
+        );
+      } catch (e) {
+        logger.warning('SQLite 元数据记录失败: ${widget.url}');
+      }
+    });
   }
 
   Future<void> _retryLoading() async {

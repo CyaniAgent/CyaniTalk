@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/core/utils/logger.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/timeline_animation_state.dart';
 import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
   const MisskeyTimelinePage({super.key, required this.timelineType});
@@ -19,6 +22,9 @@ class MisskeyTimelinePage extends ConsumerStatefulWidget {
 class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoadingMore = false;
+  int _upScrollCount = 0;
+  DateTime? _lastUpScrollTime;
+  double? _scrollTargetOffset;
 
   @override
   void initState() {
@@ -30,6 +36,74 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _handleUpScrollRefresh() {
+    final now = DateTime.now();
+    if (_lastUpScrollTime == null ||
+        now.difference(_lastUpScrollTime!) > const Duration(milliseconds: 300)) {
+      _upScrollCount++;
+      _lastUpScrollTime = now;
+      logger.info('Timeline scroll-to-refresh count: $_upScrollCount/3');
+
+      if (_upScrollCount >= 3) {
+        _upScrollCount = 0;
+        _lastUpScrollTime = null;
+        ref.read(timelineAnimationProvider.notifier).reset();
+        ref.read(misskeyTimelineProvider(widget.timelineType).notifier).refresh();
+      }
+    }
+  }
+
+  void _onPointerSignal(PointerSignalEvent event) {
+    if (event is PointerScrollEvent) {
+      if (!_scrollController.hasClients) return;
+
+      final dy = event.scrollDelta.dy;
+      if (dy == 0) return;
+
+      final currentOffset = _scrollController.offset;
+
+      // 如果在顶部，并且是往上滚，则执行“顶端往上滚动3次刷新”
+      if (currentOffset <= 0 && dy < 0) {
+        _handleUpScrollRefresh();
+        return;
+      }
+
+      // 往下滚时，重置往上滚的计数
+      if (dy > 0) {
+        _upScrollCount = 0;
+      }
+
+      // 仅在 Windows 上开启平滑无缝滚动
+      final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+      if (!isWindows) return;
+
+      GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent resolvedEvent) {
+        final maxExtent = _scrollController.position.maxScrollExtent;
+
+        double baseOffset = _scrollTargetOffset ?? currentOffset;
+
+        // 修正方向反转情况
+        if ((dy < 0 && baseOffset > currentOffset) || (dy > 0 && baseOffset < currentOffset)) {
+          baseOffset = currentOffset;
+        }
+
+        // 增加 1.5 倍滚动距离，使滚动平滑且跟手
+        final target = (baseOffset + dy * 1.5).clamp(0.0, maxExtent);
+        _scrollTargetOffset = target;
+
+        _scrollController.animateTo(
+          target,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+        ).then((_) {
+          if (mounted && _scrollController.hasClients && _scrollController.offset == _scrollTargetOffset) {
+            _scrollTargetOffset = null;
+          }
+        });
+      });
+    }
   }
 
   void _autoScrollToTop() {
@@ -79,28 +153,6 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
       _autoScrollToTop();
     }
 
-    return timelineAsync.maybeWhen(
-      data: (notes) => _buildList(notes),
-      loading: () {
-        if (timelineAsync.hasValue) {
-          return _buildList(timelineAsync.value!);
-        }
-        return const Center(child: CircularProgressIndicator());
-      },
-      error: (err, stack) {
-        if (timelineAsync.hasValue) {
-          return _buildList(timelineAsync.value!);
-        }
-        return _buildErrorState(err);
-      },
-      orElse: () => const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Widget _buildList(List<dynamic> notes) {
-    if (notes.isEmpty) return _buildEmptyState(context);
-
-    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
     final animNotifier = ref.read(timelineAnimationProvider.notifier);
 
     return RefreshIndicator(
@@ -110,91 +162,147 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             .read(misskeyTimelineProvider(widget.timelineType).notifier)
             .refresh();
       },
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: notes.length + 1,
-        cacheExtent: isWindows ? 500 : 1500,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemBuilder: (context, index) {
-          if (index < notes.length) {
-            final note = notes[index];
-            final isRecent = animNotifier.isRecent(note.id);
-            final isHighlighted = animNotifier.isHighlighted(note.id);
-
-            Widget card = ModernNoteCard(
-              key: ValueKey(note.id),
-              note: note,
-              timelineType: widget.timelineType,
-              isHighlighted: isHighlighted,
-              onHighlightEnd: () {
-                animNotifier.clearHighlight(note.id);
-              },
-            );
-
-            if (isRecent) {
-              card = card
-                  .animate(onComplete: (c) => c.stop())
-                  .slideY(begin: -0.4, end: 0, duration: 350.ms,
-                      curve: Curves.easeOutCubic)
-                  .fadeIn(duration: 350.ms, curve: Curves.easeOut);
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                animNotifier.dismissRecent(note.id);
-              });
-            }
-
-            return card;
+      child: timelineAsync.maybeWhen(
+        data: (notes) => _buildList(notes),
+        loading: () {
+          if (timelineAsync.hasValue) {
+            return _buildList(timelineAsync.value!);
           }
-          return _buildLoadMoreIndicator();
+          return _buildLoadingState();
         },
+        error: (err, stack) {
+          if (timelineAsync.hasValue) {
+            return _buildList(timelineAsync.value!);
+          }
+          return _buildErrorState(err);
+        },
+        orElse: () => _buildLoadingState(),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.auto_awesome_motion_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.outlineVariant,
+  Widget _buildLoadingState() {
+    return const CustomScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          child: Center(
+            child: CyaniLoadingIndicator(size: 60),
           ),
-          const SizedBox(height: 16),
-          Text(
-            'timeline_no_notes_found'.tr(),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.outline,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildList(List<dynamic> notes) {
+    if (notes.isEmpty) return _buildEmptyState(context);
+
+    final isWindows = Theme.of(context).platform == TargetPlatform.windows;
+    final animNotifier = ref.read(timelineAnimationProvider.notifier);
+
+    return Listener(
+      onPointerSignal: _onPointerSignal,
+      child: ListView.builder(
+        controller: _scrollController,
+      itemCount: notes.length + 1,
+      cacheExtent: isWindows ? 500 : 1500,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        if (index < notes.length) {
+          final note = notes[index];
+          final isRecent = animNotifier.isRecent(note.id);
+          final isHighlighted = animNotifier.isHighlighted(note.id);
+
+          Widget card = ModernNoteCard(
+            key: ValueKey(note.id),
+            note: note,
+            timelineType: widget.timelineType,
+            isHighlighted: isHighlighted,
+            onHighlightEnd: () {
+              animNotifier.clearHighlight(note.id);
+            },
+          );
+
+          if (isRecent) {
+            card = card
+                .animate(onComplete: (c) => c.stop())
+                .slideY(begin: -0.4, end: 0, duration: 350.ms,
+                    curve: Curves.easeOutCubic)
+                .fadeIn(duration: 350.ms, curve: Curves.easeOut);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              animNotifier.dismissRecent(note.id);
+            });
+          }
+
+          return card;
+        }
+        return _buildLoadMoreIndicator();
+      },
+    ),);
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.auto_awesome_motion_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'timeline_no_notes_found'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildErrorState(Object err) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text('Error: $err', textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                ref.read(timelineAnimationProvider.notifier).reset();
-                ref
-                    .read(misskeyTimelineProvider(widget.timelineType).notifier)
-                    .refresh();
-              },
-              child: Text('common_reload'.tr()),
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Error: $err', textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.read(timelineAnimationProvider.notifier).reset();
+                      ref
+                          .read(misskeyTimelineProvider(widget.timelineType).notifier)
+                          .refresh();
+                    },
+                    child: Text('common_reload'.tr()),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -202,7 +310,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
     return _isLoadingMore
         ? const Padding(
             padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            child: Center(
+              child: CyaniLoadingIndicator(size: 30),
+            ),
           )
         : const SizedBox(height: 80);
   }

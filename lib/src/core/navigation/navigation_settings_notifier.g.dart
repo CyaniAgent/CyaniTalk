@@ -38,7 +38,7 @@ final class NavigationSettingsNotifierProvider
 }
 
 String _$navigationSettingsNotifierHash() =>
-    r'990650882ffa6d3249f3a903973df546eaf4d1cc';
+    r'5743e4379b4399fdc19597c7e57845eac8939ae5';
 
 /// 导航设置状态管理器
 

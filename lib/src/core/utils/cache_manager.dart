@@ -201,20 +201,14 @@ class CacheManager {
   /// 首选项键：缓存目录路径
   static const String _prefKey = 'cache_directory_path';
 
-  /// 首选项键：最大缓存大小
-  static const String _maxCacheSizeKey = 'max_cache_size';
-
-  /// 首选项键前缀：类别最大大小
-  static const String _categoryMaxSizeKey = 'category_max_size_';
+  /// 首选项键：缓存时间上限（天）
+  static const String _cacheTimeLimitKey = 'cache_time_limit';
 
   /// 用于同步文件操作的锁
   final _fileLock = _FileLock();
 
-  /// 默认最大缓存大小 (100MB)
-  static const int defaultMaxCacheSize = 100 * 1024 * 1024;
-
-  /// 最大单个缓存文件大小 (50MB)
-  static const int maxCacheFileSize = 50 * 1024 * 1024;
+  /// 默认缓存时间上限（30天）
+  static const int defaultCacheTimeLimit = 30;
 
   /// 下载超时时间
   static const Duration downloadTimeout = Duration(seconds: 30);
@@ -335,45 +329,34 @@ class CacheManager {
     await prefs.setString(_prefKey, path);
   }
 
-  /// 获取最大缓存大小
+  /// 获取缓存时间上限（天）
   ///
-  /// 从首选项中获取最大缓存大小，如果未设置则返回默认值（100MB）。
+  /// 从首选项中获取缓存时间上限，如果未设置则返回默认值（30天）。
+  /// 返回 null 表示不限时长。
   ///
-  /// @return 最大缓存大小（字节）
-  Future<int> getMaxCacheSize() async {
+  /// @return 缓存时间上限（天），null 表示不限
+  Future<int?> getCacheTimeLimit() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_maxCacheSizeKey) ?? defaultMaxCacheSize;
+    return prefs.getInt(_cacheTimeLimitKey);
   }
 
-  /// 设置最大缓存大小
+  /// 设置缓存时间上限（天）
   ///
-  /// 设置缓存的最大大小限制，并在设置后检查并清理超出限制的缓存。
+  /// 设置缓存的最大保留时间，并在设置后清理过期缓存。
   ///
-  /// @param sizeInBytes 最大缓存大小（字节）
-  Future<void> setMaxCacheSize(int sizeInBytes) async {
+  /// @param days 缓存时间上限（天），null 表示不限时长
+  Future<void> setCacheTimeLimit(int? days) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_maxCacheSizeKey, sizeInBytes);
+    if (days == null) {
+      await prefs.remove(_cacheTimeLimitKey);
+    } else {
+      await prefs.setInt(_cacheTimeLimitKey, days);
+    }
 
-    // 检查并清理超出限制的缓存
-    await _ensureCacheSizeLimit();
-  }
-
-  /// 获取指定类别的最大缓存大小
-  Future<int?> getCategoryMaxSize(CacheCategory category) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('$_categoryMaxSizeKey${category.name}');
-  }
-
-  /// 设置指定类别的最大缓存大小
-  Future<void> setCategoryMaxSize(
-    CacheCategory category,
-    int sizeInBytes,
-  ) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('$_categoryMaxSizeKey${category.name}', sizeInBytes);
-
-    // 检查并清理该类别超出限制的缓存
-    await _ensureCategorySizeLimit(category);
+    // 清理过期缓存
+    if (days != null) {
+      await cleanupExpiredCache(maxAge: Duration(days: days));
+    }
   }
 
   /// 获取音频缓存类型
@@ -520,28 +503,10 @@ class CacheManager {
           },
         );
 
-        // 先获取文件大小信息
-        final response = await dio.head(url);
-        final contentLength = response.headers.value('content-length');
-        if (contentLength != null) {
-          final fileSize = int.tryParse(contentLength);
-          if (fileSize != null && fileSize > maxCacheFileSize) {
-            throw Exception('文件过大，超过缓存限制');
-          }
-        }
-
         await dio.download(url, cacheFilePath);
 
-        // 下载后再次检查文件大小
-        final finalSize = await file.length();
-        if (finalSize > maxCacheFileSize) {
-          await file.delete();
-          throw Exception('文件过大，超过缓存限制');
-        }
-
-        // 检查缓存大小限制
-        await _ensureCacheSizeLimit();
-        await _ensureCategorySizeLimit(category);
+        // 检查缓存时间限制
+        await cleanupExpiredCache();
 
         // 清除对应类别的缓存大小缓存和总缓存大小缓存
         _cacheSizeCache.remove('category_${category.name}');
@@ -1022,14 +987,14 @@ class CacheManager {
     return results;
   }
 
-  /// 清理过期缓存
+  /// 清理过期缓存（按缓存时间上限）
   ///
-  /// 清理超过指定时间的缓存文件
+  /// 清理超过指定时间的缓存文件，但 SQLite 缓存不受影响
   /// [maxAge] - 最大缓存时间
   Future<int> cleanupExpiredCache({
-    Duration maxAge = const Duration(days: 7),
+    Duration maxAge = const Duration(days: 30),
   }) async {
-    logger.info('开始清理过期缓存');
+    logger.info('开始清理过期缓存（>${maxAge.inDays} 天）');
 
     try {
       final cacheDir = await getCacheDirectory();
@@ -1053,93 +1018,12 @@ class CacheManager {
       }
 
       logger.info('清理完成: 删除了 $deletedCount 个过期文件');
+      // 清除缓存大小缓存
+      _cacheSizeCache.clear();
       return deletedCount;
     } catch (e) {
       logger.error('缓存清理失败', e);
       return 0;
-    }
-  }
-
-  /// 确保缓存大小不超过限制
-  Future<void> _ensureCacheSizeLimit() async {
-    try {
-      final maxSize = await getMaxCacheSize();
-      final currentSize = await getTotalCacheSize();
-
-      if (currentSize > maxSize) {
-        logger.info('缓存大小超过限制，开始清理...');
-
-        // 获取所有缓存项并按修改时间排序（最旧的在前）
-        final items = await getAllCacheItems();
-        items.sort((a, b) => a.modified.compareTo(b.modified));
-
-        int sizeToRemove = currentSize - maxSize;
-        int removedSize = 0;
-
-        for (final item in items) {
-          if (removedSize >= sizeToRemove) break;
-
-          if (item.canBeCleared) {
-            final file = File(item.path);
-            if (await file.exists()) {
-              final fileSize = await file.length();
-              await file.delete();
-              removedSize += fileSize;
-              logger.debug('删除旧缓存文件: ${item.name} ($fileSize 字节)');
-            }
-          }
-        }
-
-        logger.info('缓存清理完成: 删除了 $removedSize 字节');
-        // 清除缓存大小缓存
-        _cacheSizeCache.clear();
-      }
-    } catch (e) {
-      logger.error('确保缓存大小限制失败', e);
-    }
-  }
-
-  /// 确保指定类别的缓存大小不超过限制
-  Future<void> _ensureCategorySizeLimit(CacheCategory category) async {
-    try {
-      final maxSize = await getCategoryMaxSize(category);
-      if (maxSize != null) {
-        final currentSize = await getCategoryCacheSize(category);
-
-        if (currentSize > maxSize) {
-          logger.info('${category.name} 缓存大小超过限制，开始清理...');
-
-          // 获取该类别所有缓存项并按修改时间排序（最旧的在前）
-          final items = await getCategoryCacheItems(category);
-          items.sort((a, b) => a.modified.compareTo(b.modified));
-
-          int sizeToRemove = currentSize - maxSize;
-          int removedSize = 0;
-
-          for (final item in items) {
-            if (removedSize >= sizeToRemove) break;
-
-            if (item.canBeCleared) {
-              final file = File(item.path);
-              if (await file.exists()) {
-                final fileSize = await file.length();
-                await file.delete();
-                removedSize += fileSize;
-                logger.debug(
-                  '删除旧的 ${category.name} 缓存文件: ${item.name} ($fileSize 字节)',
-                );
-              }
-            }
-          }
-
-          logger.info('${category.name} 缓存清理完成: 删除了 $removedSize 字节');
-          // 清除对应类别的缓存大小缓存和总缓存大小缓存
-          _cacheSizeCache.remove('category_${category.name}');
-          _cacheSizeCache.remove('total');
-        }
-      }
-    } catch (e) {
-      logger.error('确保类别缓存大小限制失败', e);
     }
   }
 

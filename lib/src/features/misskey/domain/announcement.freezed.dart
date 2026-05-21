@@ -11,7 +11,6 @@ part of 'announcement.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
-
 /// @nodoc
 mixin _$Announcement {
 
@@ -32,8 +31,6 @@ mixin _$Announcement {
 @pragma('vm:prefer-inline')
 $AnnouncementCopyWith<Announcement> get copyWith => _$AnnouncementCopyWithImpl<Announcement>(this as Announcement, _$identity);
 
-  /// Serializes this Announcement to a JSON map.
-  Map<String, dynamic> toJson();
 
 
 @override
@@ -41,7 +38,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is Announcement&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.title, title) || other.title == title)&&(identical(other.text, text) || other.text == text)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.needConfirmationToRead, needConfirmationToRead) || other.needConfirmationToRead == needConfirmationToRead)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.reads, reads) || other.reads == reads)&&const DeepCollectionEquality().equals(other.userIds, userIds));
 }
 
-@JsonKey(includeFromJson: false, includeToJson: false)
+
 @override
 int get hashCode => Object.hash(runtimeType,id,createdAt,updatedAt,title,text,imageUrl,needConfirmationToRead,isRead,reads,const DeepCollectionEquality().hash(userIds));
 
@@ -225,11 +222,11 @@ return $default(_that.id,_that.createdAt,_that.updatedAt,_that.title,_that.text,
 }
 
 /// @nodoc
-@JsonSerializable()
+
 
 class _Announcement implements Announcement {
   const _Announcement({required this.id, required this.createdAt, required this.updatedAt, this.title, this.text, this.imageUrl, this.needConfirmationToRead = false, this.isRead = false, this.reads, final  List<String>? userIds}): _userIds = userIds;
-  factory _Announcement.fromJson(Map<String, dynamic> json) => _$AnnouncementFromJson(json);
+  
 
 /// 公告 ID
 @override final  String id;
@@ -267,17 +264,14 @@ class _Announcement implements Announcement {
 @pragma('vm:prefer-inline')
 _$AnnouncementCopyWith<_Announcement> get copyWith => __$AnnouncementCopyWithImpl<_Announcement>(this, _$identity);
 
-@override
-Map<String, dynamic> toJson() {
-  return _$AnnouncementToJson(this, );
-}
+
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _Announcement&&(identical(other.id, id) || other.id == id)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.title, title) || other.title == title)&&(identical(other.text, text) || other.text == text)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.needConfirmationToRead, needConfirmationToRead) || other.needConfirmationToRead == needConfirmationToRead)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.reads, reads) || other.reads == reads)&&const DeepCollectionEquality().equals(other._userIds, _userIds));
 }
 
-@JsonKey(includeFromJson: false, includeToJson: false)
+
 @override
 int get hashCode => Object.hash(runtimeType,id,createdAt,updatedAt,title,text,imageUrl,needConfirmationToRead,isRead,reads,const DeepCollectionEquality().hash(_userIds));
 

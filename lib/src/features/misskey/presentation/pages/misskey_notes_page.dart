@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 import 'misskey_clip_notes_page.dart';
 
 /// Misskey 笔记页面组件
@@ -42,20 +43,29 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
     final hasMore = ref.watch(misskeyClipsProvider.notifier).hasMore;
 
     return Scaffold(
-      body: clipsAsync.when(
-        data: (clips) {
-          if (clips.isEmpty) {
-            return Center(
-              child: Text(
-                '${'misskey_page_clips'.tr()} ${'search_no_results'.tr()}',
-              ),
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () => ref.read(misskeyClipsProvider.notifier).refresh(),
-            child: ListView.builder(
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(misskeyClipsProvider.notifier).refresh(),
+        child: clipsAsync.when(
+          data: (clips) {
+            if (clips.isEmpty) {
+              return CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Text(
+                        '${'misskey_page_clips'.tr()} ${'search_no_results'.tr()}',
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+            return ListView.builder(
               controller: _scrollController,
               itemCount: clips.length + (hasMore ? 1 : 0),
+              physics: const AlwaysScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 if (index < clips.length) {
                   final clip = clips[index];
@@ -109,45 +119,58 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),
                     child: Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
+                      child: CyaniLoadingIndicator(size: 30),
                     ),
                   );
                 }
               },
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
+            );
+          },
+          loading: () => const CustomScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                child: Center(
+                  child: CyaniLoadingIndicator(size: 60),
+                ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'common_loading_failed'.tr(),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Error: $err',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () =>
-                    ref.read(misskeyClipsProvider.notifier).refresh(),
-                icon: const Icon(Icons.refresh),
-                label: Text('common_reload'.tr()),
+            ],
+          ),
+          error: (err, stack) => CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'common_loading_failed'.tr(),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Error: $err',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            ref.read(misskeyClipsProvider.notifier).refresh(),
+                        icon: const Icon(Icons.refresh),
+                        label: Text('common_reload'.tr()),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),

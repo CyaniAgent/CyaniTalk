@@ -14,6 +14,7 @@ import '/src/features/misskey/presentation/widgets/poll_card.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
+import 'cached_misskey_avatar.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
@@ -156,19 +157,31 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   },
                   child: Row(
                     children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundImage: user?.avatarUrl != null
-                            ? NetworkImage(user!.avatarUrl!)
-                            : null,
-                        child: user?.avatarUrl == null
-                            ? Text(
-                                user!.username.isNotEmpty
-                                    ? user.username[0].toUpperCase()
-                                    : '?',
-                              )
-                            : null,
-                      ),
+                      if (user != null)
+                        CachedMisskeyAvatar(
+                          userId: user.id,
+                          avatarUrl: user.avatarUrl ?? '',
+                          host: user.host,
+                          radius: 20,
+                          currentUserId: ref.read(misskeyMeProvider).value?.id,
+                          onTap: () {
+                            final me = ref.read(misskeyMeProvider).value;
+                            if (me != null && me.id == user.id) {
+                            context.go('/profile');
+                          } else {
+                            context.push('/misskey/user/${user.id}', extra: user);
+                          }
+                          },
+                        )
+                      else
+                        CircleAvatar(
+                          radius: 20,
+                          child: Text(
+                            user?.username.isNotEmpty == true
+                                ? user!.username[0].toUpperCase()
+                                : '?',
+                          ),
+                        ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -433,117 +446,36 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     _showContextMenu(position);
   }
 
-  void _showContextMenu(Offset position) {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+  OverlayEntry? _menuOverlayEntry;
+  final GlobalKey _menuKey = GlobalKey();
 
-    showMenu(
-      context: context,
-      position: RelativeRect.fromRect(
-        position & const Size(40, 40),
-        Offset.zero & overlay.size,
+  void _showContextMenu(Offset position) {
+    _dismissMenu();
+
+    final theme = Theme.of(context);
+    final menuColor = theme.colorScheme.surfaceContainerHigh;
+    final primaryColor = theme.colorScheme.primary;
+
+    _menuOverlayEntry = OverlayEntry(
+      builder: (context) => _FastPopupMenuOverlay(
+        position: position,
+        menuColor: menuColor,
+        primaryColor: primaryColor,
+        menuKey: _menuKey,
+        onItemSelected: (value) {
+          _dismissMenu();
+          _handleMenuAction(value);
+        },
+        onDismissed: _dismissMenu,
       ),
-      items: [
-        PopupMenuItem(
-          value: 'details',
-          child: Row(
-            children: [
-              const Icon(Icons.info_outline, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_details'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'copy_content',
-          child: Row(
-            children: [
-              const Icon(Icons.copy, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_copy_content'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'copy_link',
-          child: Row(
-            children: [
-              const Icon(Icons.link, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_copy_link'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          enabled: false,
-          value: 'embed',
-          child: Row(
-            children: [
-              const Icon(Icons.code, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_embed'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'share',
-          child: Row(
-            children: [
-              const Icon(Icons.share, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_share'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'bookmark',
-          child: Row(
-            children: [
-              const Icon(Icons.bookmark_border, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_bookmark'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'add_note',
-          child: Row(
-            children: [
-              const Icon(Icons.reply, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_add_note'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'report',
-          child: Row(
-            children: [
-              const Icon(Icons.flag_outlined, size: 20, color: Colors.red),
-              const SizedBox(width: 12),
-              Text(
-                'post_menu_report'.tr(),
-                style: const TextStyle(color: Colors.red),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'copy_id',
-          child: Row(
-            children: [
-              const Icon(Icons.copy_all, size: 20),
-              const SizedBox(width: 12),
-              Text('post_menu_copy_id'.tr()),
-            ],
-          ),
-        ),
-      ],
-    ).then((value) {
-      if (value != null) {
-        _handleMenuAction(value);
-      }
-    });
+    );
+
+    Overlay.of(context).insert(_menuOverlayEntry!);
+  }
+
+  void _dismissMenu() {
+    _menuOverlayEntry?.remove();
+    _menuOverlayEntry = null;
   }
 
   void _handleMenuAction(String value) {
@@ -743,34 +675,32 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     String? tooltip,
   }) {
     final theme = Theme.of(context);
-    return IconButton(
-      onPressed: onTap,
-      icon: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant),
-          if (label.isNotEmpty)
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurfaceVariant,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: theme.colorScheme.primary),
+            if (label.isNotEmpty)
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.primary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
-      style: IconButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      tooltip: tooltip,
     );
   }
 
@@ -1112,17 +1042,19 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 8,
-
-                    backgroundImage: replyNote.user?.avatarUrl != null
-                        ? NetworkImage(replyNote.user!.avatarUrl!)
-                        : null,
-
-                    child: replyNote.user?.avatarUrl == null
-                        ? const Icon(Icons.person, size: 10)
-                        : null,
-                  ),
+                  if (replyNote.user != null)
+                    CachedMisskeyAvatar(
+                      userId: replyNote.user!.id,
+                      avatarUrl: replyNote.user!.avatarUrl ?? '',
+                      host: replyNote.user!.host,
+                      radius: 8,
+                      showIsMeBadge: false,
+                    )
+                  else
+                    CircleAvatar(
+                      radius: 8,
+                      child: const Icon(Icons.person, size: 10),
+                    ),
 
                   const SizedBox(width: 8),
 
@@ -1560,4 +1492,263 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       ),
     );
   }
+}
+
+/// 快速弹出菜单覆盖层（使用 OverlayEntry 替代 PopupRoute）
+class _FastPopupMenuOverlay extends StatefulWidget {
+  final Offset position;
+  final Color menuColor;
+  final Color primaryColor;
+  final GlobalKey menuKey;
+  final void Function(String) onItemSelected;
+  final VoidCallback onDismissed;
+
+  const _FastPopupMenuOverlay({
+    required this.position,
+    required this.menuColor,
+    required this.primaryColor,
+    required this.menuKey,
+    required this.onItemSelected,
+    required this.onDismissed,
+  });
+
+  @override
+  State<_FastPopupMenuOverlay> createState() => _FastPopupMenuOverlayState();
+}
+
+class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
+    with TickerProviderStateMixin {
+  Offset _calculatedPosition = Offset.zero;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  Rect? _menuBounds;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculatePosition();
+      _animationController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _calculatePosition() {
+    final renderBox = widget.menuKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final menuSize = renderBox.size;
+      final screenSize = MediaQuery.of(context).size;
+      var dx = widget.position.dx;
+      var dy = widget.position.dy;
+
+      if (dx + menuSize.width > screenSize.width) {
+        dx = screenSize.width - menuSize.width - 8;
+      }
+      if (dy + menuSize.height > screenSize.height) {
+        dy = screenSize.height - menuSize.height - 8;
+      }
+      if (dy < 0) dy = 8;
+
+      setState(() {
+        _calculatedPosition = Offset(dx, dy);
+        _menuBounds = Rect.fromLTWH(dx, dy, menuSize.width, menuSize.height);
+      });
+    }
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    if (_menuBounds != null && !_menuBounds!.contains(details.globalPosition)) {
+      _dismiss();
+    }
+  }
+
+  void _dismiss() async {
+    await _animationController.reverse();
+    if (mounted) {
+      widget.onDismissed();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <_MenuItem>[
+      _MenuItem(Icons.info_outline, 'post_menu_details'.tr(), 'details'),
+      _MenuItem(Icons.copy, 'post_menu_copy_content'.tr(), 'copy_content'),
+      _MenuItem(Icons.link, 'post_menu_copy_link'.tr(), 'copy_link'),
+      _MenuItem(Icons.code, 'post_menu_embed'.tr(), null, enabled: false),
+      _MenuItem(Icons.share, 'post_menu_share'.tr(), 'share'),
+      _MenuItem(Icons.bookmark_border, 'post_menu_bookmark'.tr(), 'bookmark'),
+      _MenuItem(Icons.reply, 'post_menu_add_note'.tr(), 'add_note'),
+      _MenuItem(
+        Icons.flag_outlined,
+        'post_menu_report'.tr(),
+        'report',
+        iconColor: Colors.red,
+        textColor: Colors.red,
+      ),
+      _MenuItem(Icons.copy_all, 'post_menu_copy_id'.tr(), 'copy_id'),
+    ];
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (event) => _handleTapDown(TapDownDetails(globalPosition: event.position)),
+      child: Stack(
+        children: [
+          Positioned(
+            left: _calculatedPosition.dx,
+            top: _calculatedPosition.dy,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Container(
+                key: widget.menuKey,
+                constraints: const BoxConstraints(maxWidth: 280, minWidth: 200),
+                decoration: BoxDecoration(
+                  color: widget.menuColor,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: items.map((item) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: _FastMenuItem(
+                          icon: item.icon,
+                          label: item.label,
+                          enabled: item.enabled,
+                          iconColor: item.iconColor ?? widget.primaryColor,
+                          textColor: item.textColor,
+                          onTap: () {
+                            if (item.enabled && item.value != null) {
+                              widget.onItemSelected(item.value!);
+                            }
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 快速菜单项
+class _FastMenuItem extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final bool enabled;
+  final Color iconColor;
+  final Color? textColor;
+  final VoidCallback onTap;
+
+  const _FastMenuItem({
+    required this.icon,
+    required this.label,
+    this.enabled = true,
+    this.iconColor = Colors.black87,
+    this.textColor,
+    required this.onTap,
+  });
+
+  @override
+  State<_FastMenuItem> createState() => _FastMenuItemState();
+}
+
+class _FastMenuItemState extends State<_FastMenuItem> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final highlightColor = widget.enabled
+        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
+        : Colors.transparent;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.enabled ? widget.onTap : null,
+          borderRadius: BorderRadius.circular(10),
+          hoverColor: highlightColor,
+          splashColor: highlightColor.withValues(alpha: 0.3),
+          highlightColor: highlightColor.withValues(alpha: 0.3),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Icon(
+                  widget.icon,
+                  size: 20,
+                  color: widget.enabled
+                      ? (_isHovered ? theme.colorScheme.primary : widget.iconColor)
+                      : Colors.grey,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      color: widget.enabled
+                          ? (widget.textColor ?? theme.colorScheme.onSurface)
+                          : Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 菜单项数据模型
+class _MenuItem {
+  final IconData icon;
+  final String label;
+  final String? value;
+  final bool enabled;
+  final Color? iconColor;
+  final Color? textColor;
+
+  const _MenuItem(
+    this.icon,
+    this.label,
+    this.value, {
+    this.enabled = true,
+    this.iconColor,
+    this.textColor,
+  });
 }
