@@ -3,6 +3,7 @@
 // 该文件包含SettingsPage组件，用于显示应用程序的设置选项。
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'about_page.dart';
 import 'accounts_page.dart';
@@ -14,6 +15,8 @@ import 'navigation_settings_page.dart';
 import 'developer_settings_page.dart';
 import 'licenses_page.dart';
 import 'network_settings_page.dart';
+import '/src/features/update/application/update_notifier.dart';
+import '/src/features/update/presentation/update_bottom_sheet.dart';
 
 /// 应用程序设置页面组件
 ///
@@ -173,6 +176,41 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           _buildSectionHeader(context, 'settings_section_system'.tr()),
+          _buildSettingsTile(
+            context,
+            Icons.system_update_rounded,
+            '检查更新',
+            '检查是否有新版本可用',
+            onTap: () async {
+              final container = ProviderScope.containerOf(context, listen: false);
+              final notifier = container.read(updateProvider.notifier);
+              await notifier.checkForUpdate();
+              final state = container.read(updateProvider);
+              if (state.state == UpdateState.updateAvailable && state.update != null) {
+                if (context.mounted) {
+                  showUpdateBottomSheet(context, state.update!);
+                }
+              } else if (state.state == UpdateState.upToDate) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('当前已是最新版本'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } else if (state.state == UpdateState.error) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.errorMessage ?? '检查更新失败'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
+          ),
           _buildSettingsTile(
             context,
             Icons.bug_report_outlined,

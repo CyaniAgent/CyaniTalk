@@ -39,6 +39,15 @@ _MisskeyUser _$MisskeyUserFromJson(Map<String, dynamic> json) => _MisskeyUser(
   emojis: (json['emojis'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
+  followedMessage: json['followedMessage'] as String?,
+  location: json['location'] as String?,
+  birthday: json['birthday'] as String?,
+  lang: json['lang'] as String?,
+  fields:
+      (json['fields'] as List<dynamic>?)
+          ?.map((e) => e as Map<String, dynamic>)
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
@@ -63,4 +72,9 @@ Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
       'driveCapacityMb': instance.driveCapacityMb,
       'driveUsage': instance.driveUsage,
       'emojis': instance.emojis,
+      'followedMessage': instance.followedMessage,
+      'location': instance.location,
+      'birthday': instance.birthday,
+      'lang': instance.lang,
+      'fields': instance.fields,
     };

@@ -187,14 +187,19 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            _mfmRenderer.processTextToRichText(
                               user?.name ?? user?.username ?? 'Unknown',
-                              style: TextStyle(
+                              context,
+                              textStyle: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                                 color: theme.colorScheme.primary,
                               ),
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              onEmojiLoaded: () {
+                                if (mounted) setState(() {});
+                              },
                             ),
                             if (user?.host != null)
                               Padding(
