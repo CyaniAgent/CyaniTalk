@@ -33,7 +33,7 @@ jobs:
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
           SHORT_HASH=$(git rev-parse --short HEAD)
-          BUILD_VERSION="${COMMIT_COUNT}.dev+${SHORT_HASH}"
+          BUILD_VERSION="${COMMIT_COUNT}.dev.${SHORT_HASH}"
           echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_OUTPUT
           echo "Generated BUILD_VERSION: ${BUILD_VERSION}"
         shell: bash
