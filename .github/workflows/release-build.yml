@@ -58,17 +58,26 @@ jobs:
           echo "Tag version: ${TAG_VERSION}"
         shell: bash
 
-      # 更新pubspec.yaml中的版本号（使用 tag 版本作为语义版本号）
+      # 更新pubspec.yaml中的版本号（tag 触发时使用 tag 版本，否则回退到 pubspec.yaml 原有版本）
       - name: Update version in pubspec.yaml
         id: update_version_in_pubspec
         run: |
-          # 从 tag 提取语义版本号（e.g. v1.4.0 → 1.4.0）
           TAG_VERSION="${{ steps.generate_version.outputs.TAG_VERSION }}"
           BUILD_NUMBER="${{ steps.generate_version.outputs.BUILD_VERSION }}"
           echo "TAG_VERSION=${TAG_VERSION}"
           
+          # 仅当 TAG_VERSION 是有效的 semver（x.y.z）时才使用它
+          if echo "${TAG_VERSION}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            MAIN_VERSION="${TAG_VERSION}"
+            echo "Using tag version: ${MAIN_VERSION}"
+          else
+            # workflow_dispatch 等非 tag 触发，回退到 pubspec.yaml 原有版本
+            MAIN_VERSION=$(grep "^version:" pubspec.yaml | sed -E 's/version: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+            echo "Falling back to pubspec.yaml version: ${MAIN_VERSION}"
+          fi
+          
           # 组合新的完整版本号 (e.g. 1.4.0+34)
-          FULL_VERSION="${TAG_VERSION}+${BUILD_NUMBER}"
+          FULL_VERSION="${MAIN_VERSION}+${BUILD_NUMBER}"
           echo "FULL_VERSION=${FULL_VERSION}"
           
           # 更新新版本号到pubspec.yaml文件
