@@ -10,18 +10,18 @@ part of 'global_search_service.dart';
 // ignore_for_file: type=lint, type=warning
 /// 全局搜索服务
 ///
-/// 提供搜索功能，支持在Misskey平台上搜索内容。
+/// 提供跨平台搜索功能，支持在Misskey平台上搜索内容。
 
 @ProviderFor(GlobalSearch)
 final globalSearchProvider = GlobalSearchProvider._();
 
 /// 全局搜索服务
 ///
-/// 提供搜索功能，支持在Misskey平台上搜索内容。
+/// 提供跨平台搜索功能，支持在Misskey平台上搜索内容。
 final class GlobalSearchProvider extends $NotifierProvider<GlobalSearch, void> {
   /// 全局搜索服务
   ///
-  /// 提供搜索功能，支持在Misskey平台上搜索内容。
+  /// 提供跨平台搜索功能，支持在Misskey平台上搜索内容。
   GlobalSearchProvider._()
     : super(
         from: null,
@@ -49,11 +49,11 @@ final class GlobalSearchProvider extends $NotifierProvider<GlobalSearch, void> {
   }
 }
 
-String _$globalSearchHash() => r'1af7867c56e9a9b8aa1b935b8d17152d7b08fed9';
+String _$globalSearchHash() => r'a61d731fc87093f1ebc825d205bf540475949c46';
 
 /// 全局搜索服务
 ///
-/// 提供搜索功能，支持在Misskey平台上搜索内容。
+/// 提供跨平台搜索功能，支持在Misskey平台上搜索内容。
 
 abstract class _$GlobalSearch extends $Notifier<void> {
   void build();

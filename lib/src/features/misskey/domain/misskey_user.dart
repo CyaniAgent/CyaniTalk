@@ -26,6 +26,11 @@ abstract class MisskeyUser with _$MisskeyUser {
     int? driveCapacityMb,
     int? driveUsage,
     Map<String, String>? emojis,
+    String? followedMessage,
+    String? location,
+    String? birthday,
+    String? lang,
+    @Default([]) List<Map<String, dynamic>> fields,
   }) = _MisskeyUser;
 
   factory MisskeyUser.fromJson(Map<String, dynamic> json) =>

@@ -64,6 +64,9 @@ class FontManager {
   /// 已注册的字体集合
   static final Set<String> _registeredFonts = {};
 
+  /// 自定义本地添加的字体列表（运行时可变）
+  static final List<FontInfo> _customFonts = [];
+
   /// 预定义字体列表
   static const List<FontInfo> availableFonts = [
     FontInfo(
@@ -97,6 +100,53 @@ class FontManager {
       fileName: 'gakumas-font.ttf',
     ),
   ];
+
+  /// 获取所有可用字体（包括自定义字体）
+  static List<FontInfo> getAllFonts() {
+    return [...availableFonts, ..._customFonts];
+  }
+
+  /// 注册本地字体文件
+  static Future<String?> registerLocalFont(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (!file.existsSync()) return null;
+
+      final fileName = filePath.split(Platform.pathSeparator).last;
+      final baseName = fileName.replaceAll(RegExp(r'\.(ttf|otf)$', caseSensitive: false), '');
+
+      final cacheDir = await getFontCacheDir();
+      final destFile = File('$cacheDir${Platform.pathSeparator}$fileName');
+
+      if (!destFile.existsSync()) {
+        await file.copy(destFile.path);
+      }
+
+      final fontData = await destFile.readAsBytes();
+      final fontLoader = FontLoader('local_$baseName');
+      fontLoader.addFont(Future.value(fontData.buffer.asByteData()));
+      await fontLoader.load();
+
+      _registeredFonts.add('local_$baseName');
+
+      final fontInfo = FontInfo(
+        id: 'local_$baseName',
+        metadataId: 1000 + _customFonts.length,
+        displayName: baseName,
+        type: FontType.downloadedFont,
+        fileName: fileName,
+      );
+
+      _customFonts.add(fontInfo);
+      return fontInfo.id;
+    } catch (e) {
+      logger.error('FontManager: Failed to register local font: $filePath', e);
+      return null;
+    }
+  }
+
+  /// 检查是否有自定义字体
+  static bool get hasCustomFonts => _customFonts.isNotEmpty;
 
   /// 获取字体缓存目录
   static Future<String> getFontCacheDir() async {
@@ -208,7 +258,7 @@ class FontManager {
 
   /// 预加载所有已缓存的下载字体
   static Future<void> preloadCachedFonts() async {
-    for (final font in availableFonts) {
+    for (final font in getAllFonts()) {
       if (font.type == FontType.downloadedFont) {
         final isCached = await isFontCached(font);
         if (isCached) {
@@ -312,7 +362,7 @@ class FontManager {
   /// 根据ID获取字体信息
   static FontInfo? getFontById(String id) {
     try {
-      return availableFonts.firstWhere((font) => font.id == id);
+      return getAllFonts().firstWhere((font) => font.id == id);
     } catch (e) {
       return null;
     }
@@ -322,7 +372,7 @@ class FontManager {
   static Future<List<(FontInfo, bool)>> getFontsWitCacheStatus() async {
     final result = <(FontInfo, bool)>[];
 
-    for (final font in availableFonts) {
+    for (final font in getAllFonts()) {
       final isCached = await isFontCached(font);
       result.add((font, isCached));
     }
@@ -355,5 +405,6 @@ class FontManager {
   /// 清除字体缓存
   static void clearFontCache() {
     _registeredFonts.clear();
+    _customFonts.clear();
   }
 }

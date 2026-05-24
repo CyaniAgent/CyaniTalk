@@ -299,6 +299,14 @@ class _TimelineIconBar extends ConsumerWidget {
     };
   }
 
+  String _getModeLabel(String type) {
+    return switch (type) {
+      'Local' => 'timeline_local'.tr(),
+      'Social' => 'timeline_social'.tr(),
+      _ => 'timeline_global'.tr(),
+    };
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -311,46 +319,110 @@ class _TimelineIconBar extends ConsumerWidget {
           tooltip: 'timeline'.tr(),
           onSelected: onTimelineTypeChanged,
           itemBuilder: (context) => [
-            PopupMenuItem(value: 'Global', child: Text('timeline_global'.tr())),
-            PopupMenuItem(value: 'Local', child: Text('timeline_local'.tr())),
-            PopupMenuItem(value: 'Social', child: Text('timeline_social'.tr())),
+            PopupMenuItem(
+              value: 'Global',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.public_rounded, color: _getIconColor('Global'), size: 18),
+                  const SizedBox(width: 8),
+                  Text('timeline_global'.tr()),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'Local',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.language_rounded, color: _getIconColor('Local'), size: 18),
+                  const SizedBox(width: 8),
+                  Text('timeline_local'.tr()),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'Social',
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.group_rounded, color: _getIconColor('Social'), size: 18),
+                  const SizedBox(width: 8),
+                  Text('timeline_social'.tr()),
+                ],
+              ),
+            ),
           ],
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
-            child: Icon(
-              _getIcon(timelineType),
-              color: _getIconColor(timelineType),
-              size: 22,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getIcon(timelineType),
+                  color: _getIconColor(timelineType),
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _getModeLabel(timelineType),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_drop_down,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         ref
             .watch(misskeyOnlineUsersProvider)
             .when(
-              data: (count) => Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.wifi_tethering_rounded,
-                    size: 18,
-                    color: onlineColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    count.toString(),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: onlineColor,
-                      fontWeight: FontWeight.w700,
+              data: (count) {
+                final suffix = switch (context.locale.languageCode) {
+                  'zh' => '人在线',
+                  'ja' => '人オンライン',
+                  _ => ' online',
+                };
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PulsingOnlineDot(color: onlineColor),
+                    const SizedBox(width: 6),
+                    RichText(
+                      text: TextSpan(
+                        style: theme.textTheme.bodyMedium,
+                        children: [
+                          TextSpan(
+                            text: count.toString(),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: onlineColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: suffix,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                );
+              },
               loading: () => const SizedBox(
                 width: 14,
                 height: 14,
@@ -359,6 +431,77 @@ class _TimelineIconBar extends ConsumerWidget {
               error: (error, stack) => const SizedBox.shrink(),
             ),
       ],
+    );
+  }
+}
+
+class _PulsingOnlineDot extends StatefulWidget {
+  const _PulsingOnlineDot({required this.color});
+
+  final Color color;
+
+  @override
+  State<_PulsingOnlineDot> createState() => _PulsingOnlineDotState();
+}
+
+class _PulsingOnlineDotState extends State<_PulsingOnlineDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            // Outer expanding ripple ring
+            Transform.scale(
+              scale: 1.0 + (_controller.value * 1.5),
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.color.withAlpha(((1.0 - _controller.value) * 160).round()),
+                ),
+              ),
+            ),
+            // Inner solid dot
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: widget.color,
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.color.withAlpha(120),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

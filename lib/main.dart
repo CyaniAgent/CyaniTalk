@@ -13,6 +13,7 @@ import '/src/core/services/background_service.dart';
 import '/src/core/services/notification_service.dart';
 import '/src/core/services/notification_manager.dart';
 import '/src/core/services/audio_engine.dart';
+import '/src/core/services/misskey_image_cache_database.dart';
 import 'dart:io';
 import 'package:window_manager/window_manager.dart';
 
@@ -117,6 +118,11 @@ void main() async {
       // 初始化后台服务
       await initializeBackgroundService();
       logger.info('Background service initialized');
+
+      // 初始化图片缓存数据库
+      final imageCacheDb = MisskeyImageCacheDatabase();
+      await imageCacheDb.database;
+      logger.info('Misskey image cache database initialized');
 
       // 在移动端请求通知权限
       if (Platform.isAndroid || Platform.isIOS) {
