@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/api/misskey_api.dart';
 import '/src/features/misskey/presentation/widgets/safe_mfm_widget.dart';
+import '/src/features/misskey/presentation/widgets/code_block_widget.dart';
 
 /// MFM 渲染器（基于 mfm 包重构版本）
 ///
@@ -306,32 +307,16 @@ class MfmRenderer {
         );
       },
       codeBlockBuilder: (ctx, code, lang) {
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Text(
-              code,
-              style: TextStyle(
-                fontFamily: 'Monospace',
-                fontSize: 12,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        );
+        return CodeBlockWidget(code: code, lang: lang);
       },
       inlineCodeBuilder: (ctx, code, style) {
         return Text(
           code,
           style: TextStyle(
-            fontFamily: 'Monospace',
+            fontFamily: 'JetBrainsMono',
             backgroundColor: colorScheme.surfaceContainerHighest,
-            fontSize: style?.fontSize ?? 14,
+            fontSize: (style?.fontSize ?? 14) * 0.9,
+            letterSpacing: -0.2,
           ),
         );
       },
@@ -360,7 +345,7 @@ class MfmRenderer {
       mentionStyle: TextStyle(color: colorScheme.primary),
       hashtagStyle: TextStyle(color: colorScheme.secondary),
       serifStyle: const TextStyle(fontFamily: 'Serif'),
-      monospaceStyle: const TextStyle(fontFamily: 'Monospace'),
+      monospaceStyle: const TextStyle(fontFamily: 'JetBrainsMono'),
       cursiveStyle: const TextStyle(fontFamily: 'Cursive'),
       fantasyStyle: const TextStyle(fontFamily: 'Fantasy'),
       mentionTap: (userName, host, acct) {
@@ -585,32 +570,16 @@ class MfmRenderer {
         );
       },
       codeBlockBuilder: (ctx, code, lang) {
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Text(
-              code,
-              style: TextStyle(
-                fontFamily: 'Monospace',
-                fontSize: 12,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        );
+        return CodeBlockWidget(code: code, lang: lang);
       },
       inlineCodeBuilder: (ctx, code, style) {
         return Text(
           code,
           style: TextStyle(
-            fontFamily: 'Monospace',
+            fontFamily: 'JetBrainsMono',
             backgroundColor: colorScheme.surfaceContainerHighest,
-            fontSize: style?.fontSize ?? 14,
+            fontSize: (style?.fontSize ?? 14) * 0.9,
+            letterSpacing: -0.2,
           ),
         );
       },
@@ -639,7 +608,7 @@ class MfmRenderer {
       mentionStyle: TextStyle(color: colorScheme.primary),
       hashtagStyle: TextStyle(color: colorScheme.secondary),
       serifStyle: const TextStyle(fontFamily: 'Serif'),
-      monospaceStyle: const TextStyle(fontFamily: 'Monospace'),
+      monospaceStyle: const TextStyle(fontFamily: 'JetBrainsMono'),
       cursiveStyle: const TextStyle(fontFamily: 'Cursive'),
       fantasyStyle: const TextStyle(fontFamily: 'Fantasy'),
       mentionTap: (userName, host, acct) {

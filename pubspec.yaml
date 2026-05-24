@@ -99,6 +99,12 @@ dependencies:
   device_info_plus: ^12.0.0
   # 图片缓存库，支持图片缓存和加载优化
   cached_network_image: ^3.4.1
+  # SQLite数据库支持，用于持久化图片缓存元数据
+  sqflite: ^2.4.2
+  # SQLite桌面端支持（Windows/Linux/macOS）
+  sqflite_common_ffi: ^2.3.5
+  # 路径操作工具
+  path: ^1.9.1
   # 后台任务服务库，支持在应用后台持续运行任务
   flutter_background_service: ^5.1.0
   # 本地通知库，用于发送系统级通知

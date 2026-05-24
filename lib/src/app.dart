@@ -1,6 +1,7 @@
 // CyaniTalk应用程序的主组件文件
 //
 // 该文件包含应用程序的根组件CyaniTalkApp，负责配置应用程序的主题、路由和整体结构。
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -14,6 +15,9 @@ import 'features/misskey/application/misskey_notifier.dart';
 import 'features/misskey/application/misskey_notifications_notifier.dart';
 import 'features/profile/presentation/settings/appearance_page.dart';
 import 'core/services/notification_manager.dart';
+import 'features/update/application/update_notifier.dart';
+import 'features/update/presentation/update_bottom_sheet.dart';
+import 'core/services/audio_engine.dart';
 
 /// CyaniTalk应用程序的根组件
 ///
@@ -54,6 +58,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
     // 初始化性能监控
     performanceMonitor.initialize();
+
+    // 延迟检查更新（等待 UI 就绪）
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(updateProvider.notifier).checkForUpdate(silent: true);
+    });
   }
 
   @override
@@ -152,21 +161,23 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         );
         final theme = _buildTheme(defaultSettings, Brightness.light);
         return GlobalFontRefresher(
-          child: MaterialApp.router(
-            routerConfig: goRouter,
-            title: 'CyaniTalk',
-            theme: theme,
-            darkTheme: _buildTheme(defaultSettings, Brightness.dark),
-            themeMode: defaultSettings.displayMode,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-            builder: (context, child) => Column(
-              children: [
-                const CustomTitleBar(),
-                Expanded(child: child!),
-              ],
+          child: _UpdateHandler(
+            child: MaterialApp.router(
+              routerConfig: goRouter,
+              title: 'CyaniTalk',
+              theme: theme,
+              darkTheme: _buildTheme(defaultSettings, Brightness.dark),
+              themeMode: defaultSettings.displayMode,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              builder: (context, child) => Column(
+                children: [
+                  const CustomTitleBar(),
+                  Expanded(child: child!),
+                ],
+              ),
             ),
           ),
         );
@@ -182,21 +193,23 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
         logger.debug('CyaniTalkApp: 构建MaterialApp');
         return GlobalFontRefresher(
-          child: MaterialApp.router(
-            routerConfig: goRouter,
-            title: 'CyaniTalk',
-            theme: theme,
-            darkTheme: darkTheme,
-            themeMode: appearanceSettings.displayMode,
-            debugShowCheckedModeBanner: false,
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-            builder: (context, child) => Column(
-              children: [
-                const CustomTitleBar(),
-                Expanded(child: child!),
-              ],
+          child: _UpdateHandler(
+            child: MaterialApp.router(
+              routerConfig: goRouter,
+              title: 'CyaniTalk',
+              theme: theme,
+              darkTheme: darkTheme,
+              themeMode: appearanceSettings.displayMode,
+              debugShowCheckedModeBanner: false,
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: context.supportedLocales,
+              locale: context.locale,
+              builder: (context, child) => Column(
+                children: [
+                  const CustomTitleBar(),
+                  Expanded(child: child!),
+                ],
+              ),
             ),
           ),
         );
@@ -351,5 +364,36 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     _cachedSettings = settings;
 
     return adjustedTheme;
+  }
+}
+
+class _UpdateHandler extends ConsumerStatefulWidget {
+  final Widget child;
+
+  const _UpdateHandler({required this.child});
+
+  @override
+  ConsumerState<_UpdateHandler> createState() => _UpdateHandlerState();
+}
+
+class _UpdateHandlerState extends ConsumerState<_UpdateHandler> {
+  bool _hasShownUpdate = false;
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(updateProvider, (prev, next) {
+      if (next.state == UpdateState.updateAvailable && !_hasShownUpdate) {
+        _hasShownUpdate = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            unawaited(ref.read(audioEngineProvider).playAsset(
+              'sounds/App/update-available.ogg',
+            ));
+            showUpdateBottomSheet(context, next.update!);
+          }
+        });
+      }
+    });
+    return widget.child;
   }
 }

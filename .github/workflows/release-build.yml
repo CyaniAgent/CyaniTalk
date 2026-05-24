@@ -53,19 +53,22 @@ jobs:
           SHORT_HASH=$(git rev-parse --short HEAD) # 获取最近一次提交的短哈希
           BUILD_VERSION="${COMMIT_COUNT}" # 组合成完整的构建版本号
           echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_OUTPUT # 设置输出变量
+          echo "TAG_VERSION=${TAG_VERSION}" >> $GITHUB_OUTPUT # 导出tag版本号
           echo "Generated BUILD_VERSION: ${BUILD_VERSION}" # 打印完整的构建版本号 (e.g. 34)
+          echo "Tag version: ${TAG_VERSION}"
         shell: bash
 
-      # 更新pubspec.yaml中的版本号
+      # 更新pubspec.yaml中的版本号（使用 tag 版本作为语义版本号）
       - name: Update version in pubspec.yaml
         id: update_version_in_pubspec
         run: |
-          # 从pubspec.yaml中提取主版本号,(e.g. version: 1.0.0+1，提取1.0.0)
-          MAIN_VERSION=$(grep "^version:" pubspec.yaml | sed -E 's/version: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-          echo "MAIN_VERSION=${MAIN_VERSION}"
+          # 从 tag 提取语义版本号（e.g. v1.4.0 → 1.4.0）
+          TAG_VERSION="${{ steps.generate_version.outputs.TAG_VERSION }}"
+          BUILD_NUMBER="${{ steps.generate_version.outputs.BUILD_VERSION }}"
+          echo "TAG_VERSION=${TAG_VERSION}"
           
-          # 组合新的完整版本号 (e.g. 1.0.0+34)
-          FULL_VERSION="${MAIN_VERSION}+${{ steps.generate_version.outputs.BUILD_VERSION }}"
+          # 组合新的完整版本号 (e.g. 1.4.0+34)
+          FULL_VERSION="${TAG_VERSION}+${BUILD_NUMBER}"
           echo "FULL_VERSION=${FULL_VERSION}"
           
           # 更新新版本号到pubspec.yaml文件
