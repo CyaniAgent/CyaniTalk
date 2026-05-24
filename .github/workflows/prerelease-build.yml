@@ -2,7 +2,17 @@ name: Flutter PreRelease Build CI/CD
 
 # 触发条件配置
 on:
-  workflow_dispatch: # 允许手动触发工作流，便于管理和测试
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '要构建的分支'
+        required: true
+        default: 'Dev'
+        type: choice
+        options:
+          - Dev
+          - main
+          - Beta
 
 # 授予 contents 写权限
 permissions:
@@ -18,6 +28,7 @@ jobs:
       # 检出代码
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0 # 获取全部历史，以便计算版本号
 
       # 生成版本号
@@ -116,6 +127,8 @@ jobs:
     steps:
       # 检出代码
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Download updated pubspec.yaml
         uses: actions/download-artifact@v4

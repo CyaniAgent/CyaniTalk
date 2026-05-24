@@ -5,7 +5,17 @@ on:
   push:
     tags:
       - 'v*' # 当推送的标签以"v"开头时触发，常用于版本发布
-  workflow_dispatch: # 允许手动触发工作流，便于管理和测试
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '要构建的分支（标签触发时忽略）'
+        required: true
+        default: 'Dev'
+        type: choice
+        options:
+          - Dev
+          - main
+          - Beta
 
 # 授予 contents 写权限
 permissions:
@@ -21,6 +31,7 @@ jobs:
       # 检出代码
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
           fetch-depth: 0 # 获取全部历史，以便计算版本号
 
       # 生成版本号
@@ -119,6 +130,8 @@ jobs:
     steps:
       # 检出代码
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Download updated pubspec.yaml
         uses: actions/download-artifact@v4
