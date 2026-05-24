@@ -53,31 +53,19 @@ jobs:
           SHORT_HASH=$(git rev-parse --short HEAD) # 获取最近一次提交的短哈希
           BUILD_VERSION="${COMMIT_COUNT}" # 组合成完整的构建版本号
           echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_OUTPUT # 设置输出变量
-          echo "TAG_VERSION=${TAG_VERSION}" >> $GITHUB_OUTPUT # 导出tag版本号
           echo "Generated BUILD_VERSION: ${BUILD_VERSION}" # 打印完整的构建版本号 (e.g. 34)
-          echo "Tag version: ${TAG_VERSION}"
         shell: bash
 
-      # 更新pubspec.yaml中的版本号（tag 触发时使用 tag 版本，否则回退到 pubspec.yaml 原有版本）
+      # 更新pubspec.yaml中的版本号
       - name: Update version in pubspec.yaml
         id: update_version_in_pubspec
         run: |
-          TAG_VERSION="${{ steps.generate_version.outputs.TAG_VERSION }}"
-          BUILD_NUMBER="${{ steps.generate_version.outputs.BUILD_VERSION }}"
-          echo "TAG_VERSION=${TAG_VERSION}"
+          # 从pubspec.yaml中提取主版本号,(e.g. version: 1.0.0+1，提取1.0.0)
+          MAIN_VERSION=$(grep "^version:" pubspec.yaml | sed -E 's/version: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          echo "MAIN_VERSION=${MAIN_VERSION}"
           
-          # 仅当 TAG_VERSION 是有效的 semver（x.y.z）时才使用它
-          if echo "${TAG_VERSION}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
-            MAIN_VERSION="${TAG_VERSION}"
-            echo "Using tag version: ${MAIN_VERSION}"
-          else
-            # workflow_dispatch 等非 tag 触发，回退到 pubspec.yaml 原有版本
-            MAIN_VERSION=$(grep "^version:" pubspec.yaml | sed -E 's/version: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-            echo "Falling back to pubspec.yaml version: ${MAIN_VERSION}"
-          fi
-          
-          # 组合新的完整版本号 (e.g. 1.4.0+34)
-          FULL_VERSION="${MAIN_VERSION}+${BUILD_NUMBER}"
+          # 组合新的完整版本号 (e.g. 1.0.0+34)
+          FULL_VERSION="${MAIN_VERSION}+${{ steps.generate_version.outputs.BUILD_VERSION }}"
           echo "FULL_VERSION=${FULL_VERSION}"
           
           # 更新新版本号到pubspec.yaml文件
