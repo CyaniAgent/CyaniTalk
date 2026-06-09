@@ -222,6 +222,11 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
             child: Text('settings_font_download_cancel'.tr()),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () {
               Navigator.of(context).pop();
               _handleDownload(font);
@@ -232,7 +237,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       ),
     );
   }
-
+ 
   void _applyFontChange(String fontName) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {

@@ -557,5 +557,21 @@
   "poll_total_votes": "喵",
   "poll_submit": "喵",
   "poll_voted_successfully": "喵",
-  "poll_vote_failed": "喵"
+  "poll_vote_failed": "喵",
+  "settings_network_http_timeout": "喵",
+  "settings_network_tools_section": "喵",
+  "settings_network_test_connection": "喵",
+  "settings_network_tap_to_test": "喵",
+  "settings_network_test_success": "喵",
+  "settings_network_test_failed": "喵",
+  "settings_network_clear_dns": "喵",
+  "settings_network_clear_dns_description": "喵",
+  "settings_network_restore_defaults": "喵",
+  "settings_network_test_success_snackbar": "喵",
+  "settings_network_test_failed_snackbar": "喵",
+  "settings_network_clear_dns_confirm": "喵",
+  "settings_network_dns_cleared": "喵",
+  "settings_network_restore_confirm": "喵",
+  "settings_network_restore_button": "喵",
+  "settings_network_restored": "喵"
 }

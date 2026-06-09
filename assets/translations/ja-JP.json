@@ -557,5 +557,21 @@
   "poll_total_votes": "合計 {} 票",
   "poll_submit": "投票",
   "poll_voted_successfully": "投票しました!",
-  "poll_vote_failed": "投票に失敗しました: {error}"
+  "poll_vote_failed": "投票に失敗しました: {error}",
+  "settings_network_http_timeout": "HTTP リクエストタイムアウト",
+  "settings_network_tools_section": "ツール",
+  "settings_network_test_connection": "ネットワーク接続をテスト",
+  "settings_network_tap_to_test": "タップしてテスト",
+  "settings_network_test_success": "成功",
+  "settings_network_test_failed": "失敗",
+  "settings_network_clear_dns": "DNS キャッシュをクリア",
+  "settings_network_clear_dns_description": "DNS リゾルバをリセット",
+  "settings_network_restore_defaults": "デフォルト設定に戻す",
+  "settings_network_test_success_snackbar": "ネットワークテスト成功！",
+  "settings_network_test_failed_snackbar": "ネットワークテスト失敗",
+  "settings_network_clear_dns_confirm": "DNS リゾルバの設定がリセットされます。",
+  "settings_network_dns_cleared": "DNS キャッシュをクリアしました",
+  "settings_network_restore_confirm": "すべてのネットワーク設定がデフォルトに戻ります。",
+  "settings_network_restore_button": "戻す",
+  "settings_network_restored": "設定をデフォルトに戻しました"
 }

@@ -448,6 +448,9 @@ class _PollSettingsSheetState extends ConsumerState<PollSettingsSheet> {
                       horizontal: 20,
                       vertical: 12,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ],

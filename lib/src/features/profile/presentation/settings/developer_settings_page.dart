@@ -3,9 +3,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/features/profile/application/developer_settings_provider.dart';
+import '/src/core/widgets/settings_widgets.dart';
 import 'log_settings_page.dart';
 
-/// 开发者设置页面组件
 class DeveloperSettingsPage extends ConsumerStatefulWidget {
   const DeveloperSettingsPage({super.key});
 
@@ -15,6 +15,9 @@ class DeveloperSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
+  static const _amber = Color(0xFFFFCA28);
+  static const _brown = Color(0xFF8D6E63);
+
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
@@ -64,72 +67,69 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
       appBar: AppBar(title: Text('settings_developer_title'.tr())),
       body: developerModeAsync.when(
         data: (developerMode) => ListView(
+          padding: const EdgeInsets.only(top: 8, bottom: 32),
           children: [
-            _buildSectionHeader(context, 'settings_logs_section_basic'.tr()),
-            SwitchListTile(
-              secondary: const Icon(Icons.bug_report_outlined),
-              title: Text('settings_developer_mode_title'.tr()),
-              subtitle: Text('settings_developer_mode_description'.tr()),
-              value: developerMode,
-              onChanged: (value) {
-                if (value) {
-                  _showDeveloperModeWarning();
-                } else {
-                  ref
-                      .read(developerSettingsProvider.notifier)
-                      .setDeveloperMode(false);
-                }
-              },
+            SettingsCardGroup(
+              children: [
+                SettingsSwitchTile(
+                  icon: Icons.bug_report_outlined,
+                  iconColor: _amber,
+                  title: 'settings_developer_mode_title'.tr(),
+                  subtitle: 'settings_developer_mode_description'.tr(),
+                  value: developerMode,
+                  onChanged: (value) {
+                    if (value) {
+                      _showDeveloperModeWarning();
+                    } else {
+                      ref
+                          .read(developerSettingsProvider.notifier)
+                          .setDeveloperMode(false);
+                    }
+                  },
+                ),
+              ],
             ),
 
-            const Divider(),
-            _buildSectionHeader(context, 'settings_section_system'.tr()),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: Text('settings_logs_title'.tr()),
-              subtitle: Text('settings_logs_description'.tr()),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const LogSettingsPage(),
+            const SizedBox(height: 16),
+            SettingsCardGroup(
+              children: [
+                SettingsTile(
+                  icon: Icons.history,
+                  iconColor: _brown,
+                  title: 'settings_logs_title'.tr(),
+                  subtitle: 'settings_logs_description'.tr(),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LogSettingsPage()),
                   ),
-                );
-              },
+                ),
+              ],
             ),
 
-            const Divider(),
-            _buildSectionHeader(context, 'about_contributors'.tr()),
-            ListTile(
-              leading: const Icon(Icons.feedback_outlined),
-              title: Text('settings_developer_submit_issue'.tr()),
-              onTap: () =>
-                  _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.merge_type),
-              title: Text('settings_developer_submit_pr'.tr()),
-              onTap: () =>
-                  _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
+            const SizedBox(height: 16),
+            SettingsCardGroup(
+              children: [
+                SettingsTile(
+                  icon: Icons.feedback_outlined,
+                  iconColor: _brown,
+                  title: 'settings_developer_submit_issue'.tr(),
+                  onTap: () =>
+                      _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
+                ),
+                SettingsTile(
+                  icon: Icons.merge_type,
+                  iconColor: _brown,
+                  title: 'settings_developer_submit_pr'.tr(),
+                  onTap: () =>
+                      _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
+                ),
+              ],
             ),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (_, _) => Center(child: Text('Error')),
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 }

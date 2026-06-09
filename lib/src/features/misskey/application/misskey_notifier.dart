@@ -10,6 +10,7 @@ import 'note_cache_manager.dart';
 import 'timeline_animation_state.dart';
 import 'timeline_animated_list_controller.dart';
 import '/src/core/core.dart';
+import '/src/core/services/timeline_cache_database.dart';
 
 part 'misskey_notifier.g.dart';
 
@@ -90,6 +91,27 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         _cacheManager.stopValidationTimer();
       });
 
+      // 检查 SQLite 中的上次刷新时间，决定是否跳过缓存
+      final shouldFetch =
+          await TimelineCacheDatabase().shouldRefresh(type);
+      if (!ref.mounted) return [];
+
+      if (shouldFetch) {
+        logger.info('Misskey时间线: SQLite 记录过期或无记录，直接从服务器获取');
+        final repository = await repositoryFuture;
+        if (!ref.mounted) return [];
+
+        final latestNotes = await repository.getTimeline(type);
+        if (!ref.mounted) return latestNotes;
+
+        _cacheManager.putNotes(latestNotes);
+        await _saveToSqliteAndUpdateMeta(type);
+        _startPeriodicValidation();
+
+        logger.info('Misskey时间线初始化完成，从服务器加载了 ${latestNotes.length} 条笔记');
+        return latestNotes;
+      }
+
       // 优先从缓存加载
       final cachedNotes = _cacheManager.getAllNotes();
       if (cachedNotes.isNotEmpty) {
@@ -146,6 +168,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
 
       // 将最新笔记添加到缓存
       _cacheManager.putNotes(latestNotes);
+      await _saveToSqliteAndUpdateMeta(type);
 
       // Start periodic validation to detect deleted notes
       _startPeriodicValidation();
@@ -213,9 +236,21 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       }
 
       _startPeriodicValidation();
+      unawaited(_saveToSqliteAndUpdateMeta(type));
     } catch (e) {
       if (e.toString().contains('disposed')) return;
       logger.error('Misskey时间线: 加载最新数据失败', e);
+    }
+  }
+
+  /// 将当前缓存笔记写入 SQLite 并更新刷新元数据
+  Future<void> _saveToSqliteAndUpdateMeta(String timelineType) async {
+    try {
+      final notes = _cacheManager.getAllNotes();
+      final noteMaps = notes.map((n) => n.toJson()).toList();
+      await TimelineCacheDatabase().saveNotes(timelineType, noteMaps);
+    } catch (e) {
+      logger.warning('Misskey时间线: SQLite 保存失败: $e');
     }
   }
 
@@ -452,6 +487,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         // 异步后台运行，不需要 await 阻塞刷新结果在 UI 的立即渲染
         _performNoteValidation(validateIds);
       }
+
+      // 刷新成功后更新 SQLite
+      await _saveToSqliteAndUpdateMeta(type);
     } catch (e, stack) {
       if (e.toString().contains('disposed')) return;
 

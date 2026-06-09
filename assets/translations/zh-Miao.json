@@ -557,5 +557,21 @@
   "poll_total_votes": "总计 {} 票喵~",
   "poll_submit": "投票喵~",
   "poll_voted_successfully": "投票成功！喵~",
-  "poll_vote_failed": "投票失败：{error} 喵~"
+  "poll_vote_failed": "投票失败：{error} 喵~",
+  "settings_network_http_timeout": "HTTP 请求超时喵~",
+  "settings_network_tools_section": "工具喵~",
+  "settings_network_test_connection": "测试网络连接喵~",
+  "settings_network_tap_to_test": "点击测试喵~",
+  "settings_network_test_success": "成功喵~",
+  "settings_network_test_failed": "失败喵~",
+  "settings_network_clear_dns": "清除 DNS 缓存喵~",
+  "settings_network_clear_dns_description": "重置 DNS 解析器喵~",
+  "settings_network_restore_defaults": "恢复默认设置喵~",
+  "settings_network_test_success_snackbar": "网络测试成功！喵~",
+  "settings_network_test_failed_snackbar": "网络测试失败喵~",
+  "settings_network_clear_dns_confirm": "这将重置 DNS 解析器设置。喵~",
+  "settings_network_dns_cleared": "DNS 缓存已清除喵~",
+  "settings_network_restore_confirm": "所有网络设置将恢复为默认值。喵~",
+  "settings_network_restore_button": "恢复喵~",
+  "settings_network_restored": "设置已恢复为默认值喵~"
 }

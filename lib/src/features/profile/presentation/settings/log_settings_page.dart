@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/log_settings_provider.dart';
 import '/src/core/utils/logger.dart';
+import '/src/core/widgets/settings_widgets.dart';
 
 class LogSettingsPage extends ConsumerStatefulWidget {
   const LogSettingsPage({super.key});
@@ -87,6 +88,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     }
   }
 
+  static const _brown = Color(0xFF8D6E63);
+  static const _cyan = Color(0xFF26A69A);
+  static const _amber = Color(0xFFFFCA28);
+
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(logSettingsProvider);
@@ -103,45 +108,42 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       ),
       body: settings.when(
         data: (config) => ListView(
+          padding: const EdgeInsets.only(top: 8, bottom: 32),
           children: [
-            _buildSectionHeader(context, 'settings_logs_section_basic'.tr()),
-            _buildLevelTile(context, config),
-            _buildMaxSizeTile(context, config),
-            SwitchListTile(
-              title: Text('settings_logs_auto_clear'.tr()),
-              subtitle: Text('settings_logs_auto_clear_desc'.tr()),
-              value: config.autoClear,
-              onChanged: (value) =>
-                  ref.read(logSettingsProvider.notifier).setAutoClear(value),
-            ),
-            if (config.autoClear) _buildRetentionTile(context, config),
-
-            const Divider(),
-            _buildSectionHeader(context, 'settings_logs_section_history'.tr()),
-            ListTile(
-              leading: const Icon(Icons.description_outlined),
-              title: Text('settings_logs_view'.tr()),
-              onTap: () => _viewCurrentLogs(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.file_upload_outlined),
-              title: Text('settings_logs_export'.tr()),
-              onTap: _exportLogs,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.delete_sweep_outlined,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              title: Text(
-                'settings_logs_delete_all'.tr(),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-              onTap: _deleteAllLogs,
+            SettingsCardGroup(
+              children: [
+                _buildLevelTile(config),
+                _buildMaxSizeTile(config),
+                _buildAutoClearTile(config),
+                if (config.autoClear) _buildRetentionTile(config),
+              ],
             ),
 
-            const Divider(),
-            _buildSectionHeader(context, 'settings_logs_file_list'.tr()),
+            const SizedBox(height: 16),
+            SettingsCardGroup(
+              children: [
+                SettingsTile(
+                  icon: Icons.description_outlined,
+                  iconColor: _brown,
+                  title: 'settings_logs_view'.tr(),
+                  onTap: () => _viewCurrentLogs(context),
+                ),
+                SettingsTile(
+                  icon: Icons.file_upload_outlined,
+                  iconColor: _brown,
+                  title: 'settings_logs_export'.tr(),
+                  onTap: _exportLogs,
+                ),
+                SettingsTile(
+                  icon: Icons.delete_sweep_outlined,
+                  iconColor: Colors.red,
+                  title: 'settings_logs_delete_all'.tr(),
+                  onTap: _deleteAllLogs,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
             if (_isLoading)
               const Center(
                 child: Padding(
@@ -161,86 +163,191 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text('Error: $e')),
+        error: (_, _) => Center(child: Text('Error')),
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
+  Widget _buildLevelTile(LogSettings config) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLevelTile(BuildContext context, LogSettings config) {
-    return ListTile(
-      title: Text('settings_logs_level'.tr()),
-      subtitle: Text('settings_logs_level_desc'.tr()),
-      trailing: DropdownButton<String>(
-        value: config.logLevel.toLowerCase(),
-        items: ['debug', 'info', 'warning', 'error']
-            .map(
-              (l) => DropdownMenuItem(value: l, child: Text(l.toUpperCase())),
-            )
-            .toList(),
-        onChanged: (value) {
-          if (value != null) {
-            ref.read(logSettingsProvider.notifier).setLogLevel(value);
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildMaxSizeTile(BuildContext context, LogSettings config) {
-    return ListTile(
-      title: Text('settings_logs_max_size'.tr()),
-      subtitle: Text('settings_logs_max_size_desc'.tr()),
-      trailing: SizedBox(
-        width: 80,
-        child: TextField(
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.end,
-          decoration: const InputDecoration(suffixText: ' MB'),
-          controller: TextEditingController(text: config.maxLogSize.toString()),
-          onSubmitted: (value) {
-            final size = int.tryParse(value);
-            if (size != null && size > 0) {
-              ref.read(logSettingsProvider.notifier).setMaxLogSize(size);
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRetentionTile(BuildContext context, LogSettings config) {
-    return ListTile(
-      title: Text('settings_logs_retention_days'.tr()),
-      subtitle: Text('settings_logs_retention_days_desc'.tr()),
-      trailing: SizedBox(
-        width: 80,
-        child: TextField(
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.end,
-          decoration: const InputDecoration(suffixText: ' Days'),
-          controller: TextEditingController(
-            text: config.retentionDays.toString(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: _brown.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.tune, color: _brown, size: 20),
           ),
-          onSubmitted: (value) {
-            final days = int.tryParse(value);
-            if (days != null && days > 0) {
-              ref.read(logSettingsProvider.notifier).setRetentionDays(days);
-            }
-          },
-        ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('settings_logs_level'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text('settings_logs_level_desc'.tr(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          DropdownButton<String>(
+            value: config.logLevel.toLowerCase(),
+            items: ['debug', 'info', 'warning', 'error']
+                .map((l) => DropdownMenuItem(value: l, child: Text(l.toUpperCase())))
+                .toList(),
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(logSettingsProvider.notifier).setLogLevel(value);
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMaxSizeTile(LogSettings config) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: _cyan.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.storage, color: _cyan, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('settings_logs_max_size'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text('settings_logs_max_size_desc'.tr(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          SizedBox(
+            width: 80,
+            child: TextField(
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.end,
+              decoration: const InputDecoration(suffixText: ' MB', isDense: true),
+              controller: TextEditingController(text: config.maxLogSize.toString()),
+              onSubmitted: (value) {
+                final size = int.tryParse(value);
+                if (size != null && size > 0) {
+                  ref.read(logSettingsProvider.notifier).setMaxLogSize(size);
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAutoClearTile(LogSettings config) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: _amber.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.auto_delete, color: _amber, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('settings_logs_auto_clear'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text('settings_logs_auto_clear_desc'.tr(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Switch(
+            value: config.autoClear,
+            onChanged: (value) => ref.read(logSettingsProvider.notifier).setAutoClear(value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRetentionTile(LogSettings config) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: _amber.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.calendar_today, color: _amber, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('settings_logs_retention_days'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text('settings_logs_retention_days_desc'.tr(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          SizedBox(
+            width: 80,
+            child: TextField(
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.end,
+              decoration: const InputDecoration(suffixText: ' Days', isDense: true),
+              controller: TextEditingController(text: config.retentionDays.toString()),
+              onSubmitted: (value) {
+                final days = int.tryParse(value);
+                if (days != null && days > 0) {
+                  ref.read(logSettingsProvider.notifier).setRetentionDays(days);
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

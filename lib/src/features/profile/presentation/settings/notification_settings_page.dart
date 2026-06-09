@@ -4,9 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/notification_settings_provider.dart';
 import '/src/core/services/notification_service.dart';
+import '/src/core/widgets/settings_widgets.dart';
 
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
+
+  static const _cyan = Color(0xFF26A69A);
+  static const _blue = Color(0xFF42A5F5);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,10 +22,11 @@ class NotificationSettingsPage extends ConsumerWidget {
       appBar: AppBar(title: Text('settings_notifications_title'.tr())),
       body: settingsAsync.when(
         data: (settings) => ListView(
+          padding: const EdgeInsets.only(top: 8, bottom: 32),
           children: [
             if (isDesktop)
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -49,73 +54,57 @@ class NotificationSettingsPage extends ConsumerWidget {
                   ),
                 ),
               ),
-            _buildPermissionSection(context, isDesktop),
-            ListTile(
-              leading: const Icon(Icons.notification_add_outlined),
-              title: Text('settings_notif_test'.tr()),
-              subtitle: Text('settings_notif_test_desc'.tr()),
-              enabled: !isDesktop,
-              onTap: isDesktop
-                  ? null
-                  : () async {
-                      await NotificationService().showNotification(
-                        id: 0,
-                        title: 'CyaniTalk (≧▽≦)',
-                        body: 'settings_notif_test_body'.tr(),
-                      );
-                    },
+
+            SettingsCardGroup(
+              children: [
+                _buildPermissionTile(context, isDesktop),
+                _buildTestTile(context, isDesktop),
+              ],
             ),
-            const Divider(),
-            _buildSectionHeader(context, 'Misskey'),
-            SwitchListTile(
-              secondary: const Icon(Icons.rss_feed),
-              title: Text('settings_notif_misskey_posts'.tr()),
-              subtitle: Text('settings_notif_misskey_posts_desc'.tr()),
-              value: settings.misskeyRealtimePost,
-              onChanged: isDesktop
-                  ? null
-                  : (value) => ref
-                        .read(notificationSettingsProvider.notifier)
-                        .toggleMisskeyRealtimePost(value),
-            ),
-            SwitchListTile(
-              secondary: const Icon(Icons.message_outlined),
-              title: Text('settings_notif_misskey_messages'.tr()),
-              subtitle: Text('settings_notif_misskey_messages_desc'.tr()),
-              value: settings.misskeyMessages,
-              onChanged: isDesktop
-                  ? null
-                  : (value) => ref
-                        .read(notificationSettingsProvider.notifier)
-                        .toggleMisskeyMessages(value),
+
+            const SizedBox(height: 16),
+            SettingsCardGroup(
+              children: [
+                SettingsSwitchTile(
+                  icon: Icons.rss_feed,
+                  iconColor: _cyan,
+                  title: 'settings_notif_misskey_posts'.tr(),
+                  subtitle: 'settings_notif_misskey_posts_desc'.tr(),
+                  value: settings.misskeyRealtimePost,
+                  onChanged: isDesktop
+                      ? null
+                      : (value) => ref
+                            .read(notificationSettingsProvider.notifier)
+                            .toggleMisskeyRealtimePost(value),
+                ),
+                SettingsSwitchTile(
+                  icon: Icons.message_outlined,
+                  iconColor: _blue,
+                  title: 'settings_notif_misskey_messages'.tr(),
+                  subtitle: 'settings_notif_misskey_messages_desc'.tr(),
+                  value: settings.misskeyMessages,
+                  onChanged: isDesktop
+                      ? null
+                      : (value) => ref
+                            .read(notificationSettingsProvider.notifier)
+                            .toggleMisskeyMessages(value),
+                ),
+              ],
             ),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (_, _) => Center(child: Text('Error')),
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPermissionSection(BuildContext context, bool isDesktop) {
-    return ListTile(
-      leading: const Icon(Icons.security_outlined),
-      title: Text('settings_notif_permission'.tr()),
-      subtitle: Text('settings_notif_permission_desc'.tr()),
-      trailing: const Icon(Icons.chevron_right),
-      enabled: !isDesktop,
+  Widget _buildPermissionTile(BuildContext context, bool isDesktop) {
+    return SettingsTile(
+      icon: Icons.security_outlined,
+      iconColor: _cyan,
+      title: 'settings_notif_permission'.tr(),
+      subtitle: 'settings_notif_permission_desc'.tr(),
       onTap: isDesktop
           ? null
           : () async {
@@ -132,6 +121,24 @@ class NotificationSettingsPage extends ConsumerWidget {
                   ),
                 );
               }
+            },
+    );
+  }
+
+  Widget _buildTestTile(BuildContext context, bool isDesktop) {
+    return SettingsTile(
+      icon: Icons.notification_add_outlined,
+      iconColor: _cyan,
+      title: 'settings_notif_test'.tr(),
+      subtitle: 'settings_notif_test_desc'.tr(),
+      onTap: isDesktop
+          ? null
+          : () async {
+              await NotificationService().showNotification(
+                id: 0,
+                title: 'CyaniTalk (≧▽≦)',
+                body: 'settings_notif_test_body'.tr(),
+              );
             },
     );
   }

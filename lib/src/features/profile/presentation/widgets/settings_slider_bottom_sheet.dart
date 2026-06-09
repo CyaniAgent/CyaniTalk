@@ -153,6 +153,11 @@ class _SettingsSliderBottomSheetState extends State<SettingsSliderBottomSheet> {
               width: double.infinity,
               height: 56,
               child: FilledButton(
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () {
                   widget.onConfirm(_currentValue);
                   Navigator.pop(context);

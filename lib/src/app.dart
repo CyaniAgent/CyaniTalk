@@ -18,6 +18,7 @@ import 'core/services/notification_manager.dart';
 import 'features/update/application/update_notifier.dart';
 import 'features/update/presentation/update_bottom_sheet.dart';
 import 'core/services/audio_engine.dart';
+import 'core/services/timeline_cache_database.dart';
 
 /// CyaniTalk应用程序的根组件
 ///
@@ -63,6 +64,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(updateProvider.notifier).checkForUpdate(silent: true);
     });
+
+    // 延迟检测 SQLite 并触发启动刷新
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshTimelinesOnStartup();
+    });
   }
 
   @override
@@ -85,12 +91,8 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       ref.read(misskeyStreamingServiceProvider.notifier).reconnect();
 
       // 刷新 Misskey 各种 Provider (如果已挂载)
-      // 注意：这里我们只刷新最关键的通知，时间线通常由 UI 层的 Visibility 触发或由流式服务维持
-      // 但为了确保万无一失，我们可以尝试刷新一次全局的 Misskey 状态
       ref.invalidate(misskeyNotificationsProvider);
-
-      // 如果有挂载的时间线，也会因为流式连接重置而更新，
-      // 或者我们可以显式地让某些关键 provider 刷新
+      _refreshTimelinesOnStartup();
     }
 
     if (state == AppLifecycleState.paused ||
@@ -122,6 +124,21 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       // 清理通知管理器
       ref.read(notificationManagerProvider).stop();
       logger.info('CyaniTalkApp: 资源清理完成');
+    }
+  }
+
+  /// 启动时检测 SQLite 并触发时间线刷新
+  Future<void> _refreshTimelinesOnStartup() async {
+    try {
+      final shouldRefresh =
+          await TimelineCacheDatabase().shouldRefresh('Home');
+      if (!shouldRefresh) return;
+
+      logger.info('CyaniTalkApp: SQLite 记录过期，触发 Home 时间线刷新');
+      ref.read(misskeyTimelineProvider('Home').notifier).refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed')) return;
+      logger.warning('CyaniTalkApp: 启动刷新失败: $e');
     }
   }
 
@@ -303,6 +320,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       }
     }
 
+    final capsuleShape = StadiumBorder();
+    final smallRadiusShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    );
+
     final theme = ThemeData(
       colorScheme: settings.useDynamicColor
           ? ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness)
@@ -325,6 +347,18 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 2,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(shape: capsuleShape),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(shape: capsuleShape),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(shape: smallRadiusShape),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(shape: capsuleShape),
       ),
     );
 

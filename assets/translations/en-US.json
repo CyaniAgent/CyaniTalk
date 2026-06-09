@@ -557,5 +557,21 @@
   "poll_total_votes": "{} votes",
   "poll_submit": "Vote",
   "poll_voted_successfully": "Voted successfully!",
-  "poll_vote_failed": "Failed to vote: {error}"
+  "poll_vote_failed": "Failed to vote: {error}",
+  "settings_network_http_timeout": "HTTP Request Timeout",
+  "settings_network_tools_section": "Tools",
+  "settings_network_test_connection": "Test Network Connection",
+  "settings_network_tap_to_test": "Tap to test",
+  "settings_network_test_success": "Success",
+  "settings_network_test_failed": "Failed",
+  "settings_network_clear_dns": "Clear DNS Cache",
+  "settings_network_clear_dns_description": "Reset DNS resolver",
+  "settings_network_restore_defaults": "Restore Default Settings",
+  "settings_network_test_success_snackbar": "Network test successful!",
+  "settings_network_test_failed_snackbar": "Network test failed",
+  "settings_network_clear_dns_confirm": "This will reset DNS resolver settings.",
+  "settings_network_dns_cleared": "DNS cache cleared",
+  "settings_network_restore_confirm": "All network settings will be reset to defaults.",
+  "settings_network_restore_button": "Restore",
+  "settings_network_restored": "Settings restored to defaults"
 }

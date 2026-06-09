@@ -557,5 +557,21 @@
   "poll_total_votes": "合計 {} 票にゃー",
   "poll_submit": "投票にゃー",
   "poll_voted_successfully": "投票しました！にゃー",
-  "poll_vote_failed": "投票に失敗しました：{error} にゃー"
+  "poll_vote_failed": "投票に失敗しました：{error} にゃー",
+  "settings_network_http_timeout": "HTTP リクエストタイムアウトにゃー",
+  "settings_network_tools_section": "ツールにゃー",
+  "settings_network_test_connection": "ネットワーク接続をテストにゃー",
+  "settings_network_tap_to_test": "タップしてテストにゃー",
+  "settings_network_test_success": "成功にゃー",
+  "settings_network_test_failed": "失敗にゃー",
+  "settings_network_clear_dns": "DNS キャッシュをクリアにゃー",
+  "settings_network_clear_dns_description": "DNS リゾルバをリセットにゃー",
+  "settings_network_restore_defaults": "デフォルト設定に戻すにゃー",
+  "settings_network_test_success_snackbar": "ネットワークテスト成功！にゃー",
+  "settings_network_test_failed_snackbar": "ネットワークテスト失敗にゃー",
+  "settings_network_clear_dns_confirm": "DNS リゾルバの設定がリセットされます。にゃー",
+  "settings_network_dns_cleared": "DNS キャッシュをクリアしましたにゃー",
+  "settings_network_restore_confirm": "すべてのネットワーク設定がデフォルトに戻ります。にゃー",
+  "settings_network_restore_button": "戻すにゃー",
+  "settings_network_restored": "設定をデフォルトに戻しましたにゃー"
 }

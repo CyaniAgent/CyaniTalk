@@ -373,6 +373,11 @@ class MfmRenderer {
                 child: const Text('取消'),
               ),
               FilledButton(
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () async {
                   Navigator.pop(dialogContext);
                   final uri = Uri.parse(url);
@@ -630,6 +635,11 @@ class MfmRenderer {
                 child: const Text('取消'),
               ),
               FilledButton(
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 onPressed: () async {
                   Navigator.pop(dialogContext);
                   final uri = Uri.parse(url);

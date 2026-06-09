@@ -1,6 +1,3 @@
-// 设置页面
-//
-// 该文件包含SettingsPage组件，用于显示应用程序的设置选项。
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,16 +12,11 @@ import 'navigation_settings_page.dart';
 import 'developer_settings_page.dart';
 import 'licenses_page.dart';
 import 'network_settings_page.dart';
+import '/src/core/widgets/settings_widgets.dart';
 import '/src/features/update/application/update_notifier.dart';
 import '/src/features/update/presentation/update_bottom_sheet.dart';
 
-/// 应用程序设置页面组件
-///
-/// 显示应用程序的各种设置选项，包括账户管理、连接配置、界面设置等。
 class SettingsPage extends StatefulWidget {
-  /// 创建一个新的SettingsPage实例
-  ///
-  /// [key] - 组件的键，用于唯一标识组件
   const SettingsPage({super.key});
 
   @override
@@ -32,7 +24,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  /// 是否显示喵星语选项
   bool showMiaoLanguage = false;
 
   @override
@@ -41,419 +32,264 @@ class _SettingsPageState extends State<SettingsPage> {
     _loadShowMiaoLanguage();
   }
 
-  /// 加载是否显示喵星语选项的设置
   Future<void> _loadShowMiaoLanguage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final value = prefs.getBool('show_miao_language') ?? false;
-      setState(() {
-        showMiaoLanguage = value;
-      });
-    } catch (e) {
-      // 加载失败时使用默认值
-      setState(() {
-        showMiaoLanguage = false;
-      });
+      setState(() => showMiaoLanguage = value);
+    } catch (_) {
+      setState(() => showMiaoLanguage = false);
     }
   }
 
-  /// 保存是否显示喵星语选项的设置
   Future<void> _saveShowMiaoLanguage(bool value) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('show_miao_language', value);
-    } catch (e) {
-      // 保存失败时忽略错误
-    }
+    } catch (_) {}
   }
 
-  /// 构建设置页面的UI界面
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  ///
-  /// 返回一个包含各种设置选项的Scaffold组件
+  // ── Icon color palette ──────────────────────────────────────────
+  static const _blue = Color(0xFF42A5F5);
+  static const _cyan = Color(0xFF26A69A);
+  static const _purple = Color(0xFFAB47BC);
+  static const _lightBlue = Color(0xFF4FC3F7);
+  static const _orange = Color(0xFFFF7043);
+  static const _pink = Color(0xFFEC407A);
+  static const _indigo = Color(0xFF5C6BC0);
+  static const _green = Color(0xFF66BB6A);
+  static const _amber = Color(0xFFFFCA28);
+  static const _brown = Color(0xFF8D6E63);
+  static const _blueGrey = Color(0xFF78909C);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('settings_title'.tr())),
       body: ListView(
+        padding: const EdgeInsets.only(top: 8, bottom: 32),
         children: [
-          _buildSectionHeader(context, 'settings_section_account'.tr()),
-          _buildSettingsTile(
-            context,
-            Icons.person_outline,
-            'settings_account_title'.tr(),
-            'settings_account_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const AccountsPage()),
-              );
-            },
+          SettingsCardGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.person_outline,
+                iconColor: _blue,
+                title: 'settings_account_title'.tr(),
+                subtitle: 'settings_account_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AccountsPage()),
+                ),
+              ),
+            ],
           ),
 
-          _buildSectionHeader(context, 'settings_section_connections'.tr()),
-          _buildSettingsTile(
-            context,
-            Icons.wifi,
-            'settings_network_title'.tr(),
-            'settings_network_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const NetworkSettingsPage()),
-              );
-            },
+          const SizedBox(height: 16),
+
+          SettingsCardGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.wifi,
+                iconColor: _cyan,
+                title: 'settings_network_title'.tr(),
+                subtitle: 'settings_network_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NetworkSettingsPage()),
+                ),
+              ),
+            ],
           ),
 
-          _buildSectionHeader(context, 'settings_section_interface'.tr()),
-          _buildSettingsTile(
-            context,
-            Icons.palette_outlined,
-            'settings_appearance_title'.tr(),
-            'settings_appearance_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const AppearancePage()),
-              );
-            },
-          ),
-          GestureDetector(
-            onDoubleTap: () {
-              final newValue = !showMiaoLanguage;
-              setState(() {
-                showMiaoLanguage = newValue;
-              });
-              _saveShowMiaoLanguage(newValue);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项'), behavior: SnackBarBehavior.floating),
-              );
-            },
-            child: _buildSettingsTile(
-              context,
-              Icons.language_outlined,
-              'settings_language_title'.tr(),
-              'settings_language_description'.tr(),
-              onTap: () => _showLanguageDialog(context),
-            ),
-          ),
-          _buildSettingsTile(
-            context,
-            Icons.notifications_outlined,
-            'settings_notifications_title'.tr(),
-            'settings_notifications_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const NotificationSettingsPage(),
-                ),
-              );
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            Icons.volume_up_outlined,
-            'settings_sound_title'.tr(),
-            'settings_sound_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const SoundSettingsPage(),
-                ),
-              );
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            Icons.navigation_outlined,
-            'settings_navigation_title'.tr(),
-            'settings_navigation_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const NavigationSettingsPage(),
-                ),
-              );
-            },
-          ),
+          const SizedBox(height: 16),
 
-          _buildSectionHeader(context, 'settings_section_system'.tr()),
-          _buildSettingsTile(
-            context,
-            Icons.system_update_rounded,
-            '检查更新',
-            '检查是否有新版本可用',
-            onTap: () async {
-              final container = ProviderScope.containerOf(context, listen: false);
-              final notifier = container.read(updateProvider.notifier);
-              await notifier.checkForUpdate();
-              final state = container.read(updateProvider);
-              if (state.state == UpdateState.updateAvailable && state.update != null) {
-                if (context.mounted) {
-                  showUpdateBottomSheet(context, state.update!);
-                }
-              } else if (state.state == UpdateState.upToDate) {
-                if (context.mounted) {
+          SettingsCardGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.palette_outlined,
+                iconColor: _purple,
+                title: 'settings_appearance_title'.tr(),
+                subtitle: 'settings_appearance_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AppearancePage()),
+                ),
+              ),
+              GestureDetector(
+                onDoubleTap: () {
+                  final newValue = !showMiaoLanguage;
+                  setState(() => showMiaoLanguage = newValue);
+                  _saveShowMiaoLanguage(newValue);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text('当前已是最新版本'),
+                      content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项'),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
-                }
-              } else if (state.state == UpdateState.error) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.errorMessage ?? '检查更新失败'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              }
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            Icons.bug_report_outlined,
-            'settings_developer_title'.tr(),
-            'settings_developer_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const DeveloperSettingsPage(),
+                },
+                child: SettingsTile(
+                  icon: Icons.language_outlined,
+                  iconColor: _lightBlue,
+                  title: 'settings_language_title'.tr(),
+                  subtitle: 'settings_language_description'.tr(),
+                  onTap: () => _showLanguageDialog(context),
                 ),
-              );
-            },
-          ),
-          _buildSettingsTile(
-            context,
-            Icons.storage_outlined,
-            'settings_storage_title'.tr(),
-            'settings_storage_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const CacheSettingsPage(),
+              ),
+              SettingsTile(
+                icon: Icons.notifications_outlined,
+                iconColor: _orange,
+                title: 'settings_notifications_title'.tr(),
+                subtitle: 'settings_notifications_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NotificationSettingsPage()),
                 ),
-              );
-            },
+              ),
+              SettingsTile(
+                icon: Icons.volume_up_outlined,
+                iconColor: _pink,
+                title: 'settings_sound_title'.tr(),
+                subtitle: 'settings_sound_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SoundSettingsPage()),
+                ),
+              ),
+              SettingsTile(
+                icon: Icons.navigation_outlined,
+                iconColor: _indigo,
+                title: 'settings_navigation_title'.tr(),
+                subtitle: 'settings_navigation_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NavigationSettingsPage()),
+                ),
+              ),
+            ],
           ),
 
-          _buildSectionHeader(context, 'settings_section_about'.tr()),
-          _buildSettingsTile(
-            context,
-            Icons.info_outline,
-            'settings_about_title'.tr(),
-            'settings_about_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const AboutPage()),
-              );
-            },
+          const SizedBox(height: 16),
+
+          SettingsCardGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.system_update_rounded,
+                iconColor: _green,
+                title: '检查更新',
+                subtitle: '检查是否有新版本可用',
+                onTap: _checkForUpdate,
+              ),
+              SettingsTile(
+                icon: Icons.bug_report_outlined,
+                iconColor: _amber,
+                title: 'settings_developer_title'.tr(),
+                subtitle: 'settings_developer_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DeveloperSettingsPage()),
+                ),
+              ),
+              SettingsTile(
+                icon: Icons.storage_outlined,
+                iconColor: _brown,
+                title: 'settings_storage_title'.tr(),
+                subtitle: 'settings_storage_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CacheSettingsPage()),
+                ),
+              ),
+            ],
           ),
-          _buildSettingsTile(
-            context,
-            Icons.description_outlined,
-            'settings_licenses_title'.tr(),
-            'settings_licenses_description'.tr(),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const LicensesPage()),
-              );
-            },
+
+          const SizedBox(height: 16),
+
+          SettingsCardGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.info_outline,
+                iconColor: _blueGrey,
+                title: 'settings_about_title'.tr(),
+                subtitle: 'settings_about_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AboutPage()),
+                ),
+              ),
+              SettingsTile(
+                icon: Icons.description_outlined,
+                iconColor: _blueGrey,
+                title: 'settings_licenses_title'.tr(),
+                subtitle: 'settings_licenses_description'.tr(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LicensesPage()),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  /// 构建设置页面的分区标题
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [title] - 分区标题文本
-  ///
-  /// 返回一个显示分区标题的Widget
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
+  Future<void> _checkForUpdate() async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final notifier = container.read(updateProvider.notifier);
+    await notifier.checkForUpdate();
+    final state = container.read(updateProvider);
+    if (!context.mounted) return;
+
+    if (state.state == UpdateState.updateAvailable && state.update != null) {
+      showUpdateBottomSheet(context, state.update!);
+    } else if (state.state == UpdateState.upToDate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('当前已是最新版本'),
+          behavior: SnackBarBehavior.floating,
         ),
-      ),
-    );
+      );
+    } else if (state.state == UpdateState.error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.errorMessage ?? '检查更新失败'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
-  /// 构建设置选项瓦片
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [icon] - 选项图标
-  /// [title] - 选项标题
-  /// [subtitle] - 选项描述
-  /// [onTap] - 点击事件回调
-  ///
-  /// 返回一个显示设置选项的ListTile组件
-  Widget _buildSettingsTile(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String? subtitle, {
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle) : null,
-      onTap:
-          onTap ??
-          () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'settings_tapped'.tr(namedArgs: {'title': title}),
-                ),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-    );
-  }
-
-  /// 显示语言选择对话框
   void _showLanguageDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
         final currentLocale = context.locale;
-        final List<Widget> languageOptions = [
-          ListTile(
-            title: Text('settings_language_chinese'.tr()),
-            onTap: () {
-              context.setLocale(const Locale('zh', 'CN'));
-              Navigator.pop(context);
-            },
-            trailing: currentLocale == const Locale('zh', 'CN')
-                ? Icon(
-                    Icons.radio_button_checked,
-                    color: Theme.of(context).colorScheme.primary,
-                  )
-                : Icon(
-                    Icons.radio_button_off,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-          ),
-          ListTile(
-            title: Text('settings_language_english'.tr()),
-            onTap: () {
-              context.setLocale(const Locale('en', 'US'));
-              Navigator.pop(context);
-            },
-            trailing: currentLocale == const Locale('en', 'US')
-                ? Icon(
-                    Icons.radio_button_checked,
-                    color: Theme.of(context).colorScheme.primary,
-                  )
-                : Icon(
-                    Icons.radio_button_off,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-          ),
-          ListTile(
-            title: Text('settings_language_japanese'.tr()),
-            onTap: () {
-              context.setLocale(const Locale('ja', 'JP'));
-              Navigator.pop(context);
-            },
-            trailing: currentLocale == const Locale('ja', 'JP')
-                ? Icon(
-                    Icons.radio_button_checked,
-                    color: Theme.of(context).colorScheme.primary,
-                  )
-                : Icon(
-                    Icons.radio_button_off,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-          ),
+
+        final languageOptions = <Widget>[
+          _langTile(context, currentLocale, 'settings_language_chinese'.tr(), const Locale('zh', 'CN')),
+          _langTile(context, currentLocale, 'settings_language_english'.tr(), const Locale('en', 'US')),
+          _langTile(context, currentLocale, 'settings_language_japanese'.tr(), const Locale('ja', 'JP')),
         ];
 
-        // 如果启用了喵星语选项，添加喵星语相关选项
         if (showMiaoLanguage) {
           languageOptions.addAll([
-            ListTile(
-              title: Text('喵星语'),
-              onTap: () {
-                context.setLocale(const Locale('zh', 'Miao'));
-                Navigator.pop(context);
-              },
-              trailing: currentLocale == const Locale('zh', 'Miao')
-                  ? Icon(
-                      Icons.radio_button_checked,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : Icon(
-                      Icons.radio_button_off,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-            ),
-            ListTile(
-              title: Text('にゃ語'),
-              onTap: () {
-                context.setLocale(const Locale('ja', 'Miao'));
-                Navigator.pop(context);
-              },
-              trailing: currentLocale == const Locale('ja', 'Miao')
-                  ? Icon(
-                      Icons.radio_button_checked,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : Icon(
-                      Icons.radio_button_off,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-            ),
-            ListTile(
-              title: Text('Meow Language（英文）'),
-              onTap: () {
-                context.setLocale(const Locale('en', 'Miao'));
-                Navigator.pop(context);
-              },
-              trailing: currentLocale == const Locale('en', 'Miao')
-                  ? Icon(
-                      Icons.radio_button_checked,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : Icon(
-                      Icons.radio_button_off,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-            ),
-            ListTile(
-              title: Text('Meow Meow Meow'),
-              onTap: () {
-                context.setLocale(const Locale('miao', 'Miao'));
-                Navigator.pop(context);
-              },
-              trailing: currentLocale == const Locale('miao', 'Miao')
-                  ? Icon(
-                      Icons.radio_button_checked,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : Icon(
-                      Icons.radio_button_off,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-            ),
+            _langTile(context, currentLocale, '喵星语', const Locale('zh', 'Miao')),
+            _langTile(context, currentLocale, 'にゃ語', const Locale('ja', 'Miao')),
+            _langTile(context, currentLocale, 'Meow Language（英文）', const Locale('en', 'Miao')),
+            _langTile(context, currentLocale, 'Meow Meow Meow', const Locale('miao', 'Miao')),
           ]);
         }
 
         return AlertDialog(
           title: Text('settings_language_select_title'.tr()),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: languageOptions,
-          ),
+          content: Column(mainAxisSize: MainAxisSize.min, children: languageOptions),
         );
       },
+    );
+  }
+
+  Widget _langTile(BuildContext context, Locale current, String label, Locale target) {
+    final isActive = current == target;
+    return ListTile(
+      title: Text(label),
+      onTap: () {
+        context.setLocale(target);
+        Navigator.pop(context);
+      },
+      trailing: Icon(
+        isActive ? Icons.radio_button_checked : Icons.radio_button_off,
+        color: isActive ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+      ),
     );
   }
 }

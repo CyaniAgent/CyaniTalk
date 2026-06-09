@@ -294,6 +294,23 @@ class MisskeyImageCacheDatabase {
     return counts;
   }
 
+  /// 按类型获取缓存大小（字节）
+  Future<Map<String, int>> getCacheSizeByType() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT cache_type, SUM(file_size_bytes) as total FROM image_cache GROUP BY cache_type',
+    );
+    final Map<String, int> sizes = {};
+    for (final row in result) {
+      final type = row['cache_type'] as String?;
+      final total = row['total'] as int? ?? 0;
+      if (type != null) {
+        sizes[type] = total;
+      }
+    }
+    return sizes;
+  }
+
   /// 关闭数据库
   Future<void> close() async {
     final db = await database;

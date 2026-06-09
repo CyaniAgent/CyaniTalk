@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/oss_licenses.dart';
+import '/src/core/widgets/settings_widgets.dart';
 
 /// 开源许可证页面
 ///
@@ -70,39 +71,75 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            'licenses_dependencies_title'.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
+        _header(context, 'licenses_dependencies_title'.tr()),
+        const SizedBox(height: 4),
+        SettingsCardGroup(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          children: dependencies.map((package) => _buildDependencyTile(package)).toList(),
         ),
-        ...dependencies.map((package) => _buildDependencyTile(package)),
       ],
     );
   }
 
   Widget _buildDependencyTile(Package package) {
-    return ListTile(
-      title: Text(package.name),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (package.version != null) Text('Version: ${package.version}'),
-          if (package.spdxIdentifiers.isNotEmpty)
-            Text(
-              '${'licenses_spdx_identifiers'.tr()}: ${package.spdxIdentifiers.first}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.outline,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showLicenseDetails(package),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40, height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.code, color: Theme.of(context).colorScheme.primary, size: 20),
               ),
-            ),
-        ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(package.name, style: Theme.of(context).textTheme.bodyLarge),
+                    if (package.version != null) ...[
+                      const SizedBox(height: 2),
+                      Text('Version: ${package.version}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    if (package.spdxIdentifiers.isNotEmpty) ...[
+                      const SizedBox(height: 1),
+                      Text(
+                        '${'licenses_spdx_identifiers'.tr()}: ${package.spdxIdentifiers.first}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ],
+          ),
+        ),
       ),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => _showLicenseDetails(package),
+    );
+  }
+
+  Widget _header(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 20, 16, 10),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
     );
   }
 

@@ -114,6 +114,9 @@ dependencies:
   mfm: ^1.0.9
   haptic_feedback: ^0.6.4+3
   window_manager: ^0.4.1
+  fl_chart: ^1.2.0
+  highlight: ^0.7.0
+  flutter_highlight: ^0.7.0
 
 dev_dependencies:
   flutter_test:

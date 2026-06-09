@@ -39,16 +39,13 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
               .toList();
 
           return ListView(
-            padding: const EdgeInsets.only(bottom: 32),
+            padding: const EdgeInsets.only(top: 8, bottom: 32),
             children: [
-              _buildSectionHeader(
-                context,
-                'settings_navigation_section_items'.tr(),
-              ),
+              _header(context, 'settings_navigation_section_items'.tr()),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                padding: const EdgeInsets.fromLTRB(28, 0, 16, 10),
                 child: Text(
-                  '样式已对齐正式侧栏。拖拽调整顺序，非“用户”项用 +/- 控制显示。',
+                  '样式已对齐正式侧栏。拖拽调整顺序，非"用户"项用 +/- 控制显示。',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -58,7 +55,7 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: desktopColors.paneBackground,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: Theme.of(context).colorScheme.outlineVariant,
                   ),
@@ -284,14 +281,14 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
+  Widget _header(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      padding: const EdgeInsets.fromLTRB(28, 20, 16, 10),
       child: Text(
         title,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     );
   }

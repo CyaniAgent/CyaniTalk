@@ -201,34 +201,24 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                 if (mounted) setState(() {});
                               },
                             ),
-                            if (user?.host != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 1.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.public, size: 10),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      child: Text(
-                                        user!.host!,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: theme.colorScheme.secondary
-                                              .withAlpha(179),
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
+                            Text.rich(
+                              TextSpan(
+                                text: '@${user?.username}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
-                              ),
-                            Text(
-                              '@${user?.username}${user?.host != null ? "@${user!.host}" : ""}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurfaceVariant,
+                                children: user?.host != null
+                                    ? [
+                                        TextSpan(
+                                          text: '@${user!.host}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+                                          ),
+                                        ),
+                                      ]
+                                    : null,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -366,48 +356,36 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
                 const SizedBox(height: 16),
 
-                // 交互按钮行
+                // 交互按钮行 (Twitter/X 左对齐风格)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // 回复按钮
-                    Expanded(
-                      child: _buildAction(
-                        Icons.reply,
-                        note.repliesCount.toString(),
-                        _handleReply,
-                        tooltip: 'Reply',
-                      ),
+                    _buildAction(
+                      Icons.reply,
+                      note.repliesCount > 0 ? note.repliesCount.toString() : null,
+                      _handleReply,
+                      tooltip: 'Reply',
                     ),
-
-                    // 转发按钮
-                    Expanded(
-                      child: _buildAction(
-                        Icons.repeat,
-                        note.renoteCount.toString(),
-                        _handleRenote,
-                        tooltip: 'Renote',
-                      ),
+                    const SizedBox(width: 4),
+                    _buildAction(
+                      Icons.repeat,
+                      note.renoteCount > 0 ? note.renoteCount.toString() : null,
+                      _handleRenote,
+                      tooltip: 'Renote',
                     ),
-
-                    // 反应按钮
-                    Expanded(
-                      child: _buildAction(
-                        Icons.add_reaction_outlined,
-                        note.reactions.length.toString(),
-                        _handleReaction,
-                        tooltip: 'Reaction',
-                      ),
+                    const SizedBox(width: 4),
+                    _buildAction(
+                      Icons.favorite_border,
+                      note.reactions.isNotEmpty ? note.reactions.length.toString() : null,
+                      _handleReaction,
+                      tooltip: 'Reaction',
                     ),
-
-                    // 更多按钮
-                    Expanded(
-                      child: _buildAction(
-                        Icons.more_vert,
-                        "",
-                        _showContextMenuFromButton,
-                        tooltip: 'More',
-                      ),
+                    const SizedBox(width: 4),
+                    _buildAction(
+                      Icons.more_horiz,
+                      null,
+                      _showContextMenuFromButton,
+                      tooltip: 'More',
                     ),
                   ],
                 ),
@@ -458,7 +436,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     _dismissMenu();
 
     final theme = Theme.of(context);
-    final menuColor = theme.colorScheme.surfaceContainerHigh;
+    final isDark = theme.brightness == Brightness.dark;
+    final menuColor = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFFFFFFF);
     final primaryColor = theme.colorScheme.primary;
 
     _menuOverlayEntry = OverlayEntry(
@@ -631,6 +610,11 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             child: Text('cancel'.tr()),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () async {
               final reason = textController.text;
               if (reason.isEmpty) return;
@@ -675,35 +659,35 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
   Widget _buildAction(
     IconData icon,
-    String label,
+    String? label,
     VoidCallback onTap, {
     String? tooltip,
   }) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: theme.colorScheme.primary),
-            if (label.isNotEmpty)
-              Flexible(
-                child: Padding(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+              if (label != null)
+                Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: Text(
                     label,
                     style: TextStyle(
                       fontSize: 12,
-                      color: theme.colorScheme.primary,
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -858,6 +842,11 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             child: Text('取消'),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () async {
               Navigator.pop(dialogContext);
               try {
@@ -913,6 +902,11 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
             child: Text('note_cancel'.tr()),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () async {
               Navigator.pop(dialogContext);
               try {
@@ -1070,38 +1064,43 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                       mainAxisSize: MainAxisSize.min,
 
                       children: [
-                        Text(
+                        _mfmRenderer.processTextToRichText(
                           replyNote.user?.name ??
                               replyNote.user?.username ??
                               'Unknown',
-
-                          style: TextStyle(
+                          context,
+                          textStyle: TextStyle(
                             fontSize: 12,
-
                             fontWeight: FontWeight.bold,
-
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          onEmojiLoaded: () {
+                            if (mounted) setState(() {});
+                          },
+                        ),
+                        Text.rich(
+                          TextSpan(
+                            text: '@${replyNote.user?.username}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                            children: replyNote.user?.host != null
+                                ? [
+                                    TextSpan(
+                                      text: '@${replyNote.user!.host}',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+                                      ),
+                                    ),
+                                  ]
+                                : null,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
-
-                        if (replyNote.user?.host != null)
-                          Text(
-                            replyNote.user!.host!,
-
-                            style: TextStyle(
-                              fontSize: 9,
-
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                            ),
-
-                            overflow: TextOverflow.ellipsis,
-                          ),
                       ],
                     ),
                   ),
@@ -1624,6 +1623,9 @@ class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
                 decoration: BoxDecoration(
                   color: widget.menuColor,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.15),
@@ -1692,9 +1694,7 @@ class _FastMenuItemState extends State<_FastMenuItem> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final highlightColor = widget.enabled
-        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
-        : Colors.transparent;
+    final isDark = theme.brightness == Brightness.dark;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -1704,33 +1704,42 @@ class _FastMenuItemState extends State<_FastMenuItem> {
         child: InkWell(
           onTap: widget.enabled ? widget.onTap : null,
           borderRadius: BorderRadius.circular(10),
-          hoverColor: highlightColor,
-          splashColor: highlightColor.withValues(alpha: 0.3),
-          highlightColor: highlightColor.withValues(alpha: 0.3),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                Icon(
-                  widget.icon,
-                  size: 20,
-                  color: widget.enabled
-                      ? (_isHovered ? theme.colorScheme.primary : widget.iconColor)
-                      : Colors.grey,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    widget.label,
-                    style: TextStyle(
-                      color: widget.enabled
-                          ? (widget.textColor ?? theme.colorScheme.onSurface)
-                          : Colors.grey,
-                      fontSize: 14,
+          hoverColor: widget.enabled
+              ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.1)
+              : Colors.transparent,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            decoration: BoxDecoration(
+              color: _isHovered && widget.enabled
+                  ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Icon(
+                    widget.icon,
+                    size: 20,
+                    color: widget.enabled
+                        ? (_isHovered ? theme.colorScheme.primary : widget.iconColor)
+                        : Colors.grey,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: widget.enabled
+                            ? (widget.textColor ?? theme.colorScheme.onSurface)
+                            : Colors.grey,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
