@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'misskey_streaming_service.dart';
+part of 'update_notifier.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,52 +9,50 @@ part of 'misskey_streaming_service.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(MisskeyStreamingService)
-final misskeyStreamingServiceProvider = MisskeyStreamingServiceProvider._();
+@ProviderFor(Update)
+final updateProvider = UpdateProvider._();
 
-final class MisskeyStreamingServiceProvider
-    extends $NotifierProvider<MisskeyStreamingService, void> {
-  MisskeyStreamingServiceProvider._()
+final class UpdateProvider extends $NotifierProvider<Update, UpdateStateData> {
+  UpdateProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'misskeyStreamingServiceProvider',
+        name: r'updateProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$misskeyStreamingServiceHash();
+  String debugGetCreateSourceHash() => _$updateHash();
 
   @$internal
   @override
-  MisskeyStreamingService create() => MisskeyStreamingService();
+  Update create() => Update();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
+  Override overrideWithValue(UpdateStateData value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
+      providerOverride: $SyncValueProvider<UpdateStateData>(value),
     );
   }
 }
 
-String _$misskeyStreamingServiceHash() =>
-    r'bcaa2f08a3d611350f5c86b890d6b1ee7b552d01';
+String _$updateHash() => r'7020e37d70d09a261d66805f00977a45db68d1ee';
 
-abstract class _$MisskeyStreamingService extends $Notifier<void> {
-  void build();
+abstract class _$Update extends $Notifier<UpdateStateData> {
+  UpdateStateData build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<UpdateStateData, UpdateStateData>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
+              AnyNotifier<UpdateStateData, UpdateStateData>,
+              UpdateStateData,
               Object?,
               Object?
             >;

@@ -138,6 +138,9 @@ class _MisskeyAiScriptConsolePageState
                     heroTag: 'clear_console',
                     onPressed: _clearConsole,
                     backgroundColor: Theme.of(context).colorScheme.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: const Icon(Icons.delete_outline),
                   ),
                   const SizedBox(height: 12),
@@ -146,6 +149,9 @@ class _MisskeyAiScriptConsolePageState
                     child: FloatingActionButton.extended(
                       heroTag: 'run_aiscript',
                       onPressed: _isRunning ? null : _runScript,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       icon: _isRunning
                           ? SizedBox(
                               width: 18,

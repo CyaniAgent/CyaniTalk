@@ -19,6 +19,7 @@ import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 
 class MisskeyPage extends ConsumerStatefulWidget {
   const MisskeyPage({super.key});
@@ -137,12 +138,12 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               shadowColor: Colors.transparent,
               elevation: 0,
               scrolledUnderElevation: 0,
-              leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => ref
-                          .read(navigationControllerProvider.notifier)
-                          .openDrawer(),
-                    ),
+              leading: CircleIconButton(
+                icon: Icons.menu,
+                onPressed: () => ref
+                    .read(navigationControllerProvider.notifier)
+                    .openDrawer(),
+              ),
               title: selectedIndex == 0
                   ? _TimelineIconBar(
                       timelineType: _timelineType,
@@ -155,8 +156,8 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               pinned: true,
               snap: true,
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.search),
+                CircleIconButton(
+                  icon: Icons.search,
                   tooltip: 'misskey_page_global_search'.tr(),
                   onPressed: () => context.push('/search'),
                 ),

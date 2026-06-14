@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/log_settings_provider.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 
 class LogSettingsPage extends ConsumerStatefulWidget {
   const LogSettingsPage({super.key});
@@ -100,8 +101,8 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       appBar: AppBar(
         title: Text('settings_logs_title'.tr()),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
+          CircleIconButton(
+            icon: Icons.refresh,
             onPressed: _refreshFileList,
           ),
         ],
@@ -419,8 +420,8 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           appBar: AppBar(
             title: Text(fileName),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.copy_all),
+              CircleIconButton(
+                icon: Icons.copy_all,
                 onPressed: () async {
                   await Clipboard.setData(
                     ClipboardData(text: content.join('\n')),

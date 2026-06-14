@@ -33,6 +33,10 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   static const int _maxReconnectAttempts = 5;
   StreamingStatus _status = StreamingStatus.disconnected;
 
+  static const _foregroundHeartbeat = Duration(seconds: 30);
+  static const _backgroundHeartbeat = Duration(seconds: 90);
+  Duration _heartbeatInterval = _foregroundHeartbeat;
+
   @override
   Stream<NoteEvent> get noteStream => _noteController.stream;
 
@@ -230,7 +234,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    final interval = _heartbeatInterval;
+    _heartbeatTimer = Timer.periodic(interval, (timer) {
       if (_status == StreamingStatus.connected && _channel != null) {
         try {
           // Misskey 官方网页客户端通常会发送一个简单的 "h" 作为应用层心跳
@@ -247,6 +252,19 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
         }
       }
     });
+  }
+
+  void setBackgroundMode(bool isBackground) {
+    final newInterval =
+        isBackground ? _backgroundHeartbeat : _foregroundHeartbeat;
+    if (_heartbeatInterval == newInterval) return;
+    _heartbeatInterval = newInterval;
+    logger.info(
+      'MisskeyStreaming: 切换心跳频率为 ${isBackground ? "90s(后台)" : "30s(前台)"}',
+    );
+    if (_status == StreamingStatus.connected && _channel != null) {
+      _startHeartbeat();
+    }
   }
 
   Future<void> _disconnect() async {

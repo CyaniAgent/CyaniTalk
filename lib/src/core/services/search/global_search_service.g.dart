@@ -49,7 +49,7 @@ final class GlobalSearchProvider extends $NotifierProvider<GlobalSearch, void> {
   }
 }
 
-String _$globalSearchHash() => r'a61d731fc87093f1ebc825d205bf540475949c46';
+String _$globalSearchHash() => r'8fc24dbb32d6eb1b60c921960334e0135b0ec929';
 
 /// 全局搜索服务
 ///

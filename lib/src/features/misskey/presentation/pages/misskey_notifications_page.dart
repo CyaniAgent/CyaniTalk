@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/features/misskey/domain/misskey_notification.dart';
 
 class MisskeyNotificationsPage extends ConsumerWidget {
@@ -20,8 +21,8 @@ class MisskeyNotificationsPage extends ConsumerWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
+          CircleIconButton(
+            icon: Icons.refresh,
             onPressed: () =>
                 ref.read(misskeyNotificationsProvider.notifier).refresh(),
           ),

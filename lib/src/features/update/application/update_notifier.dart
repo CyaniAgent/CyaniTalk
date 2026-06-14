@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/update/domain/app_update.dart';
+
+part 'update_notifier.g.dart';
 
 enum UpdateState {
   idle,
@@ -24,7 +26,8 @@ class UpdateStateData {
   });
 }
 
-class UpdateNotifier extends Notifier<UpdateStateData> {
+@riverpod
+class Update extends _$Update {
   @override
   UpdateStateData build() => const UpdateStateData();
 
@@ -106,6 +109,4 @@ class UpdateNotifier extends Notifier<UpdateStateData> {
   }
 }
 
-final updateProvider = NotifierProvider<UpdateNotifier, UpdateStateData>(
-  UpdateNotifier.new,
-);
+

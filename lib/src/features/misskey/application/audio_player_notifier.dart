@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '/src/core/utils/logger.dart';
+
+part 'audio_player_notifier.g.dart';
 
 /// 音频播放器状态
 class AudioPlayerState {
@@ -154,37 +156,37 @@ class AudioPlayerController {
 }
 
 /// 音频播放器控制器提供者
-final audioPlayerControllerProvider =
-    Provider.family<AudioPlayerController, String>((ref, audioUrl) {
-      final controller = AudioPlayerController(audioUrl);
+@riverpod
+AudioPlayerController audioPlayerController(Ref ref, String audioUrl) {
+  final controller = AudioPlayerController(audioUrl);
 
-      ref.onDispose(() {
-        controller.dispose();
-      });
+  ref.onDispose(() {
+    controller.dispose();
+  });
 
-      return controller;
-    });
+  return controller;
+}
 
 /// 音频播放器状态提供者
-final audioPlayerStateProvider =
-    StreamProvider.family<AudioPlayerState, String>((ref, audioUrl) async* {
-      final controller = ref.watch(audioPlayerControllerProvider(audioUrl));
+@riverpod
+Stream<AudioPlayerState> audioPlayerState(Ref ref, String audioUrl) async* {
+  final controller = ref.watch(audioPlayerControllerProvider(audioUrl));
 
-      final streamController = StreamController<AudioPlayerState>();
+  final streamController = StreamController<AudioPlayerState>();
 
-      controller.onStateChanged = (state) {
-        if (!streamController.isClosed) {
-          streamController.add(state);
-        }
-      };
+  controller.onStateChanged = (state) {
+    if (!streamController.isClosed) {
+      streamController.add(state);
+    }
+  };
 
-      yield controller.state;
+  yield controller.state;
 
-      await for (final state in streamController.stream) {
-        yield state;
-      }
+  await for (final state in streamController.stream) {
+    yield state;
+  }
 
-      ref.onDispose(() {
-        streamController.close();
-      });
-    });
+  ref.onDispose(() {
+    streamController.close();
+  });
+}

@@ -13,6 +13,7 @@ import '/src/features/misskey/domain/drive_file.dart';
 import '/src/features/misskey/domain/drive_folder.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/shared/widgets/login_reminder.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
@@ -129,12 +130,12 @@ class _CloudPageState extends ConsumerState<CloudPage> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => ref
-                    .read(navigationControllerProvider.notifier)
-                    .openDrawer(),
-              ),
+        leading: CircleIconButton(
+          icon: Icons.menu,
+          onPressed: () => ref
+              .read(navigationControllerProvider.notifier)
+              .openDrawer(),
+        ),
         title: (_isSelectionMode || _selectedItems.isNotEmpty)
             ? Text(
                 'cloud_selected_items'.tr(
@@ -152,14 +153,14 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                       -1;
                   return index != -1;
                 }))
-                  IconButton(
-                    icon: const Icon(Icons.download),
+                  CircleIconButton(
+                    icon: Icons.download,
                     onPressed: () =>
                         _downloadSelectedFiles(context, ref, driveState.value!),
                     tooltip: 'cloud_download'.tr(),
                   ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
+                CircleIconButton(
+                  icon: Icons.delete,
                   onPressed: () {
                     ScaffoldMessenger.of(
                       context,
@@ -167,8 +168,8 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                   },
                   tooltip: 'cloud_delete'.tr(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
+                CircleIconButton(
+                  icon: Icons.close,
                   onPressed: () => _exitSelectionMode(),
                   tooltip: 'cloud_cancel'.tr(),
                 ),
@@ -177,13 +178,13 @@ class _CloudPageState extends ConsumerState<CloudPage> {
           else
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.select_all),
+                CircleIconButton(
+                  icon: Icons.select_all,
                   onPressed: () => _enterSelectionMode(),
                   tooltip: 'cloud_select'.tr(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
+                CircleIconButton(
+                  icon: Icons.refresh,
                   onPressed: () =>
                       ref.read(misskeyDriveProvider.notifier).refresh(),
                   tooltip: 'cloud_refresh'.tr(),

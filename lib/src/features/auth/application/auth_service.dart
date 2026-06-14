@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -335,7 +334,8 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
   }
 }
 
-final selectedAccountProvider = StateProvider<Account?>((ref) {
+@riverpod
+Account? selectedAccount(Ref ref) {
   final accountsAsync = ref.watch(authServiceProvider);
 
   return accountsAsync.maybeWhen(
@@ -343,4 +343,4 @@ final selectedAccountProvider = StateProvider<Account?>((ref) {
 
     orElse: () => null,
   );
-});
+}

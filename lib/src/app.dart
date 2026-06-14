@@ -9,7 +9,6 @@ import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
 import 'routing/router.dart';
-import 'shared/widgets/custom_title_bar.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/misskey/application/misskey_notifier.dart';
 import 'features/misskey/application/misskey_notifications_notifier.dart';
@@ -85,7 +84,10 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
     if (state == AppLifecycleState.resumed) {
       // 应用回到前台时刷新数据
-      logger.info('CyaniTalkApp: 应用回到前台，刷新实时数据...');
+      logger.info('CyaniTalkApp: 应用回到前台，恢复实时心跳...');
+
+      // 恢复前台心跳频率 (30s)
+      ref.read(misskeyStreamingServiceProvider.notifier).setBackgroundMode(false);
 
       // 重新连接 Misskey 流媒体服务
       ref.read(misskeyStreamingServiceProvider.notifier).reconnect();
@@ -97,14 +99,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      // 应用进入后台时保存缓存
-      logger.info('CyaniTalkApp: 应用进入后台，保存缓存...');
-      try {
-        MisskeyTimelineNotifier.cacheManager.saveAllToStorage();
-        logger.info('CyaniTalkApp: 缓存已保存到持久化存储');
-      } catch (e) {
-        logger.warning('CyaniTalkApp: 保存缓存失败: $e');
-      }
+      // 应用进入后台：降低心跳频率省电，保留通知流/时间线流
+      logger.info('CyaniTalkApp: 应用进入后台，降低心跳频率...');
+      ref.read(misskeyStreamingServiceProvider.notifier).setBackgroundMode(true);
     }
 
     if (state == AppLifecycleState.detached) {
@@ -189,12 +186,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              builder: (context, child) => Column(
-                children: [
-                  const CustomTitleBar(),
-                  Expanded(child: child!),
-                ],
-              ),
+              builder: (context, child) => child!,
             ),
           ),
         );
@@ -221,12 +213,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
               localizationsDelegates: context.localizationDelegates,
               supportedLocales: context.supportedLocales,
               locale: context.locale,
-              builder: (context, child) => Column(
-                children: [
-                  const CustomTitleBar(),
-                  Expanded(child: child!),
-                ],
-              ),
+              builder: (context, child) => child!,
             ),
           ),
         );
@@ -347,6 +334,13 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 2,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        shadowColor: Colors.transparent,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(shape: capsuleShape),

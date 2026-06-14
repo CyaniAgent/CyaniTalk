@@ -1,11 +1,13 @@
 import 'dart:async';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '/src/features/misskey/application/misskey_streaming_service.dart';
 import '/src/features/profile/application/notification_settings_provider.dart';
 import '/src/features/auth/application/auth_service.dart';
 import 'notification_service.dart';
 import 'sound_service.dart';
 import '/src/core/core.dart';
+
+part 'notification_manager.g.dart';
 
 /// 全局通知管理器
 ///
@@ -125,5 +127,9 @@ class NotificationManager {
 
   }
 
-/// 提供 NotificationManager 的 Provider
-final notificationManagerProvider = Provider((ref) => NotificationManager(ref));
+@Riverpod(keepAlive: true)
+NotificationManager notificationManager(Ref ref) {
+  final manager = NotificationManager(ref);
+  ref.onDispose(() => manager.stop());
+  return manager;
+}

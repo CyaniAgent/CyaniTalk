@@ -397,7 +397,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
               note.createdAt.difference(pendingPostTime).inSeconds.abs();
           if (diff < 5) {
             animNotifier.markJustPosted(note.id);
-            ref.read(postCreationProvider.notifier).state = null;
+            ref.read(postCreationProvider.notifier).clear();
           }
         }
       }

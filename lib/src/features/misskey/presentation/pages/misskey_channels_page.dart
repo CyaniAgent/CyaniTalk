@@ -20,9 +20,6 @@ class MisskeyChannelsPage extends ConsumerStatefulWidget {
 class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -33,76 +30,34 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
   @override
   void dispose() {
     _tabController.dispose();
-    _searchController.dispose();
     super.dispose();
-  }
-
-  void _startSearch() {
-    setState(() {
-      _isSearching = true;
-    });
-  }
-
-  void _stopSearch() {
-    setState(() {
-      _isSearching = false;
-      _searchController.clear();
-      _searchQuery = '';
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'channels_search_hint'.tr(),
-                  border: InputBorder.none,
-                ),
-                onSubmitted: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-              )
-            : Text('misskey_page_channels'.tr()),
-        actions: [
-          if (_isSearching)
-            IconButton(icon: const Icon(Icons.close), onPressed: _stopSearch)
-          else
-            IconButton(icon: const Icon(Icons.search), onPressed: _startSearch),
-        ],
-        bottom: _isSearching
-            ? null
-            : TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                tabs: [
-                  Tab(text: 'channels_tab_featured'.tr()),
-                  Tab(text: 'channels_tab_favorites'.tr()),
-                  Tab(text: 'channels_tab_following'.tr()),
-                  Tab(text: 'channels_tab_managing'.tr()),
-                ],
-              ),
+        title: Text('misskey_page_channels'.tr()),
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabs: [
+            Tab(text: 'channels_tab_featured'.tr()),
+            Tab(text: 'channels_tab_favorites'.tr()),
+            Tab(text: 'channels_tab_following'.tr()),
+            Tab(text: 'channels_tab_managing'.tr()),
+          ],
+        ),
       ),
-      body: _isSearching
-          ? _buildChannelGrid(
-              MisskeyChannelListType.search,
-              query: _searchQuery,
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildChannelGrid(MisskeyChannelListType.featured),
-                _buildChannelGrid(MisskeyChannelListType.favorites),
-                _buildChannelGrid(MisskeyChannelListType.following),
-                _buildChannelGrid(MisskeyChannelListType.managing),
-              ],
-            ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildChannelGrid(MisskeyChannelListType.featured),
+          _buildChannelGrid(MisskeyChannelListType.favorites),
+          _buildChannelGrid(MisskeyChannelListType.following),
+          _buildChannelGrid(MisskeyChannelListType.managing),
+        ],
+      ),
     );
   }
 

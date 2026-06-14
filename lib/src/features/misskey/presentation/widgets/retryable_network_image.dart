@@ -290,8 +290,9 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.broken_image_outlined,
@@ -312,6 +313,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
                 ),
               ],
             ),
+          ),
           );
         }
       },

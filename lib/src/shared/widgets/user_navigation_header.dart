@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/auth/domain/account.dart';
+import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
 
@@ -358,7 +359,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                 );
               }),
               InkWell(
-                onTap: () => context.push('/profile'),
+                onTap: () => AddAccountBottomSheet.show(context),
                 borderRadius: BorderRadius.circular(8),
                 child: Container(
                   padding: const EdgeInsets.symmetric(

@@ -1,7 +1,21 @@
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'timeline_animated_list_controller.g.dart';
 
 /// 标记发帖时间的 Provider，用于在发帖后将新收到的笔记标记为"刚发布的"
-final postCreationProvider = StateProvider<DateTime?>((ref) => null);
+@riverpod
+class PostCreation extends _$PostCreation {
+  @override
+  DateTime? build() => null;
+
+  void markPosted() {
+    state = DateTime.now();
+  }
+
+  void clear() {
+    state = null;
+  }
+}
 
 /// 时间线列表状态控制器
 ///

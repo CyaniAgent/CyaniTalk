@@ -14,6 +14,7 @@ import '/src/features/misskey/presentation/widgets/drive_file_picker.dart'
     show showDriveFilePicker;
 import '/src/features/misskey/presentation/widgets/poll_settings_sheet.dart'
     show showPollSettings;
+import '/src/shared/widgets/circle_icon_button.dart';
 
 /// Misskey 发布笔记页面组件
 ///
@@ -147,8 +148,8 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
+        leading: CircleIconButton(
+          icon: Icons.close,
           onPressed: () => Navigator.of(context).pop(),
           tooltip: 'post_close'.tr(),
         ),
@@ -168,6 +169,11 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               padding: const EdgeInsets.only(right: 8.0),
               child: FilledButton(
                 onPressed: _handlePublish,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: Text('post_publish'.tr()),
               ),
             ),
@@ -870,7 +876,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         poll: pollParams,
       );
 
-      ref.read(postCreationProvider.notifier).state = DateTime.now();
+      ref.read(postCreationProvider.notifier).markPosted();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

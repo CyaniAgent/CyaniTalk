@@ -1,6 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '/src/core/utils/logger.dart';
+
+part 'audio_engine.g.dart';
 
 /// 全局音频引擎服务
 ///
@@ -91,8 +93,9 @@ class AudioEngine {
   }
 }
 
-final audioEngineProvider = Provider((ref) {
+@Riverpod(keepAlive: true)
+AudioEngine audioEngine(Ref ref) {
   final engine = AudioEngine();
   ref.onDispose(() => engine.dispose());
   return engine;
-});
+}

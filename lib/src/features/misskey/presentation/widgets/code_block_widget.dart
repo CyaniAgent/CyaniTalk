@@ -106,6 +106,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
         scrollDirection: Axis.horizontal,
         child: IntrinsicHeight(
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(

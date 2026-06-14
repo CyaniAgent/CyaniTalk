@@ -10,6 +10,8 @@ import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/domain/chat_room.dart';
 import '/src/features/misskey/domain/misskey_notification.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
+import '/src/core/navigation/navigation.dart';
 
 enum InboxFilter { all, direct, groups, notifications }
 
@@ -27,13 +29,17 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: CircleIconButton(
+          icon: Icons.menu,
+          onPressed: () => ref.read(navigationControllerProvider.notifier).openDrawer(),
+        ),
         title: Text(
           'nav_messages'.tr(),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
+          CircleIconButton(
+            icon: Icons.refresh,
             onPressed: () {
               ref.read(misskeyMessagingHistoryProvider.notifier).refresh();
               ref.read(misskeyNotificationsProvider.notifier).refresh();

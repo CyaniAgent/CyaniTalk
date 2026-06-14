@@ -3,6 +3,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/features/profile/application/developer_settings_provider.dart';
+import '/src/features/welcome/application/welcome_state.dart';
+import '/src/features/welcome/presentation/welcome_page.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import 'log_settings_page.dart';
 
@@ -89,6 +91,28 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
                 ),
               ],
             ),
+
+            if (developerMode) ...[
+              const SizedBox(height: 16),
+              SettingsCardGroup(
+                children: [
+                  SettingsTile(
+                    icon: Icons.open_in_new,
+                    iconColor: _amber,
+                    title: 'settings_developer_welcome_title'.tr(),
+                    subtitle: 'settings_developer_welcome_description'.tr(),
+                    onTap: () {
+                      ref.read(welcomeCompletedProvider.notifier).reset();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const WelcomePage(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
 
             const SizedBox(height: 16),
             SettingsCardGroup(

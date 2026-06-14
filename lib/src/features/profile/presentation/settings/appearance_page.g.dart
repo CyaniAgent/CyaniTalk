@@ -8,16 +8,13 @@ part of 'appearance_page.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 外观设置状态管理器
 
 @ProviderFor(AppearanceSettingsNotifier)
 final appearanceSettingsProvider = AppearanceSettingsNotifierProvider._();
 
-/// 外观设置状态管理器
 final class AppearanceSettingsNotifierProvider
     extends
         $AsyncNotifierProvider<AppearanceSettingsNotifier, AppearanceSettings> {
-  /// 外观设置状态管理器
   AppearanceSettingsNotifierProvider._()
     : super(
         from: null,
@@ -38,9 +35,7 @@ final class AppearanceSettingsNotifierProvider
 }
 
 String _$appearanceSettingsNotifierHash() =>
-    r'8c6606fb9ff64cf3b059171fa045def04f46d1dd';
-
-/// 外观设置状态管理器
+    r'b2d99aa35284a567bd420d92864ff1a1f2bee233';
 
 abstract class _$AppearanceSettingsNotifier
     extends $AsyncNotifier<AppearanceSettings> {

@@ -25,7 +25,9 @@ import '/src/features/profile/presentation/settings/licenses_page.dart';
 import '/src/features/profile/presentation/settings/developer_settings_page.dart';
 import '/src/features/search/presentation/search_page.dart';
 import '/src/features/auth/presentation/pages/login_page.dart';
+import '/src/features/welcome/presentation/welcome_page.dart';
 import '/src/shared/widgets/responsive_shell.dart';
+import '/src/features/welcome/application/welcome_state.dart';
 
 part 'router.g.dart';
 
@@ -98,11 +100,13 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
 /// 返回配置好的GoRouter实例
 @riverpod
 GoRouter goRouter(Ref ref) {
-  logger.info('Router: Initializing GoRouter with initial location: /misskey');
+  final welcomeDone = ref.watch(welcomeCompletedProvider).asData?.value ?? false;
+  final initialLocation = welcomeDone ? '/misskey' : '/welcome';
+  logger.info('Router: Initializing GoRouter with initial location: $initialLocation');
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/misskey',
+    initialLocation: initialLocation,
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -159,6 +163,12 @@ GoRouter goRouter(Ref ref) {
         ],
       ),
       // Top-level routes that don't have the navigation shell
+      GoRoute(
+        path: '/welcome',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const WelcomePage()),
+      ),
       GoRoute(
         path: '/login',
         parentNavigatorKey: rootNavigatorKey,

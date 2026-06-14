@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/services/search/global_search_service.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -67,6 +68,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final misskeyNotes = _results
         .where((r) => r.source == 'misskey' && r.type == 'Note')
         .toList();
+    final misskeyChannels = _results
+        .where((r) => r.source == 'misskey' && r.type == 'Channel')
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -82,8 +86,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ),
         actions: [
           if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
+            CircleIconButton(
+              icon: Icons.clear,
               onPressed: () {
                 _searchController.clear();
                 setState(() {
@@ -91,8 +95,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 });
               },
             ),
-          IconButton(
-            icon: const Icon(Icons.search),
+          CircleIconButton(
+            icon: Icons.search,
             onPressed: () => _performSearch(_searchController.text),
           ),
         ],
@@ -126,6 +130,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ),
                   ),
                   ...misskeyNotes.map((r) => _buildResultTile(context, r)),
+                ],
+                if (misskeyChannels.isNotEmpty) ...[
+                  _buildSectionHeader(
+                    context,
+                    'search_misskey_channels_related'.tr(
+                      namedArgs: {'search_result': query},
+                    ),
+                  ),
+                  ...misskeyChannels.map((r) => _buildResultTile(context, r)),
                 ],
               ],
             ),
@@ -168,7 +181,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
-          result.type == 'User' ? Icons.person : Icons.public,
+          result.type == 'User' ? Icons.person : result.type == 'Channel' ? Icons.forum : Icons.public,
           size: 20,
           color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'login_form_components.g.dart';
 
 /// 登录表单步骤枚举
 enum LoginStep {
@@ -11,10 +14,10 @@ enum LoginStep {
 
 /// 登录表单数据模型
 class LoginFormData {
-  String? misskeyHost;
-  String? misskeySession;
+  final String? misskeyHost;
+  final String? misskeySession;
 
-  LoginFormData({
+  const LoginFormData({
     this.misskeyHost,
     this.misskeySession,
   });
@@ -30,51 +33,20 @@ class LoginFormData {
   }
 }
 
-/// 登录表单控制器
-class LoginFormController extends ChangeNotifier {
-  LoginStep _currentStep = LoginStep.select;
-  LoginFormData _formData = LoginFormData();
-  bool _loading = false;
-
-  LoginStep get currentStep => _currentStep;
-  LoginFormData get formData => _formData;
-  bool get loading => _loading;
-
-  void setStep(LoginStep step) {
-    _currentStep = step;
-    notifyListeners();
-  }
+/// 登录表单控制器 (当前未接入 login_form.dart)
+///
+/// 管理登录流程的步骤、表单数据和加载状态。
+@riverpod
+class LoginFormController extends _$LoginFormController {
+  @override
+  LoginFormData build() => const LoginFormData();
 
   void updateFormData(LoginFormData data) {
-    _formData = data;
-    notifyListeners();
-  }
-
-  void setLoading(bool value) {
-    _loading = value;
-    notifyListeners();
-  }
-
-  void back() {
-    switch (_currentStep) {
-      case LoginStep.misskeyCheckAuth:
-        _currentStep = LoginStep.misskeyLogin;
-        break;
-      case LoginStep.select:
-        break;
-      default:
-        _currentStep = LoginStep.select;
-        _formData = LoginFormData();
-        break;
-    }
-    notifyListeners();
+    state = data;
   }
 
   void reset() {
-    _currentStep = LoginStep.select;
-    _formData = LoginFormData();
-    _loading = false;
-    notifyListeners();
+    state = const LoginFormData();
   }
 }
 

@@ -1,4 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'timeline_animation_state.g.dart';
 
 /// 时间线动画状态
 class TimelineAnimationState {
@@ -15,7 +17,8 @@ class TimelineAnimationState {
 ///
 /// 追踪新收到的帖子 ID 和待高亮帖子 ID，驱动卡片入场动画和高亮效果。
 /// 与列表数据解耦，只管理动画状态。
-class TimelineAnimationNotifier extends Notifier<TimelineAnimationState> {
+@riverpod
+class TimelineAnimation extends _$TimelineAnimation {
   final Set<String> _recent = {};
   final Set<String> _highlighted = {};
 
@@ -66,7 +69,4 @@ class TimelineAnimationNotifier extends Notifier<TimelineAnimationState> {
   }
 }
 
-final timelineAnimationProvider =
-    NotifierProvider<TimelineAnimationNotifier, TimelineAnimationState>(
-  TimelineAnimationNotifier.new,
-);
+

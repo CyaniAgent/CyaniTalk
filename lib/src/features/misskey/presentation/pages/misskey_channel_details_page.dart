@@ -63,8 +63,8 @@ class _MisskeyChannelDetailsPageState
             duration: const Duration(milliseconds: 500),
             curve: Curves.easeInOut,
           );
-          ref.read(timelineJumpProvider(widget.channel.id).notifier).state =
-              null;
+          ref.read(timelineJumpProvider(widget.channel.id).notifier).trigger(
+              null);
         }
       }
     });

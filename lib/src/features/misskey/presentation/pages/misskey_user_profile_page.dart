@@ -24,6 +24,8 @@ class MisskeyUserProfilePage extends ConsumerStatefulWidget {
 
 class _MisskeyUserProfilePageState
     extends ConsumerState<MisskeyUserProfilePage> {
+  static int _heroCounter = 0;
+  late final String _heroSuffix;
   late final MfmRenderer _mfmRenderer;
   String? _loadedEmojiUserId;
 
@@ -42,6 +44,7 @@ class _MisskeyUserProfilePageState
   @override
   void initState() {
     super.initState();
+    _heroSuffix = '_${_heroCounter++}';
     _mfmRenderer = MfmRenderer();
     _setupMfmRenderer();
     _loadEmojis(widget.initialUser);
@@ -131,7 +134,7 @@ class _MisskeyUserProfilePageState
                 Column(
                   children: [
                     Hero(
-                      tag: 'profile_banner_${user.id}',
+                      tag: 'profile_banner_${user.id}$_heroSuffix',
                       child: Container(
                         height: bannerHeight,
                         decoration: BoxDecoration(
@@ -259,6 +262,7 @@ class _MisskeyUserProfilePageState
             SliverFillRemaining(
               child: Center(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(

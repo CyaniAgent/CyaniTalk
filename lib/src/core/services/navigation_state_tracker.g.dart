@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'misskey_streaming_service.dart';
+part of 'navigation_state_tracker.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,53 +8,57 @@ part of 'misskey_streaming_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 导航路径状态
 
-@ProviderFor(MisskeyStreamingService)
-final misskeyStreamingServiceProvider = MisskeyStreamingServiceProvider._();
+@ProviderFor(NavigationPath)
+final navigationPathProvider = NavigationPathProvider._();
 
-final class MisskeyStreamingServiceProvider
-    extends $NotifierProvider<MisskeyStreamingService, void> {
-  MisskeyStreamingServiceProvider._()
+/// 导航路径状态
+final class NavigationPathProvider
+    extends $NotifierProvider<NavigationPath, String> {
+  /// 导航路径状态
+  NavigationPathProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'misskeyStreamingServiceProvider',
+        name: r'navigationPathProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$misskeyStreamingServiceHash();
+  String debugGetCreateSourceHash() => _$navigationPathHash();
 
   @$internal
   @override
-  MisskeyStreamingService create() => MisskeyStreamingService();
+  NavigationPath create() => NavigationPath();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
+  Override overrideWithValue(String value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
+      providerOverride: $SyncValueProvider<String>(value),
     );
   }
 }
 
-String _$misskeyStreamingServiceHash() =>
-    r'bcaa2f08a3d611350f5c86b890d6b1ee7b552d01';
+String _$navigationPathHash() => r'4d672cd58866ad2469fa70019d59b30ac1d06b89';
 
-abstract class _$MisskeyStreamingService extends $Notifier<void> {
-  void build();
+/// 导航路径状态
+
+abstract class _$NavigationPath extends $Notifier<String> {
+  String build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<String, String>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
+              AnyNotifier<String, String>,
+              String,
               Object?,
               Object?
             >;

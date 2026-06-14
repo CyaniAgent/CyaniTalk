@@ -50,14 +50,6 @@ class _MisskeyAnnouncementsPageState
     return Scaffold(
       appBar: AppBar(
         title: Text('misskey_page_announcements'.tr()),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              ref.read(misskeyAnnouncementsProvider.notifier).refresh();
-            },
-          ),
-        ],
       ),
       body: announcementsAsync.when(
         data: (announcements) {
