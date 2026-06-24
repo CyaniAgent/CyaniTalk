@@ -4,6 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'welcome_state.g.dart';
 
+enum WelcomePageMode { normal, debug }
+
+@riverpod
+WelcomePageMode currentWelcomeMode(Ref ref) {
+  return WelcomePageMode.normal;
+}
+
 @riverpod
 class WelcomeStep extends _$WelcomeStep {
   static const totalSteps = 6;

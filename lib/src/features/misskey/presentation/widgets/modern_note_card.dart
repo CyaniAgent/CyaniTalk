@@ -15,6 +15,7 @@ import '/src/features/misskey/application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
 import 'audio_player_widget.dart';
 import 'cached_misskey_avatar.dart';
+import 'mention_aware_text.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
@@ -105,6 +106,26 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         return null;
       }
     });
+
+    _mfmRenderer.mentionTap = (userName, host, acct) async {
+      try {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        final user = await repository.findUserByUsername(
+          userName,
+          host: host,
+        );
+        if (mounted) {
+          context.push('/misskey/user/${user.id}', extra: user);
+        }
+      } catch (e) {
+        logger.debug('Mention tap: could not find user $acct');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('User not found: $acct')),
+          );
+        }
+      }
+    };
   }
 
   /// 加载笔记中的表情到MFM渲染器缓存
@@ -249,13 +270,16 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   _buildCwContent(cw, text),
                   const SizedBox(height: 8),
                 ] else if (text != null) ...[
-                  _mfmRenderer.processTextToRichText(
-                    text,
-                    context,
+                  MentionAwareText(
+                    text: text,
+                    mfmRenderer: _mfmRenderer,
                     onEmojiLoaded: () {
                       if (mounted) {
                         setState(() {});
                       }
+                    },
+                    onMentionTap: (userId) {
+                      if (mounted) context.push('/misskey/user/$userId');
                     },
                   ),
                   const SizedBox(height: 8),
@@ -776,11 +800,14 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               ),
             ),
             child: text != null
-                ? _mfmRenderer.processTextToRichText(
-                    text,
-                    context,
+                ? MentionAwareText(
+                    text: text,
+                    mfmRenderer: _mfmRenderer,
                     onEmojiLoaded: () {
                       if (mounted) setState(() {});
+                    },
+                    onMentionTap: (userId) {
+                      if (mounted) context.push('/misskey/user/$userId');
                     },
                   )
                 : const SizedBox.shrink(),

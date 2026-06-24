@@ -13,6 +13,7 @@ import 'developer_settings_page.dart';
 import 'licenses_page.dart';
 import 'network_settings_page.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import '/src/shared/widgets/desktop_page_shell.dart';
 import '/src/features/update/application/update_notifier.dart';
 import '/src/features/update/presentation/update_bottom_sheet.dart';
 
@@ -76,9 +77,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 iconColor: _blue,
                 title: 'settings_account_title'.tr(),
                 subtitle: 'settings_account_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AccountsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const AccountsPage()),
               ),
             ],
           ),
@@ -92,9 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 iconColor: _cyan,
                 title: 'settings_network_title'.tr(),
                 subtitle: 'settings_network_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NetworkSettingsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const NetworkSettingsPage()),
               ),
             ],
           ),
@@ -108,9 +105,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 iconColor: _purple,
                 title: 'settings_appearance_title'.tr(),
                 subtitle: 'settings_appearance_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AppearancePage()),
-                ),
+                onTap: () => _pushSettingsPage(const AppearancePage()),
               ),
               GestureDetector(
                 onDoubleTap: () {
@@ -137,27 +132,21 @@ class _SettingsPageState extends State<SettingsPage> {
                 iconColor: _orange,
                 title: 'settings_notifications_title'.tr(),
                 subtitle: 'settings_notifications_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NotificationSettingsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const NotificationSettingsPage()),
               ),
               SettingsTile(
                 icon: Icons.volume_up_outlined,
                 iconColor: _pink,
                 title: 'settings_sound_title'.tr(),
                 subtitle: 'settings_sound_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SoundSettingsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const SoundSettingsPage()),
               ),
               SettingsTile(
                 icon: Icons.navigation_outlined,
                 iconColor: _indigo,
                 title: 'settings_navigation_title'.tr(),
                 subtitle: 'settings_navigation_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NavigationSettingsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const NavigationSettingsPage()),
               ),
             ],
           ),
@@ -178,18 +167,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 iconColor: _amber,
                 title: 'settings_developer_title'.tr(),
                 subtitle: 'settings_developer_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const DeveloperSettingsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const DeveloperSettingsPage()),
               ),
               SettingsTile(
                 icon: Icons.storage_outlined,
                 iconColor: _brown,
                 title: 'settings_storage_title'.tr(),
                 subtitle: 'settings_storage_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const CacheSettingsPage()),
-                ),
+                onTap: () => _pushSettingsPage(const CacheSettingsPage()),
               ),
             ],
           ),
@@ -203,18 +188,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 iconColor: _blueGrey,
                 title: 'settings_about_title'.tr(),
                 subtitle: 'settings_about_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AboutPage()),
-                ),
+                onTap: () => _pushSettingsPage(const AboutPage()),
               ),
               SettingsTile(
                 icon: Icons.description_outlined,
                 iconColor: _blueGrey,
                 title: 'settings_licenses_title'.tr(),
                 subtitle: 'settings_licenses_description'.tr(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const LicensesPage()),
-                ),
+                onTap: () => _pushSettingsPage(const LicensesPage()),
               ),
             ],
           ),
@@ -227,8 +208,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final container = ProviderScope.containerOf(context, listen: false);
     final notifier = container.read(updateProvider.notifier);
     await notifier.checkForUpdate();
+    if (!mounted) return;
     final state = container.read(updateProvider);
-    if (!context.mounted) return;
 
     if (state.state == UpdateState.updateAvailable && state.update != null) {
       showUpdateBottomSheet(context, state.update!);
@@ -247,6 +228,15 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       );
     }
+  }
+
+  /// Push a settings sub-page, wrapping it with [DesktopPageShell] on desktop.
+  void _pushSettingsPage(Widget page) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DesktopPageShell(child: page),
+      ),
+    );
   }
 
   void _showLanguageDialog(BuildContext context) {

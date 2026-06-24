@@ -50,6 +50,11 @@ abstract interface class IMisskeyRepository {
 
   Future<MisskeyUser> showUser(String userId);
 
+  Future<MisskeyUser> findUserByUsername(
+    String username, {
+    String? host,
+  });
+
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -103,6 +108,20 @@ abstract interface class IMisskeyRepository {
   Future<void> deleteDriveFile(String fileId);
 
   Future<void> deleteDriveFolder(String folderId);
+
+  Future<DriveFile> updateDriveFile(
+    String fileId, {
+    String? name,
+    String? folderId,
+    bool? isSensitive,
+    String? comment,
+  });
+
+  Future<DriveFolder> updateDriveFolder(
+    String folderId, {
+    String? name,
+    String? parentId,
+  });
 
   Future<DriveFile> uploadDriveFile(
     List<int> bytes,

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/core/utils/logger.dart';
@@ -205,7 +206,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
       child: ListView.builder(
         controller: _scrollController,
       itemCount: notes.length + 1,
-      cacheExtent: isWindows ? 500 : 1500,
+      scrollCacheExtent: ScrollCacheExtent.pixels(isWindows ? 500 : 1500),
       padding: const EdgeInsets.symmetric(vertical: 8),
       physics: const AlwaysScrollableScrollPhysics(),
       itemBuilder: (context, index) {

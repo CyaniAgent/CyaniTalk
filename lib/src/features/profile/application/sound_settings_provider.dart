@@ -3,92 +3,169 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'sound_settings_provider.g.dart';
 
+/// 通知音 & App 内提示音各插槽的默认资产路径。
+class SoundDefaults {
+  // 通知音
+  static const newPost = 'assets/sounds/PostReceived/n-aec.mp3';
+  static const post = 'assets/sounds/PostSend/n-cea-4va.mp3';
+  static const notification = 'assets/sounds/Notifications/n-ea.mp3';
+  static const reaction = 'assets/sounds/Emoji-Responses/bubble2.mp3';
+  static const message = 'assets/sounds/Chat/waon.mp3';
+
+  /// 将 `:default:` 解析为对应插槽的默认路径；空字串返回空字串。
+  static String resolve(String value, String defaultPath) {
+    if (value.isEmpty) return '';
+    if (value == ':default:') return defaultPath;
+    return value;
+  }
+}
+
 class SoundSettings {
-  final bool enableMisskeyRealtimePost;
-  final bool enableMisskeyPosting;
-  final bool enableMisskeyNotifications;
-  final bool enableMisskeyEmojiReactions;
-  final bool enableMisskeyMessages;
+  final String newPostSound;
+  final String postSound;
+  final String notificationSound;
+  final String reactionSound;
+  final String messageSound;
+
+  final String switchAccountSound;
+  final String triggerRefreshSound;
+  final String refreshSound;
+  final String appUpdateSound;
+  final String streamErrorSound;
+  final String appErrorSound;
 
   SoundSettings({
-    required this.enableMisskeyRealtimePost,
-    required this.enableMisskeyPosting,
-    required this.enableMisskeyNotifications,
-    required this.enableMisskeyEmojiReactions,
-    required this.enableMisskeyMessages,
+    required this.newPostSound,
+    required this.postSound,
+    required this.notificationSound,
+    required this.reactionSound,
+    required this.messageSound,
+    required this.switchAccountSound,
+    required this.triggerRefreshSound,
+    required this.refreshSound,
+    required this.appUpdateSound,
+    required this.streamErrorSound,
+    required this.appErrorSound,
   });
 
   SoundSettings copyWith({
-    bool? enableMisskeyRealtimePost,
-    bool? enableMisskeyPosting,
-    bool? enableMisskeyNotifications,
-    bool? enableMisskeyEmojiReactions,
-    bool? enableMisskeyMessages,
+    String? newPostSound,
+    String? postSound,
+    String? notificationSound,
+    String? reactionSound,
+    String? messageSound,
+    String? switchAccountSound,
+    String? triggerRefreshSound,
+    String? refreshSound,
+    String? appUpdateSound,
+    String? streamErrorSound,
+    String? appErrorSound,
   }) {
     return SoundSettings(
-      enableMisskeyRealtimePost:
-          enableMisskeyRealtimePost ?? this.enableMisskeyRealtimePost,
-      enableMisskeyPosting: enableMisskeyPosting ?? this.enableMisskeyPosting,
-      enableMisskeyNotifications:
-          enableMisskeyNotifications ?? this.enableMisskeyNotifications,
-      enableMisskeyEmojiReactions:
-          enableMisskeyEmojiReactions ?? this.enableMisskeyEmojiReactions,
-      enableMisskeyMessages:
-          enableMisskeyMessages ?? this.enableMisskeyMessages,
+      newPostSound: newPostSound ?? this.newPostSound,
+      postSound: postSound ?? this.postSound,
+      notificationSound: notificationSound ?? this.notificationSound,
+      reactionSound: reactionSound ?? this.reactionSound,
+      messageSound: messageSound ?? this.messageSound,
+      switchAccountSound: switchAccountSound ?? this.switchAccountSound,
+      triggerRefreshSound: triggerRefreshSound ?? this.triggerRefreshSound,
+      refreshSound: refreshSound ?? this.refreshSound,
+      appUpdateSound: appUpdateSound ?? this.appUpdateSound,
+      streamErrorSound: streamErrorSound ?? this.streamErrorSound,
+      appErrorSound: appErrorSound ?? this.appErrorSound,
     );
   }
 }
 
 @riverpod
 class SoundSettingsNotifier extends _$SoundSettingsNotifier {
-  static const _kMisskeyRealtimePost = 'sound_misskey_realtime_post';
-  static const _kMisskeyPosting = 'sound_misskey_posting';
-  static const _kMisskeyNotifications = 'sound_misskey_notifications';
-  static const _kMisskeyEmojiReactions = 'sound_misskey_emoji_reactions';
-  static const _kMisskeyMessages = 'sound_misskey_messages';
+  static const _kNewPost = 'sound_new_post';
+  static const _kPost = 'sound_post';
+  static const _kNotification = 'sound_notification';
+  static const _kReaction = 'sound_reaction';
+  static const _kMessage = 'sound_message';
+  static const _kSwitchAccount = 'sound_switch_account';
+  static const _kTriggerRefresh = 'sound_trigger_refresh';
+  static const _kRefresh = 'sound_refresh';
+  static const _kAppUpdate = 'sound_app_update';
+  static const _kStreamError = 'sound_stream_error';
+  static const _kAppError = 'sound_app_error';
 
   @override
   FutureOr<SoundSettings> build() async {
     final prefs = await SharedPreferences.getInstance();
     return SoundSettings(
-      enableMisskeyRealtimePost: prefs.getBool(_kMisskeyRealtimePost) ?? true,
-      enableMisskeyPosting: prefs.getBool(_kMisskeyPosting) ?? true,
-      enableMisskeyNotifications: prefs.getBool(_kMisskeyNotifications) ?? true,
-      enableMisskeyEmojiReactions:
-          prefs.getBool(_kMisskeyEmojiReactions) ?? true,
-      enableMisskeyMessages: prefs.getBool(_kMisskeyMessages) ?? true,
+      newPostSound: prefs.getString(_kNewPost) ?? ':default:',
+      postSound: prefs.getString(_kPost) ?? ':default:',
+      notificationSound: prefs.getString(_kNotification) ?? ':default:',
+      reactionSound: prefs.getString(_kReaction) ?? ':default:',
+      messageSound: prefs.getString(_kMessage) ?? ':default:',
+      switchAccountSound: prefs.getString(_kSwitchAccount) ?? '',
+      triggerRefreshSound: prefs.getString(_kTriggerRefresh) ?? '',
+      refreshSound: prefs.getString(_kRefresh) ?? '',
+      appUpdateSound: prefs.getString(_kAppUpdate) ?? '',
+      streamErrorSound: prefs.getString(_kStreamError) ?? '',
+      appErrorSound: prefs.getString(_kAppError) ?? '',
     );
   }
 
-  Future<void> toggleMisskeyRealtimePost(bool value) async {
+  Future<void> _setSlot(String key, String value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMisskeyRealtimePost, value);
-    state = AsyncData(state.value!.copyWith(enableMisskeyRealtimePost: value));
+    await prefs.setString(key, value);
   }
 
-  Future<void> toggleMisskeyPosting(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMisskeyPosting, value);
-    state = AsyncData(state.value!.copyWith(enableMisskeyPosting: value));
+  Future<void> setNewPostSound(String v) async {
+    await _setSlot(_kNewPost, v);
+    state = AsyncData(state.value!.copyWith(newPostSound: v));
   }
 
-  Future<void> toggleMisskeyNotifications(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMisskeyNotifications, value);
-    state = AsyncData(state.value!.copyWith(enableMisskeyNotifications: value));
+  Future<void> setPostSound(String v) async {
+    await _setSlot(_kPost, v);
+    state = AsyncData(state.value!.copyWith(postSound: v));
   }
 
-  Future<void> toggleMisskeyEmojiReactions(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMisskeyEmojiReactions, value);
-    state = AsyncData(
-      state.value!.copyWith(enableMisskeyEmojiReactions: value),
-    );
+  Future<void> setNotificationSound(String v) async {
+    await _setSlot(_kNotification, v);
+    state = AsyncData(state.value!.copyWith(notificationSound: v));
   }
 
-  Future<void> toggleMisskeyMessages(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kMisskeyMessages, value);
-    state = AsyncData(state.value!.copyWith(enableMisskeyMessages: value));
+  Future<void> setReactionSound(String v) async {
+    await _setSlot(_kReaction, v);
+    state = AsyncData(state.value!.copyWith(reactionSound: v));
+  }
+
+  Future<void> setMessageSound(String v) async {
+    await _setSlot(_kMessage, v);
+    state = AsyncData(state.value!.copyWith(messageSound: v));
+  }
+
+  Future<void> setSwitchAccountSound(String v) async {
+    await _setSlot(_kSwitchAccount, v);
+    state = AsyncData(state.value!.copyWith(switchAccountSound: v));
+  }
+
+  Future<void> setTriggerRefreshSound(String v) async {
+    await _setSlot(_kTriggerRefresh, v);
+    state = AsyncData(state.value!.copyWith(triggerRefreshSound: v));
+  }
+
+  Future<void> setRefreshSound(String v) async {
+    await _setSlot(_kRefresh, v);
+    state = AsyncData(state.value!.copyWith(refreshSound: v));
+  }
+
+  Future<void> setAppUpdateSound(String v) async {
+    await _setSlot(_kAppUpdate, v);
+    state = AsyncData(state.value!.copyWith(appUpdateSound: v));
+  }
+
+  Future<void> setStreamErrorSound(String v) async {
+    await _setSlot(_kStreamError, v);
+    state = AsyncData(state.value!.copyWith(streamErrorSound: v));
+  }
+
+  Future<void> setAppErrorSound(String v) async {
+    await _setSlot(_kAppError, v);
+    state = AsyncData(state.value!.copyWith(appErrorSound: v));
   }
 }

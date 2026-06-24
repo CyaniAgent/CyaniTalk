@@ -502,6 +502,83 @@ class MisskeyApi extends BaseApi {
     params: {'folderId': folderId},
   );
 
+  /// 更新云盘文件
+  ///
+  /// 通过调用 `/api/drive/files/update` 接口更新云盘文件信息。
+  /// 支持重命名、移动、切换敏感标记、编辑描述。
+  ///
+  /// @param fileId 文件 ID
+  /// @param name 新文件名
+  /// @param folderId 新文件夹 ID（移动）
+  /// @param isSensitive 是否标记为敏感内容
+  /// @param comment 文件描述
+  /// @return (更新后的文件信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> updateDriveFile(
+    String fileId, {
+    String? name,
+    String? folderId,
+    bool? isSensitive,
+    String? comment,
+  }) => executeApiCallSafe(
+    'MisskeyApi.updateDriveFile',
+    () => _dio.post(
+      '/api/drive/files/update',
+      data: {
+        'i': token,
+        'fileId': fileId,
+        'name': ?name,
+        'folderId': ?folderId,
+        'isSensitive': ?isSensitive,
+        'comment': ?comment,
+      },
+    ),
+    (response) => response.data as Map<String, dynamic>,
+  );
+
+  /// 获取云盘文件详情
+  ///
+  /// 通过调用 `/api/drive/files/show` 接口获取单个文件的详细信息。
+  ///
+  /// @param fileId 文件 ID
+  /// @return (文件信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> showDriveFile(
+    String fileId,
+  ) => executeApiCallSafe(
+    'MisskeyApi.showDriveFile',
+    () => _dio.post(
+      '/api/drive/files/show',
+      data: {'i': token, 'fileId': fileId},
+    ),
+    (response) => response.data as Map<String, dynamic>,
+  );
+
+  /// 更新云盘文件夹
+  ///
+  /// 通过调用 `/api/drive/folders/update` 接口更新云盘文件夹信息。
+  /// 支持重命名、移动。
+  ///
+  /// @param folderId 文件夹 ID
+  /// @param name 新文件夹名
+  /// @param parentId 新父文件夹 ID（移动）
+  /// @return (更新后的文件夹信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> updateDriveFolder(
+    String folderId, {
+    String? name,
+    String? parentId,
+  }) => executeApiCallSafe(
+    'MisskeyApi.updateDriveFolder',
+    () => _dio.post(
+      '/api/drive/folders/update',
+      data: {
+        'i': token,
+        'folderId': folderId,
+        'name': ?name,
+        'parentId': ?parentId,
+      },
+    ),
+    (response) => response.data as Map<String, dynamic>,
+  );
+
   /// 上传文件到云盘
   ///
   /// 通过调用 `/api/drive/files/create` 接口将文件上传到云盘。
@@ -514,18 +591,40 @@ class MisskeyApi extends BaseApi {
     List<int> bytes,
     String filename, {
     String? folderId,
-  }) => executeApiCallSafe(
-    'MisskeyApi.uploadDriveFile',
-    () => _dio.post(
-      '/api/drive/files/create',
-      data: FormData.fromMap({
-        'i': token,
-        'folderId': ?folderId,
-        'file': MultipartFile.fromBytes(bytes, filename: filename),
-      }),
-    ),
-    (response) => response.data as Map<String, dynamic>,
-  );
+  }) {
+    final safeName = _sanitizeFileName(filename);
+    return executeApiCallSafe(
+      'MisskeyApi.uploadDriveFile',
+      () => _dio.post(
+        '/api/drive/files/create',
+        data: FormData.fromMap({
+          'i': token,
+          'folderId': ?folderId,
+          'name': safeName,
+          'file': MultipartFile.fromBytes(bytes, filename: safeName),
+        }),
+      ),
+      (response) => response.data as Map<String, dynamic>,
+    );
+  }
+
+  /// 清理文件名中 Misskey 不接受的字符
+  String _sanitizeFileName(String name) {
+    // 保留原始扩展名
+    final dotIndex = name.lastIndexOf('.');
+    final base = dotIndex == -1 ? name : name.substring(0, dotIndex);
+    final ext = dotIndex == -1 ? '' : name.substring(dotIndex);
+
+    // 只保留字母、数字、-、_、空格，其他替换为 _
+    final clean = base.replaceAll(RegExp(r'[^\w\s\-]'), '_');
+    // 压缩连续空格/下划线
+    final compacted = clean.replaceAll(RegExp(r'[\s_]+'), '_');
+    // 去首尾特殊字符
+    final trimmed = compacted.trim().replaceAll(RegExp(r'^[_\s]+|[_\s]+$'), '');
+    // 避免空名称
+    final finalBase = trimmed.isEmpty ? 'file' : trimmed;
+    return '$finalBase$ext';
+  }
 
   /// 获取在线用户数量
   ///
@@ -834,6 +933,29 @@ class MisskeyApi extends BaseApi {
     (response) => Map<String, dynamic>.from(response.data),
     params: {'userId': userId},
   );
+
+  /// 通过用户名（和实例）获取用户信息。
+  ///
+  /// @param username 用户名（不含 @）
+  /// @param host 实例名（本地用户传 null）
+  /// @return 用户信息的 Map 对象
+  Future<Map<String, dynamic>> showUserByUsername(
+    String username, {
+    String? host,
+  }) =>
+      executeApiCall(
+        'MisskeyApi.showUserByUsername',
+        () => _dio.post(
+          '/api/users/show',
+          data: {
+            'i': token,
+            'username': username,
+            if (host != null) 'host': host,
+          },
+        ),
+        (response) => Map<String, dynamic>.from(response.data),
+        params: {'username': username, 'host': host},
+      );
 
   /// 举报用户
   ///

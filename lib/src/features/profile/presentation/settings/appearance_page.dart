@@ -16,6 +16,7 @@ class AppearanceSettings {
   final bool useCustomColor;
   final Color? primaryColor;
   final String? fontFamily;
+  final bool useCustomTitleBar;
 
   const AppearanceSettings({
     required this.displayMode,
@@ -23,6 +24,7 @@ class AppearanceSettings {
     this.useCustomColor = false,
     this.primaryColor,
     this.fontFamily,
+    this.useCustomTitleBar = true,
   });
 
   bool get isDarkMode => displayMode == ThemeMode.dark;
@@ -33,6 +35,7 @@ class AppearanceSettings {
     bool? useCustomColor,
     Color? primaryColor,
     String? fontFamily,
+    bool? useCustomTitleBar,
   }) {
     return AppearanceSettings(
       displayMode: displayMode ?? this.displayMode,
@@ -40,6 +43,7 @@ class AppearanceSettings {
       useCustomColor: useCustomColor ?? this.useCustomColor,
       primaryColor: primaryColor ?? this.primaryColor,
       fontFamily: fontFamily ?? this.fontFamily,
+      useCustomTitleBar: useCustomTitleBar ?? this.useCustomTitleBar,
     );
   }
 
@@ -52,7 +56,8 @@ class AppearanceSettings {
           useDynamicColor == other.useDynamicColor &&
           useCustomColor == other.useCustomColor &&
           primaryColor?.toARGB32() == other.primaryColor?.toARGB32() &&
-          fontFamily == other.fontFamily;
+          fontFamily == other.fontFamily &&
+          useCustomTitleBar == other.useCustomTitleBar;
 
   @override
   int get hashCode =>
@@ -60,7 +65,8 @@ class AppearanceSettings {
       useDynamicColor.hashCode ^
       useCustomColor.hashCode ^
       (primaryColor?.toARGB32().hashCode ?? 0) ^
-      (fontFamily?.hashCode ?? 0);
+      (fontFamily?.hashCode ?? 0) ^
+      useCustomTitleBar.hashCode;
 }
 
 @Riverpod(keepAlive: true)
@@ -93,21 +99,33 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
 
       final fontFamily = prefs.getString('appearance_font_family') ?? 'MiSans';
 
+      final isDesktop = defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.linux;
+      final useCustomTitleBar = isDesktop
+          ? (prefs.getBool('appearance_custom_title_bar') ?? true)
+          : false;
+
       return AppearanceSettings(
         displayMode: displayMode,
         useDynamicColor: useDynamicColor,
         useCustomColor: useCustomColor,
         primaryColor: primaryColor,
         fontFamily: fontFamily,
+        useCustomTitleBar: useCustomTitleBar,
       );
     } catch (_) {
-      final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+      final isDesktop = defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.linux;
       return AppearanceSettings(
         displayMode: ThemeMode.system,
-        useDynamicColor: isAndroid,
-        useCustomColor: !isAndroid,
+        useDynamicColor: defaultTargetPlatform == TargetPlatform.android,
+        useCustomColor: !isDesktop &&
+            defaultTargetPlatform != TargetPlatform.android,
         primaryColor: SaucePalette.mikuGreen,
         fontFamily: 'MiSans',
+        useCustomTitleBar: isDesktop,
       );
     }
   }
@@ -124,6 +142,10 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
       if (settings.fontFamily != null) {
         await prefs.setString('appearance_font_family', settings.fontFamily!);
       }
+      await prefs.setBool(
+        'appearance_custom_title_bar',
+        settings.useCustomTitleBar,
+      );
     } catch (_) {}
   }
 
@@ -168,8 +190,17 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
     await _saveToStorage(newState);
   }
 
+  Future<void> toggleCustomTitleBar(bool value) async {
+    final newState = state.value!.copyWith(useCustomTitleBar: value);
+    state = AsyncData(newState);
+    await _saveToStorage(newState);
+  }
+
   Future<void> resetSettings() async {
     final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+    final isDesktop = defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
     final newState = isAndroid
         ? const AppearanceSettings(
             displayMode: ThemeMode.system,
@@ -178,12 +209,13 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
             primaryColor: SaucePalette.mikuGreen,
             fontFamily: 'MiSans',
           )
-        : const AppearanceSettings(
+        : AppearanceSettings(
             displayMode: ThemeMode.system,
             useDynamicColor: false,
-            useCustomColor: true,
+            useCustomColor: !isDesktop && !isAndroid,
             primaryColor: SaucePalette.mikuGreen,
             fontFamily: 'MiSans',
+            useCustomTitleBar: isDesktop,
           );
     state = AsyncData(newState);
     await _saveToStorage(newState);
@@ -214,6 +246,10 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             Center(child: Text('settings_appearance_error_loading'.tr())),
         data: (appearanceSettings) {
           final isAndroid = defaultTargetPlatform == TargetPlatform.android;
+          final isDesktop =
+              defaultTargetPlatform == TargetPlatform.windows ||
+              defaultTargetPlatform == TargetPlatform.macOS ||
+              defaultTargetPlatform == TargetPlatform.linux;
 
           return ListView(
             padding: const EdgeInsets.only(top: 8, bottom: 32),
@@ -252,6 +288,16 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   ),
                   if (appearanceSettings.useCustomColor)
                     _colorPickerRow(appearanceSettings, appearanceNotifier),
+                  if (isDesktop)
+                    _switchTile(
+                      icon: Icons.crop_square_rounded,
+                      iconColor: const Color(0xFF42A5F5),
+                      title: '自定义标题栏',
+                      subtitle: '使用自定义窗口标题栏',
+                      value: appearanceSettings.useCustomTitleBar,
+                      onChanged: (v) =>
+                          appearanceNotifier.toggleCustomTitleBar(v),
+                    ),
                 ],
               ),
 

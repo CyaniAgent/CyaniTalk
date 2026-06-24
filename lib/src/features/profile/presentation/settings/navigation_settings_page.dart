@@ -87,11 +87,8 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
                               : null,
                         );
                       },
-                      onReorder: (oldIndex, newIndex) {
+                      onReorderItem: (oldIndex, newIndex) {
                         final newOrder = itemElements.map((e) => e.item).toList();
-                        if (oldIndex < newIndex) {
-                          newIndex -= 1;
-                        }
                         final moved = newOrder.removeAt(oldIndex);
                         newOrder.insert(newIndex, moved);
                         navigationNotifier.updateItemOrder(newOrder);

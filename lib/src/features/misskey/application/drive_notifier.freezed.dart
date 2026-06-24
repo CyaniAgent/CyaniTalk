@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DriveState implements DiagnosticableTreeMixin {
 
- List<DriveFile> get files; List<DriveFolder> get folders; String? get currentFolderId; List<DriveFolder> get breadcrumbs; bool get isLoading; bool get isRefreshing; int get driveCapacityMb; int get driveUsage; String? get errorMessage;
+ List<DriveFile> get files; List<DriveFolder> get folders; String? get currentFolderId; List<DriveFolder> get breadcrumbs; bool get isLoading; bool get isRefreshing; int get driveCapacityMb; int get driveUsage; int get maxFileSizeMb; DriveSortMode get sortMode; String? get errorMessage;
 /// Create a copy of DriveState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,21 +26,21 @@ $DriveStateCopyWith<DriveState> get copyWith => _$DriveStateCopyWithImpl<DriveSt
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'DriveState'))
-    ..add(DiagnosticsProperty('files', files))..add(DiagnosticsProperty('folders', folders))..add(DiagnosticsProperty('currentFolderId', currentFolderId))..add(DiagnosticsProperty('breadcrumbs', breadcrumbs))..add(DiagnosticsProperty('isLoading', isLoading))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('driveCapacityMb', driveCapacityMb))..add(DiagnosticsProperty('driveUsage', driveUsage))..add(DiagnosticsProperty('errorMessage', errorMessage));
+    ..add(DiagnosticsProperty('files', files))..add(DiagnosticsProperty('folders', folders))..add(DiagnosticsProperty('currentFolderId', currentFolderId))..add(DiagnosticsProperty('breadcrumbs', breadcrumbs))..add(DiagnosticsProperty('isLoading', isLoading))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('driveCapacityMb', driveCapacityMb))..add(DiagnosticsProperty('driveUsage', driveUsage))..add(DiagnosticsProperty('maxFileSizeMb', maxFileSizeMb))..add(DiagnosticsProperty('sortMode', sortMode))..add(DiagnosticsProperty('errorMessage', errorMessage));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DriveState&&const DeepCollectionEquality().equals(other.files, files)&&const DeepCollectionEquality().equals(other.folders, folders)&&(identical(other.currentFolderId, currentFolderId) || other.currentFolderId == currentFolderId)&&const DeepCollectionEquality().equals(other.breadcrumbs, breadcrumbs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DriveState&&const DeepCollectionEquality().equals(other.files, files)&&const DeepCollectionEquality().equals(other.folders, folders)&&(identical(other.currentFolderId, currentFolderId) || other.currentFolderId == currentFolderId)&&const DeepCollectionEquality().equals(other.breadcrumbs, breadcrumbs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&(identical(other.maxFileSizeMb, maxFileSizeMb) || other.maxFileSizeMb == maxFileSizeMb)&&(identical(other.sortMode, sortMode) || other.sortMode == sortMode)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(files),const DeepCollectionEquality().hash(folders),currentFolderId,const DeepCollectionEquality().hash(breadcrumbs),isLoading,isRefreshing,driveCapacityMb,driveUsage,errorMessage);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(files),const DeepCollectionEquality().hash(folders),currentFolderId,const DeepCollectionEquality().hash(breadcrumbs),isLoading,isRefreshing,driveCapacityMb,driveUsage,maxFileSizeMb,sortMode,errorMessage);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'DriveState(files: $files, folders: $folders, currentFolderId: $currentFolderId, breadcrumbs: $breadcrumbs, isLoading: $isLoading, isRefreshing: $isRefreshing, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, errorMessage: $errorMessage)';
+  return 'DriveState(files: $files, folders: $folders, currentFolderId: $currentFolderId, breadcrumbs: $breadcrumbs, isLoading: $isLoading, isRefreshing: $isRefreshing, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, maxFileSizeMb: $maxFileSizeMb, sortMode: $sortMode, errorMessage: $errorMessage)';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $DriveStateCopyWith<$Res>  {
   factory $DriveStateCopyWith(DriveState value, $Res Function(DriveState) _then) = _$DriveStateCopyWithImpl;
 @useResult
 $Res call({
- List<DriveFile> files, List<DriveFolder> folders, String? currentFolderId, List<DriveFolder> breadcrumbs, bool isLoading, bool isRefreshing, int driveCapacityMb, int driveUsage, String? errorMessage
+ List<DriveFile> files, List<DriveFolder> folders, String? currentFolderId, List<DriveFolder> breadcrumbs, bool isLoading, bool isRefreshing, int driveCapacityMb, int driveUsage, int maxFileSizeMb, DriveSortMode sortMode, String? errorMessage
 });
 
 
@@ -68,7 +68,7 @@ class _$DriveStateCopyWithImpl<$Res>
 
 /// Create a copy of DriveState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? files = null,Object? folders = null,Object? currentFolderId = freezed,Object? breadcrumbs = null,Object? isLoading = null,Object? isRefreshing = null,Object? driveCapacityMb = null,Object? driveUsage = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? files = null,Object? folders = null,Object? currentFolderId = freezed,Object? breadcrumbs = null,Object? isLoading = null,Object? isRefreshing = null,Object? driveCapacityMb = null,Object? driveUsage = null,Object? maxFileSizeMb = null,Object? sortMode = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 files: null == files ? _self.files : files // ignore: cast_nullable_to_non_nullable
 as List<DriveFile>,folders: null == folders ? _self.folders : folders // ignore: cast_nullable_to_non_nullable
@@ -78,7 +78,9 @@ as List<DriveFolder>,isLoading: null == isLoading ? _self.isLoading : isLoading 
 as bool,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,driveCapacityMb: null == driveCapacityMb ? _self.driveCapacityMb : driveCapacityMb // ignore: cast_nullable_to_non_nullable
 as int,driveUsage: null == driveUsage ? _self.driveUsage : driveUsage // ignore: cast_nullable_to_non_nullable
-as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as int,maxFileSizeMb: null == maxFileSizeMb ? _self.maxFileSizeMb : maxFileSizeMb // ignore: cast_nullable_to_non_nullable
+as int,sortMode: null == sortMode ? _self.sortMode : sortMode // ignore: cast_nullable_to_non_nullable
+as DriveSortMode,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<DriveFile> files,  List<DriveFolder> folders,  String? currentFolderId,  List<DriveFolder> breadcrumbs,  bool isLoading,  bool isRefreshing,  int driveCapacityMb,  int driveUsage,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<DriveFile> files,  List<DriveFolder> folders,  String? currentFolderId,  List<DriveFolder> breadcrumbs,  bool isLoading,  bool isRefreshing,  int driveCapacityMb,  int driveUsage,  int maxFileSizeMb,  DriveSortMode sortMode,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DriveState() when $default != null:
-return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumbs,_that.isLoading,_that.isRefreshing,_that.driveCapacityMb,_that.driveUsage,_that.errorMessage);case _:
+return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumbs,_that.isLoading,_that.isRefreshing,_that.driveCapacityMb,_that.driveUsage,_that.maxFileSizeMb,_that.sortMode,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumb
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<DriveFile> files,  List<DriveFolder> folders,  String? currentFolderId,  List<DriveFolder> breadcrumbs,  bool isLoading,  bool isRefreshing,  int driveCapacityMb,  int driveUsage,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<DriveFile> files,  List<DriveFolder> folders,  String? currentFolderId,  List<DriveFolder> breadcrumbs,  bool isLoading,  bool isRefreshing,  int driveCapacityMb,  int driveUsage,  int maxFileSizeMb,  DriveSortMode sortMode,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _DriveState():
-return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumbs,_that.isLoading,_that.isRefreshing,_that.driveCapacityMb,_that.driveUsage,_that.errorMessage);case _:
+return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumbs,_that.isLoading,_that.isRefreshing,_that.driveCapacityMb,_that.driveUsage,_that.maxFileSizeMb,_that.sortMode,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumb
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<DriveFile> files,  List<DriveFolder> folders,  String? currentFolderId,  List<DriveFolder> breadcrumbs,  bool isLoading,  bool isRefreshing,  int driveCapacityMb,  int driveUsage,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<DriveFile> files,  List<DriveFolder> folders,  String? currentFolderId,  List<DriveFolder> breadcrumbs,  bool isLoading,  bool isRefreshing,  int driveCapacityMb,  int driveUsage,  int maxFileSizeMb,  DriveSortMode sortMode,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _DriveState() when $default != null:
-return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumbs,_that.isLoading,_that.isRefreshing,_that.driveCapacityMb,_that.driveUsage,_that.errorMessage);case _:
+return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumbs,_that.isLoading,_that.isRefreshing,_that.driveCapacityMb,_that.driveUsage,_that.maxFileSizeMb,_that.sortMode,_that.errorMessage);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.files,_that.folders,_that.currentFolderId,_that.breadcrumb
 
 
 class _DriveState with DiagnosticableTreeMixin implements DriveState {
-  const _DriveState({final  List<DriveFile> files = const [], final  List<DriveFolder> folders = const [], this.currentFolderId, final  List<DriveFolder> breadcrumbs = const [], this.isLoading = false, this.isRefreshing = false, this.driveCapacityMb = 0, this.driveUsage = 0, this.errorMessage}): _files = files,_folders = folders,_breadcrumbs = breadcrumbs;
+  const _DriveState({final  List<DriveFile> files = const [], final  List<DriveFolder> folders = const [], this.currentFolderId, final  List<DriveFolder> breadcrumbs = const [], this.isLoading = false, this.isRefreshing = false, this.driveCapacityMb = 0, this.driveUsage = 0, this.maxFileSizeMb = 0, this.sortMode = DriveSortMode.nameAsc, this.errorMessage}): _files = files,_folders = folders,_breadcrumbs = breadcrumbs;
   
 
  final  List<DriveFile> _files;
@@ -249,6 +251,8 @@ class _DriveState with DiagnosticableTreeMixin implements DriveState {
 @override@JsonKey() final  bool isRefreshing;
 @override@JsonKey() final  int driveCapacityMb;
 @override@JsonKey() final  int driveUsage;
+@override@JsonKey() final  int maxFileSizeMb;
+@override@JsonKey() final  DriveSortMode sortMode;
 @override final  String? errorMessage;
 
 /// Create a copy of DriveState
@@ -262,21 +266,21 @@ _$DriveStateCopyWith<_DriveState> get copyWith => __$DriveStateCopyWithImpl<_Dri
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'DriveState'))
-    ..add(DiagnosticsProperty('files', files))..add(DiagnosticsProperty('folders', folders))..add(DiagnosticsProperty('currentFolderId', currentFolderId))..add(DiagnosticsProperty('breadcrumbs', breadcrumbs))..add(DiagnosticsProperty('isLoading', isLoading))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('driveCapacityMb', driveCapacityMb))..add(DiagnosticsProperty('driveUsage', driveUsage))..add(DiagnosticsProperty('errorMessage', errorMessage));
+    ..add(DiagnosticsProperty('files', files))..add(DiagnosticsProperty('folders', folders))..add(DiagnosticsProperty('currentFolderId', currentFolderId))..add(DiagnosticsProperty('breadcrumbs', breadcrumbs))..add(DiagnosticsProperty('isLoading', isLoading))..add(DiagnosticsProperty('isRefreshing', isRefreshing))..add(DiagnosticsProperty('driveCapacityMb', driveCapacityMb))..add(DiagnosticsProperty('driveUsage', driveUsage))..add(DiagnosticsProperty('maxFileSizeMb', maxFileSizeMb))..add(DiagnosticsProperty('sortMode', sortMode))..add(DiagnosticsProperty('errorMessage', errorMessage));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DriveState&&const DeepCollectionEquality().equals(other._files, _files)&&const DeepCollectionEquality().equals(other._folders, _folders)&&(identical(other.currentFolderId, currentFolderId) || other.currentFolderId == currentFolderId)&&const DeepCollectionEquality().equals(other._breadcrumbs, _breadcrumbs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DriveState&&const DeepCollectionEquality().equals(other._files, _files)&&const DeepCollectionEquality().equals(other._folders, _folders)&&(identical(other.currentFolderId, currentFolderId) || other.currentFolderId == currentFolderId)&&const DeepCollectionEquality().equals(other._breadcrumbs, _breadcrumbs)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isRefreshing, isRefreshing) || other.isRefreshing == isRefreshing)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&(identical(other.maxFileSizeMb, maxFileSizeMb) || other.maxFileSizeMb == maxFileSizeMb)&&(identical(other.sortMode, sortMode) || other.sortMode == sortMode)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_files),const DeepCollectionEquality().hash(_folders),currentFolderId,const DeepCollectionEquality().hash(_breadcrumbs),isLoading,isRefreshing,driveCapacityMb,driveUsage,errorMessage);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_files),const DeepCollectionEquality().hash(_folders),currentFolderId,const DeepCollectionEquality().hash(_breadcrumbs),isLoading,isRefreshing,driveCapacityMb,driveUsage,maxFileSizeMb,sortMode,errorMessage);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'DriveState(files: $files, folders: $folders, currentFolderId: $currentFolderId, breadcrumbs: $breadcrumbs, isLoading: $isLoading, isRefreshing: $isRefreshing, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, errorMessage: $errorMessage)';
+  return 'DriveState(files: $files, folders: $folders, currentFolderId: $currentFolderId, breadcrumbs: $breadcrumbs, isLoading: $isLoading, isRefreshing: $isRefreshing, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, maxFileSizeMb: $maxFileSizeMb, sortMode: $sortMode, errorMessage: $errorMessage)';
 }
 
 
@@ -287,7 +291,7 @@ abstract mixin class _$DriveStateCopyWith<$Res> implements $DriveStateCopyWith<$
   factory _$DriveStateCopyWith(_DriveState value, $Res Function(_DriveState) _then) = __$DriveStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<DriveFile> files, List<DriveFolder> folders, String? currentFolderId, List<DriveFolder> breadcrumbs, bool isLoading, bool isRefreshing, int driveCapacityMb, int driveUsage, String? errorMessage
+ List<DriveFile> files, List<DriveFolder> folders, String? currentFolderId, List<DriveFolder> breadcrumbs, bool isLoading, bool isRefreshing, int driveCapacityMb, int driveUsage, int maxFileSizeMb, DriveSortMode sortMode, String? errorMessage
 });
 
 
@@ -304,7 +308,7 @@ class __$DriveStateCopyWithImpl<$Res>
 
 /// Create a copy of DriveState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? files = null,Object? folders = null,Object? currentFolderId = freezed,Object? breadcrumbs = null,Object? isLoading = null,Object? isRefreshing = null,Object? driveCapacityMb = null,Object? driveUsage = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? files = null,Object? folders = null,Object? currentFolderId = freezed,Object? breadcrumbs = null,Object? isLoading = null,Object? isRefreshing = null,Object? driveCapacityMb = null,Object? driveUsage = null,Object? maxFileSizeMb = null,Object? sortMode = null,Object? errorMessage = freezed,}) {
   return _then(_DriveState(
 files: null == files ? _self._files : files // ignore: cast_nullable_to_non_nullable
 as List<DriveFile>,folders: null == folders ? _self._folders : folders // ignore: cast_nullable_to_non_nullable
@@ -314,7 +318,9 @@ as List<DriveFolder>,isLoading: null == isLoading ? _self.isLoading : isLoading 
 as bool,isRefreshing: null == isRefreshing ? _self.isRefreshing : isRefreshing // ignore: cast_nullable_to_non_nullable
 as bool,driveCapacityMb: null == driveCapacityMb ? _self.driveCapacityMb : driveCapacityMb // ignore: cast_nullable_to_non_nullable
 as int,driveUsage: null == driveUsage ? _self.driveUsage : driveUsage // ignore: cast_nullable_to_non_nullable
-as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as int,maxFileSizeMb: null == maxFileSizeMb ? _self.maxFileSizeMb : maxFileSizeMb // ignore: cast_nullable_to_non_nullable
+as int,sortMode: null == sortMode ? _self.sortMode : sortMode // ignore: cast_nullable_to_non_nullable
+as DriveSortMode,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

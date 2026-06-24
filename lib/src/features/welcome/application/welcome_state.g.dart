@@ -9,6 +9,49 @@ part of 'welcome_state.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(currentWelcomeMode)
+final currentWelcomeModeProvider = CurrentWelcomeModeProvider._();
+
+final class CurrentWelcomeModeProvider
+    extends
+        $FunctionalProvider<WelcomePageMode, WelcomePageMode, WelcomePageMode>
+    with $Provider<WelcomePageMode> {
+  CurrentWelcomeModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentWelcomeModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentWelcomeModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<WelcomePageMode> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  WelcomePageMode create(Ref ref) {
+    return currentWelcomeMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(WelcomePageMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<WelcomePageMode>(value),
+    );
+  }
+}
+
+String _$currentWelcomeModeHash() =>
+    r'9823a8a903d95db8fdc88544fec56db3f8a247e1';
+
 @ProviderFor(WelcomeStep)
 final welcomeStepProvider = WelcomeStepProvider._();
 

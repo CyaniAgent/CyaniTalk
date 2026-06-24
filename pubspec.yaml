@@ -184,6 +184,7 @@ flutter:
     - assets/sounds/PostReceived/
     - assets/sounds/PostSend/
     - assets/icons/logo/desktop/
+    - assets/images/WelcomePage/
     - assets/translations/
     - lib/aiscripts/
 

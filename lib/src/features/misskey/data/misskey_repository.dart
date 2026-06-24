@@ -224,6 +224,23 @@ class MisskeyRepository implements IMisskeyRepository {
   }
 
   @override
+  Future<MisskeyUser> findUserByUsername(
+    String username, {
+    String? host,
+  }) async {
+    logger.info('MisskeyRepository: Finding user $username@$host');
+    try {
+      final data = await api.showUserByUsername(username, host: host);
+      return MisskeyUser.fromJson(data);
+    } catch (e) {
+      logger.error(
+        'MisskeyRepository: Error finding user $username@$host', e,
+      );
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -505,6 +522,68 @@ class MisskeyRepository implements IMisskeyRepository {
     } catch (e) {
       logger.error('MisskeyRepository: Error getting/creating app folder', e);
       return null; // Fallback to root on error
+    }
+  }
+
+  @override
+  Future<DriveFile> updateDriveFile(
+    String fileId, {
+    String? name,
+    String? folderId,
+    bool? isSensitive,
+    String? comment,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Updating drive file $fileId, name=$name, folderId=$folderId',
+    );
+    try {
+      final (data, error) = await api.updateDriveFile(
+        fileId,
+        name: name,
+        folderId: folderId,
+        isSensitive: isSensitive,
+        comment: comment,
+      );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error updating drive file', error);
+        throw error;
+      }
+      if (data == null) {
+        throw Exception('Failed to update drive file: No data returned');
+      }
+      return DriveFile.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error updating drive file', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DriveFolder> updateDriveFolder(
+    String folderId, {
+    String? name,
+    String? parentId,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Updating drive folder $folderId, name=$name, parentId=$parentId',
+    );
+    try {
+      final (data, error) = await api.updateDriveFolder(
+        folderId,
+        name: name,
+        parentId: parentId,
+      );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error updating drive folder', error);
+        throw error;
+      }
+      if (data == null) {
+        throw Exception('Failed to update drive folder: No data returned');
+      }
+      return DriveFolder.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error updating drive folder', e);
+      rethrow;
     }
   }
 

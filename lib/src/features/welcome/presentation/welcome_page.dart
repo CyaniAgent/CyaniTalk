@@ -18,6 +18,8 @@ import '/src/core/services/timeline_cache_database.dart';
 import '/src/core/services/misskey_image_cache_database.dart';
 import '/src/features/profile/presentation/settings/appearance_page.dart';
 import '/src/features/welcome/application/welcome_state.dart';
+import '/src/shared/widgets/animated_blob_background.dart';
+import '/src/shared/widgets/fireworks_background.dart';
 
 class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
@@ -106,42 +108,44 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   }
 
   Widget _buildStep0(ThemeData theme) {
-    return Column(
-      key: const ValueKey(0),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Spacer(flex: 2),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: Image.asset(
-            'assets/icons/logo/desktop/logo-desktop-transparent.png',
-            width: 120,
-            height: 120,
+    return AnimatedBlobBackground(
+      child: Column(
+        key: const ValueKey(0),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Spacer(flex: 2),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Image.asset(
+              'assets/icons/logo/desktop/logo-desktop-transparent.png',
+              width: 120,
+              height: 120,
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'welcome_title'.tr(),
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: SaucePalette.mikuGreen,
+          const SizedBox(height: 24),
+          Text(
+            'welcome_title'.tr(),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: SaucePalette.mikuGreen,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'welcome_subtitle'.tr(),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+          const SizedBox(height: 12),
+          Text(
+            'welcome_subtitle'.tr(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const Spacer(flex: 2),
-        _buildCapsuleButton(
-          label: 'welcome_step0_button'.tr(),
-          onPressed: () => ref.read(welcomeStepProvider.notifier).next(),
-        ),
-        const SizedBox(height: 32),
-      ],
+          const Spacer(flex: 2),
+          _buildCapsuleButton(
+            label: 'welcome_step0_button'.tr(),
+            onPressed: () => ref.read(welcomeStepProvider.notifier).next(),
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 
@@ -764,6 +768,32 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
             ],
           ),
+        if (ref.watch(currentWelcomeModeProvider) == WelcomePageMode.debug) ...[
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.amber.withAlpha(30),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.amber.withAlpha(80)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_amber_rounded,
+                    size: 20, color: Colors.amber[700]),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    'welcome_step5_debug_hint'.tr(),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.amber[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const Spacer(flex: 2),
       ],
     );
@@ -786,6 +816,27 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       if (_statusController != null && !_statusController!.isClosed) {
         _statusController!.add(key);
       }
+    }
+
+    if (ref.read(currentWelcomeModeProvider) == WelcomePageMode.debug) {
+      final steps = [
+        'welcome_step5_creating_database',
+        'welcome_step5_creating_cache',
+        'welcome_step5_testing_connection',
+        'welcome_step5_connecting_stream',
+        'welcome_step5_fetching_posts',
+        'welcome_step5_caching_resources',
+        'welcome_step5_writing_database',
+        'welcome_step5_completing',
+      ];
+      for (final s in steps) {
+        updateStatus(s);
+        await Future.delayed(const Duration(seconds: 1));
+      }
+      if (mounted) {
+        ref.read(welcomeStepProvider.notifier).next();
+      }
+      return;
     }
 
     try {
@@ -821,17 +872,26 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         await Future.delayed(const Duration(milliseconds: 500));
 
         updateStatus('welcome_step5_caching_resources');
-        await Future.delayed(const Duration(milliseconds: 400));
+        for (final category in CacheCategory.values) {
+          await cacheManager.getCategoryCacheDirectory(category);
+        }
+        await Future.delayed(const Duration(milliseconds: 200));
 
         updateStatus('welcome_step5_writing_database');
         try {
-          await TimelineCacheDatabase().saveNotes('Home', []);
+          final imageCacheCounts = await MisskeyImageCacheDatabase()
+              .getRecordCountByType();
+          logger.info(
+            'Welcome setup: Image cache has ${imageCacheCounts.values.fold<int>(0, (a, b) => a + b)} records',
+          );
         } catch (_) {}
-        await Future.delayed(const Duration(milliseconds: 300));
+        try {
+          await TimelineCacheDatabase().getLastRefreshTime('Home');
+        } catch (_) {}
+        await Future.delayed(const Duration(milliseconds: 200));
       }
 
       updateStatus('welcome_step5_completing');
-      await ref.read(welcomeCompletedProvider.notifier).markCompleted();
       await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
@@ -841,7 +901,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       logger.error('Welcome setup failed: $e', e, stack);
 
       updateStatus('welcome_step5_completing');
-      await ref.read(welcomeCompletedProvider.notifier).markCompleted();
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
         ref.read(welcomeStepProvider.notifier).next();
@@ -850,39 +910,44 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   }
 
   Widget _buildStep6(ThemeData theme) {
-    return Column(
-      key: const ValueKey(6),
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Spacer(),
-        Image.asset(
-          'assets/images/WelcomePage/character.png',
-          height: 200,
-          fit: BoxFit.contain,
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'welcome_step6_title'.tr(),
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: SaucePalette.mikuGreen,
+    return FireworksBackground(
+      child: Column(
+        key: const ValueKey(6),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Spacer(),
+          Image.asset(
+            'assets/images/WelcomePage/character.png',
+            height: 200,
+            fit: BoxFit.contain,
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'welcome_step6_description'.tr(),
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+          const SizedBox(height: 24),
+          Text(
+            'welcome_step6_title'.tr(),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: SaucePalette.mikuGreen,
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
-        const Spacer(),
-        _buildCapsuleButton(
-          label: 'welcome_step6_button'.tr(),
-          onPressed: () => context.go('/misskey'),
-        ),
-        const SizedBox(height: 32),
-      ],
+          const SizedBox(height: 12),
+          Text(
+            'welcome_step6_description'.tr(),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const Spacer(),
+          _buildCapsuleButton(
+            label: 'welcome_step6_button'.tr(),
+            onPressed: () async {
+              await ref.read(welcomeCompletedProvider.notifier).markCompleted();
+              if (mounted) context.go('/misskey');
+            },
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 

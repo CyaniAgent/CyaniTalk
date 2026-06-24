@@ -105,7 +105,14 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
                       ref.read(welcomeCompletedProvider.notifier).reset();
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => const WelcomePage(),
+                          builder: (_) => ProviderScope(
+                            overrides: [
+                              currentWelcomeModeProvider.overrideWith(
+                                (ref) => WelcomePageMode.debug,
+                              ),
+                            ],
+                            child: const WelcomePage(),
+                          ),
                         ),
                       );
                     },

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MisskeyUser {
 
- String get id; String? get name; String get username; String? get host; String? get avatarUrl; String? get bannerUrl; String? get description; DateTime? get createdAt; int? get notesCount; int? get followingCount; int? get followersCount; List<Map<String, dynamic>> get badgeRoles; List<Map<String, dynamic>> get roles; bool get isAdmin; bool get isModerator; bool get isBot; bool get isCat; int? get driveCapacityMb; int? get driveUsage; Map<String, String>? get emojis; String? get followedMessage; String? get location; String? get birthday; String? get lang; List<Map<String, dynamic>> get fields;
+ String get id; String? get name; String get username; String? get host; String? get avatarUrl; String? get bannerUrl; String? get description; DateTime? get createdAt; int? get notesCount; int? get followingCount; int? get followersCount; List<Map<String, dynamic>> get badgeRoles; List<Map<String, dynamic>> get roles; bool get isAdmin; bool get isModerator; bool get isBot; bool get isCat; int? get driveCapacityMb; int? get driveUsage; Map<String, String>? get emojis; String? get followedMessage; String? get location; String? get birthday; String? get lang; List<Map<String, dynamic>> get fields; Map<String, dynamic> get policies;
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $MisskeyUserCopyWith<MisskeyUser> get copyWith => _$MisskeyUserCopyWithImpl<Miss
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.notesCount, notesCount) || other.notesCount == notesCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&const DeepCollectionEquality().equals(other.badgeRoles, badgeRoles)&&const DeepCollectionEquality().equals(other.roles, roles)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&const DeepCollectionEquality().equals(other.emojis, emojis)&&(identical(other.followedMessage, followedMessage) || other.followedMessage == followedMessage)&&(identical(other.location, location) || other.location == location)&&(identical(other.birthday, birthday) || other.birthday == birthday)&&(identical(other.lang, lang) || other.lang == lang)&&const DeepCollectionEquality().equals(other.fields, fields));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.notesCount, notesCount) || other.notesCount == notesCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&const DeepCollectionEquality().equals(other.badgeRoles, badgeRoles)&&const DeepCollectionEquality().equals(other.roles, roles)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&const DeepCollectionEquality().equals(other.emojis, emojis)&&(identical(other.followedMessage, followedMessage) || other.followedMessage == followedMessage)&&(identical(other.location, location) || other.location == location)&&(identical(other.birthday, birthday) || other.birthday == birthday)&&(identical(other.lang, lang) || other.lang == lang)&&const DeepCollectionEquality().equals(other.fields, fields)&&const DeepCollectionEquality().equals(other.policies, policies));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,username,host,avatarUrl,bannerUrl,description,createdAt,notesCount,followingCount,followersCount,const DeepCollectionEquality().hash(badgeRoles),const DeepCollectionEquality().hash(roles),isAdmin,isModerator,isBot,isCat,driveCapacityMb,driveUsage,const DeepCollectionEquality().hash(emojis),followedMessage,location,birthday,lang,const DeepCollectionEquality().hash(fields)]);
+int get hashCode => Object.hashAll([runtimeType,id,name,username,host,avatarUrl,bannerUrl,description,createdAt,notesCount,followingCount,followersCount,const DeepCollectionEquality().hash(badgeRoles),const DeepCollectionEquality().hash(roles),isAdmin,isModerator,isBot,isCat,driveCapacityMb,driveUsage,const DeepCollectionEquality().hash(emojis),followedMessage,location,birthday,lang,const DeepCollectionEquality().hash(fields),const DeepCollectionEquality().hash(policies)]);
 
 @override
 String toString() {
-  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, description: $description, createdAt: $createdAt, notesCount: $notesCount, followingCount: $followingCount, followersCount: $followersCount, badgeRoles: $badgeRoles, roles: $roles, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, emojis: $emojis, followedMessage: $followedMessage, location: $location, birthday: $birthday, lang: $lang, fields: $fields)';
+  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, description: $description, createdAt: $createdAt, notesCount: $notesCount, followingCount: $followingCount, followersCount: $followersCount, badgeRoles: $badgeRoles, roles: $roles, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, emojis: $emojis, followedMessage: $followedMessage, location: $location, birthday: $birthday, lang: $lang, fields: $fields, policies: $policies)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $MisskeyUserCopyWith<$Res>  {
   factory $MisskeyUserCopyWith(MisskeyUser value, $Res Function(MisskeyUser) _then) = _$MisskeyUserCopyWithImpl;
 @useResult
 $Res call({
- String id, String? name, String username, String? host, String? avatarUrl, String? bannerUrl, String? description, DateTime? createdAt, int? notesCount, int? followingCount, int? followersCount, List<Map<String, dynamic>> badgeRoles, List<Map<String, dynamic>> roles, bool isAdmin, bool isModerator, bool isBot, bool isCat, int? driveCapacityMb, int? driveUsage, Map<String, String>? emojis, String? followedMessage, String? location, String? birthday, String? lang, List<Map<String, dynamic>> fields
+ String id, String? name, String username, String? host, String? avatarUrl, String? bannerUrl, String? description, DateTime? createdAt, int? notesCount, int? followingCount, int? followersCount, List<Map<String, dynamic>> badgeRoles, List<Map<String, dynamic>> roles, bool isAdmin, bool isModerator, bool isBot, bool isCat, int? driveCapacityMb, int? driveUsage, Map<String, String>? emojis, String? followedMessage, String? location, String? birthday, String? lang, List<Map<String, dynamic>> fields, Map<String, dynamic> policies
 });
 
 
@@ -65,7 +65,7 @@ class _$MisskeyUserCopyWithImpl<$Res>
 
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? description = freezed,Object? createdAt = freezed,Object? notesCount = freezed,Object? followingCount = freezed,Object? followersCount = freezed,Object? badgeRoles = null,Object? roles = null,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,Object? emojis = freezed,Object? followedMessage = freezed,Object? location = freezed,Object? birthday = freezed,Object? lang = freezed,Object? fields = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? description = freezed,Object? createdAt = freezed,Object? notesCount = freezed,Object? followingCount = freezed,Object? followersCount = freezed,Object? badgeRoles = null,Object? roles = null,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,Object? emojis = freezed,Object? followedMessage = freezed,Object? location = freezed,Object? birthday = freezed,Object? lang = freezed,Object? fields = null,Object? policies = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -92,7 +92,8 @@ as String?,location: freezed == location ? _self.location : location // ignore: 
 as String?,birthday: freezed == birthday ? _self.birthday : birthday // ignore: cast_nullable_to_non_nullable
 as String?,lang: freezed == lang ? _self.lang : lang // ignore: cast_nullable_to_non_nullable
 as String?,fields: null == fields ? _self.fields : fields // ignore: cast_nullable_to_non_nullable
-as List<Map<String, dynamic>>,
+as List<Map<String, dynamic>>,policies: null == policies ? _self.policies : policies // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 
@@ -177,10 +178,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  String? bannerUrl,  String? description,  DateTime? createdAt,  int? notesCount,  int? followingCount,  int? followersCount,  List<Map<String, dynamic>> badgeRoles,  List<Map<String, dynamic>> roles,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage,  Map<String, String>? emojis,  String? followedMessage,  String? location,  String? birthday,  String? lang,  List<Map<String, dynamic>> fields)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  String? bannerUrl,  String? description,  DateTime? createdAt,  int? notesCount,  int? followingCount,  int? followersCount,  List<Map<String, dynamic>> badgeRoles,  List<Map<String, dynamic>> roles,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage,  Map<String, String>? emojis,  String? followedMessage,  String? location,  String? birthday,  String? lang,  List<Map<String, dynamic>> fields,  Map<String, dynamic> policies)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MisskeyUser() when $default != null:
-return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.bannerUrl,_that.description,_that.createdAt,_that.notesCount,_that.followingCount,_that.followersCount,_that.badgeRoles,_that.roles,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage,_that.emojis,_that.followedMessage,_that.location,_that.birthday,_that.lang,_that.fields);case _:
+return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.bannerUrl,_that.description,_that.createdAt,_that.notesCount,_that.followingCount,_that.followersCount,_that.badgeRoles,_that.roles,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage,_that.emojis,_that.followedMessage,_that.location,_that.birthday,_that.lang,_that.fields,_that.policies);case _:
   return orElse();
 
 }
@@ -198,10 +199,10 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  String? bannerUrl,  String? description,  DateTime? createdAt,  int? notesCount,  int? followingCount,  int? followersCount,  List<Map<String, dynamic>> badgeRoles,  List<Map<String, dynamic>> roles,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage,  Map<String, String>? emojis,  String? followedMessage,  String? location,  String? birthday,  String? lang,  List<Map<String, dynamic>> fields)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  String? bannerUrl,  String? description,  DateTime? createdAt,  int? notesCount,  int? followingCount,  int? followersCount,  List<Map<String, dynamic>> badgeRoles,  List<Map<String, dynamic>> roles,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage,  Map<String, String>? emojis,  String? followedMessage,  String? location,  String? birthday,  String? lang,  List<Map<String, dynamic>> fields,  Map<String, dynamic> policies)  $default,) {final _that = this;
 switch (_that) {
 case _MisskeyUser():
-return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.bannerUrl,_that.description,_that.createdAt,_that.notesCount,_that.followingCount,_that.followersCount,_that.badgeRoles,_that.roles,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage,_that.emojis,_that.followedMessage,_that.location,_that.birthday,_that.lang,_that.fields);case _:
+return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.bannerUrl,_that.description,_that.createdAt,_that.notesCount,_that.followingCount,_that.followersCount,_that.badgeRoles,_that.roles,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage,_that.emojis,_that.followedMessage,_that.location,_that.birthday,_that.lang,_that.fields,_that.policies);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +219,10 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  String? bannerUrl,  String? description,  DateTime? createdAt,  int? notesCount,  int? followingCount,  int? followersCount,  List<Map<String, dynamic>> badgeRoles,  List<Map<String, dynamic>> roles,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage,  Map<String, String>? emojis,  String? followedMessage,  String? location,  String? birthday,  String? lang,  List<Map<String, dynamic>> fields)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? name,  String username,  String? host,  String? avatarUrl,  String? bannerUrl,  String? description,  DateTime? createdAt,  int? notesCount,  int? followingCount,  int? followersCount,  List<Map<String, dynamic>> badgeRoles,  List<Map<String, dynamic>> roles,  bool isAdmin,  bool isModerator,  bool isBot,  bool isCat,  int? driveCapacityMb,  int? driveUsage,  Map<String, String>? emojis,  String? followedMessage,  String? location,  String? birthday,  String? lang,  List<Map<String, dynamic>> fields,  Map<String, dynamic> policies)?  $default,) {final _that = this;
 switch (_that) {
 case _MisskeyUser() when $default != null:
-return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.bannerUrl,_that.description,_that.createdAt,_that.notesCount,_that.followingCount,_that.followersCount,_that.badgeRoles,_that.roles,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage,_that.emojis,_that.followedMessage,_that.location,_that.birthday,_that.lang,_that.fields);case _:
+return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_that.bannerUrl,_that.description,_that.createdAt,_that.notesCount,_that.followingCount,_that.followersCount,_that.badgeRoles,_that.roles,_that.isAdmin,_that.isModerator,_that.isBot,_that.isCat,_that.driveCapacityMb,_that.driveUsage,_that.emojis,_that.followedMessage,_that.location,_that.birthday,_that.lang,_that.fields,_that.policies);case _:
   return null;
 
 }
@@ -233,7 +234,7 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 @JsonSerializable()
 
 class _MisskeyUser implements MisskeyUser {
-  const _MisskeyUser({required this.id, this.name, required this.username, this.host, this.avatarUrl, this.bannerUrl, this.description, this.createdAt, this.notesCount, this.followingCount, this.followersCount, final  List<Map<String, dynamic>> badgeRoles = const [], final  List<Map<String, dynamic>> roles = const [], this.isAdmin = false, this.isModerator = false, this.isBot = false, this.isCat = false, this.driveCapacityMb, this.driveUsage, final  Map<String, String>? emojis, this.followedMessage, this.location, this.birthday, this.lang, final  List<Map<String, dynamic>> fields = const []}): _badgeRoles = badgeRoles,_roles = roles,_emojis = emojis,_fields = fields;
+  const _MisskeyUser({required this.id, this.name, required this.username, this.host, this.avatarUrl, this.bannerUrl, this.description, this.createdAt, this.notesCount, this.followingCount, this.followersCount, final  List<Map<String, dynamic>> badgeRoles = const [], final  List<Map<String, dynamic>> roles = const [], this.isAdmin = false, this.isModerator = false, this.isBot = false, this.isCat = false, this.driveCapacityMb, this.driveUsage, final  Map<String, String>? emojis, this.followedMessage, this.location, this.birthday, this.lang, final  List<Map<String, dynamic>> fields = const [], final  Map<String, dynamic> policies = const {}}): _badgeRoles = badgeRoles,_roles = roles,_emojis = emojis,_fields = fields,_policies = policies;
   factory _MisskeyUser.fromJson(Map<String, dynamic> json) => _$MisskeyUserFromJson(json);
 
 @override final  String id;
@@ -287,6 +288,13 @@ class _MisskeyUser implements MisskeyUser {
   return EqualUnmodifiableListView(_fields);
 }
 
+ final  Map<String, dynamic> _policies;
+@override@JsonKey() Map<String, dynamic> get policies {
+  if (_policies is EqualUnmodifiableMapView) return _policies;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_policies);
+}
+
 
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
@@ -301,16 +309,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.notesCount, notesCount) || other.notesCount == notesCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&const DeepCollectionEquality().equals(other._badgeRoles, _badgeRoles)&&const DeepCollectionEquality().equals(other._roles, _roles)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&const DeepCollectionEquality().equals(other._emojis, _emojis)&&(identical(other.followedMessage, followedMessage) || other.followedMessage == followedMessage)&&(identical(other.location, location) || other.location == location)&&(identical(other.birthday, birthday) || other.birthday == birthday)&&(identical(other.lang, lang) || other.lang == lang)&&const DeepCollectionEquality().equals(other._fields, _fields));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MisskeyUser&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.username, username) || other.username == username)&&(identical(other.host, host) || other.host == host)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.bannerUrl, bannerUrl) || other.bannerUrl == bannerUrl)&&(identical(other.description, description) || other.description == description)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.notesCount, notesCount) || other.notesCount == notesCount)&&(identical(other.followingCount, followingCount) || other.followingCount == followingCount)&&(identical(other.followersCount, followersCount) || other.followersCount == followersCount)&&const DeepCollectionEquality().equals(other._badgeRoles, _badgeRoles)&&const DeepCollectionEquality().equals(other._roles, _roles)&&(identical(other.isAdmin, isAdmin) || other.isAdmin == isAdmin)&&(identical(other.isModerator, isModerator) || other.isModerator == isModerator)&&(identical(other.isBot, isBot) || other.isBot == isBot)&&(identical(other.isCat, isCat) || other.isCat == isCat)&&(identical(other.driveCapacityMb, driveCapacityMb) || other.driveCapacityMb == driveCapacityMb)&&(identical(other.driveUsage, driveUsage) || other.driveUsage == driveUsage)&&const DeepCollectionEquality().equals(other._emojis, _emojis)&&(identical(other.followedMessage, followedMessage) || other.followedMessage == followedMessage)&&(identical(other.location, location) || other.location == location)&&(identical(other.birthday, birthday) || other.birthday == birthday)&&(identical(other.lang, lang) || other.lang == lang)&&const DeepCollectionEquality().equals(other._fields, _fields)&&const DeepCollectionEquality().equals(other._policies, _policies));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,username,host,avatarUrl,bannerUrl,description,createdAt,notesCount,followingCount,followersCount,const DeepCollectionEquality().hash(_badgeRoles),const DeepCollectionEquality().hash(_roles),isAdmin,isModerator,isBot,isCat,driveCapacityMb,driveUsage,const DeepCollectionEquality().hash(_emojis),followedMessage,location,birthday,lang,const DeepCollectionEquality().hash(_fields)]);
+int get hashCode => Object.hashAll([runtimeType,id,name,username,host,avatarUrl,bannerUrl,description,createdAt,notesCount,followingCount,followersCount,const DeepCollectionEquality().hash(_badgeRoles),const DeepCollectionEquality().hash(_roles),isAdmin,isModerator,isBot,isCat,driveCapacityMb,driveUsage,const DeepCollectionEquality().hash(_emojis),followedMessage,location,birthday,lang,const DeepCollectionEquality().hash(_fields),const DeepCollectionEquality().hash(_policies)]);
 
 @override
 String toString() {
-  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, description: $description, createdAt: $createdAt, notesCount: $notesCount, followingCount: $followingCount, followersCount: $followersCount, badgeRoles: $badgeRoles, roles: $roles, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, emojis: $emojis, followedMessage: $followedMessage, location: $location, birthday: $birthday, lang: $lang, fields: $fields)';
+  return 'MisskeyUser(id: $id, name: $name, username: $username, host: $host, avatarUrl: $avatarUrl, bannerUrl: $bannerUrl, description: $description, createdAt: $createdAt, notesCount: $notesCount, followingCount: $followingCount, followersCount: $followersCount, badgeRoles: $badgeRoles, roles: $roles, isAdmin: $isAdmin, isModerator: $isModerator, isBot: $isBot, isCat: $isCat, driveCapacityMb: $driveCapacityMb, driveUsage: $driveUsage, emojis: $emojis, followedMessage: $followedMessage, location: $location, birthday: $birthday, lang: $lang, fields: $fields, policies: $policies)';
 }
 
 
@@ -321,7 +329,7 @@ abstract mixin class _$MisskeyUserCopyWith<$Res> implements $MisskeyUserCopyWith
   factory _$MisskeyUserCopyWith(_MisskeyUser value, $Res Function(_MisskeyUser) _then) = __$MisskeyUserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? name, String username, String? host, String? avatarUrl, String? bannerUrl, String? description, DateTime? createdAt, int? notesCount, int? followingCount, int? followersCount, List<Map<String, dynamic>> badgeRoles, List<Map<String, dynamic>> roles, bool isAdmin, bool isModerator, bool isBot, bool isCat, int? driveCapacityMb, int? driveUsage, Map<String, String>? emojis, String? followedMessage, String? location, String? birthday, String? lang, List<Map<String, dynamic>> fields
+ String id, String? name, String username, String? host, String? avatarUrl, String? bannerUrl, String? description, DateTime? createdAt, int? notesCount, int? followingCount, int? followersCount, List<Map<String, dynamic>> badgeRoles, List<Map<String, dynamic>> roles, bool isAdmin, bool isModerator, bool isBot, bool isCat, int? driveCapacityMb, int? driveUsage, Map<String, String>? emojis, String? followedMessage, String? location, String? birthday, String? lang, List<Map<String, dynamic>> fields, Map<String, dynamic> policies
 });
 
 
@@ -338,7 +346,7 @@ class __$MisskeyUserCopyWithImpl<$Res>
 
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? description = freezed,Object? createdAt = freezed,Object? notesCount = freezed,Object? followingCount = freezed,Object? followersCount = freezed,Object? badgeRoles = null,Object? roles = null,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,Object? emojis = freezed,Object? followedMessage = freezed,Object? location = freezed,Object? birthday = freezed,Object? lang = freezed,Object? fields = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? description = freezed,Object? createdAt = freezed,Object? notesCount = freezed,Object? followingCount = freezed,Object? followersCount = freezed,Object? badgeRoles = null,Object? roles = null,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,Object? emojis = freezed,Object? followedMessage = freezed,Object? location = freezed,Object? birthday = freezed,Object? lang = freezed,Object? fields = null,Object? policies = null,}) {
   return _then(_MisskeyUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -365,7 +373,8 @@ as String?,location: freezed == location ? _self.location : location // ignore: 
 as String?,birthday: freezed == birthday ? _self.birthday : birthday // ignore: cast_nullable_to_non_nullable
 as String?,lang: freezed == lang ? _self.lang : lang // ignore: cast_nullable_to_non_nullable
 as String?,fields: null == fields ? _self._fields : fields // ignore: cast_nullable_to_non_nullable
-as List<Map<String, dynamic>>,
+as List<Map<String, dynamic>>,policies: null == policies ? _self._policies : policies // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,
   ));
 }
 

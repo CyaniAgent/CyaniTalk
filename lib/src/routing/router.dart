@@ -16,6 +16,7 @@ import '/src/features/cloud/presentation/cloud_page.dart';
 import '/src/features/messaging/presentation/chat_page.dart';
 import '/src/features/messaging/presentation/messaging_page.dart';
 import '/src/shared/widgets/coming_soon_page.dart';
+import '/src/shared/widgets/desktop_page_shell.dart';
 import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/domain/chat_room.dart';
 import '/src/features/profile/presentation/profile_page.dart';
@@ -184,8 +185,10 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
-        pageBuilder: (context, state) =>
-            _buildSafePage(key: state.pageKey, child: const SettingsPage()),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const DesktopPageShell(child: SettingsPage()),
+        ),
       ),
       GoRoute(
         path: '/about',

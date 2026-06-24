@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'sauce_palette.dart';
 import 'typography.dart';
+import 'design_tokens.dart';
 
 /// 应用程序主题工厂
 ///
@@ -34,5 +35,12 @@ class MaterialTheme {
     scaffoldBackgroundColor: colorScheme.surface,
     canvasColor: colorScheme.surface,
     fontFamily: 'MiSans',
+    extensions: [
+      M3EShapeTokens.standard,
+      M3ESliderTokens.large,
+      M3EMenuTokens.standard,
+      M3ETitleBarTokens.standard,
+      M3ESoundPickerTokens.standard,
+    ],
   );
 }

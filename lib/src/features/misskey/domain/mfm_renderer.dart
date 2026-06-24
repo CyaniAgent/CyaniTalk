@@ -49,6 +49,9 @@ class MfmRenderer {
   // Misskey API 实例
   MisskeyApi? _misskeyApi;
 
+  // Mention 点击回调
+  void Function(String userName, String? host, String acct)? mentionTap;
+
   // 缓存处理后的 TextSpan 结果，避免重复计算
   final Map<String, InlineSpan> _textProcessingCache = {};
 
@@ -350,9 +353,7 @@ class MfmRenderer {
       fantasyStyle: const TextStyle(fontFamily: 'Fantasy'),
       mentionTap: (userName, host, acct) {
         logger.debug('MfmRenderer: Mention tapped: $acct');
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('提及：$acct')));
+        mentionTap?.call(userName, host, acct);
       },
       hashtagTap: (hashtag) {
         logger.debug('MfmRenderer: Hashtag tapped: $hashtag');
@@ -618,6 +619,7 @@ class MfmRenderer {
       fantasyStyle: const TextStyle(fontFamily: 'Fantasy'),
       mentionTap: (userName, host, acct) {
         logger.debug('MfmRenderer: Mention tapped: $acct');
+        mentionTap?.call(userName, host, acct);
       },
       hashtagTap: (hashtag) {
         logger.debug('MfmRenderer: Hashtag tapped: $hashtag');

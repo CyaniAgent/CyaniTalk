@@ -9,37 +9,32 @@ class SoundService {
 
   Future<void> playMisskeyRealtimePost() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyRealtimePost) {
-      await _play('sounds/PostReceived/n-aec.mp3');
-    }
+    final path = SoundDefaults.resolve(settings.newPostSound, SoundDefaults.newPost);
+    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
   }
 
   Future<void> playMisskeyPosting() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyPosting) {
-      await _play('sounds/PostSend/n-cea-4va.mp3');
-    }
+    final path = SoundDefaults.resolve(settings.postSound, SoundDefaults.post);
+    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
   }
 
   Future<void> playMisskeyNotifications() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyNotifications) {
-      await _play('sounds/Notifications/n-ea.mp3');
-    }
+    final path = SoundDefaults.resolve(settings.notificationSound, SoundDefaults.notification);
+    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
   }
 
   Future<void> playMisskeyEmojiReactions() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyEmojiReactions) {
-      await _play('sounds/Emoji-Responses/bubble2.mp3');
-    }
+    final path = SoundDefaults.resolve(settings.reactionSound, SoundDefaults.reaction);
+    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
   }
 
   Future<void> playMisskeyMessages() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyMessages) {
-      await _play('sounds/Chat/waon.mp3');
-    }
+    final path = SoundDefaults.resolve(settings.messageSound, SoundDefaults.message);
+    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
   }
 
     Future<void> _play(String assetPath) async {
