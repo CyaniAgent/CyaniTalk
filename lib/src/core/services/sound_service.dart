@@ -9,32 +9,37 @@ class SoundService {
 
   Future<void> playMisskeyRealtimePost() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    final path = SoundDefaults.resolve(settings.newPostSound, SoundDefaults.newPost);
-    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
+    if (settings.newPostSound.isNotEmpty) {
+      await _play(settings.newPostSound);
+    }
   }
 
   Future<void> playMisskeyPosting() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    final path = SoundDefaults.resolve(settings.postSound, SoundDefaults.post);
-    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
+    if (settings.postSound.isNotEmpty) {
+      await _play(settings.postSound);
+    }
   }
 
   Future<void> playMisskeyNotifications() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    final path = SoundDefaults.resolve(settings.notificationSound, SoundDefaults.notification);
-    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
+    if (settings.notificationSound.isNotEmpty) {
+      await _play(settings.notificationSound);
+    }
   }
 
   Future<void> playMisskeyEmojiReactions() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    final path = SoundDefaults.resolve(settings.reactionSound, SoundDefaults.reaction);
-    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
+    if (settings.reactionSound.isNotEmpty) {
+      await _play(settings.reactionSound);
+    }
   }
 
   Future<void> playMisskeyMessages() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    final path = SoundDefaults.resolve(settings.messageSound, SoundDefaults.message);
-    if (path.isNotEmpty) await _play(path.replaceFirst('assets/', ''));
+    if (settings.messageSound.isNotEmpty) {
+      await _play(settings.messageSound);
+    }
   }
 
     Future<void> _play(String assetPath) async {

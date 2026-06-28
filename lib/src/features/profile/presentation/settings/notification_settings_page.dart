@@ -5,6 +5,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/notification_settings_provider.dart';
 import '/src/core/services/notification_service.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
@@ -93,7 +95,7 @@ class NotificationSettingsPage extends ConsumerWidget {
             ),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (_, _) => Center(child: Text('Error')),
       ),
     );
@@ -110,15 +112,11 @@ class NotificationSettingsPage extends ConsumerWidget {
           : () async {
               final granted = await NotificationService().requestPermissions();
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      granted
-                          ? 'settings_notif_permission_granted'.tr()
-                          : 'settings_notif_permission_denied'.tr(),
-                    ),
-                    behavior: SnackBarBehavior.floating,
-                  ),
+                showToast(
+                  title: granted
+                      ? 'settings_notif_permission_granted'.tr()
+                      : 'settings_notif_permission_denied'.tr(),
+                  type: granted ? ToastificationType.success : ToastificationType.error,
                 );
               }
             },

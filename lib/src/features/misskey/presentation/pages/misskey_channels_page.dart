@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
 import 'package:cyanitalk/src/features/misskey/domain/channel.dart';
 import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_channel_details_page.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// Misskey 频道页面组件
 ///
@@ -136,7 +137,7 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CyaniLoadingIndicator()),
       error: (err, stack) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

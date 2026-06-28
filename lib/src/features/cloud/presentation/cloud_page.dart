@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/core/utils/download_utils.dart';
 import '/src/core/utils/file_icon_manager.dart';
 import '/src/core/utils/cache_manager.dart';
@@ -24,6 +26,7 @@ import '/src/features/misskey/presentation/pages/misskey_post_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import 'cloud_upload_sheet.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class CloudPage extends ConsumerStatefulWidget {
   const CloudPage({super.key});
@@ -242,7 +245,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
           return Column(
             children: [
               _buildBreadcrumbs(context, ref, currentState),
-              Expanded(child: const Center(child: CircularProgressIndicator())),
+              Expanded(child: const Center(child: CyaniLoadingIndicator())),
             ],
           );
         },
@@ -346,7 +349,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
 
     // 显示下载进度底页
     if (!context.mounted) return;
-    await showModalBottomSheet(
+    await showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -844,7 +847,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
       );
     }
     if (state.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CyaniLoadingIndicator());
     }
     return _buildContentList(context, ref, state);
   }
@@ -1336,12 +1339,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
         .read(misskeyDriveProvider.notifier)
         .toggleFileSensitive(file.id, !file.isSensitive);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('cloud_sensitive_updated'.tr()),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showToast(title: 'cloud_sensitive_updated'.tr(), type: ToastificationType.success);
     }
   }
 
@@ -1509,7 +1507,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
   }
 
   void _showAddOptions(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -1741,7 +1739,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
 
     // 显示下载确认底页
     if (!context.mounted) return;
-    await showModalBottomSheet(
+    await showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {

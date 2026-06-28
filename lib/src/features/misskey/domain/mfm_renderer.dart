@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/api/misskey_api.dart';
 import '/src/features/misskey/presentation/widgets/safe_mfm_widget.dart';
@@ -357,9 +358,7 @@ class MfmRenderer {
       },
       hashtagTap: (hashtag) {
         logger.debug('MfmRenderer: Hashtag tapped: $hashtag');
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('话题：#$hashtag')));
+        showToast(title: '话题：#$hashtag', type: ToastificationType.info);
       },
       linkTap: (url) async {
         logger.debug('MfmRenderer: Link tapped: $url');

@@ -6,6 +6,7 @@ import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyUserProfilePage extends ConsumerStatefulWidget {
   final String userId;
@@ -86,7 +87,7 @@ class _MisskeyUserProfilePageState
           data: (user) => _buildProfile(context, user),
           loading: () => widget.initialUser != null
               ? _buildProfile(context, widget.initialUser!, isLoading: true)
-              : const Center(child: CircularProgressIndicator()),
+              : const Center(child: CyaniLoadingIndicator()),
           error: (err, stack) => Scaffold(
             appBar: AppBar(title: const Text('Error')),
             body: Center(child: Text('Error: $err')),

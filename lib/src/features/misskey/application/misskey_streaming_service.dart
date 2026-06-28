@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
@@ -13,6 +15,10 @@ import '/src/features/auth/domain/account.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/config/constants.dart';
 import '/src/core/services/streaming/streaming_service_interface.dart';
+import '/src/core/services/audio_engine.dart';
+import '/src/features/profile/application/network_settings_provider.dart';
+import '/src/features/profile/application/sound_settings_provider.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 part 'misskey_streaming_service.g.dart';
 
@@ -30,7 +36,6 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
   int _reconnectAttempts = 0;
-  static const int _maxReconnectAttempts = 5;
   StreamingStatus _status = StreamingStatus.disconnected;
 
   static const _foregroundHeartbeat = Duration(seconds: 30);
@@ -108,6 +113,10 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   @override
   void reconnect() {
+    if (_status == StreamingStatus.connected && _channel != null) {
+      logger.info('MisskeyStreaming: Already connected, skipping reconnect');
+      return;
+    }
     logger.info('MisskeyStreaming: Manually triggering reconnect...');
     // Store current subscriptions to restore them after connection
     final subscriptionsToRestore = Set<String>.from(_activeTimelineSubscriptions);
@@ -208,20 +217,28 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   void _handleDisconnect(Account account) {
     _reconnectTimer?.cancel();
-    
-    if (_reconnectAttempts >= _maxReconnectAttempts) {
-      logger.error('MisskeyStreaming: Maximum reconnection attempts reached ($_maxReconnectAttempts). Stopping automatic retry.');
+
+    final settingsAsync = ref.read(networkSettingsProvider);
+    final maxAttempts = settingsAsync.value?.webSocketReconnectAttempts ?? 5;
+
+    _reconnectAttempts++;
+
+    if (_reconnectAttempts >= maxAttempts) {
+      logger.error('MisskeyStreaming: Maximum reconnection attempts reached ($maxAttempts). Stopping automatic retry.');
       _updateStatus(StreamingStatus.error);
+      _showMaxRetryToast();
       return;
     }
 
     // 指数避退重连
-    final delay = Duration(seconds: (1 << _reconnectAttempts));
-    _reconnectAttempts++;
+    final delay = Duration(seconds: (1 << (_reconnectAttempts - 1)));
 
     logger.info(
-      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts/$_maxReconnectAttempts)',
+      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts/$maxAttempts)',
     );
+
+    _showReconnectToast();
+
     _reconnectTimer = Timer(delay, () {
       if (!ref.mounted) return;
 
@@ -230,6 +247,103 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
         _connect();
       }
     });
+  }
+
+  void _showReconnectToast() {
+    toastification.showCustom(
+      autoCloseDuration: const Duration(seconds: 8),
+      builder: (context, holder) {
+        final theme = Theme.of(context);
+        final surface = theme.colorScheme.surfaceContainerLow;
+        return Card(
+          color: surface,
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('stream_disconnected'.tr(),
+                    style: theme.textTheme.bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(
+                  'stream_reconnecting'.tr(
+                    namedArgs: {'n': _reconnectAttempts.toString()},
+                  ),
+                  style: theme.textTheme.bodySmall,
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      toastification.dismissAll();
+                      _reconnectAttempts = 0;
+                      _reconnectTimer?.cancel();
+                      reconnect();
+                    },
+                    child: Text('stream_reload_button'.tr()),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showMaxRetryToast() {
+    final soundAsync = ref.read(soundSettingsProvider);
+    final soundPath = soundAsync.value?.streamErrorSound;
+    if (soundPath != null && soundPath.isNotEmpty) {
+      unawaited(ref.read(audioEngineProvider).playAsset(soundPath));
+    }
+
+    toastification.showCustom(
+      autoCloseDuration: const Duration(seconds: 10),
+      builder: (context, holder) {
+        final theme = Theme.of(context);
+        final errorContainer = theme.colorScheme.errorContainer;
+        final onError = theme.colorScheme.onErrorContainer;
+        return Card(
+          color: errorContainer,
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('stream_reconnect_failed_title'.tr(),
+                    style: theme.textTheme.bodyLarge
+                        ?.copyWith(fontWeight: FontWeight.w600, color: onError)),
+                const SizedBox(height: 4),
+                Text(
+                  'stream_reconnect_failed_body'.tr(),
+                  style: theme.textTheme.bodySmall?.copyWith(color: onError),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      toastification.dismissAll();
+                      _reconnectAttempts = 0;
+                      _reconnectTimer?.cancel();
+                      reconnect();
+                    },
+                    child: Text('stream_reload_button'.tr()),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _startHeartbeat() {

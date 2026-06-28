@@ -6,7 +6,10 @@ import '/src/features/profile/application/developer_settings_provider.dart';
 import '/src/features/welcome/application/welcome_state.dart';
 import '/src/features/welcome/presentation/welcome_page.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import 'design_playground_page.dart';
 import 'log_settings_page.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class DeveloperSettingsPage extends ConsumerStatefulWidget {
   const DeveloperSettingsPage({super.key});
@@ -24,13 +27,9 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text(
-              'could_not_launch_url'.tr(namedArgs: {'url': urlString}),
-            ),
-          ),
+        showToast(
+          title: 'could_not_launch_url'.tr(namedArgs: {'url': urlString}),
+          type: ToastificationType.error,
         );
       }
     }
@@ -117,6 +116,15 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
                       );
                     },
                   ),
+                  SettingsTile(
+                    icon: Icons.design_services_outlined,
+                    iconColor: _amber,
+                    title: 'settings_developer_design_playground'.tr(),
+                    subtitle: 'settings_developer_design_playground_description'.tr(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DesignPlaygroundPage()),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -157,7 +165,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
             ),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (_, _) => Center(child: Text('Error')),
       ),
     );

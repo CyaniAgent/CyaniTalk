@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/navigation_element.dart';
 import '/src/core/theme/desktop_semantic_colors.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class NavigationSettingsPage extends ConsumerStatefulWidget {
   const NavigationSettingsPage({super.key});
@@ -24,7 +26,7 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
     return Scaffold(
       appBar: AppBar(title: Text('settings_navigation_title'.tr())),
       body: navigationSettingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (error, stack) =>
             Center(child: Text('settings_navigation_error_loading'.tr())),
         data: (navigationSettings) {
@@ -264,12 +266,7 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
             onPressed: () {
               notifier.resetSettings();
               Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('settings_navigation_reset_done'.tr()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              showToast(title: 'settings_navigation_reset_done'.tr(), type: ToastificationType.success);
             },
             child: Text('post_reset'.tr()),
           ),

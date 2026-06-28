@@ -3,11 +3,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import '/src/features/profile/presentation/settings/appearance_page.dart';
 import '/src/core/services/device_info_service.dart';
 import 'font_manager.dart';
 import 'font_settings_notifier.dart';
 import 'font_refresh_notifier.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 字体选择器对话框
 class FontSelectorDialog extends ConsumerStatefulWidget {
@@ -83,7 +85,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
         },
         loading: () => const SizedBox(
           height: 200,
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: CyaniLoadingIndicator()),
         ),
         error: (error, stack) => SizedBox(
           height: 200,
@@ -127,12 +129,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       final fontId = await FontManager.registerLocalFont(filePath);
       if (fontId == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('字体加载失败，请确认文件格式为 .ttf 或 .otf'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
+          showToast(title: '字体加载失败，请确认文件格式为 .ttf 或 .otf', type: ToastificationType.error);
         }
         return;
       }
@@ -159,12 +156,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('选择字体文件时出错'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        showToast(title: '选择字体文件时出错', type: ToastificationType.error);
       }
     }
   }
@@ -195,18 +187,9 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
   Future<void> _handleDownload(FontInfo font) async {
     final success = await ref.read(fontSettingsProvider.notifier).downloadFont(font.id);
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('settings_font_downloaded'.tr(namedArgs: {'font': font.displayName})),
-        ),
-      );
+      showToast(title: 'settings_font_downloaded'.tr(namedArgs: {'font': font.displayName}), type: ToastificationType.success);
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('settings_font_download_failed'.tr(namedArgs: {'font': font.displayName})),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      showToast(title: 'settings_font_download_failed'.tr(namedArgs: {'font': font.displayName}), type: ToastificationType.error);
     }
   }
 
@@ -247,11 +230,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('settings_font_change_success'.tr(namedArgs: {'font': fontName})),
-          ),
-        );
+        showToast(title: 'settings_font_change_success'.tr(namedArgs: {'font': fontName}), type: ToastificationType.success);
       }
     });
   }

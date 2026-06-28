@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:webview_windows/webview_windows.dart' as windows;
 import 'package:webview_flutter/webview_flutter.dart' as mobile;
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 应用程序的赞助页面组件
 ///
@@ -195,7 +196,7 @@ class _IMikufansDonatePageState extends State<IMikufansDonatePage> {
           ? (_isWindows
                 ? windows.Webview(_windowsController)
                 : mobile.WebViewWidget(controller: _mobileController))
-          : const Center(child: CircularProgressIndicator()),
+          : const Center(child: CyaniLoadingIndicator()),
     );
   }
 }

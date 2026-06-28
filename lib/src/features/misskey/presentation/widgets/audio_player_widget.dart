@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:slider_m3e/slider_m3e.dart';
 import '/src/features/misskey/application/audio_player_notifier.dart';
 
-/// Inline audio player widget for Misskey posts using audioplayers
+/// Inline audio player widget for Misskey posts using flutter_soloud
 class AudioPlayerWidget extends ConsumerWidget {
   final String audioUrl;
   final String? fileName;
@@ -100,7 +101,7 @@ class AudioPlayerWidget extends ConsumerWidget {
                     ),
                   // 进度滑块
                   Expanded(
-                    child: Slider(
+                    child: SliderM3E(
                       value: state.position.inSeconds.toDouble().clamp(
                         0,
                         state.duration.inSeconds.toDouble(),
@@ -110,7 +111,6 @@ class AudioPlayerWidget extends ConsumerWidget {
                         double.infinity,
                       ),
                       onChanged: audioController.seek,
-                      activeColor: theme.colorScheme.primary,
                     ),
                   ),
                   // 时间显示

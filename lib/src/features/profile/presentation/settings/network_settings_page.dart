@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../application/network_settings_provider.dart';
 import '../widgets/settings_slider_bottom_sheet.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class NetworkSettingsPage extends ConsumerStatefulWidget {
   const NetworkSettingsPage({super.key});
@@ -190,7 +192,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (_, _) => Center(child: Text('settings_network_error_loading'.tr())),
       ),
     );
@@ -329,16 +331,12 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
       await Future.delayed(const Duration(seconds: 2));
       setState(() => _networkTestSuccess = true);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_network_test_success_snackbar'.tr())),
-        );
+        showToast(title: 'settings_network_test_success_snackbar'.tr(), type: ToastificationType.success);
       }
     } catch (_) {
       setState(() => _networkTestSuccess = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_network_test_failed_snackbar'.tr())),
-        );
+        showToast(title: 'settings_network_test_failed_snackbar'.tr(), type: ToastificationType.error);
       }
     } finally {
       setState(() => _isTestingNetwork = false);
@@ -373,9 +371,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
   Future<void> _clearDnsCache() async {
     await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('settings_network_dns_cleared'.tr())),
-      );
+      showToast(title: 'settings_network_dns_cleared'.tr(), type: ToastificationType.success);
     }
   }
 
@@ -407,9 +403,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
   Future<void> _restoreDefaults() async {
     await ref.read(networkSettingsProvider.notifier).restoreDefaults();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('settings_network_restored'.tr())),
-      );
+      showToast(title: 'settings_network_restored'.tr(), type: ToastificationType.success);
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'package:go_router/go_router.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/sub_navigation_notifier.dart';
@@ -20,6 +21,7 @@ import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyPage extends ConsumerStatefulWidget {
   const MisskeyPage({super.key});
@@ -193,7 +195,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               child: pages[selectedIndex],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: CyaniLoadingIndicator()),
           error: (err, stack) => Center(child: Text('Error: $err')),
         ),
       ),
@@ -223,12 +225,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
       await ref.read(audioEngineProvider).playAsset(soundPath);
       if (mounted) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('misskey_page_please_login'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'misskey_page_please_login'.tr(), type: ToastificationType.warning);
         context.go('/profile');
       }
     }

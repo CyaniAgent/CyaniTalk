@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '/src/features/misskey/domain/emoji.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import 'retryable_network_image.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class EmojiPicker extends ConsumerStatefulWidget {
   final String noteId;
@@ -124,7 +125,7 @@ class _EmojiPickerState extends ConsumerState<EmojiPicker>
             _buildCategoryTabs(),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: CyaniLoadingIndicator())
                   : _buildEmojiGrid(),
             ),
           ],

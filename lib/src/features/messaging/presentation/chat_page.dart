@@ -7,6 +7,7 @@ import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/domain/chat_room.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 enum ChatType { direct, room }
 
@@ -96,7 +97,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         }
       },
       loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+          const Scaffold(body: Center(child: CyaniLoadingIndicator())),
       error: (err, stack) => Scaffold(
         body: Center(
           child: Text('${'messaging_error_loading_user'.tr()}: $err'),
@@ -226,7 +227,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CyaniLoadingIndicator()),
               error: (err, stack) =>
                   Center(child: Text('${'common_error'.tr()}: $err')),
             ),

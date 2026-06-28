@@ -7,6 +7,7 @@ import '/src/features/auth/application/auth_service.dart';
 import '/src/features/auth/domain/account.dart';
 import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
 import 'user_details_view.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 统一登录管理器组件
 ///
@@ -58,7 +59,7 @@ class _AssociatedAccountsSectionState
           selectedMisskey,
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CyaniLoadingIndicator()),
       error: (err, stack) => Center(child: Text('Error: $err')),
     );
   }
@@ -342,7 +343,7 @@ class _AssociatedAccountsSectionState
             ),
             loading: () => const Padding(
               padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CyaniLoadingIndicator()),
             ),
             error: (err, stack) => Padding(
               padding: const EdgeInsets.all(16.0),

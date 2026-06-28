@@ -69,8 +69,8 @@ dependencies:
   flutter_animate: ^4.5.2
   # 跨平台获取应用信息，如版本号、包名等
   package_info_plus: ^9.0.0
-  # 跨平台音频播放器库，支持多种音频格式和播放控制
-  audioplayers: ^6.5.1
+  # 跨平台音频引擎，基于 SoLoud + miniaudio，支持 OGG/MP3/WAV/FLAC
+  flutter_soloud: ^4.0.11
   # Dio的Cookie管理器，用于处理HTTP请求中的Cookie
   dio_cookie_manager: ^3.3.0
   # Cookie存储库，用于持久化存储Cookie
@@ -117,6 +117,13 @@ dependencies:
   fl_chart: ^1.2.0
   highlight: ^0.7.0
   flutter_highlight: ^0.7.0
+  
+  # Material 3 Expressive 组件库
+  slider_m3e: ^0.1.1
+  m3e_collection: ^0.3.7
+  m3e_design: ^0.2.1
+  loading_indicator_m3e: ^0.1.1
+  toastification: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -178,6 +185,9 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/sounds/
+    - assets/sounds/App/
+    - assets/sounds/App/RTStream/
+    - assets/sounds/App/Expection/
     - assets/sounds/Chat/
     - assets/sounds/Emoji-Responses/
     - assets/sounds/Notifications/

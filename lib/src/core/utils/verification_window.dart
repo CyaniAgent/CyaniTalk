@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart' as windows;
 import 'package:webview_flutter/webview_flutter.dart' as mobile;
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// WAF 验证窗口
 class VerificationWindow extends StatefulWidget {
@@ -180,7 +181,7 @@ class _VerificationWindowState extends State<VerificationWindow> {
                     ? (_isWindows
                           ? windows.Webview(_windowsController)
                           : mobile.WebViewWidget(controller: _mobileController))
-                    : const Center(child: CircularProgressIndicator()),
+                    : const Center(child: CyaniLoadingIndicator()),
               ),
             ],
           ),

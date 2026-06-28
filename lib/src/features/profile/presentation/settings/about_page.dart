@@ -14,6 +14,8 @@ import '/src/core/api/network_client.dart';
 import '/src/core/services/audio_engine.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import 'sponsor_page.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 /// 应用程序的关于页面组件
 ///
@@ -89,7 +91,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       logger.info('AboutPage: Playing entrance sound');
       await ref
           .read(audioEngineProvider)
-          .playAsset('sounds/AboutPageEntrance.wav');
+          .playAsset('sounds/AboutPageEntrance.ogg');
       logger.info('AboutPage: Entrance sound played successfully');
     } catch (e) {
       logger.error('AboutPage: Error playing sound: $e');
@@ -246,9 +248,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         if (mounted) {
           logger.warning('AboutPage: Failed to launch GitHub page');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('about_github_launch_error'.tr()), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: 'about_github_launch_error'.tr(), type: ToastificationType.error);
         }
       } else {
         logger.info('AboutPage: GitHub page launched successfully');
@@ -256,9 +256,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     } catch (e) {
       logger.error('AboutPage: Error launching GitHub page: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('about_github_launch_error'.tr())),
-        );
+        showToast(title: 'about_github_launch_error'.tr(), type: ToastificationType.error);
       }
     }
   }
@@ -277,9 +275,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     } catch (e) {
       logger.error('AboutPage: Error launching sponsor page: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('about_sponsor_launch_error'.tr()), behavior: SnackBarBehavior.floating),
-          );
+        showToast(title: 'about_sponsor_launch_error'.tr(), type: ToastificationType.error);
       }
     }
   }
@@ -349,7 +345,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
           if (_isLoadingContributors)
             const Padding(
               padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CyaniLoadingIndicator()),
             )
           else if (_contributors.isEmpty)
             Padding(

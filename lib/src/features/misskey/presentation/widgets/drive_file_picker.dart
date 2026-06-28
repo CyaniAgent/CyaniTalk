@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/features/misskey/application/drive_notifier.dart';
 import '/src/features/misskey/domain/drive_file.dart';
 import '/src/features/misskey/domain/drive_folder.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 云盘文件选择器 Bottom Sheet
 ///
@@ -53,7 +55,7 @@ class _DriveFilePickerSheetState extends ConsumerState<DriveFilePickerSheet> {
                 child: driveState.when(
                   data: (state) => _buildContent(state, scrollController),
                   loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                      const Center(child: CyaniLoadingIndicator()),
                   error: (error, stack) => _buildErrorView(error.toString()),
                 ),
               ),
@@ -680,10 +682,9 @@ Future<List<DriveFile>?> showDriveFilePicker({
   required BuildContext context,
   int maxFiles = 16,
 }) {
-  return showModalBottomSheet<List<DriveFile>>(
+  return showAdaptiveSheet<List<DriveFile>>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.transparent,
     barrierColor: Colors.black.withValues(alpha: 0.32),
     builder: (context) => DriveFilePickerSheet(maxFiles: maxFiles),
   );

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import '/src/core/services/search/global_search_service.dart';
 import '/src/core/utils/logger.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -52,9 +54,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
+        showToast(title: 'Error: $e', type: ToastificationType.error);
       }
     }
   }
@@ -102,7 +102,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CyaniLoadingIndicator())
           : _results.isEmpty
           ? Center(
               child: Text(

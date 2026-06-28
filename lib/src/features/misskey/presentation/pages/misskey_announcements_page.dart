@@ -7,6 +7,7 @@ import '/src/features/misskey/domain/announcement.dart';
 import '/src/features/misskey/presentation/widgets/retryable_network_image.dart';
 import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/core/utils/logger.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyAnnouncementsPage extends ConsumerStatefulWidget {
   const MisskeyAnnouncementsPage({super.key});
@@ -70,7 +71,7 @@ class _MisskeyAnnouncementsPageState
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (err, stack) => _buildErrorState(err),
       ),
     );

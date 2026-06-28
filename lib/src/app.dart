@@ -2,9 +2,11 @@
 //
 // 该文件包含应用程序的根组件CyaniTalkApp，负责配置应用程序的主题、路由和整体结构。
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:toastification/toastification.dart';
 import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
@@ -162,6 +164,13 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     // 监听字体刷新状态以触发重建
     ref.watch(fontRefreshProvider);
 
+    final isDesktop = Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    final toastConfig = ToastificationConfig(
+      alignment: isDesktop ? Alignment.topRight : Alignment.topCenter,
+      animationDuration: const Duration(milliseconds: 300),
+      applyMediaQueryViewInsets: false,
+    );
+
     return appearanceSettingsAsync.when(
       loading: () => Container(color: Colors.white),
       error: (error, stack) {
@@ -176,17 +185,20 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         final theme = _buildTheme(defaultSettings, Brightness.light);
         return GlobalFontRefresher(
           child: _UpdateHandler(
-            child: MaterialApp.router(
-              routerConfig: goRouter,
-              title: 'CyaniTalk',
-              theme: theme,
-              darkTheme: _buildTheme(defaultSettings, Brightness.dark),
-              themeMode: defaultSettings.displayMode,
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: context.locale,
-              builder: (context, child) => child!,
+            child: ToastificationWrapper(
+              config: toastConfig,
+              child: MaterialApp.router(
+                routerConfig: goRouter,
+                title: 'CyaniTalk',
+                theme: theme,
+                darkTheme: _buildTheme(defaultSettings, Brightness.dark),
+                themeMode: defaultSettings.displayMode,
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: context.supportedLocales,
+                locale: context.locale,
+                builder: (context, child) => child!,
+              ),
             ),
           ),
         );
@@ -203,17 +215,20 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         logger.debug('CyaniTalkApp: 构建MaterialApp');
         return GlobalFontRefresher(
           child: _UpdateHandler(
-            child: MaterialApp.router(
-              routerConfig: goRouter,
-              title: 'CyaniTalk',
-              theme: theme,
-              darkTheme: darkTheme,
-              themeMode: appearanceSettings.displayMode,
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: context.supportedLocales,
-              locale: context.locale,
-              builder: (context, child) => child!,
+            child: ToastificationWrapper(
+              config: toastConfig,
+              child: MaterialApp.router(
+                routerConfig: goRouter,
+                title: 'CyaniTalk',
+                theme: theme,
+                darkTheme: darkTheme,
+                themeMode: appearanceSettings.displayMode,
+                debugShowCheckedModeBanner: false,
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: context.supportedLocales,
+                locale: context.locale,
+                builder: (context, child) => child!,
+              ),
             ),
           ),
         );
@@ -325,11 +340,6 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       useMaterial3: true,
       fontFamily: effectiveFontFamily,
       textTheme: textTheme,
-      snackBarTheme: const SnackBarThemeData(
-        backgroundColor: Colors.white,
-        behavior: SnackBarBehavior.floating,
-        elevation: 2,
-      ),
       bannerTheme: const MaterialBannerThemeData(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,

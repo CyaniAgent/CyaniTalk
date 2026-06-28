@@ -29,6 +29,7 @@ import '/src/features/auth/presentation/pages/login_page.dart';
 import '/src/features/welcome/presentation/welcome_page.dart';
 import '/src/shared/widgets/responsive_shell.dart';
 import '/src/features/welcome/application/welcome_state.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 part 'router.g.dart';
 
@@ -81,7 +82,7 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
           return const ComingSoonPage();
         },
         loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          body: Center(child: CyaniLoadingIndicator()),
         ),
         error: (err, stack) => Scaffold(
           body: Center(child: Text('Error: $err')),

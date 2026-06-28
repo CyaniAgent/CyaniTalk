@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/core/utils/utils.dart';
 import 'global_search_service.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 全局搜索代理
 ///
@@ -70,7 +71,7 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           logger.debug('GlobalSearchDelegate: 搜索中...');
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CyaniLoadingIndicator());
         } else if (snapshot.hasError) {
           logger.error('GlobalSearchDelegate: 搜索错误: ${snapshot.error}');
           return Center(child: Text('Error: ${snapshot.error}'));

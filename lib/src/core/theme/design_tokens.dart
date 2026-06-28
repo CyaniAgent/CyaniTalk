@@ -139,6 +139,13 @@ class M3ESliderTokens extends ThemeExtension<M3ESliderTokens> {
     required this.overlayRadius,
   });
 
+  /// M3 Standard slider (track ≈4dp, thumb ≈8dp).
+  static const standard = M3ESliderTokens(
+    trackHeight: 4,
+    thumbRadius: 8,
+    overlayRadius: 16,
+  );
+
   /// "Large" size per M3E expressive slider spec (track ≈8dp, thumb ≈14dp).
   static const large = M3ESliderTokens(
     trackHeight: 8,
@@ -297,7 +304,7 @@ extension M3ETokensContext on BuildContext {
       M3EShapeTokens.standard;
 
   M3ESliderTokens get m3eSlider => Theme.of(this).extension<M3ESliderTokens>() ??
-      M3ESliderTokens.large;
+      M3ESliderTokens.standard;
 
   M3EMenuTokens get m3eMenu => Theme.of(this).extension<M3EMenuTokens>() ??
       M3EMenuTokens.standard;

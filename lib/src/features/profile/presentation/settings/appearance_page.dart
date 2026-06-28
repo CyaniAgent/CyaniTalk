@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '/src/core/core.dart';
 import '/src/core/theme/font_selector.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 part 'appearance_page.g.dart';
 
@@ -241,7 +243,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
     return Scaffold(
       appBar: AppBar(title: Text('settings_appearance_title'.tr())),
       body: appearanceSettingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (_, _) =>
             Center(child: Text('settings_appearance_error_loading'.tr())),
         data: (appearanceSettings) {
@@ -486,12 +488,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             onPressed: () {
               notifier.resetSettings();
               Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('settings_appearance_reset_done'.tr()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              showToast(title: 'settings_appearance_reset_done'.tr(), type: ToastificationType.success);
             },
             child: Text('confirm'.tr()),
           ),

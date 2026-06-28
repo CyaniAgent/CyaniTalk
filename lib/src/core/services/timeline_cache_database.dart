@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '/src/core/services/database_path_helper.dart';
 import '/src/core/utils/logger.dart';
 
 class TimelineCacheDatabase {
@@ -25,6 +24,9 @@ class TimelineCacheDatabase {
   }
 
   Future<Database> _initDatabase() async {
+    await DatabasePathHelper.migrateIfNeeded();
+    await DatabasePathHelper.ensurePermissions();
+
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       if (!_ffiInitialized) {
         sqfliteFfiInit();
@@ -33,8 +35,7 @@ class TimelineCacheDatabase {
       }
     }
 
-    final dbDir = await getApplicationDocumentsDirectory();
-    final dbPath = p.join(dbDir.path, 'timeline_cache.db');
+    final dbPath = await DatabasePathHelper.getPath('timeline_cache.db');
 
     logger.info('TimelineCacheDatabase: Opening database at $dbPath');
 

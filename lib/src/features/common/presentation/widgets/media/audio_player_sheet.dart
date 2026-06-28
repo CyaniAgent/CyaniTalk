@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/shared/widgets/toast_helper.dart';
+import 'package:slider_m3e/slider_m3e.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/core/theme/design_tokens.dart';
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/core/utils/download_utils.dart';
 import '/src/features/misskey/application/audio_player_notifier.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// Shows a M3E-styled bottom-sheet audio player.
 Future<void> showAudioPlayerSheet(
   BuildContext context, {
   required MediaItem mediaItem,
 }) async {
-  await showModalBottomSheet(
+  await showAdaptiveSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -60,7 +64,6 @@ class _AudioPlayerSheetContentState
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final m3eShape = context.m3eShape;
-    final m3eSlider = context.m3eSlider;
 
     final audioController =
         ref.watch(audioPlayerControllerProvider(_audioUrl));
@@ -113,8 +116,6 @@ class _AudioPlayerSheetContentState
                           _M3ESlider(
                             value: sliderValue,
                             isLoading: isLoading,
-                            m3eSlider: m3eSlider,
-                            colorScheme: colorScheme,
                             onChanged: (v) {
                               audioController.seek(
                                 (v * duration.inSeconds).roundToDouble(),
@@ -288,15 +289,11 @@ class _TrackInfo extends StatelessWidget {
 class _M3ESlider extends StatelessWidget {
   final double value;
   final bool isLoading;
-  final M3ESliderTokens m3eSlider;
-  final ColorScheme colorScheme;
   final ValueChanged<double> onChanged;
 
   const _M3ESlider({
     required this.value,
     required this.isLoading,
-    required this.m3eSlider,
-    required this.colorScheme,
     required this.onChanged,
   });
 
@@ -304,25 +301,9 @@ class _M3ESlider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: isLoading ? 0.5 : 1.0,
-      child: SliderTheme(
-        data: SliderThemeData(
-          trackHeight: m3eSlider.trackHeight,
-          thumbShape: RoundSliderThumbShape(
-            enabledThumbRadius: m3eSlider.thumbRadius,
-          ),
-          overlayShape: RoundSliderOverlayShape(
-            overlayRadius: m3eSlider.overlayRadius,
-          ),
-          activeTrackColor: colorScheme.primary,
-          inactiveTrackColor: colorScheme.onSurface.withAlpha(60),
-          thumbColor: colorScheme.primary,
-          overlayColor: colorScheme.primary.withAlpha(20),
-          trackShape: const RoundedRectSliderTrackShape(),
-        ),
-        child: Slider(
-          value: value,
-          onChanged: isLoading ? null : onChanged,
-        ),
+      child: SliderM3E(
+        value: value,
+        onChanged: isLoading ? null : onChanged,
       ),
     );
   }
@@ -399,13 +380,7 @@ class _PlaybackControls extends StatelessWidget {
           colorScheme: colorScheme,
           onPressed: () {
             Clipboard.setData(ClipboardData(text: audioUrl));
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('链接已复制'),
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 2),
-              ),
-            );
+            showToast(title: '链接已复制', type: ToastificationType.success, autoCloseDuration: const Duration(seconds: 2));
           },
         ),
         const SizedBox(width: 8),
@@ -462,16 +437,14 @@ class _PlaybackControls extends StatelessWidget {
               ),
             );
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    result.status == DownloadStatus.completed
-                        ? '下载完成'
-                        : '下载失败: ${result.errorMessage ?? "未知错误"}',
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 2),
-                ),
+              showToast(
+                title: result.status == DownloadStatus.completed
+                    ? '下载完成'
+                    : '下载失败: ${result.errorMessage ?? "未知错误"}',
+                type: result.status == DownloadStatus.completed
+                    ? ToastificationType.success
+                    : ToastificationType.error,
+                autoCloseDuration: const Duration(seconds: 2),
               );
             }
           },
@@ -560,7 +533,7 @@ class _LoadingState extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: CircularProgressIndicator(color: colorScheme.primary),
+        child: CyaniLoadingIndicator(color: colorScheme.primary),
       ),
     );
   }

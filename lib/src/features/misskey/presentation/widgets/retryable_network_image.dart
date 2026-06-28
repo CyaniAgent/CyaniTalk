@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '/src/core/core.dart';
 import '/src/core/services/misskey_image_cache_service.dart';
 import '/src/core/services/misskey_image_cache_database.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// A network image widget with caching support and retry mechanism
 /// 
@@ -236,12 +237,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
           height: widget.height ?? 200,
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
+            child: const CyaniLoadingIndicator(size: 24),
           ),
         );
       },

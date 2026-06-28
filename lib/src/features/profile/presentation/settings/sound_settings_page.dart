@@ -5,6 +5,194 @@ import '/src/core/services/audio_engine.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import '/src/core/widgets/sound_picker.dart';
 import '/src/features/profile/application/sound_settings_provider.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
+
+/// 声音插槽配置
+class _SoundSlotConfig {
+  final String id;
+  final IconData icon;
+  final Color iconColor;
+  final String labelKey;
+  final String descKey;
+  final String Function(SoundSettings) getter;
+  final void Function(SoundSettingsNotifier, String) setter;
+  final List<SoundPickerItem> presets;
+
+  const _SoundSlotConfig({
+    required this.id,
+    required this.icon,
+    required this.iconColor,
+    required this.labelKey,
+    required this.descKey,
+    required this.getter,
+    required this.setter,
+    this.presets = const [],
+  });
+
+  String get label => labelKey.tr();
+  String get description => descKey.tr();
+
+  /// 当前选中的显示文本
+  String displayValue(SoundSettings s) {
+    final v = getter(s);
+    if (v.isEmpty) return 'sound_silent'.tr();
+    final name = v.split('/').last.replaceAll(RegExp(r'\.[^.]+$'), '');
+    return name;
+  }
+}
+
+/// 从文件名生成友好标签
+SoundPickerItem _preset(String path) {
+  final name = path.split('/').last.replaceAll(RegExp(r'\.[^.]+$'), '');
+  return SoundPickerItem(label: name, value: path);
+}
+
+// ── 预设音频列表 ──────────────────────────────────────────
+const _newPostPresets = [
+  'assets/sounds/PostReceived/n-aec.mp3',
+  'assets/sounds/PostReceived/soft.mp3',
+];
+
+const _postPresets = [
+  'assets/sounds/PostSend/n-cea-4va.mp3',
+];
+
+const _notificationPresets = [
+  'assets/sounds/Notifications/n-ea.mp3',
+  'assets/sounds/Notifications/OpenHarmonyEvent.wav',
+];
+
+const _reactionPresets = [
+  'assets/sounds/Emoji-Responses/bubble2.mp3',
+  'assets/sounds/Emoji-Responses/OpenHarmony-Click.wav',
+];
+
+const _messagePresets = [
+  'assets/sounds/Chat/waon.mp3',
+  'assets/sounds/Chat/YunaAyase-Message.wav',
+];
+
+const _appUpdatePresets = [
+  'assets/sounds/App/update-available.ogg',
+];
+
+const _streamErrorPresets = [
+  'assets/sounds/App/RTStream/disconnect.ogg',
+];
+
+// ── 插槽列表 ──────────────────────────────────────────────
+final _notificationSlots = [
+  _SoundSlotConfig(
+    id: 'newPost',
+    icon: Icons.edit_note_rounded,
+    iconColor: _blue,
+    labelKey: 'sound_new_post',
+    descKey: 'sound_new_post_desc',
+    getter: (s) => s.newPostSound,
+    setter: (n, v) => n.setNewPostSound(v),
+    presets: _newPostPresets.map(_preset).toList(),
+  ),
+  _SoundSlotConfig(
+    id: 'post',
+    icon: Icons.send_rounded,
+    iconColor: _green,
+    labelKey: 'sound_post',
+    descKey: 'sound_post_desc',
+    getter: (s) => s.postSound,
+    setter: (n, v) => n.setPostSound(v),
+    presets: _postPresets.map(_preset).toList(),
+  ),
+  _SoundSlotConfig(
+    id: 'notification',
+    icon: Icons.notifications_rounded,
+    iconColor: _orange,
+    labelKey: 'sound_notification',
+    descKey: 'sound_notification_desc',
+    getter: (s) => s.notificationSound,
+    setter: (n, v) => n.setNotificationSound(v),
+    presets: _notificationPresets.map(_preset).toList(),
+  ),
+  _SoundSlotConfig(
+    id: 'reaction',
+    icon: Icons.emoji_emotions_rounded,
+    iconColor: _pink,
+    labelKey: 'sound_reaction',
+    descKey: 'sound_reaction_desc',
+    getter: (s) => s.reactionSound,
+    setter: (n, v) => n.setReactionSound(v),
+    presets: _reactionPresets.map(_preset).toList(),
+  ),
+  _SoundSlotConfig(
+    id: 'message',
+    icon: Icons.chat_rounded,
+    iconColor: _purple,
+    labelKey: 'sound_message',
+    descKey: 'sound_message_desc',
+    getter: (s) => s.messageSound,
+    setter: (n, v) => n.setMessageSound(v),
+    presets: _messagePresets.map(_preset).toList(),
+  ),
+];
+
+final _inAppSlots = [
+  _SoundSlotConfig(
+    id: 'switchAccount',
+    icon: Icons.swap_horiz_rounded,
+    iconColor: _cyan,
+    labelKey: 'sound_switch_account',
+    descKey: 'sound_switch_account_desc',
+    getter: (s) => s.switchAccountSound,
+    setter: (n, v) => n.setSwitchAccountSound(v),
+  ),
+  _SoundSlotConfig(
+    id: 'triggerRefresh',
+    icon: Icons.refresh_rounded,
+    iconColor: _teal,
+    labelKey: 'sound_trigger_refresh',
+    descKey: 'sound_trigger_refresh_desc',
+    getter: (s) => s.triggerRefreshSound,
+    setter: (n, v) => n.setTriggerRefreshSound(v),
+  ),
+  _SoundSlotConfig(
+    id: 'refresh',
+    icon: Icons.sync_rounded,
+    iconColor: _indigo,
+    labelKey: 'sound_refresh',
+    descKey: 'sound_refresh_desc',
+    getter: (s) => s.refreshSound,
+    setter: (n, v) => n.setRefreshSound(v),
+  ),
+  _SoundSlotConfig(
+    id: 'appUpdate',
+    icon: Icons.system_update_rounded,
+    iconColor: _amber,
+    labelKey: 'sound_app_update',
+    descKey: 'sound_app_update_desc',
+    getter: (s) => s.appUpdateSound,
+    setter: (n, v) => n.setAppUpdateSound(v),
+    presets: _appUpdatePresets.map(_preset).toList(),
+  ),
+  _SoundSlotConfig(
+    id: 'streamError',
+    icon: Icons.wifi_off_rounded,
+    iconColor: _red,
+    labelKey: 'sound_stream_error',
+    descKey: 'sound_stream_error_desc',
+    getter: (s) => s.streamErrorSound,
+    setter: (n, v) => n.setStreamErrorSound(v),
+    presets: _streamErrorPresets.map(_preset).toList(),
+  ),
+  _SoundSlotConfig(
+    id: 'appError',
+    icon: Icons.error_outline_rounded,
+    iconColor: _deepOrange,
+    labelKey: 'sound_app_error',
+    descKey: 'sound_app_error_desc',
+    getter: (s) => s.appErrorSound,
+    setter: (n, v) => n.setAppErrorSound(v),
+  ),
+];
 
 class SoundSettingsPage extends ConsumerWidget {
   const SoundSettingsPage({super.key});
@@ -21,215 +209,122 @@ class SoundSettingsPage extends ConsumerWidget {
           children: [
             SettingsCardGroup(
               children: [
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.edit_note_rounded,
-                  iconColor: _blue,
-                  label: 'sound_new_post'.tr(),
-                  value: settings.newPostSound,
-                  defaultPath: SoundDefaults.newPost,
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setNewPostSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.send_rounded,
-                  iconColor: _green,
-                  label: 'sound_post'.tr(),
-                  value: settings.postSound,
-                  defaultPath: SoundDefaults.post,
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setPostSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.notifications_rounded,
-                  iconColor: _orange,
-                  label: 'sound_notification'.tr(),
-                  value: settings.notificationSound,
-                  defaultPath: SoundDefaults.notification,
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setNotificationSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.emoji_emotions_rounded,
-                  iconColor: _pink,
-                  label: 'sound_reaction'.tr(),
-                  value: settings.reactionSound,
-                  defaultPath: SoundDefaults.reaction,
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setReactionSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.chat_rounded,
-                  iconColor: _purple,
-                  label: 'sound_message'.tr(),
-                  value: settings.messageSound,
-                  defaultPath: SoundDefaults.message,
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setMessageSound(v),
-                ),
+                for (final slot in _notificationSlots)
+                  _buildTile(context, ref, settings, slot),
               ],
             ),
-
             const SizedBox(height: 16),
-
             SettingsCardGroup(
               children: [
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.swap_horiz_rounded,
-                  iconColor: _cyan,
-                  label: 'sound_switch_account'.tr(),
-                  value: settings.switchAccountSound,
-                  defaultPath: '',
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setSwitchAccountSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.refresh_rounded,
-                  iconColor: _teal,
-                  label: 'sound_trigger_refresh'.tr(),
-                  value: settings.triggerRefreshSound,
-                  defaultPath: '',
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setTriggerRefreshSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.sync_rounded,
-                  iconColor: _indigo,
-                  label: 'sound_refresh'.tr(),
-                  value: settings.refreshSound,
-                  defaultPath: '',
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setRefreshSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.system_update_rounded,
-                  iconColor: _amber,
-                  label: 'sound_app_update'.tr(),
-                  value: settings.appUpdateSound,
-                  defaultPath: '',
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setAppUpdateSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.wifi_off_rounded,
-                  iconColor: _red,
-                  label: 'sound_stream_error'.tr(),
-                  value: settings.streamErrorSound,
-                  defaultPath: '',
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setStreamErrorSound(v),
-                ),
-                _buildSlot(
-                  context, ref, settings,
-                  icon: Icons.error_outline_rounded,
-                  iconColor: _deepOrange,
-                  label: 'sound_app_error'.tr(),
-                  value: settings.appErrorSound,
-                  defaultPath: '',
-                  onChanged: (v) => ref
-                      .read(soundSettingsProvider.notifier)
-                      .setAppErrorSound(v),
-                ),
+                for (final slot in _inAppSlots)
+                  _buildTile(context, ref, settings, slot),
               ],
             ),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (_, _) => Center(child: Text('Error')),
       ),
     );
   }
 
-  Widget _buildSlot(
-    BuildContext context, WidgetRef ref, SoundSettings settings, {
-    required IconData icon,
-    required Color iconColor,
-    required String label,
-    required String value,
-    required String defaultPath,
-    required ValueChanged<String> onChanged,
-  }) {
+  Widget _buildTile(
+    BuildContext context,
+    WidgetRef ref,
+    SoundSettings settings,
+    _SoundSlotConfig slot,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final displayValue = slot.displayValue(settings);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _openSoundPicker(context, ref, settings, slot),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Row(
             children: [
               Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: iconColor.withAlpha(25),
+                  color: slot.iconColor.withAlpha(25),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: iconColor, size: 20),
+                child: Icon(slot.icon, color: slot.iconColor, size: 20),
               ),
               const SizedBox(width: 16),
-              Text(label, style: Theme.of(context).textTheme.bodyLarge),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(slot.label,
+                        style: Theme.of(context).textTheme.bodyLarge),
+                    const SizedBox(height: 2),
+                    Text(
+                      displayValue,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
             ],
           ),
-          const SizedBox(height: 10),
-          SoundPicker(
-            value: value,
-            onChanged: onChanged,
-            silentLabel: 'sound_silent'.tr(),
-            defaultLabel: 'sound_default'.tr(),
-            addFileLabel: 'sound_add_file'.tr(),
-            onAddFile: () => _onAddFile(context),
-            onPreview: value.isEmpty
-                ? null
-                : () => _playSound(ref, SoundDefaults.resolve(value, defaultPath)),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  void _onAddFile(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('sound_add_file_coming_soon'.tr()),
-        behavior: SnackBarBehavior.floating,
-      ),
+  Future<void> _openSoundPicker(
+    BuildContext context,
+    WidgetRef ref,
+    SoundSettings settings,
+    _SoundSlotConfig slot,
+  ) async {
+    final result = await showSoundPicker(
+      context: context,
+      icon: slot.icon,
+      iconColor: slot.iconColor,
+      title: slot.label,
+      description: slot.description,
+      currentValue: slot.getter(settings),
+      presets: slot.presets,
+      imports: [],
+      silentLabel: 'sound_silent'.tr(),
+      presetSectionLabel: 'sound_preset_section'.tr(),
+      importSectionLabel: 'sound_import_section'.tr(),
+      addFileLabel: 'sound_add_file'.tr(),
+      onPreview: (path) async {
+        final clean = path.replaceFirst('assets/', '');
+        await ref.read(audioEngineProvider).playAsset(clean);
+      },
+      onAddFile: () async {
+        if (!context.mounted) return null;
+        showToast(title: 'sound_add_file_coming_soon'.tr());
+        return null;
+      },
     );
+    if (result != null && context.mounted) {
+      slot.setter(ref.read(soundSettingsProvider.notifier), result);
+    }
   }
 
-  Future<void> _playSound(WidgetRef ref, String assetPath) async {
-    if (assetPath.isEmpty) return;
-    final path = assetPath.replaceFirst('assets/', '');
-    await ref.read(audioEngineProvider).playAsset(path);
-  }
-
-  // ── Icon color palette ──
-  static const _blue = Color(0xFF42A5F5);
-  static const _green = Color(0xFF66BB6A);
-  static const _orange = Color(0xFFFF7043);
-  static const _pink = Color(0xFFEC407A);
-  static const _purple = Color(0xFFAB47BC);
-  static const _cyan = Color(0xFF26A69A);
-  static const _teal = Color(0xFF00897B);
-  static const _indigo = Color(0xFF5C6BC0);
-  static const _amber = Color(0xFFFFCA28);
-  static const _red = Color(0xFFEF5350);
-  static const _deepOrange = Color(0xFFFF5722);
 }
+
+// ── Icon color palette ──
+const _blue = Color(0xFF42A5F5);
+const _green = Color(0xFF66BB6A);
+const _orange = Color(0xFFFF7043);
+const _pink = Color(0xFFEC407A);
+const _purple = Color(0xFFAB47BC);
+const _cyan = Color(0xFF26A69A);
+const _teal = Color(0xFF00897B);
+const _indigo = Color(0xFF5C6BC0);
+const _amber = Color(0xFFFFCA28);
+const _red = Color(0xFFEF5350);
+const _deepOrange = Color(0xFFFF5722);

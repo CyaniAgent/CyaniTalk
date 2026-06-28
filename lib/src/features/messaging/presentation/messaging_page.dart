@@ -12,6 +12,7 @@ import '/src/features/misskey/domain/misskey_notification.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/core/navigation/navigation.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 enum InboxFilter { all, direct, groups, notifications }
 
@@ -216,15 +217,15 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CyaniLoadingIndicator()),
               error: (err, stack) => _buildErrorState(err),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: CyaniLoadingIndicator()),
           error: (err, stack) => _buildErrorState(err),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const Center(child: CyaniLoadingIndicator()),
       error: (err, stack) => _buildErrorState(err),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/aiscript_interpreter.dart';
@@ -83,7 +84,7 @@ class _MisskeyAiScriptConsolePageState
   }
 
   void _showExampleScripts(BuildContext context) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       builder: (context) {
         return SafeArea(

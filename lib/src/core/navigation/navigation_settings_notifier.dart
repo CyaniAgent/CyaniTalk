@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'navigation_settings.dart';
 import 'navigation_item.dart';
 import 'navigation_element.dart';
@@ -260,13 +261,7 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
       final tempState = state.value!.updateItemEnabled(itemId, false);
       if (tempState.getEnabledCount() < 2) {
         // Keep at least one non-user nav item (plus the fixed user item).
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('??????????? 1 ????'),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: '??????????? 1 ????', type: ToastificationType.warning, autoCloseDuration: const Duration(seconds: 2));
         return;
       }
     }

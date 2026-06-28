@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'login_form_components.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/core/utils/logger.dart';
@@ -135,12 +136,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   void _showError(String error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('auth_error'.tr(namedArgs: {'error': error})),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    showToast(title: 'auth_error'.tr(namedArgs: {'error': error}), type: ToastificationType.error);
     widget.onLoginFailed?.call();
   }
 

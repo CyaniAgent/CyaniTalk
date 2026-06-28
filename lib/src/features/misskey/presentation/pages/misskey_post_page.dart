@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/file_upload_notifier.dart';
 import '/src/features/misskey/application/timeline_animated_list_controller.dart';
@@ -86,12 +87,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('attachment_pick_failed'.tr(args: [e.toString()])),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'attachment_pick_failed'.tr(args: [e.toString()]), type: ToastificationType.error);
       }
     }
   }
@@ -797,19 +793,14 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     if (failedTasks.isNotEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('attachment_upload_failed_warning'.tr()),
-            behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: 'attachment_retry'.tr(),
-              onPressed: () {
-                for (final task in failedTasks) {
-                  ref.read(fileUploadProvider.notifier).retryTask(task.id);
-                }
-              },
-            ),
-          ),
+        showToast(
+          title: 'attachment_upload_failed_warning'.tr(),
+          type: ToastificationType.warning,
+          onTap: () {
+            for (final task in failedTasks) {
+              ref.read(fileUploadProvider.notifier).retryTask(task.id);
+            }
+          },
         );
       }
       return;
@@ -827,12 +818,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     if (uploadingTasks.isNotEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('attachment_still_uploading'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'attachment_still_uploading'.tr(), type: ToastificationType.info);
       }
       return;
     }
@@ -879,12 +865,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       ref.read(postCreationProvider.notifier).markPosted();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('post_post_created'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'post_post_created'.tr(), type: ToastificationType.success);
 
         // 清除已完成的上传任务
         ref.read(fileUploadProvider.notifier).clearCompletedTasks();
@@ -900,12 +881,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'Error: $e', type: ToastificationType.error);
       }
     } finally {
       if (mounted) {

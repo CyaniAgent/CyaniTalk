@@ -10,6 +10,8 @@ import 'package:cyanitalk/src/core/services/timeline_cache_database.dart';
 import 'package:cyanitalk/src/features/auth/application/auth_service.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import '../widgets/settings_slider_bottom_sheet.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class CacheSettingsPage extends ConsumerStatefulWidget {
   const CacheSettingsPage({super.key});
@@ -136,17 +138,13 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         await _loadCacheSettings();
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('缓存目录已更新'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '缓存目录已更新', type: ToastificationType.success);
         }
       }
     } catch (e) {
       debugPrint('Error selecting cache directory: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择缓存目录失败: $e'), behavior: SnackBarBehavior.floating),
-        );
+        showToast(title: '选择缓存目录失败: $e', type: ToastificationType.error);
       }
     }
   }
@@ -192,9 +190,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('重置失败: $e'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '重置失败: $e', type: ToastificationType.error);
         }
       }
     }
@@ -226,16 +222,12 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         setState(() => _isStatsLoading = true);
         await _loadCacheSettings();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('内容缓存已清除'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '内容缓存已清除', type: ToastificationType.success);
         }
       } catch (e) {
         debugPrint('Error clearing content cache: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('清除内容缓存失败: $e'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '清除内容缓存失败: $e', type: ToastificationType.error);
         }
       }
     }
@@ -270,16 +262,12 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         setState(() => _isStatsLoading = true);
         await _loadCacheSettings();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('全部缓存已清除'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '全部缓存已清除', type: ToastificationType.success);
         }
       } catch (e) {
         debugPrint('Error clearing all cache: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('清除全部缓存失败: $e'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '清除全部缓存失败: $e', type: ToastificationType.error);
         }
       }
     }
@@ -301,9 +289,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         cacheManager.setCacheTimeLimit(days);
         await _loadCacheSettings();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('缓存时间上限已更新'), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: '缓存时间上限已更新', type: ToastificationType.success);
         }
       },
       icon: Icons.access_time,
@@ -317,7 +303,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('存储设置')),
       body: _isBasicSettingsLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CyaniLoadingIndicator())
           : ListView(
               padding: const EdgeInsets.only(top: 8, bottom: 32),
               children: [
@@ -332,7 +318,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
 
                 // ── 缓存概览 ──────────────────────────────────
                 _isStatsLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: CyaniLoadingIndicator())
                     : Card(
                         margin: const EdgeInsets.symmetric(horizontal: 16),
                         elevation: 0,

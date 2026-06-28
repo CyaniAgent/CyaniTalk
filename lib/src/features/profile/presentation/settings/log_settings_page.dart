@@ -7,6 +7,8 @@ import '/src/features/profile/application/log_settings_provider.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class LogSettingsPage extends ConsumerStatefulWidget {
   const LogSettingsPage({super.key});
@@ -40,18 +42,12 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     final file = await logger.exportLogs();
     if (mounted) {
       if (file != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'settings_logs_export_success'.tr(namedArgs: {'path': file.path}),
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
+        showToast(
+          title: 'settings_logs_export_success'.tr(namedArgs: {'path': file.path}),
+          type: ToastificationType.success,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_logs_export_failed'.tr()), behavior: SnackBarBehavior.floating),
-        );
+        showToast(title: 'settings_logs_export_failed'.tr(), type: ToastificationType.error);
       }
     }
   }
@@ -82,9 +78,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       await logger.deleteLogs();
       await _refreshFileList();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('settings_logs_delete_success'.tr()), behavior: SnackBarBehavior.floating),
-        );
+        showToast(title: 'settings_logs_delete_success'.tr(), type: ToastificationType.success);
       }
     }
   }
@@ -149,7 +143,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(16),
-                  child: CircularProgressIndicator(),
+                  child: CyaniLoadingIndicator(),
                 ),
               )
             else if (_logFiles.isEmpty)
@@ -163,7 +157,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
               ..._logFiles.map((file) => _buildFileTile(context, file)),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (_, _) => Center(child: Text('Error')),
       ),
     );
@@ -427,9 +421,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
                     ClipboardData(text: content.join('\n')),
                   );
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Copied to clipboard'), behavior: SnackBarBehavior.floating),
-                    );
+                    showToast(title: 'Copied to clipboard', type: ToastificationType.success);
                   }
                 },
               ),

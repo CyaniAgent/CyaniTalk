@@ -5,6 +5,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/features/misskey/domain/misskey_notification.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyNotificationsPage extends ConsumerWidget {
   const MisskeyNotificationsPage({super.key});
@@ -70,7 +71,7 @@ class MisskeyNotificationsPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (err, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

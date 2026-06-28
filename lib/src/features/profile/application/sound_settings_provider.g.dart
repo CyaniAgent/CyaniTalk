@@ -34,7 +34,7 @@ final class SoundSettingsNotifierProvider
 }
 
 String _$soundSettingsNotifierHash() =>
-    r'71389e9124bfa00be55bebb6a26adce7d9aa1419';
+    r'c0fa8fd14d302cfc5c55f457f7420d893591b877';
 
 abstract class _$SoundSettingsNotifier extends $AsyncNotifier<SoundSettings> {
   FutureOr<SoundSettings> build();

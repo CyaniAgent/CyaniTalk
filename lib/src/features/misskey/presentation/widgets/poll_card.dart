@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import '/src/features/misskey/domain/poll.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
@@ -340,16 +341,12 @@ class _PollCardState extends ConsumerState<PollCard> {
       }
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('poll_voted_successfully'.tr()), behavior: SnackBarBehavior.floating),
-        );
+        showToast(title: 'poll_voted_successfully'.tr(), type: ToastificationType.success);
       }
     } catch (e) {
       logger.error('Error voting: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('poll_vote_failed'.tr(namedArgs: {'error': e.toString()})), behavior: SnackBarBehavior.floating),
-        );
+        showToast(title: 'poll_vote_failed'.tr(namedArgs: {'error': e.toString()}), type: ToastificationType.error);
       }
     } finally {
       if (mounted) setState(() => _isVoting = false);

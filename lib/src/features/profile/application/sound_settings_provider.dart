@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'sound_settings_provider.g.dart';
 
-/// 通知音 & App 内提示音各插槽的默认资产路径。
+/// 各插槽的默认资产路径。
+/// 空字串 = 静音，非空字串 = 直接播放此路径。
 class SoundDefaults {
   // 通知音
   static const newPost = 'assets/sounds/PostReceived/n-aec.mp3';
@@ -12,12 +13,9 @@ class SoundDefaults {
   static const reaction = 'assets/sounds/Emoji-Responses/bubble2.mp3';
   static const message = 'assets/sounds/Chat/waon.mp3';
 
-  /// 将 `:default:` 解析为对应插槽的默认路径；空字串返回空字串。
-  static String resolve(String value, String defaultPath) {
-    if (value.isEmpty) return '';
-    if (value == ':default:') return defaultPath;
-    return value;
-  }
+  // App 内提示音
+  static const appUpdate = 'assets/sounds/App/update-available.ogg';
+  static const streamError = 'assets/sounds/App/RTStream/disconnect.ogg';
 }
 
 class SoundSettings {
@@ -95,16 +93,18 @@ class SoundSettingsNotifier extends _$SoundSettingsNotifier {
   FutureOr<SoundSettings> build() async {
     final prefs = await SharedPreferences.getInstance();
     return SoundSettings(
-      newPostSound: prefs.getString(_kNewPost) ?? ':default:',
-      postSound: prefs.getString(_kPost) ?? ':default:',
-      notificationSound: prefs.getString(_kNotification) ?? ':default:',
-      reactionSound: prefs.getString(_kReaction) ?? ':default:',
-      messageSound: prefs.getString(_kMessage) ?? ':default:',
+      newPostSound: prefs.getString(_kNewPost) ?? SoundDefaults.newPost,
+      postSound: prefs.getString(_kPost) ?? SoundDefaults.post,
+      notificationSound:
+          prefs.getString(_kNotification) ?? SoundDefaults.notification,
+      reactionSound: prefs.getString(_kReaction) ?? SoundDefaults.reaction,
+      messageSound: prefs.getString(_kMessage) ?? SoundDefaults.message,
       switchAccountSound: prefs.getString(_kSwitchAccount) ?? '',
       triggerRefreshSound: prefs.getString(_kTriggerRefresh) ?? '',
       refreshSound: prefs.getString(_kRefresh) ?? '',
-      appUpdateSound: prefs.getString(_kAppUpdate) ?? '',
-      streamErrorSound: prefs.getString(_kStreamError) ?? '',
+      appUpdateSound: prefs.getString(_kAppUpdate) ?? SoundDefaults.appUpdate,
+      streamErrorSound:
+          prefs.getString(_kStreamError) ?? SoundDefaults.streamError,
       appErrorSound: prefs.getString(_kAppError) ?? '',
     );
   }

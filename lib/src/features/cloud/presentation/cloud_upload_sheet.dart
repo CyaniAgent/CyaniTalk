@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/features/misskey/application/drive_notifier.dart';
 import '/src/core/utils/download_utils.dart';
 
@@ -42,7 +43,7 @@ Future<void> showCloudUploadSheet({
   required int maxFileSizeMb,
   String? currentFolderId,
 }) async {
-  await showModalBottomSheet(
+  await showAdaptiveSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,

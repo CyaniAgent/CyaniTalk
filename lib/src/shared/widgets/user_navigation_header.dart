@@ -9,6 +9,7 @@ import '/src/features/auth/domain/account.dart';
 import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class UserNavigationHeader extends ConsumerStatefulWidget {
   final bool isExtended;
@@ -397,7 +398,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
       loading: () => const Center(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: CircularProgressIndicator(),
+          child: CyaniLoadingIndicator(),
         ),
       ),
       error: (err, stack) => const SizedBox.shrink(),

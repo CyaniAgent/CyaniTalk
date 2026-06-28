@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/update/application/update_notifier.dart';
 import '/src/features/update/domain/app_update.dart';
 
 Future<void> showUpdateBottomSheet(BuildContext context, AppUpdate update) {
-  return showModalBottomSheet(
+  return showAdaptiveSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
@@ -128,23 +130,13 @@ class _UpdateBottomSheetContent extends ConsumerWidget {
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         logger.error('UpdateBottomSheet: Failed to open: $url');
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('无法打开链接'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          showToast(title: '无法打开链接', type: ToastificationType.error);
         }
       }
     } catch (e) {
       logger.error('UpdateBottomSheet: Open error: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('打开失败: $e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: '打开失败: $e', type: ToastificationType.error);
       }
     }
   }

@@ -16,6 +16,7 @@ import '/src/core/widgets/settings_widgets.dart';
 import '/src/shared/widgets/desktop_page_shell.dart';
 import '/src/features/update/application/update_notifier.dart';
 import '/src/features/update/presentation/update_bottom_sheet.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -112,12 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   final newValue = !showMiaoLanguage;
                   setState(() => showMiaoLanguage = newValue);
                   _saveShowMiaoLanguage(newValue);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  showToast(title: newValue ? '已解锁喵星语选项！' : '已隐藏喵星语选项');
                 },
                 child: SettingsTile(
                   icon: Icons.language_outlined,
@@ -214,19 +210,9 @@ class _SettingsPageState extends State<SettingsPage> {
     if (state.state == UpdateState.updateAvailable && state.update != null) {
       showUpdateBottomSheet(context, state.update!);
     } else if (state.state == UpdateState.upToDate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('当前已是最新版本'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showToast(title: '当前已是最新版本');
     } else if (state.state == UpdateState.error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.errorMessage ?? '检查更新失败'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showToast(title: state.errorMessage ?? '检查更新失败', type: ToastificationType.error);
     }
   }
 

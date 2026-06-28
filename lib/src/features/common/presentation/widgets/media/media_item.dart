@@ -1,5 +1,4 @@
 import 'package:video_player/video_player.dart';
-import 'package:audioplayers/audioplayers.dart';
 import '/src/core/utils/cache_manager.dart';
 
 /// 媒体类型枚举
@@ -15,7 +14,6 @@ class MediaItem {
   final MediaType type;
   final String? fileName;
   VideoPlayerController? videoController;
-  AudioPlayer? audioPlayer;
   String? cachedPath;
   bool isCached = false;
 
@@ -40,10 +38,7 @@ class MediaItem {
         videoController?.dispose();
         videoController = null;
       }
-      if (audioPlayer != null) {
-        audioPlayer?.dispose();
-        audioPlayer = null;
-      }
+
     } catch (e) {
       // 忽略释放时的错误
     }

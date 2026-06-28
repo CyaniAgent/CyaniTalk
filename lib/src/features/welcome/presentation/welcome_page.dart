@@ -20,6 +20,7 @@ import '/src/features/profile/presentation/settings/appearance_page.dart';
 import '/src/features/welcome/application/welcome_state.dart';
 import '/src/shared/widgets/animated_blob_background.dart';
 import '/src/shared/widgets/fireworks_background.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class WelcomePage extends ConsumerStatefulWidget {
   const WelcomePage({super.key});
@@ -445,7 +446,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             data: (accounts) => accounts.isNotEmpty
                 ? _buildExistingAccounts(theme, accounts)
                 : _buildNoAccounts(theme),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: CyaniLoadingIndicator()),
             error: (_, _) => _buildNoAccounts(theme),
           ),
         ),
@@ -724,13 +725,9 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Spacer(),
-        const SizedBox(
-          width: 48,
-          height: 48,
-          child: CircularProgressIndicator(
-            color: SaucePalette.mikuGreen,
-            strokeWidth: 4,
-          ),
+        const CyaniLoadingIndicator(
+          color: SaucePalette.mikuGreen,
+          size: 48,
         ),
         const SizedBox(height: 24),
         Text(

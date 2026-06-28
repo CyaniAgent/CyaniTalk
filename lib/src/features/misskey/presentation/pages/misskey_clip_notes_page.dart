@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'package:cyanitalk/src/core/utils/logger.dart';
 import 'package:cyanitalk/src/core/services/audio_engine.dart';
 import 'package:cyanitalk/src/features/auth/application/auth_service.dart';
@@ -9,6 +10,7 @@ import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_post_p
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/domain/clip.dart';
 import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyClipNotesPage extends ConsumerStatefulWidget {
   final Clip clip;
@@ -76,7 +78,6 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
             );
             final isMounted = mounted;
             final currentContext = context;
-            final scaffoldMessenger = ScaffoldMessenger.of(currentContext);
             try {
               final String soundPath =
                   switch (currentContext.locale.languageCode) {
@@ -94,12 +95,7 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
             }
 
             if (isMounted) {
-              scaffoldMessenger.showSnackBar(
-                SnackBar(
-                  content: Text('misskey_page_please_login'.tr()),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              showToast(title: 'misskey_page_please_login'.tr(), type: ToastificationType.info);
               // 跳转到 Profile 页面进行登录
               final router = ref.read(goRouterProvider);
               router.go('/profile');
@@ -133,7 +129,7 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (err, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

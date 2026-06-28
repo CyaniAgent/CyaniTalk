@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'media_item.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 图片查看器组件
 class ImageViewer extends StatelessWidget {
@@ -29,7 +30,7 @@ class ImageViewer extends StatelessWidget {
           ? PhotoViewHeroAttributes(tag: heroTag!)
           : null,
       loadingBuilder: (context, event) =>
-          const Center(child: CircularProgressIndicator()),
+          const Center(child: CyaniLoadingIndicator()),
       errorBuilder: (context, error, stackTrace) => Center(
         child: Icon(
           Icons.error_outline,

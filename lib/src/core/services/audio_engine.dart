@@ -1,95 +1,67 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '/src/core/utils/logger.dart';
 
 part 'audio_engine.g.dart';
 
-/// 全局音频引擎服务
-///
-/// 使用 audioplayers 提供音频播放能力
 class AudioEngine {
-  final Map<String, AudioPlayer> _players = {};
-  bool _isInitialized = true; // audioplayers doesn't need explicit init
+  final _soloud = SoLoud.instance;
+  bool _isInitialized = false;
+  final Map<String, AudioSource> _sources = {};
 
   bool get isInitialized => _isInitialized;
 
-    /// 初始化音频引擎
-    Future<void> initialize() async {
+  Future<void> _ensureInit() async {
+    if (!_isInitialized) {
+      await _soloud.init();
       _isInitialized = true;
-      logger.info('AudioEngine: Initialized (audioplayers)');
+      logger.info('AudioEngine: Initialized (flutter_soloud)');
     }
-  
-    /// 播放资产音频 (带缓存/复用 Player) - 用于通知音效
-    Future<void> playAsset(String assetPath, {double volume = 1.0}) async {
-      try {
-        final player = AudioPlayer();
-        await player.setVolume(volume);
-        
-        // 为通知音效设置音频上下文，使用通知通道
-        await player.setAudioContext(
-          AudioContext(
-            android: AudioContextAndroid(
-              usageType: AndroidUsageType.notification,
-              contentType: AndroidContentType.speech, // 或者使用 sonification
-              audioFocus: AndroidAudioFocus.gainTransientMayDuck,
-            ),
-            iOS: AudioContextIOS(
-              category: AVAudioSessionCategory.ambient, // 使用 ambient 避免干扰其他音频
-              options: {}, // ambient 类别不支持 duckOthers 选项
-            ),
-          ),
-        );
-        
-        // audioplayers expects asset path without 'assets/' prefix if using AssetSource
-        await player.play(AssetSource(assetPath));
-  
-        // We should dispose the player after it finishes playing
-        player.onPlayerComplete.listen((event) {
-          player.dispose();
-        });
-      } catch (e) {
-        logger.error('AudioEngine: Failed to play asset $assetPath', e);
-      }
+  }
+
+  String _normalizeAssetPath(String path) {
+    if (path.startsWith('assets/')) return path;
+    return 'assets/$path';
+  }
+
+  Future<AudioSource> _loadSource(String rawPath) async {
+    final assetPath = _normalizeAssetPath(rawPath);
+    final existing = _sources[assetPath];
+    if (existing != null) return existing;
+    final source = await _soloud.loadAsset(assetPath);
+    _sources[assetPath] = source;
+    return source;
+  }
+
+  Future<void> initialize() => _ensureInit();
+
+  Future<void> playAsset(String rawPath, {double volume = 1.0}) async {
+    try {
+      await _ensureInit();
+      final source = await _loadSource(rawPath);
+      _soloud.play(source, volume: volume);
+    } catch (e) {
+      logger.error('AudioEngine: Failed to play asset $rawPath', e);
     }
-  
-    /// 播放媒体音频 - 用于音频/视频内容
-    Future<void> playMediaAsset(String assetPath, {double volume = 1.0}) async {
-      try {
-        final player = AudioPlayer();
-        await player.setVolume(volume);
-        
-        // 为媒体内容设置音频上下文，使用媒体通道
-        await player.setAudioContext(
-          AudioContext(
-            android: AudioContextAndroid(
-              usageType: AndroidUsageType.media,
-              contentType: AndroidContentType.music,
-              audioFocus: AndroidAudioFocus.gain,
-            ),
-            iOS: AudioContextIOS(
-              category: AVAudioSessionCategory.playback, // 使用 playback 获取音频焦点
-              options: {AVAudioSessionOptions.duckOthers}, // playback 类别支持 duckOthers 选项
-            ),
-          ),
-        );
-        
-        // audioplayers expects asset path without 'assets/' prefix if using AssetSource
-        await player.play(AssetSource(assetPath));
-  
-        // We should dispose the player after it finishes playing
-        player.onPlayerComplete.listen((event) {
-          player.dispose();
-        });
-      } catch (e) {
-        logger.error('AudioEngine: Failed to play media asset $assetPath', e);
-      }
+  }
+
+  Future<void> playMediaAsset(String rawPath, {double volume = 1.0}) async {
+    try {
+      await _ensureInit();
+      final source = await _loadSource(rawPath);
+      _soloud.play(source, volume: volume);
+    } catch (e) {
+      logger.error('AudioEngine: Failed to play media asset $rawPath', e);
     }
-  /// 释放资源
+  }
+
   Future<void> dispose() async {
-    for (final player in _players.values) {
-      await player.dispose();
+    for (final source in _sources.values) {
+      await _soloud.disposeSource(source);
     }
-    _players.clear();
+    _sources.clear();
+    _soloud.deinit();
+    _isInitialized = false;
   }
 }
 

@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '/src/core/utils/logger.dart';
 
 part 'audio_player_notifier.g.dart';
 
-/// 音频播放器状态
 class AudioPlayerState {
   final bool isPlaying;
   final bool isLoading;
@@ -43,119 +42,90 @@ class AudioPlayerState {
   }
 }
 
-/// 音频播放器状态管理类
 class AudioPlayerController {
-  /// 音频URL
   final String audioUrl;
+  final _soloud = SoLoud.instance;
 
-  /// AudioPlayer 实例
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  AudioSource? _source;
+  SoundHandle _handle = const SoundHandle(0);
+  bool _pausedByUser = false;
 
-  /// 状态
   AudioPlayerState _state = const AudioPlayerState();
-
-  /// 状态变化回调
   Function(AudioPlayerState)? onStateChanged;
+  Timer? _pollTimer;
 
-  /// 监听器订阅
-  final List<StreamSubscription> _subscriptions = [];
+  AudioPlayerController(this.audioUrl);
 
-  /// 构造函数
-  AudioPlayerController(this.audioUrl) {
-    _initListeners();
-  }
-
-  /// 获取当前状态
   AudioPlayerState get state => _state;
 
-  /// 设置状态并通知监听器
   void _setState(AudioPlayerState newState) {
     _state = newState;
     onStateChanged?.call(newState);
   }
 
-    /// 初始化监听器
-    void _initListeners() async {
-      // 为音频播放器设置媒体音频上下文
-      await _audioPlayer.setAudioContext(
-        AudioContext(
-          android: AudioContextAndroid(
-            usageType: AndroidUsageType.media,
-            contentType: AndroidContentType.music,
-            audioFocus: AndroidAudioFocus.gain,
-          ),
-          iOS: AudioContextIOS(
-            category: AVAudioSessionCategory.playback,
-            options: {AVAudioSessionOptions.duckOthers},
-          ),
-        ),
-      );
-  
-      _subscriptions.add(
-        _audioPlayer.onPositionChanged.listen((pos) {
-          _setState(_state.copyWith(position: pos));
-        }),
-      );
-  
-      _subscriptions.add(
-        _audioPlayer.onDurationChanged.listen((dur) {
-          _setState(_state.copyWith(duration: dur));
-        }),
-      );
-  
-      _subscriptions.add(
-        _audioPlayer.onPlayerStateChanged.listen((playerState) {
-          _setState(
-            _state.copyWith(isPlaying: playerState == PlayerState.playing),
-          );
-        }),
-      );
-  
-      _subscriptions.add(
-        _audioPlayer.onPlayerComplete.listen((event) {
-          _setState(_state.copyWith(isPlaying: false, position: Duration.zero));
-        }),
-      );
-    }
-  
-    /// 切换播放/暂停状态
-    Future<void> togglePlayPause() async {
-      try {
-        if (_state.isPlaying) {
-          await _audioPlayer.pause();
-        } else {
-          if (_audioPlayer.source == null) {
-            _setState(_state.copyWith(isLoading: true, error: ''));
-            await _audioPlayer.setSource(UrlSource(audioUrl));
-            _setState(_state.copyWith(isLoading: false));
-          }
-          await _audioPlayer.resume();
-        }
-      } catch (e) {
-        logger.error('AudioPlayerController: Error toggling play/pause: $e');
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (_handle == const SoundHandle(0) || _pausedByUser) return;
+      final isValid = (_handle != const SoundHandle(0)) && _soloud.getIsValidVoiceHandle(_handle);
+      if (!isValid && _handle != const SoundHandle(0)) {
+        _setState(_state.copyWith(isPlaying: false, position: Duration.zero));
+        _pollTimer?.cancel();
+        _pausedByUser = false;
+      } else {
+        final pos = _soloud.getPosition(_handle);
+        _setState(_state.copyWith(isPlaying: true, position: pos));
+      }
+    });
+  }
+
+  Future<void> togglePlayPause() async {
+    try {
+      if (_state.isPlaying) {
+        _soloud.pauseSwitch(_handle);
+        _pausedByUser = true;
+        _setState(_state.copyWith(isPlaying: false));
+      } else if (_pausedByUser && _handle != const SoundHandle(0)) {
+        _soloud.pauseSwitch(_handle);
+        _pausedByUser = false;
+        _startPolling();
+        _setState(_state.copyWith(isPlaying: true));
+      } else {
+        _setState(_state.copyWith(isLoading: true, error: ''));
+        if (!_soloud.isInitialized) await _soloud.init();
+        _source = await _soloud.loadUrl(audioUrl, mode: LoadMode.disk);
+        final dur = _soloud.getLength(_source!);
+        _handle = _soloud.play(_source!);
+        _pausedByUser = false;
         _setState(
-          _state.copyWith(isLoading: false, error: 'Failed to play audio: $e'),
+          _state.copyWith(isLoading: false, duration: dur, isPlaying: true),
         );
+        _startPolling();
       }
+    } catch (e) {
+      logger.error('AudioPlayerController: Error toggling play/pause: $e');
+      _setState(
+        _state.copyWith(isLoading: false, error: 'Failed to play audio: $e'),
+      );
     }
-  
-    /// 跳转播放位置
-    Future<void> seek(double value) async {
+  }
+
+  Future<void> seek(double value) async {
+    if (_handle != const SoundHandle(0)) {
       final position = Duration(seconds: value.toInt());
-      await _audioPlayer.seek(position);
+      _soloud.seek(_handle, position);
+      _setState(_state.copyWith(position: position));
     }
-  
-    /// 清理资源
-    Future<void> dispose() async {
-      onStateChanged = null;
-      for (var sub in _subscriptions) {
-        await sub.cancel();
-      }
-      await _audioPlayer.dispose();
-    }
+  }
+
+  Future<void> dispose() async {
+    onStateChanged = null;
+    _pollTimer?.cancel();
+    if (_handle != const SoundHandle(0)) await _soloud.stop(_handle);
+    if (_source != null) await _soloud.disposeSource(_source!);
+  }
 }
 
-/// 音频播放器控制器提供者
 @riverpod
 AudioPlayerController audioPlayerController(Ref ref, String audioUrl) {
   final controller = AudioPlayerController(audioUrl);
@@ -167,7 +137,6 @@ AudioPlayerController audioPlayerController(Ref ref, String audioUrl) {
   return controller;
 }
 
-/// 音频播放器状态提供者
 @riverpod
 Stream<AudioPlayerState> audioPlayerState(Ref ref, String audioUrl) async* {
   final controller = ref.watch(audioPlayerControllerProvider(audioUrl));

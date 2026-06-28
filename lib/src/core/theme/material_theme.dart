@@ -37,7 +37,7 @@ class MaterialTheme {
     fontFamily: 'MiSans',
     extensions: [
       M3EShapeTokens.standard,
-      M3ESliderTokens.large,
+      M3ESliderTokens.standard,
       M3EMenuTokens.standard,
       M3ETitleBarTokens.standard,
       M3ESoundPickerTokens.standard,

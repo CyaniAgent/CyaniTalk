@@ -8,12 +8,9 @@ part of 'audio_player_notifier.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 音频播放器控制器提供者
 
 @ProviderFor(audioPlayerController)
 final audioPlayerControllerProvider = AudioPlayerControllerFamily._();
-
-/// 音频播放器控制器提供者
 
 final class AudioPlayerControllerProvider
     extends
@@ -23,7 +20,6 @@ final class AudioPlayerControllerProvider
           AudioPlayerController
         >
     with $Provider<AudioPlayerController> {
-  /// 音频播放器控制器提供者
   AudioPlayerControllerProvider._({
     required AudioPlayerControllerFamily super.from,
     required String super.argument,
@@ -79,8 +75,6 @@ final class AudioPlayerControllerProvider
 String _$audioPlayerControllerHash() =>
     r'88f14c855cdf72097cae0af42bb26e6dcbb9653b';
 
-/// 音频播放器控制器提供者
-
 final class AudioPlayerControllerFamily extends $Family
     with $FunctionalFamilyOverride<AudioPlayerController, String> {
   AudioPlayerControllerFamily._()
@@ -92,8 +86,6 @@ final class AudioPlayerControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// 音频播放器控制器提供者
-
   AudioPlayerControllerProvider call(String audioUrl) =>
       AudioPlayerControllerProvider._(argument: audioUrl, from: this);
 
@@ -101,12 +93,8 @@ final class AudioPlayerControllerFamily extends $Family
   String toString() => r'audioPlayerControllerProvider';
 }
 
-/// 音频播放器状态提供者
-
 @ProviderFor(audioPlayerState)
 final audioPlayerStateProvider = AudioPlayerStateFamily._();
-
-/// 音频播放器状态提供者
 
 final class AudioPlayerStateProvider
     extends
@@ -116,7 +104,6 @@ final class AudioPlayerStateProvider
           Stream<AudioPlayerState>
         >
     with $FutureModifier<AudioPlayerState>, $StreamProvider<AudioPlayerState> {
-  /// 音频播放器状态提供者
   AudioPlayerStateProvider._({
     required AudioPlayerStateFamily super.from,
     required String super.argument,
@@ -163,8 +150,6 @@ final class AudioPlayerStateProvider
 
 String _$audioPlayerStateHash() => r'f1bc658e4e20d8e84cf4002da5ccb4730c48c942';
 
-/// 音频播放器状态提供者
-
 final class AudioPlayerStateFamily extends $Family
     with $FunctionalFamilyOverride<Stream<AudioPlayerState>, String> {
   AudioPlayerStateFamily._()
@@ -175,8 +160,6 @@ final class AudioPlayerStateFamily extends $Family
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
-
-  /// 音频播放器状态提供者
 
   AudioPlayerStateProvider call(String audioUrl) =>
       AudioPlayerStateProvider._(argument: audioUrl, from: this);

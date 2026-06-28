@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '/src/shared/widgets/adaptive_sheet.dart';
+import '/src/shared/widgets/expressive_slider.dart';
 
 /// 底部弹窗滑块组件
 class SettingsSliderBottomSheet extends StatefulWidget {
@@ -38,7 +40,7 @@ class SettingsSliderBottomSheet extends StatefulWidget {
     required Function(int value) onConfirm,
     IconData? icon,
   }) async {
-    await showModalBottomSheet(
+    await showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -120,12 +122,13 @@ class _SettingsSliderBottomSheetState extends State<SettingsSliderBottomSheet> {
             const SizedBox(height: 24),
 
             // 滑块
-            Slider(
+            ExpressiveSlider(
               value: _currentValue.toDouble(),
               min: widget.minValue.toDouble(),
               max: widget.maxValue.toDouble(),
               divisions: widget.step != null ? (widget.maxValue - widget.minValue) ~/ widget.step! : null,
               label: widget.valueFormatter(_currentValue),
+              showIndicator: true,
               onChanged: (value) {
                 setState(() {
                   if (widget.step != null) {
@@ -154,9 +157,7 @@ class _SettingsSliderBottomSheetState extends State<SettingsSliderBottomSheet> {
               height: 56,
               child: FilledButton(
                 style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  shape: StadiumBorder(),
                 ),
                 onPressed: () {
                   widget.onConfirm(_currentValue);

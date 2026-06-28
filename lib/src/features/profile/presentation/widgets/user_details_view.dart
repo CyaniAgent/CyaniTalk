@@ -9,6 +9,7 @@ import '/src/features/auth/domain/account.dart';
 import '/src/core/api/misskey_api.dart';
 import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 part 'user_details_view.g.dart';
 
@@ -55,7 +56,7 @@ class UserDetailsView extends ConsumerWidget {
       },
       loading: () {
         logger.info('UserDetailsView: Loading user details');
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: CyaniLoadingIndicator());
       },
       error: (err, stack) {
         logger.error('UserDetailsView: Error building details view', err);

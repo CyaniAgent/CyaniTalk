@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'package:highlight/highlight.dart' show highlight, Node;
 import 'package:flutter_highlight/themes/github.dart';
 import 'package:flutter_highlight/themes/dracula.dart';
@@ -247,9 +248,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
         borderRadius: BorderRadius.circular(6),
         onTap: () {
           Clipboard.setData(ClipboardData(text: widget.code));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: const Text('代码已复制到剪贴板'), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 1)),
-          );
+          showToast(title: '代码已复制到剪贴板', type: ToastificationType.success, autoCloseDuration: const Duration(seconds: 1));
         },
         child: Padding(
           padding: const EdgeInsets.all(4),
