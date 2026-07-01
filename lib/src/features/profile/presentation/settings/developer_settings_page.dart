@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '/src/features/profile/application/developer_settings_provider.dart';
 import '/src/features/welcome/application/welcome_state.dart';
 import '/src/features/welcome/presentation/welcome_page.dart';
+import '/src/core/theme/color_constants.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import 'design_playground_page.dart';
 import 'log_settings_page.dart';
@@ -20,8 +21,7 @@ class DeveloperSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
-  static const _amber = Color(0xFFFFCA28);
-  static const _brown = Color(0xFF8D6E63);
+  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
 
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
@@ -74,7 +74,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
               children: [
                 SettingsSwitchTile(
                   icon: Icons.bug_report_outlined,
-                  iconColor: _amber,
+                  iconColor: SettingsIconColors.amber,
                   title: 'settings_developer_mode_title'.tr(),
                   subtitle: 'settings_developer_mode_description'.tr(),
                   value: developerMode,
@@ -97,7 +97,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
                 children: [
                   SettingsTile(
                     icon: Icons.open_in_new,
-                    iconColor: _amber,
+                    iconColor: SettingsIconColors.amber,
                     title: 'settings_developer_welcome_title'.tr(),
                     subtitle: 'settings_developer_welcome_description'.tr(),
                     onTap: () {
@@ -118,7 +118,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
                   ),
                   SettingsTile(
                     icon: Icons.design_services_outlined,
-                    iconColor: _amber,
+                    iconColor: SettingsIconColors.amber,
                     title: 'settings_developer_design_playground'.tr(),
                     subtitle: 'settings_developer_design_playground_description'.tr(),
                     onTap: () => Navigator.of(context).push(
@@ -134,7 +134,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
               children: [
                 SettingsTile(
                   icon: Icons.history,
-                  iconColor: _brown,
+                  iconColor: SettingsIconColors.brown,
                   title: 'settings_logs_title'.tr(),
                   subtitle: 'settings_logs_description'.tr(),
                   onTap: () => Navigator.of(context).push(
@@ -149,14 +149,14 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
               children: [
                 SettingsTile(
                   icon: Icons.feedback_outlined,
-                  iconColor: _brown,
+                  iconColor: SettingsIconColors.brown,
                   title: 'settings_developer_submit_issue'.tr(),
                   onTap: () =>
                       _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
                 ),
                 SettingsTile(
                   icon: Icons.merge_type,
-                  iconColor: _brown,
+                  iconColor: SettingsIconColors.brown,
                   title: 'settings_developer_submit_pr'.tr(),
                   onTap: () =>
                       _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
@@ -166,7 +166,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => Center(child: Text('Error')),
+        error: (_, _) => const Center(child: Text('Error')),
       ),
     );
   }

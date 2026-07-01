@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/src/core/services/audio_engine.dart';
-import '/src/core/widgets/settings_widgets.dart';
-import '/src/core/widgets/sound_picker.dart';
-import '/src/features/profile/application/sound_settings_provider.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
-import '/src/shared/widgets/toast_helper.dart';
+import 'package:cyanitalk/src/core/services/audio_engine.dart';
+import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/core/widgets/sound_picker.dart';
+import 'package:cyanitalk/src/features/profile/application/sound_settings_provider.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
 /// 声音插槽配置
 class _SoundSlotConfig {
@@ -86,7 +87,7 @@ final _notificationSlots = [
   _SoundSlotConfig(
     id: 'newPost',
     icon: Icons.edit_note_rounded,
-    iconColor: _blue,
+    iconColor: SettingsIconColors.blue,
     labelKey: 'sound_new_post',
     descKey: 'sound_new_post_desc',
     getter: (s) => s.newPostSound,
@@ -96,7 +97,7 @@ final _notificationSlots = [
   _SoundSlotConfig(
     id: 'post',
     icon: Icons.send_rounded,
-    iconColor: _green,
+    iconColor: SettingsIconColors.green,
     labelKey: 'sound_post',
     descKey: 'sound_post_desc',
     getter: (s) => s.postSound,
@@ -106,7 +107,7 @@ final _notificationSlots = [
   _SoundSlotConfig(
     id: 'notification',
     icon: Icons.notifications_rounded,
-    iconColor: _orange,
+    iconColor: SettingsIconColors.orange,
     labelKey: 'sound_notification',
     descKey: 'sound_notification_desc',
     getter: (s) => s.notificationSound,
@@ -116,7 +117,7 @@ final _notificationSlots = [
   _SoundSlotConfig(
     id: 'reaction',
     icon: Icons.emoji_emotions_rounded,
-    iconColor: _pink,
+    iconColor: SettingsIconColors.pink,
     labelKey: 'sound_reaction',
     descKey: 'sound_reaction_desc',
     getter: (s) => s.reactionSound,
@@ -126,7 +127,7 @@ final _notificationSlots = [
   _SoundSlotConfig(
     id: 'message',
     icon: Icons.chat_rounded,
-    iconColor: _purple,
+    iconColor: SettingsIconColors.purple,
     labelKey: 'sound_message',
     descKey: 'sound_message_desc',
     getter: (s) => s.messageSound,
@@ -139,7 +140,7 @@ final _inAppSlots = [
   _SoundSlotConfig(
     id: 'switchAccount',
     icon: Icons.swap_horiz_rounded,
-    iconColor: _cyan,
+    iconColor: SettingsIconColors.cyan,
     labelKey: 'sound_switch_account',
     descKey: 'sound_switch_account_desc',
     getter: (s) => s.switchAccountSound,
@@ -148,7 +149,7 @@ final _inAppSlots = [
   _SoundSlotConfig(
     id: 'triggerRefresh',
     icon: Icons.refresh_rounded,
-    iconColor: _teal,
+    iconColor: SettingsIconColors.teal,
     labelKey: 'sound_trigger_refresh',
     descKey: 'sound_trigger_refresh_desc',
     getter: (s) => s.triggerRefreshSound,
@@ -157,7 +158,7 @@ final _inAppSlots = [
   _SoundSlotConfig(
     id: 'refresh',
     icon: Icons.sync_rounded,
-    iconColor: _indigo,
+    iconColor: SettingsIconColors.indigo,
     labelKey: 'sound_refresh',
     descKey: 'sound_refresh_desc',
     getter: (s) => s.refreshSound,
@@ -166,7 +167,7 @@ final _inAppSlots = [
   _SoundSlotConfig(
     id: 'appUpdate',
     icon: Icons.system_update_rounded,
-    iconColor: _amber,
+    iconColor: SettingsIconColors.amber,
     labelKey: 'sound_app_update',
     descKey: 'sound_app_update_desc',
     getter: (s) => s.appUpdateSound,
@@ -176,7 +177,7 @@ final _inAppSlots = [
   _SoundSlotConfig(
     id: 'streamError',
     icon: Icons.wifi_off_rounded,
-    iconColor: _red,
+    iconColor: SettingsIconColors.red,
     labelKey: 'sound_stream_error',
     descKey: 'sound_stream_error_desc',
     getter: (s) => s.streamErrorSound,
@@ -186,7 +187,7 @@ final _inAppSlots = [
   _SoundSlotConfig(
     id: 'appError',
     icon: Icons.error_outline_rounded,
-    iconColor: _deepOrange,
+    iconColor: SettingsIconColors.deepOrange,
     labelKey: 'sound_app_error',
     descKey: 'sound_app_error_desc',
     getter: (s) => s.appErrorSound,
@@ -223,7 +224,7 @@ class SoundSettingsPage extends ConsumerWidget {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => Center(child: Text('Error')),
+        error: (_, _) => const Center(child: Text('Error')),
       ),
     );
   }
@@ -317,14 +318,4 @@ class SoundSettingsPage extends ConsumerWidget {
 }
 
 // ── Icon color palette ──
-const _blue = Color(0xFF42A5F5);
-const _green = Color(0xFF66BB6A);
-const _orange = Color(0xFFFF7043);
-const _pink = Color(0xFFEC407A);
-const _purple = Color(0xFFAB47BC);
-const _cyan = Color(0xFF26A69A);
-const _teal = Color(0xFF00897B);
-const _indigo = Color(0xFF5C6BC0);
-const _amber = Color(0xFFFFCA28);
-const _red = Color(0xFFEF5350);
-const _deepOrange = Color(0xFFFF5722);
+// Colors moved to SettingsIconColors in core/theme/color_constants.dart

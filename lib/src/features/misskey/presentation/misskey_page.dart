@@ -11,6 +11,7 @@ import '/src/core/utils/logger.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/shared/widgets/cyani_error_widget.dart';
 import 'pages/misskey_aiscript_console_page.dart';
 import 'pages/misskey_announcements_page.dart';
 import 'pages/misskey_antennas_page.dart';
@@ -196,7 +197,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
             );
           },
           loading: () => const Center(child: CyaniLoadingIndicator()),
-          error: (err, stack) => Center(child: Text('Error: $err')),
+          error: (err, stack) => CyaniErrorWidget(message: err.toString()),
         ),
       ),
     );
@@ -289,11 +290,11 @@ class _TimelineIconBar extends ConsumerWidget {
     };
   }
 
-  Color _getIconColor(String type) {
+  Color _getIconColor(String type, ColorScheme colorScheme) {
     return switch (type) {
-      'Local' => const Color(0xFF4CAF50),
-      'Social' => const Color(0xFF2196F3),
-      _ => const Color(0xFFFF9800),
+      'Local' => colorScheme.primary,
+      'Social' => colorScheme.tertiary,
+      _ => colorScheme.secondary,
     };
   }
 
@@ -308,7 +309,8 @@ class _TimelineIconBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    const onlineColor = Color(0xFF16D9C5);
+    final colorScheme = theme.colorScheme;
+    final onlineColor = colorScheme.primary;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -322,7 +324,7 @@ class _TimelineIconBar extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.public_rounded, color: _getIconColor('Global'), size: 18),
+                  Icon(Icons.public_rounded, color: _getIconColor('Global', colorScheme), size: 18),
                   const SizedBox(width: 8),
                   Text('timeline_global'.tr()),
                 ],
@@ -333,7 +335,7 @@ class _TimelineIconBar extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.language_rounded, color: _getIconColor('Local'), size: 18),
+                  Icon(Icons.language_rounded, color: _getIconColor('Local', colorScheme), size: 18),
                   const SizedBox(width: 8),
                   Text('timeline_local'.tr()),
                 ],
@@ -344,7 +346,7 @@ class _TimelineIconBar extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.group_rounded, color: _getIconColor('Social'), size: 18),
+                  Icon(Icons.group_rounded, color: _getIconColor('Social', colorScheme), size: 18),
                   const SizedBox(width: 8),
                   Text('timeline_social'.tr()),
                 ],
@@ -363,7 +365,7 @@ class _TimelineIconBar extends ConsumerWidget {
               children: [
                 Icon(
                   _getIcon(timelineType),
-                  color: _getIconColor(timelineType),
+                  color: _getIconColor(timelineType, colorScheme),
                   size: 18,
                 ),
                 const SizedBox(width: 8),

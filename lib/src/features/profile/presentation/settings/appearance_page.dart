@@ -4,11 +4,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '/src/core/core.dart';
-import '/src/core/theme/font_selector.dart';
-import '/src/core/widgets/settings_widgets.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
-import '/src/shared/widgets/toast_helper.dart';
+import 'package:cyanitalk/src/core/core.dart';
+import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/theme/font_selector.dart';
+import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
 part 'appearance_page.g.dart';
 
@@ -148,7 +149,9 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         'appearance_custom_title_bar',
         settings.useCustomTitleBar,
       );
-    } catch (_) {}
+    } catch (e) {
+      logger.warning('AppearanceSettings: Failed to save settings to storage', e);
+    }
   }
 
   Future<void> updateDisplayMode(ThemeMode mode) async {
@@ -261,12 +264,12 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   _displayModeSelector(appearanceSettings.displayMode, appearanceNotifier),
                   _switchTile(
                     icon: Icons.color_lens_outlined,
-                    iconColor: _purple,
+                    iconColor: SettingsIconColors.purple,
                     title: 'settings_appearance_dynamic_color'.tr(),
                     subtitle: 'settings_appearance_dynamic_color_description'.tr(),
                     value: appearanceSettings.useDynamicColor,
                     onChanged: isAndroid
-                        ? (v) => appearanceNotifier.toggleDynamicColor(v)
+                        ? appearanceNotifier.toggleDynamicColor
                         : null,
                   ),
                   if (!isAndroid)
@@ -286,7 +289,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                     title: 'settings_appearance_custom_color'.tr(),
                     subtitle: 'settings_appearance_custom_color_description'.tr(),
                     value: appearanceSettings.useCustomColor,
-                    onChanged: (v) => appearanceNotifier.toggleCustomColor(v),
+                    onChanged: appearanceNotifier.toggleCustomColor,
                   ),
                   if (appearanceSettings.useCustomColor)
                     _colorPickerRow(appearanceSettings, appearanceNotifier),
@@ -297,8 +300,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                       title: '自定义标题栏',
                       subtitle: '使用自定义窗口标题栏',
                       value: appearanceSettings.useCustomTitleBar,
-                      onChanged: (v) =>
-                          appearanceNotifier.toggleCustomTitleBar(v),
+                      onChanged: appearanceNotifier.toggleCustomTitleBar,
                     ),
                 ],
               ),
@@ -375,7 +377,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               selected: {current},
               onSelectionChanged: (v) => notifier.updateDisplayMode(v.first),
               showSelectedIcon: false,
-              style: ButtonStyle(
+              style: const ButtonStyle(
                 visualDensity: VisualDensity.compact,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),

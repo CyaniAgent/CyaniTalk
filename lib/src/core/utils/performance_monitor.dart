@@ -13,9 +13,9 @@ class PerformanceMonitor {
   
   /// 性能警报阈值
   final Map<String, Duration> _thresholds = {
-    'network_request': Duration(milliseconds: 1000),
-    'media_loading': Duration(milliseconds: 2000),
-    'widget_build': Duration(milliseconds: 16), // 60fps
+    'network_request': const Duration(milliseconds: 1000),
+    'media_loading': const Duration(milliseconds: 2000),
+    'widget_build': const Duration(milliseconds: 16), // 60fps
   };
 
   /// 初始化性能监控

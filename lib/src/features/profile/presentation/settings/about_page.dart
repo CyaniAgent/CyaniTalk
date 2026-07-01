@@ -325,14 +325,14 @@ class _AboutPageState extends ConsumerState<AboutPage> {
             children: [
               SettingsTile(
                 icon: Icons.code,
-                iconColor: const Color(0xFF42A5F5),
+                iconColor: Theme.of(context).colorScheme.primary,
                 title: 'about_github'.tr(),
                 subtitle: 'about_github_description'.tr(),
                 onTap: _launchGitHub,
               ),
               SettingsTile(
                 icon: Icons.favorite,
-                iconColor: const Color(0xFFEC407A),
+                iconColor: Theme.of(context).colorScheme.tertiary,
                 title: 'about_sponsor'.tr(),
                 subtitle: 'about_sponsor_description'.tr(),
                 onTap: _launchSponsorPage,

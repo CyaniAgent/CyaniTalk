@@ -284,7 +284,7 @@ class _MediaViewerState extends State<MediaViewer> {
                           ),
                           child: Text(
                             '${_currentIndex + 1}/${widget.mediaItems.length}',
-                            style: TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black),
                           ),
                         ),
 

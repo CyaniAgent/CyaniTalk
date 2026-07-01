@@ -130,9 +130,7 @@ class AudioPlayerController {
 AudioPlayerController audioPlayerController(Ref ref, String audioUrl) {
   final controller = AudioPlayerController(audioUrl);
 
-  ref.onDispose(() {
-    controller.dispose();
-  });
+  ref.onDispose(controller.dispose);
 
   return controller;
 }
@@ -155,7 +153,5 @@ Stream<AudioPlayerState> audioPlayerState(Ref ref, String audioUrl) async* {
     yield state;
   }
 
-  ref.onDispose(() {
-    streamController.close();
-  });
+  ref.onDispose(streamController.close);
 }

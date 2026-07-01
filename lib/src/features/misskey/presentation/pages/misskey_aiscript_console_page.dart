@@ -78,9 +78,7 @@ class _MisskeyAiScriptConsolePageState
   }
 
   void _clearConsole() {
-    setState(() {
-      _output.clear();
-    });
+    setState(_output.clear);
   }
 
   void _showExampleScripts(BuildContext context) {

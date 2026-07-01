@@ -6,30 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/src/core/utils/logger.dart';
-import '/src/features/profile/application/developer_settings_provider.dart';
-
-import '/src/features/misskey/presentation/misskey_page.dart';
-import '/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
-import '/src/features/misskey/presentation/pages/misskey_notifications_page.dart';
-import '/src/features/cloud/presentation/cloud_page.dart';
-import '/src/features/messaging/presentation/chat_page.dart';
-import '/src/features/messaging/presentation/messaging_page.dart';
-import '/src/shared/widgets/coming_soon_page.dart';
-import '/src/shared/widgets/desktop_page_shell.dart';
-import '/src/features/misskey/domain/misskey_user.dart';
-import '/src/features/misskey/domain/chat_room.dart';
-import '/src/features/profile/presentation/profile_page.dart';
-import '/src/features/profile/presentation/settings/about_page.dart';
-import '/src/features/profile/presentation/settings/settings_page.dart';
-import '/src/features/profile/presentation/settings/licenses_page.dart';
-import '/src/features/profile/presentation/settings/developer_settings_page.dart';
-import '/src/features/search/presentation/search_page.dart';
-import '/src/features/auth/presentation/pages/login_page.dart';
-import '/src/features/welcome/presentation/welcome_page.dart';
-import '/src/shared/widgets/responsive_shell.dart';
-import '/src/features/welcome/application/welcome_state.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/core/utils/logger.dart';
+import 'package:cyanitalk/src/features/auth/presentation/pages/login_page.dart';
+import 'package:cyanitalk/src/features/cloud/presentation/cloud_page.dart';
+import 'package:cyanitalk/src/features/messaging/presentation/chat_page.dart';
+import 'package:cyanitalk/src/features/messaging/presentation/messaging_page.dart';
+import 'package:cyanitalk/src/features/misskey/domain/chat_room.dart';
+import 'package:cyanitalk/src/features/misskey/domain/misskey_user.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/misskey_page.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_notifications_page.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
+import 'package:cyanitalk/src/features/profile/application/developer_settings_provider.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_error_widget.dart';
+import 'package:cyanitalk/src/features/profile/presentation/profile_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/about_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/developer_settings_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/licenses_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/settings_page.dart';
+import 'package:cyanitalk/src/features/search/presentation/search_page.dart';
+import 'package:cyanitalk/src/features/welcome/application/welcome_state.dart';
+import 'package:cyanitalk/src/features/welcome/presentation/welcome_page.dart';
+import 'package:cyanitalk/src/shared/widgets/coming_soon_page.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
 
@@ -85,7 +84,7 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
           body: Center(child: CyaniLoadingIndicator()),
         ),
         error: (err, stack) => Scaffold(
-          body: Center(child: Text('Error: $err')),
+          body: CyaniErrorWidget(message: err.toString()),
         ),
       );
     },
@@ -188,7 +187,7 @@ GoRouter goRouter(Ref ref) {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => _buildSafePage(
           key: state.pageKey,
-          child: const DesktopPageShell(child: SettingsPage()),
+          child: const SettingsPage(),
         ),
       ),
       GoRoute(

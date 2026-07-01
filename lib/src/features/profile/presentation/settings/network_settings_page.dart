@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/network_settings_provider.dart';
-import '../widgets/settings_slider_bottom_sheet.dart';
-import '/src/core/widgets/settings_widgets.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
-import '/src/shared/widgets/toast_helper.dart';
+import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/features/profile/application/network_settings_provider.dart';
+import 'package:cyanitalk/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
 class NetworkSettingsPage extends ConsumerStatefulWidget {
   const NetworkSettingsPage({super.key});
@@ -18,9 +19,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
   bool _isTestingNetwork = false;
   bool? _networkTestSuccess;
 
-  static const _cyan = Color(0xFF26A69A);
-  static const _blue = Color(0xFF42A5F5);
-  static const _amber = Color(0xFFFFCA28);
+  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +29,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
       appBar: AppBar(title: Text('settings_network_title'.tr())),
       body: settingsAsync.when(
         data: (settings) {
-          final userAgentOptions = UserAgentType.values;
+          const userAgentOptions = UserAgentType.values;
           final currentAgentType = userAgentOptions.firstWhere(
             (type) => type.name == settings.userAgentType,
             orElse: () => UserAgentType.defaultAgent,
@@ -43,14 +42,14 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                 children: [
                   SettingsTile(
                     icon: Icons.public,
-                    iconColor: _cyan,
+                    iconColor: SettingsIconColors.cyan,
                     title: 'settings_network_user_agent_selector'.tr(),
                     subtitle: currentAgentType.displayName,
                     onTap: () => _showUserAgentDialog(ref, settings),
                   ),
                   SettingsTile(
                     icon: Icons.timer_outlined,
-                    iconColor: _cyan,
+                    iconColor: SettingsIconColors.cyan,
                     title: 'settings_network_http_timeout'.tr(),
                     subtitle: '${settings.httpRequestTimeout}s',
                     onTap: () => _showDurationPicker(
@@ -71,7 +70,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                 children: [
                   _switchTile(
                     icon: Icons.bolt,
-                    iconColor: _blue,
+                    iconColor: SettingsIconColors.blue,
                     title: 'settings_network_misskey_realtime_mode'.tr(),
                     subtitle: 'settings_network_misskey_realtime_mode_description'.tr(),
                     value: settings.misskeyRealtimeMode,
@@ -80,7 +79,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                   ),
                   SettingsTile(
                     icon: Icons.article_outlined,
-                    iconColor: _blue,
+                    iconColor: SettingsIconColors.blue,
                     title: 'settings_network_misskey_load_post_duration'.tr(),
                     subtitle: '${settings.loadPostMaxDuration}s',
                     onTap: () => _showDurationPicker(
@@ -94,7 +93,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                   ),
                   SettingsTile(
                     icon: Icons.emoji_emotions_outlined,
-                    iconColor: _blue,
+                    iconColor: SettingsIconColors.blue,
                     title: 'settings_network_misskey_load_emoji_duration'.tr(),
                     subtitle: '${settings.loadEmojiMaxDuration}s',
                     onTap: () => _showDurationPicker(
@@ -108,7 +107,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                   ),
                   SettingsTile(
                     icon: Icons.wifi_tethering_error_rounded,
-                    iconColor: _blue,
+                    iconColor: SettingsIconColors.blue,
                     title: 'settings_network_websocket_reconnect_attempts'.tr(),
                     subtitle: '${settings.webSocketReconnectAttempts}',
                     onTap: () => _showNumberPicker(
@@ -123,7 +122,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                   ),
                   SettingsTile(
                     icon: Icons.av_timer,
-                    iconColor: _blue,
+                    iconColor: SettingsIconColors.blue,
                     title: 'settings_network_websocket_background_duration'.tr(),
                     subtitle: _formatDuration(settings.webSocketBackgroundMaxDuration),
                     onTap: () => _showDurationPicker(
@@ -144,7 +143,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                 children: [
                   SettingsTile(
                     icon: Icons.network_check,
-                    iconColor: _amber,
+                    iconColor: SettingsIconColors.amber,
                     title: 'settings_network_test_connection'.tr(),
                     subtitle: _networkTestSuccess == null
                         ? 'settings_network_tap_to_test'.tr()
@@ -172,7 +171,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                   ),
                   SettingsTile(
                     icon: Icons.clear_all,
-                    iconColor: _amber,
+                    iconColor: SettingsIconColors.amber,
                     title: 'settings_network_clear_dns'.tr(),
                     subtitle: 'settings_network_clear_dns_description'.tr(),
                     onTap: _showClearDnsConfirmDialog,
@@ -240,7 +239,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
   }
 
   void _showUserAgentDialog(WidgetRef ref, NetworkSettings settings) {
-    final options = UserAgentType.values;
+    const options = UserAgentType.values;
     final currentType = options.firstWhere(
       (type) => type.name == settings.userAgentType,
       orElse: () => UserAgentType.defaultAgent,

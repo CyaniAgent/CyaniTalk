@@ -101,8 +101,8 @@ abstract class BaseApi {
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 5,
-    Duration retryDelay = const Duration(seconds: 1),
+    int maxRetries = 2,
+    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
     return apiRequestManager.execute(
       operationName,
@@ -171,8 +171,8 @@ abstract class BaseApi {
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 5,
-    Duration retryDelay = const Duration(seconds: 1),
+    int maxRetries = 2,
+    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
     return apiRequestManager.execute(
       operationName,
@@ -199,13 +199,12 @@ abstract class BaseApi {
             return (data, error);
           } catch (e) {
             if (e is DioException) {
-              // 检查是否是可重试的错误
+              // check if retryable
               if (_isRetryableError(e) && retryCount < maxRetries) {
                 retryCount++;
-                // 优化：更加积极的指数退避策略
                 final delay = retryDelay * (1 << (retryCount - 1));
                 logger.warning(
-                  '$operationName: 检测到临时错误，${delay.inSeconds}秒后重试 (尝试 $retryCount/$maxRetries): ${e.message}',
+                  '$operationName: Transient error, retrying in ${delay.inMilliseconds}ms (attempt $retryCount/$maxRetries): ${e.message}',
                 );
                 await Future.delayed(delay);
                 continue;
@@ -259,8 +258,8 @@ abstract class BaseApi {
     Map<String, dynamic>? params,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 5, // 统一提升至 5 次重试
-    Duration retryDelay = const Duration(seconds: 1),
+    int maxRetries = 2,
+    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
     await apiRequestManager.execute(
       operationName,
@@ -333,8 +332,8 @@ abstract class BaseApi {
     Map<String, dynamic>? params,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 5,
-    Duration retryDelay = const Duration(seconds: 1),
+    int maxRetries = 2,
+    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
     return apiRequestManager.execute(
       operationName,

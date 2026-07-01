@@ -764,7 +764,7 @@ class MisskeyApi extends BaseApi {
   /// 但为了兼容标准 Misskey，保留此方法。
   ///
   /// @param messageId 要标记为已读的消息 ID
-  Future<void> readMessagingMessage(String messageId) async {
+  Future<bool> readMessagingMessage(String messageId) async {
     // Note: The new Chat API provides 'read-all' which takes a userId/roomId, not a single messageId.
     // However, keeping this for compatibility with standard Misskey.
     // For Chat API, we might need a different method to mark conversation as read.
@@ -778,10 +778,12 @@ class MisskeyApi extends BaseApi {
     try {
       // Standard Misskey
       await _dio.post('/api/messaging/messages/read', data: data);
+      return true;
     } catch (e) {
       logger.warning(
         'MisskeyApi: /api/messaging/messages/read failed. Chat API may require read-all per user.',
       );
+      return false;
     }
   }
 

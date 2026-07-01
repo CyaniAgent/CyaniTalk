@@ -177,6 +177,13 @@ class DownloadUtils {
 
           downloadSuccess = true;
         } catch (e) {
+          // 4xx 客户端错误无需重试，直接抛出
+          if (e is DioException &&
+              e.response?.statusCode != null &&
+              e.response!.statusCode! >= 400 &&
+              e.response!.statusCode! < 500) {
+            rethrow;
+          }
           retryCount++;
           if (retryCount <= config.maxRetries) {
             onStatusChange?.call(

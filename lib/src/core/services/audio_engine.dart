@@ -68,6 +68,6 @@ class AudioEngine {
 @Riverpod(keepAlive: true)
 AudioEngine audioEngine(Ref ref) {
   final engine = AudioEngine();
-  ref.onDispose(() => engine.dispose());
+  ref.onDispose(engine.dispose);
   return engine;
 }

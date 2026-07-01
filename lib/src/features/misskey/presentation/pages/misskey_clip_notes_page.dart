@@ -147,7 +147,7 @@ class _MisskeyClipNotesPageState extends ConsumerState<MisskeyClipNotesPage> {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
+              FilledButton.icon(
                 onPressed: () => ref
                     .read(misskeyClipNotesProvider(widget.clip.id).notifier)
                     .refresh(),

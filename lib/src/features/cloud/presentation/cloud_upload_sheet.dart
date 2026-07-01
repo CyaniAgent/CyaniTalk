@@ -304,8 +304,8 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
   Widget _buildAddFileButton(ColorScheme colorScheme) {
     return OutlinedButton.icon(
       onPressed: _isUploading ? null : _pickFiles,
-      icon: Icon(Icons.add_circle_outline_rounded, size: 18),
-      label: Text('添加文件'),
+      icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+      label: const Text('添加文件'),
       style: OutlinedButton.styleFrom(
         foregroundColor: colorScheme.primary,
         side: BorderSide(color: colorScheme.outline),

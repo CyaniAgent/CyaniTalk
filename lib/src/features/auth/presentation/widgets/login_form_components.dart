@@ -251,7 +251,7 @@ class MisskeyLoginStep extends ConsumerWidget {
             onPressed: loading ? null : onLogin,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: StadiumBorder(),
+              shape: const StadiumBorder(),
             ),
             icon: loading
                 ? const SizedBox.shrink()
@@ -316,7 +316,7 @@ class MisskeyCheckAuthStep extends StatelessWidget {
             onPressed: loading ? null : onCheck,
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: StadiumBorder(),
+              shape: const StadiumBorder(),
             ),
             icon: loading
                 ? const SizedBox.shrink()

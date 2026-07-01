@@ -9,7 +9,7 @@ class RetryInterceptor extends Interceptor {
   final int maxRetries;
   final Dio dio;
 
-  RetryInterceptor({required this.dio, this.maxRetries = 5});
+  RetryInterceptor({required this.dio, this.maxRetries = 2});
 
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
@@ -111,7 +111,7 @@ class NetworkClient {
 
     dio.transformer = BackgroundTransformer();
 
-    dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 5));
+    dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 2));
     dio.interceptors.add(PerformanceInterceptor());
     dio.interceptors.add(
       LogInterceptor(

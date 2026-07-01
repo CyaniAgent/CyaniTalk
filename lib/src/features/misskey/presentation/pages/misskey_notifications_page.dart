@@ -93,7 +93,7 @@ class MisskeyNotificationsPage extends ConsumerWidget {
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
+              FilledButton.icon(
                 onPressed: () =>
                     ref.read(misskeyNotificationsProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),

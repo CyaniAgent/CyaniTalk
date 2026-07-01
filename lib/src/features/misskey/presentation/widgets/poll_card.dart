@@ -53,7 +53,7 @@ class _PollCardState extends ConsumerState<PollCard> {
     final poll = widget.poll;
     
     // Miku Green 及其变体
-    const mikuGreen = Color(0xFF39C5BB);
+    final mikuGreen = theme.colorScheme.primary;
     final mikuGreenSoft = mikuGreen.withValues(alpha: 0.2);
 
     Widget cardBody = Column(

@@ -15,6 +15,7 @@ Future<T?> showAdaptiveSheet<T>({
   Color? backgroundColor,
   Color? barrierColor,
   double sideSheetWidth = 400,
+  BorderRadiusGeometry? sideSheetBorderRadius,
 }) {
   if (_isDesktop) {
     return _showSideSheet<T>(
@@ -23,6 +24,8 @@ Future<T?> showAdaptiveSheet<T>({
       backgroundColor: backgroundColor,
       barrierColor: barrierColor,
       sideSheetWidth: sideSheetWidth,
+      sideSheetBorderRadius: sideSheetBorderRadius ??
+          const BorderRadius.horizontal(left: Radius.circular(16)),
     );
   }
   return showModalBottomSheet<T>(
@@ -42,9 +45,8 @@ Future<T?> _showSideSheet<T>({
   Color? backgroundColor,
   Color? barrierColor,
   double sideSheetWidth = 400,
+  BorderRadiusGeometry? sideSheetBorderRadius,
 }) {
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
   final viewInsets = MediaQuery.viewInsetsOf(context);
 
   return showGeneralDialog<T>(
@@ -76,24 +78,10 @@ Future<T?> _showSideSheet<T>({
               width: sideSheetWidth,
               child: Material(
                 elevation: 8,
-                color: backgroundColor ?? colorScheme.surface,
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: sideSheetBorderRadius,
                 clipBehavior: Clip.antiAlias,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _SideSheetHandle(color: colorScheme.outlineVariant),
-                    Flexible(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.sizeOf(context).height * 0.9,
-                        ),
-                        child: builder(context),
-                      ),
-                    ),
-                  ],
-                ),
+                child: builder(context),
               ),
             ),
           ),
@@ -101,27 +89,4 @@ Future<T?> _showSideSheet<T>({
       );
     },
   );
-}
-
-class _SideSheetHandle extends StatelessWidget {
-  final Color color;
-
-  const _SideSheetHandle({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Container(
-          width: 32,
-          height: 4,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
-    );
-  }
 }

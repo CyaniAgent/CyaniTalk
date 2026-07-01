@@ -97,7 +97,7 @@ class AudioPlayerWidget extends ConsumerWidget {
                         state.isPlaying ? Icons.pause : Icons.play_arrow,
                         color: theme.colorScheme.primary,
                       ),
-                      onPressed: () => audioController.togglePlayPause(),
+                      onPressed: audioController.togglePlayPause,
                     ),
                   // 进度滑块
                   Expanded(

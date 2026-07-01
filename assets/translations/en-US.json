@@ -494,6 +494,7 @@
   "messaging_direct": "Direct",
   "messaging_groups": "Groups",
   "notifications_title": "Notifications",
+  "common_error_occurred": "An error occurred",
   "common_retry": "Retry",
   "common_error": "Error",
   "common_refresh_stage": "Refresh Stage",

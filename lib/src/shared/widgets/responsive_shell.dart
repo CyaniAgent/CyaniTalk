@@ -1,14 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '/src/core/navigation/navigation.dart';
-import '/src/core/navigation/navigation_element.dart';
-import '/src/features/profile/presentation/settings/appearance_page.dart';
-import 'custom_title_bar.dart';
+import 'package:cyanitalk/src/core/navigation/navigation.dart';
+import 'package:cyanitalk/src/core/navigation/navigation_element.dart';
 import 'root_navigation_drawer.dart';
 
 class ResponsiveShell extends ConsumerStatefulWidget {
@@ -50,7 +47,6 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   @override
   Widget build(BuildContext context) {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
-    final appearanceAsync = ref.watch(appearanceSettingsProvider);
 
     return navigationSettingsAsync.when(
       loading: () => const Scaffold(body: SizedBox.shrink()),
@@ -89,11 +85,6 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           selectedRootIndex = -1;
         }
 
-        final isDesktop =
-            Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-        final useCustomTitleBar = isDesktop &&
-            (appearanceAsync.asData?.value.useCustomTitleBar ?? true);
-
         return Scaffold(
           key: rootScaffoldKey,
           drawer: RootNavigationDrawer(
@@ -101,16 +92,9 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
             onRootSelected: (index) =>
                 _onRootSelected(index, navigationSettings),
           ),
-          body: Column(
-            children: [
-              if (useCustomTitleBar) const CustomTitleBar(),
-              Expanded(
-                child: ExcludeSemantics(
-                  excluding: _isTransitioning,
-                  child: widget.navigationShell,
-                ),
-              ),
-            ],
+          body: ExcludeSemantics(
+            excluding: _isTransitioning,
+            child: widget.navigationShell,
           ),
         );
       },

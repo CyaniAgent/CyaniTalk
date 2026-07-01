@@ -801,7 +801,9 @@ class MisskeyRepository implements IMisskeyRepository {
             }
 
             messages.add(MessagingMessage.fromJson(map));
-          } catch (_) {}
+          } catch (e) {
+            logger.warning('MisskeyRepository: Failed to parse chat message', e);
+          }
         }
         return messages;
       }, data);
@@ -1283,7 +1285,9 @@ class MisskeyRepository implements IMisskeyRepository {
         if (map['recipientId'] != null && message.recipient == null) {
           missingUserIds.add(map['recipientId'] as String);
         }
-      } catch (_) {}
+      } catch (e) {
+        logger.warning('MisskeyRepository: Failed to parse messaging message', e);
+      }
     }
 
     return _MessagingParsingResult(messages, missingUserIds.toList());

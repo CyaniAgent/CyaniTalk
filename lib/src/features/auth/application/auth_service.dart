@@ -291,7 +291,9 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
     if (selectedId != null) {
       try {
         selectedAccount = accounts.firstWhere((a) => a.id == selectedId);
-      } catch (_) {}
+      } catch (e) {
+        logger.warning('AuthService: Selected account not found, falling back', e);
+      }
     }
 
     selectedAccount ??= accounts

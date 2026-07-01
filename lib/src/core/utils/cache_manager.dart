@@ -664,7 +664,9 @@ class CacheManager {
           }
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      logger.debug('CacheManager: Failed to calculate directory size', e);
+    }
     return size;
   }
 

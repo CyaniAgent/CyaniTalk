@@ -86,7 +86,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
   }
 
   Widget _buildHighlightedCode(String code, bool isDark, Map<String, TextStyle> theme) {
-    final mergedTextStyle = const TextStyle(
+    const mergedTextStyle = TextStyle(
       fontFamily: 'JetBrainsMono',
       fontSize: 13,
       height: 1.55,

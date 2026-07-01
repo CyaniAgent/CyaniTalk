@@ -421,7 +421,7 @@ class _PollSettingsSheetState extends ConsumerState<PollSettingsSheet> {
                   TextButton.icon(
                     onPressed: () {
                       Navigator.of(context).pop(
-                        Poll(
+                        const Poll(
                           choices: [''],
                           multiple: false,
                           mode: PollMode.permanent,

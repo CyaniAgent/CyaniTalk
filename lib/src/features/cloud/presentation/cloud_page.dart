@@ -27,6 +27,7 @@ import '/src/features/misskey/presentation/pages/misskey_post_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import 'cloud_upload_sheet.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/cyani_error_widget.dart';
 
 class CloudPage extends ConsumerStatefulWidget {
   const CloudPage({super.key});
@@ -203,7 +204,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
                 ),
                 CircleIconButton(
                   icon: Icons.close,
-                  onPressed: () => _exitSelectionMode(),
+                  onPressed: _exitSelectionMode,
                   tooltip: 'cloud_cancel'.tr(),
                 ),
               ],
@@ -213,7 +214,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
               children: [
                 CircleIconButton(
                   icon: Icons.select_all,
-                  onPressed: () => _enterSelectionMode(),
+                  onPressed: _enterSelectionMode,
                   tooltip: 'cloud_select'.tr(),
                 ),
                 CircleIconButton(
@@ -245,7 +246,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
           return Column(
             children: [
               _buildBreadcrumbs(context, ref, currentState),
-              Expanded(child: const Center(child: CyaniLoadingIndicator())),
+              const Expanded(child: Center(child: CyaniLoadingIndicator())),
             ],
           );
         },
@@ -819,12 +820,12 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
             },
           ),
           if (state.isLoading)
-            Positioned(
+            const Positioned(
               right: 0,
               child: SizedBox(
                 width: 24,
                 height: 24,
-                child: const CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
         ],
@@ -858,8 +859,8 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
     DriveState state,
   ) {
     final combined = [
-      ...state.folders.map((f) => _DriveItem.folder(f)),
-      ...state.files.map((f) => _DriveItem.file(f)),
+      ...state.folders.map(_DriveItem.folder),
+      ...state.files.map(_DriveItem.file),
     ];
 
     // CustomScrollView + SliverFillRemaining:
@@ -1033,10 +1034,10 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
       position: position,
       items: [
         M3EMenuItemData(value: 'refresh', icon: Icons.refresh, label: 'cloud_refresh'.tr()),
-        M3EMenuItemData.separator(),
+        const M3EMenuItemData.separator(),
         M3EMenuItemData(value: 'upload', icon: Icons.upload_file, label: 'cloud_upload_file'.tr()),
         M3EMenuItemData(value: 'create_folder', icon: Icons.create_new_folder, label: 'cloud_create_folder'.tr()),
-        M3EMenuItemData.separator(),
+        const M3EMenuItemData.separator(),
         M3EMenuItemData(value: 'sort', icon: Icons.sort, label: 'cloud_sort_by'.tr()),
         M3EMenuItemData(value: 'open_in_browser', icon: Icons.open_in_browser, label: 'cloud_open_in_instance'.tr()),
       ],
@@ -1073,7 +1074,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
       position: position,
       items: [
         M3EMenuItemData(value: 'refresh', icon: Icons.refresh, label: 'cloud_refresh'.tr()),
-        M3EMenuItemData.separator(),
+        const M3EMenuItemData.separator(),
         M3EMenuItemData(
           value: 'open',
           icon: isFolder ? Icons.folder_open : Icons.open_in_new,
@@ -1084,12 +1085,12 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
           M3EMenuItemData(value: 'move', icon: Icons.drive_file_move, label: 'cloud_move_to'.tr()),
           M3EMenuItemData(value: 'download', icon: Icons.download, label: 'cloud_download'.tr()),
         ],
-        M3EMenuItemData.separator(),
+        const M3EMenuItemData.separator(),
         if (!isFolder) ...[
           M3EMenuItemData(value: 'post_with_file', icon: Icons.rate_review, label: 'cloud_post_with_file'.tr()),
           M3EMenuItemData(value: 'copy_link', icon: Icons.link, label: 'cloud_copy_link'.tr()),
           M3EMenuItemData(value: 'open_in_browser', icon: Icons.open_in_browser, label: 'cloud_open_in_browser'.tr()),
-          M3EMenuItemData.separator(),
+          const M3EMenuItemData.separator(),
           M3EMenuItemData(value: 'edit_description', icon: Icons.description, label: 'cloud_edit_description'.tr()),
           M3EMenuItemData(
             value: 'toggle_sensitive',
@@ -1485,16 +1486,8 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ),
-            error: (_, _) => ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: 0,
-                minHeight: 8,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.colorScheme.error,
-                ),
-              ),
+            error: (_, _) => CyaniErrorWidget(
+              message: 'cloud_error'.tr(),
             ),
           ),
         ],

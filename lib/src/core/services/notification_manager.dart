@@ -130,6 +130,6 @@ class NotificationManager {
 @Riverpod(keepAlive: true)
 NotificationManager notificationManager(Ref ref) {
   final manager = NotificationManager(ref);
-  ref.onDispose(() => manager.stop());
+  ref.onDispose(manager.stop);
   return manager;
 }

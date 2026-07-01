@@ -455,8 +455,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     _dismissMenu();
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final menuColor = isDark ? const Color(0xFF1A1A1A) : const Color(0xFFFFFFFF);
+    final menuColor = theme.colorScheme.surface;
     final primaryColor = theme.colorScheme.primary;
 
     _menuOverlayEntry = OverlayEntry(
@@ -822,12 +821,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('转发确认'),
-        content: Text('确定要转发这条消息吗？'),
+        title: const Text('转发确认'),
+        content: const Text('确定要转发这条消息吗？'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('取消'),
+            child: const Text('取消'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -856,7 +855,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 }
               }
             },
-            child: Text('确定'),
+            child: const Text('确定'),
           ),
         ],
       ),
@@ -1011,9 +1010,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                       showIsMeBadge: false,
                     )
                   else
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 8,
-                      child: const Icon(Icons.person, size: 10),
+                      child: Icon(Icons.person, size: 10),
                     ),
 
                   const SizedBox(width: 8),

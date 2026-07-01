@@ -493,6 +493,7 @@
   "messaging_direct": "私信",
   "messaging_groups": "群组",
   "notifications_title": "通知",
+  "common_error_occurred": "发生了一个错误",
   "common_retry": "重试",
   "common_error": "错误",
   "common_refresh_stage": "刷新舞台",

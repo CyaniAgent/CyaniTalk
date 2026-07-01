@@ -3,24 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:convert';
-import '/src/features/auth/application/auth_service.dart';
-import '/src/features/auth/domain/account.dart';
-import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
+import 'package:cyanitalk/src/features/auth/application/auth_service.dart';
+import 'package:cyanitalk/src/features/auth/domain/account.dart';
+import 'package:cyanitalk/src/features/auth/presentation/widgets/add_account_dialog.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_error_widget.dart';
 import 'user_details_view.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
 
-/// 统一登录管理器组件
-///
-/// 显示用户关联的账户列表，支持切换查看详细资料以及添加/删除账户。
+/// 统一登录管理器组件，与设置页整体样式保持一致。
 class AssociatedAccountsSection extends ConsumerStatefulWidget {
   final bool showRemoveButton;
-  final bool showTitle;
 
-  /// 创建一个新的AssociatedAccountsSection实例
   const AssociatedAccountsSection({
     super.key,
     this.showRemoveButton = true,
-    this.showTitle = true,
   });
 
   @override
@@ -46,32 +42,38 @@ class _AssociatedAccountsSectionState
           return _buildEmptyState(context);
         }
 
-        // Ensure focused account is valid
         if (_focusedAccount == null || !accounts.contains(_focusedAccount)) {
-          // Default to one of the active accounts or the first one
           _focusedAccount = selectedMisskey ?? accounts.first;
         }
 
-        return _buildManagerLayout(
-          context,
-          ref,
-          accounts,
-          selectedMisskey,
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAccountList(context, accounts, selectedMisskey),
+              if (_focusedAccount != null) ...[
+                const SizedBox(height: 4),
+                _buildFocusedCard(context, _focusedAccount!),
+              ],
+            ],
+          ),
         );
       },
       loading: () => const Center(child: CyaniLoadingIndicator()),
-      error: (err, stack) => Center(child: Text('Error: $err')),
+      error: (err, stack) => CyaniErrorWidget(message: err.toString()),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         const SizedBox(height: 40),
         Icon(
           Icons.account_circle_outlined,
           size: 80,
-          color: Theme.of(context).colorScheme.outlineVariant,
+          color: colorScheme.outlineVariant,
         ),
         const SizedBox(height: 16),
         Text(
@@ -88,266 +90,66 @@ class _AssociatedAccountsSectionState
     );
   }
 
-  Widget _buildManagerLayout(
+  Widget _buildAccountList(
     BuildContext context,
-    WidgetRef ref,
     List<Account> accounts,
     Account? selectedMisskey,
   ) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section Title: Accounts
-        if (widget.showTitle)
-          Padding(
-            padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
-            child: Text(
-              'settings_section_account'.tr(),
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-
-        // Horizontal Account List
-        Container(
-          height: 80,
-          margin: const EdgeInsets.only(bottom: 24.0),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: accounts.length + 1,
-            itemBuilder: (context, index) {
-              if (index == accounts.length) {
-                return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: _AddAccountButton(
-                        onTap: () => _showAddAccountDialog(context),
-                      ),
-                    )
-                    .animate()
-                    .fadeIn(delay: 400.ms)
-                    .scale(begin: const Offset(0.8, 0.8));
-              }
-
-              final account = accounts[index];
-              final isMisskeyActive = account.id == selectedMisskey?.id;
-              final isActive = isMisskeyActive;
-              final isFocused = account.id == _focusedAccount?.id;
-
-              return Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: _AccountAvatarItem(
-                      account: account,
-                      isActive: isActive,
-                      isFocused: isFocused,
-                      activeColor: isMisskeyActive
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurfaceVariant,
-                      onTap: () {
-                        setState(() {
-                          _focusedAccount = account;
-                        });
-                        if (account.platform == 'misskey') {
-                          ref
-                              .read(selectedMisskeyAccountProvider.notifier)
-                              .select(account);
-                        }
-                      },
-                    ),
-                  )
-                  .animate()
-                  .fadeIn(delay: (index * 100).ms)
-                  .slideX(begin: 0.2, end: 0);
-            },
-          ),
-        ),
-
-        if (_focusedAccount != null) ...[
-          // Focused Account Card
-          Card(
-                elevation: 0,
-                color: theme.colorScheme.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  side: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withValues(
-                      alpha: 0.5,
-                    ),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      _buildSelectedHeader(context, _focusedAccount!),
-                      const SizedBox(height: 16),
-                      _buildRawDataSection(context, ref, _focusedAccount!),
-                      if (widget.showRemoveButton) ...[
-                        const SizedBox(height: 16),
-                        const Divider(),
-                        const SizedBox(height: 16),
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              _confirmDelete(context, ref, _focusedAccount!),
-                          icon: const Icon(Icons.delete_outline),
-                          label: Text('accounts_remove_button'.tr()),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              )
-              .animate(key: ValueKey(_focusedAccount!.id))
-              .fadeIn(duration: 400.ms)
-              .slideY(begin: 0.05, end: 0),
-        ],
-      ],
-    ).animate().fadeIn(duration: 400.ms);
-  }
-
-  Widget _buildSelectedHeader(BuildContext context, Account account) {
-    final primaryName = (account.name != null && account.name!.isNotEmpty)
-        ? account.name!
-        : (account.username ?? 'Unknown');
-    final secondaryName = account.username != null
-        ? '@${account.username}'
-        : '';
-
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 36,
-          backgroundImage: account.avatarUrl != null
-              ? NetworkImage(account.avatarUrl!)
-              : null,
-          child: account.avatarUrl == null
-              ? const Icon(Icons.person, size: 36)
-              : null,
-        ),
-        const SizedBox(width: 20),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                primaryName,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (secondaryName.isNotEmpty)
-                Text(
-                  secondaryName,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset(
-                      'assets/icons/misskey.png',
-                      width: 16,
-                      height: 16,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        account.host,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRawDataSection(
-    BuildContext context,
-    WidgetRef ref,
-    Account account,
-  ) {
-    final detailsAsync = ref.watch(userDetailsProvider(account));
-
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      color: Theme.of(context).colorScheme.surfaceContainer,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ExpansionTile(
-        title: Text(
-          'user_details_raw_data'.tr(),
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        leading: const Icon(Icons.code),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          detailsAsync.when(
-            data: (data) => Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SelectableText(
-                    const JsonEncoder.withIndent('  ').convert(data),
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
+          Text(
+            'settings_section_account'.tr(),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 64,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: accounts.length + 1,
+              itemBuilder: (context, index) {
+                if (index == accounts.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _AddAccountButton(
+                      onTap: () => _showAddAccountDialog(context),
                     ),
+                  );
+                }
+
+                final account = accounts[index];
+                final isMisskeyActive = account.id == selectedMisskey?.id;
+                final isFocused = account.id == _focusedAccount?.id;
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: _AccountAvatarItem(
+                    account: account,
+                    isActive: isMisskeyActive,
+                    isFocused: isFocused,
+                    onTap: () {
+                      setState(() => _focusedAccount = account);
+                      if (account.platform == 'misskey') {
+                        ref
+                            .read(selectedMisskeyAccountProvider.notifier)
+                            .select(account);
+                      }
+                    },
                   ),
-                ),
-              ),
-            ),
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CyaniLoadingIndicator()),
-            ),
-            error: (err, stack) => Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text('Error: $err'),
+                );
+              },
             ),
           ),
         ],
@@ -355,14 +157,156 @@ class _AssociatedAccountsSectionState
     );
   }
 
+  Widget _buildFocusedCard(BuildContext context, Account account) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildAccountHeader(context, account),
+          const SizedBox(height: 12),
+          _buildRawDataSection(context, account),
+          if (widget.showRemoveButton) ...[
+            const SizedBox(height: 12),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _confirmDelete(context, account),
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: Text('accounts_remove_button'.tr()),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: theme.colorScheme.error,
+                  side: BorderSide(color: theme.colorScheme.error),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ).animate(key: ValueKey(account.id)).fadeIn().slideY(begin: 0.05, end: 0);
+  }
+
+  Widget _buildAccountHeader(BuildContext context, Account account) {
+    final theme = Theme.of(context);
+    final primaryName = (account.name != null && account.name!.isNotEmpty)
+        ? account.name!
+        : (account.username ?? 'Unknown');
+    final secondaryName =
+        account.username != null ? '@${account.username}' : '';
+
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(shape: BoxShape.circle),
+          child: CircleAvatar(
+            radius: 20,
+            backgroundImage: account.avatarUrl != null
+                ? NetworkImage(account.avatarUrl!)
+                : null,
+            child: account.avatarUrl == null
+                ? Text(account.username?[0].toUpperCase() ?? '?')
+                : null,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                primaryName,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (secondaryName.isNotEmpty)
+                Text(
+                  secondaryName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
+      ],
+    );
+  }
+
+  Widget _buildRawDataSection(BuildContext context, Account account) {
+    final detailsAsync = ref.watch(userDetailsProvider(account));
+
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      title: Text(
+        'user_details_raw_data'.tr(),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+      leading: Icon(Icons.code, size: 20, color: Theme.of(context).colorScheme.primary),
+      children: [
+        detailsAsync.when(
+          data: (data) => Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SelectableText(
+                  const JsonEncoder.withIndent('  ').convert(data),
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                ),
+              ),
+            ),
+          ),
+          loading: () => const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Center(child: SizedBox(
+              width: 24, height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )),
+          ),
+          error: (err, _) => Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: CyaniErrorWidget(message: err.toString()),
+          ),
+        ),
+      ],
+    );
+  }
+
   void _showAddAccountDialog(BuildContext context) {
     AddAccountBottomSheet.show(context);
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, Account account) {
+  void _confirmDelete(BuildContext context, Account account) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text('accounts_remove_title'.tr()),
         content: Text(
           'accounts_remove_confirm'.tr(
@@ -371,20 +315,18 @@ class _AssociatedAccountsSectionState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: Text('accounts_remove_cancel'.tr()),
           ),
           TextButton(
             onPressed: () {
               ref.read(authServiceProvider.notifier).removeAccount(account.id);
-              Navigator.pop(context);
-              setState(() {
-                _focusedAccount = null; // Reset focus
-              });
+              Navigator.pop(ctx);
+              setState(() => _focusedAccount = null);
             },
             child: Text(
               'accounts_remove_confirm_button'.tr(),
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -397,57 +339,47 @@ class _AccountAvatarItem extends StatelessWidget {
   final Account account;
   final bool isActive;
   final bool isFocused;
-  final Color activeColor;
   final VoidCallback onTap;
 
   const _AccountAvatarItem({
     required this.account,
     required this.isActive,
     required this.isFocused,
-    required this.activeColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12.0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isActive
-                    ? activeColor
-                    : (isFocused
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.transparent),
-                width: 2,
-              ),
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.3),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : null,
-            ),
-            child: CircleAvatar(
-              radius: 24,
-              backgroundImage: account.avatarUrl != null
-                  ? NetworkImage(account.avatarUrl!)
-                  : null,
-              child: account.avatarUrl == null
-                  ? Text(account.username?[0].toUpperCase() ?? '?')
-                  : null,
-            ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final borderColor = isActive
+        ? colorScheme.primary
+        : (isFocused ? colorScheme.primary : Colors.transparent);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: borderColor, width: 2),
+            boxShadow: isActive
+                ? [BoxShadow(
+                    color: colorScheme.primary.withValues(alpha: 0.25),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  )]
+                : null,
+          ),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundImage:
+                account.avatarUrl != null ? NetworkImage(account.avatarUrl!) : null,
+            child: account.avatarUrl == null
+                ? Text(account.username?[0].toUpperCase() ?? '?')
+                : null,
           ),
         ),
       ),
@@ -468,16 +400,15 @@ class _AddAccountButton extends StatelessWidget {
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: Container(
-          width: 48,
-          height: 48,
+          width: 50,
+          height: 50,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: Theme.of(context).colorScheme.outlineVariant,
-              width: 1,
             ),
           ),
-          child: const Icon(Icons.add),
+          child: Icon(Icons.add, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ),
     );

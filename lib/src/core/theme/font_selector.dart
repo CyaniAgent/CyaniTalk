@@ -109,7 +109,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       child: FilledButton.tonalIcon(
         onPressed: _pickLocalFont,
         icon: const Icon(Icons.add, size: 18),
-        label: Text('从本地添加字体'),
+        label: const Text('从本地添加字体'),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart' as windows;
 import 'package:webview_flutter/webview_flutter.dart' as mobile;
+import 'logger.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// WAF 验证窗口
@@ -123,7 +124,9 @@ class _VerificationWindowState extends State<VerificationWindow> {
             }
           }
         }
-      } catch (_) {}
+      } catch (e) {
+        logger.warning('VerificationWindow: Failed to parse verification cookie', e);
+      }
     });
   }
 
