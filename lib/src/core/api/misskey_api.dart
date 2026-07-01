@@ -760,32 +760,16 @@ class MisskeyApi extends BaseApi {
   /// 标记消息为已读
   ///
   /// 通过调用 `/api/messaging/messages/read` 接口标记指定消息为已读。
-  /// 注意：新的 Chat API 提供了 'read-all' 接口，需要 userId/roomId 而不是单个 messageId。
-  /// 但为了兼容标准 Misskey，保留此方法。
   ///
   /// @param messageId 要标记为已读的消息 ID
-  Future<bool> readMessagingMessage(String messageId) async {
-    // Note: The new Chat API provides 'read-all' which takes a userId/roomId, not a single messageId.
-    // However, keeping this for compatibility with standard Misskey.
-    // For Chat API, we might need a different method to mark conversation as read.
-    // For now, we try 'read-all' with the messageId as a fallback if the API is confusing,
-    // but likely 'read-all' expects 'userId'.
-    // Since we don't have userId here, we'll skip the chat endpoint for single message read
-    // OR we could change this method signature.
-    // Given the constraints, let's keep the standard messaging fallback.
-
-    final data = {'i': token, 'messageId': messageId};
-    try {
-      // Standard Misskey
-      await _dio.post('/api/messaging/messages/read', data: data);
-      return true;
-    } catch (e) {
-      logger.warning(
-        'MisskeyApi: /api/messaging/messages/read failed. Chat API may require read-all per user.',
-      );
-      return false;
-    }
-  }
+  Future<(void, Exception?)> readMessagingMessage(String messageId) => executeApiCallSafeVoid(
+    'MisskeyApi.readMessagingMessage',
+    () => _dio.post(
+      '/api/messaging/messages/read',
+      data: {'i': token, 'messageId': messageId},
+    ),
+    params: {'messageId': messageId},
+  );
 
   /// 删除消息
   ///

@@ -951,11 +951,10 @@ class MisskeyRepository implements IMisskeyRepository {
     logger.info(
       'MisskeyRepository: Marking messaging message $messageId as read',
     );
-    try {
-      await api.readMessagingMessage(messageId);
-    } catch (e) {
-      logger.error('MisskeyRepository: Error marking message as read', e);
-      rethrow;
+    final (_, error) = await api.readMessagingMessage(messageId);
+    if (error != null) {
+      logger.error('MisskeyRepository: Error marking message as read', error);
+      throw error;
     }
   }
 
