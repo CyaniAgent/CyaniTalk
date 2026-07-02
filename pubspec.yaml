@@ -79,10 +79,8 @@ dependencies:
   dio_http2_adapter: ^2.6.0
   # 轻量级本地存储库，用于存储键值对数据
   shared_preferences: ^2.5.4
-  # 跨平台WebView组件，用于在应用中显示网页
-  webview_flutter: ^4.13.1
-  # Windows平台的WebView实现，支持Windows应用中的网页显示
-  webview_windows: ^0.4.0
+  # 跨平台WebView组件，支持Android、iOS、macOS、Windows、Linux
+  flutter_inappwebview: ^6.1.5
   # 强大的日志库，支持不同级别的日志输出和格式化
   logger: ^2.3.0
   # 路径提供者库，用于获取应用的文档目录和临时目录

@@ -56,12 +56,14 @@ class RootNavigationDrawer extends ConsumerWidget {
           isDrawer: true,
           isSelected: effectiveSelectedRootIndex == -1,
           onTap: () {
-            onRootSelected(
-              NavigationService.mapBranchIndexToDisplayIndex(
-                NavigationService.getBranchIndexForItem('me'),
-                navigationSettings!,
-              ),
-            );
+            ref.read(navigationControllerProvider.notifier).closeDrawer(
+                  onComplete: () => onRootSelected(
+                    NavigationService.mapBranchIndexToDisplayIndex(
+                      NavigationService.getBranchIndexForItem('me'),
+                      navigationSettings!,
+                    ),
+                  ),
+                );
           },
         ),
         const Divider(indent: 12, endIndent: 12),
@@ -79,7 +81,7 @@ class RootNavigationDrawer extends ConsumerWidget {
 
         const SizedBox(height: 12),
         const Divider(indent: 12, endIndent: 12),
-        _buildSettingsButton(context),
+        _buildSettingsButton(context, ref),
         const SizedBox(height: 12),
       ],
     );
@@ -104,7 +106,11 @@ class RootNavigationDrawer extends ConsumerWidget {
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: InkWell(
-              onTap: () => onRootSelected(index),
+              onTap: () {
+                ref.read(navigationControllerProvider.notifier).closeDrawer(
+                      onComplete: () => onRootSelected(index),
+                    );
+              },
               borderRadius: BorderRadius.circular(32),
               splashColor: theme.colorScheme.primary.withAlpha(20),
               highlightColor: theme.colorScheme.primary.withAlpha(10),
@@ -237,7 +243,7 @@ class RootNavigationDrawer extends ConsumerWidget {
               isSelected: selectedSub == i,
               onTap: () {
                 ref.read(misskeySubIndexProvider.notifier).set(i);
-                Navigator.of(context).maybePop();
+                ref.read(navigationControllerProvider.notifier).closeDrawer();
               },
             ),
         ],
@@ -326,7 +332,7 @@ class RootNavigationDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildSettingsButton(BuildContext context) {
+  Widget _buildSettingsButton(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -335,7 +341,9 @@ class RootNavigationDrawer extends ConsumerWidget {
         cursor: SystemMouseCursors.click,
         child: InkWell(
           onTap: () {
-            context.push('/settings');
+            ref.read(navigationControllerProvider.notifier).closeDrawer(
+                  onComplete: () => context.push('/settings'),
+                );
           },
           borderRadius: BorderRadius.circular(32),
           splashColor: theme.colorScheme.primary.withAlpha(20),

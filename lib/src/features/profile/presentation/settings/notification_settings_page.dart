@@ -134,7 +134,7 @@ class NotificationSettingsPage extends ConsumerWidget {
           : () async {
               await NotificationService().showNotification(
                 id: 0,
-                title: 'CyaniTalk (≧▽≦)',
+                title: 'Notification Test',
                 body: 'settings_notif_test_body'.tr(),
               );
             },

@@ -1,10 +1,13 @@
-if(POLICY CMP0175)
-  cmake_policy(SET CMP0175 OLD)
-endif()
-
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
 project(cyanitalk LANGUAGES CXX)
+
+# Suppress CMP0175 warning from plugins using add_custom_command(TARGET ... DEPENDS)
+# Must be set after cmake_minimum_required and before add_subdirectory/plugin includes
+if(POLICY CMP0175)
+  cmake_policy(SET CMP0175 OLD)
+  set(CMAKE_POLICY_DEFAULT_CMP0175 OLD)
+endif()
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
@@ -49,8 +52,9 @@ add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
 # of modifying this function.
 function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_17)
-  target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4100")
+  target_compile_options(${TARGET} PRIVATE /W4 /WX /wd"4018" /wd"4100" /wd"4189" /wd"4244" /wd"4245" /wd"4267" /wd"4305" /wd"4389" /wd"4456" /wd"4457" /wd"4458" /wd"4459" /wd"4701" /wd"4702" /wd"4819" /wd"4996" /FS)
   target_compile_options(${TARGET} PRIVATE /EHsc)
+  target_link_options(${TARGET} PRIVATE /IGNORE:4075)
   target_compile_definitions(${TARGET} PRIVATE "_HAS_EXCEPTIONS=0")
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
   target_compile_definitions(${TARGET} PRIVATE

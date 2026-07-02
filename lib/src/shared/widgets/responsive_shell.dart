@@ -11,6 +11,8 @@ import '/src/features/profile/presentation/settings/appearance_page.dart';
 import 'custom_title_bar.dart';
 import 'root_navigation_drawer.dart';
 
+const double _kDrawerWidth = 304.0;
+
 class ResponsiveShell extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -20,13 +22,31 @@ class ResponsiveShell extends ConsumerStatefulWidget {
   ConsumerState<ResponsiveShell> createState() => _ResponsiveShellState();
 }
 
-class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
+class _ResponsiveShellState extends ConsumerState<ResponsiveShell>
+    with TickerProviderStateMixin {
   bool _isTransitioning = false;
   Timer? _transitionTimer;
+  late AnimationController _drawerAnimationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _drawerAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    // Attach to NavigationController after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(navigationControllerProvider.notifier)
+          .attachAnimationController(_drawerAnimationController);
+    });
+  }
 
   @override
   void dispose() {
     _transitionTimer?.cancel();
+    _drawerAnimationController.dispose();
     super.dispose();
   }
 
@@ -94,24 +114,74 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
         final useCustomTitleBar = isDesktop &&
             (appearanceAsync.asData?.value.useCustomTitleBar ?? true);
 
-        return Scaffold(
-          key: rootScaffoldKey,
-          drawer: RootNavigationDrawer(
-            selectedRootIndex: selectedRootIndex,
-            onRootSelected: (index) =>
-                _onRootSelected(index, navigationSettings),
-          ),
-          body: Column(
-            children: [
-              if (useCustomTitleBar) const CustomTitleBar(),
-              Expanded(
-                child: ExcludeSemantics(
-                  excluding: _isTransitioning,
-                  child: widget.navigationShell,
-                ),
+        return Column(
+          children: [
+            if (useCustomTitleBar) const CustomTitleBar(),
+            Expanded(
+              child: Stack(
+                children: [
+                  // Layer 1: Scaffold (main content)
+                  Scaffold(
+                    body: ExcludeSemantics(
+                      excluding: _isTransitioning,
+                      child: widget.navigationShell,
+                    ),
+                  ),
+
+                  // Layer 2: Dim overlay (below title bar z-level)
+                  if (useCustomTitleBar)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: AnimatedBuilder(
+                        animation: _drawerAnimationController,
+                        builder: (context, child) {
+                          final opacity = _drawerAnimationController.value * 0.5;
+                          if (opacity <= 0) return const SizedBox.shrink();
+                          return GestureDetector(
+                            onTap: () => ref
+                                .read(navigationControllerProvider.notifier)
+                                .closeDrawer(),
+                            child: Container(
+                              color: Colors.black.withValues(alpha: opacity),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                  // Layer 3: Drawer overlay (left side, full height, above dim)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    width: _kDrawerWidth,
+                    child: AnimatedBuilder(
+                      animation: _drawerAnimationController,
+                      builder: (context, child) {
+                        final offset = Offset.lerp(
+                          const Offset(-1, 0),
+                          Offset.zero,
+                          _drawerAnimationController.value,
+                        )!;
+                        return FractionalTranslation(
+                          translation: offset,
+                          child: child,
+                        );
+                      },
+                      child: RootNavigationDrawer(
+                        selectedRootIndex: selectedRootIndex,
+                        onRootSelected: (index) =>
+                            _onRootSelected(index, navigationSettings),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

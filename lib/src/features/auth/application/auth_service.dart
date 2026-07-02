@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/auth/domain/account.dart';
+import '/src/features/auth/domain/misskey_permissions.dart';
 import '/src/core/api/network_client.dart';
 import '/src/core/core.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
@@ -58,10 +59,7 @@ class AuthService extends _$AuthService {
 
     final uri = Uri.https(sanitizedHost, '/miauth/$session', {
       'name': 'CyaniTalk',
-
-      'permission':
-          'read:account,write:account,read:notes,write:notes,read:blocks,write:blocks,read:drive,write:drive,read:favorites,write:favorites,read:following,write:following,read:messaging,write:messaging,read:mutes,write:mutes,read:notifications,write:notifications,read:reactions,write:reactions,read:votes,write:votes,read:pages,write:pages,read:gallery,write:gallery,read:flash,write:flash,read:chat,write:chat,read:antennas,write:antennas,read:clips,write:clips,read:channels,write:channels,read:user-groups,write:user-groups', // 请求所需权限
-      // 'callback': 'cyanitalk://callback', // 未来可能需要的深度链接
+      'permission': MisskeyPermissions.toMiAuthString(),
     });
 
     logger.debug('生成MiAuth URL: ${uri.toString()}');

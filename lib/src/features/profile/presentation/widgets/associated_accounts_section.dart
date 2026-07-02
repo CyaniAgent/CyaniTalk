@@ -6,6 +6,7 @@ import 'dart:convert';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/auth/domain/account.dart';
 import '/src/features/auth/presentation/widgets/add_account_dialog.dart';
+import '/src/features/auth/presentation/widgets/misskey_permissions_sheet.dart';
 import 'user_details_view.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 
@@ -207,6 +208,14 @@ class _AssociatedAccountsSectionState
                           ),
                         ),
                       ],
+                      const SizedBox(height: 12),
+                      // 查看 API 权限
+                      TextButton.icon(
+                        onPressed: () =>
+                            MisskeyPermissionsSheet.show(context),
+                        icon: const Icon(Icons.key, size: 18),
+                        label: Text('accounts_view_permissions'.tr()),
+                      ),
                     ],
                   ),
                 ),

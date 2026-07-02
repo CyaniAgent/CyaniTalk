@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:webview_windows/webview_windows.dart' as windows;
-import 'package:webview_flutter/webview_flutter.dart' as mobile;
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// WAF 验证窗口
@@ -25,62 +23,13 @@ class VerificationWindow extends StatefulWidget {
 }
 
 class _VerificationWindowState extends State<VerificationWindow> {
-  late windows.WebviewController _windowsController;
-  late mobile.WebViewController _mobileController;
+  InAppWebViewController? _webViewController;
   Timer? _cookieTimer;
   bool _isWebviewInitialized = false;
-  final bool _isWindows = Platform.isWindows;
 
   @override
   void initState() {
     super.initState();
-    if (_isWindows) {
-      _initWindowsWebview();
-    } else {
-      _initMobileWebview();
-    }
-  }
-
-  Future<void> _initWindowsWebview() async {
-    _windowsController = windows.WebviewController();
-    try {
-      await _windowsController.initialize();
-      await _windowsController.setBackgroundColor(Colors.transparent);
-      await _windowsController.setPopupWindowPolicy(
-        windows.WebviewPopupWindowPolicy.deny,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _isWebviewInitialized = true;
-      });
-
-      await _windowsController.loadUrl(widget.url);
-      _startCookieCheck();
-    } catch (e) {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    }
-  }
-
-  Future<void> _initMobileWebview() async {
-    _mobileController = mobile.WebViewController()
-      ..setJavaScriptMode(mobile.JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        mobile.NavigationDelegate(
-          onPageFinished: (String url) {
-            _startCookieCheck();
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
-
-    if (!mounted) return;
-    setState(() {
-      _isWebviewInitialized = true;
-    });
   }
 
   void _startCookieCheck() {
@@ -89,27 +38,9 @@ class _VerificationWindowState extends State<VerificationWindow> {
       timer,
     ) async {
       try {
-        String? cookiesString;
-        if (_isWindows) {
-          if (!_windowsController.value.isInitialized) return;
-          cookiesString = await _windowsController.executeScript(
-            'document.cookie',
-          );
-        } else {
-          cookiesString =
-              await _mobileController.runJavaScriptReturningResult(
-                    'document.cookie',
-                  )
-                  as String?;
-          if (cookiesString != null &&
-              cookiesString.startsWith('"') &&
-              cookiesString.endsWith('"')) {
-            cookiesString = cookiesString.substring(
-              1,
-              cookiesString.length - 1,
-            );
-          }
-        }
+        final cookiesString = await _webViewController?.evaluateJavascript(
+          source: 'document.cookie',
+        );
 
         if (cookiesString != null && cookiesString.isNotEmpty) {
           final cookies = cookiesString.split(';');
@@ -137,23 +68,24 @@ class _VerificationWindowState extends State<VerificationWindow> {
   @override
   void dispose() {
     _cookieTimer?.cancel();
-    if (_isWindows) {
-      _windowsController.dispose();
-    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = Theme.of(context).platform == TargetPlatform.windows ||
+        Theme.of(context).platform == TargetPlatform.macOS ||
+        Theme.of(context).platform == TargetPlatform.linux;
+
     return Center(
       child: Material(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         elevation: 8,
         child: Container(
-          width: _isWindows ? 800 : double.infinity,
-          height: _isWindows ? 600 : double.infinity,
-          margin: _isWindows ? EdgeInsets.zero : const EdgeInsets.all(16),
+          width: isDesktop ? 800 : double.infinity,
+          height: isDesktop ? 600 : double.infinity,
+          margin: isDesktop ? EdgeInsets.zero : const EdgeInsets.all(16),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
           child: Column(
@@ -178,9 +110,27 @@ class _VerificationWindowState extends State<VerificationWindow> {
               ),
               Expanded(
                 child: _isWebviewInitialized
-                    ? (_isWindows
-                          ? windows.Webview(_windowsController)
-                          : mobile.WebViewWidget(controller: _mobileController))
+                    ? InAppWebView(
+                        initialUrlRequest: URLRequest(
+                          url: WebUri(widget.url),
+                        ),
+                        initialSettings: InAppWebViewSettings(
+                          javaScriptEnabled: true,
+                          transparentBackground: true,
+                          useShouldOverrideUrlLoading: false,
+                        ),
+                        onWebViewCreated: (controller) {
+                          _webViewController = controller;
+                        },
+                        onLoadStop: (controller, url) {
+                          if (!_isWebviewInitialized) {
+                            setState(() {
+                              _isWebviewInitialized = true;
+                            });
+                            _startCookieCheck();
+                          }
+                        },
+                      )
                     : const Center(child: CyaniLoadingIndicator()),
               ),
             ],
