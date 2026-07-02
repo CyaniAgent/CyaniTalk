@@ -205,26 +205,35 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   );
                 }
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == me.id;
-
-                    if (widget.type == ChatType.direct &&
-                        !message.isRead &&
-                        !isMe) {
-                      Future.microtask(
-                        () => ref
-                            .read(misskeyMessagingProvider(widget.id).notifier)
-                            .markAsRead(message.id),
-                      );
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    if (widget.type == ChatType.direct) {
+                      ref.invalidate(misskeyMessagingProvider(widget.id));
+                    } else {
+                      ref.invalidate(misskeyChatRoomProvider(widget.id));
                     }
-
-                    return _buildMessageBubble(context, message, isMe, me.id);
                   },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isMe = message.senderId == me.id;
+
+                      if (widget.type == ChatType.direct &&
+                          !message.isRead &&
+                          !isMe) {
+                        Future.microtask(
+                          () => ref
+                              .read(misskeyMessagingProvider(widget.id).notifier)
+                              .markAsRead(message.id),
+                        );
+                      }
+
+                      return _buildMessageBubble(context, message, isMe, me.id);
+                    },
+                  ),
                 );
               },
               loading: () => const Center(child: CyaniLoadingIndicator()),

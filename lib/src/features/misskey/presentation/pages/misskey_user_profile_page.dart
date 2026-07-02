@@ -7,6 +7,7 @@ import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/core/utils/logger.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/cyani_error_widget.dart';
 
 class MisskeyUserProfilePage extends ConsumerStatefulWidget {
   final String userId;
@@ -90,7 +91,7 @@ class _MisskeyUserProfilePageState
               : const Center(child: CyaniLoadingIndicator()),
           error: (err, stack) => Scaffold(
             appBar: AppBar(title: const Text('Error')),
-            body: Center(child: Text('Error: $err')),
+            body: CyaniErrorWidget(message: err.toString()),
           ),
         ),
       ),
@@ -110,7 +111,10 @@ class _MisskeyUserProfilePageState
     final isWideScreen = MediaQuery.of(context).size.width > 900;
     final bannerHeight = isWideScreen ? 350.0 : 200.0;
 
-    return NestedScrollView(
+    return RefreshIndicator(
+      onRefresh: () =>
+          ref.read(misskeyUserProvider(widget.userId).notifier).refresh(),
+      child: NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           SliverOverlapAbsorber(
@@ -244,6 +248,7 @@ class _MisskeyUserProfilePageState
           _buildComingSoon('Play'),
           _buildComingSoon('图集'),
         ],
+      ),
       ),
     );
   }
@@ -791,7 +796,7 @@ class _MisskeyUserProfilePageState
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar tabBar;
 
-  _TabBarDelegate(this.tabBar);
+  const _TabBarDelegate(this.tabBar);
 
   @override
   double get minExtent => tabBar.preferredSize.height;

@@ -88,7 +88,7 @@ class NavigationSettings {
       (element) =>
           element.id == id && element.type == NavigationElementType.item,
       orElse: () => NavigationItemElement(
-        item: NavigationItem(
+        item: const NavigationItem(
           id: '',
           title: '',
           icon: Icons.star_outline,

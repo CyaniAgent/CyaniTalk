@@ -75,7 +75,7 @@ class NavigationSettingsNotifier extends _$NavigationSettingsNotifier {
           for (final id in orderList) {
             final item = items.firstWhere(
               (item) => item.id == id,
-              orElse: () => NavigationItem(
+              orElse: () => const NavigationItem(
                 id: '',
                 title: '',
                 icon: Icons.star_outline,

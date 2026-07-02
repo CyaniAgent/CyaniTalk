@@ -20,6 +20,6 @@ void showToast({
     showIcon: showIcon,
     callbacks: onTap != null
         ? ToastificationCallbacks(onTap: (_) => onTap())
-        : ToastificationCallbacks(),
+        : const ToastificationCallbacks(),
   );
 }

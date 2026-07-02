@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/src/core/theme/design_tokens.dart';
+import 'package:cyanitalk/src/core/theme/design_tokens.dart';
 
 class DesignPlaygroundPage extends StatelessWidget {
   const DesignPlaygroundPage({super.key});
@@ -16,7 +16,7 @@ class DesignPlaygroundPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         children: [
-          _SectionHeader(title: 'Color Scheme'),
+          const _SectionHeader(title: 'Color Scheme'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +86,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Typography'),
+          const _SectionHeader(title: 'Typography'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +171,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'M3E Shape Tokens'),
+          const _SectionHeader(title: 'M3E Shape Tokens'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +204,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'M3E Slider Tokens'),
+          const _SectionHeader(title: 'M3E Slider Tokens'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,7 +226,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'M3E Menu Tokens'),
+          const _SectionHeader(title: 'M3E Menu Tokens'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +253,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'M3E Sound Picker Tokens'),
+          const _SectionHeader(title: 'M3E Sound Picker Tokens'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +283,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'M3E Title Bar Tokens'),
+          const _SectionHeader(title: 'M3E Title Bar Tokens'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,8 +305,8 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Buttons'),
-          _Card(
+          const _SectionHeader(title: 'Buttons'),
+          const _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -314,39 +314,39 @@ class DesignPlaygroundPage extends StatelessWidget {
                   label: 'FilledButton',
                   child: FilledButton(
                     onPressed: null,
-                    child: const Text('Filled'),
+                    child: Text('Filled'),
                   ),
                 ),
                 _ButtonRow(
                   label: 'FilledTonalButton',
                   child: FilledButton.tonal(
                     onPressed: null,
-                    child: const Text('Tonal'),
+                    child: Text('Tonal'),
                   ),
                 ),
                 _ButtonRow(
                   label: 'OutlinedButton',
                   child: OutlinedButton(
                     onPressed: null,
-                    child: const Text('Outlined'),
+                    child: Text('Outlined'),
                   ),
                 ),
                 _ButtonRow(
                   label: 'TextButton',
-                  child: TextButton(onPressed: null, child: const Text('Text')),
+                  child: TextButton(onPressed: null, child: Text('Text')),
                 ),
                 _ButtonRow(
                   label: 'IconButton',
                   child: IconButton(
                     onPressed: null,
-                    icon: const Icon(Icons.favorite),
+                    icon: Icon(Icons.favorite),
                   ),
                 ),
                 _ButtonRow(
                   label: 'FilledButton (disabled)',
                   child: FilledButton(
                     onPressed: null,
-                    child: const Text('Disabled'),
+                    child: Text('Disabled'),
                   ),
                 ),
               ],
@@ -354,36 +354,36 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Google Expressive Sliders (custom paint)'),
-          _Card(
+          const _SectionHeader(title: 'Google Expressive Sliders (custom paint)'),
+          const _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _ExpressiveSliderExample(
+                _ExpressiveSliderExample(
                   label: 'Standard slider',
                   initialValue: 45,
                 ),
-                const SizedBox(height: 12),
-                const _ExpressiveSliderExample(
+                SizedBox(height: 12),
+                _ExpressiveSliderExample(
                   label: 'Centered slider',
                   centered: true,
                   initialValue: 70,
                 ),
-                const SizedBox(height: 12),
-                const _ExpressiveSliderExample(
+                SizedBox(height: 12),
+                _ExpressiveSliderExample(
                   label: 'Discrete slider (10 divisions)',
                   initialValue: 40,
                   divisions: 10,
                   showIndicator: true,
                 ),
-                const SizedBox(height: 12),
-                const _ExpressiveRangeSliderExample(label: 'Range slider'),
+                SizedBox(height: 12),
+                _ExpressiveRangeSliderExample(label: 'Range slider'),
               ],
             ),
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Chips'),
+          const _SectionHeader(title: 'Chips'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,20 +392,20 @@ class DesignPlaygroundPage extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 4,
                   children: [
-                    Chip(label: const Text('Assist')),
-                    Chip(
-                      label: const Text('Filter'),
-                      deleteIcon: const Icon(Icons.close, size: 18),
+                    const Chip(label: Text('Assist')),
+                    const Chip(
+                      label: Text('Filter'),
+                      deleteIcon: Icon(Icons.close, size: 18),
                       onDeleted: null,
                     ),
-                    InputChip(label: const Text('Input'), selected: true),
+                    const InputChip(label: Text('Input'), selected: true),
                     FilterChip(
                       label: const Text('Filter'),
                       selected: true,
                       onSelected: (_) {},
                     ),
-                    ChoiceChip(label: const Text('Choice'), selected: true),
-                    ActionChip(label: const Text('Action'), onPressed: null),
+                    const ChoiceChip(label: Text('Choice'), selected: true),
+                    const ActionChip(label: Text('Action'), onPressed: null),
                   ],
                 ),
               ],
@@ -413,7 +413,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Cards'),
+          const _SectionHeader(title: 'Cards'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,7 +454,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Progress Indicators'),
+          const _SectionHeader(title: 'Progress Indicators'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,7 +474,7 @@ class DesignPlaygroundPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 24),
-          _SectionHeader(title: 'Dialogs (visual)'),
+          const _SectionHeader(title: 'Dialogs (visual)'),
           _Card(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,17 +509,17 @@ class DesignPlaygroundPage extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
                             onPressed: null,
-                            child: const Text('Cancel'),
+                            child: Text('Cancel'),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           FilledButton(
                             onPressed: null,
-                            child: const Text('Confirm'),
+                            child: Text('Confirm'),
                           ),
                         ],
                       ),

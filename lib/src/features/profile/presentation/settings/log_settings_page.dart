@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/profile/application/log_settings_provider.dart';
 import '/src/core/utils/logger.dart';
+import '/src/core/theme/color_constants.dart';
 import '/src/core/widgets/settings_widgets.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
@@ -83,9 +84,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     }
   }
 
-  static const _brown = Color(0xFF8D6E63);
-  static const _cyan = Color(0xFF26A69A);
-  static const _amber = Color(0xFFFFCA28);
+  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
 
   @override
   Widget build(BuildContext context) {
@@ -119,13 +118,13 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
               children: [
                 SettingsTile(
                   icon: Icons.description_outlined,
-                  iconColor: _brown,
+                  iconColor: SettingsIconColors.brown,
                   title: 'settings_logs_view'.tr(),
                   onTap: () => _viewCurrentLogs(context),
                 ),
                 SettingsTile(
                   icon: Icons.file_upload_outlined,
-                  iconColor: _brown,
+                  iconColor: SettingsIconColors.brown,
                   title: 'settings_logs_export'.tr(),
                   onTap: _exportLogs,
                 ),
@@ -158,7 +157,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => Center(child: Text('Error')),
+        error: (_, _) => const Center(child: Text('Error')),
       ),
     );
   }
@@ -171,10 +170,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(
-              color: _brown.withAlpha(25),
+              color: SettingsIconColors.brown.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.tune, color: _brown, size: 20),
+            child: const Icon(Icons.tune, color: SettingsIconColors.brown, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -217,10 +216,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(
-              color: _cyan.withAlpha(25),
+              color: SettingsIconColors.cyan.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.storage, color: _cyan, size: 20),
+            child: const Icon(Icons.storage, color: SettingsIconColors.cyan, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -267,10 +266,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(
-              color: _amber.withAlpha(25),
+              color: SettingsIconColors.amber.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.auto_delete, color: _amber, size: 20),
+            child: const Icon(Icons.auto_delete, color: SettingsIconColors.amber, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -306,10 +305,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(
-              color: _amber.withAlpha(25),
+              color: SettingsIconColors.amber.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.calendar_today, color: _amber, size: 20),
+            child: const Icon(Icons.calendar_today, color: SettingsIconColors.amber, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -359,7 +358,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     final size = (stat.size / 1024).toStringAsFixed(1);
     final isCurrent = file.path == logger.logFilePath;
 
-    // 根据文件名生成确定的“随机”字母 (A-Z)
+    // 根据文件名生成确定的"随机"字母 (A-Z)
     final charCode = 65 + (fileName.hashCode.abs() % 26);
     final letter = String.fromCharCode(charCode);
 

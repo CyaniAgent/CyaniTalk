@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/features/update/application/update_notifier.dart';
+import 'package:cyanitalk/src/features/update/presentation/update_bottom_sheet.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
+import 'package:cyanitalk/src/core/utils/logger.dart';
 import 'about_page.dart';
 import 'accounts_page.dart';
 import 'appearance_page.dart';
 import 'cache_settings_page.dart';
-import 'notification_settings_page.dart';
-import 'sound_settings_page.dart';
-import 'navigation_settings_page.dart';
 import 'developer_settings_page.dart';
 import 'licenses_page.dart';
+import 'navigation_settings_page.dart';
 import 'network_settings_page.dart';
-import '/src/core/widgets/settings_widgets.dart';
-import '/src/shared/widgets/desktop_page_shell.dart';
-import '/src/features/update/application/update_notifier.dart';
-import '/src/features/update/presentation/update_bottom_sheet.dart';
-import '/src/shared/widgets/toast_helper.dart';
+import 'notification_settings_page.dart';
+import 'sound_settings_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -48,21 +49,13 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('show_miao_language', value);
-    } catch (_) {}
+    } catch (e) {
+      logger.warning('SettingsPage: Failed to save show_miao_language preference', e);
+    }
   }
 
   // ── Icon color palette ──────────────────────────────────────────
-  static const _blue = Color(0xFF42A5F5);
-  static const _cyan = Color(0xFF26A69A);
-  static const _purple = Color(0xFFAB47BC);
-  static const _lightBlue = Color(0xFF4FC3F7);
-  static const _orange = Color(0xFFFF7043);
-  static const _pink = Color(0xFFEC407A);
-  static const _indigo = Color(0xFF5C6BC0);
-  static const _green = Color(0xFF66BB6A);
-  static const _amber = Color(0xFFFFCA28);
-  static const _brown = Color(0xFF8D6E63);
-  static const _blueGrey = Color(0xFF78909C);
+  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               SettingsTile(
                 icon: Icons.person_outline,
-                iconColor: _blue,
+                iconColor: SettingsIconColors.blue,
                 title: 'settings_account_title'.tr(),
                 subtitle: 'settings_account_description'.tr(),
                 onTap: () => _pushSettingsPage(const AccountsPage()),
@@ -89,7 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               SettingsTile(
                 icon: Icons.wifi,
-                iconColor: _cyan,
+                iconColor: SettingsIconColors.cyan,
                 title: 'settings_network_title'.tr(),
                 subtitle: 'settings_network_description'.tr(),
                 onTap: () => _pushSettingsPage(const NetworkSettingsPage()),
@@ -103,7 +96,7 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               SettingsTile(
                 icon: Icons.palette_outlined,
-                iconColor: _purple,
+                iconColor: SettingsIconColors.purple,
                 title: 'settings_appearance_title'.tr(),
                 subtitle: 'settings_appearance_description'.tr(),
                 onTap: () => _pushSettingsPage(const AppearancePage()),
@@ -117,7 +110,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 child: SettingsTile(
                   icon: Icons.language_outlined,
-                  iconColor: _lightBlue,
+                  iconColor: SettingsIconColors.lightBlue,
                   title: 'settings_language_title'.tr(),
                   subtitle: 'settings_language_description'.tr(),
                   onTap: () => _showLanguageDialog(context),
@@ -125,21 +118,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               SettingsTile(
                 icon: Icons.notifications_outlined,
-                iconColor: _orange,
+                iconColor: SettingsIconColors.orange,
                 title: 'settings_notifications_title'.tr(),
                 subtitle: 'settings_notifications_description'.tr(),
                 onTap: () => _pushSettingsPage(const NotificationSettingsPage()),
               ),
               SettingsTile(
                 icon: Icons.volume_up_outlined,
-                iconColor: _pink,
+                iconColor: SettingsIconColors.pink,
                 title: 'settings_sound_title'.tr(),
                 subtitle: 'settings_sound_description'.tr(),
                 onTap: () => _pushSettingsPage(const SoundSettingsPage()),
               ),
               SettingsTile(
                 icon: Icons.navigation_outlined,
-                iconColor: _indigo,
+                iconColor: SettingsIconColors.indigo,
                 title: 'settings_navigation_title'.tr(),
                 subtitle: 'settings_navigation_description'.tr(),
                 onTap: () => _pushSettingsPage(const NavigationSettingsPage()),
@@ -153,21 +146,21 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               SettingsTile(
                 icon: Icons.system_update_rounded,
-                iconColor: _green,
+                iconColor: SettingsIconColors.green,
                 title: '检查更新',
                 subtitle: '检查是否有新版本可用',
                 onTap: _checkForUpdate,
               ),
               SettingsTile(
                 icon: Icons.bug_report_outlined,
-                iconColor: _amber,
+                iconColor: SettingsIconColors.amber,
                 title: 'settings_developer_title'.tr(),
                 subtitle: 'settings_developer_description'.tr(),
                 onTap: () => _pushSettingsPage(const DeveloperSettingsPage()),
               ),
               SettingsTile(
                 icon: Icons.storage_outlined,
-                iconColor: _brown,
+                iconColor: SettingsIconColors.brown,
                 title: 'settings_storage_title'.tr(),
                 subtitle: 'settings_storage_description'.tr(),
                 onTap: () => _pushSettingsPage(const CacheSettingsPage()),
@@ -181,14 +174,14 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               SettingsTile(
                 icon: Icons.info_outline,
-                iconColor: _blueGrey,
+                iconColor: SettingsIconColors.blueGrey,
                 title: 'settings_about_title'.tr(),
                 subtitle: 'settings_about_description'.tr(),
                 onTap: () => _pushSettingsPage(const AboutPage()),
               ),
               SettingsTile(
                 icon: Icons.description_outlined,
-                iconColor: _blueGrey,
+                iconColor: SettingsIconColors.blueGrey,
                 title: 'settings_licenses_title'.tr(),
                 subtitle: 'settings_licenses_description'.tr(),
                 onTap: () => _pushSettingsPage(const LicensesPage()),
@@ -218,11 +211,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Push a settings sub-page, wrapping it with [DesktopPageShell] on desktop.
   void _pushSettingsPage(Widget page) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => DesktopPageShell(child: page),
-      ),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
   }
 
   void _showLanguageDialog(BuildContext context) {

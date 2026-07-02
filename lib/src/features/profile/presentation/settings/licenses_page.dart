@@ -75,7 +75,7 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
         const SizedBox(height: 4),
         SettingsCardGroup(
           margin: const EdgeInsets.symmetric(horizontal: 16),
-          children: dependencies.map((package) => _buildDependencyTile(package)).toList(),
+          children: dependencies.map(_buildDependencyTile).toList(),
         ),
       ],
     );

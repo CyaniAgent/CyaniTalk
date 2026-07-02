@@ -34,9 +34,7 @@ class MisskeyNotificationsNotifier extends _$MisskeyNotificationsNotifier {
         _handleNewNotification(event);
       });
 
-      ref.onDispose(() {
-        subscription.cancel();
-      });
+      ref.onDispose(subscription.cancel);
 
       return notifications;
     } catch (e, stack) {

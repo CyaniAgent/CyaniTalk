@@ -122,7 +122,7 @@ class AppLogger {
     debug('AppLogger: User log level: $logLevel');
 
     // 异步执行清理
-    Future.microtask(() => cleanupLogs());
+    Future.microtask(cleanupLogs);
   }
 
   /// 为测试环境初始化日志配置
@@ -171,7 +171,7 @@ class AppLogger {
     } catch (e) {
       // 如果文件创建失败，返回本地控制台输出
       debugPrint('AppLogger Error: Failed to create file output: $e');
-      final defaultPath = './${Constants.logFilePrefix}_logs.log';
+      const defaultPath = './${Constants.logFilePrefix}_logs.log';
       _logFilePath = defaultPath;
       return AppFileOutput(
         file: File(defaultPath),
@@ -215,7 +215,7 @@ class AppLogger {
   Future<void> _checkAndCleanLogFile(File file) async {
     try {
       final stat = await file.stat();
-      final maxSize = Constants.defaultMaxLogSize * 1024 * 1024; // MB to bytes
+      const maxSize = Constants.defaultMaxLogSize * 1024 * 1024; // MB to bytes
 
       if (stat.size > maxSize) {
         // 超过限制，保留最后50%内容

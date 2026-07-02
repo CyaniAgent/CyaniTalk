@@ -146,7 +146,7 @@ class _DriveFilePickerSheetState extends ConsumerState<DriveFilePickerSheet> {
         children: [
           // 根目录按钮
           IconButton(
-            icon: Icon(Icons.folder_rounded, size: 20),
+            icon: const Icon(Icons.folder_rounded, size: 20),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             tooltip: 'drive_root'.tr(),

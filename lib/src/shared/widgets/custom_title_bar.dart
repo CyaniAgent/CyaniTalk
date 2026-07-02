@@ -3,10 +3,66 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '/src/core/core.dart';
+import 'package:cyanitalk/src/core/core.dart';
 
+/// Controller for the custom title bar.
+///
+/// Pages can use [CustomTitleBar.of] to access the controller and update the
+/// title bar's title and actions.
+class TitleBarController extends ChangeNotifier {
+  String _title = 'CyaniTalk';
+  List<Widget> _actions = const [];
+
+  String get title => _title;
+  List<Widget> get actions => _actions;
+
+  /// Set the title displayed in the center of the title bar.
+  void setTitle(String title) {
+    if (_title != title) {
+      _title = title;
+      notifyListeners();
+    }
+  }
+
+  /// Set action widgets displayed in the title bar (Windows/Linux only).
+  void setActions(List<Widget> actions) {
+    _actions = actions;
+    notifyListeners();
+  }
+
+  /// Reset title bar to defaults.
+  void reset() {
+    _title = 'CyaniTalk';
+    _actions = const [];
+    notifyListeners();
+  }
+}
+
+class _TitleBarInherited extends InheritedWidget {
+  final TitleBarController controller;
+
+  const _TitleBarInherited({
+    required this.controller,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify(_TitleBarInherited oldWidget) => false;
+}
+
+/// Desktop custom title bar with window controls and [TitleBarController]
+/// integration.
 class CustomTitleBar extends StatelessWidget {
-  const CustomTitleBar({super.key});
+  final TitleBarController controller;
+
+  const CustomTitleBar({super.key, required this.controller});
+
+  /// Access the [TitleBarController] from the widget tree.
+  static TitleBarController of(BuildContext context) {
+    final inherited = context.dependOnInheritedWidgetOfExactType<_TitleBarInherited>();
+    assert(inherited != null, 'No _TitleBarInherited found in context');
+    return inherited!.controller;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,35 +80,62 @@ class CustomTitleBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
-        children: [
-          if (isMacOS) ...[
-            SizedBox(width: tokens.macOSTrafficLightInset),
-            _MacOSTrafficLights(),
-            const Spacer(),
-            _TitleLabel(),
-            const Spacer(),
-          ] else ...[
-              Expanded(
-                child: DragToMoveArea(
-                  child: const Center(child: _TitleLabel()),
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, _) {
+          return Row(
+            children: [
+              if (isMacOS) ...[
+                SizedBox(width: tokens.macOSTrafficLightInset),
+                _MacOSTrafficLights(),
+                const Spacer(),
+                _TitleLabel(title: controller.title),
+                const Spacer(),
+              ] else ...[
+                Expanded(
+                  child: DragToMoveArea(
+                    child: Center(child: _TitleLabel(title: controller.title)),
+                  ),
                 ),
-              ),
-            _WindowControls(),
-          ],
-        ],
+                ...controller.actions,
+                _WindowControls(),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
 }
 
+/// Wraps the app with [TitleBarController] access.
+///
+/// Must be placed above [MaterialApp] so that [CustomTitleBar.of] works
+/// everywhere.
+class TitleBarScope extends StatelessWidget {
+  final TitleBarController controller;
+  final Widget child;
+
+  const TitleBarScope({
+    super.key,
+    required this.controller,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _TitleBarInherited(controller: controller, child: child);
+  }
+}
+
 class _TitleLabel extends StatelessWidget {
-  const _TitleLabel();
+  final String title;
+  const _TitleLabel({required this.title});
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      'CyaniTalk',
+      title,
       style: Theme.of(context).textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
       ),
@@ -72,14 +155,14 @@ class _MacOSTrafficLights extends StatelessWidget {
           defaultColor: const Color(0xFFFF5F56),
           hoverColor: const Color(0xFFFF3333),
           hoverIcon: Icons.close,
-          onTap: () => windowManager.close(),
+          onTap: windowManager.close,
         ),
         SizedBox(width: tokens.macOSTrafficLightSpacing),
         _MacOSTrafficLightButton(
           defaultColor: const Color(0xFFFFBD2E),
           hoverColor: const Color(0xFFFFAA00),
           hoverIcon: Icons.remove,
-          onTap: () => windowManager.minimize(),
+          onTap: windowManager.minimize,
         ),
         SizedBox(width: tokens.macOSTrafficLightSpacing),
         _MacOSTrafficLightButton(
@@ -158,7 +241,7 @@ class _WindowControls extends StatelessWidget {
         children: [
           _WindowControlButton(
             icon: Icons.minimize,
-            onTap: () => windowManager.minimize(),
+            onTap: windowManager.minimize,
           ),
           SizedBox(width: tokens.windowButtonSpacing),
           _MaximizeControlButton(),
@@ -167,7 +250,7 @@ class _WindowControls extends StatelessWidget {
             icon: Icons.close,
             hoverBgColor: colorScheme.error,
             hoverIconColor: colorScheme.onError,
-            onTap: () => windowManager.close(),
+            onTap: windowManager.close,
           ),
         ],
       ),

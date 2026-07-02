@@ -1,17 +1,12 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '/src/core/navigation/navigation.dart';
-import '/src/core/navigation/navigation_element.dart';
-import '/src/features/profile/presentation/settings/appearance_page.dart';
-import 'custom_title_bar.dart';
+import 'package:cyanitalk/src/core/navigation/navigation.dart';
+import 'package:cyanitalk/src/core/navigation/navigation_element.dart';
 import 'root_navigation_drawer.dart';
-
-const double _kDrawerWidth = 304.0;
 
 class ResponsiveShell extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -22,31 +17,13 @@ class ResponsiveShell extends ConsumerStatefulWidget {
   ConsumerState<ResponsiveShell> createState() => _ResponsiveShellState();
 }
 
-class _ResponsiveShellState extends ConsumerState<ResponsiveShell>
-    with TickerProviderStateMixin {
+class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
   bool _isTransitioning = false;
   Timer? _transitionTimer;
-  late AnimationController _drawerAnimationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _drawerAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    // Attach to NavigationController after first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(navigationControllerProvider.notifier)
-          .attachAnimationController(_drawerAnimationController);
-    });
-  }
 
   @override
   void dispose() {
     _transitionTimer?.cancel();
-    _drawerAnimationController.dispose();
     super.dispose();
   }
 
@@ -70,7 +47,6 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell>
   @override
   Widget build(BuildContext context) {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
-    final appearanceAsync = ref.watch(appearanceSettingsProvider);
 
     return navigationSettingsAsync.when(
       loading: () => const Scaffold(body: SizedBox.shrink()),
@@ -109,79 +85,17 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell>
           selectedRootIndex = -1;
         }
 
-        final isDesktop =
-            Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-        final useCustomTitleBar = isDesktop &&
-            (appearanceAsync.asData?.value.useCustomTitleBar ?? true);
-
-        return Column(
-          children: [
-            if (useCustomTitleBar) const CustomTitleBar(),
-            Expanded(
-              child: Stack(
-                children: [
-                  // Layer 1: Scaffold (main content)
-                  Scaffold(
-                    body: ExcludeSemantics(
-                      excluding: _isTransitioning,
-                      child: widget.navigationShell,
-                    ),
-                  ),
-
-                  // Layer 2: Dim overlay (below title bar z-level)
-                  if (useCustomTitleBar)
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: AnimatedBuilder(
-                        animation: _drawerAnimationController,
-                        builder: (context, child) {
-                          final opacity = _drawerAnimationController.value * 0.5;
-                          if (opacity <= 0) return const SizedBox.shrink();
-                          return GestureDetector(
-                            onTap: () => ref
-                                .read(navigationControllerProvider.notifier)
-                                .closeDrawer(),
-                            child: Container(
-                              color: Colors.black.withValues(alpha: opacity),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-
-                  // Layer 3: Drawer overlay (left side, full height, above dim)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    width: _kDrawerWidth,
-                    child: AnimatedBuilder(
-                      animation: _drawerAnimationController,
-                      builder: (context, child) {
-                        final offset = Offset.lerp(
-                          const Offset(-1, 0),
-                          Offset.zero,
-                          _drawerAnimationController.value,
-                        )!;
-                        return FractionalTranslation(
-                          translation: offset,
-                          child: child,
-                        );
-                      },
-                      child: RootNavigationDrawer(
-                        selectedRootIndex: selectedRootIndex,
-                        onRootSelected: (index) =>
-                            _onRootSelected(index, navigationSettings),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        return Scaffold(
+          key: rootScaffoldKey,
+          drawer: RootNavigationDrawer(
+            selectedRootIndex: selectedRootIndex,
+            onRootSelected: (index) =>
+                _onRootSelected(index, navigationSettings),
+          ),
+          body: ExcludeSemantics(
+            excluding: _isTransitioning,
+            child: widget.navigationShell,
+          ),
         );
       },
     );

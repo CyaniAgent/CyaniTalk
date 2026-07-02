@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '/src/core/theme/sauce_palette.dart';
 import '/src/core/theme/font_settings_notifier.dart';
 import '/src/core/utils/cache_manager.dart';
 import '/src/core/utils/logger.dart';
@@ -77,7 +76,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
           height: 8,
           decoration: BoxDecoration(
             color: i == step
-                ? SaucePalette.mikuGreen
+                ? theme.colorScheme.primary
                 : theme.colorScheme.onSurface.withAlpha(40),
             borderRadius: BorderRadius.circular(4),
           ),
@@ -128,7 +127,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             'welcome_title'.tr(),
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: SaucePalette.mikuGreen,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
@@ -225,11 +224,11 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: isSelected
-              ? SaucePalette.mikuGreen.withAlpha(20)
+              ? theme.colorScheme.primary.withAlpha(20)
               : theme.colorScheme.surfaceContainerHighest.withAlpha(80),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? SaucePalette.mikuGreen : Colors.transparent,
+            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -244,7 +243,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: SaucePalette.mikuGreen, size: 20),
+              Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
           ],
         ),
       ),
@@ -339,17 +338,17 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: isSelected
-              ? SaucePalette.mikuGreen.withAlpha(20)
+              ? theme.colorScheme.primary.withAlpha(20)
               : theme.colorScheme.surfaceContainerHighest.withAlpha(80),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? SaucePalette.mikuGreen : Colors.transparent,
+            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
             width: 1.5,
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: SaucePalette.mikuGreen, size: 24),
+            Icon(icon, color: theme.colorScheme.primary, size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -360,7 +359,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: SaucePalette.mikuGreen, size: 20),
+              Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
           ],
         ),
       ),
@@ -382,11 +381,11 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? SaucePalette.mikuGreen.withAlpha(20)
+              ? theme.colorScheme.primary.withAlpha(20)
               : theme.colorScheme.surfaceContainerHighest.withAlpha(50),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? SaucePalette.mikuGreen : Colors.transparent,
+            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -403,7 +402,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: SaucePalette.mikuGreen, size: 20),
+              Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
           ],
         ),
       ),
@@ -493,7 +492,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
           Icon(
             Icons.person_add_alt_1,
             size: 64,
-            color: SaucePalette.mikuGreen.withAlpha(150),
+            color: theme.colorScheme.primary.withAlpha(150),
           ),
           const SizedBox(height: 24),
           _buildCapsuleButton(
@@ -667,7 +666,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: SaucePalette.mikuGreen, size: 28),
+              Icon(icon, color: theme.colorScheme.primary, size: 28),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -725,8 +724,8 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Spacer(),
-        const CyaniLoadingIndicator(
-          color: SaucePalette.mikuGreen,
+        CyaniLoadingIndicator(
+          color: theme.colorScheme.primary,
           size: 48,
         ),
         const SizedBox(height: 24),
@@ -923,7 +922,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             'welcome_step6_title'.tr(),
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: SaucePalette.mikuGreen,
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
@@ -953,20 +952,22 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     required VoidCallback onPressed,
     bool filled = true,
   }) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final style = filled
         ? FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(26),
             ),
-            backgroundColor: SaucePalette.mikuGreen,
+            backgroundColor: primaryColor,
           )
         : OutlinedButton.styleFrom(
             minimumSize: const Size(double.infinity, 52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(26),
             ),
-            side: BorderSide(color: SaucePalette.mikuGreen, width: 1.5),
+            side: BorderSide(color: primaryColor, width: 1.5),
           );
 
     return SizedBox(
@@ -982,7 +983,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               onPressed: onPressed,
               child: Text(
                 label,
-                style: TextStyle(color: SaucePalette.mikuGreen),
+                style: TextStyle(color: primaryColor),
               ),
             ),
     );
@@ -1010,5 +1011,3 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     );
   }
 }
-
-

@@ -136,7 +136,7 @@ class _AudioPlayerSheetContentState
                             isLoading: isLoading,
                             colorScheme: colorScheme,
                             m3eShape: m3eShape,
-                            onPlayPause: () => audioController.togglePlayPause(),
+                            onPlayPause: audioController.togglePlayPause,
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -154,7 +154,7 @@ class _AudioPlayerSheetContentState
         error: error,
         colorScheme: colorScheme,
         m3eShape: m3eShape,
-        onRetry: () => audioController.togglePlayPause(),
+        onRetry: audioController.togglePlayPause,
       ),
     );
   }

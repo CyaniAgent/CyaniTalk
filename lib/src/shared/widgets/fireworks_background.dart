@@ -171,7 +171,7 @@ class _Burst {
 
   void _explode() {
     final baseHue = rng.nextDouble() * 360;
-    final rayCount = 8;
+    const rayCount = 8;
 
     for (int ring = 0; ring < 3; ring++) {
       final offset = ring * pi / rayCount;

@@ -815,8 +815,13 @@ class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
 
   Future<int> _fetchCount() async {
     if (!ref.mounted) return 0;
-    final repository = await ref.read(misskeyRepositoryProvider.future);
-    return await repository.getOnlineUsersCount();
+    try {
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      return await repository.getOnlineUsersCount();
+    } catch (e) {
+      logger.warning('_fetchCount failed: $e');
+      return 0;
+    }
   }
 
   Future<void> refresh() async {

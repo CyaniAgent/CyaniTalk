@@ -47,4 +47,4 @@ class SoundService {
     }
 }
 
-final soundServiceProvider = Provider((ref) => SoundService(ref));
+final soundServiceProvider = Provider(SoundService.new);

@@ -236,8 +236,8 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
           width: widget.width,
           height: widget.height ?? 200,
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Center(
-            child: const CyaniLoadingIndicator(size: 24),
+          child: const Center(
+            child: CyaniLoadingIndicator(size: 24),
           ),
         );
       },
@@ -303,7 +303,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> with Widg
                   ),
                 ),
                 const SizedBox(height: 8),
-                ElevatedButton(
+                FilledButton(
                   onPressed: _retryLoading,
                   child: Text('retry'.tr()),
                 ),

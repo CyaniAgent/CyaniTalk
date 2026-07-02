@@ -20,7 +20,9 @@ class MisskeyImageCacheService {
   static const _uuid = Uuid();
   
   // 共享 Dio 实例，减少资源开销
-  static final Dio _dio = Dio();
+  static final Dio _dio = Dio()
+    ..options.connectTimeout = const Duration(seconds: 30)
+    ..options.receiveTimeout = const Duration(seconds: 30);
   
   // 共享数据库实例
   static final MisskeyImageCacheDatabase _db = MisskeyImageCacheDatabase();
@@ -182,7 +184,9 @@ class MisskeyImageCacheService {
           return cleanExt;
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      logger.debug('MisskeyImageCacheService: Failed to extract extension from URI', e);
+    }
     return 'jpg';
   }
 }

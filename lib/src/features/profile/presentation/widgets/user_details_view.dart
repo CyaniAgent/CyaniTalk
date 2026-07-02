@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '/src/core/core.dart';
-import '/src/features/auth/domain/account.dart';
-import '/src/core/api/misskey_api.dart';
-import '/src/features/misskey/domain/misskey_user.dart';
-import '/src/features/misskey/data/misskey_repository.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/core/api/misskey_api.dart';
+import 'package:cyanitalk/src/core/core.dart';
+import 'package:cyanitalk/src/features/auth/domain/account.dart';
+import 'package:cyanitalk/src/features/misskey/data/misskey_repository.dart';
+import 'package:cyanitalk/src/features/misskey/domain/misskey_user.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_error_widget.dart';
 
 part 'user_details_view.g.dart';
 
@@ -60,7 +61,7 @@ class UserDetailsView extends ConsumerWidget {
       },
       error: (err, stack) {
         logger.error('UserDetailsView: Error building details view', err);
-        return Center(child: Text('Error: $err'));
+        return CyaniErrorWidget(message: err.toString());
       },
     );
   }

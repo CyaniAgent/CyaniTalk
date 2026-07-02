@@ -502,6 +502,7 @@
   "messaging_direct": "ダイレクト",
   "messaging_groups": "グループ",
   "notifications_title": "通知",
+  "common_error_occurred": "エラーが発生しました",
   "common_retry": "再試行",
   "common_error": "エラー",
   "common_refresh_stage": "ステージを更新",

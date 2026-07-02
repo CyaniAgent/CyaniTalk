@@ -20,6 +20,7 @@ import 'features/update/application/update_notifier.dart';
 import 'features/update/presentation/update_bottom_sheet.dart';
 import 'core/services/audio_engine.dart';
 import 'core/services/timeline_cache_database.dart';
+import 'shared/widgets/custom_title_bar.dart';
 
 /// CyaniTalk应用程序的根组件
 ///
@@ -89,7 +90,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       logger.info('CyaniTalkApp: 应用回到前台，恢复实时心跳...');
 
       // 恢复前台心跳频率 (30s)
-      ref.read(misskeyStreamingServiceProvider.notifier).setBackgroundMode(false);
+      ref
+          .read(misskeyStreamingServiceProvider.notifier)
+          .setBackgroundMode(false);
 
       // 重新连接 Misskey 流媒体服务
       ref.read(misskeyStreamingServiceProvider.notifier).reconnect();
@@ -103,7 +106,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         state == AppLifecycleState.inactive) {
       // 应用进入后台：降低心跳频率省电，保留通知流/时间线流
       logger.info('CyaniTalkApp: 应用进入后台，降低心跳频率...');
-      ref.read(misskeyStreamingServiceProvider.notifier).setBackgroundMode(true);
+      ref
+          .read(misskeyStreamingServiceProvider.notifier)
+          .setBackgroundMode(true);
     }
 
     if (state == AppLifecycleState.detached) {
@@ -129,8 +134,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
   /// 启动时检测 SQLite 并触发时间线刷新
   Future<void> _refreshTimelinesOnStartup() async {
     try {
-      final shouldRefresh =
-          await TimelineCacheDatabase().shouldRefresh('Home');
+      final shouldRefresh = await TimelineCacheDatabase().shouldRefresh('Home');
       if (!shouldRefresh) return;
 
       logger.info('CyaniTalkApp: SQLite 记录过期，触发 Home 时间线刷新');
@@ -164,7 +168,8 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     // 监听字体刷新状态以触发重建
     ref.watch(fontRefreshProvider);
 
-    final isDesktop = Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    final isDesktop =
+        Platform.isWindows || Platform.isMacOS || Platform.isLinux;
     final toastConfig = ToastificationConfig(
       alignment: isDesktop ? Alignment.topRight : Alignment.topCenter,
       animationDuration: const Duration(milliseconds: 300),
@@ -212,8 +217,15 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         final theme = _buildTheme(appearanceSettings, Brightness.light);
         final darkTheme = _buildTheme(appearanceSettings, Brightness.dark);
 
+        final useCustomTitleBar =
+            isDesktop && appearanceSettings.useCustomTitleBar;
+        final titleBarController = useCustomTitleBar
+            ? TitleBarController()
+            : null;
+
         logger.debug('CyaniTalkApp: 构建MaterialApp');
-        return GlobalFontRefresher(
+
+        Widget app = GlobalFontRefresher(
           child: _UpdateHandler(
             child: ToastificationWrapper(
               config: toastConfig,
@@ -227,11 +239,41 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
                 localizationsDelegates: context.localizationDelegates,
                 supportedLocales: context.supportedLocales,
                 locale: context.locale,
-                builder: (context, child) => child!,
+                builder: (context, child) {
+                  if (useCustomTitleBar) {
+                    return Stack(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: M3ETitleBarTokens.standard.height,
+                          ),
+                          child: child!,
+                        ),
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: ListenableBuilder(
+                            listenable: titleBarController!,
+                            builder: (context, _) =>
+                                CustomTitleBar(controller: titleBarController),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  return child!;
+                },
               ),
             ),
           ),
         );
+
+        if (useCustomTitleBar) {
+          app = TitleBarScope(controller: titleBarController!, child: app);
+        }
+
+        return app;
       },
     );
   }
@@ -322,7 +364,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       }
     }
 
-    final capsuleShape = StadiumBorder();
+    const capsuleShape = StadiumBorder();
     final smallRadiusShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(8),
     );
@@ -330,13 +372,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     final theme = ThemeData(
       colorScheme: settings.useDynamicColor
           ? ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness)
-          : ColorScheme.fromSeed(
-              seedColor: seedColor,
-              brightness: brightness,
-              // 固定色彩方案，不使用动态色彩
-              primary: seedColor,
-              secondary: const Color(0xFF6366F1),
-            ),
+          : ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
       useMaterial3: true,
       fontFamily: effectiveFontFamily,
       textTheme: textTheme,
@@ -379,16 +415,10 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         ? theme.copyWith(
             scaffoldBackgroundColor: semanticColors.appBackground,
             canvasColor: semanticColors.appBackground,
-            extensions: [
-              ...theme.extensions.values,
-              semanticColors,
-            ],
+            extensions: [...theme.extensions.values, semanticColors],
           )
         : theme.copyWith(
-            extensions: [
-              ...theme.extensions.values,
-              semanticColors,
-            ],
+            extensions: [...theme.extensions.values, semanticColors],
           );
 
     // 缓存主题和设置
@@ -424,9 +454,11 @@ class _UpdateHandlerState extends ConsumerState<_UpdateHandler> {
         _hasShownUpdate = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            unawaited(ref.read(audioEngineProvider).playAsset(
-              'sounds/App/update-available.ogg',
-            ));
+            unawaited(
+              ref
+                  .read(audioEngineProvider)
+                  .playAsset('sounds/App/update-available.ogg'),
+            );
             showUpdateBottomSheet(context, next.update!);
           }
         });

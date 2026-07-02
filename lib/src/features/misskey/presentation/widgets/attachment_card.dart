@@ -173,7 +173,7 @@ class AttachmentCard extends StatelessWidget {
           right: 4,
           child: Container(
             padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.green,
               shape: BoxShape.circle,
             ),

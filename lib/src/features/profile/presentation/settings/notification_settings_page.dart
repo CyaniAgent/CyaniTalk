@@ -2,17 +2,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '/src/features/profile/application/notification_settings_provider.dart';
-import '/src/core/services/notification_service.dart';
-import '/src/core/widgets/settings_widgets.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
-import '/src/shared/widgets/toast_helper.dart';
+import 'package:cyanitalk/src/core/services/notification_service.dart';
+import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/features/profile/application/notification_settings_provider.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
 
-  static const _cyan = Color(0xFF26A69A);
-  static const _blue = Color(0xFF42A5F5);
+  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,7 +69,7 @@ class NotificationSettingsPage extends ConsumerWidget {
               children: [
                 SettingsSwitchTile(
                   icon: Icons.rss_feed,
-                  iconColor: _cyan,
+                  iconColor: SettingsIconColors.cyan,
                   title: 'settings_notif_misskey_posts'.tr(),
                   subtitle: 'settings_notif_misskey_posts_desc'.tr(),
                   value: settings.misskeyRealtimePost,
@@ -81,7 +81,7 @@ class NotificationSettingsPage extends ConsumerWidget {
                 ),
                 SettingsSwitchTile(
                   icon: Icons.message_outlined,
-                  iconColor: _blue,
+                  iconColor: SettingsIconColors.blue,
                   title: 'settings_notif_misskey_messages'.tr(),
                   subtitle: 'settings_notif_misskey_messages_desc'.tr(),
                   value: settings.misskeyMessages,
@@ -96,7 +96,7 @@ class NotificationSettingsPage extends ConsumerWidget {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => Center(child: Text('Error')),
+        error: (_, _) => const Center(child: Text('Error')),
       ),
     );
   }
@@ -104,7 +104,7 @@ class NotificationSettingsPage extends ConsumerWidget {
   Widget _buildPermissionTile(BuildContext context, bool isDesktop) {
     return SettingsTile(
       icon: Icons.security_outlined,
-      iconColor: _cyan,
+      iconColor: SettingsIconColors.cyan,
       title: 'settings_notif_permission'.tr(),
       subtitle: 'settings_notif_permission_desc'.tr(),
       onTap: isDesktop
@@ -126,7 +126,7 @@ class NotificationSettingsPage extends ConsumerWidget {
   Widget _buildTestTile(BuildContext context, bool isDesktop) {
     return SettingsTile(
       icon: Icons.notification_add_outlined,
-      iconColor: _cyan,
+      iconColor: SettingsIconColors.cyan,
       title: 'settings_notif_test'.tr(),
       subtitle: 'settings_notif_test_desc'.tr(),
       onTap: isDesktop

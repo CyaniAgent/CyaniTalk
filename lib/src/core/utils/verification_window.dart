@@ -54,7 +54,9 @@ class _VerificationWindowState extends State<VerificationWindow> {
             }
           }
         }
-      } catch (_) {}
+      } catch (e) {
+        logger.warning('VerificationWindow: Failed to parse verification cookie', e);
+      }
     });
   }
 

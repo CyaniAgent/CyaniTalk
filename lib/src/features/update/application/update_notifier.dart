@@ -34,14 +34,19 @@ class Update extends _$Update {
   Future<void> checkForUpdate({bool silent = false}) async {
     if (state.state == UpdateState.checking) return;
 
-    state = UpdateStateData(state: UpdateState.checking);
+    state = const UpdateStateData(state: UpdateState.checking);
 
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version;
       logger.info('UpdateNotifier: Current version: $currentVersion');
 
-      final response = await Dio().get(
+      final response = await Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      ).get(
         'https://api.github.com/repos/CyaniAgent/CyaniTalk/releases/latest',
         options: Options(
           headers: {
@@ -53,7 +58,7 @@ class Update extends _$Update {
 
       final tagName = response.data['tag_name'] as String?;
       if (tagName == null) {
-        state = UpdateStateData(
+        state = const UpdateStateData(
           state: UpdateState.error,
           errorMessage: '无法获取最新版本信息',
         );
@@ -71,7 +76,7 @@ class Update extends _$Update {
         );
       } else {
         logger.info('UpdateNotifier: App is up to date');
-        state = UpdateStateData(state: UpdateState.upToDate);
+        state = const UpdateStateData(state: UpdateState.upToDate);
       }
     } catch (e) {
       logger.error('UpdateNotifier: Check failed: $e');

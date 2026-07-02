@@ -188,7 +188,7 @@ class MisskeyImageCacheDatabase {
       where: 'associated_user_id = ? AND cache_type = ?',
       whereArgs: [userId, ImageCacheType.avatar.name],
     );
-    return maps.map((m) => ImageCacheRecord.fromMap(m)).toList();
+    return maps.map(ImageCacheRecord.fromMap).toList();
   }
 
   /// 检查用户 UID 是否存在于缓存中（用于发帖人标记）
@@ -230,7 +230,7 @@ class MisskeyImageCacheDatabase {
       'image_cache',
       orderBy: 'last_accessed_at DESC',
     );
-    return maps.map((m) => ImageCacheRecord.fromMap(m)).toList();
+    return maps.map(ImageCacheRecord.fromMap).toList();
   }
 
   /// 获取缓存总大小（字节）

@@ -238,7 +238,7 @@ class _VideoViewerState extends State<VideoViewer> {
                                         // 时间显示
                                         Text(
                                           '${_formatDuration(videoController.value.position)} / ${_formatDuration(videoController.value.duration)}',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
                                           ),

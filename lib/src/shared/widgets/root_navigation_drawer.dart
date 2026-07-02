@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-import '/src/core/navigation/navigation.dart';
-import '/src/core/navigation/navigation_element.dart';
-import '/src/core/navigation/sub_navigation_notifier.dart';
-import 'user_navigation_header.dart';
+import 'package:cyanitalk/src/core/navigation/navigation.dart';
+import 'package:cyanitalk/src/core/navigation/navigation_element.dart';
+import 'package:cyanitalk/src/core/navigation/sub_navigation_notifier.dart';
+import 'package:cyanitalk/src/shared/widgets/user_navigation_header.dart';
 
 class RootNavigationDrawer extends ConsumerWidget {
   final int selectedRootIndex;
@@ -39,31 +39,24 @@ class RootNavigationDrawer extends ConsumerWidget {
             .toList() ??
         [];
 
-    // Actually, selectedRootIndex passed here is already the display index.
-    // Let's refine the logic to match ResponsiveShell.
     final effectiveSelectedRootIndex = selectedRootIndex >= rootItems.length
         ? -1
         : selectedRootIndex;
 
     return NavigationDrawer(
-      selectedIndex:
-          -1, // We'll manage highlighting manually to support hierarchical view
-      onDestinationSelected: (index) {
-        // This is called for any destination. We need to distinguish between root and sub.
-      },
+      selectedIndex: -1,
+      onDestinationSelected: (index) {},
       children: [
         UserNavigationHeader(
           isDrawer: true,
           isSelected: effectiveSelectedRootIndex == -1,
           onTap: () {
-            ref.read(navigationControllerProvider.notifier).closeDrawer(
-                  onComplete: () => onRootSelected(
-                    NavigationService.mapBranchIndexToDisplayIndex(
-                      NavigationService.getBranchIndexForItem('me'),
-                      navigationSettings!,
-                    ),
-                  ),
-                );
+            onRootSelected(
+              NavigationService.mapBranchIndexToDisplayIndex(
+                NavigationService.getBranchIndexForItem('me'),
+                navigationSettings!,
+              ),
+            );
           },
         ),
         const Divider(indent: 12, endIndent: 12),
@@ -81,7 +74,7 @@ class RootNavigationDrawer extends ConsumerWidget {
 
         const SizedBox(height: 12),
         const Divider(indent: 12, endIndent: 12),
-        _buildSettingsButton(context, ref),
+        _buildSettingsButton(context),
         const SizedBox(height: 12),
       ],
     );
@@ -100,17 +93,12 @@ class RootNavigationDrawer extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Custom root item implementation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: InkWell(
-              onTap: () {
-                ref.read(navigationControllerProvider.notifier).closeDrawer(
-                      onComplete: () => onRootSelected(index),
-                    );
-              },
+              onTap: () => onRootSelected(index),
               borderRadius: BorderRadius.circular(32),
               splashColor: theme.colorScheme.primary.withAlpha(20),
               highlightColor: theme.colorScheme.primary.withAlpha(10),
@@ -243,7 +231,7 @@ class RootNavigationDrawer extends ConsumerWidget {
               isSelected: selectedSub == i,
               onTap: () {
                 ref.read(misskeySubIndexProvider.notifier).set(i);
-                ref.read(navigationControllerProvider.notifier).closeDrawer();
+                Navigator.of(context).maybePop();
               },
             ),
         ],
@@ -332,7 +320,7 @@ class RootNavigationDrawer extends ConsumerWidget {
     );
   }
 
-  Widget _buildSettingsButton(BuildContext context, WidgetRef ref) {
+  Widget _buildSettingsButton(BuildContext context) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -341,9 +329,7 @@ class RootNavigationDrawer extends ConsumerWidget {
         cursor: SystemMouseCursors.click,
         child: InkWell(
           onTap: () {
-            ref.read(navigationControllerProvider.notifier).closeDrawer(
-                  onComplete: () => context.push('/settings'),
-                );
+            context.push('/settings');
           },
           borderRadius: BorderRadius.circular(32),
           splashColor: theme.colorScheme.primary.withAlpha(20),
