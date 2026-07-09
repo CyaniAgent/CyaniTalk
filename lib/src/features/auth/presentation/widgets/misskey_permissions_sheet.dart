@@ -19,7 +19,7 @@ class MisskeyPermissionsSheet extends StatefulWidget {
         builder: (context) => Dialog(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480, maxHeight: 700),
-            child: MisskeyPermissionsSheet(),
+            child: const MisskeyPermissionsSheet(),
           ),
         ),
       );
@@ -55,7 +55,7 @@ class _MisskeyPermissionsSheetState extends State<MisskeyPermissionsSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final groups = MisskeyPermissions.permissionGroups;
+    const groups = MisskeyPermissions.permissionGroups;
 
     // 过滤权限组
     final filteredGroups = <String, List<PermissionEntry>>{};

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/shared/widgets/toast_helper.dart';
-import 'package:slider_m3e/slider_m3e.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/core/theme/design_tokens.dart';
 import '/src/shared/widgets/adaptive_sheet.dart';
+import '/src/shared/widgets/expressive_slider.dart';
 import '/src/core/utils/download_utils.dart';
 import '/src/features/misskey/application/audio_player_notifier.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
@@ -75,9 +75,9 @@ class _AudioPlayerSheetContentState
         final isLoading = state.isLoading;
         final position = state.position;
         final duration =
-            state.duration.inSeconds > 0 ? state.duration : const Duration(seconds: 1);
-        final sliderValue = duration.inSeconds > 0
-            ? (position.inSeconds / duration.inSeconds).clamp(0.0, 1.0)
+            state.duration.inMilliseconds > 0 ? state.duration : const Duration(seconds: 1);
+        final sliderValue = duration.inMilliseconds > 0
+            ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
             : 0.0;
 
         return DraggableScrollableSheet(
@@ -137,6 +137,16 @@ class _AudioPlayerSheetContentState
                             colorScheme: colorScheme,
                             m3eShape: m3eShape,
                             onPlayPause: audioController.togglePlayPause,
+                            onSeek: (seconds) {
+                              final newPosition = position + Duration(seconds: seconds.round());
+                              final clampedPosition = Duration(
+                                milliseconds: newPosition.inMilliseconds.clamp(
+                                  0,
+                                  duration.inMilliseconds,
+                                ),
+                              );
+                              audioController.seek(clampedPosition.inSeconds.toDouble());
+                            },
                           ),
                           const SizedBox(height: 16),
                         ],
@@ -301,9 +311,12 @@ class _M3ESlider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: isLoading ? 0.5 : 1.0,
-      child: SliderM3E(
+      child: ExpressiveSlider(
         value: value,
+        min: 0,
+        max: 1,
         onChanged: isLoading ? null : onChanged,
+        showIndicator: false,
       ),
     );
   }
@@ -358,6 +371,7 @@ class _PlaybackControls extends StatelessWidget {
   final ColorScheme colorScheme;
   final M3EShapeTokens m3eShape;
   final VoidCallback onPlayPause;
+  final void Function(double seconds) onSeek;
 
   const _PlaybackControls({
     required this.audioUrl,
@@ -367,6 +381,7 @@ class _PlaybackControls extends StatelessWidget {
     required this.colorScheme,
     required this.m3eShape,
     required this.onPlayPause,
+    required this.onSeek,
   });
 
   @override
@@ -385,8 +400,9 @@ class _PlaybackControls extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         _SecondaryControlButton(
-          icon: Icons.skip_previous_rounded,
-          onPressed: () {},
+          icon: Icons.replay_10_rounded,
+          tooltip: '快退 10 秒',
+          onPressed: () => onSeek(-10),
           colorScheme: colorScheme,
         ),
         const SizedBox(width: 24),
@@ -420,8 +436,9 @@ class _PlaybackControls extends StatelessWidget {
         ),
         const SizedBox(width: 24),
         _SecondaryControlButton(
-          icon: Icons.skip_next_rounded,
-          onPressed: () {},
+          icon: Icons.forward_10_rounded,
+          tooltip: '快进 10 秒',
+          onPressed: () => onSeek(10),
           colorScheme: colorScheme,
         ),
         const SizedBox(width: 8),
@@ -488,11 +505,13 @@ class _ExtraControlButton extends StatelessWidget {
 
 class _SecondaryControlButton extends StatelessWidget {
   final IconData icon;
+  final String? tooltip;
   final VoidCallback onPressed;
   final ColorScheme colorScheme;
 
   const _SecondaryControlButton({
     required this.icon,
+    this.tooltip,
     required this.onPressed,
     required this.colorScheme,
   });
@@ -500,7 +519,7 @@ class _SecondaryControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final m3eShape = context.m3eShape;
-    return FilledButton(
+    final button = FilledButton(
       onPressed: onPressed,
       style: FilledButton.styleFrom(
         minimumSize: const Size(48, 48),
@@ -513,6 +532,10 @@ class _SecondaryControlButton extends StatelessWidget {
       ),
       child: Icon(icon, size: 28),
     );
+    if (tooltip != null) {
+      return Tooltip(message: tooltip!, child: button);
+    }
+    return button;
   }
 }
 

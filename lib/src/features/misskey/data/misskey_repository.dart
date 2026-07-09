@@ -241,6 +241,62 @@ class MisskeyRepository implements IMisskeyRepository {
   }
 
   @override
+  Future<void> createFollow(String userId) async {
+    logger.info('MisskeyRepository: Following user $userId');
+    try {
+      await api.createFollow(userId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error following user $userId', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteFollow(String userId) async {
+    logger.info('MisskeyRepository: Unfollowing user $userId');
+    try {
+      await api.deleteFollow(userId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error unfollowing user $userId', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getFollowRelation(String userId) async {
+    logger.info('MisskeyRepository: Getting follow relation for $userId');
+    try {
+      return await api.getFollowRelation(userId);
+    } catch (e) {
+      logger.error(
+        'MisskeyRepository: Error getting follow relation for $userId',
+        e,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getFollowers(
+    String userId, {
+    int limit = 30,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Getting followers for $userId, limit=$limit',
+    );
+    try {
+      final data = await api.getFollowers(userId, limit: limit);
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (e) {
+      logger.error(
+        'MisskeyRepository: Error getting followers for $userId',
+        e,
+      );
+      rethrow;
+    }
+  }
+
+  @override
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -1062,6 +1118,82 @@ class MisskeyRepository implements IMisskeyRepository {
       }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error searching users', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Note>> getUserNotes(
+    String userId, {
+    int limit = 20,
+    String? untilId,
+    bool? withReplies,
+    bool? withFiles,
+  }) async {
+    logger.info('MisskeyRepository: Getting notes for user: $userId');
+    try {
+      final data = await api.getUserNotes(
+        userId,
+        limit: limit,
+        untilId: untilId,
+        withReplies: withReplies,
+        withFiles: withFiles,
+      );
+      return await compute((List<dynamic> list) {
+        return list
+            .map((e) => Note.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting user notes', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<DriveFile>> getUserDriveFiles(
+    String userId, {
+    int limit = 30,
+    String? untilId,
+    String? folderId,
+  }) async {
+    logger.info('MisskeyRepository: Getting drive files for user: $userId');
+    try {
+      final data = await api.getUserDriveFiles(
+        userId,
+        limit: limit,
+        untilId: untilId,
+        folderId: folderId,
+      );
+      return await compute((List<dynamic> list) {
+        return list
+            .map((e) => DriveFile.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting user drive files', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserGalleryPosts(
+    String userId, {
+    int limit = 10,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting gallery posts for user: $userId');
+    try {
+      final data = await api.getUserGalleryPosts(
+        userId,
+        limit: limit,
+        untilId: untilId,
+      );
+      return await compute((List<dynamic> list) {
+        return list.cast<Map<String, dynamic>>();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting user gallery posts', e);
       rethrow;
     }
   }

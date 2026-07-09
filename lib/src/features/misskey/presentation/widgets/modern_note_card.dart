@@ -14,14 +14,15 @@ import '/src/features/misskey/data/misskey_repository_interface.dart';
 import '/src/features/misskey/presentation/widgets/poll_card.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import 'retryable_network_image.dart';
-import 'audio_player_widget.dart';
 import 'cached_misskey_avatar.dart';
 import 'mention_aware_text.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
+import '/src/features/common/presentation/widgets/media/audio_player_sheet.dart';
 import 'emoji_picker.dart';
 import 'reaction_display.dart';
+import 'note_details_sheet.dart';
 
 /// Modern NoteCard组件
 ///
@@ -514,34 +515,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   }
 
   void _showDetails() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('post_details'.tr()),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SelectableText('ID: ${widget.note.id}'),
-              const SizedBox(height: 8),
-              SelectableText('Created: ${widget.note.createdAt}'),
-              const SizedBox(height: 8),
-              SelectableText('User: ${widget.note.user?.username}'),
-              const SizedBox(height: 8),
-              const Text('Raw Data (Debug):'),
-              SelectableText(widget.note.toString()), // Simple dump for now
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('close'.tr()),
-          ),
-        ],
-      ),
-    );
+    NoteDetailsSheet.show(context, widget.note);
   }
 
   Future<void> _copyLink() async {
@@ -1094,268 +1068,216 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     );
   }
 
-  /// 构建媒体网格，根据媒体文件数量调整布局
+  /// 构建媒体网格 - 新布局系统
   Widget _buildMediaGrid(List<Map<String, dynamic>> files) {
-    // 过滤出图片和视频文件
-    final mediaFiles = files.where((file) {
+    final isDesktop = MediaQuery.of(context).size.width > 600;
+
+    // 分类文件
+    final imageFiles = <Map<String, dynamic>>[];
+    final videoFiles = <Map<String, dynamic>>[];
+    final audioFiles = <Map<String, dynamic>>[];
+    final otherFiles = <Map<String, dynamic>>[];
+
+    for (final file in files) {
       final url = file['url'] as String?;
       final type = file['type'] as String?;
-      if (url == null) return false;
-      return _isImageFile(type, url) || _isVideoFile(type, url);
-    }).toList();
+      if (url == null) continue;
 
-    // 如果没有图片或视频，只显示音频
-    if (mediaFiles.isEmpty) {
-      return Column(
-        children: files.map((file) {
-          final url = file['url'] as String?;
-          final type = file['type'] as String?;
-          final name = file['name'] as String?;
-
-          if (url == null) return const SizedBox.shrink();
-
-          final isAudio = _isAudioFile(type, url);
-          if (isAudio) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: AudioPlayerWidget(audioUrl: url, fileName: name),
-            );
-          }
-
-          return const SizedBox.shrink();
-        }).toList(),
-      );
+      if (_isImageFile(type, url)) {
+        imageFiles.add(file);
+      } else if (_isVideoFile(type, url)) {
+        videoFiles.add(file);
+      } else if (_isAudioFile(type, url)) {
+        audioFiles.add(file);
+      } else {
+        otherFiles.add(file);
+      }
     }
 
-    // 根据媒体文件数量选择不同的布局
-    if (mediaFiles.length == 1) {
-      // 单个媒体文件
-      final file = mediaFiles[0];
-      return _buildSingleMedia(file);
-    } else if (mediaFiles.length == 2) {
-      // 两个媒体文件，水平排列
-      return _buildTwoMedia(mediaFiles);
-    } else if (mediaFiles.length == 3) {
-      // 三个媒体文件，一个大图加两个小图
-      return _buildThreeMedia(mediaFiles);
-    } else if (mediaFiles.length == 4) {
-      // 四个媒体文件，2x2网格
-      return _buildFourMedia(mediaFiles);
-    } else {
-      // 五个或更多媒体文件，使用2列网格
-      return _buildMultipleMedia(mediaFiles);
-    }
-  }
-
-  /// 构建单个媒体文件的显示
-  Widget _buildSingleMedia(Map<String, dynamic> file) {
-    final url = file['url'] as String?;
-    final type = file['type'] as String?;
-
-    if (url == null) return const SizedBox.shrink();
-
-    final isImage = _isImageFile(type, url);
-    final isVideo = _isVideoFile(type, url);
-    final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
-
-    if (isVideo) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: GestureDetector(
-            onTap: () => _openMediaViewer(
-              context,
-              widget.note.files,
-              url,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                RetryableNetworkImage(
-                  url: thumbnailUrl,
-                  width: 160, // 增加单个图片的宽度
-                  height: 160, // 增加单个图片的高度
-                  fit: BoxFit.cover,
-                ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.play_arrow,
-                    color: Theme.of(context).colorScheme.surface,
-                    size: 48,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    } else if (isImage) {
-      final heroTag = 'image_${url}_${widget.note.id}';
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 4.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: GestureDetector(
-            onTap: () => _openMediaViewer(
-              context,
-              widget.note.files,
-              url,
-              heroTag: heroTag,
-            ),
-            child: Hero(
-              tag: heroTag,
-              child: RetryableNetworkImage(
-                url: thumbnailUrl,
-                width: 160, // 增加单个图片的宽度
-                height: 160, // 增加单个图片的高度
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ),
-      );
+    if (imageFiles.isEmpty && videoFiles.isEmpty && audioFiles.isEmpty && otherFiles.isEmpty) {
+      return const SizedBox.shrink();
     }
 
-    return const SizedBox.shrink();
-  }
-
-  /// 构建两个媒体文件的显示（水平排列）
-  Widget _buildTwoMedia(List<Map<String, dynamic>> files) {
-    return SizedBox(
-      height: 100,
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildMediaThumbnail(files[0], width: 0, height: 100),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: _buildMediaThumbnail(files[1], width: 0, height: 100),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 构建三个媒体文件的显示（一个大图加两个小图）
-  Widget _buildThreeMedia(List<Map<String, dynamic>> files) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildMediaThumbnail(files[0], width: double.infinity, height: 120),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Expanded(
-              child: _buildMediaThumbnail(files[1], width: 0, height: 80),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: _buildMediaThumbnail(files[2], width: 0, height: 80),
-            ),
-          ],
-        ),
+        // 图片区
+        if (imageFiles.isNotEmpty) ...[
+          if (isDesktop)
+            _buildDesktopImageGrid(imageFiles)
+          else
+            _buildMobileImageGrid(imageFiles),
+        ],
+
+        // 视频区
+        if (videoFiles.isNotEmpty) ...[
+          if (imageFiles.isNotEmpty) const SizedBox(height: 8),
+          ...videoFiles.map(_buildVideoItem),
+        ],
+
+        // 音频区
+        if (audioFiles.isNotEmpty) ...[
+          if (imageFiles.isNotEmpty || videoFiles.isNotEmpty) const SizedBox(height: 8),
+          _buildAudioGrid(audioFiles),
+        ],
+
+        // 其他文件区
+        if (otherFiles.isNotEmpty) ...[
+          if (imageFiles.isNotEmpty || videoFiles.isNotEmpty || audioFiles.isNotEmpty)
+            const SizedBox(height: 8),
+          _buildOtherFilesButton(otherFiles),
+        ],
       ],
     );
   }
 
-  /// 构建四个媒体文件的显示（2x2网格）
-  Widget _buildFourMedia(List<Map<String, dynamic>> files) {
-    return SizedBox(
-      height: 204, // 100 * 2 + 4 gap
-      child: Column(
+  /// 移动端图片网格布局
+  Widget _buildMobileImageGrid(List<Map<String, dynamic>> images) {
+    if (images.length == 1) {
+      return _buildImageThumbnail(images[0], height: 200);
+    } else if (images.length == 2) {
+      return SizedBox(
+        height: 120,
+        child: Row(
+          children: [
+            Expanded(child: _buildImageThumbnail(images[0], height: 120)),
+            const SizedBox(width: 4),
+            Expanded(child: _buildImageThumbnail(images[1], height: 120)),
+          ],
+        ),
+      );
+    } else if (images.length == 3) {
+      return Column(
         children: [
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildMediaThumbnail(files[0], width: 0, height: 100),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: _buildMediaThumbnail(files[1], width: 0, height: 100),
-                ),
-              ],
-            ),
-          ),
+          _buildImageThumbnail(images[0], height: 140),
           const SizedBox(height: 4),
-          Expanded(
+          SizedBox(
+            height: 100,
             child: Row(
               children: [
-                Expanded(
-                  child: _buildMediaThumbnail(files[2], width: 0, height: 100),
-                ),
+                Expanded(child: _buildImageThumbnail(images[1], height: 100)),
                 const SizedBox(width: 4),
-                Expanded(
-                  child: _buildMediaThumbnail(files[3], width: 0, height: 100),
-                ),
+                Expanded(child: _buildImageThumbnail(images[2], height: 100)),
               ],
             ),
           ),
         ],
-      ),
-    );
+      );
+    } else if (images.length == 4) {
+      return SizedBox(
+        height: 204,
+        child: Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(child: _buildImageThumbnail(images[0])),
+                  const SizedBox(width: 4),
+                  Expanded(child: _buildImageThumbnail(images[1])),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(child: _buildImageThumbnail(images[2])),
+                  const SizedBox(width: 4),
+                  Expanded(child: _buildImageThumbnail(images[3])),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // 5+ 张图片，2列网格
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+          childAspectRatio: 1,
+        ),
+        itemCount: images.length,
+        itemBuilder: (context, index) => _buildImageThumbnail(images[index]),
+      );
+    }
   }
 
-  /// 构建多个媒体文件的显示（2列网格）
-  Widget _buildMultipleMedia(List<Map<String, dynamic>> files) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(), // 避免与外层滚动冲突
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-        childAspectRatio: 1,
-      ),
-      itemCount: files.length,
-      itemBuilder: (context, index) {
-        return _buildMediaThumbnail(files[index], width: 0, height: 100);
-      },
-    );
+  /// 桌面端图片网格布局 - 顺序排列 + 左右导航
+  Widget _buildDesktopImageGrid(List<Map<String, dynamic>> images) {
+    if (images.length <= 9) {
+      // 少于等于9张，直接3列网格
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+          childAspectRatio: 1,
+        ),
+        itemCount: images.length,
+        itemBuilder: (context, index) => _buildImageThumbnail(images[index]),
+      );
+    } else {
+      // 超过9张，使用分页导航
+      return _DesktopImageGridWithNav(images: images);
+    }
   }
 
-  /// 构建单个媒体缩略图
-  Widget _buildMediaThumbnail(
-    Map<String, dynamic> file, {
-    double width = 100,
-    double height = 100,
-  }) {
+  /// 单个图片缩略图
+  Widget _buildImageThumbnail(Map<String, dynamic> file, {double? height}) {
     final url = file['url'] as String?;
-    final type = file['type'] as String?;
-
     if (url == null) return const SizedBox.shrink();
 
-    final isImage = _isImageFile(type, url);
-    final isVideo = _isVideoFile(type, url);
-    final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
+    final heroTag = 'image_${url}_${widget.note.id}';
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: GestureDetector(
+        onTap: () => _openMediaViewer(context, widget.note.files, url, heroTag: heroTag),
+        child: Hero(
+          tag: heroTag,
+          child: SizedBox(
+            height: height,
+            child: RetryableNetworkImage(
+              url: file['thumbnailUrl'] as String? ?? url,
+              width: double.infinity,
+              height: height,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-    if (isVideo) {
-      return ClipRRect(
+  /// 视频项 - 1行1个，缩略图为视频第一帧
+  Widget _buildVideoItem(Map<String, dynamic> file) {
+    final url = file['url'] as String?;
+    final thumbnailUrl = file['thumbnailUrl'] as String? ?? url;
+    if (url == null || thumbnailUrl == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: GestureDetector(
-          onTap: () => _openMediaViewer(
-            context,
-            widget.note.files,
-            url,
-          ),
+          onTap: () => _openMediaViewer(context, widget.note.files, url),
           child: Stack(
             alignment: Alignment.center,
             children: [
               RetryableNetworkImage(
                 url: thumbnailUrl,
-                width: width > 0 ? width : null,
-                height: height,
+                width: double.infinity,
+                height: 180,
                 fit: BoxFit.cover,
               ),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
@@ -1363,38 +1285,184 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 child: const Icon(
                   Icons.play_arrow,
                   color: Colors.white,
-                  size: 24,
+                  size: 48,
                 ),
               ),
             ],
           ),
         ),
-      );
-    } else if (isImage) {
-      final heroTag = 'image_${url}_${widget.note.id}';
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: GestureDetector(
-          onTap: () => _openMediaViewer(
-            context,
-            widget.note.files,
-            url,
-            heroTag: heroTag,
-          ),
-          child: Hero(
-            tag: heroTag,
-            child: RetryableNetworkImage(
-              url: thumbnailUrl,
-              width: width > 0 ? width : null,
-              height: height,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      );
-    }
+      ),
+    );
+  }
 
-    return const SizedBox.shrink();
+  /// 音频网格 - 1行2个
+  Widget _buildAudioGrid(List<Map<String, dynamic>> audioFiles) {
+    final rows = <Widget>[];
+    for (var i = 0; i < audioFiles.length; i += 2) {
+      final rowChildren = <Widget>[
+        Expanded(child: _buildAudioItem(audioFiles[i])),
+      ];
+      if (i + 1 < audioFiles.length) {
+        rowChildren.add(const SizedBox(width: 8));
+        rowChildren.add(Expanded(child: _buildAudioItem(audioFiles[i + 1])));
+      } else {
+        rowChildren.add(const Spacer());
+      }
+      rows.add(Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(children: rowChildren),
+      ));
+    }
+    return Column(children: rows);
+  }
+
+  /// 单个音频项
+  Widget _buildAudioItem(Map<String, dynamic> file) {
+    final url = file['url'] as String?;
+    final name = file['name'] as String? ?? 'Unknown';
+    final size = file['size'] as int?;
+    final theme = Theme.of(context);
+
+    if (url == null) return const SizedBox.shrink();
+
+    return GestureDetector(
+      onTap: () => _openMediaViewer(context, widget.note.files, url),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.audiotrack,
+                color: theme.colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _formatFileSize(size),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 其他文件按钮
+  Widget _buildOtherFilesButton(List<Map<String, dynamic>> otherFiles) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: () => _showOtherFilesDialog(otherFiles),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.insert_drive_file,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '其它文件 ${otherFiles.length}个',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 显示其他文件对话框
+  void _showOtherFilesDialog(List<Map<String, dynamic>> otherFiles) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '其它文件',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: otherFiles.length,
+                itemBuilder: (context, index) {
+                  final file = otherFiles[index];
+                  final name = file['name'] as String? ?? 'Unknown';
+                  final type = file['type'] as String? ?? '';
+                  final size = file['size'] as int?;
+                  return ListTile(
+                    leading: const Icon(Icons.insert_drive_file),
+                    title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: Text('$type - ${_formatFileSize(size)}'),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 格式化文件大小
+  String _formatFileSize(int? bytes) {
+    if (bytes == null) return '';
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   static void _openMediaViewer(
@@ -1403,6 +1471,27 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     String targetUrl, {
     String? heroTag,
   }) {
+    // 查找目标文件
+    final targetFile = allFiles.firstWhere(
+      (file) => file['url'] == targetUrl,
+      orElse: () => {},
+    );
+    final targetType = targetFile['type'] as String? ?? '';
+
+    // 如果是音频文件，使用统一的音频播放器
+    if (targetType.startsWith('audio/')) {
+      showAudioPlayerSheet(
+        context,
+        mediaItem: MediaItem(
+          url: targetUrl,
+          type: MediaType.audio,
+          fileName: targetFile['name'] as String?,
+        ),
+      );
+      return;
+    }
+
+    // 其他文件类型使用媒体查看器
     final mediaItems = <MediaItem>[];
     int initialIndex = 0;
 
@@ -1414,7 +1503,6 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
       final isImage = fileType.startsWith('image/');
       final isVideo = fileType.startsWith('video/');
-      final isAudio = fileType.startsWith('audio/');
 
       if (isImage) {
         mediaItems.add(
@@ -1434,15 +1522,6 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
           ),
         );
         if (fileUrl == targetUrl) initialIndex = mediaItems.length - 1;
-      } else if (isAudio) {
-        mediaItems.add(
-          MediaItem(
-            url: fileUrl,
-            type: MediaType.audio,
-            fileName: file['name'] as String?,
-          ),
-        );
-        if (fileUrl == targetUrl) initialIndex = mediaItems.length - 1;
       }
     }
 
@@ -1454,6 +1533,115 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
           heroTag: heroTag,
         ),
       ),
+    );
+  }
+}
+
+/// 桌面端图片网格 - 带分页导航
+class _DesktopImageGridWithNav extends StatefulWidget {
+  final List<Map<String, dynamic>> images;
+
+  const _DesktopImageGridWithNav({required this.images});
+
+  @override
+  State<_DesktopImageGridWithNav> createState() => _DesktopImageGridWithNavState();
+}
+
+class _DesktopImageGridWithNavState extends State<_DesktopImageGridWithNav> {
+  int _currentPage = 0;
+  static const int _itemsPerPage = 9;
+
+  int get _totalPages => (widget.images.length / _itemsPerPage).ceil();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final startIndex = _currentPage * _itemsPerPage;
+    final endIndex = (startIndex + _itemsPerPage).clamp(0, widget.images.length);
+    final currentImages = widget.images.sublist(startIndex, endIndex);
+
+    return Column(
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 4,
+            mainAxisSpacing: 4,
+            childAspectRatio: 1,
+          ),
+          itemCount: currentImages.length,
+          itemBuilder: (context, index) {
+            final file = currentImages[index];
+            final url = file['url'] as String?;
+            if (url == null) return const SizedBox.shrink();
+
+            final heroTag = 'image_${url}_desktop_$index';
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => MediaViewerPage(
+                        mediaItems: widget.images
+                            .where((f) => f['url'] != null)
+                            .map((f) => MediaItem(
+                                  url: f['url'] as String,
+                                  type: MediaType.image,
+                                  fileName: f['name'] as String?,
+                                ))
+                            .toList(),
+                        initialIndex: startIndex + index,
+                        heroTag: heroTag,
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: heroTag,
+                  child: RetryableNetworkImage(
+                    url: file['thumbnailUrl'] as String? ?? url,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        if (_totalPages > 1) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: _currentPage > 0
+                    ? () => setState(() => _currentPage--)
+                    : null,
+                icon: const Icon(Icons.chevron_left),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  '${_currentPage + 1} / $_totalPages',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: _currentPage < _totalPages - 1
+                    ? () => setState(() => _currentPage++)
+                    : null,
+                icon: const Icon(Icons.chevron_right),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

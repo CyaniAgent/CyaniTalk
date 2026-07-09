@@ -55,6 +55,17 @@ abstract interface class IMisskeyRepository {
     String? host,
   });
 
+  Future<void> createFollow(String userId);
+
+  Future<void> deleteFollow(String userId);
+
+  Future<Map<String, dynamic>> getFollowRelation(String userId);
+
+  Future<List<Map<String, dynamic>>> getFollowers(
+    String userId, {
+    int limit = 30,
+  });
+
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -193,6 +204,30 @@ abstract interface class IMisskeyRepository {
     String query, {
     int limit = 20,
     String? offset,
+  });
+
+  /// 获取用户帖子列表
+  Future<List<Note>> getUserNotes(
+    String userId, {
+    int limit = 20,
+    String? untilId,
+    bool? withReplies,
+    bool? withFiles,
+  });
+
+  /// 获取用户云盘文件列表
+  Future<List<DriveFile>> getUserDriveFiles(
+    String userId, {
+    int limit = 30,
+    String? untilId,
+    String? folderId,
+  });
+
+  /// 获取用户画廊帖子列表
+  Future<List<Map<String, dynamic>>> getUserGalleryPosts(
+    String userId, {
+    int limit = 10,
+    String? untilId,
   });
 
   /// 获取公告列表

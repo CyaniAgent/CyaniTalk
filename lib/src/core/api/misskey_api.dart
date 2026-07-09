@@ -943,6 +943,67 @@ class MisskeyApi extends BaseApi {
         params: {'username': username, 'host': host},
       );
 
+  /// 关注指定用户
+  ///
+  /// @param userId 要关注的用户 ID
+  /// @throws DioException 如果请求失败
+  Future<void> createFollow(String userId) => executeApiCallVoid(
+    'MisskeyApi.createFollow',
+    () => _dio.post(
+      '/api/following/create',
+      data: {'i': token, 'userId': userId},
+    ),
+    params: {'userId': userId},
+  );
+
+  /// 取消关注指定用户
+  ///
+  /// @param userId 要取消关注的用户 ID
+  /// @throws DioException 如果请求失败
+  Future<void> deleteFollow(String userId) => executeApiCallVoid(
+    'MisskeyApi.deleteFollow',
+    () => _dio.post(
+      '/api/following/delete',
+      data: {'i': token, 'userId': userId},
+    ),
+    params: {'userId': userId},
+  );
+
+  /// 获取关注关系
+  ///
+  /// 获取当前用户与指定用户之间的关注关系。
+  /// @param userId 对方用户 ID
+  /// @return 关系 Map：{ id, isFollowing, hasPendingFollowRequestFromYou, hasPendingFollowRequestToYou, isBlocked, isBlocking }
+  Future<Map<String, dynamic>> getFollowRelation(String userId) =>
+      executeApiCall(
+        'MisskeyApi.getFollowRelation',
+        () => _dio.post(
+          '/api/users/relation',
+          data: {'i': token, 'userId': userId},
+        ),
+        (response) {
+          final data = response.data;
+          // Handle both single object and list responses
+          if (data is List && data.isNotEmpty) {
+            return Map<String, dynamic>.from(data.first);
+          }
+          return Map<String, dynamic>.from(data);
+        },
+        params: {'userId': userId},
+      );
+
+  /// 获取指定用户的关注者列表
+  ///
+  /// @param userId 目标用户 ID
+  /// @param limit 返回数量限制，默认 30
+  /// @return 关注者列表
+  Future<List<dynamic>> getFollowers(String userId, {int limit = 30}) =>
+      _fetchList(
+        'MisskeyApi.getFollowers',
+        '/api/users/followers',
+        {'i': token, 'userId': userId, 'limit': limit},
+      );
+
   /// 举报用户
   ///
   /// 通过调用 `/api/users/report-abuse` 接口举报指定用户。
@@ -1033,6 +1094,45 @@ class MisskeyApi extends BaseApi {
     'query': query,
     'limit': limit,
     'offset': ?offset,
+  });
+
+  /// 获取用户帖子列表
+  Future<List<dynamic>> getUserNotes(
+    String userId, {
+    int limit = 20,
+    String? untilId,
+    bool? withReplies,
+    bool? withFiles,
+  }) => _fetchList('MisskeyApi.getUserNotes', '/api/users/notes', {
+    'userId': userId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+    if (withReplies != null) 'withReplies': withReplies,
+    if (withFiles != null) 'withFiles': withFiles,
+  });
+
+  /// 获取用户云盘文件列表
+  Future<List<dynamic>> getUserDriveFiles(
+    String userId, {
+    int limit = 30,
+    String? untilId,
+    String? folderId,
+  }) => _fetchList('MisskeyApi.getUserDriveFiles', '/api/drive/files', {
+    'userId': userId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+    if (folderId != null) 'folderId': folderId,
+  });
+
+  /// 获取用户画廊帖子列表
+  Future<List<dynamic>> getUserGalleryPosts(
+    String userId, {
+    int limit = 10,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.getUserGalleryPosts', '/api/gallery/posts', {
+    'userId': userId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
   });
 
   /// 获取单个表情信息
