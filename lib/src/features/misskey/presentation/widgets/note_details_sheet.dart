@@ -1,27 +1,38 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '/src/features/misskey/domain/note.dart';
+import '/src/features/misskey/domain/mfm_renderer.dart';
+import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import 'cached_misskey_avatar.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class NoteDetailsSheet extends StatelessWidget {
   final Note note;
+  final String? replyAuthorName;
+  final String? replyAuthorUsername;
 
-  const NoteDetailsSheet({super.key, required this.note});
+  const NoteDetailsSheet({
+    super.key,
+    required this.note,
+    this.replyAuthorName,
+    this.replyAuthorUsername,
+  });
 
-  static void show(BuildContext context, Note note) {
+  static void show(BuildContext context, Note note, {String? replyAuthorName, String? replyAuthorUsername}) {
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
     if (isWideScreen) {
-      showSideSheet(context, note);
+      showSideSheet(context, note, replyAuthorName: replyAuthorName, replyAuthorUsername: replyAuthorUsername);
     } else {
-      showBottomSheet(context, note);
+      showBottomSheet(context, note, replyAuthorName: replyAuthorName, replyAuthorUsername: replyAuthorUsername);
     }
   }
 
-  static void showBottomSheet(BuildContext context, Note note) {
+  static void showBottomSheet(BuildContext context, Note note, {String? replyAuthorName, String? replyAuthorUsername}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -37,12 +48,14 @@ class NoteDetailsSheet extends StatelessWidget {
         builder: (context, scrollController) => _NoteDetailsContent(
           note: note,
           scrollController: scrollController,
+          replyAuthorName: replyAuthorName,
+          replyAuthorUsername: replyAuthorUsername,
         ),
       ),
     );
   }
 
-  static void showSideSheet(BuildContext context, Note note) {
+  static void showSideSheet(BuildContext context, Note note, {String? replyAuthorName, String? replyAuthorUsername}) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -58,7 +71,11 @@ class NoteDetailsSheet extends StatelessWidget {
             child: SizedBox(
               width: 420,
               height: double.infinity,
-              child: _NoteDetailsContent(note: note),
+              child: _NoteDetailsContent(
+                note: note,
+                replyAuthorName: replyAuthorName,
+                replyAuthorUsername: replyAuthorUsername,
+              ),
             ),
           ),
         );
@@ -84,19 +101,57 @@ class NoteDetailsSheet extends StatelessWidget {
   }
 }
 
-class _NoteDetailsContent extends StatelessWidget {
+class _NoteDetailsContent extends ConsumerStatefulWidget {
   final Note note;
   final ScrollController? scrollController;
+  final String? replyAuthorName;
+  final String? replyAuthorUsername;
 
   const _NoteDetailsContent({
     required this.note,
     this.scrollController,
+    this.replyAuthorName,
+    this.replyAuthorUsername,
   });
+
+  @override
+  ConsumerState<_NoteDetailsContent> createState() => _NoteDetailsContentState();
+}
+
+class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
+  late final MfmRenderer _mfmRenderer;
+  bool _showRawData = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _mfmRenderer = MfmRenderer();
+    _initMfmRenderer();
+  }
+
+  void _initMfmRenderer() {
+    _mfmRenderer.setApiEmojiLoader((emojiName) async {
+      try {
+        final repository = await ref.read(misskeyRepositoryProvider.future);
+        final emojiDetail = await repository.getEmoji(emojiName);
+        return emojiDetail.url;
+      } catch (e) {
+        return null;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _mfmRenderer.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final noteTimestamp = _parseSnowflakeTimestamp(note.id);
+    final noteTimestamp = _parseSnowflakeTimestamp(widget.note.id);
+    final isReply = widget.note.replyId != null;
 
     return Container(
       decoration: BoxDecoration(
@@ -105,7 +160,6 @@ class _NoteDetailsContent extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Drag handle
           Container(
             margin: const EdgeInsets.only(top: 12),
             width: 40,
@@ -115,7 +169,6 @@ class _NoteDetailsContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          // Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
@@ -142,22 +195,29 @@ class _NoteDetailsContent extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
-          // Content
           Expanded(
             child: ListView(
-              controller: scrollController,
+              controller: widget.scrollController,
               padding: const EdgeInsets.all(20),
               children: [
-                // User info
                 _buildSection(
                   context,
-                  title: 'note_detail_author'.tr(),
+                  title: isReply ? 'note_detail_reply_author'.tr() : 'note_detail_author'.tr(),
                   icon: Icons.person_outline,
                   child: _buildUserInfo(context),
                 ),
                 const SizedBox(height: 20),
 
-                // Post info
+                if (isReply && widget.replyAuthorName != null) ...[
+                  _buildSection(
+                    context,
+                    title: 'note_detail_original_author'.tr(),
+                    icon: Icons.person_outline,
+                    child: _buildOriginalAuthorInfo(context),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+
                 _buildSection(
                   context,
                   title: 'note_detail_post_info'.tr(),
@@ -166,8 +226,7 @@ class _NoteDetailsContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Content preview
-                if (note.text != null && note.text!.isNotEmpty) ...[
+                if (widget.note.text != null && widget.note.text!.isNotEmpty) ...[
                   _buildSection(
                     context,
                     title: 'note_detail_content'.tr(),
@@ -177,8 +236,7 @@ class _NoteDetailsContent extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
-                // Reactions
-                if (note.reactions.isNotEmpty) ...[
+                if (widget.note.reactions.isNotEmpty) ...[
                   _buildSection(
                     context,
                     title: 'note_detail_reactions'.tr(),
@@ -188,7 +246,6 @@ class _NoteDetailsContent extends StatelessWidget {
                   const SizedBox(height: 20),
                 ],
 
-                // Statistics
                 _buildSection(
                   context,
                   title: 'note_detail_statistics'.tr(),
@@ -197,7 +254,6 @@ class _NoteDetailsContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Visibility & Flags
                 _buildSection(
                   context,
                   title: 'note_detail_visibility'.tr(),
@@ -206,13 +262,15 @@ class _NoteDetailsContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Technical details
                 _buildSection(
                   context,
                   title: 'note_detail_technical'.tr(),
                   icon: Icons.code,
                   child: _buildTechnicalDetails(context, noteTimestamp),
                 ),
+                const SizedBox(height: 20),
+
+                _buildRawDataButton(context),
               ],
             ),
           ),
@@ -259,35 +317,45 @@ class _NoteDetailsContent extends StatelessWidget {
 
   Widget _buildUserInfo(BuildContext context) {
     final theme = Theme.of(context);
-    final user = note.user;
+    final user = widget.note.user;
 
     return Row(
       children: [
         if (user != null) ...[
-          CachedMisskeyAvatar(
-            userId: user.id,
-            avatarUrl: user.avatarUrl ?? '',
-            host: user.host,
-            radius: 24,
+          GestureDetector(
+            onTap: () {
+              context.push('/misskey/user/${user.id}', extra: user);
+            },
+            child: CachedMisskeyAvatar(
+              userId: user.id,
+              avatarUrl: user.avatarUrl ?? '',
+              host: user.host,
+              radius: 24,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.name ?? user.username,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+            child: GestureDetector(
+              onTap: () {
+                context.push('/misskey/user/${user.id}', extra: user);
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.name ?? user.username,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                Text(
-                  '@${user.username}${user.host != null ? '@${user.host}' : ''}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  Text(
+                    '@${user.username}${user.host != null ? '@${user.host}' : ''}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -295,15 +363,48 @@ class _NoteDetailsContent extends StatelessWidget {
     );
   }
 
+  Widget _buildOriginalAuthorInfo(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Icon(Icons.person_outline, size: 24, color: theme.colorScheme.onSurfaceVariant),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.replyAuthorName ?? 'unknown',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '@${widget.replyAuthorUsername ?? 'unknown'}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPostInfo(BuildContext context, DateTime? noteTimestamp) {
+    final createdAt = widget.note.createdAt;
+    final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(createdAt);
+
     return Column(
       children: [
         _buildInfoRow(
           context,
           label: 'note_detail_id'.tr(),
-          value: note.id,
+          value: widget.note.id,
           onTap: () {
-            Clipboard.setData(ClipboardData(text: note.id));
+            Clipboard.setData(ClipboardData(text: widget.note.id));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('post_id_copied'.tr())),
             );
@@ -313,15 +414,13 @@ class _NoteDetailsContent extends StatelessWidget {
         _buildInfoRow(
           context,
           label: 'note_detail_created'.tr(),
-          value: noteTimestamp != null
-              ? DateFormat('yyyy-MM-dd HH:mm:ss').format(noteTimestamp.toUtc())
-              : note.createdAt.toIso8601String(),
+          value: formattedDate,
         ),
         const SizedBox(height: 8),
         _buildInfoRow(
           context,
           label: 'note_detail_timeago'.tr(),
-          value: timeago.format(note.createdAt, locale: 'zh'),
+          value: timeago.format(createdAt, locale: 'zh'),
         ),
       ],
     );
@@ -337,10 +436,10 @@ class _NoteDetailsContent extends StatelessWidget {
         color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: SelectableText(
-        note.text!,
-        style: theme.textTheme.bodyMedium,
-        maxLines: 10,
+      child: _mfmRenderer.processTextToRichText(
+        widget.note.text!,
+        context,
+        textStyle: theme.textTheme.bodyMedium,
       ),
     );
   }
@@ -351,7 +450,7 @@ class _NoteDetailsContent extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: note.reactions.entries.map((entry) {
+      children: widget.note.reactions.entries.map((entry) {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
@@ -387,19 +486,19 @@ class _NoteDetailsContent extends StatelessWidget {
           context,
           icon: Icons.repeat,
           label: 'note_detail_renotes'.tr(),
-          value: note.renoteCount,
+          value: widget.note.renoteCount,
         ),
         _buildStatItem(
           context,
           icon: Icons.reply,
           label: 'note_detail_replies'.tr(),
-          value: note.repliesCount,
+          value: widget.note.repliesCount,
         ),
         _buildStatItem(
           context,
           icon: Icons.emoji_emotions,
           label: 'note_detail_reactions'.tr(),
-          value: note.reactions.values.fold(0, (sum, count) => sum + count),
+          value: widget.note.reactions.values.fold(0, (sum, count) => sum + count),
         ),
       ],
     );
@@ -440,41 +539,41 @@ class _NoteDetailsContent extends StatelessWidget {
         _buildFlagRow(
           context,
           label: 'note_detail_visibility'.tr(),
-          value: _getVisibilityLabel(note.visibility),
-          icon: _getVisibilityIcon(note.visibility),
-          color: _getVisibilityColor(note.visibility, theme),
+          value: _getVisibilityLabel(widget.note.visibility),
+          icon: _getVisibilityIcon(widget.note.visibility),
+          color: _getVisibilityColor(widget.note.visibility, theme),
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
           context,
           label: 'note_detail_local_only'.tr(),
-          value: note.localOnly ? 'common_yes'.tr() : 'common_no'.tr(),
-          icon: note.localOnly ? Icons.check_circle : Icons.cancel,
-          color: note.localOnly ? Colors.orange : theme.colorScheme.onSurfaceVariant,
+          value: widget.note.localOnly ? 'common_yes'.tr() : 'common_no'.tr(),
+          icon: widget.note.localOnly ? Icons.check_circle : Icons.cancel,
+          color: widget.note.localOnly ? Colors.orange : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
           context,
           label: 'note_detail_has_poll'.tr(),
-          value: note.poll != null ? 'common_yes'.tr() : 'common_no'.tr(),
-          icon: note.poll != null ? Icons.check_circle : Icons.cancel,
-          color: note.poll != null ? Colors.blue : theme.colorScheme.onSurfaceVariant,
+          value: widget.note.poll != null ? 'common_yes'.tr() : 'common_no'.tr(),
+          icon: widget.note.poll != null ? Icons.check_circle : Icons.cancel,
+          color: widget.note.poll != null ? Colors.blue : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
           context,
           label: 'note_detail_has_cw'.tr(),
-          value: note.cw != null ? 'common_yes'.tr() : 'common_no'.tr(),
-          icon: note.cw != null ? Icons.check_circle : Icons.cancel,
-          color: note.cw != null ? Colors.purple : theme.colorScheme.onSurfaceVariant,
+          value: widget.note.cw != null ? 'common_yes'.tr() : 'common_no'.tr(),
+          icon: widget.note.cw != null ? Icons.check_circle : Icons.cancel,
+          color: widget.note.cw != null ? Colors.purple : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
           context,
           label: 'note_detail_has_files'.tr(),
-          value: note.fileIds.isNotEmpty ? 'common_yes'.tr() : 'common_no'.tr(),
-          icon: note.fileIds.isNotEmpty ? Icons.check_circle : Icons.cancel,
-          color: note.fileIds.isNotEmpty ? Colors.green : theme.colorScheme.onSurfaceVariant,
+          value: widget.note.fileIds.isNotEmpty ? 'common_yes'.tr() : 'common_no'.tr(),
+          icon: widget.note.fileIds.isNotEmpty ? Icons.check_circle : Icons.cancel,
+          color: widget.note.fileIds.isNotEmpty ? Colors.green : theme.colorScheme.onSurfaceVariant,
         ),
       ],
     );
@@ -522,13 +621,13 @@ class _NoteDetailsContent extends StatelessWidget {
         _buildInfoRow(
           context,
           label: 'note_detail_uri'.tr(),
-          value: note.user?.host != null
-              ? 'https://${note.user!.host}/notes/${note.id}'
+          value: widget.note.user?.host != null
+              ? 'https://${widget.note.user!.host}/notes/${widget.note.id}'
               : 'note_detail_local'.tr(),
-          onTap: note.user?.host != null
+          onTap: widget.note.user?.host != null
               ? () {
                   Clipboard.setData(
-                    ClipboardData(text: 'https://${note.user!.host}/notes/${note.id}'),
+                    ClipboardData(text: 'https://${widget.note.user!.host}/notes/${widget.note.id}'),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('post_link_copied'.tr())),
@@ -540,44 +639,44 @@ class _NoteDetailsContent extends StatelessWidget {
         _buildInfoRow(
           context,
           label: 'note_detail_user_id'.tr(),
-          value: note.userId ?? 'unknown',
-          onTap: note.userId != null
+          value: widget.note.userId ?? 'unknown',
+          onTap: widget.note.userId != null
               ? () {
-                  Clipboard.setData(ClipboardData(text: note.userId!));
+                  Clipboard.setData(ClipboardData(text: widget.note.userId!));
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('post_id_copied'.tr())),
                   );
                 }
               : null,
         ),
-        if (note.replyId != null) ...[
+        if (widget.note.replyId != null) ...[
           const SizedBox(height: 8),
           _buildInfoRow(
             context,
             label: 'note_detail_reply_to'.tr(),
-            value: note.replyId!,
+            value: widget.note.replyId!,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: note.replyId!));
+              Clipboard.setData(ClipboardData(text: widget.note.replyId!));
             },
           ),
         ],
-        if (note.renoteId != null) ...[
+        if (widget.note.renoteId != null) ...[
           const SizedBox(height: 8),
           _buildInfoRow(
             context,
             label: 'note_detail_renote_of'.tr(),
-            value: note.renoteId!,
+            value: widget.note.renoteId!,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: note.renoteId!));
+              Clipboard.setData(ClipboardData(text: widget.note.renoteId!));
             },
           ),
         ],
-        if (note.fileIds.isNotEmpty) ...[
+        if (widget.note.fileIds.isNotEmpty) ...[
           const SizedBox(height: 8),
           _buildInfoRow(
             context,
             label: 'note_detail_files'.tr(),
-            value: '${note.fileIds.length} ${'note_detail_files_count'.tr()}',
+            value: '${widget.note.fileIds.length} ${'note_detail_files_count'.tr()}',
           ),
         ],
       ],
@@ -628,8 +727,6 @@ class _NoteDetailsContent extends StatelessWidget {
 
   DateTime? _parseSnowflakeTimestamp(String noteId) {
     try {
-      // Misskey snowflake ID format: timestamp_ms + node + counter
-      // The first 42 bits are timestamp in milliseconds since epoch
       final id = int.parse(noteId);
       final timestampMs = id >> 22;
       return DateTime.fromMillisecondsSinceEpoch(timestampMs);
@@ -681,5 +778,85 @@ class _NoteDetailsContent extends StatelessWidget {
       default:
         return theme.colorScheme.onSurfaceVariant;
     }
+  }
+
+  Widget _buildRawDataButton(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _showRawData = !_showRawData;
+              });
+            },
+            icon: Icon(
+              _showRawData ? Icons.visibility_off : Icons.code,
+              size: 18,
+            ),
+            label: Text(
+              _showRawData ? 'note_detail_hide_raw_data'.tr() : 'note_detail_show_raw_data'.tr(),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
+        if (_showRawData) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: theme.colorScheme.outline.withAlpha(50),
+              ),
+            ),
+            child: SelectableText(
+              _getNoteRawData(),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _getNoteRawData() {
+    final buffer = StringBuffer();
+    buffer.writeln('{');
+    buffer.writeln('  "id": "${widget.note.id}",');
+    buffer.writeln('  "createdAt": "${widget.note.createdAt.toIso8601String()}",');
+    if (widget.note.text != null) {
+      buffer.writeln('  "text": "${widget.note.text}",');
+    }
+    if (widget.note.cw != null) {
+      buffer.writeln('  "cw": "${widget.note.cw}",');
+    }
+    buffer.writeln('  "userId": "${widget.note.userId}",');
+    buffer.writeln('  "visibility": "${widget.note.visibility}",');
+    buffer.writeln('  "localOnly": ${widget.note.localOnly},');
+    buffer.writeln('  "renoteCount": ${widget.note.renoteCount},');
+    buffer.writeln('  "repliesCount": ${widget.note.repliesCount},');
+    buffer.writeln('  "reactionCount": ${widget.note.reactions.values.fold(0, (sum, count) => sum + count)},');
+    buffer.writeln('  "fileIds": [${widget.note.fileIds.map((id) => '"$id"').join(', ')}],');
+    if (widget.note.replyId != null) {
+      buffer.writeln('  "replyId": "${widget.note.replyId}",');
+    }
+    if (widget.note.renoteId != null) {
+      buffer.writeln('  "renoteId": "${widget.note.renoteId}",');
+    }
+    buffer.writeln('}');
+    return buffer.toString();
   }
 }

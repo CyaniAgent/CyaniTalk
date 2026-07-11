@@ -135,4 +135,4 @@ This project is moving towards its first stable release. Contributions, especial
 
 ## 📄 License
 
-[MIT License](LICENSE)
+[AGPL-3.0 License](LICENSE)

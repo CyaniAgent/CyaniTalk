@@ -42,12 +42,37 @@ class TimelineCacheDatabase {
     final db = await databaseFactory.openDatabase(
       dbPath,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: 2,
         onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
       ),
     );
 
     return db;
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // 添加音频时长缓存表
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS audio_length (
+          file_id TEXT PRIMARY KEY,
+          duration_ms INTEGER NOT NULL,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+
+      // 添加文件大小缓存表
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS file_size (
+          file_id TEXT PRIMARY KEY,
+          size_bytes INTEGER NOT NULL,
+          cached_at TEXT NOT NULL
+        )
+      ''');
+
+      logger.info('TimelineCacheDatabase: Upgraded to version 2');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -77,6 +102,24 @@ class TimelineCacheDatabase {
 
     await db.execute('''
       CREATE INDEX idx_cached_notes_type ON cached_notes(timeline_type)
+    ''');
+
+    // 音频时长缓存表
+    await db.execute('''
+      CREATE TABLE audio_length (
+        file_id TEXT PRIMARY KEY,
+        duration_ms INTEGER NOT NULL,
+        cached_at TEXT NOT NULL
+      )
+    ''');
+
+    // 文件大小缓存表
+    await db.execute('''
+      CREATE TABLE file_size (
+        file_id TEXT PRIMARY KEY,
+        size_bytes INTEGER NOT NULL,
+        cached_at TEXT NOT NULL
+      )
     ''');
 
     logger.info('TimelineCacheDatabase: Created successfully');
@@ -203,6 +246,62 @@ class TimelineCacheDatabase {
     await db.delete('timeline_refresh',
         where: 'timeline_type = ?', whereArgs: [timelineType]);
     logger.info('TimelineCacheDatabase: Cleared timeline $timelineType');
+  }
+
+  // ==================== 音频时长缓存 ====================
+
+  /// 获取缓存的音频时长（毫秒）
+  Future<int?> getAudioDuration(String fileId) async {
+    final db = await database;
+    final maps = await db.query(
+      'audio_length',
+      where: 'file_id = ?',
+      whereArgs: [fileId],
+    );
+    if (maps.isEmpty) return null;
+    return maps.first['duration_ms'] as int?;
+  }
+
+  /// 保存音频时长到缓存
+  Future<void> saveAudioDuration(String fileId, int durationMs) async {
+    final db = await database;
+    await db.insert(
+      'audio_length',
+      {
+        'file_id': fileId,
+        'duration_ms': durationMs,
+        'cached_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // ==================== 文件大小缓存 ====================
+
+  /// 获取缓存的文件大小（字节）
+  Future<int?> getFileSize(String fileId) async {
+    final db = await database;
+    final maps = await db.query(
+      'file_size',
+      where: 'file_id = ?',
+      whereArgs: [fileId],
+    );
+    if (maps.isEmpty) return null;
+    return maps.first['size_bytes'] as int?;
+  }
+
+  /// 保存文件大小到缓存
+  Future<void> saveFileSize(String fileId, int sizeBytes) async {
+    final db = await database;
+    await db.insert(
+      'file_size',
+      {
+        'file_id': fileId,
+        'size_bytes': sizeBytes,
+        'cached_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<void> close() async {

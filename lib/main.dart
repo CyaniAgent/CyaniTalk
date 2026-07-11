@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '/src/app.dart';
 import '/src/core/core.dart';
 import '/src/core/utils/http_overrides.dart';
@@ -71,6 +72,9 @@ void main() async {
   performanceMonitor.initialize();
 
   await EasyLocalization.ensureInitialized();
+
+  // 设置 timeago 的中文语言包
+  timeago.setLocaleMessages('zh', timeago.ZhMessages());
 
   // 创建 ProviderContainer 以便在非 Widget 环境中使用 Provider
   final container = ProviderContainer(

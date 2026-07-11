@@ -23,6 +23,7 @@ import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import 'widgets/timeline_selector_sheet.dart';
 
 class MisskeyPage extends ConsumerStatefulWidget {
   const MisskeyPage({super.key});
@@ -284,6 +285,7 @@ class _TimelineIconBar extends ConsumerWidget {
 
   IconData _getIcon(String type) {
     return switch (type) {
+      'Home' => Icons.home_rounded,
       'Local' => Icons.language_rounded,
       'Social' => Icons.group_rounded,
       _ => Icons.public_rounded,
@@ -292,17 +294,10 @@ class _TimelineIconBar extends ConsumerWidget {
 
   Color _getIconColor(String type, ColorScheme colorScheme) {
     return switch (type) {
-      'Local' => colorScheme.primary,
-      'Social' => colorScheme.tertiary,
+      'Home' => colorScheme.primary,
+      'Local' => colorScheme.tertiary,
+      'Social' => colorScheme.primaryContainer,
       _ => colorScheme.secondary,
-    };
-  }
-
-  String _getModeLabel(String type) {
-    return switch (type) {
-      'Local' => 'timeline_local'.tr(),
-      'Social' => 'timeline_social'.tr(),
-      _ => 'timeline_global'.tr(),
     };
   }
 
@@ -315,44 +310,14 @@ class _TimelineIconBar extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PopupMenuButton<String>(
-          tooltip: 'timeline'.tr(),
-          onSelected: onTimelineTypeChanged,
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'Global',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.public_rounded, color: _getIconColor('Global', colorScheme), size: 18),
-                  const SizedBox(width: 8),
-                  Text('timeline_global'.tr()),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'Local',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.language_rounded, color: _getIconColor('Local', colorScheme), size: 18),
-                  const SizedBox(width: 8),
-                  Text('timeline_local'.tr()),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'Social',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.group_rounded, color: _getIconColor('Social', colorScheme), size: 18),
-                  const SizedBox(width: 8),
-                  Text('timeline_social'.tr()),
-                ],
-              ),
-            ),
-          ],
+        GestureDetector(
+          onTap: () {
+            TimelineSelectorSheet.show(
+              context,
+              currentType: timelineType,
+              onTypeSelected: onTimelineTypeChanged,
+            );
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -367,13 +332,6 @@ class _TimelineIconBar extends ConsumerWidget {
                   _getIcon(timelineType),
                   color: _getIconColor(timelineType, colorScheme),
                   size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  _getModeLabel(timelineType),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
                 const SizedBox(width: 4),
                 Icon(

@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import '/src/core/utils/logger.dart';
+import '/src/core/services/file_metadata_service.dart';
 import '/src/features/misskey/domain/note.dart';
 import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
@@ -1320,60 +1321,17 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
   Widget _buildAudioItem(Map<String, dynamic> file) {
     final url = file['url'] as String?;
     final name = file['name'] as String? ?? 'Unknown';
-    final size = file['size'] as int?;
-    final theme = Theme.of(context);
+    final fileId = file['id'] as String?;
+    final fileSize = file['size'] as int?;
 
     if (url == null) return const SizedBox.shrink();
 
-    return GestureDetector(
+    return _AudioItemWidget(
+      url: url,
+      name: name,
+      fileId: fileId,
+      fileSize: fileSize,
       onTap: () => _openMediaViewer(context, widget.note.files, url),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.audiotrack,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _formatFileSize(size),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1415,54 +1373,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '其它文件',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: otherFiles.length,
-                itemBuilder: (context, index) {
-                  final file = otherFiles[index];
-                  final name = file['name'] as String? ?? 'Unknown';
-                  final type = file['type'] as String? ?? '';
-                  final size = file['size'] as int?;
-                  return ListTile(
-                    leading: const Icon(Icons.insert_drive_file),
-                    title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text('$type - ${_formatFileSize(size)}'),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => _OtherFilesDialog(otherFiles: otherFiles),
     );
-  }
-
-  /// 格式化文件大小
-  String _formatFileSize(int? bytes) {
-    if (bytes == null) return '';
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    }
-    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
   static void _openMediaViewer(
@@ -1913,4 +1825,259 @@ class _MenuItem {
     this.iconColor,
     this.textColor,
   });
+}
+
+/// 音频项组件（带时长获取）
+class _AudioItemWidget extends StatefulWidget {
+  final String url;
+  final String name;
+  final String? fileId;
+  final int? fileSize;
+  final VoidCallback onTap;
+
+  const _AudioItemWidget({
+    required this.url,
+    required this.name,
+    this.fileId,
+    this.fileSize,
+    required this.onTap,
+  });
+
+  @override
+  State<_AudioItemWidget> createState() => _AudioItemWidgetState();
+}
+
+class _AudioItemWidgetState extends State<_AudioItemWidget> {
+  int? _durationMs;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDuration();
+  }
+
+  Future<void> _loadDuration() async {
+    if (widget.fileId == null) {
+      setState(() {
+        _isLoading = false;
+        _error = 'no_file_id';
+      });
+      return;
+    }
+
+    try {
+      final metadataService = FileMetadataService();
+      final duration = await metadataService.getAudioDuration(
+        widget.fileId!,
+        widget.url,
+      );
+      
+      if (mounted) {
+        setState(() {
+          _durationMs = duration;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.audiotrack,
+                color: theme.colorScheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  _buildInfoText(theme),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoText(ThemeData theme) {
+    final sizeText = FileMetadataService.formatFileSize(widget.fileSize);
+    
+    if (_isLoading) {
+      // 显示文件大小 · 计算中...
+      return Text(
+        '$sizeText · ${'audio_calculating'.tr()}',
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
+
+    if (_error != null || _durationMs == null) {
+      // 仅显示文件大小
+      return Text(
+        sizeText,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
+
+    // 显示文件大小 · 音频时长
+    final durationText = FileMetadataService.formatDuration(_durationMs);
+    return Text(
+      '$sizeText · $durationText',
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+/// 其他文件对话框
+class _OtherFilesDialog extends StatefulWidget {
+  final List<Map<String, dynamic>> otherFiles;
+
+  const _OtherFilesDialog({required this.otherFiles});
+
+  @override
+  State<_OtherFilesDialog> createState() => _OtherFilesDialogState();
+}
+
+class _OtherFilesDialogState extends State<_OtherFilesDialog> {
+  final Map<int, int?> _fileSizes = {};
+  final Map<int, bool> _loadingStates = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAllFileSizes();
+  }
+
+  Future<void> _loadAllFileSizes() async {
+    final metadataService = FileMetadataService();
+    
+    for (int i = 0; i < widget.otherFiles.length; i++) {
+      final file = widget.otherFiles[i];
+      final fileId = file['id'] as String?;
+      final fileUrl = file['url'] as String?;
+      final existingSize = file['size'] as int?;
+      
+      // 如果已有大小且大于0，直接使用
+      if (existingSize != null && existingSize > 0) {
+        setState(() {
+          _fileSizes[i] = existingSize;
+        });
+        continue;
+      }
+      
+      // 否则从网络获取
+      if (fileId != null && fileUrl != null) {
+        setState(() {
+          _loadingStates[i] = true;
+        });
+        
+        final size = await metadataService.getFileSize(fileId, fileUrl);
+        
+        if (mounted) {
+          setState(() {
+            _fileSizes[i] = size;
+            _loadingStates[i] = false;
+          });
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '其它文件',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: widget.otherFiles.length,
+              itemBuilder: (context, index) {
+                final file = widget.otherFiles[index];
+                final name = file['name'] as String? ?? 'Unknown';
+                final type = file['type'] as String? ?? '';
+                final size = _fileSizes[index];
+                final isLoading = _loadingStates[index] ?? false;
+                
+                return ListTile(
+                  leading: const Icon(Icons.insert_drive_file),
+                  title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(_buildSubtitle(type, size, isLoading)),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _buildSubtitle(String type, int? size, bool isLoading) {
+    if (isLoading) {
+      return '$type - ${'file_calculating_size'.tr()}';
+    }
+    
+    final sizeText = FileMetadataService.formatFileSize(size);
+    return '$type - $sizeText';
+  }
 }

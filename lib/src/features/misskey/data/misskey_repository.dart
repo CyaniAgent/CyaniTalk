@@ -83,6 +83,16 @@ class MisskeyRepository implements IMisskeyRepository {
       final notes = await compute((List<dynamic> list) {
         return list.map((e) => Note.fromJson(e)).toList();
       }, data);
+      
+      // 过滤逻辑：本地和全局时间线过滤掉"主页"可见性的帖子，仅社交时间线不过滤
+      if (type == 'Local' || type == 'Global') {
+        final filteredNotes = notes.where((note) => note.visibility != 'home').toList();
+        logger.info(
+          'MisskeyRepository: Successfully retrieved ${filteredNotes.length} notes for $type timeline (filtered from ${notes.length})',
+        );
+        return filteredNotes;
+      }
+      
       logger.info(
         'MisskeyRepository: Successfully retrieved ${notes.length} notes for $type timeline',
       );

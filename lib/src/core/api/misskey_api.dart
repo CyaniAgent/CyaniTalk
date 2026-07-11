@@ -29,6 +29,21 @@ class MisskeyApi extends BaseApi {
     );
   }
 
+  /// 安全地将响应数据转换为 Map
+  ///
+  /// @param responseData 响应数据
+  /// @return Map 类型的数据
+  /// @throws Exception 如果数据类型不正确
+  static Map<String, dynamic> _toMap(dynamic responseData) {
+    if (responseData is Map) {
+      return Map<String, dynamic>.from(responseData);
+    }
+    if (responseData is String) {
+      throw Exception('API returned string instead of map: $responseData');
+    }
+    throw Exception('Unexpected response type: ${responseData.runtimeType}');
+  }
+
   /// 获取当前用户信息
   ///
   /// 返回当前认证用户的详细信息，包括用户名、头像、个人简介等。
@@ -37,7 +52,7 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> i() => executeApiCallSafe(
     'MisskeyApi.i',
     () => _dio.post('/api/i', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 检查笔记是否仍然存在于服务器上
@@ -97,7 +112,7 @@ class MisskeyApi extends BaseApi {
         '/api/notes/show',
         data: {'i': token, 'noteId': noteId},
       );
-      return Map<String, dynamic>.from(response.data);
+      return _toMap(response.data);
     } catch (e) {
       logger.error('MisskeyApi: Error getting note: $noteId', e);
       if (e is DioException) {
@@ -127,7 +142,7 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
     'MisskeyApi.getDriveInfo',
     () => _dio.post('/api/drive', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 从 API 获取列表数据的辅助方法
@@ -147,7 +162,19 @@ class MisskeyApi extends BaseApi {
   ) => executeApiCall(
     operationName,
     () => _dio.post(endpoint, data: {'i': token, ...data}),
-    (response) => response.data as List<dynamic>,
+    (response) {
+      final responseData = response.data;
+      if (responseData is List) {
+        return responseData;
+      }
+      if (responseData is String) {
+        throw Exception('API returned string instead of list: $responseData');
+      }
+      if (responseData is Map && responseData.containsKey('error')) {
+        throw Exception('API error: ${responseData['error']}');
+      }
+      throw Exception('Unexpected response type: ${responseData.runtimeType}');
+    },
     params: data,
     dioErrorParser: (error) =>
         error.response?.data?['error']?['message'] ?? error.message,
@@ -274,7 +301,7 @@ class MisskeyApi extends BaseApi {
       '/api/channels/show',
       data: {'i': token, 'channelId': channelId},
     ),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'channelId': channelId},
   );
 
@@ -752,7 +779,7 @@ class MisskeyApi extends BaseApi {
           return await _dio.post('/api/messaging/messages/create', data: data);
         }
       },
-      (response) => Map<String, dynamic>.from(response.data),
+      (response) => _toMap(response.data),
       params: data,
     );
   }
@@ -798,7 +825,7 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> createChatRoom(String name) => executeApiCall(
     'MisskeyApi.createChatRoom',
     () => _dio.post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'name': name},
   );
 
@@ -883,7 +910,7 @@ class MisskeyApi extends BaseApi {
         'description': ?description,
       },
     ),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'name': name, 'isPublic': isPublic, 'description': description},
   );
 
@@ -916,7 +943,7 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> showUser(String userId) => executeApiCall(
     'MisskeyApi.showUser',
     () => _dio.post('/api/users/show', data: {'i': token, 'userId': userId}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'userId': userId},
   );
 
@@ -939,7 +966,7 @@ class MisskeyApi extends BaseApi {
             if (host != null) 'host': host,
           },
         ),
-        (response) => Map<String, dynamic>.from(response.data),
+        (response) => _toMap(response.data),
         params: {'username': username, 'host': host},
       );
 
@@ -1074,7 +1101,7 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> getMeta() => executeApiCallSafe(
     'MisskeyApi.getMeta',
     () => _dio.post('/api/meta', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 搜索用户
@@ -1144,7 +1171,7 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> getEmoji(String name) => executeApiCallSafe(
     'MisskeyApi.getEmoji',
     () => _dio.post('/api/emoji', data: {'i': token, 'name': name}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'name': name},
   );
 
@@ -1156,7 +1183,7 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> getEmojis() => executeApiCallSafe(
     'MisskeyApi.getEmojis',
     () => _dio.post('/api/emojis', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 获取当前用户的公告列表

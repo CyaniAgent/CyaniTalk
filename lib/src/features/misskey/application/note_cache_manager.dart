@@ -351,7 +351,8 @@ class NoteCacheManager {
       }
     }
 
-    notes.sort((a, b) => b.id.compareTo(a.id));
+    // 按创建时间倒序排列（最新的在前）
+    notes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return notes;
   }
 
@@ -386,7 +387,8 @@ class NoteCacheManager {
         }
       }
 
-      notes.sort((a, b) => b.id.compareTo(a.id));
+      // 按创建时间倒序排列（最新的在前）
+      notes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return notes;
     } catch (e) {
       logger.warning(
