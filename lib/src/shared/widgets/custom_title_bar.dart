@@ -47,7 +47,8 @@ class _TitleBarInherited extends InheritedWidget {
   });
 
   @override
-  bool updateShouldNotify(_TitleBarInherited oldWidget) => false;
+  bool updateShouldNotify(_TitleBarInherited oldWidget) =>
+      controller != oldWidget.controller;
 }
 
 /// Desktop custom title bar with window controls and [TitleBarController]

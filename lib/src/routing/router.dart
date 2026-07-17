@@ -33,6 +33,7 @@ import 'package:cyanitalk/src/shared/widgets/responsive_shell.dart';
 part 'router.g.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
+final routerRefreshNotifier = ValueNotifier<int>(0);
 
 /// 自定义安全转换页面，防止 Windows AXTree 报错
 Page<T> _buildSafePage<T>({
@@ -101,13 +102,26 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
 /// 返回配置好的GoRouter实例
 @riverpod
 GoRouter goRouter(Ref ref) {
-  final welcomeDone = ref.watch(welcomeCompletedProvider).asData?.value ?? false;
-  final initialLocation = welcomeDone ? '/misskey' : '/welcome';
-  logger.info('Router: Initializing GoRouter with initial location: $initialLocation');
+  logger.info('Router: Initializing GoRouter');
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: initialLocation,
+    initialLocation: '/misskey',
+    refreshListenable: routerRefreshNotifier,
+    redirect: (context, state) {
+      final welcomeDone = ref.read(welcomeCompletedProvider).asData?.value ?? false;
+      final location = state.uri.toString();
+
+      // 未完成欢迎页 → 强制跳转 /welcome
+      if (!welcomeDone && location != '/welcome') {
+        return '/welcome';
+      }
+      // 已完成欢迎页但在 /welcome → 跳转首页
+      if (welcomeDone && location == '/welcome') {
+        return '/misskey';
+      }
+      return null;
+    },
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

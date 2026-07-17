@@ -49,11 +49,13 @@ class _FireworksBackgroundState extends State<FireworksBackground>
         return Stack(
           children: [
             Positioned.fill(
-              child: ClipRect(
-                child: CustomPaint(
-                  painter: _FireworksPainter(
-                    rockets: _rockets,
-                    bursts: _bursts,
+              child: RepaintBoundary(
+                child: ClipRect(
+                  child: CustomPaint(
+                    painter: _FireworksPainter(
+                      rockets: _rockets,
+                      bursts: _bursts,
+                    ),
                   ),
                 ),
               ),

@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:cyanitalk/src/core/core.dart';
 import 'package:cyanitalk/src/core/theme/color_constants.dart';
 import 'package:cyanitalk/src/core/theme/font_selector.dart';
@@ -300,7 +302,13 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                       title: '自定义标题栏',
                       subtitle: '使用自定义窗口标题栏',
                       value: appearanceSettings.useCustomTitleBar,
-                      onChanged: appearanceNotifier.toggleCustomTitleBar,
+                      onChanged: (value) {
+                        if (value && !appearanceSettings.useCustomTitleBar) {
+                          _showTitleBarRestartDialog(appearanceNotifier);
+                        } else {
+                          appearanceNotifier.toggleCustomTitleBar(value);
+                        }
+                      },
                     ),
                 ],
               ),
@@ -493,6 +501,36 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               showToast(title: 'settings_appearance_reset_done'.tr(), type: ToastificationType.success);
             },
             child: Text('confirm'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTitleBarRestartDialog(AppearanceSettingsNotifier notifier) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('需要重启 App'),
+        content: const Text('开启此功能后需要重启一次 App，以保障良好的使用体验。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('保持关闭'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () {
+              notifier.toggleCustomTitleBar(true);
+              Navigator.of(ctx).pop();
+              // 重启应用
+              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+                windowManager.close();
+              }
+            },
+            child: const Text('重启 App'),
           ),
         ],
       ),

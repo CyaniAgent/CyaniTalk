@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:toastification/toastification.dart';
+import 'package:window_manager/window_manager.dart';
 import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
@@ -15,6 +16,7 @@ import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/misskey/application/misskey_notifier.dart';
 import 'features/misskey/application/misskey_notifications_notifier.dart';
 import 'features/profile/presentation/settings/appearance_page.dart';
+import 'features/welcome/application/welcome_state.dart';
 import 'core/services/notification_manager.dart';
 import 'features/update/application/update_notifier.dart';
 import 'features/update/presentation/update_bottom_sheet.dart';
@@ -50,8 +52,14 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
   /// 缓存的暗色主题
   ThemeData? _cachedDarkTheme;
 
-  /// 缓存的外观设置
-  AppearanceSettings? _cachedSettings;
+  /// 缓存的亮色外观设置
+  AppearanceSettings? _cachedLightSettings;
+
+  /// 缓存的暗色外观设置
+  AppearanceSettings? _cachedDarkSettings;
+
+  /// 标题栏 controller，仅创建一次
+  final TitleBarController _titleBarController = TitleBarController();
 
   @override
   void initState() {
@@ -158,6 +166,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     final goRouter = ref.watch(goRouterProvider);
     logger.debug('CyaniTalkApp: 加载路由配置');
 
+    // 监听欢迎页完成状态，触发路由刷新
+    ref.listen(welcomeCompletedProvider, (prev, next) {
+      routerRefreshNotifier.value++;
+    });
+
     // Get appearance settings
     final appearanceSettingsAsync = ref.watch(appearanceSettingsProvider);
 
@@ -219,9 +232,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
         final useCustomTitleBar =
             isDesktop && appearanceSettings.useCustomTitleBar;
-        final titleBarController = useCustomTitleBar
-            ? TitleBarController()
-            : null;
+
+        // 非自定义标题栏时恢复系统标题栏
+        if (isDesktop && !useCustomTitleBar) {
+          windowManager.setTitleBarStyle(TitleBarStyle.normal);
+        }
 
         logger.debug('CyaniTalkApp: 构建MaterialApp');
 
@@ -254,9 +269,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
                           left: 0,
                           right: 0,
                           child: ListenableBuilder(
-                            listenable: titleBarController!,
+                            listenable: _titleBarController,
                             builder: (context, _) =>
-                                CustomTitleBar(controller: titleBarController),
+                                CustomTitleBar(controller: _titleBarController),
                           ),
                         ),
                       ],
@@ -270,7 +285,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         );
 
         if (useCustomTitleBar) {
-          app = TitleBarScope(controller: titleBarController!, child: app);
+          app = TitleBarScope(controller: _titleBarController, child: app);
         }
 
         return app;
@@ -287,12 +302,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
   /// @param brightness 主题亮度，Brightness.light或Brightness.dark
   /// @return 返回构建的ThemeData对象
   ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness) {
-    // 检查是否需要重新构建主题
     final isDark = brightness == Brightness.dark;
     final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
+    final cachedSettings = isDark ? _cachedDarkSettings : _cachedLightSettings;
 
-    // 如果设置没有变化且主题已缓存，直接返回缓存的主题
-    if (_cachedSettings == settings && themeCache != null) {
+    if (cachedSettings == settings && themeCache != null) {
       return themeCache;
     }
 
@@ -371,7 +385,10 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
     final theme = ThemeData(
       colorScheme: settings.useDynamicColor
-          ? ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness)
+          ? ColorScheme.fromSeed(
+              seedColor: const Color(0xFF39C5BB),
+              brightness: brightness,
+            )
           : ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
       useMaterial3: true,
       fontFamily: effectiveFontFamily,
@@ -422,14 +439,13 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
           );
 
     // 缓存主题和设置
-
     if (isDark) {
       _cachedDarkTheme = adjustedTheme;
+      _cachedDarkSettings = settings;
     } else {
       _cachedLightTheme = adjustedTheme;
+      _cachedLightSettings = settings;
     }
-
-    _cachedSettings = settings;
 
     return adjustedTheme;
   }

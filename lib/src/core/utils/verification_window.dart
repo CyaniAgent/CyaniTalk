@@ -26,7 +26,7 @@ class VerificationWindow extends StatefulWidget {
 class _VerificationWindowState extends State<VerificationWindow> {
   InAppWebViewController? _webViewController;
   Timer? _cookieTimer;
-  bool _isWebviewInitialized = false;
+  bool _isWebviewLoaded = false;
 
   @override
   void initState() {
@@ -112,29 +112,33 @@ class _VerificationWindowState extends State<VerificationWindow> {
                 ),
               ),
               Expanded(
-                child: _isWebviewInitialized
-                    ? InAppWebView(
-                        initialUrlRequest: URLRequest(
-                          url: WebUri(widget.url),
-                        ),
-                        initialSettings: InAppWebViewSettings(
-                          javaScriptEnabled: true,
-                          transparentBackground: true,
-                          useShouldOverrideUrlLoading: false,
-                        ),
-                        onWebViewCreated: (controller) {
-                          _webViewController = controller;
-                        },
-                        onLoadStop: (controller, url) {
-                          if (!_isWebviewInitialized) {
-                            setState(() {
-                              _isWebviewInitialized = true;
-                            });
-                            _startCookieCheck();
-                          }
-                        },
-                      )
-                    : const Center(child: CyaniLoadingIndicator()),
+                child: Stack(
+                  children: [
+                    InAppWebView(
+                      initialUrlRequest: URLRequest(
+                        url: WebUri(widget.url),
+                      ),
+                      initialSettings: InAppWebViewSettings(
+                        javaScriptEnabled: true,
+                        transparentBackground: true,
+                        useShouldOverrideUrlLoading: false,
+                      ),
+                      onWebViewCreated: (controller) {
+                        _webViewController = controller;
+                      },
+                      onLoadStop: (controller, url) {
+                        if (!_isWebviewLoaded) {
+                          setState(() {
+                            _isWebviewLoaded = true;
+                          });
+                          _startCookieCheck();
+                        }
+                      },
+                    ),
+                    if (!_isWebviewLoaded)
+                      const Center(child: CyaniLoadingIndicator()),
+                  ],
+                ),
               ),
             ],
           ),
