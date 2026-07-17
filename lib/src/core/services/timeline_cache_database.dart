@@ -15,7 +15,15 @@ class TimelineCacheDatabase {
   Database? _database;
   static bool _ffiInitialized = false;
 
+  /// 当前账号标识，用于隔离不同账号的缓存
+  String _accountKey = 'default';
+
   static const _maxCacheAge = Duration(minutes: 30);
+
+  /// 设置当前账号标识
+  void setAccountContext(String host, String? token) {
+    _accountKey = '${host}_${token ?? ''}';
+  }
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -125,7 +133,7 @@ class TimelineCacheDatabase {
     logger.info('TimelineCacheDatabase: Created successfully');
   }
 
-  String _buildId(String timelineType) => 'default_$timelineType';
+  String _buildId(String timelineType) => '${_accountKey}_$timelineType';
 
   Future<DateTime?> getLastRefreshTime(String timelineType) async {
     final db = await database;

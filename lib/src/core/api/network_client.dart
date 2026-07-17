@@ -103,8 +103,8 @@ class NetworkClient {
           ...?extraHeaders
         },
         validateStatus: (status) {
-          // 让所有状态码都通过，由 BaseApi.handleResponse 来处理
-          return true;
+          // 接受 2xx 和 3xx，4xx/5xx 抛异常让 RetryInterceptor 和 BaseApi 正常工作
+          return status != null && status >= 200 && status < 400;
         },
       ),
     );

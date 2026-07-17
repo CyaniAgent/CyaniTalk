@@ -29,7 +29,7 @@ class AppLogger {
   late Logger _logger;
 
   /// 文件输出实例
-  late final AppFileOutput _fileOutput;
+  AppFileOutput? _fileOutput;
 
   /// 当前日志级别
   Level _currentLevel = Level.debug;
@@ -111,7 +111,7 @@ class AppLogger {
     // 初始化日志器
     _logger = Logger(
       level: _currentLevel, // 初始日志级别
-      output: AppMultiOutput([consoleOutput, _fileOutput]),
+      output: AppMultiOutput([consoleOutput, _fileOutput!]),
       printer: SimplePrinter(),
     );
 
@@ -260,7 +260,7 @@ class AppLogger {
     // 重新创建日志器以更新级别
     _logger = Logger(
       level: _currentLevel,
-      output: AppMultiOutput([consoleOutput, _fileOutput]),
+      output: AppMultiOutput([consoleOutput, _fileOutput!]),
       printer: SimplePrinter(),
     );
   }
@@ -339,12 +339,20 @@ class AppLogger {
   /// @return 无返回值
   Future<void> deleteLogs() async {
     try {
+      // 先关闭当前日志文件的 sink，释放文件锁
+      await _fileOutput?.destroy();
+      _fileOutput = null;
+
       final dir = await _getLogDirectory();
       if (dir.existsSync()) {
         final files = dir.listSync();
         for (final file in files) {
           if (file is File) {
-            await file.delete();
+            try {
+              await file.delete();
+            } catch (e) {
+              // Windows 上文件可能仍被占用，忽略删除错误
+            }
           }
         }
       }

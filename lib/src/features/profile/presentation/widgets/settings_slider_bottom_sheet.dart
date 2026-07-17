@@ -127,8 +127,7 @@ class _SettingsSliderBottomSheetState extends State<SettingsSliderBottomSheet> {
               min: widget.minValue.toDouble(),
               max: widget.maxValue.toDouble(),
               divisions: widget.step != null ? (widget.maxValue - widget.minValue) ~/ widget.step! : null,
-              label: widget.valueFormatter(_currentValue),
-              showIndicator: true,
+              showIndicator: false,
               onChanged: (value) {
                 setState(() {
                   if (widget.step != null) {
