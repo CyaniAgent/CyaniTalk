@@ -30,3 +30,8 @@ If applicable, add screenshots to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+
+**(Please delete this line and the following lines. 请删除本行与以下几行。 この行とそれ以降の行を削除してください。)**
+如果你是中国用户，你可以使用 AI 翻译或直接使用中文提交 issues。
+日本からのユーザーの方は、AI翻訳を利用するか、直接日本語で問題を報告することができます。
