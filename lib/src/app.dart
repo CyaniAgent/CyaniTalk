@@ -6,6 +6,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 import 'core/core.dart';
@@ -226,69 +227,81 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
           'CyaniTalkApp: 加载外观设置 - 显示模式: ${appearanceSettings.displayMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
         );
 
-        // Build theme based on settings
-        final theme = _buildTheme(appearanceSettings, Brightness.light);
-        final darkTheme = _buildTheme(appearanceSettings, Brightness.dark);
+        return DynamicColorBuilder(
+          builder: (lightDynamic, darkDynamic) {
+            // 解析系统动态色：harmonized() 让颜色与系统风格统一
+            final lightScheme = (appearanceSettings.useDynamicColor && lightDynamic != null)
+                ? lightDynamic.harmonized()
+                : null;
+            final darkScheme = (appearanceSettings.useDynamicColor && darkDynamic != null)
+                ? darkDynamic.harmonized()
+                : null;
 
-        final useCustomTitleBar =
-            isDesktop && appearanceSettings.useCustomTitleBar;
+            // 构建主题
+            final theme = _buildTheme(appearanceSettings, Brightness.light, dynamicColorScheme: lightScheme);
+            final darkTheme = _buildTheme(appearanceSettings, Brightness.dark, dynamicColorScheme: darkScheme);
 
-        // 非自定义标题栏时恢复系统标题栏
-        if (isDesktop && !useCustomTitleBar) {
-          windowManager.setTitleBarStyle(TitleBarStyle.normal);
-        }
+            final useCustomTitleBar =
+                isDesktop && appearanceSettings.useCustomTitleBar;
 
-        logger.debug('CyaniTalkApp: 构建MaterialApp');
+            // 非自定义标题栏时恢复系统标题栏
+            if (isDesktop && !useCustomTitleBar) {
+              windowManager.setTitleBarStyle(TitleBarStyle.normal);
+            }
 
-        Widget app = GlobalFontRefresher(
-          child: _UpdateHandler(
-            child: ToastificationWrapper(
-              config: toastConfig,
-              child: MaterialApp.router(
-                routerConfig: goRouter,
-                title: 'CyaniTalk',
-                theme: theme,
-                darkTheme: darkTheme,
-                themeMode: appearanceSettings.displayMode,
-                debugShowCheckedModeBanner: false,
-                localizationsDelegates: context.localizationDelegates,
-                supportedLocales: context.supportedLocales,
-                locale: context.locale,
-                builder: (context, child) {
-                  if (useCustomTitleBar) {
-                    return Stack(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: M3ETitleBarTokens.standard.height,
-                          ),
-                          child: child!,
-                        ),
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          child: ListenableBuilder(
-                            listenable: _titleBarController,
-                            builder: (context, _) =>
-                                CustomTitleBar(controller: _titleBarController),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return child!;
-                },
+            logger.debug('CyaniTalkApp: 构建MaterialApp');
+
+            Widget app = GlobalFontRefresher(
+              child: _UpdateHandler(
+                child: ToastificationWrapper(
+                  config: toastConfig,
+                  child: MaterialApp.router(
+                    routerConfig: goRouter,
+                    title: 'CyaniTalk',
+                    theme: theme,
+                    darkTheme: darkTheme,
+                    themeMode: appearanceSettings.displayMode,
+                    debugShowCheckedModeBanner: false,
+                    localizationsDelegates: context.localizationDelegates,
+                    supportedLocales: context.supportedLocales,
+                    locale: context.locale,
+                    builder: (context, child) {
+                      if (useCustomTitleBar) {
+                        return Stack(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: M3ETitleBarTokens.standard.height,
+                              ),
+                              child: child!,
+                            ),
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: ListenableBuilder(
+                                listenable: _titleBarController,
+                                builder: (context, _) =>
+                                    CustomTitleBar(controller: _titleBarController),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      return child!;
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+
+            if (useCustomTitleBar) {
+              app = TitleBarScope(controller: _titleBarController, child: app);
+            }
+
+            return app;
+          },
         );
-
-        if (useCustomTitleBar) {
-          app = TitleBarScope(controller: _titleBarController, child: app);
-        }
-
-        return app;
       },
     );
   }
@@ -300,8 +313,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
   ///
   /// @param settings 用户的外观设置，包含显示模式、动态色彩和自定义颜色选项
   /// @param brightness 主题亮度，Brightness.light或Brightness.dark
+  /// @param dynamicColorScheme 系统动态取色方案（可选）
   /// @return 返回构建的ThemeData对象
-  ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness) {
+  ThemeData _buildTheme(AppearanceSettings settings, Brightness brightness, {ColorScheme? dynamicColorScheme}) {
     final isDark = brightness == Brightness.dark;
     final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
     final cachedSettings = isDark ? _cachedDarkSettings : _cachedLightSettings;
@@ -310,10 +324,18 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       return themeCache;
     }
 
-    // 使用自定义颜色或默认颜色
-    final seedColor = settings.useCustomColor && settings.primaryColor != null
-        ? settings.primaryColor!
-        : const Color(0xFF39C5BB);
+    // 解析 ColorScheme：优先使用系统动态色，否则用种子色生成
+    ColorScheme colorScheme;
+    if (settings.useDynamicColor && dynamicColorScheme != null) {
+      // Android 12+ / macOS / Windows / Linux → 使用系统动态色
+      colorScheme = dynamicColorScheme;
+    } else {
+      // 回退：用种子色生成
+      final seedColor = settings.useCustomColor && settings.primaryColor != null
+          ? settings.primaryColor!
+          : const Color(0xFF39C5BB);
+      colorScheme = ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness);
+    }
 
     // 获取字体ID
     // 空字符串表示系统字体
@@ -384,12 +406,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     );
 
     final theme = ThemeData(
-      colorScheme: settings.useDynamicColor
-          ? ColorScheme.fromSeed(
-              seedColor: const Color(0xFF39C5BB),
-              brightness: brightness,
-            )
-          : ColorScheme.fromSeed(seedColor: seedColor, brightness: brightness),
+      colorScheme: colorScheme,
       useMaterial3: true,
       fontFamily: effectiveFontFamily,
       textTheme: textTheme,

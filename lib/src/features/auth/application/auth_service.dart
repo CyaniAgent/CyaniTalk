@@ -9,6 +9,7 @@ import '/src/features/auth/domain/misskey_permissions.dart';
 import '/src/core/api/network_client.dart';
 import '/src/core/core.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/profile/application/network_settings_provider.dart';
 
 part 'auth_service.g.dart';
 
@@ -107,9 +108,10 @@ class AuthService extends _$AuthService {
     final sanitizedHost = _sanitizeHost(host);
     logger.info('检查Misskey MiAuth认证状态，主机: $sanitizedHost');
 
+    final networkSettings = ref.read(networkSettingsProvider).value;
     final dio = NetworkClient().createDio(
       host: sanitizedHost,
-      userAgent: Constants.getUserAgent(),
+      userAgent: networkSettings?.effectiveUserAgent,
     );
 
     int retryCount = 0;
@@ -240,28 +242,7 @@ class AuthService extends _$AuthService {
 
   /// 清理主机地址，提取出域名部分
   String _sanitizeHost(String host) {
-    String sanitized = host.trim();
-    if (sanitized.startsWith('https://')) {
-      sanitized = sanitized.substring(8);
-    } else if (sanitized.startsWith('http://')) {
-      sanitized = sanitized.substring(7);
-    }
-
-    // 移除路径部分
-    if (sanitized.contains('/')) {
-      sanitized = sanitized.split('/').first;
-    }
-
-    // 移除可能的查询参数或锚点
-    if (sanitized.contains('?')) {
-      sanitized = sanitized.split('?').first;
-    }
-    if (sanitized.contains('#')) {
-      sanitized = sanitized.split('#').first;
-    }
-
-    logger.debug('清理主机地址: $host -> $sanitized');
-    return sanitized;
+    return sanitizeHost(host);
   }
 }
 

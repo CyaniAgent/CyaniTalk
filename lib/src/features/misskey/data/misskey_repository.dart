@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/core/api/misskey_api.dart';
+import '/src/features/profile/application/network_settings_provider.dart';
 import '/src/features/misskey/domain/note.dart';
 import '/src/features/misskey/domain/clip.dart';
 import '/src/features/misskey/domain/channel.dart';
@@ -1454,6 +1455,11 @@ Future<IMisskeyRepository> misskeyRepository(Ref ref) async {
   logger.info(
     'MisskeyRepository: Initializing for account: ${account.id} on ${account.host}',
   );
-  final api = MisskeyApi(host: account.host, token: account.token);
+  final networkSettings = ref.read(networkSettingsProvider).value;
+  final api = MisskeyApi(
+    host: account.host,
+    token: account.token,
+    userAgent: networkSettings?.effectiveUserAgent,
+  );
   return MisskeyRepository(api);
 }

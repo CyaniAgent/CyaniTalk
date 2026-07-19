@@ -10,6 +10,7 @@ import '/src/core/config/constants.dart';
 ///
 /// @param host Misskey实例的主机名
 /// @param token 认证令牌
+/// @param userAgent 可选的自定义 User Agent
 class MisskeyApi extends BaseApi {
   final String host;
   final String token;
@@ -19,13 +20,14 @@ class MisskeyApi extends BaseApi {
   ///
   /// @param host Misskey实例的主机名
   /// @param token 认证令牌
-  MisskeyApi({required this.host, required this.token}) {
+  /// @param userAgent 可选的自定义 User Agent，为 null 时使用默认精简 UA
+  MisskeyApi({required this.host, required this.token, String? userAgent}) {
     logger.info('MisskeyApi: Initializing for host: $host');
 
     _dio = NetworkClient().createDio(
       host: host,
       token: token,
-      userAgent: Constants.getUserAgent(),
+      userAgent: userAgent ?? Constants.getUserAgent(),
     );
   }
 

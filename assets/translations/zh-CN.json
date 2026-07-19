@@ -498,7 +498,6 @@
   "settings_appearance_system": "跟随系统",
   "settings_appearance_light": "浅色模式",
   "settings_appearance_dark": "深色模式",
-  "settings_appearance_dynamic_color_android_only": "动态色彩功能仅在 Android 上受支持。",
   "settings_appearance_reset_config": "重置主题配置",
   "settings_appearance_reset_confirm": "确定要重置所有主题设置吗？",
   "settings_appearance_reset_done": "主题设置已成功重置！",
@@ -643,7 +642,10 @@
   "auth_terms_of_service": "服务条款",
   "auth_privacy_policy": "隐私政策",
   "settings_network_global_section": "全局",
-  "settings_network_user_agent_selector": "User Agent 选择器",
+  "settings_network_custom_ua": "自定义 User Agent",
+  "settings_network_custom_ua_description": "使用自定义 User Agent 字符串代替默认精简 UA",
+  "settings_network_custom_ua_hint": "输入自定义 User Agent...",
+  "settings_network_custom_ua_warning": "自定义 UA 可能会影响与某些服务器的兼容性",
   "settings_network_misskey_section": "Misskey",
   "settings_network_misskey_realtime_mode": "实时模式",
   "settings_network_misskey_realtime_mode_description": "启用实时数据更新",
@@ -728,7 +730,7 @@
   "settings_developer_design_playground_description": "展示本 App 使用的所有设计，基于 Material Design 3 等组件库。",
   "stream_disconnected": "已和实时流断开连接",
   "stream_reconnecting": "自动进行第 {n} 次重连",
-  "stream_reconnect_failed_title": "App 已停用连接",
+  "stream_reconnect_failed_title": "实时流连接失败",
   "stream_reconnect_failed_body": "超过设置的断线重连次数，已将当前的时间线列表保存至数据库中。",
-  "stream_reload_button": "重载 App"
+  "stream_refresh": "刷新"
 }
