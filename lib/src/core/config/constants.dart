@@ -35,8 +35,8 @@ class Constants {
 
   /// 生成用户代理字符串
   ///
-  /// 用于网络请求的User-Agent头，包含应用名称和版本号。
+  /// 精简 UA，符合 RFC 7231 规范，不包含具体浏览器版本号。
   static String getUserAgent() {
-    return 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36 CyaniTalk/$appVersion';
+    return 'CyaniTalk/$appVersion (Misskey Client; +https://github.com/user/CyaniTalk)';
   }
 }

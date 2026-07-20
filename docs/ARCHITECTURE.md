@@ -1,9 +1,9 @@
 # Architecture Design Document
 
 ## 1. Overview
-CyaniTalk is a complex, data-intensive Flutter application that interacts with two distinct backend ecosystems: **Misskey** (Node.js/Postgres) and **Flarum** (PHP/MySQL).
+CyaniTalk is a complex, data-intensive Flutter application that interacts with the **Misskey** (Node.js/Postgres) backend ecosystem.
 
-The architecture follows a **Feature-First, Layered Architecture** powered by **Riverpod** for dependency injection and state management. This approach ensures scalability, testability, and a clean separation of concerns between the "Real-time" nature of Misskey and the "Structured" nature of Flarum.
+The architecture follows a **Feature-First, Layered Architecture** powered by **Riverpod** for dependency injection and state management. This approach ensures scalability, testability, and a clean separation of concerns.
 
 ---
 
@@ -27,9 +27,8 @@ CyaniTalk/
 │   │   │   ├── theme/       # AppTheme, ColorPalettes
 │   │   │   └── utils/       # Helpers (Date formatters, String extensions)
 │   │   ├── features/        # Business Logic Modules
-│   │   │   ├── auth/        # Login (MiAuth & Flarum Token)
+│   │   │   ├── auth/        # Login (MiAuth)
 │   │   │   ├── misskey/     # Streaming, Notes, MFM Rendering, Drive
-│   │   │   ├── flarum/      # Discussions, Tags, JSON:API parsing
 │   │   │   ├── messages/    # Aggregated Messaging System
 │   │   │   └── admin/       # API Console, Admin Dashboard
 │   │   ├── routing/         # GoRouter configuration
@@ -40,8 +39,7 @@ CyaniTalk/
 ```
 ---
 
-## 3. The Dual-Core Data Layer
-Since the backends talk different languages, the Data Layer is split into two parallel engines.
+## 3. The Data Layer
 
 ### 3.1. Misskey Engine
 * **Protocol**: REST (HTTP/2) & WebSocket.
@@ -50,13 +48,6 @@ Since the backends talk different languages, the Data Layer is split into two pa
     * A global WebSocketService maintains a persistent connection to the Misskey streaming endpoint.
     * Incoming events (note, notification) are broadcast via a StreamController.
 * **Data Models**: Plain Dart objects generated from JSON (using json_serializable).
-
-### 3.2. Flarum Engine
-* **Protocol**: REST (JSON:API Specification).
-* **Authentication**: Token-based.
-* **Parsing Strategy**：
-    * Flarum responses are deeply nested (data, included, relationships).
-    * We use a dedicated JsonApiParser service to flatten these responses into consumable Domain Entities.
 
 ---
 
@@ -132,11 +123,10 @@ flutter:
 
 ---
 
-## 7. Rendering Engine (Markdown & MFM)
+## 7. Rendering Engine (MFM)
 
 Rendering user-generated content is one of the most resource-intensive tasks.
 
-* **Flarum**: Uses standard Markdown. We utilize flutter_markdown with a custom extension for Flarum-specific tags (e.g., [u]user[/u]).
 * **Misskey (MFM)**: 
     * Misskey Flavored Markdown includes animations (bounce, shake) and custom syntax.
     * **Strategy**: We implement a custom MfmRenderer widget. It parses the syntax tree and maps it to a RichText widget structure. Complex animations utilize Flutter's AnimationController.
@@ -157,4 +147,4 @@ Rendering user-generated content is one of the most resource-intensive tasks.
 
 * **Multi-Account**: The architecture supports switching the currentUserId. Providers should be watched/rebuilt when the active user changes.
 * **Offline Mode**: We plan to implement hive caching for the Timeline and Forum Thread lists to allow reading without an internet connection.
-* **Push Notifications**: We plan to implement push notifications for Misskey and Flarum.
+* **Push Notifications**: We plan to implement push notifications for Misskey.

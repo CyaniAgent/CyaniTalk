@@ -264,35 +264,28 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               SettingsCardGroup(
                 children: [
                   _displayModeSelector(appearanceSettings.displayMode, appearanceNotifier),
-                  _switchTile(
-                    icon: Icons.color_lens_outlined,
-                    iconColor: SettingsIconColors.purple,
-                    title: 'settings_appearance_dynamic_color'.tr(),
-                    subtitle: 'settings_appearance_dynamic_color_description'.tr(),
-                    value: appearanceSettings.useDynamicColor,
-                    onChanged: isAndroid
-                        ? appearanceNotifier.toggleDynamicColor
-                        : null,
-                  ),
-                  if (!isAndroid)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(72, 0, 16, 12),
-                      child: Text(
-                        'settings_appearance_dynamic_color_android_only'.tr(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.amber[800],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  if (!isDesktop)
+                    _switchTile(
+                      icon: Icons.color_lens_outlined,
+                      iconColor: SettingsIconColors.purple,
+                      title: 'settings_appearance_dynamic_color'.tr(),
+                      subtitle: 'settings_appearance_dynamic_color_description'.tr(),
+                      value: appearanceSettings.useDynamicColor,
+                      onChanged: isAndroid
+                          ? appearanceNotifier.toggleDynamicColor
+                          : null,
                     ),
-                  _switchTile(
-                    icon: Icons.palette_outlined,
-                    iconColor: _purple,
-                    title: 'settings_appearance_custom_color'.tr(),
-                    subtitle: 'settings_appearance_custom_color_description'.tr(),
-                    value: appearanceSettings.useCustomColor,
-                    onChanged: appearanceNotifier.toggleCustomColor,
-                  ),
+                  if (!isDesktop)
+                    _switchTile(
+                      icon: Icons.palette_outlined,
+                      iconColor: _purple,
+                      title: 'settings_appearance_custom_color'.tr(),
+                      subtitle: 'settings_appearance_custom_color_description'.tr(),
+                      value: appearanceSettings.useCustomColor,
+                      onChanged: isAndroid
+                          ? appearanceNotifier.toggleCustomColor
+                          : null,
+                    ),
                   if (appearanceSettings.useCustomColor)
                     _colorPickerRow(appearanceSettings, appearanceNotifier),
                   if (isDesktop)

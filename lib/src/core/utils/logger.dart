@@ -268,7 +268,11 @@ class AppLogger {
     // 重新创建日志器以更新级别
     _logger = Logger(
       level: _currentLevel,
+<<<<<<< HEAD
       output: multiOutput,
+=======
+      output: AppMultiOutput([consoleOutput, _fileOutput!]),
+>>>>>>> 0d7eefc4c1f7a0ddff3330c53d314e7c17fdcda4
       printer: SimplePrinter(),
     );
   }

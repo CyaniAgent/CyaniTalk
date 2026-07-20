@@ -240,7 +240,7 @@ logger.apiSuccess('getUserInfo', result: user);
 logger.apiError('getUserInfo', error);
 
 // ✗ 不推荐：重复的日志代码
-logger.info('FlarumApi: 开始登录，用户: $identification');
+logger.info('Api: 开始登录，用户: $identification');
 // ... 重复的错误处理...
 ```
 
@@ -339,7 +339,6 @@ final dataProvider = FutureProvider<Data>((ref) async {
 ### v1.0 (2026-02-01)
 - ✓ BaseApi 基类创建
 - ✓ MisskeyApi 优化 (减少 43% 代码)
-- ✓ FlarumApi 优化
 - ✓ LoggerExtension 创建
 - ✓ DataConversion 工具创建
 - ✓ UIExtensions 创建

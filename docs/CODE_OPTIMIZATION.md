@@ -54,11 +54,6 @@ Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
 );
 ```
 
-#### 优化了 FlarumApi
-- **扩展**: 现在继承自`BaseApi`
-- **优化的方法**:
-  - `getUserProfile()`: 使用`executeApiCall()`和自定义错误解析器
-
 ### 2. 代码质量改进
 
 #### 优化亮点
@@ -121,7 +116,6 @@ Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
 应创建以下测试:
 - `test/core/api/base_api_test.dart`: BaseApi 错误处理测试
 - `test/core/api/misskey_api_test.dart`: MisskeyApi 方法测试
-- `test/core/api/flarum_api_test.dart`: FlarumApi 方法测试
 
 ### 6. 改进前后统计
 
@@ -152,7 +146,6 @@ Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
 
 **已修改**:
 - `lib/src/core/api/misskey_api.dart` (大幅精简)
-- `lib/src/core/api/flarum_api.dart` (部分优化)
 
 **新建**:
 - `lib/src/core/api/base_api.dart` (API 基类)

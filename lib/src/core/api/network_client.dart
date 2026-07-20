@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import '/src/core/utils/logger.dart';
-import '/src/core/utils/performance_monitor.dart';
+import '/src/core/utils/utils.dart';
 
 /// A custom interceptor that retries failed requests up to a specified number of times.
 class RetryInterceptor extends Interceptor {
@@ -66,9 +65,9 @@ class RetryInterceptor extends Interceptor {
            isHandshakeError ||
            isSemaphoreTimeout ||
            (err.type == DioExceptionType.badResponse && 
-            (err.response?.statusCode == 502 || 
-             err.response?.statusCode == 503 || 
-             err.response?.statusCode == 504));
+            (err.response?.statusCode != null &&
+             err.response!.statusCode! >= 500 && 
+             err.response!.statusCode! < 600));  // 所有 5xx 错误（500/502/503/504/524 等）
   }
 }
 
@@ -88,11 +87,17 @@ class NetworkClient {
     Map<String, dynamic>? extraHeaders,
     bool enableCertificateValidation = true,
   }) {
-    logger.info('NetworkClient: Creating Dio instance for $host');
+    // 防御性清理：移除无效端口号（如 :0），防止 500/524 等错误
+    final sanitizedHost = sanitizeHost(host);
+    if (sanitizedHost != host) {
+      logger.warning('NetworkClient: Sanitized host from "$host" to "$sanitizedHost"');
+    }
+
+    logger.info('NetworkClient: Creating Dio instance for $sanitizedHost');
 
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'https://$host',
+        baseUrl: 'https://$sanitizedHost',
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),

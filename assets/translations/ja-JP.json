@@ -499,7 +499,6 @@
   "settings_appearance_system": "システム設定",
   "settings_appearance_light": "ライトモード",
   "settings_appearance_dark": "ダークモード",
-  "settings_appearance_dynamic_color_android_only": "動的カラー機能は Android でのみサポートされています。",
   "settings_appearance_reset_config": "テーマ設定をリセット",
   "settings_appearance_reset_confirm": "すべてのテーマ設定をリセットしますか?",
   "settings_appearance_reset_done": "テーマ設定が正常にリセットされました!",
@@ -645,7 +644,10 @@
   "auth_terms_of_service": "利用規約",
   "auth_privacy_policy": "プライバシーポリシー",
   "settings_network_global_section": "グローバル",
-  "settings_network_user_agent_selector": "User Agent セレクター",
+  "settings_network_custom_ua": "カスタム User Agent",
+  "settings_network_custom_ua_description": "デフォルトの簡略化されたUAの代わりにカスタムUser Agent文字列を使用",
+  "settings_network_custom_ua_hint": "カスタム User Agent を入力...",
+  "settings_network_custom_ua_warning": "カスタム UA は一部のサーバーとの互換性に影響する可能性があります",
   "settings_network_misskey_section": "Misskey",
   "settings_network_misskey_realtime_mode": "リアルタイムモード",
   "settings_network_misskey_realtime_mode_description": "リアルタイムデータ更新を有効にする",
@@ -730,7 +732,7 @@
   "settings_developer_design_playground_description": "このアプリで使用されているすべてのデザインコンポーネントを表示します。Material Design 3 ベース。",
   "stream_disconnected": "リアルタイムストリームから切断されました",
   "stream_reconnecting": "自動再接続中 ({n}回目)",
-  "stream_reconnect_failed_title": "アプリの接続が無効になりました",
+  "stream_reconnect_failed_title": "リアルタイムストリームの接続に失敗しました",
   "stream_reconnect_failed_body": "最大再接続回数を超えました。タイムラインデータは保存済みです。",
-  "stream_reload_button": "アプリを再読み込み"
+  "stream_refresh": "更新"
 }

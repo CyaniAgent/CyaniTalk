@@ -38,6 +38,8 @@ dependencies:
   intl: ^0.20.2
   # 简化国际化实现的库
   easy_localization: ^3.0.8
+  # Android/桌面动态取色支持（Material You）
+  dynamic_color: ^1.8.1
   # 强大的Dart网络请求库，支持RESTful API、拦截器、FormData等
   dio: ^5.9.0
   # WebSocket通信支持，用于实时数据传输

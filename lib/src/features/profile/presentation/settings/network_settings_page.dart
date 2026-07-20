@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/config/constants.dart';
 import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
 import 'package:cyanitalk/src/features/profile/application/network_settings_provider.dart';
 import 'package:cyanitalk/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
@@ -19,8 +20,20 @@ class NetworkSettingsPage extends ConsumerStatefulWidget {
 class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
   bool _isTestingNetwork = false;
   bool? _networkTestSuccess;
+  late TextEditingController _customUaController;
 
-  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
+  @override
+  void initState() {
+    super.initState();
+    final settings = ref.read(networkSettingsProvider).value;
+    _customUaController = TextEditingController(text: settings?.customUserAgent ?? '');
+  }
+
+  @override
+  void dispose() {
+    _customUaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,24 +43,71 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
       appBar: AppBar(title: Text('settings_network_title'.tr())),
       body: settingsAsync.when(
         data: (settings) {
-          const userAgentOptions = UserAgentType.values;
-          final currentAgentType = userAgentOptions.firstWhere(
-            (type) => type.name == settings.userAgentType,
-            orElse: () => UserAgentType.defaultAgent,
-          );
-
           return ListView(
             padding: const EdgeInsets.only(top: 8, bottom: 32),
             children: [
               SettingsCardGroup(
                 children: [
-                  SettingsTile(
+                  _switchTile(
                     icon: Icons.public,
                     iconColor: SettingsIconColors.cyan,
-                    title: 'settings_network_user_agent_selector'.tr(),
-                    subtitle: currentAgentType.getEffectiveUA(customUA: settings.customUserAgent),
-                    onTap: () => _showUserAgentDialog(ref, settings),
+                    title: 'settings_network_custom_ua'.tr(),
+                    subtitle: 'settings_network_custom_ua_description'.tr(),
+                    value: settings.useCustomAgent,
+                    onChanged: (v) =>
+                        ref.read(networkSettingsProvider.notifier).toggleCustomAgent(v),
                   ),
+                  if (settings.useCustomAgent)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: _customUaController,
+                            maxLines: 3,
+                            minLines: 2,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontFamily: 'monospace',
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'settings_network_custom_ua_hint'.tr(),
+                              hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.all(12),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  _customUaController.clear();
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'settings_network_custom_ua_warning'.tr(),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (!settings.useCustomAgent)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(72, 0, 16, 12),
+                      child: Text(
+                        Constants.getUserAgent(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontFamily: 'monospace',
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
                   SettingsTile(
                     icon: Icons.timer_outlined,
                     iconColor: SettingsIconColors.cyan,
@@ -239,6 +299,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
     );
   }
 
+<<<<<<< HEAD
   void _showUserAgentDialog(WidgetRef ref, NetworkSettings settings) {
     final currentType = UserAgentType.values.firstWhere(
       (type) => type.name == settings.userAgentType,
@@ -265,6 +326,8 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
     );
   }
 
+=======
+>>>>>>> 0d7eefc4c1f7a0ddff3330c53d314e7c17fdcda4
   void _showDurationPicker({
     required String title,
     required int initialValue,

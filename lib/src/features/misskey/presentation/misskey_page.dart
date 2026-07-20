@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import '/src/core/utils/logger.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/features/misskey/application/misskey_streaming_service.dart';
 import '/src/shared/widgets/cyani_error_widget.dart';
 import 'pages/misskey_aiscript_console_page.dart';
 import 'pages/misskey_announcements_page.dart';
@@ -35,15 +37,27 @@ class MisskeyPage extends ConsumerStatefulWidget {
 class _MisskeyPageState extends ConsumerState<MisskeyPage>
     with WidgetsBindingObserver {
   String _timelineType = 'Global';
+  bool _isToastVisible = false;
+  StreamSubscription<bool>? _toastSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 监听 Toast 可见性变化
+    _toastSubscription = ref
+        .read(misskeyStreamingServiceProvider.notifier)
+        .toastVisibilityStream
+        .listen((visible) {
+      if (mounted) {
+        setState(() => _isToastVisible = visible);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _toastSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -160,6 +174,16 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               pinned: true,
               snap: true,
               actions: [
+                if (_isToastVisible)
+                  CircleIconButton(
+                    icon: Icons.refresh,
+                    tooltip: 'stream_refresh'.tr(),
+                    onPressed: () {
+                      ref
+                          .read(misskeyStreamingServiceProvider.notifier)
+                          .dismissToastAndReconnect();
+                    },
+                  ),
                 CircleIconButton(
                   icon: Icons.search,
                   tooltip: 'misskey_page_global_search'.tr(),

@@ -7,7 +7,7 @@ void showToast({
   required String title,
   ToastificationType type = ToastificationType.info,
   String? description,
-  Duration autoCloseDuration = const Duration(seconds: 3),
+  Duration? autoCloseDuration,
   VoidCallback? onTap,
   bool showIcon = true,
 }) {
@@ -16,7 +16,7 @@ void showToast({
     style: ToastificationStyle.flatColored,
     title: Text(title),
     description: description != null ? Text(description) : null,
-    autoCloseDuration: autoCloseDuration,
+    autoCloseDuration: autoCloseDuration ?? const Duration(seconds: 3),
     showIcon: showIcon,
     callbacks: onTap != null
         ? ToastificationCallbacks(onTap: (_) => onTap())
