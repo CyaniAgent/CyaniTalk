@@ -6,6 +6,7 @@ import 'package:cyanitalk/src/core/config/constants.dart';
 import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
 import 'package:cyanitalk/src/features/profile/application/network_settings_provider.dart';
 import 'package:cyanitalk/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
+import 'package:cyanitalk/src/shared/widgets/adaptive_sheet.dart';
 import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
 import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
@@ -298,6 +299,35 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
     );
   }
 
+<<<<<<< HEAD
+  void _showUserAgentDialog(WidgetRef ref, NetworkSettings settings) {
+    final currentType = UserAgentType.values.firstWhere(
+      (type) => type.name == settings.userAgentType,
+      orElse: () => UserAgentType.defaultAgent,
+    );
+
+    showAdaptiveSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => _UserAgentSheet(
+        currentType: currentType,
+        customUA: settings.customUserAgent,
+        onSelected: (type, customUA) {
+          ref.read(networkSettingsProvider.notifier).updateUserAgentType(type.name);
+          if (type == UserAgentType.custom && customUA != null) {
+            ref.read(networkSettingsProvider.notifier).updateCustomUserAgent(customUA);
+          }
+        },
+      ),
+    );
+  }
+
+=======
+>>>>>>> 0d7eefc4c1f7a0ddff3330c53d314e7c17fdcda4
   void _showDurationPicker({
     required String title,
     required int initialValue,
@@ -430,5 +460,227 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
     if (mounted) {
       showToast(title: 'settings_network_restored'.tr(), type: ToastificationType.success);
     }
+  }
+}
+
+/// User Agent 选择器 Bottom Sheet
+class _UserAgentSheet extends StatefulWidget {
+  final UserAgentType currentType;
+  final String customUA;
+  final void Function(UserAgentType type, String? customUA) onSelected;
+
+  const _UserAgentSheet({
+    required this.currentType,
+    required this.customUA,
+    required this.onSelected,
+  });
+
+  @override
+  State<_UserAgentSheet> createState() => _UserAgentSheetState();
+}
+
+class _UserAgentSheetState extends State<_UserAgentSheet> {
+  late UserAgentType _selected;
+  late TextEditingController _customController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.currentType;
+    _customController = TextEditingController(text: widget.customUA);
+  }
+
+  @override
+  void dispose() {
+    _customController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final desktopOptions = UserAgentType.desktopOptions;
+    final mobileOptions = UserAgentType.mobileOptions;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 标题栏
+            Row(
+              children: [
+                Icon(Icons.public, color: colorScheme.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'settings_network_user_agent_selector'.tr(),
+                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // 可滚动内容
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Desktop 分组
+                    _buildSectionHeader('Desktop', Icons.computer, colorScheme),
+                    const SizedBox(height: 8),
+                    ...desktopOptions.map((option) => _buildOptionTile(option, colorScheme)),
+
+                    const SizedBox(height: 20),
+
+                    // Mobile 分组
+                    _buildSectionHeader('Mobile', Icons.smartphone, colorScheme),
+                    const SizedBox(height: 8),
+                    ...mobileOptions.map((option) => _buildOptionTile(option, colorScheme)),
+
+                    const SizedBox(height: 20),
+
+                    // Custom 分组
+                    _buildSectionHeader('Custom', Icons.edit, colorScheme),
+                    const SizedBox(height: 8),
+                    _buildOptionTile(UserAgentType.custom, colorScheme),
+                    if (_selected == UserAgentType.custom)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        child: TextField(
+                          controller: _customController,
+                          maxLines: 4,
+                          minLines: 2,
+                          style: theme.textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+                          decoration: InputDecoration(
+                            hintText: '输入自定义 User Agent...',
+                            hintStyle: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.outline,
+                            ),
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.all(12),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _customController.clear();
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 确定按钮
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  shape: const StadiumBorder(),
+                ),
+                onPressed: () {
+                  widget.onSelected(_selected, _customController.text);
+                  Navigator.pop(context);
+                },
+                child: Text('confirm'.tr(), style: const TextStyle(fontSize: 16)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String label, IconData icon, ColorScheme colorScheme) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: colorScheme.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: colorScheme.primary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOptionTile(UserAgentType option, ColorScheme colorScheme) {
+    final isSelected = option.name == _selected.name;
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => setState(() => _selected = option),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: isSelected
+              ? colorScheme.primaryContainer.withAlpha(80)
+              : colorScheme.surfaceContainerHighest.withAlpha(60),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary : colorScheme.outlineVariant.withAlpha(100),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    option.displayName,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                      fontSize: 14,
+                    ),
+                  ),
+                  if (option.userAgentString.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        option.userAgentString,
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 11,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle, color: colorScheme.primary, size: 20)
+            else
+              Icon(Icons.radio_button_unchecked, color: colorScheme.outline, size: 20),
+          ],
+        ),
+      ),
+    );
   }
 }

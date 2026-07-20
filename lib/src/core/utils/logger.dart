@@ -58,15 +58,15 @@ class AppLogger {
   ///
   /// 配置日志输出方式，包括控制台输出和文件输出。
   /// 会根据平台选择合适的日志文件存储位置。
-  /// 如果是Release模式，默认日志级别会被覆盖为WARNING。
+  /// 如果是Release模式，默认日志级别会被覆盖为ERROR（与Constants.defaultLogLevel一致）。
   /// 如果提供了logLevel参数，会使用该值覆盖默认级别。
   ///
   /// @param logLevel 可选的日志级别字符串，如'debug'、'info'、'warning'、'error'
   /// @return 无返回值，初始化完成后日志系统即可使用
   Future<void> initialize({String? logLevel}) async {
-    // 如果是Release模式，默认日志级别为WARNING
+    // 如果是Release模式，默认日志级别为ERROR（与Constants.defaultLogLevel一致）
     if (kReleaseMode) {
-      _currentLevel = Level.warning;
+      _currentLevel = Level.error;
     }
 
     // 如果提供了日志级别参数，使用该值覆盖默认级别
@@ -108,10 +108,14 @@ class AppLogger {
     // 创建文件输出
     _fileOutput = await _createFileOutput();
 
+    // 先初始化输出目标，确保文件流已打开，再创建 Logger
+    final multiOutput = AppMultiOutput([consoleOutput, _fileOutput!]);
+    await multiOutput.init();
+
     // 初始化日志器
     _logger = Logger(
-      level: _currentLevel, // 初始日志级别
-      output: AppMultiOutput([consoleOutput, _fileOutput!]),
+      level: _currentLevel,
+      output: multiOutput,
       printer: SimplePrinter(),
     );
 
@@ -189,8 +193,8 @@ class AppLogger {
     } else if (Platform.isIOS) {
       directory = await getApplicationDocumentsDirectory();
     } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      final exePath = Platform.resolvedExecutable;
-      directory = File(exePath).parent;
+      // 使用应用支持目录，避免权限问题（如 Program Files）
+      directory = await getApplicationSupportDirectory();
     } else {
       directory = await getApplicationDocumentsDirectory();
     }
@@ -235,7 +239,7 @@ class AppLogger {
   ///
   /// @param level 要设置的日志级别字符串
   /// @return 无返回值
-  void setLogLevel(String level) {
+  Future<void> setLogLevel(String level) async {
     switch (level.toLowerCase()) {
       case 'debug':
         _currentLevel = Level.debug;
@@ -257,10 +261,18 @@ class AppLogger {
     // 创建控制台输出
     final consoleOutput = FilteredConsoleOutput();
 
+    // 先初始化输出目标，确保文件流已打开
+    final multiOutput = AppMultiOutput([consoleOutput, _fileOutput!]);
+    await multiOutput.init();
+
     // 重新创建日志器以更新级别
     _logger = Logger(
       level: _currentLevel,
+<<<<<<< HEAD
+      output: multiOutput,
+=======
       output: AppMultiOutput([consoleOutput, _fileOutput!]),
+>>>>>>> 0d7eefc4c1f7a0ddff3330c53d314e7c17fdcda4
       printer: SimplePrinter(),
     );
   }

@@ -150,6 +150,13 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     state = AsyncData(state.value!.copyWith(customUserAgent: ua));
   }
 
+  /// 更新自定义 User Agent
+  Future<void> updateCustomUserAgent(String ua) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_customUserAgentKey, ua);
+    state = AsyncData(state.value!.copyWith(customUserAgent: ua));
+  }
+
   /// 切换 Misskey 实时模式
   Future<void> toggleMisskeyRealtimeMode(bool value) async {
     final prefs = await SharedPreferences.getInstance();
