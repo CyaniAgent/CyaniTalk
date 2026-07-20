@@ -65,9 +65,11 @@ class RetryInterceptor extends Interceptor {
            isHandshakeError ||
            isSemaphoreTimeout ||
            (err.type == DioExceptionType.badResponse && 
-            (err.response?.statusCode != null &&
-             err.response!.statusCode! >= 500 && 
-             err.response!.statusCode! < 600));  // 所有 5xx 错误（500/502/503/504/524 等）
+             (err.response?.statusCode != null &&
+              err.response!.statusCode! >= 500 && 
+              err.response!.statusCode! < 600 &&
+              err.response!.statusCode! != 504 &&
+              err.response!.statusCode! != 524));  // 网关超时 = 服务器过载，立即重试只会加重伤害
   }
 }
 

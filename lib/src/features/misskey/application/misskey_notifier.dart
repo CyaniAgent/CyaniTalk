@@ -51,6 +51,9 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// 验证定时器，用于定期检测已删除的笔记
   Timer? _validationTimer;
 
+  /// 是否正在进行笔记验证（防止并发验证批次叠加产生请求风暴）
+  bool _isValidating = false;
+
   /// 最后已知笔记 ID（用于增量同步 sinceId）
   String? _latestNoteId;
 
@@ -265,6 +268,11 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   ///
   /// 分批次执行，每批 10 条，避免阻塞 UI。
   Future<void> _validateAllCachedNotes() async {
+    if (_isValidating) {
+      logger.info('Misskey时间线: 验证正在进行中，跳过重复验证');
+      return;
+    }
+    _isValidating = true;
     try {
       if (!ref.mounted) return;
 
@@ -285,6 +293,8 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     } catch (e) {
       if (e.toString().contains('disposed')) return;
       logger.error('Misskey时间线: 启动全量验证失败', e);
+    } finally {
+      _isValidating = false;
     }
   }
 
@@ -324,7 +334,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
           _cacheManager.addToDeletedIds(noteId);
         }
       }
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 500));
     }
 
     if (!ref.mounted) return;
@@ -481,11 +491,13 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         state = AsyncData(latestNotes);
       }
       // 刷新的同时，异步执行删帖检测（API对接），以清除已经删帖的帖子
-      final mergedNotes = state.value ?? [];
-      if (mergedNotes.isNotEmpty) {
-        final validateIds = mergedNotes.take(30).map((n) => n.id).toList();
-        // 异步后台运行，不需要 await 阻塞刷新结果在 UI 的立即渲染
-        _performNoteValidation(validateIds);
+      if (!_isValidating) {
+        final mergedNotes = state.value ?? [];
+        if (mergedNotes.isNotEmpty) {
+          final validateIds = mergedNotes.take(30).map((n) => n.id).toList();
+          // 异步后台运行，不需要 await 阻塞刷新结果在 UI 的立即渲染
+          _performNoteValidation(validateIds);
+        }
       }
 
       // 刷新成功后更新 SQLite

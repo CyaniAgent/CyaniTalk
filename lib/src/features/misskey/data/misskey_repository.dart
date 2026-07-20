@@ -805,8 +805,10 @@ class MisskeyRepository implements IMisskeyRepository {
           'MisskeyRepository: Fetching ${missingUserIds.length} missing users',
         );
         final users = <String, MisskeyUser>{};
-        await Future.wait(
-          missingUserIds.map((id) async {
+        // 限制并发数，防止大量 showUser 请求同时发送导致 524
+        await _fetchWithConcurrency(
+          missingUserIds,
+          (id) async {
             try {
               final user = await showUser(id);
               users[id] = user;
@@ -816,7 +818,8 @@ class MisskeyRepository implements IMisskeyRepository {
                 e,
               );
             }
-          }),
+          },
+          concurrency: 5,
         );
 
         // Update messages with fetched users
@@ -949,8 +952,9 @@ class MisskeyRepository implements IMisskeyRepository {
           'MisskeyRepository: Fetching ${missingUserIds.length} missing users for direct messages',
         );
         final users = <String, MisskeyUser>{};
-        await Future.wait(
-          missingUserIds.map((id) async {
+        await _fetchWithConcurrency(
+          missingUserIds,
+          (id) async {
             try {
               final user = await showUser(id);
               users[id] = user;
@@ -960,7 +964,8 @@ class MisskeyRepository implements IMisskeyRepository {
                 e,
               );
             }
-          }),
+          },
+          concurrency: 5,
         );
 
         // Update messages with fetched users
@@ -1433,6 +1438,19 @@ class MisskeyRepository implements IMisskeyRepository {
     }
 
     return _MessagingParsingResult(messages, missingUserIds.toList());
+  }
+
+  /// 限制并发数执行异步任务，防止无界并行请求导致服务器过载 (524)
+  static Future<void> _fetchWithConcurrency<T>(
+    Iterable<T> items,
+    Future<void> Function(T) task, {
+    int concurrency = 5,
+  }) async {
+    final list = items.toList();
+    for (var i = 0; i < list.length; i += concurrency) {
+      final batch = list.skip(i).take(concurrency);
+      await Future.wait(batch.map(task));
+    }
   }
 }
 
