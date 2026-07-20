@@ -92,29 +92,54 @@ class FileMetadataService {
     }
   }
 
-  /// 从网络获取文件大小（通过下载 Raw 数据获取实际大小）
+  /// 从网络获取文件大小（通过 HEAD 请求获取 Content-Length）
   Future<int?> _fetchFileSize(String fileUrl) async {
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 30);
       
-      final request = await client.getUrl(Uri.parse(fileUrl));
+      final request = await client.headUrl(Uri.parse(fileUrl));
       final response = await request.close();
       
-      // 计算实际下载的数据大小
-      int totalBytes = 0;
-      await for (final chunk in response) {
-        totalBytes += chunk.length;
-      }
+      final contentLength = response.contentLength;
       client.close();
       
-      if (totalBytes > 0) {
-        return totalBytes;
+      if (contentLength > 0) {
+        return contentLength;
+      }
+      
+      // HEAD 请求未返回 Content-Length 时，回退到 Range 请求
+      return _fetchFileSizeWithRange(fileUrl);
+    } catch (e) {
+      logger.error('FileMetadataService: Error fetching file size from $fileUrl', e);
+      return null;
+    }
+  }
+
+  /// 使用 Range 请求获取文件大小（仅下载 1 字节）
+  Future<int?> _fetchFileSizeWithRange(String fileUrl) async {
+    try {
+      final client = HttpClient();
+      client.connectionTimeout = const Duration(seconds: 30);
+      
+      final request = await client.getUrl(Uri.parse(fileUrl));
+      request.headers.set('Range', 'bytes=0-0');
+      final response = await request.close();
+      
+      final contentRange = response.headers.value('content-range');
+      client.close();
+      
+      if (contentRange != null) {
+        // 格式: bytes 0-0/12345
+        final totalMatch = RegExp(r'/(\d+)').firstMatch(contentRange);
+        if (totalMatch != null) {
+          return int.tryParse(totalMatch.group(1)!);
+        }
       }
       
       return null;
     } catch (e) {
-      logger.error('FileMetadataService: Error fetching file size from $fileUrl', e);
+      logger.error('FileMetadataService: Error fetching file size with range from $fileUrl', e);
       return null;
     }
   }

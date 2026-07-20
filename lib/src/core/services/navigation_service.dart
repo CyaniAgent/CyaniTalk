@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '/src/routing/router.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/config/page_config.dart';
@@ -24,46 +24,40 @@ class NavigationService {
   }) async {
     logger.info('NavigationService: 尝试通过页面ID跳转: $pageId, 参数: $params');
 
-    final navigator = rootNavigatorKey.currentState;
-    if (navigator == null) {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) {
       logger.error('NavigationService: 导航器未初始化');
       return false;
     }
 
     try {
-      // 检查是否是带参数的页面
       if (pageId == 'user' && params != null && params.containsKey('id')) {
-        // 跳转到用户资料页
         final userId = params['id'];
-        await navigator.pushNamed('/misskey/user/$userId');
+        context.push('/misskey/user/$userId');
         logger.info('NavigationService: 成功跳转到用户资料页: $userId');
         return true;
       } else if (pageId == 'chat' &&
           params != null &&
           params.containsKey('id')) {
-        // 跳转到私信页面
         final userId = params['id'];
-        await navigator.pushNamed('/messaging/chat/$userId');
+        context.push('/messaging/chat/$userId');
         logger.info('NavigationService: 成功跳转到私信页面: $userId');
         return true;
       } else if (pageId == 'room' &&
           params != null &&
           params.containsKey('id')) {
-        // 跳转到群聊页面
         final roomId = params['id'];
-        await navigator.pushNamed('/messaging/chat/room/$roomId');
+        context.push('/messaging/chat/room/$roomId');
         logger.info('NavigationService: 成功跳转到群聊页面: $roomId');
         return true;
       } else {
-        // 跳转到普通页面
         final route = PageConfig.getRouteByPageId(pageId);
         if (route != null) {
-          await navigator.pushNamed(route, arguments: params);
+          context.push(route);
           logger.info('NavigationService: 成功跳转到页面: $pageId, 路由: $route');
           return true;
         } else {
-          // 页面ID不存在，跳转到搜索页面
-          await navigator.pushNamed('/search', arguments: {'query': pageId});
+          context.push('/search', extra: {'query': pageId});
           logger.info('NavigationService: 页面ID不存在，跳转到搜索页面: $pageId');
           return true;
         }
@@ -84,46 +78,39 @@ class NavigationService {
   Future<bool> navigateById(String id, {String? idType}) async {
     logger.info('NavigationService: 尝试通过ID跳转: $id, 类型: $idType');
 
-    final navigator = rootNavigatorKey.currentState;
-    if (navigator == null) {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) {
       logger.error('NavigationService: 导航器未初始化');
       return false;
     }
 
     try {
-      // 根据ID类型或格式判断跳转目标
       if (idType == 'user' ||
           id.startsWith('u_') ||
           id.length > 10 && !id.contains('-')) {
-        // 跳转到用户资料页
-        await navigator.pushNamed('/misskey/user/$id');
+        context.push('/misskey/user/$id');
         logger.info('NavigationService: 成功跳转到用户资料页: $id');
         return true;
       } else if (idType == 'room' ||
           id.startsWith('room_') ||
           id.contains('-')) {
-        // 跳转到群聊页面
-        await navigator.pushNamed('/messaging/chat/room/$id');
+        context.push('/messaging/chat/room/$id');
         logger.info('NavigationService: 成功跳转到群聊页面: $id');
         return true;
       } else if (idType == 'message' || id.startsWith('msg_')) {
-        // 跳转到私信页面
-        await navigator.pushNamed('/messaging/chat/$id');
+        context.push('/messaging/chat/$id');
         logger.info('NavigationService: 成功跳转到私信页面: $id');
         return true;
       } else if (idType == 'notification') {
-        // 跳转到通知页面
-        await navigator.pushNamed('/misskey/notifications');
+        context.push('/misskey/notifications');
         logger.info('NavigationService: 成功跳转到通知页面');
         return true;
       } else if (idType == 'misskey' || id == 'home') {
-        // 跳转到Misskey主页
-        await navigator.pushNamed('/misskey');
+        context.go('/misskey');
         logger.info('NavigationService: 成功跳转到Misskey主页');
         return true;
       } else {
-        // 默认跳转到搜索页面，搜索该ID
-        await navigator.pushNamed('/search', arguments: {'query': id});
+        context.push('/search', extra: {'query': id});
         logger.info('NavigationService: 成功跳转到搜索页面，搜索: $id');
         return true;
       }
@@ -143,9 +130,7 @@ class NavigationService {
     logger.info('NavigationService: 尝试通过payload跳转: $payload');
 
     try {
-      // 解析payload，支持JSON格式
       if (payload.contains('{') && payload.contains('}')) {
-        // 简单的JSON解析
         if (payload.contains('"type":"user"') && payload.contains('"id":"')) {
           final id = payload.split('"id":"')[1].split('"')[0];
           return await navigateById(id, idType: 'user');
@@ -162,7 +147,6 @@ class NavigationService {
         }
       }
 
-      // 如果payload不是JSON格式，尝试直接作为ID处理
       return await navigateById(payload);
     } catch (e) {
       logger.error('NavigationService: 解析payload失败: $e');
@@ -174,10 +158,9 @@ class NavigationService {
   ///
   /// @return 返回当前路由的路径
   String? getCurrentRoute() {
-    final navigator = rootNavigatorKey.currentState;
-    if (navigator != null) {
-      final context = navigator.context;
-      final route = ModalRoute.of(context)?.settings.name;
+    final context = rootNavigatorKey.currentContext;
+    if (context != null) {
+      final route = GoRouterState.of(context).uri.toString();
       logger.debug('NavigationService: 当前路由: $route');
       return route;
     }
@@ -188,9 +171,9 @@ class NavigationService {
   ///
   /// @return 返回是否成功返回
   Future<bool> goBack() async {
-    final navigator = rootNavigatorKey.currentState;
-    if (navigator != null && navigator.canPop()) {
-      navigator.pop();
+    final context = rootNavigatorKey.currentContext;
+    if (context != null && context.canPop()) {
+      context.pop();
       logger.info('NavigationService: 成功返回上一页');
       return true;
     }
@@ -204,14 +187,14 @@ class NavigationService {
   /// @param arguments 可选的参数
   /// @return 返回导航是否成功
   Future<bool> navigateTo(String path, {Object? arguments}) async {
-    final navigator = rootNavigatorKey.currentState;
-    if (navigator == null) {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) {
       logger.error('NavigationService: 导航器未初始化');
       return false;
     }
 
     try {
-      await navigator.pushNamed(path, arguments: arguments);
+      context.push(path, extra: arguments);
       logger.info('NavigationService: 成功跳转到路径: $path');
       return true;
     } catch (e) {

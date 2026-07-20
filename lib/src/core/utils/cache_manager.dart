@@ -395,10 +395,13 @@ class CacheManager {
         return 'unknown_${DateTime.now().millisecondsSinceEpoch}.cache';
       }
       final uri = Uri.parse(url);
+      // 含 query 参数的 URL（如代理图片）用完整 URL hash 避免串图
+      if (uri.queryParameters.isNotEmpty) {
+        return '${uri.toString().hashCode}.cache';
+      }
       final pathSegments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
       if (pathSegments.isNotEmpty) {
         String fileName = pathSegments.last;
-        // 如果文件名不包含扩展名，尝试从Content-Type推断
         if (!fileName.contains('.')) {
           return '${fileName.hashCode}.cache';
         }
