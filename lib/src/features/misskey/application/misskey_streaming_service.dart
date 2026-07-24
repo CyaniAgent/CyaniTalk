@@ -36,6 +36,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
   Timer? _backgroundMaxTimer;
+  Timer? _toastHideTimer;
+  Future<void>? _audioPlayFuture;
   DateTime? _backgroundStartTime;
   int _reconnectAttempts = 0;
   StreamingStatus _status = StreamingStatus.disconnected;
@@ -108,6 +110,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     _reconnectTimer?.cancel();
     _heartbeatTimer?.cancel();
     _backgroundMaxTimer?.cancel();
+    _toastHideTimer?.cancel();
     _backgroundStartTime = null;
     _channel?.sink.close();
     _channel = null;
@@ -130,6 +133,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       _reconnectAttempts = 0;
       final subscriptionsToRestore = Set<String>.from(_activeTimelineSubscriptions);
       _connect().then((_) {
+        if (!ref.mounted) return;
         for (final channelName in subscriptionsToRestore) {
           _subscribeToChannel(channelName);
         }
@@ -147,6 +151,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     // Store current subscriptions to restore them after connection
     final subscriptionsToRestore = Set<String>.from(_activeTimelineSubscriptions);
     _connect().then((_) {
+      if (!ref.mounted) return;
       for (final channelName in subscriptionsToRestore) {
         _subscribeToChannel(channelName);
       }
@@ -300,7 +305,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       autoCloseDuration: const Duration(seconds: 8),
     );
     // 8 秒后自动隐藏刷新按钮
-    Future.delayed(const Duration(seconds: 8), () {
+    _toastHideTimer?.cancel();
+    _toastHideTimer = Timer(const Duration(seconds: 8), () {
       if (!_toastVisibilityController.isClosed) {
         _toastVisibilityController.add(false);
       }
@@ -311,7 +317,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     final soundAsync = ref.read(soundSettingsProvider);
     final soundPath = soundAsync.value?.streamErrorSound;
     if (soundPath != null && soundPath.isNotEmpty) {
-      unawaited(ref.read(audioEngineProvider).playAsset(soundPath));
+      _audioPlayFuture = ref.read(audioEngineProvider).playAsset(soundPath);
+      _audioPlayFuture?.catchError((_) {});
     }
 
     _toastVisibilityController.add(true);
@@ -386,7 +393,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     }
   }
 
-  Future<void> _disconnect() async {
+  void _disconnect() {
     _cleanup();
     _updateStatus(StreamingStatus.disconnected);
   }

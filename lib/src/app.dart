@@ -12,6 +12,7 @@ import 'package:window_manager/window_manager.dart';
 import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
+import 'core/services/dynamic_color_service.dart';
 import 'routing/router.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/misskey/application/misskey_notifier.dart';
@@ -59,6 +60,12 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
   /// 缓存的暗色外观设置
   AppearanceSettings? _cachedDarkSettings;
 
+  /// 缓存的亮色动态 ColorScheme（用于缓存键比较）
+  ColorScheme? _cachedLightDynamicScheme;
+
+  /// 缓存的暗色动态 ColorScheme
+  ColorScheme? _cachedDarkDynamicScheme;
+
   /// 标题栏 controller，仅创建一次
   final TitleBarController _titleBarController = TitleBarController();
 
@@ -67,6 +74,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     super.initState();
     // 注册生命周期观察者
     WidgetsBinding.instance.addObserver(this);
+
+    // 初始化动态取色服务（实时监听系统主题色变化）
+    DynamicColorService.instance.initialize();
 
     // 初始化性能监控
     performanceMonitor.initialize();
@@ -86,6 +96,8 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
   void dispose() {
     // 移除生命周期观察者
     WidgetsBinding.instance.removeObserver(this);
+    // 清理动态取色服务
+    DynamicColorService.instance.dispose();
     super.dispose();
   }
 
@@ -227,14 +239,17 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
           'CyaniTalkApp: 加载外观设置 - 显示模式: ${appearanceSettings.displayMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
         );
 
-        return DynamicColorBuilder(
-          builder: (lightDynamic, darkDynamic) {
-            // 解析系统动态色：harmonized() 让颜色与系统风格统一
-            final lightScheme = (appearanceSettings.useDynamicColor && lightDynamic != null)
-                ? lightDynamic.harmonized()
+        final colorService = DynamicColorService.instance;
+
+        return ListenableBuilder(
+          listenable: colorService.accentColor,
+          builder: (context, _) {
+            // 从 DynamicColorService 获取实时 ColorScheme
+            final lightScheme = (appearanceSettings.useDynamicColor && colorService.lightScheme != null)
+                ? colorService.lightScheme!.harmonized()
                 : null;
-            final darkScheme = (appearanceSettings.useDynamicColor && darkDynamic != null)
-                ? darkDynamic.harmonized()
+            final darkScheme = (appearanceSettings.useDynamicColor && colorService.darkScheme != null)
+                ? colorService.darkScheme!.harmonized()
                 : null;
 
             // 构建主题
@@ -319,8 +334,15 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     final isDark = brightness == Brightness.dark;
     final themeCache = isDark ? _cachedDarkTheme : _cachedLightTheme;
     final cachedSettings = isDark ? _cachedDarkSettings : _cachedLightSettings;
+    final cachedScheme = isDark ? _cachedDarkDynamicScheme : _cachedLightDynamicScheme;
 
-    if (cachedSettings == settings && themeCache != null) {
+    // 缓存键 = settings + dynamicColorScheme（accent color 变化时 scheme 会变）
+    final schemeMatch = dynamicColorScheme == null
+        ? cachedScheme == null
+        : (cachedScheme != null &&
+            dynamicColorScheme.primary.toARGB32() == cachedScheme.primary.toARGB32());
+
+    if (cachedSettings == settings && schemeMatch && themeCache != null) {
       return themeCache;
     }
 
@@ -459,9 +481,11 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     if (isDark) {
       _cachedDarkTheme = adjustedTheme;
       _cachedDarkSettings = settings;
+      _cachedDarkDynamicScheme = dynamicColorScheme;
     } else {
       _cachedLightTheme = adjustedTheme;
       _cachedLightSettings = settings;
+      _cachedLightDynamicScheme = dynamicColorScheme;
     }
 
     return adjustedTheme;

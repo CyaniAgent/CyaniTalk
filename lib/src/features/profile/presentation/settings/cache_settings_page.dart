@@ -45,15 +45,22 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   bool _isBasicSettingsLoading = true;
   bool _isStatsLoading = true;
 
-  static const _cyan = Color(0xFF39C5BB);
-  static const _pink = Color(0xFFFF6B9D);
-  static const _amber = Color(0xFFFFB74D);
-  static const _grey = Color(0xFFB0BEC5);
-  static const _yellow = Color(0xFFFFD93D);
-  static const _indigo = Color(0xFF5C6BC0);
-  static const _green = Color(0xFF66BB6A);
-  static const _purple = Color(0xFFAB47BC);
-  static const _brown = Color(0xFF8D6E63);
+  /// Generate a palette of distinct colors from the current ColorScheme.
+  List<Color> _chartPalette(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final base = HSLColor.fromColor(scheme.primary);
+    return [
+      scheme.primary,
+      scheme.secondary,
+      scheme.tertiary,
+      base.withHue((base.hue + 60) % 360).toColor(),
+      base.withHue((base.hue + 120) % 360).toColor(),
+      base.withHue((base.hue + 180) % 360).toColor(),
+      base.withHue((base.hue + 240) % 360).toColor(),
+      base.withHue((base.hue + 300) % 360).toColor(),
+      scheme.error,
+    ];
+  }
 
   @override
   void initState() {
@@ -336,10 +343,10 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                                 children: [
                                   Expanded(child: _buildSectorChart(
                                     slices: [
-                                      _SectorSlice('图片', _contentImageSize, _cyan),
-                                      _SectorSlice('音频', _contentAudioSize, _pink),
-                                      _SectorSlice('时间线文件', _contentTimelineSize, _amber),
-                                      _SectorSlice('其他', _contentOtherSize, _grey),
+                                      _SectorSlice('图片', _contentImageSize, _chartPalette(context)[0]),
+                                      _SectorSlice('音频', _contentAudioSize, _chartPalette(context)[1]),
+                                      _SectorSlice('时间线文件', _contentTimelineSize, _chartPalette(context)[2]),
+                                      _SectorSlice('其他', _contentOtherSize, _chartPalette(context)[3]),
                                     ],
                                     touchedIndex: _touchedContentIndex,
                                     onTouch: (i) => setState(() => _touchedContentIndex = i),
@@ -348,12 +355,12 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                                   const SizedBox(width: 16),
                                   Expanded(child: _buildSectorChart(
                                     slices: [
-                                      _SectorSlice('时间线', _sqliteTimelineSize, _cyan),
-                                      _SectorSlice('用户头像', _sqliteAvatarSize, _yellow),
-                                      _SectorSlice('帖文图片', _sqlitePostImageSize, _indigo),
-                                      _SectorSlice('表情', _sqliteEmojiSize, _green),
-                                      _SectorSlice('横幅/缩略图', _sqliteBannerSize + _sqliteThumbnailSize, _purple),
-                                      _SectorSlice('其他', _sqliteOtherSize, _grey),
+                                      _SectorSlice('时间线', _sqliteTimelineSize, _chartPalette(context)[0]),
+                                      _SectorSlice('用户头像', _sqliteAvatarSize, _chartPalette(context)[4]),
+                                      _SectorSlice('帖文图片', _sqlitePostImageSize, _chartPalette(context)[5]),
+                                      _SectorSlice('表情', _sqliteEmojiSize, _chartPalette(context)[6]),
+                                      _SectorSlice('横幅/缩略图', _sqliteBannerSize + _sqliteThumbnailSize, _chartPalette(context)[7]),
+                                      _SectorSlice('其他', _sqliteOtherSize, _chartPalette(context)[3]),
                                     ],
                                     touchedIndex: _touchedSqliteIndex,
                                     onTouch: (i) => setState(() => _touchedSqliteIndex = i),
@@ -390,7 +397,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                   children: [
                     SettingsTile(
                       icon: Icons.access_time,
-                      iconColor: _cyan,
+                      iconColor: _chartPalette(context)[0],
                       title: '缓存时间上限',
                       subtitle: _isUnlimited ? '不限时长' : '$_cacheTimeLimit 天',
                       onTap: _showCacheTimeLimitPicker,
@@ -405,14 +412,14 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                   children: [
                     SettingsTile(
                       icon: Icons.delete_outline,
-                      iconColor: _brown,
+                      iconColor: _chartPalette(context)[8],
                       title: '清理内容缓存',
                       subtitle: '清除文件缓存，SQLite 数据不受影响',
                       onTap: _clearContentCache,
                     ),
                     SettingsTile(
                       icon: Icons.cleaning_services_outlined,
-                      iconColor: _brown,
+                      iconColor: _chartPalette(context)[8],
                       title: '清理全部缓存',
                       subtitle: '清除所有缓存文件及数据库数据',
                       onTap: _clearAllCache,
@@ -447,10 +454,10 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           Container(
             width: 40, height: 40,
             decoration: BoxDecoration(
-              color: _cyan.withAlpha(25),
+              color: _chartPalette(context)[0].withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.folder_outlined, color: _cyan, size: 20),
+            child: Icon(Icons.folder_outlined, color: _chartPalette(context)[0], size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -581,18 +588,18 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
 
   Widget _buildTooltip(ColorScheme colorScheme) {
     final contentSlices = [
-      _SectorSlice('图片', _contentImageSize, _cyan),
-      _SectorSlice('音频', _contentAudioSize, _pink),
-      _SectorSlice('时间线文件', _contentTimelineSize, _amber),
-      _SectorSlice('其他', _contentOtherSize, _grey),
+      _SectorSlice('图片', _contentImageSize, _chartPalette(context)[0]),
+      _SectorSlice('音频', _contentAudioSize, _chartPalette(context)[1]),
+      _SectorSlice('时间线文件', _contentTimelineSize, _chartPalette(context)[2]),
+      _SectorSlice('其他', _contentOtherSize, _chartPalette(context)[3]),
     ];
     final sqliteSlices = [
-      _SectorSlice('时间线', _sqliteTimelineSize, _cyan),
-      _SectorSlice('用户头像', _sqliteAvatarSize, _yellow),
-      _SectorSlice('帖文图片', _sqlitePostImageSize, _indigo),
-      _SectorSlice('表情', _sqliteEmojiSize, _green),
-      _SectorSlice('横幅/缩略图', _sqliteBannerSize + _sqliteThumbnailSize, _purple),
-      _SectorSlice('其他', _sqliteOtherSize, _grey),
+      _SectorSlice('时间线', _sqliteTimelineSize, _chartPalette(context)[0]),
+      _SectorSlice('用户头像', _sqliteAvatarSize, _chartPalette(context)[4]),
+      _SectorSlice('帖文图片', _sqlitePostImageSize, _chartPalette(context)[5]),
+      _SectorSlice('表情', _sqliteEmojiSize, _chartPalette(context)[6]),
+      _SectorSlice('横幅/缩略图', _sqliteBannerSize + _sqliteThumbnailSize, _chartPalette(context)[7]),
+      _SectorSlice('其他', _sqliteOtherSize, _chartPalette(context)[3]),
     ];
 
     _SectorSlice? slice;

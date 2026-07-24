@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,6 +7,100 @@ import '/src/core/utils/logger.dart';
 import '/src/core/api/misskey_api.dart';
 import '/src/features/misskey/presentation/widgets/safe_mfm_widget.dart';
 import '/src/features/misskey/presentation/widgets/code_block_widget.dart';
+
+/// 全局 emoji 缓存，跨所有 MfmRenderer 实例共享
+///
+/// 避免同个 emoji 在不同卡片中重复拉取 API。
+class GlobalEmojiCache {
+  static final GlobalEmojiCache _instance = GlobalEmojiCache._();
+  factory GlobalEmojiCache() => _instance;
+  GlobalEmojiCache._();
+
+  final Map<String, String> _cache = {};
+  final Map<String, Completer<String?>> _pending = {};
+  final List<_EmojiFetchTask> _queue = [];
+  int _activeFetches = 0;
+  static const int _maxConcurrent = 3;
+
+  /// 获取缓存的 emoji URL，不存在则返回 null
+  String? get(String name) => _cache[name];
+
+  /// 添加单个 emoji 到缓存
+  void add(String name, String url) {
+    _cache[name] = url;
+  }
+
+  /// 批量预填充缓存（从 note/user JSON 或 emoji picker）
+  void addAll(Map<String, String> emojis) {
+    _cache.addAll(emojis);
+  }
+
+  /// 获取 emoji URL：缓存命中直接返回，否则加入限流队列异步获取
+  ///
+  /// [fetcher] 是实际的网络请求函数
+  Future<String?> fetchOrQueue(
+    String name,
+    Future<String?> Function(String) fetcher,
+  ) async {
+    // 缓存命中
+    if (_cache.containsKey(name)) {
+      return _cache[name];
+    }
+
+    // 已在请求中，等待结果
+    if (_pending.containsKey(name)) {
+      return _pending[name]!.future;
+    }
+
+    // 加入等待队列
+    final completer = Completer<String?>();
+    _pending[name] = completer;
+    _queue.add(_EmojiFetchTask(
+      name: name,
+      completer: completer,
+      fetcher: fetcher,
+    ));
+    _processQueue();
+    return completer.future;
+  }
+
+  void _processQueue() {
+    while (_activeFetches < _maxConcurrent && _queue.isNotEmpty) {
+      _activeFetches++;
+      final task = _queue.removeAt(0);
+      _executeFetch(task);
+    }
+  }
+
+  Future<void> _executeFetch(_EmojiFetchTask task) async {
+    try {
+      final url = await task.fetcher(task.name);
+      if (url != null && url.isNotEmpty) {
+        _cache[task.name] = url;
+        task.completer.complete(url);
+      } else {
+        task.completer.complete(null);
+      }
+    } catch (e) {
+      task.completer.complete(null);
+    } finally {
+      _pending.remove(task.name);
+      _activeFetches--;
+      _processQueue();
+    }
+  }
+}
+
+class _EmojiFetchTask {
+  final String name;
+  final Completer<String?> completer;
+  final Future<String?> Function(String) fetcher;
+  _EmojiFetchTask({
+    required this.name,
+    required this.completer,
+    required this.fetcher,
+  });
+}
 
 /// MFM 渲染器（基于 mfm 包重构版本）
 ///
@@ -32,14 +127,13 @@ import '/src/features/misskey/presentation/widgets/code_block_widget.dart';
 /// - Nyaize 转换（如 なんなん -> にゃんにゃん）
 ///
 /// ## 主要特性：
-/// - 表情缓存机制，避免重复加载
-/// - 异步表情加载支持
+/// - 全局共享表情缓存，避免重复加载
+/// - 异步表情加载支持（限流并发 max 3）
 /// - 与 Misskey API 集成
 /// - 完整的动画效果支持
 /// - 可自定义的样式和回调
 class MfmRenderer {
-  // 表情缓存 - 键为表情名称，值为表情 URL
-  final Map<String, String> _emojiCache = {};
+  final GlobalEmojiCache _globalEmojiCache = GlobalEmojiCache();
 
   // 表情加载回调 - 用于从外部加载表情图像
   Future<String?> Function(String, String)? _emojiLoader;
@@ -125,41 +219,25 @@ class MfmRenderer {
   }
 
   /// 添加表情到缓存
-  ///
-  /// @param name 表情名称
-  /// @param url 表情 URL
   void addEmojiToCache(String name, String url) {
-    logger.debug('MfmRenderer: Adding emoji to cache: $name -> $url');
-    _emojiCache[name] = url;
-    logger.debug('MfmRenderer: Emoji cache size: ${_emojiCache.length}');
+    _globalEmojiCache.add(name, url);
   }
 
   /// 批量添加表情到缓存
-  ///
-  /// @param emojis 表情映射，键为表情名称，值为表情 URL
   void addEmojisToCache(Map<String, String> emojis) {
-    logger.debug('MfmRenderer: Adding ${emojis.length} emojis to cache');
-    _emojiCache.addAll(emojis);
-    logger.debug('MfmRenderer: Emoji cache size: ${_emojiCache.length}');
+    _globalEmojiCache.addAll(emojis);
   }
 
   /// 从缓存获取表情 URL
-  ///
-  /// @param emojiName 表情名称（可能包含实例信息）
-  /// @return 表情 URL，如果缓存中不存在则返回 null
   String? _getEmojiUrl(String emojiName) {
-    // 首先尝试完整名称
-    String? url = _emojiCache[emojiName];
+    String? url = _globalEmojiCache.get(emojiName);
     if (url != null) return url;
 
-    // 提取纯表情名称（不包含实例信息）
-    // 表情名称格式：name@instance 或 name
     final atIndex = emojiName.indexOf('@');
     if (atIndex != -1) {
       final pureName = emojiName.substring(0, atIndex);
-      url = _emojiCache[pureName];
+      url = _globalEmojiCache.get(pureName);
     }
-
     return url;
   }
 
@@ -186,10 +264,6 @@ class MfmRenderer {
     );
 
     if (emojiUrl != null) {
-      // 表情已缓存，显示表情图像
-      logger.debug(
-        'MfmRenderer: Creating image widget for emoji: $emojiName with URL: $emojiUrl',
-      );
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
         child: Image.network(
@@ -198,76 +272,42 @@ class MfmRenderer {
           width: (style?.fontSize ?? 14) * 1.5,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
-            // 加载失败时显示原始文本
-            logger.debug('MfmRenderer: Error loading emoji image: $error');
             return Text(':$emojiName:', style: style);
           },
         ),
       );
     } else {
-      // 表情未缓存，尝试异步加载
-      logger.debug(
-        'MfmRenderer: Emoji not in cache, attempting to load: $emojiName',
-      );
-
-      // 异步加载表情
-      Future.microtask(() async {
-        String? url;
-
-        // 首先尝试使用外部加载器
+      // 表情未缓存，通过限流队列异步加载（max 3 concurrent, 全局去重）
+      _globalEmojiCache.fetchOrQueue(emojiName, (name) async {
+        // 首先尝试外部加载器
         if (_emojiLoader != null) {
           try {
-            logger.debug('MfmRenderer: Calling emoji loader for $emojiName');
-            url = await _emojiLoader!(emojiName, '');
-          } catch (error) {
-            logger.error(
-              'MfmRenderer: Error with external emoji loader: $error',
-            );
-          }
+            final url = await _emojiLoader!(name, '');
+            if (url != null && url.isNotEmpty) return url;
+          } catch (_) {}
         }
 
-        // 如果外部加载器失败或未设置，尝试使用 API 表情加载器
-        if (url == null && _apiEmojiLoader != null) {
+        // 尝试 API 表情加载器
+        if (_apiEmojiLoader != null) {
           try {
-            logger.debug(
-              'MfmRenderer: Calling API emoji loader for $emojiName',
-            );
-            url = await _apiEmojiLoader!(emojiName);
-          } catch (error) {
-            logger.error('MfmRenderer: Error with API emoji loader: $error');
-          }
+            final url = await _apiEmojiLoader!(name);
+            if (url != null && url.isNotEmpty) return url;
+          } catch (_) {}
         }
 
-        // 如果 API 表情加载器失败或未设置，尝试从 Misskey API 获取
-        if (url == null && _misskeyApi != null) {
-          try {
-            logger.debug(
-              'MfmRenderer: Fetching emoji from Misskey API for $emojiName',
-            );
-            url = await _fetchEmojiFromApi(emojiName);
-          } catch (error) {
-            logger.error(
-              'MfmRenderer: Error fetching emoji from Misskey API: $error',
-            );
-          }
+        // 尝试 Misskey API
+        if (_misskeyApi != null) {
+          final url = await _fetchEmojiFromApi(name);
+          if (url != null && url.isNotEmpty) return url;
         }
 
-        // 如果成功获取到表情 URL，添加到缓存并通知 UI 更新
-        if (url != null && url.isNotEmpty) {
-          logger.debug(
-            'MfmRenderer: Emoji loaded successfully: $emojiName -> $url',
-          );
-          addEmojiToCache(emojiName, url);
-          // 通知 UI 更新
-          if (onEmojiLoaded != null) {
-            onEmojiLoaded();
-          }
-        } else {
-          logger.debug('MfmRenderer: Failed to load emoji: $emojiName');
+        return null;
+      }).then((url) {
+        if (url != null && url.isNotEmpty && onEmojiLoaded != null) {
+          onEmojiLoaded();
         }
       });
 
-      // 暂时显示原始文本
       return Text(':$emojiName:', style: style);
     }
   }
@@ -724,11 +764,6 @@ class MfmRenderer {
       'MfmRenderer: Clearing text processing cache (${_textProcessingCache.length} items)',
     );
     _textProcessingCache.clear();
-
-    logger.debug(
-      'MfmRenderer: Clearing emoji cache (${_emojiCache.length} items)',
-    );
-    _emojiCache.clear();
 
     _emojiLoader = null;
     _apiEmojiLoader = null;

@@ -549,7 +549,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           label: 'note_detail_local_only'.tr(),
           value: widget.note.localOnly ? 'common_yes'.tr() : 'common_no'.tr(),
           icon: widget.note.localOnly ? Icons.check_circle : Icons.cancel,
-          color: widget.note.localOnly ? Colors.orange : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.localOnly ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
@@ -557,7 +557,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           label: 'note_detail_has_poll'.tr(),
           value: widget.note.poll != null ? 'common_yes'.tr() : 'common_no'.tr(),
           icon: widget.note.poll != null ? Icons.check_circle : Icons.cancel,
-          color: widget.note.poll != null ? Colors.blue : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.poll != null ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
@@ -565,7 +565,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           label: 'note_detail_has_cw'.tr(),
           value: widget.note.cw != null ? 'common_yes'.tr() : 'common_no'.tr(),
           icon: widget.note.cw != null ? Icons.check_circle : Icons.cancel,
-          color: widget.note.cw != null ? Colors.purple : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.cw != null ? theme.colorScheme.secondary : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
@@ -573,7 +573,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           label: 'note_detail_has_files'.tr(),
           value: widget.note.fileIds.isNotEmpty ? 'common_yes'.tr() : 'common_no'.tr(),
           icon: widget.note.fileIds.isNotEmpty ? Icons.check_circle : Icons.cancel,
-          color: widget.note.fileIds.isNotEmpty ? Colors.green : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.fileIds.isNotEmpty ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
         ),
       ],
     );
@@ -766,17 +766,20 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
   }
 
   Color _getVisibilityColor(String? visibility, ThemeData theme) {
+    final scheme = theme.colorScheme;
     switch (visibility) {
       case 'public':
-        return Colors.green;
+        return scheme.tertiary;
       case 'home':
-        return Colors.blue;
+        return scheme.primary;
       case 'followers':
-        return Colors.orange;
+        return HSLColor.fromColor(scheme.secondary).withHue(
+          (HSLColor.fromColor(scheme.secondary).hue + 30) % 360,
+        ).toColor();
       case 'specified':
-        return Colors.purple;
+        return scheme.secondary;
       default:
-        return theme.colorScheme.onSurfaceVariant;
+        return scheme.onSurfaceVariant;
     }
   }
 

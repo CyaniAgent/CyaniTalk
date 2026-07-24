@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '/src/core/theme/sauce_palette.dart';
 
 class AnimatedBlobBackground extends StatefulWidget {
   final Widget child;
@@ -131,8 +130,8 @@ class _TriangleShape extends AnimatedWidget {
         painter: _ShapePainter(
           vertices: verts,
           cornerRadius: r * 0.3,
-          fillColor: SaucePalette.mikuGreen.withAlpha(25),
-          strokeColor: SaucePalette.mikuGreen.withAlpha(40),
+          fillColor: Theme.of(context).colorScheme.primary.withAlpha(25),
+          strokeColor: Theme.of(context).colorScheme.primary.withAlpha(40),
         ),
       ),
     );
@@ -192,8 +191,8 @@ class _QuadShape extends AnimatedWidget {
         painter: _ShapePainter(
           vertices: verts,
           cornerRadius: baseR * 0.3,
-          fillColor: const Color(0xFF4FC3F7).withAlpha(22),
-          strokeColor: const Color(0xFF4FC3F7).withAlpha(35),
+          fillColor: Theme.of(context).colorScheme.secondary.withAlpha(22),
+          strokeColor: Theme.of(context).colorScheme.secondary.withAlpha(35),
         ),
       ),
     );
@@ -233,8 +232,8 @@ class _HexagonShape extends AnimatedWidget {
         painter: _ShapePainter(
           vertices: verts,
           cornerRadius: r * 0.25,
-          fillColor: const Color(0xFFCE93D8).withAlpha(20),
-          strokeColor: const Color(0xFFCE93D8).withAlpha(32),
+          fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(20),
+          strokeColor: Theme.of(context).colorScheme.tertiary.withAlpha(32),
         ),
       ),
     );
@@ -276,8 +275,8 @@ class _DiamondShape extends AnimatedWidget {
         painter: _ShapePainter(
           vertices: verts,
           cornerRadius: r * 0.3,
-          fillColor: SaucePalette.mikuGreen.withAlpha((20 * opacity).round()),
-          strokeColor: SaucePalette.mikuGreen.withAlpha((35 * opacity).round()),
+          fillColor: Theme.of(context).colorScheme.primary.withAlpha((20 * opacity).round()),
+          strokeColor: Theme.of(context).colorScheme.primary.withAlpha((35 * opacity).round()),
         ),
       ),
     );

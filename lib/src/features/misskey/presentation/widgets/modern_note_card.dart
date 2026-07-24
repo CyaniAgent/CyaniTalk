@@ -1280,12 +1280,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.play_arrow,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 48,
                 ),
               ),
@@ -1661,8 +1661,8 @@ class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
         Icons.flag_outlined,
         'post_menu_report'.tr(),
         'report',
-        iconColor: Colors.red,
-        textColor: Colors.red,
+        iconColor: Theme.of(context).colorScheme.error,
+        textColor: Theme.of(context).colorScheme.error,
       ),
       _MenuItem(Icons.copy_all, 'post_menu_copy_id'.tr(), 'copy_id'),
     ];
@@ -1731,7 +1731,7 @@ class _FastMenuItem extends StatefulWidget {
   final IconData icon;
   final String label;
   final bool enabled;
-  final Color iconColor;
+  final Color? iconColor;
   final Color? textColor;
   final VoidCallback onTap;
 
@@ -1739,7 +1739,7 @@ class _FastMenuItem extends StatefulWidget {
     required this.icon,
     required this.label,
     this.enabled = true,
-    this.iconColor = Colors.black87,
+    this.iconColor,
     this.textColor,
     required this.onTap,
   });
@@ -1783,8 +1783,8 @@ class _FastMenuItemState extends State<_FastMenuItem> {
                     widget.icon,
                     size: 20,
                     color: widget.enabled
-                        ? (_isHovered ? theme.colorScheme.primary : widget.iconColor)
-                        : Colors.grey,
+                        ? (_isHovered ? theme.colorScheme.primary : (widget.iconColor ?? theme.colorScheme.onSurface))
+                        : theme.colorScheme.outline,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -1793,7 +1793,7 @@ class _FastMenuItemState extends State<_FastMenuItem> {
                       style: TextStyle(
                         color: widget.enabled
                             ? (widget.textColor ?? theme.colorScheme.onSurface)
-                            : Colors.grey,
+                            : theme.colorScheme.outline,
                         fontSize: 14,
                       ),
                     ),

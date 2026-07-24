@@ -247,8 +247,10 @@ abstract class BaseApi {
         error.type == DioExceptionType.unknown || // 未知错误
         isNetworkError || // 网络错误
         (error.response?.statusCode != null &&
-            (error.response!.statusCode! >= 500 ||
-                error.response!.statusCode == 429)); // 500+ 服务器错误或 429 (请求过多)
+            error.response!.statusCode! >= 502 &&
+            (error.response!.statusCode! == 429 ||
+             error.response!.statusCode! == 502 ||
+             error.response!.statusCode! == 503));  // 502/503 + 429 才重试，500/504/524 不重试
   }
 
   /// 类似于 executeApiCall，但用于不返回数据的操作（无返回值操作）

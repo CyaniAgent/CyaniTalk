@@ -90,12 +90,11 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
           prefs.getInt('appearance_display_mode') ?? 0;
       final displayMode = ThemeMode.values[themeModeIndex];
 
-      final isAndroid = defaultTargetPlatform == TargetPlatform.android;
-      final useDynamicColor = isAndroid
-          ? (prefs.getBool('appearance_dynamic_color') ?? true)
-          : false;
+      // 动态色彩：所有支持的平台默认开启（Android/macOS/Windows）
+      final useDynamicColor =
+          prefs.getBool('appearance_dynamic_color') ?? true;
       final useCustomColor =
-          prefs.getBool('appearance_custom_color') ?? (!isAndroid);
+          prefs.getBool('appearance_custom_color') ?? false;
 
       final primaryColorValue = prefs.getInt('appearance_primary_color');
       final primaryColor = primaryColorValue != null
@@ -125,9 +124,8 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
           defaultTargetPlatform == TargetPlatform.linux;
       return AppearanceSettings(
         displayMode: ThemeMode.system,
-        useDynamicColor: defaultTargetPlatform == TargetPlatform.android,
-        useCustomColor: !isDesktop &&
-            defaultTargetPlatform != TargetPlatform.android,
+        useDynamicColor: true,
+        useCustomColor: false,
         primaryColor: SaucePalette.mikuGreen,
         fontFamily: 'MiSans',
         useCustomTitleBar: isDesktop,
@@ -163,7 +161,6 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
   }
 
   Future<void> toggleDynamicColor(bool value) async {
-    if (defaultTargetPlatform != TargetPlatform.android) return;
     final newState = state.value!.copyWith(
       useDynamicColor: value,
       useCustomColor: value ? false : state.value!.useCustomColor,
@@ -204,26 +201,17 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
   }
 
   Future<void> resetSettings() async {
-    final isAndroid = defaultTargetPlatform == TargetPlatform.android;
     final isDesktop = defaultTargetPlatform == TargetPlatform.windows ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.linux;
-    final newState = isAndroid
-        ? const AppearanceSettings(
-            displayMode: ThemeMode.system,
-            useDynamicColor: true,
-            useCustomColor: false,
-            primaryColor: SaucePalette.mikuGreen,
-            fontFamily: 'MiSans',
-          )
-        : AppearanceSettings(
-            displayMode: ThemeMode.system,
-            useDynamicColor: false,
-            useCustomColor: !isDesktop && !isAndroid,
-            primaryColor: SaucePalette.mikuGreen,
-            fontFamily: 'MiSans',
-            useCustomTitleBar: isDesktop,
-          );
+    final newState = AppearanceSettings(
+      displayMode: ThemeMode.system,
+      useDynamicColor: true,
+      useCustomColor: false,
+      primaryColor: SaucePalette.mikuGreen,
+      fontFamily: 'MiSans',
+      useCustomTitleBar: isDesktop,
+    );
     state = AsyncData(newState);
     await _saveToStorage(newState);
   }
@@ -252,7 +240,6 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
         error: (_, _) =>
             Center(child: Text('settings_appearance_error_loading'.tr())),
         data: (appearanceSettings) {
-          final isAndroid = defaultTargetPlatform == TargetPlatform.android;
           final isDesktop =
               defaultTargetPlatform == TargetPlatform.windows ||
               defaultTargetPlatform == TargetPlatform.macOS ||
@@ -264,28 +251,22 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               SettingsCardGroup(
                 children: [
                   _displayModeSelector(appearanceSettings.displayMode, appearanceNotifier),
-                  if (!isDesktop)
-                    _switchTile(
-                      icon: Icons.color_lens_outlined,
-                      iconColor: SettingsIconColors.purple,
-                      title: 'settings_appearance_dynamic_color'.tr(),
-                      subtitle: 'settings_appearance_dynamic_color_description'.tr(),
-                      value: appearanceSettings.useDynamicColor,
-                      onChanged: isAndroid
-                          ? appearanceNotifier.toggleDynamicColor
-                          : null,
-                    ),
-                  if (!isDesktop)
-                    _switchTile(
-                      icon: Icons.palette_outlined,
-                      iconColor: _purple,
-                      title: 'settings_appearance_custom_color'.tr(),
-                      subtitle: 'settings_appearance_custom_color_description'.tr(),
-                      value: appearanceSettings.useCustomColor,
-                      onChanged: isAndroid
-                          ? appearanceNotifier.toggleCustomColor
-                          : null,
-                    ),
+                  _switchTile(
+                    icon: Icons.color_lens_outlined,
+                    iconColor: SettingsIconColors.purple,
+                    title: 'settings_appearance_dynamic_color'.tr(),
+                    subtitle: 'settings_appearance_dynamic_color_description'.tr(),
+                    value: appearanceSettings.useDynamicColor,
+                    onChanged: appearanceNotifier.toggleDynamicColor,
+                  ),
+                  _switchTile(
+                    icon: Icons.palette_outlined,
+                    iconColor: _purple,
+                    title: 'settings_appearance_custom_color'.tr(),
+                    subtitle: 'settings_appearance_custom_color_description'.tr(),
+                    value: appearanceSettings.useCustomColor,
+                    onChanged: appearanceNotifier.toggleCustomColor,
+                  ),
                   if (appearanceSettings.useCustomColor)
                     _colorPickerRow(appearanceSettings, appearanceNotifier),
                   if (isDesktop)
@@ -693,12 +674,14 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                             Container(
                               width: double.infinity, height: 60,
                               decoration: BoxDecoration(
-                                color: colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(8),
-                                image: const DecorationImage(
-                                  image: NetworkImage('https://api.dicebear.com/7.x/shapes/png?seed=miku&backgroundColor=39c5bb'),
-                                  fit: BoxFit.cover, opacity: 0.3,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colorScheme.primaryContainer.withAlpha(80),
+                                    colorScheme.secondaryContainer.withAlpha(60),
+                                    colorScheme.tertiaryContainer.withAlpha(40),
+                                  ],
                                 ),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Center(
                                 child: Icon(Icons.play_circle_outline, color: colorScheme.primary, size: 32),

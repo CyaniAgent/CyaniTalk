@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/features/misskey/domain/emoji.dart';
+import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import 'retryable_network_image.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
@@ -65,6 +66,11 @@ class _EmojiPickerState extends ConsumerState<EmojiPicker>
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final emojis = await repository.getEmojis();
       if (mounted) {
+        // 预填充全局 emoji 缓存，后续 MFM 渲染直接从缓存命中
+        final cache = GlobalEmojiCache();
+        for (final emoji in emojis) {
+          cache.addAll({emoji.name: emoji.url});
+        }
         setState(() {
           _emojis = emojis;
           _isLoading = false;

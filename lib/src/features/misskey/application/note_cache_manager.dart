@@ -68,6 +68,9 @@ class NoteCacheManager {
   /// 当前账户ID
   String? _currentAccountId;
 
+  /// 账户切换异步加载 Future，用于跟踪和错误处理
+  Future<void>? _loadFuture;
+
   /// 已删除笔记ID黑名单（持久化，防残留）
   final Set<String> _deletedIds = {};
 
@@ -109,7 +112,7 @@ class NoteCacheManager {
 
     await _loadDeletedIds();
     await _loadFromStorage();
-    await _filterDeletedFromCache();
+    _filterDeletedFromCache();
     cleanupExpiredCache();
     _isInitialized = true;
   }
@@ -134,14 +137,23 @@ class NoteCacheManager {
     _deletedIdsFile = _cacheDirectoryPath != null
         ? File('$_cacheDirectoryPath/$_deletedIdsFileName')
         : null;
-    _loadFromStorage();
-    _loadDeletedIds();
+    // 跟踪异步加载 Future，确保错误被记录
+    _loadFuture = Future.wait<void>([
+      _loadFromStorage(),
+      _loadDeletedIds(),
+    ]).catchError((e) {
+      logger.warning('NoteCacheManager: Account switch load failed: $e');
+      return <void>[];
+    });
   }
 
   /// 获取当前账户ID
   String? getCurrentAccountId() {
     return _currentAccountId;
   }
+
+  /// 获取账户切换异步加载 Future（外部可 await 确保缓存加载完成）
+  Future<void>? get loadFuture => _loadFuture;
 
   /// 从持久化存储加载缓存
   Future<void> _loadFromStorage() async {
@@ -152,7 +164,7 @@ class NoteCacheManager {
       final cacheJson = await _cacheFile!.readAsString();
 
       if (cacheJson.isNotEmpty) {
-        await _loadCacheFromJson(cacheJson);
+        _loadCacheFromJson(cacheJson);
       }
     } catch (e) {
       logger.warning('NoteCacheManager: Failed to load cache from file: $e');
@@ -162,7 +174,7 @@ class NoteCacheManager {
   }
 
   /// 从JSON加载缓存
-  Future<void> _loadCacheFromJson(String cacheJson) async {
+  void _loadCacheFromJson(String cacheJson) {
     try {
       final cacheData = jsonDecode(cacheJson) as Map<String, dynamic>;
       final notesData = cacheData['notes'] as Map<String, dynamic>?;
@@ -227,7 +239,7 @@ class NoteCacheManager {
   }
 
   /// 从缓存中过滤掉已被删除的笔记
-  Future<void> _filterDeletedFromCache() async {
+  void _filterDeletedFromCache() {
     if (_deletedIds.isEmpty || _cache.isEmpty) return;
 
     int removedCount = 0;

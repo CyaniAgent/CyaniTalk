@@ -68,8 +68,9 @@ class RetryInterceptor extends Interceptor {
              (err.response?.statusCode != null &&
               err.response!.statusCode! >= 500 && 
               err.response!.statusCode! < 600 &&
+              err.response!.statusCode! != 500 &&
               err.response!.statusCode! != 504 &&
-              err.response!.statusCode! != 524));  // 网关超时 = 服务器过载，立即重试只会加重伤害
+              err.response!.statusCode! != 524));  // 500/504/524 = 服务器内部错误/过载，重试只会加重伤害
   }
 }
 

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
 /// Shared icon colors for settings tiles.
+///
+/// These are category accent colors kept visually distinct from each other.
+/// Main theme colors (primary/secondary/tertiary) come from [ColorScheme]
+/// and follow the dynamic color setting.
 class SettingsIconColors {
   SettingsIconColors._();
 

@@ -51,6 +51,12 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// 验证定时器，用于定期检测已删除的笔记
   Timer? _validationTimer;
 
+  /// 启动延迟定时器，用于 dispose 时取消
+  Timer? _startupTimer;
+
+  /// SQLite 保存 Future，用于跟踪异步写入
+  Future<void>? _sqliteSaveFuture;
+
   /// 是否正在进行笔记验证（防止并发验证批次叠加产生请求风暴）
   bool _isValidating = false;
 
@@ -91,6 +97,7 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       ref.onDispose(() {
         subscription.cancel();
         _validationTimer?.cancel();
+        _startupTimer?.cancel();
         _cacheManager.stopValidationTimer();
       });
 
@@ -121,7 +128,8 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         logger.info('Misskey时间线: 从内存缓存加载了 ${cachedNotes.length} 条笔记');
 
         // 延迟获取最新数据并启动验证，避免阻塞UI
-        Future.delayed(const Duration(seconds: 2), () async {
+        _startupTimer?.cancel();
+        _startupTimer = Timer(const Duration(seconds: 2), () async {
           if (!ref.mounted) return;
           await _loadLatestData(type);
           if (!ref.mounted) return;
@@ -147,7 +155,8 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
         _cacheManager.putNotes(persistentNotes);
 
         // 延迟获取最新数据，避免阻塞UI
-        Future.delayed(const Duration(seconds: 2), () async {
+        _startupTimer?.cancel();
+        _startupTimer = Timer(const Duration(seconds: 2), () async {
           if (!ref.mounted) return;
           await _loadLatestData(type);
           if (!ref.mounted) return;
@@ -239,7 +248,13 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
       }
 
       _startPeriodicValidation();
-      unawaited(_saveToSqliteAndUpdateMeta(type));
+      // 异步保存到 SQLite，不阻塞 UI；跟踪 Future 以便 dispose 时取消
+      _sqliteSaveFuture = _saveToSqliteAndUpdateMeta(type);
+      _sqliteSaveFuture?.catchError((e) {
+        if (!e.toString().contains('disposed')) {
+          logger.warning('Misskey时间线: SQLite 保存失败', e);
+        }
+      });
     } catch (e) {
       if (e.toString().contains('disposed')) return;
       logger.error('Misskey时间线: 加载最新数据失败', e);
@@ -260,14 +275,15 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
   /// 启动定期验证 — 每 60 秒全量扫描所有未验证/过期缓存笔记
   void _startPeriodicValidation() {
     _cacheManager.startValidationTimer((noteIds) async {
-      await _validateAllCachedNotes();
+      await _validateAllCachedNotes(noteIds);
     });
   }
 
   /// 启动时全量验证：验证所有缓存中未验证/过期的笔记
   ///
   /// 分批次执行，每批 10 条，避免阻塞 UI。
-  Future<void> _validateAllCachedNotes() async {
+  /// @param noteIds 可选的要验证的笔记 ID 列表，为 null 时自动从缓存获取
+  Future<void> _validateAllCachedNotes([List<String>? noteIds]) async {
     if (_isValidating) {
       logger.info('Misskey时间线: 验证正在进行中，跳过重复验证');
       return;
@@ -276,16 +292,16 @@ class MisskeyTimelineNotifier extends _$MisskeyTimelineNotifier {
     try {
       if (!ref.mounted) return;
 
-      final noteIds = _cacheManager.getNotesToValidate();
-      if (noteIds.isEmpty) return;
+      final ids = noteIds ?? _cacheManager.getNotesToValidate();
+      if (ids.isEmpty) return;
 
-      logger.info('Misskey时间线: 启动全量验证，共 ${noteIds.length} 条笔记');
+      logger.info('Misskey时间线: 启动全量验证，共 ${ids.length} 条笔记');
 
       const batchSize = 10;
-      for (var i = 0; i < noteIds.length; i += batchSize) {
+      for (var i = 0; i < ids.length; i += batchSize) {
         if (!ref.mounted) return;
 
-        final batch = noteIds.skip(i).take(batchSize).toList();
+        final batch = ids.skip(i).take(batchSize).toList();
         await _performNoteValidation(batch);
       }
 
@@ -812,12 +828,20 @@ class MisskeyClipNotesNotifier extends _$MisskeyClipNotesNotifier {
 @riverpod
 class MisskeyOnlineUsersNotifier extends _$MisskeyOnlineUsersNotifier {
   Timer? _timer;
+  bool _isRefreshing = false;
 
   @override
   FutureOr<int> build() async {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) async {
-      if (ref.mounted) await refresh();
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) async {
+      if (ref.mounted && !_isRefreshing) {
+        _isRefreshing = true;
+        try {
+          await refresh();
+        } finally {
+          _isRefreshing = false;
+        }
+      }
     });
 
     ref.onDispose(() => _timer?.cancel());

@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '/src/core/theme/sauce_palette.dart';
 
 class FireworksBackground extends StatefulWidget {
   final Widget child;
@@ -94,13 +93,25 @@ class _FireworksBackgroundState extends State<FireworksBackground>
   }
 
   void _launchRocket() {
-    _rockets.add(_Rocket(rng: _rng));
+    final scheme = Theme.of(context).colorScheme;
+    _rockets.add(_Rocket(rng: _rng, colors: _themeColors(scheme)));
   }
 
   void _burst(Offset center, Color baseColor) {
     _bursts.add(_Burst(center: center, baseColor: baseColor, rng: _rng));
   }
 }
+
+// ─── Theme-derived firework palette ──────────────────────────────────
+List<Color> _themeColors(ColorScheme s) => [
+      s.primary,
+      s.secondary,
+      s.tertiary,
+      HSLColor.fromColor(s.primary).withHue((HSLColor.fromColor(s.primary).hue + 30) % 360).toColor(),
+      HSLColor.fromColor(s.secondary).withHue((HSLColor.fromColor(s.secondary).hue + 45) % 360).toColor(),
+      HSLColor.fromColor(s.tertiary).withHue((HSLColor.fromColor(s.tertiary).hue + 60) % 360).toColor(),
+      s.error,
+    ];
 
 // ─── Rocket ─────────────────────────────────────────────────────────
 class _Rocket {
@@ -112,26 +123,16 @@ class _Rocket {
   bool exploded = false;
   final List<Offset> trail;
 
-  _Rocket({required Random rng})
+  _Rocket({required Random rng, required List<Color> colors})
       : position = Offset(
           0.15 + rng.nextDouble() * 0.7,
           0.95 + rng.nextDouble() * 0.05,
         ),
         targetY = 0.1 + rng.nextDouble() * 0.35,
-        color = _colors[rng.nextInt(_colors.length)],
+        color = colors[rng.nextInt(colors.length)],
         speed = -0.006 - rng.nextDouble() * 0.003,
         life = 5.0,
         trail = [];
-
-  static const _colors = [
-    SaucePalette.mikuGreen,
-    Color(0xFF4FC3F7),
-    Color(0xFFFF8A65),
-    Color(0xFFCE93D8),
-    Color(0xFFFFF176),
-    Color(0xFFEF5350),
-    Color(0xFF81C784),
-  ];
 
   bool get dead => life <= 0 || (!exploded && position.dy > 1.1);
 

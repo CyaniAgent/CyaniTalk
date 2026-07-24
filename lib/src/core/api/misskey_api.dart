@@ -1175,6 +1175,7 @@ class MisskeyApi extends BaseApi {
     () => _dio.post('/api/emoji', data: {'i': token, 'name': name}),
     (response) => _toMap(response.data),
     params: {'name': name},
+    cacheTtl: const Duration(minutes: 5),
   );
 
   /// 获取表情列表
@@ -1186,6 +1187,7 @@ class MisskeyApi extends BaseApi {
     'MisskeyApi.getEmojis',
     () => _dio.post('/api/emojis', data: {'i': token}),
     (response) => _toMap(response.data),
+    cacheTtl: const Duration(minutes: 5),
   );
 
   /// 获取当前用户的公告列表

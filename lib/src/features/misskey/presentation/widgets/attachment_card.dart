@@ -173,13 +173,13 @@ class AttachmentCard extends StatelessWidget {
           right: 4,
           child: Container(
             padding: const EdgeInsets.all(2),
-            decoration: const BoxDecoration(
-              color: Colors.green,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.tertiary,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onTertiary,
               size: 14,
             ),
           ),
@@ -313,20 +313,23 @@ class FileTypeIcon extends StatelessWidget {
   }
 
   Color _getColorForFileType(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     if (fileType.startsWith('image/')) {
-      return Colors.purple;
+      return scheme.tertiary;
     } else if (fileType.startsWith('video/')) {
-      return Colors.red;
+      return scheme.error;
     } else if (fileType.startsWith('audio/')) {
-      return Colors.orange;
+      return scheme.secondary;
     } else if (fileType == 'application/pdf') {
-      return Colors.red.shade700;
+      return HSLColor.fromColor(scheme.error).withLightness(0.4).toColor();
     } else if (fileType.startsWith('text/')) {
-      return Colors.blue;
+      return scheme.primary;
     } else if (fileType.contains('zip') || fileType.contains('compressed')) {
-      return Colors.amber;
+      return HSLColor.fromColor(scheme.secondary).withHue(
+        (HSLColor.fromColor(scheme.secondary).hue + 30) % 360,
+      ).toColor();
     } else {
-      return Theme.of(context).colorScheme.onSurfaceVariant;
+      return scheme.onSurfaceVariant;
     }
   }
 }
