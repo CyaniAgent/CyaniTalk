@@ -130,7 +130,7 @@ class SafeMfmWidgetState extends State<SafeMfmWidget> {
         linkTap: widget.linkTap,
         isNyaize: widget.isNyaize ?? false,
         isUseAnimation: widget.isUseAnimation ?? true,
-        defaultBorderColor: widget.defaultBorderColor ?? Colors.blue,
+        defaultBorderColor: widget.defaultBorderColor ?? Theme.of(context).colorScheme.primary,
       );
 
       // 如果不启用折叠功能，直接返回 MFM 组件

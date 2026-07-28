@@ -198,7 +198,7 @@ class _VideoViewerState extends State<VideoViewer> {
                               padding: const EdgeInsets.all(16.0),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withAlpha(150),
+                                  color: Theme.of(context).colorScheme.scrim.withAlpha(150),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 padding: const EdgeInsets.all(12.0),
@@ -210,8 +210,8 @@ class _VideoViewerState extends State<VideoViewer> {
                                       allowScrubbing: true,
                                       colors: VideoProgressColors(
                                         playedColor: Theme.of(context).colorScheme.primary,
-                                        bufferedColor: Colors.white.withAlpha(100),
-                                        backgroundColor: Colors.white.withAlpha(50),
+                                        bufferedColor: Theme.of(context).colorScheme.onSurface.withAlpha(100),
+                                        backgroundColor: Theme.of(context).colorScheme.onSurface.withAlpha(50),
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -226,7 +226,7 @@ class _VideoViewerState extends State<VideoViewer> {
                                             videoController.value.isPlaying
                                                 ? Icons.pause
                                                 : Icons.play_arrow,
-                                            color: Colors.white,
+                                            color: Theme.of(context).colorScheme.onSurface,
                                           ),
                                           style: IconButton.styleFrom(
                                             shape: RoundedRectangleBorder(
@@ -238,8 +238,8 @@ class _VideoViewerState extends State<VideoViewer> {
                                         // 时间显示
                                         Text(
                                           '${_formatDuration(videoController.value.position)} / ${_formatDuration(videoController.value.duration)}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.onSurface,
                                             fontSize: 12,
                                           ),
                                         ),

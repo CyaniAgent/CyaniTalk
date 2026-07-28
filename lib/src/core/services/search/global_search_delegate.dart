@@ -88,9 +88,9 @@ class GlobalSearchDelegate extends SearchDelegate<SearchResult?> {
             final result = results[index];
             final sourceText = 'search_source_misskey'.tr();
             return ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.public,
-                color: Colors.green,
+                color: Theme.of(context).colorScheme.primary,
               ),
               title: Text(result.title),
               subtitle: Text(

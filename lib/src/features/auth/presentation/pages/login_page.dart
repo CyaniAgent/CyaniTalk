@@ -146,7 +146,7 @@ class LogoSection extends StatelessWidget {
       shaderCallback: (bounds) => LinearGradient(
         colors: [
           colorScheme.primary,
-          const Color(0xFF66CCFF),
+          colorScheme.primary,
         ],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -160,17 +160,17 @@ class LogoSection extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   colorScheme.primary,
-                  const Color(0xFF66CCFF),
+                  colorScheme.primary,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.chat_bubble_outline,
               size: 48,
-              color: Colors.white,
+              color: colorScheme.onPrimary,
             ),
           ),
           const SizedBox(height: 16),

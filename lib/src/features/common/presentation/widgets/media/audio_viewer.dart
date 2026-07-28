@@ -292,14 +292,14 @@ class _AudioViewerState extends State<AudioViewer> {
                       ],
                     ),
                     child: _isLoading
-                        ? const Center(
+                        ? Center(
                             child: SizedBox(
                               width: 28,
                               height: 28,
                               child: CircularProgressIndicator(
                                 strokeWidth: 3,
                                 valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                    AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onSurface),
                               ),
                             ),
                           )

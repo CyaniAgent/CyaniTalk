@@ -7,6 +7,7 @@ import '/src/features/profile/application/log_settings_provider.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/theme/color_constants.dart';
 import '/src/core/widgets/settings_widgets.dart';
+import '/src/shared/widgets/expressive_switch.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 import '/src/shared/widgets/toast_helper.dart';
@@ -130,7 +131,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
                 ),
                 SettingsTile(
                   icon: Icons.delete_sweep_outlined,
-                  iconColor: Colors.red,
+                  iconColor: Theme.of(context).colorScheme.error,
                   title: 'settings_logs_delete_all'.tr(),
                   onTap: _deleteAllLogs,
                 ),
@@ -287,7 +288,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
             ),
           ),
           const SizedBox(width: 16),
-          Switch(
+          ExpressiveSwitch(
             value: config.autoClear,
             onChanged: (value) => ref.read(logSettingsProvider.notifier).setAutoClear(value),
           ),

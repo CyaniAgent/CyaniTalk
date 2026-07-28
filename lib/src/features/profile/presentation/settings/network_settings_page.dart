@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:cyanitalk/src/core/theme/color_constants.dart';
 import 'package:cyanitalk/src/core/config/constants.dart';
 import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/shared/widgets/expressive_switch.dart';
 import 'package:cyanitalk/src/features/profile/application/network_settings_provider.dart';
 import 'package:cyanitalk/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
 import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
@@ -90,7 +91,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                           Text(
                             'settings_network_custom_ua_warning'.tr(),
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.amber[800],
+                              color: Theme.of(context).colorScheme.tertiary,
                             ),
                           ),
                         ],
@@ -224,8 +225,8 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                             color: _networkTestSuccess == null
                                 ? Theme.of(context).colorScheme.onSurfaceVariant
                                 : _networkTestSuccess == true
-                                    ? Colors.green
-                                    : Colors.red,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.error,
                           ),
                     onTap: _isTestingNetwork ? null : _testNetworkConnection,
                   ),
@@ -292,7 +293,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
             ),
           ),
           const SizedBox(width: 16),
-          Switch(value: value, onChanged: onChanged),
+          ExpressiveSwitch(value: value, onChanged: onChanged),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/shared/widgets/adaptive_sheet.dart';
+import '/src/shared/widgets/expressive_switch.dart';
 import '/src/features/misskey/domain/poll.dart';
 import '/src/features/misskey/presentation/widgets/poll_choice_input.dart';
 import '/src/features/misskey/presentation/widgets/poll_time_selector.dart';
@@ -288,7 +289,7 @@ class _PollSettingsSheetState extends ConsumerState<PollSettingsSheet> {
             ),
           ),
           // Switch 切换
-          Switch(
+          ExpressiveSwitch(
             value: _multiple,
             onChanged: (value) {
               setState(() {

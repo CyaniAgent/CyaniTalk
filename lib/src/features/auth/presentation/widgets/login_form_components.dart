@@ -172,7 +172,7 @@ class PlatformSelectionStep extends StatelessWidget {
               shaderCallback: (bounds) => LinearGradient(
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  const Color(0xFF66CCFF),
+                  Theme.of(context).colorScheme.primary,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,

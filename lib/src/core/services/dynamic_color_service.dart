@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
-/// 跨平台动态取色服务
+/// Windows 专用动态取色服务
 ///
-/// - Windows: 通过原生 WM_DWMCOLORIZATIONCOLORCHANGED 消息实时监听系统主题色变化
-/// - macOS/Linux/Android/iOS: App 回到前台时轮询对比
-/// - 提供 [accentColor] ValueNotifier 供主题系统监听
+/// 通过原生 WM_DWMCOLORIZATIONCOLORCHANGED 消息实时监听系统主题色变化。
+/// Android/macOS/Linux 使用 DynamicColorBuilder（见 app.dart）。
 class DynamicColorService extends WidgetsBindingObserver {
   DynamicColorService._();
   static final instance = DynamicColorService._();
@@ -26,22 +25,23 @@ class DynamicColorService extends WidgetsBindingObserver {
   /// 当前完整的动态 ColorScheme（dark）
   ColorScheme? darkScheme;
 
-  Timer? _pollTimer;
   Color? _lastKnownColor;
   bool _initialized = false;
 
   /// 初始化服务：注册监听器并获取初始颜色
+  ///
+  /// 仅在 Windows 平台生效。其他平台无操作。
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
 
-    // 注册生命周期观察者（跨平台轮询）
+    if (!Platform.isWindows) return;
+
+    // 注册生命周期观察者（Windows 回到前台时轮询兜底）
     WidgetsBinding.instance.addObserver(this);
 
-    // Windows 平台：监听原生颜色变化推送
-    if (Platform.isWindows) {
-      _channel.setMethodCallHandler(_onMethodCall);
-    }
+    // 监听原生颜色变化推送
+    _channel.setMethodCallHandler(_onMethodCall);
 
     // 获取初始颜色
     await _fetchAccentColor();
@@ -50,7 +50,6 @@ class DynamicColorService extends WidgetsBindingObserver {
   /// 销毁服务
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _pollTimer?.cancel();
     _channel.setMethodCallHandler(null);
   }
 
@@ -65,45 +64,43 @@ class DynamicColorService extends WidgetsBindingObserver {
     }
   }
 
-  /// 从系统获取强调色（跨平台）
+  /// 从系统获取强调色（仅 Windows）
+  ///
+  /// 使用 DynamicColorPlugin 获取初始 accent color，
+  /// 后续变化由原生 MethodChannel 推送。
   Future<void> _fetchAccentColor() async {
+    if (!Platform.isWindows) return;
+
     try {
       final color = await DynamicColorPlugin.getAccentColor();
       if (color != null) {
         _updateColor(color);
-      } else {
-        // 平台不支持动态取色，使用 Miku Green 作为 fallback
-        _updateColor(const Color(0xFF39C5BB));
       }
     } catch (e) {
-      _updateColor(const Color(0xFF39C5BB));
+      debugPrint('DynamicColorService: failed to fetch accent color — $e');
     }
   }
 
   /// 更新颜色并重建 ColorScheme
   void _updateColor(Color color) {
-    // 避免重复更新
     if (_lastKnownColor != null && _lastKnownColor!.toARGB32() == color.toARGB32()) {
       return;
     }
     _lastKnownColor = color;
 
-    // 从种子色生成完整的 Material 3 ColorScheme
     lightScheme = ColorScheme.fromSeed(seedColor: color, brightness: Brightness.light);
     darkScheme = ColorScheme.fromSeed(seedColor: color, brightness: Brightness.dark);
 
-    // 通知监听者
     accentColor.value = color;
 
     debugPrint('DynamicColorService: accent color updated — #${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}');
   }
 
-  // ── WidgetsBindingObserver: App 回到前台时轮询 ──────────────────────
+  // ── WidgetsBindingObserver: App 回到前台时轮询兜底 ──────────────────────
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // App 回到前台：重新获取系统强调色（覆盖后台期间的系统设置变化）
+    if (state == AppLifecycleState.resumed && Platform.isWindows) {
       _fetchAccentColor();
     }
   }

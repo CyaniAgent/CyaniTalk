@@ -434,7 +434,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                   children: [
                     SettingsTile(
                       icon: Icons.refresh,
-                      iconColor: Colors.red,
+                      iconColor: Theme.of(context).colorScheme.error,
                       title: '重置此应用',
                       subtitle: 'storage_reset_app_warning'.tr(),
                       onTap: _resetApp,
@@ -522,7 +522,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     if (sections.isEmpty) {
       sections.add(PieChartSectionData(
         value: 1,
-        color: Colors.grey.shade300,
+        color: Theme.of(context).colorScheme.outlineVariant,
         radius: 36,
         title: '',
         showTitle: false,

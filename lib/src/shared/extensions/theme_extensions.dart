@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 /// 主题颜色扩展
 extension ThemeColorExtension on BuildContext {
   /// 获取主颜色
-  Color get primaryColor => Theme.of(this).primaryColor;
+  Color get primaryColor => Theme.of(this).colorScheme.primary;
 
   /// 获取主颜色（Material 3）
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
@@ -19,11 +19,11 @@ extension ThemeColorExtension on BuildContext {
 
   /// 获取文本颜色
   Color get textColor =>
-      Theme.of(this).textTheme.bodyLarge?.color ?? Colors.black;
+      Theme.of(this).textTheme.bodyLarge?.color ?? Theme.of(this).colorScheme.onSurface;
 
   /// 获取次要文本颜色
   Color get secondaryTextColor =>
-      Theme.of(this).textTheme.bodySmall?.color ?? Colors.grey;
+      Theme.of(this).textTheme.bodySmall?.color ?? Theme.of(this).colorScheme.onSurfaceVariant;
 
   /// 获取错误颜色
   Color get errorColor => Theme.of(this).colorScheme.error;

@@ -258,7 +258,7 @@ class _MisskeyAiScriptConsolePageState
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.black87,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant,
@@ -269,8 +269,8 @@ class _MisskeyAiScriptConsolePageState
               itemBuilder: (context, index) {
                 return Text(
                   _output[index],
-                  style: const TextStyle(
-                    color: Colors.greenAccent,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
                     fontFamily: 'JetBrainsMono',
                     fontSize: 13,
                     height: 1.4,

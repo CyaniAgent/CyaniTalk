@@ -10,6 +10,7 @@ import 'package:cyanitalk/src/core/core.dart';
 import 'package:cyanitalk/src/core/theme/color_constants.dart';
 import 'package:cyanitalk/src/core/theme/font_selector.dart';
 import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/shared/widgets/expressive_switch.dart';
 import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
 import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
@@ -225,8 +226,7 @@ class AppearancePage extends ConsumerStatefulWidget {
 }
 
 class _AppearancePageState extends ConsumerState<AppearancePage> {
-  static const _purple = Color(0xFFAB47BC);
-  static const _teal = Color(0xFF26A69A);
+
 
   @override
   Widget build(BuildContext context) {
@@ -261,7 +261,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   ),
                   _switchTile(
                     icon: Icons.palette_outlined,
-                    iconColor: _purple,
+                    iconColor: SettingsIconColors.purple,
                     title: 'settings_appearance_custom_color'.tr(),
                     subtitle: 'settings_appearance_custom_color_description'.tr(),
                     value: appearanceSettings.useCustomColor,
@@ -272,7 +272,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   if (isDesktop)
                     _switchTile(
                       icon: Icons.crop_square_rounded,
-                      iconColor: const Color(0xFF42A5F5),
+                      iconColor: SettingsIconColors.blue,
                       title: '自定义标题栏',
                       subtitle: '使用自定义窗口标题栏',
                       value: appearanceSettings.useCustomTitleBar,
@@ -292,7 +292,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                 children: [
                   SettingsTile(
                     icon: Icons.font_download_outlined,
-                    iconColor: _teal,
+                    iconColor: SettingsIconColors.cyan,
                     title: 'settings_font_title'.tr(),
                     subtitle: appearanceSettings.fontFamily ?? 'MiSans',
                     onTap: () => showDialog(
@@ -412,7 +412,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
             ),
           ),
           const SizedBox(width: 16),
-          Switch(value: value, onChanged: onChanged),
+          ExpressiveSwitch(value: value, onChanged: onChanged),
         ],
       ),
     );
@@ -543,12 +543,12 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                   color: color,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: isSelected ? Colors.black : Colors.transparent,
+                    color: isSelected ? Theme.of(context).colorScheme.outline : Colors.transparent,
                     width: 3,
                   ),
                 ),
                 child: isSelected
-                    ? const Icon(Icons.check, color: Colors.white, size: 20)
+                    ? Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary, size: 20)
                     : null,
               ),
             );
@@ -609,7 +609,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                         CircleAvatar(
                           radius: 14,
                           backgroundColor: colorScheme.primary,
-                          child: const Text("01", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                          child: Text("01", style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 10, fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(width: 10),
                         Container(

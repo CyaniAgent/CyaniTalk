@@ -203,7 +203,7 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     );
 
     return appearanceSettingsAsync.when(
-      loading: () => Container(color: Colors.white),
+      loading: () => const ColoredBox(color: Color(0xFFF0F0F0)),
       error: (error, stack) {
         logger.error('CyaniTalkApp: 加载外观设置失败', error);
         // 使用默认设置
@@ -239,22 +239,55 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
           'CyaniTalkApp: 加载外观设置 - 显示模式: ${appearanceSettings.displayMode}, 动态色彩: ${appearanceSettings.useDynamicColor}',
         );
 
+        // ── 动态取色策略 ──
+        // Android/macOS/Linux: DynamicColorBuilder（自动监听壁纸/系统主题变化）
+        // Windows: DynamicColorService（原生 WM_DWMCOLORIZATIONCOLORCHANGED 推送）
+        // 两者通过 ListenableBuilder 同时监听，任一变化触发重建
+        final isWindows = Platform.isWindows;
         final colorService = DynamicColorService.instance;
 
-        return ListenableBuilder(
-          listenable: colorService.accentColor,
-          builder: (context, _) {
-            // 从 DynamicColorService 获取实时 ColorScheme
-            final lightScheme = (appearanceSettings.useDynamicColor && colorService.lightScheme != null)
-                ? colorService.lightScheme!.harmonized()
-                : null;
-            final darkScheme = (appearanceSettings.useDynamicColor && colorService.darkScheme != null)
-                ? colorService.darkScheme!.harmonized()
-                : null;
+        // Windows 端：监听原生推送的 accent color 变化
+        // 非 Windows 端：ListenableBuilder 仍挂载但 accentColor 很少变化，
+        //   真正的 scheme 更新由 DynamicColorBuilder 驱动
+        final rebuildTrigger = isWindows
+            ? Listenable.merge([colorService.accentColor])
+            : ValueNotifier<int>(0); // Android/macOS/Linux: 由 DynamicColorBuilder 驱动
 
-            // 构建主题
-            final theme = _buildTheme(appearanceSettings, Brightness.light, dynamicColorScheme: lightScheme);
-            final darkTheme = _buildTheme(appearanceSettings, Brightness.dark, dynamicColorScheme: darkScheme);
+        return ListenableBuilder(
+          listenable: rebuildTrigger,
+          builder: (context, _) {
+            // 使用 DynamicColorBuilder 获取系统动态 ColorScheme
+            // Android/macOS/Linux: 返回完整 CorePalette/accent 方案
+            // Windows/旧版 Android: 返回 null，fallback 到 DynamicColorService 或种子色
+            return DynamicColorBuilder(
+              builder: (ColorScheme? builderLight, ColorScheme? builderDark) {
+                // 确定最终的动态 ColorScheme
+                ColorScheme? lightScheme;
+                ColorScheme? darkScheme;
+
+                if (appearanceSettings.useDynamicColor) {
+                  if (isWindows) {
+                    // Windows: 优先用 DynamicColorBuilder，fallback 到 DynamicColorService
+                    lightScheme = builderLight ?? colorService.lightScheme;
+                    darkScheme = builderDark ?? colorService.darkScheme;
+                  } else {
+                    // Android/macOS/Linux: 直接使用 DynamicColorBuilder
+                    lightScheme = builderLight;
+                    darkScheme = builderDark;
+                  }
+
+                  // 协调品牌色：将自定义 secondary/tertiary 微调至匹配动态 primary
+                  if (lightScheme != null) {
+                    lightScheme = lightScheme.harmonized();
+                  }
+                  if (darkScheme != null) {
+                    darkScheme = darkScheme.harmonized();
+                  }
+                }
+
+                // 构建主题
+                final theme = _buildTheme(appearanceSettings, Brightness.light, dynamicColorScheme: lightScheme);
+                final darkTheme = _buildTheme(appearanceSettings, Brightness.dark, dynamicColorScheme: darkScheme);
 
             final useCustomTitleBar =
                 isDesktop && appearanceSettings.useCustomTitleBar;
@@ -316,7 +349,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
 
             return app;
           },
-        );
+          ); // DynamicColorBuilder
+        },
+        ); // ListenableBuilder
       },
     );
   }
@@ -349,10 +384,8 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     // 解析 ColorScheme：优先使用系统动态色，否则用种子色生成
     ColorScheme colorScheme;
     if (settings.useDynamicColor && dynamicColorScheme != null) {
-      // Android 12+ / macOS / Windows / Linux → 使用系统动态色
       colorScheme = dynamicColorScheme;
     } else {
-      // 回退：用种子色生成
       final seedColor = settings.useCustomColor && settings.primaryColor != null
           ? settings.primaryColor!
           : const Color(0xFF39C5BB);
@@ -360,7 +393,6 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
     }
 
     // 获取字体ID
-    // 空字符串表示系统字体
     final fontFamilyId = settings.fontFamily ?? 'misans';
     final isSystemFont = fontFamilyId.isEmpty || fontFamilyId == 'system';
 
@@ -369,45 +401,28 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       Theme.of(context).platform,
     );
 
-    // 应用字体
+    // 应用字体 — 使用 colorScheme.onSurface 确保跟随动态取色
     TextTheme textTheme;
     String? effectiveFontFamily;
 
     if (isSystemFont) {
-      // 系统字体：不设置 fontFamily，使用系统默认
       textTheme = baseTextTheme.apply(
-        bodyColor: isDark
-            ? SaucePalette.darkOnSurface
-            : SaucePalette.lightOnSurface,
-        displayColor: isDark
-            ? SaucePalette.darkOnSurface
-            : SaucePalette.lightOnSurface,
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
       );
       effectiveFontFamily = null;
     } else if (fontFamilyId == 'misans') {
-      // MiSans 内置字体
       textTheme = baseTextTheme.apply(
-        bodyColor: isDark
-            ? SaucePalette.darkOnSurface
-            : SaucePalette.lightOnSurface,
-        displayColor: isDark
-            ? SaucePalette.darkOnSurface
-            : SaucePalette.lightOnSurface,
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
       );
       effectiveFontFamily = 'MiSans';
     } else {
-      // 动态加载的字体
-      // 先应用颜色
       final coloredTextTheme = baseTextTheme.apply(
-        bodyColor: isDark
-            ? SaucePalette.darkOnSurface
-            : SaucePalette.lightOnSurface,
-        displayColor: isDark
-            ? SaucePalette.darkOnSurface
-            : SaucePalette.lightOnSurface,
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
       );
 
-      // 尝试使用 FontManager 的 TextTheme
       final dynamicTextTheme = FontManager.getTextTheme(
         fontFamilyId,
         coloredTextTheme,
@@ -416,7 +431,6 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
         textTheme = dynamicTextTheme;
         effectiveFontFamily = fontFamilyId;
       } else {
-        // 回退到 MiSans
         textTheme = coloredTextTheme;
         effectiveFontFamily = 'MiSans';
       }
@@ -432,10 +446,9 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       useMaterial3: true,
       fontFamily: effectiveFontFamily,
       textTheme: textTheme,
-      bannerTheme: const MaterialBannerThemeData(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        elevation: 2,
+      bannerTheme: MaterialBannerThemeData(
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: colorScheme.surface,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -467,14 +480,15 @@ class _CyaniTalkAppState extends ConsumerState<CyaniTalkApp>
       theme.colorScheme,
       isDesktop: isDesktop,
     );
+    const switchTokens = M3ESwitchTokens.standard;
     final adjustedTheme = isDesktop
         ? theme.copyWith(
             scaffoldBackgroundColor: semanticColors.appBackground,
             canvasColor: semanticColors.appBackground,
-            extensions: [...theme.extensions.values, semanticColors],
+            extensions: [...theme.extensions.values, semanticColors, switchTokens],
           )
         : theme.copyWith(
-            extensions: [...theme.extensions.values, semanticColors],
+            extensions: [...theme.extensions.values, semanticColors, switchTokens],
           );
 
     // 缓存主题和设置

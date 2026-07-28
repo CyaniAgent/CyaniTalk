@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../shared/widgets/expressive_switch.dart';
 
 class SettingsTile extends StatelessWidget {
   final IconData icon;
@@ -122,7 +123,7 @@ class SettingsSwitchTile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Switch(value: value, onChanged: onChanged),
+          ExpressiveSwitch(value: value, onChanged: onChanged),
         ],
       ),
     );

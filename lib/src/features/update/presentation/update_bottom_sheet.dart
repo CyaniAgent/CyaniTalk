@@ -80,12 +80,12 @@ class _UpdateBottomSheetContent extends ConsumerWidget {
                       ? null
                       : () => _openGitHubReleases(context),
                   icon: state.state == UpdateState.checking
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                           ),
                         )
                       : const Icon(Icons.open_in_new_rounded),

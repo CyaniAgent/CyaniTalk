@@ -181,7 +181,7 @@ class _MediaViewerState extends State<MediaViewer> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(28),
-                      color: Colors.white.withAlpha(150),
+                      color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
                     ),
                     child: IconButton(
                       onPressed: () {
@@ -214,7 +214,7 @@ class _MediaViewerState extends State<MediaViewer> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(28),
-                      color: Colors.white.withAlpha(150),
+                      color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
                     ),
                     child: IconButton(
                       onPressed: () {
@@ -255,7 +255,7 @@ class _MediaViewerState extends State<MediaViewer> {
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(28),
-                          color: Colors.white.withAlpha(150),
+                          color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
                         ),
                         child: IconButton(
                           onPressed: () {
@@ -276,7 +276,7 @@ class _MediaViewerState extends State<MediaViewer> {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            color: Colors.white.withAlpha(150),
+                            color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
                           ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -284,7 +284,7 @@ class _MediaViewerState extends State<MediaViewer> {
                           ),
                           child: Text(
                             '${_currentIndex + 1}/${widget.mediaItems.length}',
-                            style: const TextStyle(color: Colors.black),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                           ),
                         ),
 

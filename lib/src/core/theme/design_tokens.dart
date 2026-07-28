@@ -234,6 +234,91 @@ class M3EMenuTokens extends ThemeExtension<M3EMenuTokens> {
   }
 }
 
+/// M3E Switch Tokens — dimensions and motion for the expressive toggle switch.
+///
+/// Fixed thumb size (24dp) with ✓/× icons; only position animates.
+class M3ESwitchTokens extends ThemeExtension<M3ESwitchTokens> {
+  /// Track width (dp).
+  final double trackWidth;
+
+  /// Track height (dp).
+  final double trackHeight;
+
+  /// Fixed thumb diameter (dp) — same in on/off states.
+  final double thumbSize;
+
+  /// Icon displayed inside the thumb (dp).
+  final double iconSize;
+
+  /// Track outline width when unchecked (dp).
+  final double outlineWidth;
+
+  /// Toggle animation duration.
+  final Duration toggleDuration;
+
+  /// Toggle animation curve.
+  final Curve toggleCurve;
+
+  const M3ESwitchTokens({
+    required this.trackWidth,
+    required this.trackHeight,
+    required this.thumbSize,
+    required this.iconSize,
+    required this.outlineWidth,
+    required this.toggleDuration,
+    required this.toggleCurve,
+  });
+
+  /// M3 standard switch dimensions with expressive fixed-thumb behavior.
+  static const standard = M3ESwitchTokens(
+    trackWidth: 52,
+    trackHeight: 32,
+    thumbSize: 24,
+    iconSize: 14,
+    outlineWidth: 2,
+    toggleDuration: Duration(milliseconds: 300),
+    toggleCurve: Curves.easeOutBack,
+  );
+
+  @override
+  M3ESwitchTokens copyWith({
+    double? trackWidth,
+    double? trackHeight,
+    double? thumbSize,
+    double? iconSize,
+    double? outlineWidth,
+    Duration? toggleDuration,
+    Curve? toggleCurve,
+  }) {
+    return M3ESwitchTokens(
+      trackWidth: trackWidth ?? this.trackWidth,
+      trackHeight: trackHeight ?? this.trackHeight,
+      thumbSize: thumbSize ?? this.thumbSize,
+      iconSize: iconSize ?? this.iconSize,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      toggleDuration: toggleDuration ?? this.toggleDuration,
+      toggleCurve: toggleCurve ?? this.toggleCurve,
+    );
+  }
+
+  @override
+  ThemeExtension<M3ESwitchTokens> lerp(
+    covariant ThemeExtension<M3ESwitchTokens>? other,
+    double t,
+  ) {
+    if (other is! M3ESwitchTokens) return this;
+    return M3ESwitchTokens(
+      trackWidth: lerpDouble(trackWidth, other.trackWidth, t)!,
+      trackHeight: lerpDouble(trackHeight, other.trackHeight, t)!,
+      thumbSize: lerpDouble(thumbSize, other.thumbSize, t)!,
+      iconSize: lerpDouble(iconSize, other.iconSize, t)!,
+      outlineWidth: lerpDouble(outlineWidth, other.outlineWidth, t)!,
+      toggleDuration: t < 0.5 ? toggleDuration : other.toggleDuration,
+      toggleCurve: t < 0.5 ? toggleCurve : other.toggleCurve,
+    );
+  }
+}
+
 /// M3E Sound Picker Tokens — shape, spacing, and layout for expressive
 /// sound-selection chips (M3E segmented‑list variant).
 class M3ESoundPickerTokens extends ThemeExtension<M3ESoundPickerTokens> {
@@ -316,4 +401,8 @@ extension M3ETokensContext on BuildContext {
   M3ESoundPickerTokens get m3eSoundPicker =>
       Theme.of(this).extension<M3ESoundPickerTokens>() ??
       M3ESoundPickerTokens.standard;
+
+  M3ESwitchTokens get m3eSwitch =>
+      Theme.of(this).extension<M3ESwitchTokens>() ??
+      M3ESwitchTokens.standard;
 }
