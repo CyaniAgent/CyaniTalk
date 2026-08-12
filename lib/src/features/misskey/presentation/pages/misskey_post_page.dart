@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/file_upload_notifier.dart';
 import '/src/features/misskey/application/timeline_animated_list_controller.dart';
@@ -14,6 +15,7 @@ import '/src/features/misskey/presentation/widgets/drive_file_picker.dart'
     show showDriveFilePicker;
 import '/src/features/misskey/presentation/widgets/poll_settings_sheet.dart'
     show showPollSettings;
+import '/src/shared/widgets/circle_icon_button.dart';
 
 /// Misskey 发布笔记页面组件
 ///
@@ -85,12 +87,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('attachment_pick_failed'.tr(args: [e.toString()])),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'attachment_pick_failed'.tr(args: [e.toString()]), type: ToastificationType.error);
       }
     }
   }
@@ -147,8 +144,8 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
+        leading: CircleIconButton(
+          icon: Icons.close,
           onPressed: () => Navigator.of(context).pop(),
           tooltip: 'post_close'.tr(),
         ),
@@ -168,6 +165,11 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
               padding: const EdgeInsets.only(right: 8.0),
               child: FilledButton(
                 onPressed: _handlePublish,
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
                 child: Text('post_publish'.tr()),
               ),
             ),
@@ -791,19 +793,14 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     if (failedTasks.isNotEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('attachment_upload_failed_warning'.tr()),
-            behavior: SnackBarBehavior.floating,
-            action: SnackBarAction(
-              label: 'attachment_retry'.tr(),
-              onPressed: () {
-                for (final task in failedTasks) {
-                  ref.read(fileUploadProvider.notifier).retryTask(task.id);
-                }
-              },
-            ),
-          ),
+        showToast(
+          title: 'attachment_upload_failed_warning'.tr(),
+          type: ToastificationType.warning,
+          onTap: () {
+            for (final task in failedTasks) {
+              ref.read(fileUploadProvider.notifier).retryTask(task.id);
+            }
+          },
         );
       }
       return;
@@ -821,12 +818,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
 
     if (uploadingTasks.isNotEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('attachment_still_uploading'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'attachment_still_uploading'.tr(), type: ToastificationType.info);
       }
       return;
     }
@@ -870,15 +862,10 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
         poll: pollParams,
       );
 
-      ref.read(postCreationProvider.notifier).state = DateTime.now();
+      ref.read(postCreationProvider.notifier).markPosted();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('post_post_created'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'post_post_created'.tr(), type: ToastificationType.success);
 
         // 清除已完成的上传任务
         ref.read(fileUploadProvider.notifier).clearCompletedTasks();
@@ -894,12 +881,7 @@ class _MisskeyPostPageState extends ConsumerState<MisskeyPostPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'Error: $e', type: ToastificationType.error);
       }
     } finally {
       if (mounted) {

@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/utils/performance_monitor.dart';
 import 'media_item.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 视频查看器组件
 class VideoViewer extends StatefulWidget {
@@ -237,7 +238,7 @@ class _VideoViewerState extends State<VideoViewer> {
                                         // 时间显示
                                         Text(
                                           '${_formatDuration(videoController.value.position)} / ${_formatDuration(videoController.value.duration)}',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,
                                           ),
@@ -296,7 +297,7 @@ class _VideoViewerState extends State<VideoViewer> {
                     ],
                   ),
                 )
-              : const Center(child: CircularProgressIndicator()),
+              : const Center(child: CyaniLoadingIndicator()),
     );
   }
 }

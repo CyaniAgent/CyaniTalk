@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/features/misskey/domain/misskey_notification.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyNotificationsPage extends ConsumerWidget {
   const MisskeyNotificationsPage({super.key});
@@ -20,8 +22,8 @@ class MisskeyNotificationsPage extends ConsumerWidget {
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
+          CircleIconButton(
+            icon: Icons.refresh,
             onPressed: () =>
                 ref.read(misskeyNotificationsProvider.notifier).refresh(),
           ),
@@ -69,7 +71,7 @@ class MisskeyNotificationsPage extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
         error: (err, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -91,7 +93,7 @@ class MisskeyNotificationsPage extends ConsumerWidget {
                 style: theme.textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
+              FilledButton.icon(
                 onPressed: () =>
                     ref.read(misskeyNotificationsProvider.notifier).refresh(),
                 icon: const Icon(Icons.refresh),

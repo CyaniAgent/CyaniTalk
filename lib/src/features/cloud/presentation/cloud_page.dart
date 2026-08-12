@@ -1,21 +1,33 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/core/utils/download_utils.dart';
 import '/src/core/utils/file_icon_manager.dart';
 import '/src/core/utils/cache_manager.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/features/misskey/application/drive_notifier.dart';
+import '/src/features/misskey/application/file_upload_notifier.dart';
 import '/src/features/misskey/domain/drive_file.dart';
 import '/src/features/misskey/domain/drive_folder.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/shared/widgets/login_reminder.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
+import '/src/shared/widgets/m3e_context_menu.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
+import '/src/features/common/presentation/widgets/media/audio_player_sheet.dart';
+import '/src/features/misskey/presentation/pages/misskey_post_page.dart';
 
 import '/src/features/common/presentation/widgets/media/media_item.dart';
+import 'cloud_upload_sheet.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/cyani_error_widget.dart';
 
 class CloudPage extends ConsumerStatefulWidget {
   const CloudPage({super.key});
@@ -95,11 +107,31 @@ class _CachedThumbnailState extends State<_CachedThumbnail> {
   }
 }
 
-class _CloudPageState extends ConsumerState<CloudPage> {
+class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserver {
   final Set<String> _selectedItems = {};
   final GlobalKey _listKey = GlobalKey();
   bool _isSelectionMode = false;
   bool _isButtonEnteredSelectionMode = false;
+  bool _pendingRefreshOnResume = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _pendingRefreshOnResume = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,14 +159,21 @@ class _CloudPageState extends ConsumerState<CloudPage> {
     final driveState = ref.watch(misskeyDriveProvider);
     Theme.of(context);
 
+    if (_pendingRefreshOnResume) {
+      _pendingRefreshOnResume = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ref.read(misskeyDriveProvider.notifier).refresh();
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => ref
-                    .read(navigationControllerProvider.notifier)
-                    .openDrawer(),
-              ),
+        leading: CircleIconButton(
+          icon: Icons.menu,
+          onPressed: () => ref
+              .read(navigationControllerProvider.notifier)
+              .openDrawer(),
+        ),
         title: (_isSelectionMode || _selectedItems.isNotEmpty)
             ? Text(
                 'cloud_selected_items'.tr(
@@ -152,24 +191,20 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                       -1;
                   return index != -1;
                 }))
-                  IconButton(
-                    icon: const Icon(Icons.download),
+                  CircleIconButton(
+                    icon: Icons.download,
                     onPressed: () =>
                         _downloadSelectedFiles(context, ref, driveState.value!),
                     tooltip: 'cloud_download'.tr(),
                   ),
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
-                  },
+                CircleIconButton(
+                  icon: Icons.delete,
+                  onPressed: () => _batchDeleteSelected(context, ref, driveState.value ?? const DriveState()),
                   tooltip: 'cloud_delete'.tr(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => _exitSelectionMode(),
+                CircleIconButton(
+                  icon: Icons.close,
+                  onPressed: _exitSelectionMode,
                   tooltip: 'cloud_cancel'.tr(),
                 ),
               ],
@@ -177,13 +212,13 @@ class _CloudPageState extends ConsumerState<CloudPage> {
           else
             Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.select_all),
-                  onPressed: () => _enterSelectionMode(),
+                CircleIconButton(
+                  icon: Icons.select_all,
+                  onPressed: _enterSelectionMode,
                   tooltip: 'cloud_select'.tr(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
+                CircleIconButton(
+                  icon: Icons.refresh,
                   onPressed: () =>
                       ref.read(misskeyDriveProvider.notifier).refresh(),
                   tooltip: 'cloud_refresh'.tr(),
@@ -200,14 +235,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
               child: RefreshIndicator(
                 onRefresh: () =>
                     ref.read(misskeyDriveProvider.notifier).refresh(),
-                child:
-                    state.files.isEmpty &&
-                        state.folders.isEmpty &&
-                        !state.isLoading
-                    ? _buildEmptyState(context)
-                    : state.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _buildContentList(context, ref, state),
+                child: _buildContentArea(context, ref, state),
               ),
             ),
           ],
@@ -218,7 +246,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
           return Column(
             children: [
               _buildBreadcrumbs(context, ref, currentState),
-              Expanded(child: const Center(child: CircularProgressIndicator())),
+              const Expanded(child: Center(child: CyaniLoadingIndicator())),
             ],
           );
         },
@@ -322,7 +350,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
 
     // 显示下载进度底页
     if (!context.mounted) return;
-    await showModalBottomSheet(
+    await showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -640,7 +668,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                                         );
 
                                         if (allSuccess &&
-                                            downloadPath.isNotEmpty) {
+                                                downloadPath.isNotEmpty) {
                                           setState(() {
                                             isDownloadComplete = true;
                                             isDownloading = false;
@@ -649,6 +677,9 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                                             overallProgress = 1.0;
                                             currentFileProgress = 1.0;
                                           });
+                                          ref
+                                              .read(misskeyDriveProvider.notifier)
+                                              .refresh();
 
                                           // 显示完成信息
                                           if (context.mounted) {
@@ -789,17 +820,37 @@ class _CloudPageState extends ConsumerState<CloudPage> {
             },
           ),
           if (state.isLoading)
-            Positioned(
+            const Positioned(
               right: 0,
               child: SizedBox(
                 width: 24,
                 height: 24,
-                child: const CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
         ],
       ),
     );
+  }
+
+  /// 构建内容区域，根据是否有文件/文件夹分别附加空区域右键菜单
+  Widget _buildContentArea(
+    BuildContext context,
+    WidgetRef ref,
+    DriveState state,
+  ) {
+    if (state.files.isEmpty && state.folders.isEmpty && !state.isLoading) {
+      return GestureDetector(
+        onSecondaryTapDown: (details) {
+          _showEmptyAreaContextMenu(context, ref, state, details.globalPosition);
+        },
+        child: _buildEmptyState(context),
+      );
+    }
+    if (state.isLoading) {
+      return const Center(child: CyaniLoadingIndicator());
+    }
+    return _buildContentList(context, ref, state);
   }
 
   Widget _buildContentList(
@@ -808,46 +859,65 @@ class _CloudPageState extends ConsumerState<CloudPage> {
     DriveState state,
   ) {
     final combined = [
-      ...state.folders.map((f) => _DriveItem.folder(f)),
-      ...state.files.map((f) => _DriveItem.file(f)),
+      ...state.folders.map(_DriveItem.folder),
+      ...state.files.map(_DriveItem.file),
     ];
 
-    return ListView.builder(
+    // CustomScrollView + SliverFillRemaining:
+    // SliverFillRemaining 只在列表内容不足视口时才有正 extent，
+    // 此时它会占据剩余空白区域并捕获右键。
+    // 当内容填满/超出视口时，它的 extent = 0，不会与 item 产生
+    // 手势冲突——因为它是 item GestureDetector 的平级节点，
+    // 不在同一 hit-test 路径中，onSecondaryTapDown 不会同时触发。
+    return CustomScrollView(
       key: _listKey,
-      itemCount: combined.length,
-      itemBuilder: (context, index) {
-        final item = combined[index];
-        final isSelected = _selectedItems.contains(
-          item.isFolder ? item.folder!.id : item.file!.id,
-        );
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final item = combined[index];
+              final itemId = item.isFolder ? item.folder!.id : item.file!.id;
+              final isSelected = _selectedItems.contains(itemId);
 
-        return GestureDetector(
-          onSecondaryTapDown: (details) {
-            // 右键点击显示菜单
-            _showContextMenu(context, ref, item, details.globalPosition);
-          },
-          child: ListTile(
-            tileColor: isSelected
-                ? Theme.of(context).colorScheme.secondaryContainer.withAlpha(128)
-                : null,
-            hoverColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(80),
-            onTap: () {
-              if (_isSelectionMode || _selectedItems.isNotEmpty) {
-                // 如果处于选择模式或已经有选中的项目，则切换当前项目的选中状态
-                _toggleSelection(item.isFolder ? item.folder!.id : item.file!.id);
-              } else {
-                // 否则执行正常的点击操作
-                if (item.isFolder) {
-                  ref.read(misskeyDriveProvider.notifier).cd(item.folder!);
+              return GestureDetector(
+                onSecondaryTapDown: (details) {
+                  // 右键->独占选择：只选中这一个，清除其他
+                  setState(() {
+                    _selectedItems.clear();
+                    _selectedItems.add(itemId);
+                    if (_isButtonEnteredSelectionMode) {
+                      _isButtonEnteredSelectionMode = false;
+                    }
+                  });
+                  _showFileContextMenu(context, ref, item, details.globalPosition);
+                },
+                child: ListTile(
+              tileColor: isSelected
+                  ? Theme.of(context).colorScheme.secondaryContainer.withAlpha(128)
+                  : null,
+              hoverColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(80),
+              onTap: () {
+                if (_isSelectionMode || _selectedItems.isNotEmpty) {
+                  _toggleSelection(itemId);
                 } else {
-                  _openFilePreview(context, item.file!);
+                  if (item.isFolder) {
+                    ref.read(misskeyDriveProvider.notifier).cd(item.folder!);
+                  } else {
+                    _openFilePreview(context, item.file!);
+                  }
                 }
-              }
-            },
-            onLongPress: () {
-              // 长按切换选中状态
-              _toggleSelection(item.isFolder ? item.folder!.id : item.file!.id);
-            },
+              },
+              onLongPress: () {
+                // 长按->独占选择 + 菜单
+                setState(() {
+                  _selectedItems.clear();
+                  _selectedItems.add(itemId);
+                  if (_isButtonEnteredSelectionMode) {
+                    _isButtonEnteredSelectionMode = false;
+                  }
+                });
+                _showFileContextMenu(context, ref, item, Offset.zero);
+              },
             leading: SizedBox(
             width: 48,
             height: 48,
@@ -902,15 +972,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
               if (value == 'download' && !item.isFolder) {
                 _downloadFile(context, item.file!);
               } else if (value == 'delete') {
-                if (item.isFolder) {
-                  ref
-                      .read(misskeyDriveProvider.notifier)
-                      .deleteFolder(item.folder!.id);
-                } else {
-                  ref
-                      .read(misskeyDriveProvider.notifier)
-                      .deleteFile(item.file!.id);
-                }
+                _confirmDeleteSingle(context, ref, item);
               }
             },
             itemBuilder: (context) => [
@@ -940,68 +1002,379 @@ class _CloudPageState extends ConsumerState<CloudPage> {
             ],
             ),
           ),
-        );
+          );
+        },
+        childCount: combined.length,
+      ),
+      ),
+        // 仅在内容不足视口时占据剩余空白，捕获空白区域右键
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onSecondaryTapDown: (details) {
+              _showEmptyAreaContextMenu(
+                context, ref, state, details.globalPosition,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showEmptyAreaContextMenu(
+    BuildContext context,
+    WidgetRef ref,
+    DriveState state,
+    Offset position,
+  ) {
+    M3EContextMenu.show<String>(
+      context: context,
+      position: position,
+      items: [
+        M3EMenuItemData(value: 'refresh', icon: Icons.refresh, label: 'cloud_refresh'.tr()),
+        const M3EMenuItemData.separator(),
+        M3EMenuItemData(value: 'upload', icon: Icons.upload_file, label: 'cloud_upload_file'.tr()),
+        M3EMenuItemData(value: 'create_folder', icon: Icons.create_new_folder, label: 'cloud_create_folder'.tr()),
+        const M3EMenuItemData.separator(),
+        M3EMenuItemData(value: 'sort', icon: Icons.sort, label: 'cloud_sort_by'.tr()),
+        M3EMenuItemData(value: 'open_in_browser', icon: Icons.open_in_browser, label: 'cloud_open_in_instance'.tr()),
+      ],
+      onSelected: (value) {
+        if (!context.mounted) return;
+        switch (value) {
+          case 'refresh':
+            ref.read(misskeyDriveProvider.notifier).refresh();
+          case 'upload':
+            _triggerUpload(context, ref, state);
+          case 'create_folder':
+            _showCreateFolderDialog(context, ref);
+          case 'sort':
+            _showSortMenu(context, ref, state, position);
+          case 'open_in_browser':
+            _openDriveInBrowser(context);
+        }
       },
     );
   }
 
-  void _showContextMenu(
+  void _showFileContextMenu(
     BuildContext context,
     WidgetRef ref,
     _DriveItem item,
     Offset position,
   ) {
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox?;
-    if (overlay == null) return;
+    final isFolder = item.isFolder;
+    final isSensitive = !isFolder && item.file!.isSensitive;
+    final errorColor = Theme.of(context).colorScheme.error;
 
-    final currentContext = context;
-    showMenu<String>(
-      context: currentContext,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx + 1,
-        position.dy + 1,
-      ),
+    M3EContextMenu.show<String>(
+      context: context,
+      position: position,
       items: [
-        if (!item.isFolder)
-          PopupMenuItem(
-            value: 'download',
-            child: ListTile(
-              leading: const Icon(Icons.download),
-              title: Text('cloud_download'.tr()),
-            ),
+        M3EMenuItemData(value: 'refresh', icon: Icons.refresh, label: 'cloud_refresh'.tr()),
+        const M3EMenuItemData.separator(),
+        M3EMenuItemData(
+          value: 'open',
+          icon: isFolder ? Icons.folder_open : Icons.open_in_new,
+          label: 'cloud_open'.tr(),
+        ),
+        M3EMenuItemData(value: 'rename', icon: Icons.edit, label: 'cloud_rename'.tr()),
+        if (!isFolder) ...[
+          M3EMenuItemData(value: 'move', icon: Icons.drive_file_move, label: 'cloud_move_to'.tr()),
+          M3EMenuItemData(value: 'download', icon: Icons.download, label: 'cloud_download'.tr()),
+        ],
+        const M3EMenuItemData.separator(),
+        if (!isFolder) ...[
+          M3EMenuItemData(value: 'post_with_file', icon: Icons.rate_review, label: 'cloud_post_with_file'.tr()),
+          M3EMenuItemData(value: 'copy_link', icon: Icons.link, label: 'cloud_copy_link'.tr()),
+          M3EMenuItemData(value: 'open_in_browser', icon: Icons.open_in_browser, label: 'cloud_open_in_browser'.tr()),
+          const M3EMenuItemData.separator(),
+          M3EMenuItemData(value: 'edit_description', icon: Icons.description, label: 'cloud_edit_description'.tr()),
+          M3EMenuItemData(
+            value: 'toggle_sensitive',
+            icon: isSensitive ? Icons.visibility : Icons.visibility_off,
+            label: isSensitive ? 'cloud_unmark_sensitive'.tr() : 'cloud_mark_sensitive'.tr(),
           ),
-        PopupMenuItem(
+          M3EMenuItemData(value: 'copy_id', icon: Icons.tag, label: 'cloud_copy_id'.tr()),
+        ],
+        M3EMenuItemData(
           value: 'delete',
-          child: ListTile(
-            leading: Icon(
-              Icons.delete,
-              color: Theme.of(currentContext).colorScheme.error,
-            ),
-            title: Text(
-              'cloud_delete'.tr(),
-              style: TextStyle(
-                color: Theme.of(currentContext).colorScheme.error,
-              ),
-            ),
-          ),
+          icon: Icons.delete,
+          label: 'cloud_delete'.tr(),
+          iconColor: errorColor,
+          textColor: errorColor,
         ),
       ],
-    ).then((value) {
-      if (value == 'download' && !item.isFolder) {
-        if (currentContext.mounted) {
-          _downloadFile(currentContext, item.file!);
+      onSelected: (value) {
+        if (!context.mounted) return;
+        _handleFileContextAction(context, ref, item, value);
+      },
+    );
+  }
+
+  void _handleFileContextAction(
+    BuildContext context,
+    WidgetRef ref,
+    _DriveItem item,
+    String? value,
+  ) {
+    switch (value) {
+      case 'refresh':
+        ref.read(misskeyDriveProvider.notifier).refresh();
+      case 'open':
+        if (item.isFolder) {
+          ref.read(misskeyDriveProvider.notifier).cd(item.folder!);
+        } else {
+          _openFilePreview(context, item.file!);
         }
-      } else if (value == 'delete') {
-        if (currentContext.mounted) {
-          ScaffoldMessenger.of(
-            currentContext,
-          ).showSnackBar(SnackBar(content: Text('功能开发中，敬请期待'), behavior: SnackBarBehavior.floating));
+      case 'rename':
+        _showRenameDialog(context, ref, item);
+      case 'move':
+        if (!item.isFolder) {
+          _showMoveDialog(context, ref, item.file!);
         }
+      case 'download':
+        if (!item.isFolder) {
+          _downloadFile(context, item.file!);
+        }
+      case 'post_with_file':
+        if (!item.isFolder) {
+          _postWithFile(context, ref, item.file!);
+        }
+      case 'copy_link':
+        if (!item.isFolder) {
+          _copyLink(item.file!);
+        }
+      case 'open_in_browser':
+        if (!item.isFolder) {
+          _openUrl(item.file!.url);
+        } else {
+          _openDriveInBrowser(context);
+        }
+      case 'edit_description':
+        if (!item.isFolder) {
+          _showEditDescriptionDialog(context, ref, item.file!);
+        }
+      case 'toggle_sensitive':
+        if (!item.isFolder) {
+          _toggleSensitive(context, ref, item.file!);
+        }
+      case 'copy_id':
+        if (!item.isFolder) {
+          _copyFileId(item.file!);
+        }
+      case 'delete':
+        _confirmDeleteSingle(context, ref, item);
+    }
+  }
+
+  void _showSortMenu(
+    BuildContext context,
+    WidgetRef ref,
+    DriveState state,
+    Offset position,
+  ) {
+    final currentMode = state.sortMode;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    String sortLabel(DriveSortMode mode) {
+      switch (mode) {
+        case DriveSortMode.nameAsc: return 'cloud_sort_name_asc'.tr();
+        case DriveSortMode.nameDesc: return 'cloud_sort_name_desc'.tr();
+        case DriveSortMode.dateAsc: return 'cloud_sort_date_asc'.tr();
+        case DriveSortMode.dateDesc: return 'cloud_sort_date_desc'.tr();
+        case DriveSortMode.sizeAsc: return 'cloud_sort_size_asc'.tr();
+        case DriveSortMode.sizeDesc: return 'cloud_sort_size_desc'.tr();
       }
-    });
+    }
+
+    IconData sortIcon(DriveSortMode mode) {
+      switch (mode) {
+        case DriveSortMode.nameAsc:
+        case DriveSortMode.nameDesc: return Icons.sort_by_alpha;
+        case DriveSortMode.dateAsc:
+        case DriveSortMode.dateDesc: return Icons.calendar_today;
+        case DriveSortMode.sizeAsc:
+        case DriveSortMode.sizeDesc: return Icons.storage;
+      }
+    }
+
+    M3EContextMenu.show<DriveSortMode>(
+      context: context,
+      position: position,
+      items: DriveSortMode.values.map((mode) {
+        final isSelected = mode == currentMode;
+        return M3EMenuItemData(
+          value: mode,
+          icon: sortIcon(mode),
+          label: sortLabel(mode),
+          trailing: isSelected
+              ? Icon(Icons.check, size: 18, color: primaryColor)
+              : null,
+        );
+      }).toList(),
+      onSelected: (value) {
+        if (context.mounted) {
+          ref.read(misskeyDriveProvider.notifier).setSortMode(value);
+        }
+      },
+    );
+  }
+
+  void _triggerUpload(
+    BuildContext context,
+    WidgetRef ref,
+    DriveState state,
+  ) {
+    showCloudUploadSheet(
+      context: context,
+      ref: ref,
+      maxFileSizeMb: state.maxFileSizeMb,
+      currentFolderId: state.currentFolderId,
+    );
+  }
+
+  void _showRenameDialog(
+    BuildContext context,
+    WidgetRef ref,
+    _DriveItem item,
+  ) {
+    final controller = TextEditingController(text: item.name);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('cloud_rename_title'.tr()),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(hintText: 'cloud_enter_new_name'.tr()),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('cloud_cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty && controller.text != item.name) {
+                if (item.isFolder) {
+                  ref
+                      .read(misskeyDriveProvider.notifier)
+                      .renameFolder(item.folder!.id, controller.text);
+                } else {
+                  ref
+                      .read(misskeyDriveProvider.notifier)
+                      .renameFile(item.file!.id, controller.text);
+                }
+              }
+              Navigator.pop(context);
+            },
+            child: Text('cloud_rename'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoveDialog(
+    BuildContext context,
+    WidgetRef ref,
+    DriveFile file,
+  ) async {
+    final resultFolderName = await showDialog<String>(
+      context: context,
+      builder: (context) => const _FolderPickerDialog(),
+    );
+    if (resultFolderName == null || !context.mounted) return;
+
+    // resultFolderName is 'root' or a folder ID
+    final folderId = resultFolderName == 'root' ? null : resultFolderName;
+    ref.read(misskeyDriveProvider.notifier).moveFile(file.id, folderId);
+  }
+
+  void _showEditDescriptionDialog(
+    BuildContext context,
+    WidgetRef ref,
+    DriveFile file,
+  ) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('cloud_edit_description'.tr()),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: 'cloud_description_hint'.tr(),
+          ),
+          maxLines: 3,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('cloud_cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () {
+              ref
+                  .read(misskeyDriveProvider.notifier)
+                  .updateFileComment(file.id, controller.text);
+              Navigator.pop(context);
+            },
+            child: Text('cloud_save'.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleSensitive(
+    BuildContext context,
+    WidgetRef ref,
+    DriveFile file,
+  ) {
+    ref
+        .read(misskeyDriveProvider.notifier)
+        .toggleFileSensitive(file.id, !file.isSensitive);
+    if (context.mounted) {
+      showToast(title: 'cloud_sensitive_updated'.tr(), type: ToastificationType.success);
+    }
+  }
+
+  void _copyLink(DriveFile file) {
+    Clipboard.setData(ClipboardData(text: file.url));
+    // SnackBar is shown after context rebuild — use a global key or skip
+  }
+
+  void _copyFileId(DriveFile file) {
+    Clipboard.setData(ClipboardData(text: file.id));
+  }
+
+  void _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _openDriveInBrowser(BuildContext context) {
+    final host = ref.watch(selectedMisskeyAccountProvider).value?.host;
+    if (host == null) return;
+    final driveUrl = 'https://$host/my/drive';
+    _openUrl(driveUrl);
+  }
+
+  void _postWithFile(BuildContext context, WidgetRef ref, DriveFile file) {
+    // 将文件添加到发帖页面的上传队列
+    ref.read(fileUploadProvider.notifier).addExistingDriveFile(file);
+    // 导航到发帖页面
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const MisskeyPostPage()),
+    );
   }
 
   Widget _buildFileIcon(DriveFile file) {
@@ -1113,16 +1486,8 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ),
-            error: (_, _) => ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: 0,
-                minHeight: 8,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.colorScheme.error,
-                ),
-              ),
+            error: (_, _) => CyaniErrorWidget(
+              message: 'cloud_error'.tr(),
             ),
           ),
         ],
@@ -1135,7 +1500,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
   }
 
   void _showAddOptions(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
@@ -1154,7 +1519,13 @@ class _CloudPageState extends ConsumerState<CloudPage> {
               title: Text('cloud_upload_file'.tr()),
               onTap: () {
                 Navigator.pop(context);
-                // Implementation for picking and uploading file
+                final driveState = ref.read(misskeyDriveProvider).asData?.value;
+                showCloudUploadSheet(
+                  context: context,
+                  ref: ref,
+                  maxFileSizeMb: driveState?.maxFileSizeMb ?? 0,
+                  currentFolderId: driveState?.currentFolderId,
+                );
               },
             ),
           ],
@@ -1195,6 +1566,84 @@ class _CloudPageState extends ConsumerState<CloudPage> {
     );
   }
 
+  Future<bool> _confirmDelete(
+    BuildContext context,
+    String title,
+    String message,
+  ) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('cloud_cancel'.tr()),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text('cloud_delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  void _confirmDeleteSingle(
+    BuildContext context,
+    WidgetRef ref,
+    _DriveItem item,
+  ) async {
+    final name = item.name;
+    final confirmed = await _confirmDelete(
+      context,
+      'cloud_delete'.tr(),
+      'cloud_delete_confirm_single'.tr(namedArgs: {'name': name}),
+    );
+    if (!confirmed || !context.mounted) return;
+
+    if (item.isFolder) {
+      ref.read(misskeyDriveProvider.notifier).deleteFolder(item.folder!.id);
+    } else {
+      ref.read(misskeyDriveProvider.notifier).deleteFile(item.file!.id);
+    }
+  }
+
+  void _batchDeleteSelected(
+    BuildContext context,
+    WidgetRef ref,
+    DriveState state,
+  ) async {
+    if (_selectedItems.isEmpty) return;
+
+    final fileIds = state.files.where((f) => _selectedItems.contains(f.id)).map((f) => f.id).toList();
+    final folderIds = state.folders.where((f) => _selectedItems.contains(f.id)).map((f) => f.id).toList();
+    final total = fileIds.length + folderIds.length;
+
+    final confirmed = await _confirmDelete(
+      context,
+      'cloud_delete'.tr(),
+      'cloud_delete_confirm_batch'.tr(namedArgs: {'count': total.toString()}),
+    );
+    if (!confirmed || !context.mounted) return;
+
+    _clearSelection();
+
+    final notifier = ref.read(misskeyDriveProvider.notifier);
+    for (final fid in folderIds) {
+      notifier.deleteFolder(fid);
+    }
+    for (final fid in fileIds) {
+      notifier.deleteFile(fid);
+    }
+  }
+
   void _openFilePreview(BuildContext context, DriveFile file) {
     final mimeType = file.type.toLowerCase();
 
@@ -1232,19 +1681,13 @@ class _CloudPageState extends ConsumerState<CloudPage> {
         ),
       );
     } else if (mimeType.startsWith('audio/')) {
-      // 音频文件 - 打开媒体查看器
-      Navigator.push(
+      // 音频文件 - 打开M3E风格底部弹出播放器
+      showAudioPlayerSheet(
         context,
-        MaterialPageRoute(
-          builder: (context) => MediaViewerPage(
-            mediaItems: [
-              MediaItem(
-                url: file.url,
-                type: MediaType.audio,
-                fileName: file.name,
-              ),
-            ],
-          ),
+        mediaItem: MediaItem(
+          url: file.url,
+          type: MediaType.audio,
+          fileName: file.name,
         ),
       );
     } else {
@@ -1289,7 +1732,7 @@ class _CloudPageState extends ConsumerState<CloudPage> {
 
     // 显示下载确认底页
     if (!context.mounted) return;
-    await showModalBottomSheet(
+    await showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -1453,19 +1896,22 @@ class _CloudPageState extends ConsumerState<CloudPage> {
                                               },
                                         );
 
-                                        if (result.status ==
-                                                DownloadStatus.completed &&
-                                            result.filePath != null) {
-                                          savePath = result.filePath!;
-                                          setState(() {
-                                            isDownloadComplete = true;
-                                            isDownloading = false;
-                                            status = 'cloud_download_completed'
-                                                .tr();
-                                            progress = 1.0;
-                                          });
+                                          if (result.status ==
+                                                  DownloadStatus.completed &&
+                                              result.filePath != null) {
+                                            savePath = result.filePath!;
+                                            setState(() {
+                                              isDownloadComplete = true;
+                                              isDownloading = false;
+                                              status = 'cloud_download_completed'
+                                                  .tr();
+                                              progress = 1.0;
+                                            });
+                                            ref
+                                                .read(misskeyDriveProvider.notifier)
+                                                .refresh();
 
-                                          // 显示完成信息
+                                            // 显示完成信息
                                           if (context.mounted) {
                                             final currentContext = context;
                                             await showDialog(
@@ -1640,6 +2086,64 @@ class _CloudPageState extends ConsumerState<CloudPage> {
           },
         );
       },
+    );
+  }
+}
+
+/// 文件夹选择器弹窗
+///
+/// 显示当前云盘的文件夹列表供用户选择移动目标。
+class _FolderPickerDialog extends ConsumerStatefulWidget {
+  const _FolderPickerDialog();
+
+  @override
+  ConsumerState<_FolderPickerDialog> createState() => _FolderPickerDialogState();
+}
+
+class _FolderPickerDialogState extends ConsumerState<_FolderPickerDialog> {
+  String? _selectedFolderId;
+
+  @override
+  Widget build(BuildContext context) {
+    final driveState = ref.watch(misskeyDriveProvider).asData?.value;
+    final folders = driveState?.folders ?? [];
+
+    return AlertDialog(
+      title: Text('cloud_select_folder'.tr()),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: RadioGroup<String?>(
+          groupValue: _selectedFolderId,
+          onChanged: (v) => setState(() => _selectedFolderId = v),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              ListTile(
+                leading: const Radio<String?>(value: 'root'),
+                title: Text('cloud_drive'.tr()),
+                onTap: () => setState(() => _selectedFolderId = 'root'),
+              ),
+              ...folders.map((f) => ListTile(
+                leading: Radio<String?>(value: f.id),
+                title: Text(f.name),
+                onTap: () => setState(() => _selectedFolderId = f.id),
+              )),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('cloud_cancel'.tr()),
+        ),
+        FilledButton(
+          onPressed: _selectedFolderId != null
+              ? () => Navigator.pop(context, _selectedFolderId)
+              : null,
+          child: Text('cloud_move'.tr()),
+        ),
+      ],
     );
   }
 }

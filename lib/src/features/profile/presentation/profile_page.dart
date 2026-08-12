@@ -10,7 +10,8 @@ import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import '/src/core/navigation/navigation.dart';
-import '/src/features/profile/presentation/widgets/profile_login_reminder.dart';
+import '/src/shared/widgets/login_reminder.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -20,20 +21,35 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  static int _heroCounter = 0;
+  late final String _heroSuffix;
+
+  @override
+  void initState() {
+    super.initState();
+    _heroSuffix = '_${_heroCounter++}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isWideScreen = MediaQuery.of(context).size.width > 900;
     final bannerHeight = isWideScreen ? 350.0 : 200.0;
 
-    final selectedMisskey = ref
-        .watch(selectedMisskeyAccountProvider)
-        .asData
-        ?.value;
+    final selectedMisskeyAsync = ref.watch(selectedMisskeyAccountProvider);
+    final selectedMisskey = selectedMisskeyAsync.when(
+      data: (account) => account,
+      loading: () => null,
+      error: (_, _) => null,
+    );
     final primaryAccount = selectedMisskey;
 
     final misskeyUser = primaryAccount?.platform == 'misskey'
-        ? ref.watch(misskeyMeProvider).asData?.value
+        ? ref.watch(misskeyMeProvider).when(
+            data: (user) => user,
+            loading: () => null,
+            error: (_, _) => null,
+          )
         : null;
 
     final bool isLoggedIn = primaryAccount != null;
@@ -42,12 +58,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            leading: IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => ref
-                        .read(navigationControllerProvider.notifier)
-                        .openDrawer(),
-                  ),
+            leading: CircleIconButton(
+              icon: Icons.menu,
+              onPressed: () => ref
+                  .read(navigationControllerProvider.notifier)
+                  .openDrawer(),
+            ),
             title: Text('nav_me'.tr()),
             centerTitle: true,
             floating: true,
@@ -57,7 +73,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (!isLoggedIn)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: ProfileLoginReminder(
+              child: LoginReminder(
+                title: 'profile_no_account_title'.tr(),
+                message: 'profile_no_account_subtitle'.tr(),
+                icon: Icons.account_circle_outlined,
                 onLoginPressed: () => _showAddAccountDialog(context),
               ),
             )
@@ -84,14 +103,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                         ),
                                       ],
                                       heroTag:
-                                          'profile_banner_${misskeyUser.id}',
+                                          'profile_banner_${misskeyUser.id}$_heroSuffix',
                                     ),
                                   ),
                                 );
                               }
                             : null,
                         child: Hero(
-                          tag: 'profile_banner_${misskeyUser?.id ?? 'default'}',
+                          tag: 'profile_banner_${misskeyUser?.id ?? 'default'}$_heroSuffix',
                           child: Container(
                             height: bannerHeight,
                             decoration: BoxDecoration(
@@ -136,11 +155,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         primaryAccount,
                         misskeyUser,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [],
+                          children: [],
                         ),
                       ),
                     ],

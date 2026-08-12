@@ -31,6 +31,7 @@ abstract class MisskeyUser with _$MisskeyUser {
     String? birthday,
     String? lang,
     @Default([]) List<Map<String, dynamic>> fields,
+    @Default({}) Map<String, dynamic> policies,
   }) = _MisskeyUser;
 
   factory MisskeyUser.fromJson(Map<String, dynamic> json) =>

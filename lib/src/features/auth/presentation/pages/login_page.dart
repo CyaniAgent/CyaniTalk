@@ -71,9 +71,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: colorScheme.outline.withValues(alpha: 0.3),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: const LoginForm(
+                    child: const Padding(
+                      padding: EdgeInsets.all(24),
+                      child: LoginForm(
                         showPlatformSelection: true,
                         isBottomSheet: false,
                       ),

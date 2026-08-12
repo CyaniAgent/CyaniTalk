@@ -7,6 +7,7 @@ import '/src/features/misskey/domain/misskey_user.dart';
 import '/src/features/misskey/domain/chat_room.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 enum ChatType { direct, room }
 
@@ -96,7 +97,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         }
       },
       loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+          const Scaffold(body: Center(child: CyaniLoadingIndicator())),
       error: (err, stack) => Scaffold(
         body: Center(
           child: Text('${'messaging_error_loading_user'.tr()}: $err'),
@@ -204,29 +205,38 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   );
                 }
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    final isMe = message.senderId == me.id;
-
-                    if (widget.type == ChatType.direct &&
-                        !message.isRead &&
-                        !isMe) {
-                      Future.microtask(
-                        () => ref
-                            .read(misskeyMessagingProvider(widget.id).notifier)
-                            .markAsRead(message.id),
-                      );
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    if (widget.type == ChatType.direct) {
+                      ref.invalidate(misskeyMessagingProvider(widget.id));
+                    } else {
+                      ref.invalidate(misskeyChatRoomProvider(widget.id));
                     }
-
-                    return _buildMessageBubble(context, message, isMe, me.id);
                   },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[index];
+                      final isMe = message.senderId == me.id;
+
+                      if (widget.type == ChatType.direct &&
+                          !message.isRead &&
+                          !isMe) {
+                        Future.microtask(
+                          () => ref
+                              .read(misskeyMessagingProvider(widget.id).notifier)
+                              .markAsRead(message.id),
+                        );
+                      }
+
+                      return _buildMessageBubble(context, message, isMe, me.id);
+                    },
+                  ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CyaniLoadingIndicator()),
               error: (err, stack) =>
                   Center(child: Text('${'common_error'.tr()}: $err')),
             ),

@@ -128,3 +128,44 @@ abstract class _$SelectedMisskeyAccount extends $AsyncNotifier<Account?> {
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(selectedAccount)
+final selectedAccountProvider = SelectedAccountProvider._();
+
+final class SelectedAccountProvider
+    extends $FunctionalProvider<Account?, Account?, Account?>
+    with $Provider<Account?> {
+  SelectedAccountProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedAccountProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedAccountHash();
+
+  @$internal
+  @override
+  $ProviderElement<Account?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Account? create(Ref ref) {
+    return selectedAccount(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Account? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Account?>(value),
+    );
+  }
+}
+
+String _$selectedAccountHash() => r'8ee48b014145c2905604890b91a3e8b3ab03159b';

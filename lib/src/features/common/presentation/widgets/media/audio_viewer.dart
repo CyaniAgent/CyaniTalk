@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
+import 'package:slider_m3e/slider_m3e.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/utils/cache_manager.dart';
 import '/src/core/utils/performance_monitor.dart';
 import 'media_item.dart';
 
-/// 音频查看器组件
 class AudioViewer extends StatefulWidget {
   final MediaItem mediaItem;
 
@@ -16,35 +17,107 @@ class AudioViewer extends StatefulWidget {
 }
 
 class _AudioViewerState extends State<AudioViewer> {
+  final _soloud = SoLoud.instance;
+  AudioSource? _source;
+  SoundHandle _handle = const SoundHandle(0);
+  Timer? _pollTimer;
+
+  bool _isLoading = false;
+  bool _isPlaying = false;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
     _initializeAudio();
   }
 
-  bool _isLoading = true;
-  String? _errorMessage;
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    if (_handle != const SoundHandle(0)) _soloud.stop(_handle);
+    if (_source != null) _soloud.disposeSource(_source!);
+    super.dispose();
+  }
 
-  void _initializeAudio() {
-    if (widget.mediaItem.audioPlayer == null) {
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (!mounted || _handle == const SoundHandle(0)) return;
+      final isValid = _soloud.getIsValidVoiceHandle(_handle);
       setState(() {
-        _isLoading = true;
-        _errorMessage = null;
+        if (isValid) {
+          _position = _soloud.getPosition(_handle);
+        } else {
+          _isPlaying = false;
+          _position = Duration.zero;
+          _pollTimer?.cancel();
+        }
       });
+    });
+  }
 
-      widget.mediaItem.audioPlayer = AudioPlayer();
+  void _initializeAudio() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-      // 优先使用网络直接播放，不等待缓存
-      _initializeAudioFromNetwork();
+    try {
+      final startTime = DateTime.now();
+      if (!_soloud.isInitialized) await _soloud.init();
+      _source = await _soloud.loadUrl(widget.mediaItem.url, mode: LoadMode.disk);
+      _duration = _soloud.getLength(_source!);
+      _handle = _soloud.play(_source!);
+      _isPlaying = true;
+      _isLoading = false;
+      if (mounted) setState(() {});
 
-      // 后台缓存，下次使用时可以本地播放
-      if (!widget.mediaItem.isCached && widget.mediaItem.cachedPath == null) {
-        _cacheAudioInBackground();
+      performanceMonitor.trackMediaLoading(
+        widget.mediaItem.url,
+        DateTime.now().difference(startTime),
+        'audio',
+      );
+
+      _startPolling();
+    } catch (e) {
+      logger.error('Error loading audio from network', e);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString();
+        });
       }
+    }
+
+    if (!widget.mediaItem.isCached && widget.mediaItem.cachedPath == null) {
+      _cacheAudioInBackground();
     }
   }
 
-  /// 后台缓存音频文件
+  void _togglePlayPause() {
+    if (_handle == const SoundHandle(0)) return;
+    if (_isPlaying) {
+      _soloud.pauseSwitch(_handle);
+      _isPlaying = false;
+      setState(() {});
+    } else {
+      _soloud.pauseSwitch(_handle);
+      _isPlaying = true;
+      _startPolling();
+      setState(() {});
+    }
+  }
+
+  String formatDuration(Duration d) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(d.inMinutes.remainder(60));
+    final seconds = twoDigits(d.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+
   void _cacheAudioInBackground() async {
     try {
       final cachedPath = await cacheManager.cacheFile(
@@ -60,96 +133,6 @@ class _AudioViewerState extends State<AudioViewer> {
       logger.debug('Audio cached in background: ${widget.mediaItem.url}');
     } catch (error) {
       logger.error('Error caching audio in background', error);
-      // 后台缓存失败不影响用户体验
-    }
-  }
-
-      void _initializeAudioFromNetwork() async {
-        final startTime = DateTime.now();
-        try {
-          widget.mediaItem.audioPlayer
-              ?.setSource(UrlSource(widget.mediaItem.url))
-              .then((_) async {
-                // 设置音频上下文，必须在设置源之后
-                await widget.mediaItem.audioPlayer?.setAudioContext(
-                  AudioContext(
-                    android: AudioContextAndroid(
-                      usageType: AndroidUsageType.media,
-                      contentType: AndroidContentType.music,
-                      audioFocus: AndroidAudioFocus.gain,
-                    ),
-                    iOS: AudioContextIOS(
-                      category: AVAudioSessionCategory.playback,
-                      options: {AVAudioSessionOptions.duckOthers},
-                    ),
-                  ),
-                );
-    
-                if (mounted) {
-                  setState(() {
-                    _isLoading = false;
-                  });
-                  widget.mediaItem.audioPlayer?.resume();
-                  
-                  // 记录音频加载性能
-                  final duration = DateTime.now().difference(startTime);
-                  performanceMonitor.trackMediaLoading(
-                    widget.mediaItem.url,
-                    duration,
-                    'audio',
-                  );
-                }
-              })
-              .catchError((error) {
-                logger.error('Error loading audio from network', error);
-                if (mounted) {
-                  setState(() {
-                    _isLoading = false;
-                    _errorMessage = error.toString();
-                  });
-                }
-                
-                // 记录失败的音频加载性能
-                final duration = DateTime.now().difference(startTime);
-                performanceMonitor.trackMediaLoading(
-                  widget.mediaItem.url,
-                  duration,
-                  'audio',
-                );
-              });
-        } catch (error) {
-          logger.error('Exception loading audio from network', error);
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-              _errorMessage = error.toString();
-            });
-          }
-          
-          // 记录异常情况下的音频加载性能
-          final duration = DateTime.now().difference(startTime);
-          performanceMonitor.trackMediaLoading(
-            widget.mediaItem.url,
-            duration,
-            'audio',
-          );
-        }
-      }  // 格式化时间
-  String formatDuration(Duration d) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(d.inMinutes.remainder(60));
-    final seconds = twoDigits(d.inSeconds.remainder(60));
-    return '$minutes:$seconds';
-  }
-
-  // 处理进度条拖动
-  void handleSeek(double sliderValue, Duration duration) {
-    try {
-      final newPosition = (duration.inMilliseconds * (sliderValue / 100))
-          .toInt();
-      widget.mediaItem.audioPlayer?.seek(Duration(milliseconds: newPosition));
-    } catch (error) {
-      logger.error('Error seeking audio', error);
     }
   }
 
@@ -160,7 +143,6 @@ class _AudioViewerState extends State<AudioViewer> {
     }
 
     final theme = Theme.of(context);
-    final audioPlayer = widget.mediaItem.audioPlayer;
 
     return Center(
       child: Container(
@@ -215,9 +197,8 @@ class _AudioViewerState extends State<AudioViewer> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      // 尝试重新加载
-                      audioPlayer?.dispose();
-                      widget.mediaItem.audioPlayer = null;
+                      _handle = const SoundHandle(0);
+                      _source = null;
                       _initializeAudio();
                     },
                     child: const Text('重试'),
@@ -228,7 +209,6 @@ class _AudioViewerState extends State<AudioViewer> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // 音频图标
                   Container(
                     width: 80,
                     height: 80,
@@ -241,8 +221,6 @@ class _AudioViewerState extends State<AudioViewer> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // 音频标题
                   if (widget.mediaItem.fileName != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 20),
@@ -256,109 +234,47 @@ class _AudioViewerState extends State<AudioViewer> {
                         maxLines: 2,
                       ),
                     ),
-
-                  // 进度条和时间显示
-                  StreamBuilder<Duration>(
-                    stream: audioPlayer?.onDurationChanged,
-                    builder: (context, durationSnapshot) {
-                      final duration =
-                          durationSnapshot.data ?? Duration(seconds: 1);
-
-                      return StreamBuilder<Duration>(
-                        stream: audioPlayer?.onPositionChanged,
-                        builder: (context, positionSnapshot) {
-                          final position =
-                              positionSnapshot.data ?? Duration.zero;
-                          final initialValue = duration.inMilliseconds > 0
-                              ? ((position.inMilliseconds /
-                                            duration.inMilliseconds) *
-                                        100)
-                                    .clamp(0.0, 100.0)
-                              : 0.0;
-
-                          return StatefulBuilder(
-                            builder: (context, setState) {
-                              double sliderValue = initialValue;
-
-                              // 当播放位置变化时，更新滑块位置
-                              if (positionSnapshot.hasData) {
-                                final newPosition = positionSnapshot.data!;
-                                final newValue = duration.inMilliseconds > 0
-                                    ? ((newPosition.inMilliseconds /
-                                                  duration.inMilliseconds) *
-                                              100)
-                                          .clamp(0.0, 100.0)
-                                    : 0.0;
-                                if ((newValue - sliderValue).abs() > 1.0) {
-                                  sliderValue = newValue;
-                                }
-                              }
-
-                              return Column(
-                                children: [
-                                  // 进度条
-                                  Opacity(
-                                    opacity: _isLoading ? 0.5 : 1.0,
-                                    child: Slider(
-                                      value: sliderValue,
-                                      min: 0,
-                                      max: 100,
-                                      onChanged: _isLoading
-                                          ? null
-                                          : (newValue) {
-                                              // 实时更新UI
-                                              setState(() {
-                                                sliderValue = newValue;
-                                              });
-                                            },
-                                      onChangeEnd: _isLoading
-                                          ? null
-                                          : (newValue) {
-                                              // 只在拖动结束时seek，避免频繁调用导致异常
-                                              handleSeek(newValue, duration);
-                                            },
-                                      activeColor: theme.colorScheme.primary,
-                                      inactiveColor: theme.colorScheme.onSurface.withAlpha(100),
-                                      thumbColor: theme.colorScheme.primary,
-                                    ),
-                                  ),
-
-                                  // 时间显示
-                                  Opacity(
-                                    opacity: _isLoading ? 0.5 : 1.0,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          formatDuration(position),
-                                          style: theme.textTheme.bodySmall,
-                                        ),
-                                        Text(
-                                          formatDuration(duration),
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: theme
-                                                    .colorScheme
-                                                    .onSurface
-                                                    .withAlpha(128),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
+                  Opacity(
+                    opacity: _isLoading ? 0.5 : 1.0,
+                    child: SliderM3E(
+                      value: _duration.inMilliseconds > 0
+                          ? (_position.inMilliseconds /
+                                  _duration.inMilliseconds)
+                              .clamp(0.0, 1.0)
+                          : 0.0,
+                      onChanged: _isLoading || _handle == const SoundHandle(0)
+                          ? null
+                          : (v) {
+                              final seekMs =
+                                  (_duration.inMilliseconds * v).round();
+                              _soloud.seek(
+                                  _handle, Duration(milliseconds: seekMs));
+                              setState(() {
+                                _position = Duration(milliseconds: seekMs);
+                              });
                             },
-                          );
-                        },
-                      );
-                    },
+                    ),
                   ),
-
+                  const SizedBox(height: 8),
+                  Opacity(
+                    opacity: _isLoading ? 0.5 : 1.0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          formatDuration(_position),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        Text(
+                          formatDuration(_duration),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurface.withAlpha(128),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 24),
-
-                  // 播放/暂停按钮或加载动画
                   Container(
                     width: 64,
                     height: 64,
@@ -382,43 +298,19 @@ class _AudioViewerState extends State<AudioViewer> {
                               height: 28,
                               child: CircularProgressIndicator(
                                 strokeWidth: 3,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             ),
                           )
-                        : StreamBuilder<PlayerState>(
-                            stream: audioPlayer?.onPlayerStateChanged,
-                            builder: (context, snapshot) {
-                              final playerState =
-                                  snapshot.data ?? PlayerState.stopped;
-                              final isPlaying =
-                                  playerState == PlayerState.playing;
-
-                              return IconButton(
-                                onPressed: () {
-                                  try {
-                                    if (isPlaying) {
-                                      audioPlayer?.pause();
-                                    } else {
-                                      audioPlayer?.resume();
-                                    }
-                                  } catch (error) {
-                                    logger.error(
-                                      'Error toggling play/pause',
-                                      error,
-                                    );
-                                  }
-                                },
-                                icon: Icon(
-                                  isPlaying ? Icons.pause : Icons.play_arrow,
-                                  color: theme.colorScheme.onPrimary,
-                                  size: 32,
-                                ),
-                                iconSize: 32,
-                              );
-                            },
+                        : IconButton(
+                            onPressed: _togglePlayPause,
+                            icon: Icon(
+                              _isPlaying ? Icons.pause : Icons.play_arrow,
+                              color: theme.colorScheme.onPrimary,
+                              size: 32,
+                            ),
+                            iconSize: 32,
                           ),
                   ),
                 ],

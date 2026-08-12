@@ -12,7 +12,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '/src/core/core.dart';
 import '/src/core/api/network_client.dart';
 import '/src/core/services/audio_engine.dart';
+import '/src/core/widgets/settings_widgets.dart';
 import 'sponsor_page.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
 /// 应用程序的关于页面组件
 ///
@@ -88,7 +91,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       logger.info('AboutPage: Playing entrance sound');
       await ref
           .read(audioEngineProvider)
-          .playAsset('sounds/AboutPageEntrance.wav');
+          .playAsset('sounds/AboutPageEntrance.ogg');
       logger.info('AboutPage: Entrance sound played successfully');
     } catch (e) {
       logger.error('AboutPage: Error playing sound: $e');
@@ -245,9 +248,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         if (mounted) {
           logger.warning('AboutPage: Failed to launch GitHub page');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('about_github_launch_error'.tr()), behavior: SnackBarBehavior.floating),
-          );
+          showToast(title: 'about_github_launch_error'.tr(), type: ToastificationType.error);
         }
       } else {
         logger.info('AboutPage: GitHub page launched successfully');
@@ -255,9 +256,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     } catch (e) {
       logger.error('AboutPage: Error launching GitHub page: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('about_github_launch_error'.tr())),
-        );
+        showToast(title: 'about_github_launch_error'.tr(), type: ToastificationType.error);
       }
     }
   }
@@ -276,9 +275,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     } catch (e) {
       logger.error('AboutPage: Error launching sponsor page: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('about_sponsor_launch_error'.tr()), behavior: SnackBarBehavior.floating),
-          );
+        showToast(title: 'about_sponsor_launch_error'.tr(), type: ToastificationType.error);
       }
     }
   }
@@ -293,29 +290,26 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     return Scaffold(
       appBar: AppBar(title: Text('about_title'.tr())),
       body: ListView(
+        padding: const EdgeInsets.only(top: 8, bottom: 32),
         children: [
           // 应用信息部分
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // Logo
                 Image.asset(
                   'assets/icons/logo/desktop/logo-desktop-transparent.png',
                   width: 80,
                   height: 80,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.error, size: 80),
+                  errorBuilder: (_, _, _) => const Icon(Icons.error, size: 80),
                 ),
                 const SizedBox(height: 16),
-                // App Name
                 Text(
                   _appName,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // Version
                 Text(
                   'Version $_version',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -325,30 +319,33 @@ class _AboutPageState extends ConsumerState<AboutPage> {
               ],
             ),
           ),
-          
+
           // 链接部分
-          _buildSectionHeader(context, 'about_links'.tr()),
-          _buildSettingsTile(
-            context,
-            Icons.code,
-            'about_github'.tr(),
-            'about_github_description'.tr(),
-            onTap: _launchGitHub,
+          SettingsCardGroup(
+            children: [
+              SettingsTile(
+                icon: Icons.code,
+                iconColor: Theme.of(context).colorScheme.primary,
+                title: 'about_github'.tr(),
+                subtitle: 'about_github_description'.tr(),
+                onTap: _launchGitHub,
+              ),
+              SettingsTile(
+                icon: Icons.favorite,
+                iconColor: Theme.of(context).colorScheme.tertiary,
+                title: 'about_sponsor'.tr(),
+                subtitle: 'about_sponsor_description'.tr(),
+                onTap: _launchSponsorPage,
+              ),
+            ],
           ),
-          _buildSettingsTile(
-            context,
-            Icons.favorite,
-            'about_sponsor'.tr(),
-            'about_sponsor_description'.tr(),
-            onTap: _launchSponsorPage,
-          ),
-          
-          // 贡献者部分
-          _buildSectionHeader(context, 'about_contributors'.tr()),
+
+          const SizedBox(height: 16),
+
           if (_isLoadingContributors)
             const Padding(
               padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: CyaniLoadingIndicator()),
             )
           else if (_contributors.isEmpty)
             Padding(
@@ -367,7 +364,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                   crossAxisSpacing: 16,
                 ),
                 itemCount: _contributors.length,
-                itemBuilder: (context, index) {
+                itemBuilder: (_, index) {
                   final contributor = _contributors[index];
                   return Column(
                     children: [
@@ -377,10 +374,7 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                         ),
                         radius: 30,
                         onBackgroundImageError: (_, _) {},
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.transparent,
-                        ),
+                        child: const Icon(Icons.person, color: Colors.transparent),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -393,9 +387,10 @@ class _AboutPageState extends ConsumerState<AboutPage> {
                 },
               ),
             ),
-          
-          // 版权信息
-          _buildSectionHeader(context, 'about_legal'.tr()),
+
+          const SizedBox(height: 16),
+
+
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
@@ -411,45 +406,4 @@ class _AboutPageState extends ConsumerState<AboutPage> {
     );
   }
 
-  /// 构建页面的分区标题
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [title] - 分区标题文本
-  ///
-  /// 返回一个显示分区标题的Widget
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-    );
-  }
-
-  /// 构建设置选项瓦片
-  ///
-  /// [context] - 构建上下文，包含组件树的信息
-  /// [icon] - 选项图标
-  /// [title] - 选项标题
-  /// [subtitle] - 选项描述
-  /// [onTap] - 点击事件回调
-  ///
-  /// 返回一个显示设置选项的ListTile组件
-  Widget _buildSettingsTile(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String? subtitle, {
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle) : null,
-      onTap: onTap,
-    );
-  }
 }

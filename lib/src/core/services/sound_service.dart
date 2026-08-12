@@ -9,36 +9,36 @@ class SoundService {
 
   Future<void> playMisskeyRealtimePost() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyRealtimePost) {
-      await _play('sounds/PostReceived/n-aec.mp3');
+    if (settings.newPostSound.isNotEmpty) {
+      await _play(settings.newPostSound);
     }
   }
 
   Future<void> playMisskeyPosting() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyPosting) {
-      await _play('sounds/PostSend/n-cea-4va.mp3');
+    if (settings.postSound.isNotEmpty) {
+      await _play(settings.postSound);
     }
   }
 
   Future<void> playMisskeyNotifications() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyNotifications) {
-      await _play('sounds/Notifications/n-ea.mp3');
+    if (settings.notificationSound.isNotEmpty) {
+      await _play(settings.notificationSound);
     }
   }
 
   Future<void> playMisskeyEmojiReactions() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyEmojiReactions) {
-      await _play('sounds/Emoji-Responses/bubble2.mp3');
+    if (settings.reactionSound.isNotEmpty) {
+      await _play(settings.reactionSound);
     }
   }
 
   Future<void> playMisskeyMessages() async {
     final settings = await ref.read(soundSettingsProvider.future);
-    if (settings.enableMisskeyMessages) {
-      await _play('sounds/Chat/waon.mp3');
+    if (settings.messageSound.isNotEmpty) {
+      await _play(settings.messageSound);
     }
   }
 
@@ -47,4 +47,4 @@ class SoundService {
     }
 }
 
-final soundServiceProvider = Provider((ref) => SoundService(ref));
+final soundServiceProvider = Provider(SoundService.new);

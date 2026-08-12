@@ -17,14 +17,4 @@ AppBar? desktopNullAppBar(AppBar? appBar) {
   return appBar;
 }
 
-/// 根页面 AppBar 显隐帮助函数
-///
-/// 所有平台都返回传入的 AppBar
-/// 用于 Misskey、云盘、聊天、消息、我 这五个根导航页面
-///
-/// [appBar] - 要显示的 AppBar 组件
-///
-/// 返回：始终返回 [appBar]
-AppBar? rootAppBar(AppBar? appBar) {
-  return appBar;
-}
+

@@ -54,7 +54,7 @@ class LogSettingsNotifier extends _$LogSettingsNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kLogLevel, level);
     state = AsyncData(state.value!.copyWith(logLevel: level));
-    logger.setLogLevel(level);
+    await logger.setLogLevel(level);
   }
 
   Future<void> setMaxLogSize(int size) async {

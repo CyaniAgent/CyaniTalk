@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../../application/network_settings_provider.dart';
-import '../widgets/settings_slider_bottom_sheet.dart';
+import 'package:cyanitalk/src/core/theme/color_constants.dart';
+import 'package:cyanitalk/src/core/config/constants.dart';
+import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
+import 'package:cyanitalk/src/features/profile/application/network_settings_provider.dart';
+import 'package:cyanitalk/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
-/// 网络与实时设置页面
 class NetworkSettingsPage extends ConsumerStatefulWidget {
   const NetworkSettingsPage({super.key});
 
@@ -15,6 +19,20 @@ class NetworkSettingsPage extends ConsumerStatefulWidget {
 class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
   bool _isTestingNetwork = false;
   bool? _networkTestSuccess;
+  late TextEditingController _customUaController;
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = ref.read(networkSettingsProvider).value;
+    _customUaController = TextEditingController(text: settings?.customUserAgent ?? '');
+  }
+
+  @override
+  void dispose() {
+    _customUaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,272 +43,269 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
       body: settingsAsync.when(
         data: (settings) {
           return ListView(
+            padding: const EdgeInsets.only(top: 8, bottom: 32),
             children: [
-              // 全局设置
-              _buildSectionHeader(context, 'settings_network_global_section'.tr()),
-
-              // User Agent 选择器
-              _buildUserAgentSelector(context, ref, settings),
-
-              // HTTP 请求超时
-              _buildSettingsTile(
-                icon: Icons.timer,
-                title: 'HTTP Request Timeout'.tr(),
-                subtitle: '${settings.httpRequestTimeout}s',
-                onTap: () => _showDurationPicker(
-                  context,
-                  'HTTP Request Timeout'.tr(),
-                  settings.httpRequestTimeout,
-                  5,
-                  120,
-                  5,
-                  (value) => ref.read(networkSettingsProvider.notifier).updateHttpRequestTimeout(value),
-                ),
-              ),
-
-              const Divider(indent: 16, endIndent: 16),
-
-              // Misskey 设置
-              _buildSectionHeader(context, 'settings_network_misskey_section'.tr()),
-
-              // Misskey 实时模式开关
-              SwitchListTile(
-                secondary: const Icon(Icons.bolt),
-                title: Text('settings_network_misskey_realtime_mode'.tr()),
-                subtitle: Text('settings_network_misskey_realtime_mode_description'.tr()),
-                value: settings.misskeyRealtimeMode,
-                onChanged: (value) => ref.read(networkSettingsProvider.notifier).toggleMisskeyRealtimeMode(value),
-              ),
-
-              // 加载帖子最大时长
-              _buildSettingsTile(
-                icon: Icons.timer,
-                title: 'settings_network_misskey_load_post_duration'.tr(),
-                subtitle: '${settings.loadPostMaxDuration}s',
-                onTap: () => _showDurationPicker(
-                  context,
-                  'settings_network_misskey_load_post_duration'.tr(),
-                  settings.loadPostMaxDuration,
-                  5,
-                  60,
-                  null,
-                  (value) => ref.read(networkSettingsProvider.notifier).updateLoadPostMaxDuration(value),
-                ),
-              ),
-
-              // 加载表情最大时长
-              _buildSettingsTile(
-                icon: Icons.timer,
-                title: 'settings_network_misskey_load_emoji_duration'.tr(),
-                subtitle: '${settings.loadEmojiMaxDuration}s',
-                onTap: () => _showDurationPicker(
-                  context,
-                  'settings_network_misskey_load_emoji_duration'.tr(),
-                  settings.loadEmojiMaxDuration,
-                  5,
-                  60,
-                  null,
-                  (value) => ref.read(networkSettingsProvider.notifier).updateLoadEmojiMaxDuration(value),
-                ),
-              ),
-
-              // WebSocket 断线重连次数
-              _buildSettingsTile(
-                icon: Icons.wifi_tethering_error_rounded,
-                title: 'settings_network_websocket_reconnect_attempts'.tr(),
-                subtitle: '${settings.webSocketReconnectAttempts}',
-                onTap: () => _showNumberPicker(
-                  context,
-                  'settings_network_websocket_reconnect_attempts'.tr(),
-                  settings.webSocketReconnectAttempts,
-                  1,
-                  20,
-                  1,
-                  (value) => ref.read(networkSettingsProvider.notifier).updateWebSocketReconnectAttempts(value),
-                ),
-              ),
-
-              // WebSocket 后台最大存活时长
-              _buildSettingsTile(
-                icon: Icons.av_timer,
-                title: 'settings_network_websocket_background_duration'.tr(),
-                subtitle: _formatDuration(settings.webSocketBackgroundMaxDuration),
-                onTap: () => _showDurationPicker(
-                  context,
-                  'settings_network_websocket_background_duration'.tr(),
-                  settings.webSocketBackgroundMaxDuration,
-                  300,
-                  7200,
-                  300,
-                  (value) => ref.read(networkSettingsProvider.notifier).updateWebSocketBackgroundMaxDuration(value),
-                ),
-              ),
-
-              const Divider(indent: 16, endIndent: 16),
-
-              // 工具
-              _buildSectionHeader(context, 'Tools'.tr()),
-
-              // 网络测试
-              _buildSettingsTile(
-                icon: Icons.network_check,
-                title: 'Test Network Connection'.tr(),
-                subtitle: _networkTestSuccess == null
-                    ? 'Tap to test'.tr()
-                    : _networkTestSuccess == true
-                        ? 'Success!'.tr()
-                        : 'Failed'.tr(),
-                trailing: _isTestingNetwork
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        _networkTestSuccess == null
-                            ? Icons.chevron_right
-                            : _networkTestSuccess == true
-                                ? Icons.check_circle
-                                : Icons.error,
-                        color: _networkTestSuccess == null
-                            ? null
-                            : _networkTestSuccess == true
-                                ? Colors.green
-                                : Colors.red,
+              SettingsCardGroup(
+                children: [
+                  _switchTile(
+                    icon: Icons.public,
+                    iconColor: SettingsIconColors.cyan,
+                    title: 'settings_network_custom_ua'.tr(),
+                    subtitle: 'settings_network_custom_ua_description'.tr(),
+                    value: settings.useCustomAgent,
+                    onChanged: (v) =>
+                        ref.read(networkSettingsProvider.notifier).toggleCustomAgent(v),
+                  ),
+                  if (settings.useCustomAgent)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: _customUaController,
+                            maxLines: 3,
+                            minLines: 2,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontFamily: 'monospace',
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'settings_network_custom_ua_hint'.tr(),
+                              hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                              border: const OutlineInputBorder(),
+                              contentPadding: const EdgeInsets.all(12),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () {
+                                  _customUaController.clear();
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'settings_network_custom_ua_warning'.tr(),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.amber[800],
+                            ),
+                          ),
+                        ],
                       ),
-                onTap: _isTestingNetwork ? null : _testNetworkConnection,
+                    ),
+                  if (!settings.useCustomAgent)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(72, 0, 16, 12),
+                      child: Text(
+                        Constants.getUserAgent(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontFamily: 'monospace',
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  SettingsTile(
+                    icon: Icons.timer_outlined,
+                    iconColor: SettingsIconColors.cyan,
+                    title: 'settings_network_http_timeout'.tr(),
+                    subtitle: '${settings.httpRequestTimeout}s',
+                    onTap: () => _showDurationPicker(
+                      title: 'settings_network_http_timeout'.tr(),
+                      initialValue: settings.httpRequestTimeout,
+                      minValue: 5,
+                      maxValue: 120,
+                      step: 5,
+                      onConfirm: (value) =>
+                          ref.read(networkSettingsProvider.notifier).updateHttpRequestTimeout(value),
+                    ),
+                  ),
+                ],
               ),
 
-              // 清除 DNS 缓存
-              _buildSettingsTile(
-                icon: Icons.clear_all,
-                title: 'Clear DNS Cache'.tr(),
-                subtitle: 'Reset DNS resolver'.tr(),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _showClearDnsConfirmDialog,
+              const SizedBox(height: 16),
+              SettingsCardGroup(
+                children: [
+                  _switchTile(
+                    icon: Icons.bolt,
+                    iconColor: SettingsIconColors.blue,
+                    title: 'settings_network_misskey_realtime_mode'.tr(),
+                    subtitle: 'settings_network_misskey_realtime_mode_description'.tr(),
+                    value: settings.misskeyRealtimeMode,
+                    onChanged: (v) =>
+                        ref.read(networkSettingsProvider.notifier).toggleMisskeyRealtimeMode(v),
+                  ),
+                  SettingsTile(
+                    icon: Icons.article_outlined,
+                    iconColor: SettingsIconColors.blue,
+                    title: 'settings_network_misskey_load_post_duration'.tr(),
+                    subtitle: '${settings.loadPostMaxDuration}s',
+                    onTap: () => _showDurationPicker(
+                      title: 'settings_network_misskey_load_post_duration'.tr(),
+                      initialValue: settings.loadPostMaxDuration,
+                      minValue: 5,
+                      maxValue: 60,
+                      onConfirm: (value) =>
+                          ref.read(networkSettingsProvider.notifier).updateLoadPostMaxDuration(value),
+                    ),
+                  ),
+                  SettingsTile(
+                    icon: Icons.emoji_emotions_outlined,
+                    iconColor: SettingsIconColors.blue,
+                    title: 'settings_network_misskey_load_emoji_duration'.tr(),
+                    subtitle: '${settings.loadEmojiMaxDuration}s',
+                    onTap: () => _showDurationPicker(
+                      title: 'settings_network_misskey_load_emoji_duration'.tr(),
+                      initialValue: settings.loadEmojiMaxDuration,
+                      minValue: 5,
+                      maxValue: 60,
+                      onConfirm: (value) =>
+                          ref.read(networkSettingsProvider.notifier).updateLoadEmojiMaxDuration(value),
+                    ),
+                  ),
+                  SettingsTile(
+                    icon: Icons.wifi_tethering_error_rounded,
+                    iconColor: SettingsIconColors.blue,
+                    title: 'settings_network_websocket_reconnect_attempts'.tr(),
+                    subtitle: '${settings.webSocketReconnectAttempts}',
+                    onTap: () => _showNumberPicker(
+                      title: 'settings_network_websocket_reconnect_attempts'.tr(),
+                      initialValue: settings.webSocketReconnectAttempts,
+                      minValue: 1,
+                      maxValue: 20,
+                      step: 1,
+                      onConfirm: (value) =>
+                          ref.read(networkSettingsProvider.notifier).updateWebSocketReconnectAttempts(value),
+                    ),
+                  ),
+                  SettingsTile(
+                    icon: Icons.av_timer,
+                    iconColor: SettingsIconColors.blue,
+                    title: 'settings_network_websocket_background_duration'.tr(),
+                    subtitle: _formatDuration(settings.webSocketBackgroundMaxDuration),
+                    onTap: () => _showDurationPicker(
+                      title: 'settings_network_websocket_background_duration'.tr(),
+                      initialValue: settings.webSocketBackgroundMaxDuration,
+                      minValue: 300,
+                      maxValue: 7200,
+                      step: 300,
+                      onConfirm: (value) =>
+                          ref.read(networkSettingsProvider.notifier).updateWebSocketBackgroundMaxDuration(value),
+                    ),
+                  ),
+                ],
               ),
 
-              const Divider(indent: 16, endIndent: 16),
+              const SizedBox(height: 16),
+              SettingsCardGroup(
+                children: [
+                  SettingsTile(
+                    icon: Icons.network_check,
+                    iconColor: SettingsIconColors.amber,
+                    title: 'settings_network_test_connection'.tr(),
+                    subtitle: _networkTestSuccess == null
+                        ? 'settings_network_tap_to_test'.tr()
+                        : _networkTestSuccess == true
+                            ? 'settings_network_test_success'.tr()
+                            : 'settings_network_test_failed'.tr(),
+                    trailing: _isTestingNetwork
+                        ? const SizedBox(
+                            width: 20, height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            _networkTestSuccess == null
+                                ? Icons.chevron_right
+                                : _networkTestSuccess == true
+                                    ? Icons.check_circle
+                                    : Icons.error,
+                            color: _networkTestSuccess == null
+                                ? Theme.of(context).colorScheme.onSurfaceVariant
+                                : _networkTestSuccess == true
+                                    ? Colors.green
+                                    : Colors.red,
+                          ),
+                    onTap: _isTestingNetwork ? null : _testNetworkConnection,
+                  ),
+                  SettingsTile(
+                    icon: Icons.clear_all,
+                    iconColor: SettingsIconColors.amber,
+                    title: 'settings_network_clear_dns'.tr(),
+                    subtitle: 'settings_network_clear_dns_description'.tr(),
+                    onTap: _showClearDnsConfirmDialog,
+                  ),
+                ],
+              ),
 
-              // 恢复默认设置
+              const SizedBox(height: 24),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.restore),
-                  label: Text('Restore Default Settings'.tr()),
+                  label: Text('settings_network_restore_defaults'.tr()),
                   onPressed: _showRestoreDefaultsConfirmDialog,
                 ),
               ),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('settings_network_error_loading'.tr())),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
+        error: (_, _) => Center(child: Text('settings_network_error_loading'.tr())),
       ),
     );
   }
 
-  /// 构建设置页面的分区标题
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-      ),
-    );
-  }
-
-  /// 构建设置项
-  Widget _buildSettingsTile({
+  Widget _switchTile({
     required IconData icon,
+    required Color iconColor,
     required String title,
     required String subtitle,
-    VoidCallback? onTap,
-    Widget? trailing,
+    required bool value,
+    required ValueChanged<bool> onChanged,
   }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: trailing ?? const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
-  /// 构建用户代理选择器
-  Widget _buildUserAgentSelector(BuildContext context, WidgetRef ref, NetworkSettings settings) {
-    final userAgentOptions = UserAgentType.values;
-    final currentType = userAgentOptions.firstWhere(
-      (type) => type.name == settings.userAgentType,
-      orElse: () => UserAgentType.defaultAgent,
-    );
-
-    return ListTile(
-      leading: const Icon(Icons.public),
-      title: Text('settings_network_user_agent_selector'.tr()),
-      subtitle: Text(currentType.displayName),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () {
-        _showUserAgentDialog(context, ref, settings, userAgentOptions);
-      },
-    );
-  }
-
-  /// 显示用户代理选择对话框
-  void _showUserAgentDialog(
-    BuildContext context,
-    WidgetRef ref,
-    NetworkSettings settings,
-    List<UserAgentType> options,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final currentType = options.firstWhere(
-          (type) => type.name == settings.userAgentType,
-          orElse: () => UserAgentType.defaultAgent,
-        );
-
-        return AlertDialog(
-          title: Text('settings_network_user_agent_selector'.tr()),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: options.length,
-              itemBuilder: (context, index) {
-                final option = options[index];
-                final isSelected = option.name == currentType.name;
-
-                return ListTile(
-                  title: Text(option.displayName),
-                  trailing: isSelected ? const Icon(Icons.check) : null,
-                  onTap: () {
-                    ref.read(networkSettingsProvider.notifier).updateUserAgentType(option.name);
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: iconColor.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(height: 2),
+                Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                )),
+              ],
             ),
           ),
-        );
-      },
+          const SizedBox(width: 16),
+          Switch(value: value, onChanged: onChanged),
+        ],
+      ),
     );
   }
 
-  /// 显示时长选择器（底部弹窗）
-  void _showDurationPicker(
-    BuildContext context,
-    String title,
-    int initialValue,
-    int minValue,
-    int maxValue,
+  void _showDurationPicker({
+    required String title,
+    required int initialValue,
+    required int minValue,
+    required int maxValue,
     int? step,
-    ValueChanged<int> onConfirm,
-  ) {
+    required ValueChanged<int> onConfirm,
+  }) {
     SettingsSliderBottomSheet.show(
       context: context,
       title: title,
@@ -304,16 +319,14 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
     );
   }
 
-  /// 显示数字选择器（底部弹窗）
-  void _showNumberPicker(
-    BuildContext context,
-    String title,
-    int initialValue,
-    int minValue,
-    int maxValue,
+  void _showNumberPicker({
+    required String title,
+    required int initialValue,
+    required int minValue,
+    required int maxValue,
     int? step,
-    ValueChanged<int> onConfirm,
-  ) {
+    required ValueChanged<int> onConfirm,
+  }) {
     SettingsSliderBottomSheet.show(
       context: context,
       title: title,
@@ -327,126 +340,95 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
     );
   }
 
-  /// 格式化时长（秒 -> 分/小时）
   String _formatDuration(int seconds) {
-    if (seconds < 60) {
-      return '${seconds}s';
-    } else if (seconds < 3600) {
-      final minutes = seconds ~/ 60;
-      return '${minutes}m';
-    } else {
-      final hours = seconds ~/ 3600;
-      final minutes = (seconds % 3600) ~/ 60;
-      return minutes == 0 ? '${hours}h' : '${hours}h ${minutes}m';
-    }
+    if (seconds < 60) return '${seconds}s';
+    if (seconds < 3600) return '${seconds ~/ 60}m';
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    return minutes == 0 ? '${hours}h' : '${hours}h ${minutes}m';
   }
 
-  /// 测试网络连接
   Future<void> _testNetworkConnection() async {
     if (_isTestingNetwork) return;
-    
-    setState(() {
-      _isTestingNetwork = true;
-      _networkTestSuccess = null;
-    });
+    setState(() { _isTestingNetwork = true; _networkTestSuccess = null; });
 
     try {
-      // 简单的网络测试（实际项目中应该调用真实的网络测试 API）
       await Future.delayed(const Duration(seconds: 2));
-      setState(() {
-        _networkTestSuccess = true;
-      });
-
+      setState(() => _networkTestSuccess = true);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Network test successful!'.tr())),
-        );
+        showToast(title: 'settings_network_test_success_snackbar'.tr(), type: ToastificationType.success);
       }
-    } catch (e) {
-      setState(() {
-        _networkTestSuccess = false;
-      });
-
+    } catch (_) {
+      setState(() => _networkTestSuccess = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Network test failed'.tr())),
-        );
+        showToast(title: 'settings_network_test_failed_snackbar'.tr(), type: ToastificationType.error);
       }
     } finally {
-      setState(() {
-        _isTestingNetwork = false;
-      });
+      setState(() => _isTestingNetwork = false);
     }
   }
 
-  /// 显示清除 DNS 确认对话框
   void _showClearDnsConfirmDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Clear DNS Cache?'.tr()),
-        content: Text('This will reset DNS resolver settings.'.tr()),
+      builder: (ctx) => AlertDialog(
+        title: Text('settings_network_clear_dns'.tr()),
+        content: Text('settings_network_clear_dns_confirm'.tr()),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'.tr()),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('cancel'.tr()),
           ),
           FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _clearDnsCache();
-            },
-            child: Text('Clear'.tr()),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () { Navigator.pop(ctx); _clearDnsCache(); },
+            child: Text('confirm'.tr()),
           ),
         ],
       ),
     );
   }
 
-  /// 清除 DNS 缓存
   Future<void> _clearDnsCache() async {
-    // 实际项目中应该调用真实的 DNS 清除 API
     await Future.delayed(const Duration(milliseconds: 500));
-
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('DNS cache cleared'.tr())),
-      );
+      showToast(title: 'settings_network_dns_cleared'.tr(), type: ToastificationType.success);
     }
   }
 
-  /// 显示恢复默认确认对话框
   void _showRestoreDefaultsConfirmDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Restore Defaults?'.tr()),
-        content: Text('All network settings will be reset to defaults.'.tr()),
+      builder: (ctx) => AlertDialog(
+        title: Text('settings_network_restore_defaults'.tr()),
+        content: Text('settings_network_restore_confirm'.tr()),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'.tr()),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('cancel'.tr()),
           ),
           FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _restoreDefaults();
-            },
-            child: Text('Restore'.tr()),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () { Navigator.pop(ctx); _restoreDefaults(); },
+            child: Text('settings_network_restore_button'.tr()),
           ),
         ],
       ),
     );
   }
 
-  /// 恢复默认设置
   Future<void> _restoreDefaults() async {
     await ref.read(networkSettingsProvider.notifier).restoreDefaults();
-
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Settings restored to defaults'.tr())),
-      );
+      showToast(title: 'settings_network_restored'.tr(), type: ToastificationType.success);
     }
   }
 }

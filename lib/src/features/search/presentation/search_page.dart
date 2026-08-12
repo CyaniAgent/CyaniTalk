@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '/src/core/services/search/global_search_service.dart';
-import '/src/core/utils/logger.dart';
+import 'package:cyanitalk/src/core/services/search/global_search_service.dart';
+import 'package:cyanitalk/src/core/utils/logger.dart';
+import 'package:cyanitalk/src/shared/widgets/circle_icon_button.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -51,9 +54,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e'), behavior: SnackBarBehavior.floating));
+        showToast(title: 'Error: $e', type: ToastificationType.error);
       }
     }
   }
@@ -66,6 +67,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         .toList();
     final misskeyNotes = _results
         .where((r) => r.source == 'misskey' && r.type == 'Note')
+        .toList();
+    final misskeyChannels = _results
+        .where((r) => r.source == 'misskey' && r.type == 'Channel')
         .toList();
 
     return Scaffold(
@@ -82,8 +86,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
         ),
         actions: [
           if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
+            CircleIconButton(
+              icon: Icons.clear,
               onPressed: () {
                 _searchController.clear();
                 setState(() {
@@ -91,44 +95,56 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 });
               },
             ),
-          IconButton(
-            icon: const Icon(Icons.search),
+          CircleIconButton(
+            icon: Icons.search,
             onPressed: () => _performSearch(_searchController.text),
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _results.isEmpty
-          ? Center(
-              child: Text(
-                _searchController.text.isEmpty
-                    ? 'search_enter_query'.tr()
-                    : 'search_no_results'.tr(),
+      body: RefreshIndicator(
+        onRefresh: () => _performSearch(_searchController.text),
+        child: _isLoading
+            ? const Center(child: CyaniLoadingIndicator())
+            : _results.isEmpty
+            ? Center(
+                child: Text(
+                  _searchController.text.isEmpty
+                      ? 'search_enter_query'.tr()
+                      : 'search_no_results'.tr(),
+                ),
+              )
+            : ListView(
+                children: [
+                  if (misskeyUsers.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      context,
+                      'search_misskey_users_related'.tr(
+                        namedArgs: {'search_result': query},
+                      ),
+                    ),
+                    ...misskeyUsers.map((r) => _buildResultTile(context, r)),
+                  ],
+                  if (misskeyNotes.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      context,
+                      'search_misskey_posts_related'.tr(
+                        namedArgs: {'search_result': query},
+                      ),
+                    ),
+                    ...misskeyNotes.map((r) => _buildResultTile(context, r)),
+                  ],
+                  if (misskeyChannels.isNotEmpty) ...[
+                    _buildSectionHeader(
+                      context,
+                      'search_misskey_channels_related'.tr(
+                        namedArgs: {'search_result': query},
+                      ),
+                    ),
+                    ...misskeyChannels.map((r) => _buildResultTile(context, r)),
+                  ],
+                ],
               ),
-            )
-          : ListView(
-              children: [
-                if (misskeyUsers.isNotEmpty) ...[
-                  _buildSectionHeader(
-                    context,
-                    'search_misskey_users_related'.tr(
-                      namedArgs: {'search_result': query},
-                    ),
-                  ),
-                  ...misskeyUsers.map((r) => _buildResultTile(context, r)),
-                ],
-                if (misskeyNotes.isNotEmpty) ...[
-                  _buildSectionHeader(
-                    context,
-                    'search_misskey_posts_related'.tr(
-                      namedArgs: {'search_result': query},
-                    ),
-                  ),
-                  ...misskeyNotes.map((r) => _buildResultTile(context, r)),
-                ],
-              ],
-            ),
+      ),
     );
   }
 
@@ -168,7 +184,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
-          result.type == 'User' ? Icons.person : Icons.public,
+          result.type == 'User' ? Icons.person : result.type == 'Channel' ? Icons.forum : Icons.public,
           size: 20,
           color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),

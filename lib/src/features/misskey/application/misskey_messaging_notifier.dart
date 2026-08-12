@@ -88,9 +88,7 @@ class MisskeyMessagingHistoryNotifier
         _handleNewMessage(message);
       });
 
-      ref.onDispose(() {
-        subscription.cancel();
-      });
+      ref.onDispose(subscription.cancel);
 
       logger.info('Misskey消息历史初始化完成，加载了 ${history.length} 条对话');
       return combined;
@@ -241,9 +239,7 @@ class MisskeyMessagingNotifier extends _$MisskeyMessagingNotifier {
         }
       });
 
-      ref.onDispose(() {
-        subscription.cancel();
-      });
+      ref.onDispose(subscription.cancel);
 
       // 为聊天UI准备，将消息按时间正序排列
       final sortedMessages = messages.reversed.toList();
@@ -372,9 +368,7 @@ class MisskeyChatRoomNotifier extends _$MisskeyChatRoomNotifier {
         }
       });
 
-      ref.onDispose(() {
-        subscription.cancel();
-      });
+      ref.onDispose(subscription.cancel);
 
       // 同样按时间正序排列
       final sortedMessages = messages.reversed.toList();

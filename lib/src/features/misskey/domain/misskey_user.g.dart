@@ -48,6 +48,7 @@ _MisskeyUser _$MisskeyUserFromJson(Map<String, dynamic> json) => _MisskeyUser(
           ?.map((e) => e as Map<String, dynamic>)
           .toList() ??
       const [],
+  policies: json['policies'] as Map<String, dynamic>? ?? const {},
 );
 
 Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
@@ -77,4 +78,5 @@ Map<String, dynamic> _$MisskeyUserToJson(_MisskeyUser instance) =>
       'birthday': instance.birthday,
       'lang': instance.lang,
       'fields': instance.fields,
+      'policies': instance.policies,
     };

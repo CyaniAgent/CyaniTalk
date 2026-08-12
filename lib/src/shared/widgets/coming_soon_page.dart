@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/core/navigation/navigation.dart';
+import 'circle_icon_button.dart';
 
 class ComingSoonPage extends ConsumerWidget {
   const ComingSoonPage({super.key});
@@ -15,12 +16,13 @@ class ComingSoonPage extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white),
-                onPressed: () => ref
-                    .read(navigationControllerProvider.notifier)
-                    .openDrawer(),
-              ),
+        leading: CircleIconButton(
+          icon: Icons.menu,
+          color: Colors.white,
+          onPressed: () => ref
+              .read(navigationControllerProvider.notifier)
+              .openDrawer(),
+        ),
       ),
       body: Stack(
         fit: StackFit.expand,

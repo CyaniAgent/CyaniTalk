@@ -81,8 +81,9 @@ class _CachedMisskeyAvatarState extends ConsumerState<CachedMisskeyAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: widget.onTap,
+      customBorder: const CircleBorder(),
       child: Stack(
         children: [
           CircleAvatar(

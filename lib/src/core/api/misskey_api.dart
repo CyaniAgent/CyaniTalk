@@ -10,6 +10,7 @@ import '/src/core/config/constants.dart';
 ///
 /// @param host Misskey实例的主机名
 /// @param token 认证令牌
+/// @param userAgent 可选的自定义 User Agent
 class MisskeyApi extends BaseApi {
   final String host;
   final String token;
@@ -19,14 +20,30 @@ class MisskeyApi extends BaseApi {
   ///
   /// @param host Misskey实例的主机名
   /// @param token 认证令牌
-  MisskeyApi({required this.host, required this.token}) {
+  /// @param userAgent 可选的自定义 User Agent，为 null 时使用默认精简 UA
+  MisskeyApi({required this.host, required this.token, String? userAgent}) {
     logger.info('MisskeyApi: Initializing for host: $host');
 
     _dio = NetworkClient().createDio(
       host: host,
       token: token,
-      userAgent: Constants.getUserAgent(),
+      userAgent: userAgent ?? Constants.getUserAgent(),
     );
+  }
+
+  /// 安全地将响应数据转换为 Map
+  ///
+  /// @param responseData 响应数据
+  /// @return Map 类型的数据
+  /// @throws Exception 如果数据类型不正确
+  static Map<String, dynamic> _toMap(dynamic responseData) {
+    if (responseData is Map) {
+      return Map<String, dynamic>.from(responseData);
+    }
+    if (responseData is String) {
+      throw Exception('API returned string instead of map: $responseData');
+    }
+    throw Exception('Unexpected response type: ${responseData.runtimeType}');
   }
 
   /// 获取当前用户信息
@@ -37,7 +54,7 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> i() => executeApiCallSafe(
     'MisskeyApi.i',
     () => _dio.post('/api/i', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 检查笔记是否仍然存在于服务器上
@@ -97,7 +114,7 @@ class MisskeyApi extends BaseApi {
         '/api/notes/show',
         data: {'i': token, 'noteId': noteId},
       );
-      return Map<String, dynamic>.from(response.data);
+      return _toMap(response.data);
     } catch (e) {
       logger.error('MisskeyApi: Error getting note: $noteId', e);
       if (e is DioException) {
@@ -127,7 +144,7 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
     'MisskeyApi.getDriveInfo',
     () => _dio.post('/api/drive', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 从 API 获取列表数据的辅助方法
@@ -147,7 +164,19 @@ class MisskeyApi extends BaseApi {
   ) => executeApiCall(
     operationName,
     () => _dio.post(endpoint, data: {'i': token, ...data}),
-    (response) => response.data as List<dynamic>,
+    (response) {
+      final responseData = response.data;
+      if (responseData is List) {
+        return responseData;
+      }
+      if (responseData is String) {
+        throw Exception('API returned string instead of list: $responseData');
+      }
+      if (responseData is Map && responseData.containsKey('error')) {
+        throw Exception('API error: ${responseData['error']}');
+      }
+      throw Exception('Unexpected response type: ${responseData.runtimeType}');
+    },
     params: data,
     dioErrorParser: (error) =>
         error.response?.data?['error']?['message'] ?? error.message,
@@ -274,7 +303,7 @@ class MisskeyApi extends BaseApi {
       '/api/channels/show',
       data: {'i': token, 'channelId': channelId},
     ),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'channelId': channelId},
   );
 
@@ -502,6 +531,83 @@ class MisskeyApi extends BaseApi {
     params: {'folderId': folderId},
   );
 
+  /// 更新云盘文件
+  ///
+  /// 通过调用 `/api/drive/files/update` 接口更新云盘文件信息。
+  /// 支持重命名、移动、切换敏感标记、编辑描述。
+  ///
+  /// @param fileId 文件 ID
+  /// @param name 新文件名
+  /// @param folderId 新文件夹 ID（移动）
+  /// @param isSensitive 是否标记为敏感内容
+  /// @param comment 文件描述
+  /// @return (更新后的文件信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> updateDriveFile(
+    String fileId, {
+    String? name,
+    String? folderId,
+    bool? isSensitive,
+    String? comment,
+  }) => executeApiCallSafe(
+    'MisskeyApi.updateDriveFile',
+    () => _dio.post(
+      '/api/drive/files/update',
+      data: {
+        'i': token,
+        'fileId': fileId,
+        'name': ?name,
+        'folderId': ?folderId,
+        'isSensitive': ?isSensitive,
+        'comment': ?comment,
+      },
+    ),
+    (response) => response.data as Map<String, dynamic>,
+  );
+
+  /// 获取云盘文件详情
+  ///
+  /// 通过调用 `/api/drive/files/show` 接口获取单个文件的详细信息。
+  ///
+  /// @param fileId 文件 ID
+  /// @return (文件信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> showDriveFile(
+    String fileId,
+  ) => executeApiCallSafe(
+    'MisskeyApi.showDriveFile',
+    () => _dio.post(
+      '/api/drive/files/show',
+      data: {'i': token, 'fileId': fileId},
+    ),
+    (response) => response.data as Map<String, dynamic>,
+  );
+
+  /// 更新云盘文件夹
+  ///
+  /// 通过调用 `/api/drive/folders/update` 接口更新云盘文件夹信息。
+  /// 支持重命名、移动。
+  ///
+  /// @param folderId 文件夹 ID
+  /// @param name 新文件夹名
+  /// @param parentId 新父文件夹 ID（移动）
+  /// @return (更新后的文件夹信息, 错误) 元组
+  Future<(Map<String, dynamic>?, Exception?)> updateDriveFolder(
+    String folderId, {
+    String? name,
+    String? parentId,
+  }) => executeApiCallSafe(
+    'MisskeyApi.updateDriveFolder',
+    () => _dio.post(
+      '/api/drive/folders/update',
+      data: {
+        'i': token,
+        'folderId': folderId,
+        'name': ?name,
+        'parentId': ?parentId,
+      },
+    ),
+    (response) => response.data as Map<String, dynamic>,
+  );
+
   /// 上传文件到云盘
   ///
   /// 通过调用 `/api/drive/files/create` 接口将文件上传到云盘。
@@ -514,18 +620,40 @@ class MisskeyApi extends BaseApi {
     List<int> bytes,
     String filename, {
     String? folderId,
-  }) => executeApiCallSafe(
-    'MisskeyApi.uploadDriveFile',
-    () => _dio.post(
-      '/api/drive/files/create',
-      data: FormData.fromMap({
-        'i': token,
-        'folderId': ?folderId,
-        'file': MultipartFile.fromBytes(bytes, filename: filename),
-      }),
-    ),
-    (response) => response.data as Map<String, dynamic>,
-  );
+  }) {
+    final safeName = _sanitizeFileName(filename);
+    return executeApiCallSafe(
+      'MisskeyApi.uploadDriveFile',
+      () => _dio.post(
+        '/api/drive/files/create',
+        data: FormData.fromMap({
+          'i': token,
+          'folderId': ?folderId,
+          'name': safeName,
+          'file': MultipartFile.fromBytes(bytes, filename: safeName),
+        }),
+      ),
+      (response) => response.data as Map<String, dynamic>,
+    );
+  }
+
+  /// 清理文件名中 Misskey 不接受的字符
+  String _sanitizeFileName(String name) {
+    // 保留原始扩展名
+    final dotIndex = name.lastIndexOf('.');
+    final base = dotIndex == -1 ? name : name.substring(0, dotIndex);
+    final ext = dotIndex == -1 ? '' : name.substring(dotIndex);
+
+    // 只保留字母、数字、-、_、空格，其他替换为 _
+    final clean = base.replaceAll(RegExp(r'[^\w\s\-]'), '_');
+    // 压缩连续空格/下划线
+    final compacted = clean.replaceAll(RegExp(r'[\s_]+'), '_');
+    // 去首尾特殊字符
+    final trimmed = compacted.trim().replaceAll(RegExp(r'^[_\s]+|[_\s]+$'), '');
+    // 避免空名称
+    final finalBase = trimmed.isEmpty ? 'file' : trimmed;
+    return '$finalBase$ext';
+  }
 
   /// 获取在线用户数量
   ///
@@ -653,7 +781,7 @@ class MisskeyApi extends BaseApi {
           return await _dio.post('/api/messaging/messages/create', data: data);
         }
       },
-      (response) => Map<String, dynamic>.from(response.data),
+      (response) => _toMap(response.data),
       params: data,
     );
   }
@@ -661,30 +789,16 @@ class MisskeyApi extends BaseApi {
   /// 标记消息为已读
   ///
   /// 通过调用 `/api/messaging/messages/read` 接口标记指定消息为已读。
-  /// 注意：新的 Chat API 提供了 'read-all' 接口，需要 userId/roomId 而不是单个 messageId。
-  /// 但为了兼容标准 Misskey，保留此方法。
   ///
   /// @param messageId 要标记为已读的消息 ID
-  Future<void> readMessagingMessage(String messageId) async {
-    // Note: The new Chat API provides 'read-all' which takes a userId/roomId, not a single messageId.
-    // However, keeping this for compatibility with standard Misskey.
-    // For Chat API, we might need a different method to mark conversation as read.
-    // For now, we try 'read-all' with the messageId as a fallback if the API is confusing,
-    // but likely 'read-all' expects 'userId'.
-    // Since we don't have userId here, we'll skip the chat endpoint for single message read
-    // OR we could change this method signature.
-    // Given the constraints, let's keep the standard messaging fallback.
-
-    final data = {'i': token, 'messageId': messageId};
-    try {
-      // Standard Misskey
-      await _dio.post('/api/messaging/messages/read', data: data);
-    } catch (e) {
-      logger.warning(
-        'MisskeyApi: /api/messaging/messages/read failed. Chat API may require read-all per user.',
-      );
-    }
-  }
+  Future<(void, Exception?)> readMessagingMessage(String messageId) => executeApiCallSafeVoid(
+    'MisskeyApi.readMessagingMessage',
+    () => _dio.post(
+      '/api/messaging/messages/read',
+      data: {'i': token, 'messageId': messageId},
+    ),
+    params: {'messageId': messageId},
+  );
 
   /// 删除消息
   ///
@@ -713,7 +827,7 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> createChatRoom(String name) => executeApiCall(
     'MisskeyApi.createChatRoom',
     () => _dio.post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'name': name},
   );
 
@@ -798,7 +912,7 @@ class MisskeyApi extends BaseApi {
         'description': ?description,
       },
     ),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'name': name, 'isPublic': isPublic, 'description': description},
   );
 
@@ -831,9 +945,93 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> showUser(String userId) => executeApiCall(
     'MisskeyApi.showUser',
     () => _dio.post('/api/users/show', data: {'i': token, 'userId': userId}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'userId': userId},
   );
+
+  /// 通过用户名（和实例）获取用户信息。
+  ///
+  /// @param username 用户名（不含 @）
+  /// @param host 实例名（本地用户传 null）
+  /// @return 用户信息的 Map 对象
+  Future<Map<String, dynamic>> showUserByUsername(
+    String username, {
+    String? host,
+  }) =>
+      executeApiCall(
+        'MisskeyApi.showUserByUsername',
+        () => _dio.post(
+          '/api/users/show',
+          data: {
+            'i': token,
+            'username': username,
+            if (host != null) 'host': host,
+          },
+        ),
+        (response) => _toMap(response.data),
+        params: {'username': username, 'host': host},
+      );
+
+  /// 关注指定用户
+  ///
+  /// @param userId 要关注的用户 ID
+  /// @throws DioException 如果请求失败
+  Future<void> createFollow(String userId) => executeApiCallVoid(
+    'MisskeyApi.createFollow',
+    () => _dio.post(
+      '/api/following/create',
+      data: {'i': token, 'userId': userId},
+    ),
+    params: {'userId': userId},
+  );
+
+  /// 取消关注指定用户
+  ///
+  /// @param userId 要取消关注的用户 ID
+  /// @throws DioException 如果请求失败
+  Future<void> deleteFollow(String userId) => executeApiCallVoid(
+    'MisskeyApi.deleteFollow',
+    () => _dio.post(
+      '/api/following/delete',
+      data: {'i': token, 'userId': userId},
+    ),
+    params: {'userId': userId},
+  );
+
+  /// 获取关注关系
+  ///
+  /// 获取当前用户与指定用户之间的关注关系。
+  /// @param userId 对方用户 ID
+  /// @return 关系 Map：{ id, isFollowing, hasPendingFollowRequestFromYou, hasPendingFollowRequestToYou, isBlocked, isBlocking }
+  Future<Map<String, dynamic>> getFollowRelation(String userId) =>
+      executeApiCall(
+        'MisskeyApi.getFollowRelation',
+        () => _dio.post(
+          '/api/users/relation',
+          data: {'i': token, 'userId': userId},
+        ),
+        (response) {
+          final data = response.data;
+          // Handle both single object and list responses
+          if (data is List && data.isNotEmpty) {
+            return Map<String, dynamic>.from(data.first);
+          }
+          return Map<String, dynamic>.from(data);
+        },
+        params: {'userId': userId},
+      );
+
+  /// 获取指定用户的关注者列表
+  ///
+  /// @param userId 目标用户 ID
+  /// @param limit 返回数量限制，默认 30
+  /// @return 关注者列表
+  Future<List<dynamic>> getFollowers(String userId, {int limit = 30}) =>
+      _fetchList(
+        'MisskeyApi.getFollowers',
+        '/api/users/followers',
+        {'i': token, 'userId': userId, 'limit': limit},
+      );
 
   /// 举报用户
   ///
@@ -905,7 +1103,7 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> getMeta() => executeApiCallSafe(
     'MisskeyApi.getMeta',
     () => _dio.post('/api/meta', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
   );
 
   /// 搜索用户
@@ -927,6 +1125,45 @@ class MisskeyApi extends BaseApi {
     'offset': ?offset,
   });
 
+  /// 获取用户帖子列表
+  Future<List<dynamic>> getUserNotes(
+    String userId, {
+    int limit = 20,
+    String? untilId,
+    bool? withReplies,
+    bool? withFiles,
+  }) => _fetchList('MisskeyApi.getUserNotes', '/api/users/notes', {
+    'userId': userId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+    if (withReplies != null) 'withReplies': withReplies,
+    if (withFiles != null) 'withFiles': withFiles,
+  });
+
+  /// 获取用户云盘文件列表
+  Future<List<dynamic>> getUserDriveFiles(
+    String userId, {
+    int limit = 30,
+    String? untilId,
+    String? folderId,
+  }) => _fetchList('MisskeyApi.getUserDriveFiles', '/api/drive/files', {
+    'userId': userId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+    if (folderId != null) 'folderId': folderId,
+  });
+
+  /// 获取用户画廊帖子列表
+  Future<List<dynamic>> getUserGalleryPosts(
+    String userId, {
+    int limit = 10,
+    String? untilId,
+  }) => _fetchList('MisskeyApi.getUserGalleryPosts', '/api/gallery/posts', {
+    'userId': userId,
+    'limit': limit,
+    if (untilId != null) 'untilId': untilId,
+  });
+
   /// 获取单个表情信息
   ///
   /// 通过调用 `/api/emoji` 接口获取指定名称的表情详细信息。
@@ -936,8 +1173,9 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> getEmoji(String name) => executeApiCallSafe(
     'MisskeyApi.getEmoji',
     () => _dio.post('/api/emoji', data: {'i': token, 'name': name}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
     params: {'name': name},
+    cacheTtl: const Duration(minutes: 5),
   );
 
   /// 获取表情列表
@@ -948,7 +1186,8 @@ class MisskeyApi extends BaseApi {
   Future<(Map<String, dynamic>?, Exception?)> getEmojis() => executeApiCallSafe(
     'MisskeyApi.getEmojis',
     () => _dio.post('/api/emojis', data: {'i': token}),
-    (response) => Map<String, dynamic>.from(response.data),
+    (response) => _toMap(response.data),
+    cacheTtl: const Duration(minutes: 5),
   );
 
   /// 获取当前用户的公告列表

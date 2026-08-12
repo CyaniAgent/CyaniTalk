@@ -1,12 +1,16 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '/src/core/config/constants.dart';
 
 part 'network_settings_provider.g.dart';
 
 /// 网络与实时设置
 class NetworkSettings {
-  /// User Agent 类型
-  final String userAgentType;
+  /// 是否使用自定义 User Agent
+  final bool useCustomAgent;
+
+  /// 自定义 User Agent 字符串
+  final String customUserAgent;
 
   /// Misskey 实时模式开关
   final bool misskeyRealtimeMode;
@@ -27,7 +31,8 @@ class NetworkSettings {
   final int httpRequestTimeout;
 
   const NetworkSettings({
-    required this.userAgentType,
+    required this.useCustomAgent,
+    required this.customUserAgent,
     required this.misskeyRealtimeMode,
     required this.loadPostMaxDuration,
     required this.loadEmojiMaxDuration,
@@ -37,7 +42,8 @@ class NetworkSettings {
   });
 
   static const NetworkSettings defaults = NetworkSettings(
-    userAgentType: 'default',
+    useCustomAgent: false,
+    customUserAgent: '',
     misskeyRealtimeMode: true,
     loadPostMaxDuration: 15,
     loadEmojiMaxDuration: 15,
@@ -46,8 +52,17 @@ class NetworkSettings {
     httpRequestTimeout: 30,
   );
 
+  /// 获取有效的 User Agent 字符串
+  String get effectiveUserAgent {
+    if (useCustomAgent && customUserAgent.isNotEmpty) {
+      return customUserAgent;
+    }
+    return Constants.getUserAgent();
+  }
+
   NetworkSettings copyWith({
-    String? userAgentType,
+    bool? useCustomAgent,
+    String? customUserAgent,
     bool? misskeyRealtimeMode,
     int? loadPostMaxDuration,
     int? loadEmojiMaxDuration,
@@ -56,7 +71,8 @@ class NetworkSettings {
     int? httpRequestTimeout,
   }) {
     return NetworkSettings(
-      userAgentType: userAgentType ?? this.userAgentType,
+      useCustomAgent: useCustomAgent ?? this.useCustomAgent,
+      customUserAgent: customUserAgent ?? this.customUserAgent,
       misskeyRealtimeMode: misskeyRealtimeMode ?? this.misskeyRealtimeMode,
       loadPostMaxDuration: loadPostMaxDuration ?? this.loadPostMaxDuration,
       loadEmojiMaxDuration: loadEmojiMaxDuration ?? this.loadEmojiMaxDuration,
@@ -71,7 +87,8 @@ class NetworkSettings {
       identical(this, other) ||
       other is NetworkSettings &&
           runtimeType == other.runtimeType &&
-          userAgentType == other.userAgentType &&
+          useCustomAgent == other.useCustomAgent &&
+          customUserAgent == other.customUserAgent &&
           misskeyRealtimeMode == other.misskeyRealtimeMode &&
           loadPostMaxDuration == other.loadPostMaxDuration &&
           loadEmojiMaxDuration == other.loadEmojiMaxDuration &&
@@ -81,7 +98,8 @@ class NetworkSettings {
 
   @override
   int get hashCode =>
-      userAgentType.hashCode ^
+      useCustomAgent.hashCode ^
+      customUserAgent.hashCode ^
       misskeyRealtimeMode.hashCode ^
       loadPostMaxDuration.hashCode ^
       loadEmojiMaxDuration.hashCode ^
@@ -93,7 +111,8 @@ class NetworkSettings {
 /// 网络设置状态管理器
 @riverpod
 class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
-  static const String _userAgentTypeKey = 'network_user_agent_type';
+  static const String _useCustomAgentKey = 'network_use_custom_agent';
+  static const String _customUserAgentKey = 'network_custom_user_agent';
   static const String _misskeyRealtimeModeKey = 'network_misskey_realtime_mode';
   static const String _loadPostMaxDurationKey = 'network_load_post_max_duration';
   static const String _loadEmojiMaxDurationKey = 'network_load_emoji_max_duration';
@@ -106,7 +125,8 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     final prefs = await SharedPreferences.getInstance();
 
     return NetworkSettings(
-      userAgentType: prefs.getString(_userAgentTypeKey) ?? NetworkSettings.defaults.userAgentType,
+      useCustomAgent: prefs.getBool(_useCustomAgentKey) ?? NetworkSettings.defaults.useCustomAgent,
+      customUserAgent: prefs.getString(_customUserAgentKey) ?? NetworkSettings.defaults.customUserAgent,
       misskeyRealtimeMode: prefs.getBool(_misskeyRealtimeModeKey) ?? NetworkSettings.defaults.misskeyRealtimeMode,
       loadPostMaxDuration: prefs.getInt(_loadPostMaxDurationKey) ?? NetworkSettings.defaults.loadPostMaxDuration,
       loadEmojiMaxDuration: prefs.getInt(_loadEmojiMaxDurationKey) ?? NetworkSettings.defaults.loadEmojiMaxDuration,
@@ -116,11 +136,18 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     );
   }
 
-  /// 更新 User Agent 类型
-  Future<void> updateUserAgentType(String type) async {
+  /// 切换自定义 User Agent
+  Future<void> toggleCustomAgent(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userAgentTypeKey, type);
-    state = AsyncData(state.value!.copyWith(userAgentType: type));
+    await prefs.setBool(_useCustomAgentKey, value);
+    state = AsyncData(state.value!.copyWith(useCustomAgent: value));
+  }
+
+  /// 更新自定义 User Agent
+  Future<void> updateCustomUserAgent(String ua) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_customUserAgentKey, ua);
+    state = AsyncData(state.value!.copyWith(customUserAgent: ua));
   }
 
   /// 切换 Misskey 实时模式
@@ -168,7 +195,8 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
   /// 恢复默认设置
   Future<void> restoreDefaults() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userAgentTypeKey);
+    await prefs.remove(_useCustomAgentKey);
+    await prefs.remove(_customUserAgentKey);
     await prefs.remove(_misskeyRealtimeModeKey);
     await prefs.remove(_loadPostMaxDurationKey);
     await prefs.remove(_loadEmojiMaxDurationKey);
@@ -177,15 +205,4 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     await prefs.remove(_httpRequestTimeoutKey);
     state = const AsyncData(NetworkSettings.defaults);
   }
-}
-
-/// User Agent 类型选项
-enum UserAgentType {
-  defaultAgent('Default', 'Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36 CyaniTalk/1.0.0'),
-  chromeLatest('Chrome Latest', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36');
-
-  const UserAgentType(this.displayName, this.userAgentString);
-
-  final String displayName;
-  final String userAgentString;
 }

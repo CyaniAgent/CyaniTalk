@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,9 +5,11 @@ import 'package:dio/dio.dart';
 
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/auth/domain/account.dart';
+import '/src/features/auth/domain/misskey_permissions.dart';
 import '/src/core/api/network_client.dart';
 import '/src/core/core.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
+import '/src/features/profile/application/network_settings_provider.dart';
 
 part 'auth_service.g.dart';
 
@@ -59,10 +60,7 @@ class AuthService extends _$AuthService {
 
     final uri = Uri.https(sanitizedHost, '/miauth/$session', {
       'name': 'CyaniTalk',
-
-      'permission':
-          'read:account,write:account,read:notes,write:notes,read:blocks,write:blocks,read:drive,write:drive,read:favorites,write:favorites,read:following,write:following,read:messaging,write:messaging,read:mutes,write:mutes,read:notifications,write:notifications,read:reactions,write:reactions,read:votes,write:votes,read:pages,write:pages,read:gallery,write:gallery,read:flash,write:flash,read:chat,write:chat,read:antennas,write:antennas,read:clips,write:clips,read:channels,write:channels,read:user-groups,write:user-groups', // 请求所需权限
-      // 'callback': 'cyanitalk://callback', // 未来可能需要的深度链接
+      'permission': MisskeyPermissions.toMiAuthString(),
     });
 
     logger.debug('生成MiAuth URL: ${uri.toString()}');
@@ -110,9 +108,10 @@ class AuthService extends _$AuthService {
     final sanitizedHost = _sanitizeHost(host);
     logger.info('检查Misskey MiAuth认证状态，主机: $sanitizedHost');
 
+    final networkSettings = ref.read(networkSettingsProvider).value;
     final dio = NetworkClient().createDio(
       host: sanitizedHost,
-      userAgent: Constants.getUserAgent(),
+      userAgent: networkSettings?.effectiveUserAgent,
     );
 
     int retryCount = 0;
@@ -243,28 +242,7 @@ class AuthService extends _$AuthService {
 
   /// 清理主机地址，提取出域名部分
   String _sanitizeHost(String host) {
-    String sanitized = host.trim();
-    if (sanitized.startsWith('https://')) {
-      sanitized = sanitized.substring(8);
-    } else if (sanitized.startsWith('http://')) {
-      sanitized = sanitized.substring(7);
-    }
-
-    // 移除路径部分
-    if (sanitized.contains('/')) {
-      sanitized = sanitized.split('/').first;
-    }
-
-    // 移除可能的查询参数或锚点
-    if (sanitized.contains('?')) {
-      sanitized = sanitized.split('?').first;
-    }
-    if (sanitized.contains('#')) {
-      sanitized = sanitized.split('#').first;
-    }
-
-    logger.debug('清理主机地址: $host -> $sanitized');
-    return sanitized;
+    return sanitizeHost(host);
   }
 }
 
@@ -292,7 +270,9 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
     if (selectedId != null) {
       try {
         selectedAccount = accounts.firstWhere((a) => a.id == selectedId);
-      } catch (_) {}
+      } catch (e) {
+        logger.warning('AuthService: Selected account not found, falling back', e);
+      }
     }
 
     selectedAccount ??= accounts
@@ -335,7 +315,8 @@ class SelectedMisskeyAccount extends _$SelectedMisskeyAccount {
   }
 }
 
-final selectedAccountProvider = StateProvider<Account?>((ref) {
+@riverpod
+Account? selectedAccount(Ref ref) {
   final accountsAsync = ref.watch(authServiceProvider);
 
   return accountsAsync.maybeWhen(
@@ -343,4 +324,4 @@ final selectedAccountProvider = StateProvider<Account?>((ref) {
 
     orElse: () => null,
   );
-});
+}

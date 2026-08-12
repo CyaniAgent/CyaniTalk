@@ -1,11 +1,12 @@
 // 赞助页面
 //
 // 该文件包含SponsorPage组件和iMikufansDonatePage组件，用于显示应用程序的赞助信息。
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:webview_windows/webview_windows.dart' as windows;
-import 'package:webview_flutter/webview_flutter.dart' as mobile;
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
 
 /// 应用程序的赞助页面组件
 ///
@@ -56,17 +57,28 @@ class SponsorPage extends StatelessWidget {
             'sponsor_imikufans'.tr(),
             'sponsor_imikufans_description'.tr(),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const IMikufansDonatePage(),
-                ),
-              );
+              if (Platform.isAndroid) {
+                _openInSystemBrowser();
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IMikufansDonatePage(),
+                  ),
+                );
+              }
             },
           ),
         ],
       ),
     );
+  }
+
+  static Future<void> _openInSystemBrowser() async {
+    final uri = Uri.parse('https://www.imikufans.com/donate.php');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   /// 构建页面的分区标题
@@ -115,7 +127,7 @@ class SponsorPage extends StatelessWidget {
 
 /// iMikufans赞助页面组件
 ///
-/// 嵌入iMikufans的赞助页面网页
+/// 嵌入iMikufans的赞助页面网页（仅 iOS/macOS/Linux/Windows 使用）
 class IMikufansDonatePage extends StatefulWidget {
   /// 创建一个新的IMikufansDonatePage实例
   ///
@@ -127,63 +139,15 @@ class IMikufansDonatePage extends StatefulWidget {
 }
 
 class _IMikufansDonatePageState extends State<IMikufansDonatePage> {
-  late windows.WebviewController _windowsController;
-  late mobile.WebViewController _mobileController;
-  bool _isWebviewInitialized = false;
-  final bool _isWindows = Platform.isWindows;
+  bool _isWebviewLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    if (_isWindows) {
-      _initWindowsWebview();
-    } else {
-      _initMobileWebview();
-    }
-  }
-
-  Future<void> _initWindowsWebview() async {
-    _windowsController = windows.WebviewController();
-    try {
-      await _windowsController.initialize();
-      await _windowsController.setBackgroundColor(Colors.transparent);
-      await _windowsController.setPopupWindowPolicy(
-        windows.WebviewPopupWindowPolicy.deny,
-      );
-
-      if (!mounted) return;
-      setState(() {
-        _isWebviewInitialized = true;
-      });
-
-      await _windowsController.loadUrl('https://www.imikufans.com/donate.php');
-    } catch (e) {
-      // 初始化失败，显示错误信息
-      if (mounted) {
-        setState(() {
-          _isWebviewInitialized = true;
-        });
-      }
-    }
-  }
-
-  Future<void> _initMobileWebview() async {
-    _mobileController = mobile.WebViewController()
-      ..setJavaScriptMode(mobile.JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..loadRequest(Uri.parse('https://www.imikufans.com/donate.php'));
-
-    if (!mounted) return;
-    setState(() {
-      _isWebviewInitialized = true;
-    });
   }
 
   @override
   void dispose() {
-    if (_isWindows) {
-      _windowsController.dispose();
-    }
     super.dispose();
   }
 
@@ -191,11 +155,30 @@ class _IMikufansDonatePageState extends State<IMikufansDonatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('赞助iMikufans')),
-      body: _isWebviewInitialized
-          ? (_isWindows
-                ? windows.Webview(_windowsController)
-                : mobile.WebViewWidget(controller: _mobileController))
-          : const Center(child: CircularProgressIndicator()),
+      body: Stack(
+        children: [
+          InAppWebView(
+            initialUrlRequest: URLRequest(
+              url: WebUri('https://www.imikufans.com/donate.php'),
+            ),
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              transparentBackground: true,
+              useShouldOverrideUrlLoading: false,
+            ),
+            onWebViewCreated: (controller) {},
+            onLoadStop: (controller, url) {
+              if (!_isWebviewLoaded) {
+                setState(() {
+                  _isWebviewLoaded = true;
+                });
+              }
+            },
+          ),
+          if (!_isWebviewLoaded)
+            const Center(child: CyaniLoadingIndicator()),
+        ],
+      ),
     );
   }
 }

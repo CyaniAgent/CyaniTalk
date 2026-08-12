@@ -1,43 +1,36 @@
-import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class NavigationStateTracker extends ChangeNotifier {
-  static final NavigationStateTracker instance =
-      NavigationStateTracker._internal();
-  factory NavigationStateTracker() => instance;
-  NavigationStateTracker._internal();
+part 'navigation_state_tracker.g.dart';
 
-  String _currentPath = '';
+/// 导航路径状态
+@riverpod
+class NavigationPath extends _$NavigationPath {
+  @override
+  String build() => '';
 
-  String get currentPath => _currentPath;
-  set currentPath(String value) {
-    if (_currentPath != value) {
-      _currentPath = value;
-      notifyListeners();
-    }
+  void navigate(String path) {
+    state = path;
   }
 
   static const rootPaths = ['/misskey', '/cloud', '/messaging', '/profile'];
 
-  String get currentPageName {
-    final path = _currentPath;
+  String pageName(String path) {
+    if (path.isEmpty) return 'CyaniTalk';
 
     for (final rootPath in rootPaths) {
       if (path == rootPath ||
           path.startsWith('$rootPath/') ||
           path.startsWith('$rootPath?')) {
-        return _pageNameFromRootPath(rootPath);
+        return _nameFromRootPath(rootPath);
       }
     }
 
-    return _pageNameFromRoute(path);
+    return _nameFromRoute(path);
   }
 
-  bool get isRootPage {
-    final path = _currentPath;
-    return rootPaths.contains(path);
-  }
+  bool isRootPage(String path) => rootPaths.contains(path);
 
-  String _pageNameFromRootPath(String rootPath) {
+  String _nameFromRootPath(String rootPath) {
     switch (rootPath) {
       case '/misskey':
         return 'Misskey';
@@ -52,7 +45,7 @@ class NavigationStateTracker extends ChangeNotifier {
     }
   }
 
-  String _pageNameFromRoute(String location) {
+  String _nameFromRoute(String location) {
     if (location == '/search') return '搜索';
     if (location == '/settings' || location.startsWith('/settings/')) {
       return '设置';

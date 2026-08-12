@@ -10,6 +10,15 @@ import '/src/features/misskey/domain/drive_folder.dart';
 part 'drive_notifier.freezed.dart';
 part 'drive_notifier.g.dart';
 
+enum DriveSortMode {
+  nameAsc,
+  nameDesc,
+  dateAsc,
+  dateDesc,
+  sizeAsc,
+  sizeDesc,
+}
+
 @freezed
 abstract class DriveState with _$DriveState {
   const factory DriveState({
@@ -21,6 +30,8 @@ abstract class DriveState with _$DriveState {
     @Default(false) bool isRefreshing,
     @Default(0) int driveCapacityMb,
     @Default(0) int driveUsage,
+    @Default(0) int maxFileSizeMb,
+    @Default(DriveSortMode.nameAsc) DriveSortMode sortMode,
     String? errorMessage,
   }) = _DriveState;
 }
@@ -90,8 +101,11 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
         _cachedUser?.driveUsage ??
         (_cachedDriveInfo?['usage'] as num? ?? 0).toInt();
 
+    // Extract max file size from user policies
+    final int maxFileSizeMb = _cachedUser?.policies['maxFileSizeMb'] as int? ?? 0;
+
     logger.info(
-      'DriveNotifier: Final Storage - Capacity: $capacityBytes, Usage: $usageBytes',
+      'DriveNotifier: Final Storage - Capacity: $capacityBytes, Usage: $usageBytes, MaxFileSize: ${maxFileSizeMb}MB',
     );
 
     return DriveState(
@@ -103,6 +117,7 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
       isRefreshing: false,
       driveCapacityMb: capacityBytes ~/ (1024 * 1024),
       driveUsage: usageBytes,
+      maxFileSizeMb: maxFileSizeMb,
       errorMessage: null,
     );
   }
@@ -302,6 +317,115 @@ class MisskeyDriveNotifier extends _$MisskeyDriveNotifier {
     final currentState = state.value;
     if (currentState != null && currentState.errorMessage != null) {
       state = AsyncValue.data(currentState.copyWith(errorMessage: null));
+    }
+  }
+
+  void setSortMode(DriveSortMode mode) {
+    if (!ref.mounted) return;
+    final currentState = state.value;
+    if (currentState == null) return;
+    state = AsyncValue.data(currentState.copyWith(sortMode: mode));
+  }
+
+  Future<void> renameFile(String fileId, String newName) async {
+    try {
+      if (!ref.mounted) return;
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.updateDriveFile(fileId, name: newName);
+      await refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) return;
+      logger.error('DriveNotifier: Error renaming file', e);
+      if (ref.mounted) {
+        state = AsyncValue.data(
+          (state.value ?? const DriveState()).copyWith(errorMessage: '重命名文件失败: $e'),
+        );
+      }
+    }
+  }
+
+  Future<void> moveFile(String fileId, String? newFolderId) async {
+    try {
+      if (!ref.mounted) return;
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.updateDriveFile(fileId, folderId: newFolderId);
+      await refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) return;
+      logger.error('DriveNotifier: Error moving file', e);
+      if (ref.mounted) {
+        state = AsyncValue.data(
+          (state.value ?? const DriveState()).copyWith(errorMessage: '移动文件失败: $e'),
+        );
+      }
+    }
+  }
+
+  Future<void> toggleFileSensitive(String fileId, bool isSensitive) async {
+    try {
+      if (!ref.mounted) return;
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.updateDriveFile(fileId, isSensitive: isSensitive);
+      await refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) return;
+      logger.error('DriveNotifier: Error toggling sensitive flag', e);
+      if (ref.mounted) {
+        state = AsyncValue.data(
+          (state.value ?? const DriveState()).copyWith(errorMessage: '更新敏感标记失败: $e'),
+        );
+      }
+    }
+  }
+
+  Future<void> updateFileComment(String fileId, String comment) async {
+    try {
+      if (!ref.mounted) return;
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.updateDriveFile(fileId, comment: comment);
+      await refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) return;
+      logger.error('DriveNotifier: Error updating file comment', e);
+      if (ref.mounted) {
+        state = AsyncValue.data(
+          (state.value ?? const DriveState()).copyWith(errorMessage: '更新描述失败: $e'),
+        );
+      }
+    }
+  }
+
+  Future<void> renameFolder(String folderId, String newName) async {
+    try {
+      if (!ref.mounted) return;
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.updateDriveFolder(folderId, name: newName);
+      await refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) return;
+      logger.error('DriveNotifier: Error renaming folder', e);
+      if (ref.mounted) {
+        state = AsyncValue.data(
+          (state.value ?? const DriveState()).copyWith(errorMessage: '重命名文件夹失败: $e'),
+        );
+      }
+    }
+  }
+
+  Future<void> moveFolder(String folderId, String? newParentId) async {
+    try {
+      if (!ref.mounted) return;
+      final repository = await ref.read(misskeyRepositoryProvider.future);
+      await repository.updateDriveFolder(folderId, parentId: newParentId);
+      await refresh();
+    } catch (e) {
+      if (e.toString().contains('disposed') || e.toString().contains('UnmountedRefException')) return;
+      logger.error('DriveNotifier: Error moving folder', e);
+      if (ref.mounted) {
+        state = AsyncValue.data(
+          (state.value ?? const DriveState()).copyWith(errorMessage: '移动文件夹失败: $e'),
+        );
+      }
     }
   }
 

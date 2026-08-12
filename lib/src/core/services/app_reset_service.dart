@@ -17,7 +17,7 @@ class AppReset extends _$AppReset {
     logger.warning('AppResetService: 开始全量重置应用程序数据...');
 
     try {
-      // 1. 清除 SharedPreferences
+      // 1. 清除 SharedPreferences (包括 welcome_completed)
       final prefs = ref.read(sharedPreferencesProvider);
       final bool prefsCleared = await prefs.clear();
       logger.info('AppResetService: SharedPreferences 清理状态: $prefsCleared');

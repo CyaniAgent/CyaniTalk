@@ -118,6 +118,19 @@ class GlobalSearch extends _$GlobalSearch {
           ),
         );
       }
+
+      final channels = await misskeyRepo.searchChannels(query, limit: 5);
+      results.addAll(
+        channels.map(
+          (ch) => SearchResult(
+            title: ch.name,
+            subtitle: ch.description ?? '',
+            source: 'misskey',
+            type: 'Channel',
+            originalData: ch,
+          ),
+        ),
+      );
     } catch (e) {
       logger.warning('GlobalSearch: Misskey search failed: $e');
     }

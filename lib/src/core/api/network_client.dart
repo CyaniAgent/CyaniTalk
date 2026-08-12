@@ -1,15 +1,14 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
-import '/src/core/utils/logger.dart';
-import '/src/core/utils/performance_monitor.dart';
+import '/src/core/utils/utils.dart';
 
 /// A custom interceptor that retries failed requests up to a specified number of times.
 class RetryInterceptor extends Interceptor {
   final int maxRetries;
   final Dio dio;
 
-  RetryInterceptor({required this.dio, this.maxRetries = 5});
+  RetryInterceptor({required this.dio, this.maxRetries = 2});
 
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
@@ -66,9 +65,12 @@ class RetryInterceptor extends Interceptor {
            isHandshakeError ||
            isSemaphoreTimeout ||
            (err.type == DioExceptionType.badResponse && 
-            (err.response?.statusCode == 502 || 
-             err.response?.statusCode == 503 || 
-             err.response?.statusCode == 504));
+             (err.response?.statusCode != null &&
+              err.response!.statusCode! >= 500 && 
+              err.response!.statusCode! < 600 &&
+              err.response!.statusCode! != 500 &&
+              err.response!.statusCode! != 504 &&
+              err.response!.statusCode! != 524));  // 500/504/524 = 服务器内部错误/过载，重试只会加重伤害
   }
 }
 
@@ -88,11 +90,17 @@ class NetworkClient {
     Map<String, dynamic>? extraHeaders,
     bool enableCertificateValidation = true,
   }) {
-    logger.info('NetworkClient: Creating Dio instance for $host');
+    // 防御性清理：移除无效端口号（如 :0），防止 500/524 等错误
+    final sanitizedHost = sanitizeHost(host);
+    if (sanitizedHost != host) {
+      logger.warning('NetworkClient: Sanitized host from "$host" to "$sanitizedHost"');
+    }
+
+    logger.info('NetworkClient: Creating Dio instance for $sanitizedHost');
 
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'https://$host',
+        baseUrl: 'https://$sanitizedHost',
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
@@ -103,15 +111,15 @@ class NetworkClient {
           ...?extraHeaders
         },
         validateStatus: (status) {
-          // 让所有状态码都通过，由 BaseApi.handleResponse 来处理
-          return true;
+          // 接受 2xx 和 3xx，4xx/5xx 抛异常让 RetryInterceptor 和 BaseApi 正常工作
+          return status != null && status >= 200 && status < 400;
         },
       ),
     );
 
     dio.transformer = BackgroundTransformer();
 
-    dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 5));
+    dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 2));
     dio.interceptors.add(PerformanceInterceptor());
     dio.interceptors.add(
       LogInterceptor(

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/core/api/misskey_api.dart';
+import '/src/features/profile/application/network_settings_provider.dart';
 import '/src/features/misskey/domain/note.dart';
 import '/src/features/misskey/domain/clip.dart';
 import '/src/features/misskey/domain/channel.dart';
@@ -83,6 +84,16 @@ class MisskeyRepository implements IMisskeyRepository {
       final notes = await compute((List<dynamic> list) {
         return list.map((e) => Note.fromJson(e)).toList();
       }, data);
+      
+      // 过滤逻辑：本地和全局时间线过滤掉"主页"可见性的帖子，仅社交时间线不过滤
+      if (type == 'Local' || type == 'Global') {
+        final filteredNotes = notes.where((note) => note.visibility != 'home').toList();
+        logger.info(
+          'MisskeyRepository: Successfully retrieved ${filteredNotes.length} notes for $type timeline (filtered from ${notes.length})',
+        );
+        return filteredNotes;
+      }
+      
       logger.info(
         'MisskeyRepository: Successfully retrieved ${notes.length} notes for $type timeline',
       );
@@ -219,6 +230,79 @@ class MisskeyRepository implements IMisskeyRepository {
       return MisskeyUser.fromJson(data);
     } catch (e) {
       logger.error('MisskeyRepository: Error showing user $userId', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<MisskeyUser> findUserByUsername(
+    String username, {
+    String? host,
+  }) async {
+    logger.info('MisskeyRepository: Finding user $username@$host');
+    try {
+      final data = await api.showUserByUsername(username, host: host);
+      return MisskeyUser.fromJson(data);
+    } catch (e) {
+      logger.error(
+        'MisskeyRepository: Error finding user $username@$host', e,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> createFollow(String userId) async {
+    logger.info('MisskeyRepository: Following user $userId');
+    try {
+      await api.createFollow(userId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error following user $userId', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteFollow(String userId) async {
+    logger.info('MisskeyRepository: Unfollowing user $userId');
+    try {
+      await api.deleteFollow(userId);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error unfollowing user $userId', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getFollowRelation(String userId) async {
+    logger.info('MisskeyRepository: Getting follow relation for $userId');
+    try {
+      return await api.getFollowRelation(userId);
+    } catch (e) {
+      logger.error(
+        'MisskeyRepository: Error getting follow relation for $userId',
+        e,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getFollowers(
+    String userId, {
+    int limit = 30,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Getting followers for $userId, limit=$limit',
+    );
+    try {
+      final data = await api.getFollowers(userId, limit: limit);
+      return data.map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (e) {
+      logger.error(
+        'MisskeyRepository: Error getting followers for $userId',
+        e,
+      );
       rethrow;
     }
   }
@@ -509,6 +593,68 @@ class MisskeyRepository implements IMisskeyRepository {
   }
 
   @override
+  Future<DriveFile> updateDriveFile(
+    String fileId, {
+    String? name,
+    String? folderId,
+    bool? isSensitive,
+    String? comment,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Updating drive file $fileId, name=$name, folderId=$folderId',
+    );
+    try {
+      final (data, error) = await api.updateDriveFile(
+        fileId,
+        name: name,
+        folderId: folderId,
+        isSensitive: isSensitive,
+        comment: comment,
+      );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error updating drive file', error);
+        throw error;
+      }
+      if (data == null) {
+        throw Exception('Failed to update drive file: No data returned');
+      }
+      return DriveFile.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error updating drive file', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<DriveFolder> updateDriveFolder(
+    String folderId, {
+    String? name,
+    String? parentId,
+  }) async {
+    logger.info(
+      'MisskeyRepository: Updating drive folder $folderId, name=$name, parentId=$parentId',
+    );
+    try {
+      final (data, error) = await api.updateDriveFolder(
+        folderId,
+        name: name,
+        parentId: parentId,
+      );
+      if (error != null) {
+        logger.error('MisskeyRepository: Error updating drive folder', error);
+        throw error;
+      }
+      if (data == null) {
+        throw Exception('Failed to update drive folder: No data returned');
+      }
+      return DriveFolder.fromJson(data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error updating drive folder', e);
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> deleteDriveFile(String fileId) async {
     logger.info('MisskeyRepository: Deleting drive file $fileId');
     try {
@@ -659,8 +805,10 @@ class MisskeyRepository implements IMisskeyRepository {
           'MisskeyRepository: Fetching ${missingUserIds.length} missing users',
         );
         final users = <String, MisskeyUser>{};
-        await Future.wait(
-          missingUserIds.map((id) async {
+        // 限制并发数，防止大量 showUser 请求同时发送导致 524
+        await _fetchWithConcurrency(
+          missingUserIds,
+          (id) async {
             try {
               final user = await showUser(id);
               users[id] = user;
@@ -670,7 +818,8 @@ class MisskeyRepository implements IMisskeyRepository {
                 e,
               );
             }
-          }),
+          },
+          concurrency: 5,
         );
 
         // Update messages with fetched users
@@ -722,7 +871,9 @@ class MisskeyRepository implements IMisskeyRepository {
             }
 
             messages.add(MessagingMessage.fromJson(map));
-          } catch (_) {}
+          } catch (e) {
+            logger.warning('MisskeyRepository: Failed to parse chat message', e);
+          }
         }
         return messages;
       }, data);
@@ -801,8 +952,9 @@ class MisskeyRepository implements IMisskeyRepository {
           'MisskeyRepository: Fetching ${missingUserIds.length} missing users for direct messages',
         );
         final users = <String, MisskeyUser>{};
-        await Future.wait(
-          missingUserIds.map((id) async {
+        await _fetchWithConcurrency(
+          missingUserIds,
+          (id) async {
             try {
               final user = await showUser(id);
               users[id] = user;
@@ -812,7 +964,8 @@ class MisskeyRepository implements IMisskeyRepository {
                 e,
               );
             }
-          }),
+          },
+          concurrency: 5,
         );
 
         // Update messages with fetched users
@@ -870,11 +1023,10 @@ class MisskeyRepository implements IMisskeyRepository {
     logger.info(
       'MisskeyRepository: Marking messaging message $messageId as read',
     );
-    try {
-      await api.readMessagingMessage(messageId);
-    } catch (e) {
-      logger.error('MisskeyRepository: Error marking message as read', e);
-      rethrow;
+    final (_, error) = await api.readMessagingMessage(messageId);
+    if (error != null) {
+      logger.error('MisskeyRepository: Error marking message as read', error);
+      throw error;
     }
   }
 
@@ -982,6 +1134,82 @@ class MisskeyRepository implements IMisskeyRepository {
       }, data);
     } catch (e) {
       logger.error('MisskeyRepository: Error searching users', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Note>> getUserNotes(
+    String userId, {
+    int limit = 20,
+    String? untilId,
+    bool? withReplies,
+    bool? withFiles,
+  }) async {
+    logger.info('MisskeyRepository: Getting notes for user: $userId');
+    try {
+      final data = await api.getUserNotes(
+        userId,
+        limit: limit,
+        untilId: untilId,
+        withReplies: withReplies,
+        withFiles: withFiles,
+      );
+      return await compute((List<dynamic> list) {
+        return list
+            .map((e) => Note.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting user notes', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<DriveFile>> getUserDriveFiles(
+    String userId, {
+    int limit = 30,
+    String? untilId,
+    String? folderId,
+  }) async {
+    logger.info('MisskeyRepository: Getting drive files for user: $userId');
+    try {
+      final data = await api.getUserDriveFiles(
+        userId,
+        limit: limit,
+        untilId: untilId,
+        folderId: folderId,
+      );
+      return await compute((List<dynamic> list) {
+        return list
+            .map((e) => DriveFile.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting user drive files', e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getUserGalleryPosts(
+    String userId, {
+    int limit = 10,
+    String? untilId,
+  }) async {
+    logger.info('MisskeyRepository: Getting gallery posts for user: $userId');
+    try {
+      final data = await api.getUserGalleryPosts(
+        userId,
+        limit: limit,
+        untilId: untilId,
+      );
+      return await compute((List<dynamic> list) {
+        return list.cast<Map<String, dynamic>>();
+      }, data);
+    } catch (e) {
+      logger.error('MisskeyRepository: Error getting user gallery posts', e);
       rethrow;
     }
   }
@@ -1204,10 +1432,25 @@ class MisskeyRepository implements IMisskeyRepository {
         if (map['recipientId'] != null && message.recipient == null) {
           missingUserIds.add(map['recipientId'] as String);
         }
-      } catch (_) {}
+      } catch (e) {
+        logger.warning('MisskeyRepository: Failed to parse messaging message', e);
+      }
     }
 
     return _MessagingParsingResult(messages, missingUserIds.toList());
+  }
+
+  /// 限制并发数执行异步任务，防止无界并行请求导致服务器过载 (524)
+  static Future<void> _fetchWithConcurrency<T>(
+    Iterable<T> items,
+    Future<void> Function(T) task, {
+    int concurrency = 5,
+  }) async {
+    final list = items.toList();
+    for (var i = 0; i < list.length; i += concurrency) {
+      final batch = list.skip(i).take(concurrency);
+      await Future.wait(batch.map(task));
+    }
   }
 }
 
@@ -1230,6 +1473,11 @@ Future<IMisskeyRepository> misskeyRepository(Ref ref) async {
   logger.info(
     'MisskeyRepository: Initializing for account: ${account.id} on ${account.host}',
   );
-  final api = MisskeyApi(host: account.host, token: account.token);
+  final networkSettings = ref.read(networkSettingsProvider).value;
+  final api = MisskeyApi(
+    host: account.host,
+    token: account.token,
+    userAgent: networkSettings?.effectiveUserAgent,
+  );
   return MisskeyRepository(api);
 }

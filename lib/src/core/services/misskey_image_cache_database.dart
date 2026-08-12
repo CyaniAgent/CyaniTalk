@@ -1,9 +1,8 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '/src/core/services/database_path_helper.dart';
 import '/src/core/utils/logger.dart';
 
 /// 图片缓存类型枚举
@@ -101,6 +100,9 @@ class MisskeyImageCacheDatabase {
   }
 
   Future<Database> _initDatabase() async {
+    await DatabasePathHelper.migrateIfNeeded();
+    await DatabasePathHelper.ensurePermissions();
+
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       if (!_ffiInitialized) {
         sqfliteFfiInit();
@@ -109,8 +111,7 @@ class MisskeyImageCacheDatabase {
       }
     }
 
-    final dbDir = await getApplicationDocumentsDirectory();
-    final dbPath = p.join(dbDir.path, 'misskey_image_cache.db');
+    final dbPath = await DatabasePathHelper.getPath('misskey_image_cache.db');
 
     logger.info('MisskeyImageCacheDatabase: Opening database at $dbPath');
 
@@ -187,7 +188,7 @@ class MisskeyImageCacheDatabase {
       where: 'associated_user_id = ? AND cache_type = ?',
       whereArgs: [userId, ImageCacheType.avatar.name],
     );
-    return maps.map((m) => ImageCacheRecord.fromMap(m)).toList();
+    return maps.map(ImageCacheRecord.fromMap).toList();
   }
 
   /// 检查用户 UID 是否存在于缓存中（用于发帖人标记）
@@ -229,7 +230,7 @@ class MisskeyImageCacheDatabase {
       'image_cache',
       orderBy: 'last_accessed_at DESC',
     );
-    return maps.map((m) => ImageCacheRecord.fromMap(m)).toList();
+    return maps.map(ImageCacheRecord.fromMap).toList();
   }
 
   /// 获取缓存总大小（字节）
@@ -292,6 +293,23 @@ class MisskeyImageCacheDatabase {
       counts[type] = row['count'] as int;
     }
     return counts;
+  }
+
+  /// 按类型获取缓存大小（字节）
+  Future<Map<String, int>> getCacheSizeByType() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT cache_type, SUM(file_size_bytes) as total FROM image_cache GROUP BY cache_type',
+    );
+    final Map<String, int> sizes = {};
+    for (final row in result) {
+      final type = row['cache_type'] as String?;
+      final total = row['total'] as int? ?? 0;
+      if (type != null) {
+        sizes[type] = total;
+      }
+    }
+    return sizes;
   }
 
   /// 关闭数据库

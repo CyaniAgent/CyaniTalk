@@ -1,10 +1,11 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '/src/core/navigation/navigation.dart';
-import '/src/core/navigation/navigation_element.dart';
+import 'package:cyanitalk/src/core/navigation/navigation.dart';
+import 'package:cyanitalk/src/core/navigation/navigation_element.dart';
 import 'root_navigation_drawer.dart';
 
 class ResponsiveShell extends ConsumerStatefulWidget {

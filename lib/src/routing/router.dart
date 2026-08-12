@@ -6,30 +6,34 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/src/core/utils/logger.dart';
-import '/src/features/profile/application/developer_settings_provider.dart';
-
-import '/src/features/misskey/presentation/misskey_page.dart';
-import '/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
-import '/src/features/misskey/presentation/pages/misskey_notifications_page.dart';
-import '/src/features/cloud/presentation/cloud_page.dart';
-import '/src/features/messaging/presentation/chat_page.dart';
-import '/src/features/messaging/presentation/messaging_page.dart';
-import '/src/shared/widgets/coming_soon_page.dart';
-import '/src/features/misskey/domain/misskey_user.dart';
-import '/src/features/misskey/domain/chat_room.dart';
-import '/src/features/profile/presentation/profile_page.dart';
-import '/src/features/profile/presentation/settings/about_page.dart';
-import '/src/features/profile/presentation/settings/settings_page.dart';
-import '/src/features/profile/presentation/settings/licenses_page.dart';
-import '/src/features/profile/presentation/settings/developer_settings_page.dart';
-import '/src/features/search/presentation/search_page.dart';
-import '/src/features/auth/presentation/pages/login_page.dart';
-import '/src/shared/widgets/responsive_shell.dart';
+import 'package:cyanitalk/src/core/utils/logger.dart';
+import 'package:cyanitalk/src/features/auth/presentation/pages/login_page.dart';
+import 'package:cyanitalk/src/features/cloud/presentation/cloud_page.dart';
+import 'package:cyanitalk/src/features/messaging/presentation/chat_page.dart';
+import 'package:cyanitalk/src/features/messaging/presentation/messaging_page.dart';
+import 'package:cyanitalk/src/features/misskey/domain/chat_room.dart';
+import 'package:cyanitalk/src/features/misskey/domain/misskey_user.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/misskey_page.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_notifications_page.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
+import 'package:cyanitalk/src/features/profile/application/developer_settings_provider.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_error_widget.dart';
+import 'package:cyanitalk/src/features/profile/presentation/profile_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/about_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/developer_settings_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/licenses_page.dart';
+import 'package:cyanitalk/src/features/profile/presentation/settings/settings_page.dart';
+import 'package:cyanitalk/src/features/search/presentation/search_page.dart';
+import 'package:cyanitalk/src/features/welcome/application/welcome_state.dart';
+import 'package:cyanitalk/src/features/welcome/presentation/welcome_page.dart';
+import 'package:cyanitalk/src/shared/widgets/coming_soon_page.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/shared/widgets/responsive_shell.dart';
 
 part 'router.g.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
+final routerRefreshNotifier = ValueNotifier<int>(0);
 
 /// 自定义安全转换页面，防止 Windows AXTree 报错
 Page<T> _buildSafePage<T>({
@@ -78,10 +82,10 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
           return const ComingSoonPage();
         },
         loading: () => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          body: Center(child: CyaniLoadingIndicator()),
         ),
         error: (err, stack) => Scaffold(
-          body: Center(child: Text('Error: $err')),
+          body: CyaniErrorWidget(message: err.toString()),
         ),
       );
     },
@@ -98,11 +102,26 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
 /// 返回配置好的GoRouter实例
 @riverpod
 GoRouter goRouter(Ref ref) {
-  logger.info('Router: Initializing GoRouter with initial location: /misskey');
+  logger.info('Router: Initializing GoRouter');
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/misskey',
+    refreshListenable: routerRefreshNotifier,
+    redirect: (context, state) {
+      final welcomeDone = ref.read(welcomeCompletedProvider).asData?.value ?? false;
+      final location = state.uri.toString();
+
+      // 未完成欢迎页 → 强制跳转 /welcome
+      if (!welcomeDone && location != '/welcome') {
+        return '/welcome';
+      }
+      // 已完成欢迎页但在 /welcome → 跳转首页
+      if (welcomeDone && location == '/welcome') {
+        return '/misskey';
+      }
+      return null;
+    },
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -160,6 +179,12 @@ GoRouter goRouter(Ref ref) {
       ),
       // Top-level routes that don't have the navigation shell
       GoRoute(
+        path: '/welcome',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _buildSafePage(key: state.pageKey, child: const WelcomePage()),
+      ),
+      GoRoute(
         path: '/login',
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) =>
@@ -174,8 +199,10 @@ GoRouter goRouter(Ref ref) {
       GoRoute(
         path: '/settings',
         parentNavigatorKey: rootNavigatorKey,
-        pageBuilder: (context, state) =>
-            _buildSafePage(key: state.pageKey, child: const SettingsPage()),
+        pageBuilder: (context, state) => _buildSafePage(
+          key: state.pageKey,
+          child: const SettingsPage(),
+        ),
       ),
       GoRoute(
         path: '/about',

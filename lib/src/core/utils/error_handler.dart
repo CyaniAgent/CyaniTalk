@@ -111,7 +111,7 @@ class ErrorHandler {
           originalError: error,
           stackTrace: error.stackTrace,
         );
-      case DioExceptionType.unknown:
+      default:
         return AppError(
           type: ErrorType.unknown,
           message: 'error_unknown'.tr(),

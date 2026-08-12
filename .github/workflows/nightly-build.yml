@@ -2,7 +2,17 @@ name: Flutter Nightly Build CI/CD
 
 # 触发条件配置
 on:
-  workflow_dispatch: # 允许手动触发工作流，便于管理和测试
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '要构建的分支（定时构建默认 Dev）'
+        required: false
+        default: 'Dev'
+        type: choice
+        options:
+          - Dev
+          - main
+          - Beta
   schedule:
     - cron: "0 0 * * *" # 每天UTC时间0点触发（即北京时间8点），实现夜间构建
 
@@ -22,6 +32,7 @@ jobs:
       # 检出代码
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.branch || 'Dev' }}
           fetch-depth: 0 # 获取全部历史，以便计算版本号
 
       # 检查是否有代码变更（仅适用于夜间构建）
@@ -155,6 +166,8 @@ jobs:
     steps:
       # 检出代码
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || 'Dev' }}
 
       - name: Download updated pubspec.yaml
         uses: actions/download-artifact@v4

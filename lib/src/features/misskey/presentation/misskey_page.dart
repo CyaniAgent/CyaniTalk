@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '/src/shared/widgets/toast_helper.dart';
 import 'package:go_router/go_router.dart';
 import '/src/core/navigation/navigation.dart';
 import '/src/core/navigation/sub_navigation_notifier.dart';
@@ -10,6 +12,8 @@ import '/src/core/utils/logger.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
+import '/src/features/misskey/application/misskey_streaming_service.dart';
+import '/src/shared/widgets/cyani_error_widget.dart';
 import 'pages/misskey_aiscript_console_page.dart';
 import 'pages/misskey_announcements_page.dart';
 import 'pages/misskey_antennas_page.dart';
@@ -19,6 +23,9 @@ import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
+import '/src/shared/widgets/circle_icon_button.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import 'widgets/timeline_selector_sheet.dart';
 
 class MisskeyPage extends ConsumerStatefulWidget {
   const MisskeyPage({super.key});
@@ -30,15 +37,27 @@ class MisskeyPage extends ConsumerStatefulWidget {
 class _MisskeyPageState extends ConsumerState<MisskeyPage>
     with WidgetsBindingObserver {
   String _timelineType = 'Global';
+  bool _isToastVisible = false;
+  StreamSubscription<bool>? _toastSubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 监听 Toast 可见性变化
+    _toastSubscription = ref
+        .read(misskeyStreamingServiceProvider.notifier)
+        .toastVisibilityStream
+        .listen((visible) {
+      if (mounted) {
+        setState(() => _isToastVisible = visible);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _toastSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -137,12 +156,12 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               shadowColor: Colors.transparent,
               elevation: 0,
               scrolledUnderElevation: 0,
-              leading: IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () => ref
-                          .read(navigationControllerProvider.notifier)
-                          .openDrawer(),
-                    ),
+              leading: CircleIconButton(
+                icon: Icons.menu,
+                onPressed: () => ref
+                    .read(navigationControllerProvider.notifier)
+                    .openDrawer(),
+              ),
               title: selectedIndex == 0
                   ? _TimelineIconBar(
                       timelineType: _timelineType,
@@ -155,8 +174,18 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               pinned: true,
               snap: true,
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.search),
+                if (_isToastVisible)
+                  CircleIconButton(
+                    icon: Icons.refresh,
+                    tooltip: 'stream_refresh'.tr(),
+                    onPressed: () {
+                      ref
+                          .read(misskeyStreamingServiceProvider.notifier)
+                          .dismissToastAndReconnect();
+                    },
+                  ),
+                CircleIconButton(
+                  icon: Icons.search,
                   tooltip: 'misskey_page_global_search'.tr(),
                   onPressed: () => context.push('/search'),
                 ),
@@ -192,8 +221,8 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               child: pages[selectedIndex],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(child: Text('Error: $err')),
+          loading: () => const Center(child: CyaniLoadingIndicator()),
+          error: (err, stack) => CyaniErrorWidget(message: err.toString()),
         ),
       ),
     );
@@ -222,12 +251,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
       await ref.read(audioEngineProvider).playAsset(soundPath);
       if (mounted) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('misskey_page_please_login'.tr()),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showToast(title: 'misskey_page_please_login'.tr(), type: ToastificationType.warning);
         context.go('/profile');
       }
     }
@@ -285,74 +309,39 @@ class _TimelineIconBar extends ConsumerWidget {
 
   IconData _getIcon(String type) {
     return switch (type) {
+      'Home' => Icons.home_rounded,
       'Local' => Icons.language_rounded,
       'Social' => Icons.group_rounded,
       _ => Icons.public_rounded,
     };
   }
 
-  Color _getIconColor(String type) {
+  Color _getIconColor(String type, ColorScheme colorScheme) {
     return switch (type) {
-      'Local' => const Color(0xFF4CAF50),
-      'Social' => const Color(0xFF2196F3),
-      _ => const Color(0xFFFF9800),
-    };
-  }
-
-  String _getModeLabel(String type) {
-    return switch (type) {
-      'Local' => 'timeline_local'.tr(),
-      'Social' => 'timeline_social'.tr(),
-      _ => 'timeline_global'.tr(),
+      'Home' => colorScheme.primary,
+      'Local' => colorScheme.tertiary,
+      'Social' => colorScheme.primaryContainer,
+      _ => colorScheme.secondary,
     };
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    const onlineColor = Color(0xFF16D9C5);
+    final colorScheme = theme.colorScheme;
+    final onlineColor = colorScheme.primary;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        PopupMenuButton<String>(
-          tooltip: 'timeline'.tr(),
-          onSelected: onTimelineTypeChanged,
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'Global',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.public_rounded, color: _getIconColor('Global'), size: 18),
-                  const SizedBox(width: 8),
-                  Text('timeline_global'.tr()),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'Local',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.language_rounded, color: _getIconColor('Local'), size: 18),
-                  const SizedBox(width: 8),
-                  Text('timeline_local'.tr()),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'Social',
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.group_rounded, color: _getIconColor('Social'), size: 18),
-                  const SizedBox(width: 8),
-                  Text('timeline_social'.tr()),
-                ],
-              ),
-            ),
-          ],
+        GestureDetector(
+          onTap: () {
+            TimelineSelectorSheet.show(
+              context,
+              currentType: timelineType,
+              onTypeSelected: onTimelineTypeChanged,
+            );
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -365,15 +354,8 @@ class _TimelineIconBar extends ConsumerWidget {
               children: [
                 Icon(
                   _getIcon(timelineType),
-                  color: _getIconColor(timelineType),
+                  color: _getIconColor(timelineType, colorScheme),
                   size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  _getModeLabel(timelineType),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
                 const SizedBox(width: 4),
                 Icon(

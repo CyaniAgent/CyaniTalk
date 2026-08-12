@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '/src/shared/widgets/adaptive_sheet.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/application/aiscript_interpreter.dart';
@@ -77,13 +78,11 @@ class _MisskeyAiScriptConsolePageState
   }
 
   void _clearConsole() {
-    setState(() {
-      _output.clear();
-    });
+    setState(_output.clear);
   }
 
   void _showExampleScripts(BuildContext context) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       builder: (context) {
         return SafeArea(
@@ -138,6 +137,9 @@ class _MisskeyAiScriptConsolePageState
                     heroTag: 'clear_console',
                     onPressed: _clearConsole,
                     backgroundColor: Theme.of(context).colorScheme.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: const Icon(Icons.delete_outline),
                   ),
                   const SizedBox(height: 12),
@@ -146,6 +148,9 @@ class _MisskeyAiScriptConsolePageState
                     child: FloatingActionButton.extended(
                       heroTag: 'run_aiscript',
                       onPressed: _isRunning ? null : _runScript,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       icon: _isRunning
                           ? SizedBox(
                               width: 18,

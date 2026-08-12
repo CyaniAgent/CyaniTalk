@@ -50,6 +50,22 @@ abstract interface class IMisskeyRepository {
 
   Future<MisskeyUser> showUser(String userId);
 
+  Future<MisskeyUser> findUserByUsername(
+    String username, {
+    String? host,
+  });
+
+  Future<void> createFollow(String userId);
+
+  Future<void> deleteFollow(String userId);
+
+  Future<Map<String, dynamic>> getFollowRelation(String userId);
+
+  Future<List<Map<String, dynamic>>> getFollowers(
+    String userId, {
+    int limit = 30,
+  });
+
   Future<List<Note>> getChannelTimeline(
     String channelId, {
     int limit = 20,
@@ -103,6 +119,20 @@ abstract interface class IMisskeyRepository {
   Future<void> deleteDriveFile(String fileId);
 
   Future<void> deleteDriveFolder(String folderId);
+
+  Future<DriveFile> updateDriveFile(
+    String fileId, {
+    String? name,
+    String? folderId,
+    bool? isSensitive,
+    String? comment,
+  });
+
+  Future<DriveFolder> updateDriveFolder(
+    String folderId, {
+    String? name,
+    String? parentId,
+  });
 
   Future<DriveFile> uploadDriveFile(
     List<int> bytes,
@@ -174,6 +204,30 @@ abstract interface class IMisskeyRepository {
     String query, {
     int limit = 20,
     String? offset,
+  });
+
+  /// 获取用户帖子列表
+  Future<List<Note>> getUserNotes(
+    String userId, {
+    int limit = 20,
+    String? untilId,
+    bool? withReplies,
+    bool? withFiles,
+  });
+
+  /// 获取用户云盘文件列表
+  Future<List<DriveFile>> getUserDriveFiles(
+    String userId, {
+    int limit = 30,
+    String? untilId,
+    String? folderId,
+  });
+
+  /// 获取用户画廊帖子列表
+  Future<List<Map<String, dynamic>>> getUserGalleryPosts(
+    String userId, {
+    int limit = 10,
+    String? untilId,
   });
 
   /// 获取公告列表

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
@@ -10,9 +11,13 @@ import '/src/features/misskey/domain/messaging_message.dart';
 
 import '/src/features/auth/application/auth_service.dart';
 import '/src/features/auth/domain/account.dart';
-import '/src/core/utils/logger.dart';
 import '/src/core/config/constants.dart';
 import '/src/core/services/streaming/streaming_service_interface.dart';
+import '/src/core/services/audio_engine.dart';
+import '/src/features/profile/application/network_settings_provider.dart';
+import '/src/features/profile/application/sound_settings_provider.dart';
+import '/src/shared/widgets/toast_helper.dart';
+import '/src/core/utils/utils.dart';
 
 part 'misskey_streaming_service.g.dart';
 
@@ -25,13 +30,21 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       StreamController<Map<String, dynamic>>.broadcast();
   final _messageController = StreamController<MessagingMessage>.broadcast();
   final _statusController = StreamController<StreamingStatus>.broadcast();
+  final _toastVisibilityController = StreamController<bool>.broadcast();
 
   final Set<String> _activeTimelineSubscriptions = {};
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
+  Timer? _backgroundMaxTimer;
+  Timer? _toastHideTimer;
+  Future<void>? _audioPlayFuture;
+  DateTime? _backgroundStartTime;
   int _reconnectAttempts = 0;
-  static const int _maxReconnectAttempts = 5;
   StreamingStatus _status = StreamingStatus.disconnected;
+
+  static const _foregroundHeartbeat = Duration(seconds: 30);
+  static const _backgroundHeartbeat = Duration(seconds: 90);
+  Duration _heartbeatInterval = _foregroundHeartbeat;
 
   @override
   Stream<NoteEvent> get noteStream => _noteController.stream;
@@ -45,6 +58,9 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   @override
   Stream<StreamingStatus> get statusStream => _statusController.stream;
+
+  /// Toast 可见性流，用于在 AppBar 中显示/隐藏刷新按钮
+  Stream<bool> get toastVisibilityStream => _toastVisibilityController.stream;
 
   StreamingStatus get status => _status;
 
@@ -86,12 +102,16 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       _messageController.close();
       _notificationController.close();
       _statusController.close();
+      _toastVisibilityController.close();
     });
   }
 
   void _cleanup() {
     _reconnectTimer?.cancel();
     _heartbeatTimer?.cancel();
+    _backgroundMaxTimer?.cancel();
+    _toastHideTimer?.cancel();
+    _backgroundStartTime = null;
     _channel?.sink.close();
     _channel = null;
     _activeTimelineSubscriptions.clear();
@@ -100,33 +120,71 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   @override
   void dispose() {
     _cleanup();
+    _toastVisibilityController.close();
   }
 
   @override
   void reconnect() {
+    // 如果刚从后台回来，无论当前状态如何都强制重连（连接可能已过期）
+    if (_backgroundStartTime != null) {
+      logger.info('MisskeyStreaming: Returning from background, forcing reconnect...');
+      _cleanup();
+      _updateStatus(StreamingStatus.disconnected);
+      _reconnectAttempts = 0;
+      final subscriptionsToRestore = Set<String>.from(_activeTimelineSubscriptions);
+      _connect().then((_) {
+        if (!ref.mounted) return;
+        for (final channelName in subscriptionsToRestore) {
+          _subscribeToChannel(channelName);
+        }
+      });
+      return;
+    }
+
+    if (_status == StreamingStatus.connected && _channel != null) {
+      logger.info('MisskeyStreaming: Already connected, skipping reconnect');
+      return;
+    }
     logger.info('MisskeyStreaming: Manually triggering reconnect...');
+    _reconnectAttempts = 0;
+    _reconnectTimer?.cancel();
     // Store current subscriptions to restore them after connection
     final subscriptionsToRestore = Set<String>.from(_activeTimelineSubscriptions);
     _connect().then((_) {
+      if (!ref.mounted) return;
       for (final channelName in subscriptionsToRestore) {
         _subscribeToChannel(channelName);
       }
     });
   }
 
+  bool _isConnecting = false;
+
   Future<void> _connect() async {
     if (!ref.mounted) return;
+    if (_isConnecting) {
+      logger.info('MisskeyStreaming: Already connecting, skipping...');
+      return;
+    }
+    _isConnecting = true;
 
     final account = ref.read(selectedMisskeyAccountProvider).value;
     if (account == null) {
       _updateStatus(StreamingStatus.disconnected);
+      _isConnecting = false;
       return;
     }
 
     _cleanup();
     _updateStatus(StreamingStatus.connecting);
 
-    final uri = Uri.parse('wss://${account.host}/streaming?i=${account.token}');
+    // 防御性清理：移除无效端口号（如 :0），防止 Cloudflare 524 错误
+    final host = sanitizeHost(account.host);
+    if (host != account.host) {
+      logger.warning('MisskeyStreaming: Sanitized host from "${account.host}" to "$host"');
+    }
+
+    final uri = Uri.parse('wss://$host/streaming?i=${account.token}');
     logger.info('MisskeyStreaming: Connecting to $uri');
 
     try {
@@ -137,16 +195,16 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       // 显式设置闲置超时
       client.idleTimeout = const Duration(seconds: 120);
 
+      final networkSettings = ref.read(networkSettingsProvider).value;
+      final userAgent = networkSettings?.effectiveUserAgent ?? Constants.getUserAgent();
+
       // 使用局部变量防止竞态条件
       final channel = IOWebSocketChannel.connect(
         uri,
         customClient: client,
         headers: {
-          'User-Agent': Constants.getUserAgent(),
-          'Connection': 'Upgrade',
-          'Upgrade': 'websocket',
+          'User-Agent': userAgent,
         },
-        pingInterval: const Duration(seconds: 20), // 启用内置心跳
       );
       _channel = channel;
 
@@ -199,25 +257,35 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       logger.error('MisskeyStreaming Connection failed (Catch): $e');
       _updateStatus(StreamingStatus.error);
       _handleDisconnect(account);
+    } finally {
+      _isConnecting = false;
     }
   }
 
   void _handleDisconnect(Account account) {
     _reconnectTimer?.cancel();
-    
-    if (_reconnectAttempts >= _maxReconnectAttempts) {
-      logger.error('MisskeyStreaming: Maximum reconnection attempts reached ($_maxReconnectAttempts). Stopping automatic retry.');
+
+    final settingsAsync = ref.read(networkSettingsProvider);
+    final maxAttempts = settingsAsync.value?.webSocketReconnectAttempts ?? 5;
+
+    _reconnectAttempts++;
+
+    if (_reconnectAttempts >= maxAttempts) {
+      logger.error('MisskeyStreaming: Maximum reconnection attempts reached ($maxAttempts). Stopping automatic retry.');
       _updateStatus(StreamingStatus.error);
+      _showMaxRetryToast();
       return;
     }
 
     // 指数避退重连
-    final delay = Duration(seconds: (1 << _reconnectAttempts));
-    _reconnectAttempts++;
+    final delay = Duration(seconds: (1 << (_reconnectAttempts - 1)));
 
     logger.info(
-      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts/$_maxReconnectAttempts)',
+      'MisskeyStreaming: Scheduling reconnect in ${delay.inSeconds}s (Attempt $_reconnectAttempts/$maxAttempts)',
     );
+
+    _showReconnectToast();
+
     _reconnectTimer = Timer(delay, () {
       if (!ref.mounted) return;
 
@@ -228,9 +296,53 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     });
   }
 
+  void _showReconnectToast() {
+    _toastVisibilityController.add(true);
+    showToast(
+      title: 'stream_disconnected'.tr(),
+      description: 'stream_reconnecting'.tr(namedArgs: {'n': _reconnectAttempts.toString()}),
+      type: ToastificationType.warning,
+      autoCloseDuration: const Duration(seconds: 8),
+    );
+    // 8 秒后自动隐藏刷新按钮
+    _toastHideTimer?.cancel();
+    _toastHideTimer = Timer(const Duration(seconds: 8), () {
+      if (!_toastVisibilityController.isClosed) {
+        _toastVisibilityController.add(false);
+      }
+    });
+  }
+
+  void _showMaxRetryToast() {
+    final soundAsync = ref.read(soundSettingsProvider);
+    final soundPath = soundAsync.value?.streamErrorSound;
+    if (soundPath != null && soundPath.isNotEmpty) {
+      _audioPlayFuture = ref.read(audioEngineProvider).playAsset(soundPath);
+      _audioPlayFuture?.catchError((_) {});
+    }
+
+    _toastVisibilityController.add(true);
+    showToast(
+      title: 'stream_reconnect_failed_title'.tr(),
+      description: 'stream_reconnect_failed_body'.tr(),
+      type: ToastificationType.error,
+      autoCloseDuration: null, // 持续显示，直到用户手动刷新
+    );
+  }
+
+  /// 关闭所有 Toast 并隐藏刷新按钮，然后尝试重连
+  void dismissToastAndReconnect() {
+    toastification.dismissAll();
+    _toastVisibilityController.add(false);
+    _reconnectAttempts = 0;
+    _reconnectTimer?.cancel();
+    reconnect();
+  }
+
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    final interval = _heartbeatInterval;
+    _heartbeatTimer = Timer.periodic(interval, (timer) {
       if (_status == StreamingStatus.connected && _channel != null) {
         try {
           // Misskey 官方网页客户端通常会发送一个简单的 "h" 作为应用层心跳
@@ -249,7 +361,39 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     });
   }
 
-  Future<void> _disconnect() async {
+  void setBackgroundMode(bool isBackground) {
+    final newInterval =
+        isBackground ? _backgroundHeartbeat : _foregroundHeartbeat;
+    if (_heartbeatInterval == newInterval) return;
+    _heartbeatInterval = newInterval;
+    logger.info(
+      'MisskeyStreaming: 切换心跳频率为 ${isBackground ? "90s(后台)" : "30s(前台)"}',
+    );
+
+    if (isBackground) {
+      _backgroundStartTime = DateTime.now();
+      // 启动后台最大时长定时器
+      _backgroundMaxTimer?.cancel();
+      final maxDuration = ref.read(networkSettingsProvider).value?.webSocketBackgroundMaxDuration ?? 3600;
+      _backgroundMaxTimer = Timer(Duration(seconds: maxDuration), () {
+        if (_status == StreamingStatus.connected) {
+          logger.info('MisskeyStreaming: 后台超时 ${maxDuration}s，强制重连');
+          _cleanup();
+          _updateStatus(StreamingStatus.disconnected);
+          _connect();
+        }
+      });
+    } else {
+      _backgroundMaxTimer?.cancel();
+      _backgroundStartTime = null;
+    }
+
+    if (_status == StreamingStatus.connected && _channel != null) {
+      _startHeartbeat();
+    }
+  }
+
+  void _disconnect() {
     _cleanup();
     _updateStatus(StreamingStatus.disconnected);
   }

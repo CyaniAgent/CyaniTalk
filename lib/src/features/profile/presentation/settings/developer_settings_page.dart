@@ -3,9 +3,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/features/profile/application/developer_settings_provider.dart';
+import '/src/features/welcome/application/welcome_state.dart';
+import '/src/features/welcome/presentation/welcome_page.dart';
+import '/src/core/theme/color_constants.dart';
+import '/src/core/widgets/settings_widgets.dart';
+import 'design_playground_page.dart';
 import 'log_settings_page.dart';
+import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/toast_helper.dart';
 
-/// 开发者设置页面组件
 class DeveloperSettingsPage extends ConsumerStatefulWidget {
   const DeveloperSettingsPage({super.key});
 
@@ -15,17 +21,15 @@ class DeveloperSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
+  // Colors moved to SettingsIconColors in core/theme/color_constants.dart
+
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text(
-              'could_not_launch_url'.tr(namedArgs: {'url': urlString}),
-            ),
-          ),
+        showToast(
+          title: 'could_not_launch_url'.tr(namedArgs: {'url': urlString}),
+          type: ToastificationType.error,
         );
       }
     }
@@ -64,72 +68,107 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
       appBar: AppBar(title: Text('settings_developer_title'.tr())),
       body: developerModeAsync.when(
         data: (developerMode) => ListView(
+          padding: const EdgeInsets.only(top: 8, bottom: 32),
           children: [
-            _buildSectionHeader(context, 'settings_logs_section_basic'.tr()),
-            SwitchListTile(
-              secondary: const Icon(Icons.bug_report_outlined),
-              title: Text('settings_developer_mode_title'.tr()),
-              subtitle: Text('settings_developer_mode_description'.tr()),
-              value: developerMode,
-              onChanged: (value) {
-                if (value) {
-                  _showDeveloperModeWarning();
-                } else {
-                  ref
-                      .read(developerSettingsProvider.notifier)
-                      .setDeveloperMode(false);
-                }
-              },
+            SettingsCardGroup(
+              children: [
+                SettingsSwitchTile(
+                  icon: Icons.bug_report_outlined,
+                  iconColor: SettingsIconColors.amber,
+                  title: 'settings_developer_mode_title'.tr(),
+                  subtitle: 'settings_developer_mode_description'.tr(),
+                  value: developerMode,
+                  onChanged: (value) {
+                    if (value) {
+                      _showDeveloperModeWarning();
+                    } else {
+                      ref
+                          .read(developerSettingsProvider.notifier)
+                          .setDeveloperMode(false);
+                    }
+                  },
+                ),
+              ],
             ),
 
-            const Divider(),
-            _buildSectionHeader(context, 'settings_section_system'.tr()),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: Text('settings_logs_title'.tr()),
-              subtitle: Text('settings_logs_description'.tr()),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const LogSettingsPage(),
+            if (developerMode) ...[
+              const SizedBox(height: 16),
+              SettingsCardGroup(
+                children: [
+                  SettingsTile(
+                    icon: Icons.open_in_new,
+                    iconColor: SettingsIconColors.amber,
+                    title: 'settings_developer_welcome_title'.tr(),
+                    subtitle: 'settings_developer_welcome_description'.tr(),
+                    onTap: () {
+                      ref.read(welcomeCompletedProvider.notifier).reset();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ProviderScope(
+                            overrides: [
+                              currentWelcomeModeProvider.overrideWith(
+                                (ref) => WelcomePageMode.debug,
+                              ),
+                            ],
+                            child: const WelcomePage(),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                  SettingsTile(
+                    icon: Icons.design_services_outlined,
+                    iconColor: SettingsIconColors.amber,
+                    title: 'settings_developer_design_playground'.tr(),
+                    subtitle: 'settings_developer_design_playground_description'.tr(),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DesignPlaygroundPage()),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            const SizedBox(height: 16),
+            SettingsCardGroup(
+              children: [
+                SettingsTile(
+                  icon: Icons.history,
+                  iconColor: SettingsIconColors.brown,
+                  title: 'settings_logs_title'.tr(),
+                  subtitle: 'settings_logs_description'.tr(),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LogSettingsPage()),
+                  ),
+                ),
+              ],
             ),
 
-            const Divider(),
-            _buildSectionHeader(context, 'about_contributors'.tr()),
-            ListTile(
-              leading: const Icon(Icons.feedback_outlined),
-              title: Text('settings_developer_submit_issue'.tr()),
-              onTap: () =>
-                  _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.merge_type),
-              title: Text('settings_developer_submit_pr'.tr()),
-              onTap: () =>
-                  _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
+            const SizedBox(height: 16),
+            SettingsCardGroup(
+              children: [
+                SettingsTile(
+                  icon: Icons.feedback_outlined,
+                  iconColor: SettingsIconColors.brown,
+                  title: 'settings_developer_submit_issue'.tr(),
+                  onTap: () =>
+                      _launchUrl('https://github.com/CyaniAgent/CyaniTalk/issues'),
+                ),
+                SettingsTile(
+                  icon: Icons.merge_type,
+                  iconColor: SettingsIconColors.brown,
+                  title: 'settings_developer_submit_pr'.tr(),
+                  onTap: () =>
+                      _launchUrl('https://github.com/CyaniAgent/CyaniTalk/pulls'),
+                ),
+              ],
             ),
           ],
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        loading: () => const Center(child: CyaniLoadingIndicator()),
+        error: (_, _) => const Center(child: Text('Error')),
       ),
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
 }

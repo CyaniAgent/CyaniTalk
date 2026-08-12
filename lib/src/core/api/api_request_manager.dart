@@ -31,6 +31,9 @@ class ApiRequestManager {
   factory ApiRequestManager() => _instance;
   ApiRequestManager._();
 
+  /// 当前账号标识（host + token），用于隔离不同账号的缓存/去重
+  String _accountKey = '';
+
   /// 请求缓存
   final Map<String, ApiCacheItem<dynamic>> _cache = {};
 
@@ -39,6 +42,14 @@ class ApiRequestManager {
 
   /// 缓存清理定时器
   Timer? _cacheCleanupTimer;
+
+  /// 设置当前账号标识
+  void setAccountContext(String host, String? token) {
+    _accountKey = '$host:${token ?? ''}';
+    // 切换账号时清理旧账号的缓存和去重
+    _cache.clear();
+    _pendingRequests.clear();
+  }
 
   /// 初始化
   void initialize() {
@@ -49,10 +60,10 @@ class ApiRequestManager {
     });
   }
 
-  /// 生成请求键
+  /// 生成请求键（包含账号标识，防止不同账号串台）
   String _generateKey(String endpoint, [Map<String, dynamic>? params]) {
     final paramsString = params != null ? params.toString() : '';
-    return '$endpoint:$paramsString';
+    return '$_accountKey:$endpoint:$paramsString';
   }
 
   /// 执行 API 请求，支持缓存和去重

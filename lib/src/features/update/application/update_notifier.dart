@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '/src/core/utils/logger.dart';
 import '/src/features/update/domain/app_update.dart';
+
+part 'update_notifier.g.dart';
 
 enum UpdateState {
   idle,
@@ -24,21 +26,27 @@ class UpdateStateData {
   });
 }
 
-class UpdateNotifier extends Notifier<UpdateStateData> {
+@riverpod
+class Update extends _$Update {
   @override
   UpdateStateData build() => const UpdateStateData();
 
   Future<void> checkForUpdate({bool silent = false}) async {
     if (state.state == UpdateState.checking) return;
 
-    state = UpdateStateData(state: UpdateState.checking);
+    state = const UpdateStateData(state: UpdateState.checking);
 
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version;
       logger.info('UpdateNotifier: Current version: $currentVersion');
 
-      final response = await Dio().get(
+      final response = await Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      ).get(
         'https://api.github.com/repos/CyaniAgent/CyaniTalk/releases/latest',
         options: Options(
           headers: {
@@ -50,7 +58,7 @@ class UpdateNotifier extends Notifier<UpdateStateData> {
 
       final tagName = response.data['tag_name'] as String?;
       if (tagName == null) {
-        state = UpdateStateData(
+        state = const UpdateStateData(
           state: UpdateState.error,
           errorMessage: '无法获取最新版本信息',
         );
@@ -68,7 +76,7 @@ class UpdateNotifier extends Notifier<UpdateStateData> {
         );
       } else {
         logger.info('UpdateNotifier: App is up to date');
-        state = UpdateStateData(state: UpdateState.upToDate);
+        state = const UpdateStateData(state: UpdateState.upToDate);
       }
     } catch (e) {
       logger.error('UpdateNotifier: Check failed: $e');
@@ -106,6 +114,4 @@ class UpdateNotifier extends Notifier<UpdateStateData> {
   }
 }
 
-final updateProvider = NotifierProvider<UpdateNotifier, UpdateStateData>(
-  UpdateNotifier.new,
-);
+

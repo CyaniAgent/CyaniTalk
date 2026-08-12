@@ -99,7 +99,7 @@ class SidebarLayoutState {
       return 72.0;
     }
 
-    final ratio = 1 / 3;
+    const ratio = 1 / 3;
     final calculatedWidth = availableWidth * ratio;
 
     const minWidth = 240.0;

@@ -1,13 +1,15 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '/src/core/utils/logger.dart';
-import '/src/features/misskey/application/misskey_notifier.dart';
-import '/src/features/misskey/application/timeline_animation_state.dart';
-import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
-import '/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:cyanitalk/src/core/utils/logger.dart';
+import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
+import 'package:cyanitalk/src/features/misskey/application/timeline_animation_state.dart';
+import 'package:cyanitalk/src/features/misskey/domain/note.dart';
+import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
+import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
   const MisskeyTimelinePage({super.key, required this.timelineType});
@@ -64,7 +66,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
 
       final currentOffset = _scrollController.offset;
 
-      // 如果在顶部，并且是往上滚，则执行“顶端往上滚动3次刷新”
+      // 如果在顶部，并且是往上滚，则执行"顶端往上滚动3次刷新"
       if (currentOffset <= 0 && dy < 0) {
         _handleUpScrollRefresh();
         return;
@@ -163,7 +165,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
             .refresh();
       },
       child: timelineAsync.maybeWhen(
-        data: (notes) => _buildList(notes),
+        data: _buildList,
         loading: () {
           if (timelineAsync.hasValue) {
             return _buildList(timelineAsync.value!);
@@ -176,7 +178,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
           }
           return _buildErrorState(err);
         },
-        orElse: () => _buildLoadingState(),
+        orElse: _buildLoadingState,
       ),
     );
   }
@@ -194,7 +196,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
     );
   }
 
-  Widget _buildList(List<dynamic> notes) {
+  Widget _buildList(List<Note> notes) {
     if (notes.isEmpty) return _buildEmptyState(context);
 
     final isWindows = Theme.of(context).platform == TargetPlatform.windows;
@@ -205,7 +207,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
       child: ListView.builder(
         controller: _scrollController,
       itemCount: notes.length + 1,
-      cacheExtent: isWindows ? 500 : 1500,
+      scrollCacheExtent: ScrollCacheExtent.pixels(isWindows ? 500 : 1500),
       padding: const EdgeInsets.symmetric(vertical: 8),
       physics: const AlwaysScrollableScrollPhysics(),
       itemBuilder: (context, index) {
@@ -288,7 +290,7 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
                   const SizedBox(height: 16),
                   Text('Error: $err', textAlign: TextAlign.center),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  FilledButton(
                     onPressed: () {
                       ref.read(timelineAnimationProvider.notifier).reset();
                       ref

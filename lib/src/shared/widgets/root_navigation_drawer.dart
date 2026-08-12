@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
-import '/src/core/navigation/navigation.dart';
-import '/src/core/navigation/navigation_element.dart';
-import '/src/core/navigation/sub_navigation_notifier.dart';
-import 'user_navigation_header.dart';
+import 'package:cyanitalk/src/core/navigation/navigation.dart';
+import 'package:cyanitalk/src/core/navigation/navigation_element.dart';
+import 'package:cyanitalk/src/core/navigation/sub_navigation_notifier.dart';
+import 'package:cyanitalk/src/shared/widgets/user_navigation_header.dart';
 
 class RootNavigationDrawer extends ConsumerWidget {
   final int selectedRootIndex;
@@ -39,18 +39,13 @@ class RootNavigationDrawer extends ConsumerWidget {
             .toList() ??
         [];
 
-    // Actually, selectedRootIndex passed here is already the display index.
-    // Let's refine the logic to match ResponsiveShell.
     final effectiveSelectedRootIndex = selectedRootIndex >= rootItems.length
         ? -1
         : selectedRootIndex;
 
     return NavigationDrawer(
-      selectedIndex:
-          -1, // We'll manage highlighting manually to support hierarchical view
-      onDestinationSelected: (index) {
-        // This is called for any destination. We need to distinguish between root and sub.
-      },
+      selectedIndex: -1,
+      onDestinationSelected: (index) {},
       children: [
         UserNavigationHeader(
           isDrawer: true,
@@ -98,7 +93,6 @@ class RootNavigationDrawer extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Custom root item implementation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
           child: MouseRegion(
