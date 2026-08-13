@@ -67,17 +67,18 @@ Page<T> _buildSafePage<T>({
   );
 }
 
-/// 根据开发者模式状态返回合适的消息页面
-Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
-  // 这里需要使用 ConsumerWidget 来访问 provider
+/// 根据开发者模式状态返回消息相关页面
+///
+/// 开发者模式未开启时显示 ComingSoonPage，防止未授权访问消息功能。
+Widget _buildDeveloperGuardedPage(Widget child) {
   return Consumer(
-    builder: (context, ref, child) {
+    builder: (context, ref, _) {
       final developerModeAsync = ref.watch(developerSettingsProvider);
-      
+
       return developerModeAsync.when(
         data: (developerMode) {
           if (developerMode) {
-            return const MessagingPage();
+            return child;
           }
           return const ComingSoonPage();
         },
@@ -90,6 +91,11 @@ Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
       );
     },
   );
+}
+
+/// 消息主页（开发者模式开启时显示）
+Widget _buildMessagingPage(BuildContext context, GoRouterState state) {
+  return _buildDeveloperGuardedPage(const MessagingPage());
 }
 
 /// 提供应用程序的GoRouter实例
@@ -252,10 +258,12 @@ GoRouter goRouter(Ref ref) {
           final user = state.extra as MisskeyUser?;
           return _buildSafePage(
             key: state.pageKey,
-            child: ChatPage(
-              id: userId,
-              type: ChatType.direct,
-              initialData: user,
+            child: _buildDeveloperGuardedPage(
+              ChatPage(
+                id: userId,
+                type: ChatType.direct,
+                initialData: user,
+              ),
             ),
           );
         },
@@ -268,7 +276,13 @@ GoRouter goRouter(Ref ref) {
           final room = state.extra as ChatRoom?;
           return _buildSafePage(
             key: state.pageKey,
-            child: ChatPage(id: roomId, type: ChatType.room, initialData: room),
+            child: _buildDeveloperGuardedPage(
+              ChatPage(
+                id: roomId,
+                type: ChatType.room,
+                initialData: room,
+              ),
+            ),
           );
         },
       ),

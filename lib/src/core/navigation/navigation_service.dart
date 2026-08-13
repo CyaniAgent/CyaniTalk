@@ -19,16 +19,28 @@ class NavigationService {
     return _itemBranchIndexMap[itemId] ?? 0;
   }
 
+  /// 判断导航项在给定开发者模式下是否可见
+  ///
+  /// 消息页面仅在开发者模式下显示
+  static bool isItemVisible(String itemId, bool developerMode) {
+    if (itemId == 'messages') {
+      return developerMode;
+    }
+    return true;
+  }
+
   /// 将显示索引映射到分支索引
   ///
   /// [displayIndex] - 显示索引
   /// [navigationSettings] - 导航设置
+  /// [developerMode] - 开发者模式，未开启时隐藏消息导航项
   ///
   /// 返回对应的分支索引
   static int mapDisplayIndexToBranchIndex(
     int displayIndex,
-    NavigationSettings navigationSettings,
-  ) {
+    NavigationSettings navigationSettings, {
+    bool developerMode = true,
+  }) {
     int currentDisplayIndex = 0;
 
     // 遍历启用的导航项元素
@@ -36,7 +48,7 @@ class NavigationService {
       if (element.type == NavigationElementType.item) {
         final itemElement = element as NavigationItemElement;
         final item = itemElement.item;
-        if (item.isEnabled) {
+        if (item.isEnabled && isItemVisible(item.id, developerMode)) {
           if (currentDisplayIndex == displayIndex) {
             return getBranchIndexForItem(item.id);
           }
@@ -52,12 +64,14 @@ class NavigationService {
   ///
   /// [branchIndex] - 分支索引
   /// [navigationSettings] - 导航设置
+  /// [developerMode] - 开发者模式，未开启时隐藏消息导航项
   ///
   /// 返回对应的显示索引
   static int mapBranchIndexToDisplayIndex(
     int branchIndex,
-    NavigationSettings navigationSettings,
-  ) {
+    NavigationSettings navigationSettings, {
+    bool developerMode = true,
+  }) {
     int currentDisplayIndex = 0;
 
     // 遍历启用的导航项元素
@@ -65,7 +79,7 @@ class NavigationService {
       if (element.type == NavigationElementType.item) {
         final itemElement = element as NavigationItemElement;
         final item = itemElement.item;
-        if (item.isEnabled) {
+        if (item.isEnabled && isItemVisible(item.id, developerMode)) {
           if (getBranchIndexForItem(item.id) == branchIndex) {
             return currentDisplayIndex;
           }
