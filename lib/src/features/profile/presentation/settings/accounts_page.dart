@@ -9,9 +9,16 @@ class AccountsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('profile_unified_login_manager'.tr())),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: AssociatedAccountsSection(),
+      body: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight - 16,
+            ),
+            child: const AssociatedAccountsSection(),
+          ),
+        ),
       ),
     );
   }

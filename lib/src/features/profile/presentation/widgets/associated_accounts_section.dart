@@ -68,26 +68,29 @@ class _AssociatedAccountsSectionState
 
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        const SizedBox(height: 40),
-        Icon(
-          Icons.account_circle_outlined,
-          size: 80,
-          color: colorScheme.outlineVariant,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'accounts_no_linked'.tr(),
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: () => _showAddAccountDialog(context),
-          icon: const Icon(Icons.add),
-          label: Text('accounts_add_account'.tr()),
-        ),
-      ],
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 40),
+          Icon(
+            Icons.account_circle_outlined,
+            size: 80,
+            color: colorScheme.outlineVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'accounts_no_linked'.tr(),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: () => _showAddAccountDialog(context),
+            icon: const Icon(Icons.add),
+            label: Text('accounts_add_account'.tr()),
+          ),
+        ],
+      ),
     );
   }
 
