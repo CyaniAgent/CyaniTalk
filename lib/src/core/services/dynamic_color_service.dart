@@ -67,6 +67,20 @@ class DynamicColorService extends WidgetsBindingObserver {
 
   /// 从系统获取强调色（跨平台）
   Future<void> _fetchAccentColor() async {
+    // Android 12+：优先通过 CorePalette 获取系统动态色（还原度最高）
+    // iOS：该 dynamic_color 版本未实现，返回 null/异常后走桌面通道
+    try {
+      final corePalette = await DynamicColorPlugin.getCorePalette();
+      if (corePalette != null) {
+        // 以系统主色调（tone 40）作为种子色，由 _updateColor 生成 ColorScheme
+        _updateColor(Color(corePalette.primary.get(40)));
+        return;
+      }
+    } catch (e) {
+      // 非 Android 平台 getCorePalette 不受支持，回退到 getAccentColor
+    }
+
+    // macOS / Windows / Linux：获取系统强调色
     try {
       final color = await DynamicColorPlugin.getAccentColor();
       if (color != null) {
