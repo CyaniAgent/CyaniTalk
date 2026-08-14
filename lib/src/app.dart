@@ -436,11 +436,6 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
       }
     }
 
-    const capsuleShape = StadiumBorder();
-    final smallRadiusShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    );
-
     final theme = ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
@@ -451,24 +446,49 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
         surfaceTintColor: colorScheme.surface,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        shadowColor: Colors.transparent,
+        scrolledUnderElevation: 3,
       ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(shape: capsuleShape),
+      badgeTheme: const BadgeThemeData(),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: colorScheme.surfaceContainerLow,
+        showDragHandle: true,
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(shape: capsuleShape),
+      cardTheme: CardThemeData(
+        elevation: 1,
+        surfaceTintColor: colorScheme.surfaceTint,
       ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(shape: smallRadiusShape),
+      checkboxTheme: const CheckboxThemeData(),
+      chipTheme: const ChipThemeData(),
+      datePickerTheme: const DatePickerThemeData(),
+      dialogTheme: DialogThemeData(
+        backgroundColor: colorScheme.surfaceContainerHigh,
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(shape: capsuleShape),
+      dividerTheme: const DividerThemeData(),
+      dropdownMenuTheme: const DropdownMenuThemeData(),
+      expansionTileTheme: const ExpansionTileThemeData(),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(),
+      iconButtonTheme: const IconButtonThemeData(),
+      inputDecorationTheme: const InputDecorationThemeData(
+        filled: true,
+        border: OutlineInputBorder(),
       ),
+      listTileTheme: const ListTileThemeData(),
+      menuTheme: const MenuThemeData(),
+      navigationDrawerTheme: NavigationDrawerThemeData(
+        backgroundColor: colorScheme.surfaceContainerLow,
+      ),
+      popupMenuTheme: const PopupMenuThemeData(),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(),
+      radioTheme: const RadioThemeData(),
+      segmentedButtonTheme: const SegmentedButtonThemeData(),
+      sliderTheme: const SliderThemeData(),
+      snackBarTheme: const SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+      ),
+      switchTheme: const SwitchThemeData(),
+      tabBarTheme: const TabBarThemeData(),
+      timePickerTheme: const TimePickerThemeData(),
+      tooltipTheme: const TooltipThemeData(),
     );
 
     final platform = Theme.of(context).platform;
