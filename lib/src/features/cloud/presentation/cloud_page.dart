@@ -19,7 +19,6 @@ import '/src/features/misskey/domain/drive_folder.dart';
 import '/src/features/auth/application/auth_service.dart';
 import '/src/shared/widgets/login_reminder.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
-import '/src/shared/widgets/m3e_context_menu.dart';
 import '/src/features/common/presentation/pages/media_viewer_page.dart';
 import '/src/features/common/presentation/widgets/media/audio_player_sheet.dart';
 import '/src/features/misskey/presentation/pages/misskey_post_page.dart';
@@ -1023,95 +1022,183 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
     );
   }
 
-  void _showEmptyAreaContextMenu(
+  /// 构建原生 PopupMenuItem 的 icon + label(+trailing) 内容行。
+  Widget _menuRow(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    Color? iconColor,
+    Color? textColor,
+    Widget? trailing,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: iconColor ?? colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: textColor != null ? TextStyle(color: textColor) : null,
+        ),
+        if (trailing != null) ...[
+          const SizedBox(width: 8),
+          trailing,
+        ],
+      ],
+    );
+  }
+
+  Future<void> _showEmptyAreaContextMenu(
     BuildContext context,
     WidgetRef ref,
     DriveState state,
     Offset position,
-  ) {
-    M3EContextMenu.show<String>(
+  ) async {
+    final value = await showMenu<String>(
       context: context,
-      position: position,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
       items: [
-        M3EMenuItemData(value: 'refresh', icon: Icons.refresh, label: 'cloud_refresh'.tr()),
-        const M3EMenuItemData.separator(),
-        M3EMenuItemData(value: 'upload', icon: Icons.upload_file, label: 'cloud_upload_file'.tr()),
-        M3EMenuItemData(value: 'create_folder', icon: Icons.create_new_folder, label: 'cloud_create_folder'.tr()),
-        const M3EMenuItemData.separator(),
-        M3EMenuItemData(value: 'sort', icon: Icons.sort, label: 'cloud_sort_by'.tr()),
-        M3EMenuItemData(value: 'open_in_browser', icon: Icons.open_in_browser, label: 'cloud_open_in_instance'.tr()),
+        PopupMenuItem(
+          value: 'refresh',
+          child: _menuRow(context, Icons.refresh, 'cloud_refresh'.tr()),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'upload',
+          child: _menuRow(context, Icons.upload_file, 'cloud_upload_file'.tr()),
+        ),
+        PopupMenuItem(
+          value: 'create_folder',
+          child: _menuRow(context, Icons.create_new_folder, 'cloud_create_folder'.tr()),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'sort',
+          child: _menuRow(context, Icons.sort, 'cloud_sort_by'.tr()),
+        ),
+        PopupMenuItem(
+          value: 'open_in_browser',
+          child: _menuRow(context, Icons.open_in_browser, 'cloud_open_in_instance'.tr()),
+        ),
       ],
-      onSelected: (value) {
-        if (!context.mounted) return;
-        switch (value) {
-          case 'refresh':
-            ref.read(misskeyDriveProvider.notifier).refresh();
-          case 'upload':
-            _triggerUpload(context, ref, state);
-          case 'create_folder':
-            _showCreateFolderDialog(context, ref);
-          case 'sort':
-            _showSortMenu(context, ref, state, position);
-          case 'open_in_browser':
-            _openDriveInBrowser(context);
-        }
-      },
     );
+    if (value == null || !context.mounted) return;
+    switch (value) {
+      case 'refresh':
+        ref.read(misskeyDriveProvider.notifier).refresh();
+      case 'upload':
+        _triggerUpload(context, ref, state);
+      case 'create_folder':
+        _showCreateFolderDialog(context, ref);
+      case 'sort':
+        _showSortMenu(context, ref, state, position);
+      case 'open_in_browser':
+        _openDriveInBrowser(context);
+    }
   }
 
-  void _showFileContextMenu(
+  Future<void> _showFileContextMenu(
     BuildContext context,
     WidgetRef ref,
     _DriveItem item,
     Offset position,
-  ) {
+  ) async {
     final isFolder = item.isFolder;
     final isSensitive = !isFolder && item.file!.isSensitive;
     final errorColor = Theme.of(context).colorScheme.error;
 
-    M3EContextMenu.show<String>(
+    final value = await showMenu<String>(
       context: context,
-      position: position,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
       items: [
-        M3EMenuItemData(value: 'refresh', icon: Icons.refresh, label: 'cloud_refresh'.tr()),
-        const M3EMenuItemData.separator(),
-        M3EMenuItemData(
-          value: 'open',
-          icon: isFolder ? Icons.folder_open : Icons.open_in_new,
-          label: 'cloud_open'.tr(),
+        PopupMenuItem(
+          value: 'refresh',
+          child: _menuRow(context, Icons.refresh, 'cloud_refresh'.tr()),
         ),
-        M3EMenuItemData(value: 'rename', icon: Icons.edit, label: 'cloud_rename'.tr()),
-        if (!isFolder) ...[
-          M3EMenuItemData(value: 'move', icon: Icons.drive_file_move, label: 'cloud_move_to'.tr()),
-          M3EMenuItemData(value: 'download', icon: Icons.download, label: 'cloud_download'.tr()),
-        ],
-        const M3EMenuItemData.separator(),
-        if (!isFolder) ...[
-          M3EMenuItemData(value: 'post_with_file', icon: Icons.rate_review, label: 'cloud_post_with_file'.tr()),
-          M3EMenuItemData(value: 'copy_link', icon: Icons.link, label: 'cloud_copy_link'.tr()),
-          M3EMenuItemData(value: 'open_in_browser', icon: Icons.open_in_browser, label: 'cloud_open_in_browser'.tr()),
-          const M3EMenuItemData.separator(),
-          M3EMenuItemData(value: 'edit_description', icon: Icons.description, label: 'cloud_edit_description'.tr()),
-          M3EMenuItemData(
-            value: 'toggle_sensitive',
-            icon: isSensitive ? Icons.visibility : Icons.visibility_off,
-            label: isSensitive ? 'cloud_unmark_sensitive'.tr() : 'cloud_mark_sensitive'.tr(),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'open',
+          child: _menuRow(
+            context,
+            isFolder ? Icons.folder_open : Icons.open_in_new,
+            'cloud_open'.tr(),
           ),
-          M3EMenuItemData(value: 'copy_id', icon: Icons.tag, label: 'cloud_copy_id'.tr()),
+        ),
+        PopupMenuItem(
+          value: 'rename',
+          child: _menuRow(context, Icons.edit, 'cloud_rename'.tr()),
+        ),
+        if (!isFolder) ...[
+          PopupMenuItem(
+            value: 'move',
+            child: _menuRow(context, Icons.drive_file_move, 'cloud_move_to'.tr()),
+          ),
+          PopupMenuItem(
+            value: 'download',
+            child: _menuRow(context, Icons.download, 'cloud_download'.tr()),
+          ),
         ],
-        M3EMenuItemData(
+        const PopupMenuDivider(),
+        if (!isFolder) ...[
+          PopupMenuItem(
+            value: 'post_with_file',
+            child: _menuRow(context, Icons.rate_review, 'cloud_post_with_file'.tr()),
+          ),
+          PopupMenuItem(
+            value: 'copy_link',
+            child: _menuRow(context, Icons.link, 'cloud_copy_link'.tr()),
+          ),
+          PopupMenuItem(
+            value: 'open_in_browser',
+            child: _menuRow(context, Icons.open_in_browser, 'cloud_open_in_browser'.tr()),
+          ),
+          const PopupMenuDivider(),
+          PopupMenuItem(
+            value: 'edit_description',
+            child: _menuRow(context, Icons.description, 'cloud_edit_description'.tr()),
+          ),
+          PopupMenuItem(
+            value: 'toggle_sensitive',
+            child: _menuRow(
+              context,
+              isSensitive ? Icons.visibility : Icons.visibility_off,
+              isSensitive ? 'cloud_unmark_sensitive'.tr() : 'cloud_mark_sensitive'.tr(),
+            ),
+          ),
+          PopupMenuItem(
+            value: 'copy_id',
+            child: _menuRow(context, Icons.tag, 'cloud_copy_id'.tr()),
+          ),
+        ],
+        PopupMenuItem(
           value: 'delete',
-          icon: Icons.delete,
-          label: 'cloud_delete'.tr(),
-          iconColor: errorColor,
-          textColor: errorColor,
+          child: _menuRow(
+            context,
+            Icons.delete,
+            'cloud_delete'.tr(),
+            iconColor: errorColor,
+            textColor: errorColor,
+          ),
         ),
       ],
-      onSelected: (value) {
-        if (!context.mounted) return;
-        _handleFileContextAction(context, ref, item, value);
-      },
     );
+    if (value == null || !context.mounted) return;
+    _handleFileContextAction(context, ref, item, value);
   }
 
   void _handleFileContextAction(
@@ -1170,12 +1257,12 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
     }
   }
 
-  void _showSortMenu(
+  Future<void> _showSortMenu(
     BuildContext context,
     WidgetRef ref,
     DriveState state,
     Offset position,
-  ) {
+  ) async {
     final currentMode = state.sortMode;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
@@ -1201,26 +1288,31 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
       }
     }
 
-    M3EContextMenu.show<DriveSortMode>(
+    final value = await showMenu<DriveSortMode>(
       context: context,
-      position: position,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
       items: DriveSortMode.values.map((mode) {
         final isSelected = mode == currentMode;
-        return M3EMenuItemData(
+        return PopupMenuItem(
           value: mode,
-          icon: sortIcon(mode),
-          label: sortLabel(mode),
-          trailing: isSelected
-              ? Icon(Icons.check, size: 18, color: primaryColor)
-              : null,
+          child: _menuRow(
+            context,
+            sortIcon(mode),
+            sortLabel(mode),
+            trailing: isSelected
+                ? Icon(Icons.check, size: 18, color: primaryColor)
+                : null,
+          ),
         );
       }).toList(),
-      onSelected: (value) {
-        if (context.mounted) {
-          ref.read(misskeyDriveProvider.notifier).setSortMode(value);
-        }
-      },
     );
+    if (value == null || !context.mounted) return;
+    ref.read(misskeyDriveProvider.notifier).setSortMode(value);
   }
 
   void _triggerUpload(
