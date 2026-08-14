@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cyanitalk/src/core/theme/color_constants.dart';
-import 'package:cyanitalk/src/core/config/constants.dart';
-import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
-import 'package:cyanitalk/src/shared/widgets/expressive_switch.dart';
-import 'package:cyanitalk/src/features/profile/application/network_settings_provider.dart';
-import 'package:cyanitalk/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
-import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
-import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
+import 'package:Nyachi/src/core/theme/color_constants.dart';
+import 'package:Nyachi/src/core/config/constants.dart';
+import 'package:Nyachi/src/core/widgets/settings_widgets.dart';
+import 'package:Nyachi/src/shared/widgets/expressive_switch.dart';
+import 'package:Nyachi/src/features/profile/application/network_settings_provider.dart';
+import 'package:Nyachi/src/features/profile/presentation/widgets/settings_slider_bottom_sheet.dart';
+import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:Nyachi/src/shared/widgets/toast_helper.dart';
 
 class NetworkSettingsPage extends ConsumerStatefulWidget {
   const NetworkSettingsPage({super.key});

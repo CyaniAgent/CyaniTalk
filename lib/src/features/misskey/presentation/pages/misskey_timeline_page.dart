@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cyanitalk/src/core/utils/logger.dart';
-import 'package:cyanitalk/src/features/misskey/application/misskey_notifier.dart';
-import 'package:cyanitalk/src/features/misskey/application/timeline_animation_state.dart';
-import 'package:cyanitalk/src/features/misskey/domain/note.dart';
-import 'package:cyanitalk/src/features/misskey/presentation/widgets/modern_note_card.dart';
-import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:Nyachi/src/core/utils/logger.dart';
+import 'package:Nyachi/src/features/misskey/application/misskey_notifier.dart';
+import 'package:Nyachi/src/features/misskey/application/timeline_animation_state.dart';
+import 'package:Nyachi/src/features/misskey/domain/note.dart';
+import 'package:Nyachi/src/features/misskey/presentation/widgets/modern_note_card.dart';
+import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
   const MisskeyTimelinePage({super.key, required this.timelineType});

@@ -88,7 +88,7 @@ class FontManager {
       metadataId: 2,
       displayName: 'Star Rail',
       type: FontType.downloadedFont,
-      downloadUrl: 'https://bavoice.imikufans.cn/cyanitalk_data/fonts/StarRailFont.ttf',
+      downloadUrl: 'https://bavoice.imikufans.cn/Nyachi_data/fonts/StarRailFont.ttf',
       fileName: 'StarRailFont.ttf',
     ),
     FontInfo(
@@ -96,7 +96,7 @@ class FontManager {
       metadataId: 3,
       displayName: 'Gakumas Sans',
       type: FontType.downloadedFont,
-      downloadUrl: 'https://bavoice.imikufans.cn/cyanitalk_data/fonts/gakumas-font.ttf',
+      downloadUrl: 'https://bavoice.imikufans.cn/Nyachi_data/fonts/gakumas-font.ttf',
       fileName: 'gakumas-font.ttf',
     ),
   ];

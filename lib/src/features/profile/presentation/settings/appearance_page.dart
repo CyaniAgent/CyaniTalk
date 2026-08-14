@@ -6,13 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:cyanitalk/src/core/core.dart';
-import 'package:cyanitalk/src/core/theme/color_constants.dart';
-import 'package:cyanitalk/src/core/theme/font_selector.dart';
-import 'package:cyanitalk/src/core/widgets/settings_widgets.dart';
-import 'package:cyanitalk/src/shared/widgets/expressive_switch.dart';
-import 'package:cyanitalk/src/shared/widgets/cyani_loading_indicator.dart';
-import 'package:cyanitalk/src/shared/widgets/toast_helper.dart';
+import 'package:Nyachi/src/core/core.dart';
+import 'package:Nyachi/src/core/theme/color_constants.dart';
+import 'package:Nyachi/src/core/theme/font_selector.dart';
+import 'package:Nyachi/src/core/widgets/settings_widgets.dart';
+import 'package:Nyachi/src/shared/widgets/expressive_switch.dart';
+import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:Nyachi/src/shared/widgets/toast_helper.dart';
 
 part 'appearance_page.g.dart';
 

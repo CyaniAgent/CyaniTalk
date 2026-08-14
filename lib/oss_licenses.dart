@@ -8,7 +8,7 @@
 // https://pub.dev/packages/dart_pubspec_licenses
 
 /// This package.
-const thisPackage = _cyanitalk;
+const thisPackage = _Nyachi;
 
 /// All dependencies including transitive dependencies.
 const allDependencies = <Package>[
@@ -12830,9 +12830,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
   );
 
-/// cyanitalk 1.3.4+224
-const _cyanitalk = Package(
-    name: 'cyanitalk',
+/// Nyachi 1.3.4+224
+const _Nyachi = Package(
+    name: 'Nyachi',
     description: 'A comprehensive, multi-functional social application built with Flutter, connecting Misskey and Flarum, and belonging to CyaniAgent.',
     authors: [],
     version: '1.3.4+224',
