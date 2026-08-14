@@ -8,6 +8,7 @@ import 'package:Nyachi/src/core/widgets/sound_picker.dart';
 import 'package:Nyachi/src/features/profile/application/sound_settings_provider.dart';
 import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
 import 'package:Nyachi/src/shared/widgets/toast_helper.dart';
+import 'package:Nyachi/src/shared/widgets/error_state.dart';
 
 /// 声音插槽配置
 class _SoundSlotConfig {
@@ -224,7 +225,7 @@ class SoundSettingsPage extends ConsumerWidget {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => const Center(child: Text('Error')),
+        error: (_, _) => ErrorState(message: 'common_error_occurred'.tr()),
       ),
     );
   }

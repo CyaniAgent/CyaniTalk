@@ -27,7 +27,7 @@ import '/src/features/misskey/presentation/pages/misskey_post_page.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
 import 'cloud_upload_sheet.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
-import '/src/shared/widgets/cyani_error_widget.dart';
+import '/src/shared/widgets/error_state.dart';
 
 class CloudPage extends ConsumerStatefulWidget {
   const CloudPage({super.key});
@@ -1486,7 +1486,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ),
-            error: (_, _) => CyaniErrorWidget(
+            error: (_, _) => ErrorState(
               message: 'cloud_error'.tr(),
             ),
           ),

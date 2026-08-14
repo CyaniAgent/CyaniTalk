@@ -10,6 +10,8 @@ import 'package:Nyachi/src/features/misskey/application/timeline_animation_state
 import 'package:Nyachi/src/features/misskey/domain/note.dart';
 import 'package:Nyachi/src/features/misskey/presentation/widgets/modern_note_card.dart';
 import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
+import 'package:Nyachi/src/shared/widgets/error_state.dart';
+import 'package:Nyachi/src/shared/widgets/empty_state.dart';
 
 class MisskeyTimelinePage extends ConsumerStatefulWidget {
   const MisskeyTimelinePage({super.key, required this.timelineType});
@@ -250,24 +252,9 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.auto_awesome_motion_outlined,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'timeline_no_notes_found'.tr(),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
+          child: EmptyState(
+            icon: Icons.auto_awesome_motion_outlined,
+            title: 'timeline_no_notes_found'.tr(),
           ),
         ),
       ],
@@ -280,28 +267,15 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                  const SizedBox(height: 16),
-                  Text('Error: $err', textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () {
-                      ref.read(timelineAnimationProvider.notifier).reset();
-                      ref
-                          .read(misskeyTimelineProvider(widget.timelineType).notifier)
-                          .refresh();
-                    },
-                    child: Text('common_reload'.tr()),
-                  ),
-                ],
-              ),
-            ),
+          child: ErrorState(
+            message: 'Error: $err',
+            retryLabel: 'common_reload'.tr(),
+            onRetry: () {
+              ref.read(timelineAnimationProvider.notifier).reset();
+              ref
+                  .read(misskeyTimelineProvider(widget.timelineType).notifier)
+                  .refresh();
+            },
           ),
         ),
       ],

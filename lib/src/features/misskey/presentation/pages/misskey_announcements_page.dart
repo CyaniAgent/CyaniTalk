@@ -8,6 +8,7 @@ import '/src/features/misskey/presentation/widgets/retryable_network_image.dart'
 import '/src/features/misskey/domain/mfm_renderer.dart';
 import '/src/core/utils/logger.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/empty_state.dart';
 
 class MisskeyAnnouncementsPage extends ConsumerStatefulWidget {
   const MisskeyAnnouncementsPage({super.key});
@@ -156,28 +157,9 @@ class _MisskeyAnnouncementsPageState
   }
 
   Widget _buildEmptyState() {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.campaign_outlined,
-              size: 64,
-              color: theme.colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'misskey_announcements_none'.tr(),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.outline,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.campaign_outlined,
+      title: 'misskey_announcements_none'.tr(),
     );
   }
 

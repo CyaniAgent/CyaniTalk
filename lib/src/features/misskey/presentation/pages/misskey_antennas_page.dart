@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/empty_state.dart';
 
 class MisskeyAntennasPage extends StatefulWidget {
   const MisskeyAntennasPage({super.key});
@@ -36,22 +37,9 @@ class _MisskeyAntennasPageState extends State<MisskeyAntennasPage> {
             child: Center(
               child: _isLoading
                   ? const CyaniLoadingIndicator(size: 60)
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.satellite_alt_outlined,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'misskey_antennas_none'.tr(),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                      ],
+                  : EmptyState(
+                      icon: Icons.satellite_alt_outlined,
+                      title: 'misskey_antennas_none'.tr(),
                     ),
             ),
           ),

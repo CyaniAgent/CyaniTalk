@@ -6,6 +6,7 @@ import '/src/features/misskey/application/misskey_notifications_notifier.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/features/misskey/domain/misskey_notification.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/empty_state.dart';
 
 class MisskeyNotificationsPage extends ConsumerWidget {
   const MisskeyNotificationsPage({super.key});
@@ -32,19 +33,9 @@ class MisskeyNotificationsPage extends ConsumerWidget {
       body: notificationsAsync.when(
         data: (notifications) {
           if (notifications.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_none,
-                    size: 64,
-                    color: theme.colorScheme.outlineVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text('search_no_results'.tr()),
-                ],
-              ),
+            return EmptyState(
+              icon: Icons.notifications_none,
+              title: 'search_no_results'.tr(),
             );
           }
 

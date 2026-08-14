@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '/src/shared/widgets/toast_helper.dart';
+import '/src/shared/widgets/error_state.dart';
 import 'package:Nyachi/src/core/utils/logger.dart';
 import 'package:Nyachi/src/core/services/audio_engine.dart';
 import 'package:Nyachi/src/features/auth/application/auth_service.dart';
@@ -170,36 +171,16 @@ class _MisskeyChannelDetailsPageState
           );
         },
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-              const SizedBox(height: 16),
-              Text(
-                'common_loading_failed'.tr(),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Error: $err',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () => ref
-                    .read(
-                      misskeyChannelTimelineProvider(
-                        widget.channel.id,
-                      ).notifier,
-                    )
-                    .refresh(),
-                icon: const Icon(Icons.refresh),
-                label: Text('common_reload'.tr()),
-              ),
-            ],
-          ),
+        error: (err, stack) => ErrorState(
+          message: '${'common_loading_failed'.tr()}\nError: $err',
+          retryLabel: 'common_reload'.tr(),
+          onRetry: () => ref
+              .read(
+                misskeyChannelTimelineProvider(
+                  widget.channel.id,
+                ).notifier,
+              )
+              .refresh(),
         ),
       ),
     );

@@ -8,6 +8,7 @@ import 'package:Nyachi/src/core/widgets/settings_widgets.dart';
 import 'package:Nyachi/src/features/profile/application/notification_settings_provider.dart';
 import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
 import 'package:Nyachi/src/shared/widgets/toast_helper.dart';
+import 'package:Nyachi/src/shared/widgets/error_state.dart';
 
 class NotificationSettingsPage extends ConsumerWidget {
   const NotificationSettingsPage({super.key});
@@ -96,7 +97,7 @@ class NotificationSettingsPage extends ConsumerWidget {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => const Center(child: Text('Error')),
+        error: (_, _) => ErrorState(message: 'common_error_occurred'.tr()),
       ),
     );
   }

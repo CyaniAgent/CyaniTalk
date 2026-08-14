@@ -17,7 +17,7 @@ import 'package:Nyachi/src/features/misskey/presentation/misskey_page.dart';
 import 'package:Nyachi/src/features/misskey/presentation/pages/misskey_notifications_page.dart';
 import 'package:Nyachi/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
 import 'package:Nyachi/src/features/profile/application/developer_settings_provider.dart';
-import 'package:Nyachi/src/shared/widgets/cyani_error_widget.dart';
+import 'package:Nyachi/src/shared/widgets/error_state.dart';
 import 'package:Nyachi/src/features/profile/presentation/profile_page.dart';
 import 'package:Nyachi/src/features/profile/presentation/settings/about_page.dart';
 import 'package:Nyachi/src/features/profile/presentation/settings/developer_settings_page.dart';
@@ -75,7 +75,7 @@ Widget _buildDeveloperGuardedPage(Widget child) {
           body: Center(child: CyaniLoadingIndicator()),
         ),
         error: (err, stack) => Scaffold(
-          body: CyaniErrorWidget(message: err.toString()),
+          body: ErrorState(message: err.toString()),
         ),
       );
     },

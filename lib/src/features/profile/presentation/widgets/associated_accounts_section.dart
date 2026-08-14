@@ -8,7 +8,7 @@ import 'package:Nyachi/src/features/auth/domain/account.dart';
 import 'package:Nyachi/src/features/auth/presentation/widgets/add_account_dialog.dart';
 import 'package:Nyachi/src/features/auth/presentation/widgets/misskey_permissions_sheet.dart';
 import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
-import 'package:Nyachi/src/shared/widgets/cyani_error_widget.dart';
+import 'package:Nyachi/src/shared/widgets/error_state.dart';
 import 'user_details_view.dart';
 
 /// 统一登录管理器组件，与设置页整体样式保持一致。
@@ -62,7 +62,7 @@ class _AssociatedAccountsSectionState
         );
       },
       loading: () => const Center(child: CyaniLoadingIndicator()),
-      error: (err, stack) => CyaniErrorWidget(message: err.toString()),
+      error: (err, stack) => ErrorState(message: err.toString()),
     );
   }
 
@@ -302,7 +302,7 @@ class _AssociatedAccountsSectionState
           ),
           error: (err, _) => Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: CyaniErrorWidget(message: err.toString()),
+            child: ErrorState(message: err.toString()),
           ),
         ),
       ],

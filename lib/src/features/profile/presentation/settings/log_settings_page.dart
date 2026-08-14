@@ -11,6 +11,7 @@ import '/src/shared/widgets/expressive_switch.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 import '/src/shared/widgets/toast_helper.dart';
+import '/src/shared/widgets/error_state.dart';
 
 class LogSettingsPage extends ConsumerStatefulWidget {
   const LogSettingsPage({super.key});
@@ -158,7 +159,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => const Center(child: Text('Error')),
+        error: (_, _) => ErrorState(message: 'common_error_occurred'.tr()),
       ),
     );
   }

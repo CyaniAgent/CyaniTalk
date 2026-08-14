@@ -11,6 +11,7 @@ import 'design_playground_page.dart';
 import 'log_settings_page.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 import '/src/shared/widgets/toast_helper.dart';
+import '/src/shared/widgets/error_state.dart';
 
 class DeveloperSettingsPage extends ConsumerStatefulWidget {
   const DeveloperSettingsPage({super.key});
@@ -166,7 +167,7 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
           ],
         ),
         loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (_, _) => const Center(child: Text('Error')),
+        error: (_, _) => ErrorState(message: 'common_error_occurred'.tr()),
       ),
     );
   }

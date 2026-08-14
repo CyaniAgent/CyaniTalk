@@ -13,7 +13,7 @@ import '/src/features/auth/application/auth_service.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/misskey/application/misskey_notifications_notifier.dart';
 import '/src/features/misskey/application/misskey_streaming_service.dart';
-import '/src/shared/widgets/cyani_error_widget.dart';
+import '/src/shared/widgets/error_state.dart';
 import 'pages/misskey_aiscript_console_page.dart';
 import 'pages/misskey_announcements_page.dart';
 import 'pages/misskey_antennas_page.dart';
@@ -218,7 +218,7 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
             );
           },
           loading: () => const Center(child: CyaniLoadingIndicator()),
-          error: (err, stack) => CyaniErrorWidget(message: err.toString()),
+          error: (err, stack) => ErrorState(message: err.toString()),
         ),
       ),
     );

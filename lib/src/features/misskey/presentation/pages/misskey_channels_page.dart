@@ -153,7 +153,6 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
             )
             .refresh(),
       ),
-      ),
     );
   }
 

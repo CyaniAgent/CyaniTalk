@@ -10,7 +10,7 @@ import 'package:Nyachi/src/features/auth/domain/account.dart';
 import 'package:Nyachi/src/features/misskey/data/misskey_repository.dart';
 import 'package:Nyachi/src/features/misskey/domain/misskey_user.dart';
 import 'package:Nyachi/src/shared/widgets/cyani_loading_indicator.dart';
-import 'package:Nyachi/src/shared/widgets/cyani_error_widget.dart';
+import 'package:Nyachi/src/shared/widgets/error_state.dart';
 
 part 'user_details_view.g.dart';
 
@@ -61,7 +61,7 @@ class UserDetailsView extends ConsumerWidget {
       },
       error: (err, stack) {
         logger.error('UserDetailsView: Error building details view', err);
-        return CyaniErrorWidget(message: err.toString());
+        return ErrorState(message: err.toString());
       },
     );
   }
