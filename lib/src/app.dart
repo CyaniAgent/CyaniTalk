@@ -485,10 +485,28 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
         ? theme.copyWith(
             scaffoldBackgroundColor: semanticColors.appBackground,
             canvasColor: semanticColors.appBackground,
-            extensions: [...theme.extensions.values, semanticColors, switchTokens],
+            extensions: [
+              ...theme.extensions.values,
+              semanticColors,
+              switchTokens,
+              M3ETitleBarTokens.standard,
+              M3EShapeTokens.standard,
+              M3ESliderTokens.standard,
+              M3EMenuTokens.standard,
+              M3ESoundPickerTokens.standard,
+            ],
           )
         : theme.copyWith(
-            extensions: [...theme.extensions.values, semanticColors, switchTokens],
+            extensions: [
+              ...theme.extensions.values,
+              semanticColors,
+              switchTokens,
+              M3ETitleBarTokens.standard,
+              M3EShapeTokens.standard,
+              M3ESliderTokens.standard,
+              M3EMenuTokens.standard,
+              M3ESoundPickerTokens.standard,
+            ],
           );
 
     // 缓存主题和设置

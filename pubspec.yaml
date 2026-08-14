@@ -118,6 +118,7 @@ dependencies:
   flutter_highlight: ^0.7.0
   
   # Material 3 Expressive 组件库
+  m3e_core: ^0.1.5
   slider_m3e: ^0.1.1
   m3e_collection: ^0.3.7
   m3e_design: ^0.2.1
