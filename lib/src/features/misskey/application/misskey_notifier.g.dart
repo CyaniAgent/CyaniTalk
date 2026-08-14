@@ -67,7 +67,7 @@ final class MisskeyTimelineNotifierProvider
 }
 
 String _$misskeyTimelineNotifierHash() =>
-    r'43781bda69965574e7ad52216fe9363c3769d810';
+    r'acf54280d9aa9c59849b3fb1eb5c8bce4c1691e9';
 
 /// Misskey时间线状态管理类
 ///
@@ -119,7 +119,7 @@ abstract class _$MisskeyTimelineNotifier extends $AsyncNotifier<List<Note>> {
   FutureOr<List<Note>> build(String type);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Note>>, List<Note>>;
     final element =
         ref.element
@@ -129,7 +129,7 @@ abstract class _$MisskeyTimelineNotifier extends $AsyncNotifier<List<Note>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -230,7 +230,7 @@ abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
   });
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Channel>>, List<Channel>>;
     final element =
         ref.element
@@ -240,7 +240,7 @@ abstract class _$MisskeyChannelsNotifier extends $AsyncNotifier<List<Channel>> {
               Object?,
               Object?
             >;
-    element.handleCreate(
+    return element.handleCreate(
       ref,
       () => build(type: _$args.type, query: _$args.query),
     );
@@ -335,7 +335,7 @@ abstract class _$MisskeyChannelTimelineNotifier
   FutureOr<List<Note>> build(String channelId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Note>>, List<Note>>;
     final element =
         ref.element
@@ -345,7 +345,7 @@ abstract class _$MisskeyChannelTimelineNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -386,7 +386,7 @@ abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
   FutureOr<List<Clip>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Clip>>, List<Clip>>;
     final element =
         ref.element
@@ -396,7 +396,7 @@ abstract class _$MisskeyClipsNotifier extends $AsyncNotifier<List<Clip>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -487,7 +487,7 @@ abstract class _$MisskeyClipNotesNotifier extends $AsyncNotifier<List<Note>> {
   FutureOr<List<Note>> build(String clipId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Note>>, List<Note>>;
     final element =
         ref.element
@@ -497,7 +497,7 @@ abstract class _$MisskeyClipNotesNotifier extends $AsyncNotifier<List<Note>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -530,7 +530,7 @@ final class MisskeyOnlineUsersNotifierProvider
 }
 
 String _$misskeyOnlineUsersNotifierHash() =>
-    r'edfefc91f45880b74e9fcd18b7847ebff4877add';
+    r'57d3ca5ec9de910de2f1eb33cf6c6bd994a9528c';
 
 /// Misskey在线用户数状态管理类
 
@@ -538,7 +538,7 @@ abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
   FutureOr<int> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<int>, int>;
     final element =
         ref.element
@@ -548,7 +548,7 @@ abstract class _$MisskeyOnlineUsersNotifier extends $AsyncNotifier<int> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -588,7 +588,7 @@ abstract class _$MisskeyMeNotifier extends $AsyncNotifier<MisskeyUser> {
   FutureOr<MisskeyUser> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<MisskeyUser>, MisskeyUser>;
     final element =
         ref.element
@@ -598,7 +598,7 @@ abstract class _$MisskeyMeNotifier extends $AsyncNotifier<MisskeyUser> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -688,7 +688,7 @@ abstract class _$MisskeyUserNotifier extends $AsyncNotifier<MisskeyUser> {
   FutureOr<MisskeyUser> build(String userId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<MisskeyUser>, MisskeyUser>;
     final element =
         ref.element
@@ -698,6 +698,6 @@ abstract class _$MisskeyUserNotifier extends $AsyncNotifier<MisskeyUser> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

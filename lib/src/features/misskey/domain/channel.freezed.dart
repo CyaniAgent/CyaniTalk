@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'channel.dart';
@@ -9,6 +9,7 @@ part of 'channel.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$ChannelCopyWithImpl<$Res>
 /// Create a copy of Channel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? lastNotedAt = freezed,Object? name = null,Object? description = freezed,Object? userId = freezed,Object? bannerUrl = freezed,Object? pinnedNoteIds = null,Object? color = null,Object? isArchived = null,Object? usersCount = null,Object? notesCount = null,Object? isSensitive = null,Object? allowRenoteToExternal = null,Object? isFollowing = freezed,Object? isFavorited = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(Channel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,lastNotedAt: freezed == lastNotedAt ? _self.lastNotedAt : lastNotedAt // ignore: cast_nullable_to_non_nullable
@@ -224,7 +225,7 @@ return $default(_that.id,_that.createdAt,_that.lastNotedAt,_that.name,_that.desc
 @JsonSerializable()
 
 class _Channel implements Channel {
-  const _Channel({required this.id, required this.createdAt, this.lastNotedAt, required this.name, this.description, this.userId, this.bannerUrl, final  List<String> pinnedNoteIds = const [], this.color = "", this.isArchived = false, this.usersCount = 0, this.notesCount = 0, this.isSensitive = false, this.allowRenoteToExternal = true, this.isFollowing, this.isFavorited}): _pinnedNoteIds = pinnedNoteIds;
+  const _Channel({required this.id, required this.createdAt, this.lastNotedAt, required this.name, this.description, this.userId, this.bannerUrl,  List<String> pinnedNoteIds = const [], this.color = "", this.isArchived = false, this.usersCount = 0, this.notesCount = 0, this.isSensitive = false, this.allowRenoteToExternal = true, this.isFollowing, this.isFavorited}): _pinnedNoteIds = pinnedNoteIds;
   factory _Channel.fromJson(Map<String, dynamic> json) => _$ChannelFromJson(json);
 
 @override final  String id;

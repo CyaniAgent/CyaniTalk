@@ -40,13 +40,13 @@ final class UpdateProvider extends $NotifierProvider<Update, UpdateStateData> {
   }
 }
 
-String _$updateHash() => r'7020e37d70d09a261d66805f00977a45db68d1ee';
+String _$updateHash() => r'62b1d5c0c6e7e3eee63950067ce3898ba78eaa2f';
 
 abstract class _$Update extends $Notifier<UpdateStateData> {
   UpdateStateData build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<UpdateStateData, UpdateStateData>;
     final element =
         ref.element
@@ -56,6 +56,6 @@ abstract class _$Update extends $Notifier<UpdateStateData> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -10,7 +10,7 @@
 ![Flarum](https://img.shields.io/badge/Flarum-E7742E?style=for-the-badge&logo=flarum&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge)
 
-**Nyachi** is a diversified, cross-platform social client built with Flutter. It bridges the gap between **Misskey** (decentralized micro-blogging) and **Flarum** (structured community forums), offering a unified experience for both casual social interaction and deep technical discussions.
+**Nyachi** is a diversified, cross-platform social client built with Flutter. It bridges the gap between **Misskey** (decentralized micro-blogging) , offering a unified experience for both casual social interaction and deep technical discussions.
 
 Designed with a **Responsive Shell**, Nyachi adapts seamlessly between mobile (iOS/Android) and desktop (Windows/macOS/Linux) environments, providing native-tier features like real-time streaming and advanced administrative tools.
 
@@ -22,7 +22,7 @@ Designed with a **Responsive Shell**, Nyachi adapts seamlessly between mobile (i
 Nyachi decouples the navigation logic from the content to provide an ergonomic experience on any device:
 *   **Mobile:** Classic **Bottom Navigation Bar** for one-handed use.
 *   **Desktop:** Vertical **Navigation Rail** for wide screens, utilizing a Master-Detail view for efficient browsing.
-*   **Unified Sections:** Access Misskey, Forum, Drive, Messages, and Profile seamlessly.
+*   **Unified Sections:** Access Misskey, Drive, Messages, and Profile seamlessly.
 
 ### 🪐 Misskey Integration (The "Dynamic" Layer)
 *   **Real-time Streaming:** Connects to the Misskey WebSocket (`streaming`) to deliver notes, notifications, and messaging instantly.
@@ -30,13 +30,8 @@ Nyachi decouples the navigation logic from the content to provide an ergonomic e
 *   **Misskey Drive:** A dedicated visual interface for managing cloud files and images.
 *   **AiScript & API:** Support for running basic AiScript interactions and an embedded API Console.
 
-### 💬 Flarum Integration (The "Static" Layer)
-*   **Structured Discussions:** Browse tags, discussions, and posts with a clean reading experience.
-*   **Community interaction:** Create discussions, reply to posts, and manage your forum identity.
-*   **Authentication:** Seamless JSON:API based login and token management.
-
 ### 🔍 Unified Services
-*   **Global Search:** Unified search across Misskey and Flarum platforms.
+*   **Global Search:** Unified search across Misskey platforms.
 *   **Notification System:** Unified management system supporting multiple notification types.
 *   **Cache Management:** Integrated note and image cache management for improved performance.
 *   **Audio Engine:** Audio playback powered by `audioplayers`.
@@ -44,7 +39,6 @@ Nyachi decouples the navigation logic from the content to provide an ergonomic e
 ### 🛡️ Admin & Power Tools (Admin Only)
 *   **Unified Dashboard:** Detects admin privileges to reveal hidden control panels.
 *   **Misskey Control Panel:** View instance health, stats, and moderate users.
-*   **Flarum Management:** Basic moderation tools and backend management.
 *   **API Console:** A built-in developer tool to test endpoints and inspect JSON responses directly within the app.
 
 ---
@@ -69,11 +63,10 @@ Nyachi decouples the navigation logic from the content to provide an ergonomic e
 ### Phase 1: The Responsive Foundation 🚧
 - [x] Initialize Flutter project.
 - [x] Implement the **Responsive Shell** (Bottom Nav vs. Nav Rail).
-- [x] Create skeleton pages for the 5 main tabs.
+- [x] Create skeleton pages for the 4 main tabs.
 
 ### Phase 2: Authentication & Core Connectivity
 - [x] Implement **MiAuth** flow for Misskey.
-- [x] Implement Token retrieval for Flarum.
 - [x] Create the Unified Login Manager.
 
 ### Phase 3: The Real-time Engine ✅
@@ -84,7 +77,6 @@ Nyachi decouples the navigation logic from the content to provide an ergonomic e
 ### Phase 4: Content & Creation 🚧
 - [x] **Misskey:** Timeline rendering and Posting interface.
 - [x] **MFM Renderer:** Full syntax support.
-- [x] **Flarum:** Discussion list and Thread view.
 - [x] **Drive:** File grid view and upload functionality.
 - [ ] Advanced drafting and rich media uploads.
 
@@ -119,7 +111,7 @@ Nyachi decouples the navigation logic from the content to provide an ergonomic e
 
 4.  **Run the app:**
     ```bash
-    # For Mobile
+    # For Mobile (You need to connect a mobile device first, then select a mobile device in VS Code, and finally run the following command.)
     flutter run
 
     # For Desktop (macOS/Windows/Linux)

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'misskey_notification.dart';
@@ -9,14 +9,14 @@ part of 'misskey_notification.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$MisskeyNotification {
 
- String get id; DateTime get createdAt; String get type; String? get userId; MisskeyUser? get user; String? get noteId; Note? get note; String? get reaction;// For follow requests, etc.
- Map<String, dynamic>? get body;
+ String get id; DateTime get createdAt; String get type; String? get userId; MisskeyUser? get user; String? get noteId; Note? get note; String? get reaction; Map<String, dynamic>? get body;
 /// Create a copy of MisskeyNotification
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -67,7 +67,7 @@ class _$MisskeyNotificationCopyWithImpl<$Res>
 /// Create a copy of MisskeyNotification
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? type = null,Object? userId = freezed,Object? user = freezed,Object? noteId = freezed,Object? note = freezed,Object? reaction = freezed,Object? body = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(MisskeyNotification(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -242,7 +242,7 @@ return $default(_that.id,_that.createdAt,_that.type,_that.userId,_that.user,_tha
 @JsonSerializable()
 
 class _MisskeyNotification implements MisskeyNotification {
-  const _MisskeyNotification({required this.id, required this.createdAt, required this.type, this.userId, this.user, this.noteId, this.note, this.reaction, final  Map<String, dynamic>? body}): _body = body;
+  const _MisskeyNotification({required this.id, required this.createdAt, required this.type, this.userId, this.user, this.noteId, this.note, this.reaction,  Map<String, dynamic>? body}): _body = body;
   factory _MisskeyNotification.fromJson(Map<String, dynamic> json) => _$MisskeyNotificationFromJson(json);
 
 @override final  String id;
@@ -253,9 +253,7 @@ class _MisskeyNotification implements MisskeyNotification {
 @override final  String? noteId;
 @override final  Note? note;
 @override final  String? reaction;
-// For follow requests, etc.
  final  Map<String, dynamic>? _body;
-// For follow requests, etc.
 @override Map<String, dynamic>? get body {
   final value = _body;
   if (value == null) return null;

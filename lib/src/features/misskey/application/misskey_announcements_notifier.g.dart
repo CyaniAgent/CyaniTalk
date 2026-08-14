@@ -45,7 +45,7 @@ abstract class _$MisskeyAnnouncementsNotifier
   FutureOr<List<Announcement>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<List<Announcement>>, List<Announcement>>;
     final element =
@@ -56,6 +56,6 @@ abstract class _$MisskeyAnnouncementsNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

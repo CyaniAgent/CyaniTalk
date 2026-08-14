@@ -85,7 +85,7 @@ abstract class _$MisskeyUserNotifier extends $AsyncNotifier<MisskeyUser> {
   FutureOr<MisskeyUser> build(String userId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<MisskeyUser>, MisskeyUser>;
     final element =
         ref.element
@@ -95,6 +95,6 @@ abstract class _$MisskeyUserNotifier extends $AsyncNotifier<MisskeyUser> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

@@ -22,7 +22,7 @@ Nyachi 采用**响应式外壳 (Responsive Shell)** 设计，能够完美适配�
 Nyachi 将导航逻辑与内容展示分离，在不同设备上提供符合直觉的操作体验：
 *   **移动端：** 经典的 **底部导航栏 (Bottom Navigation)**，便于单手操作。
 *   **桌面端：** 垂直的 **侧边导航轨 (Navigation Rail)**，利用宽屏优势，支持 Master-Detail（列表-详情）分栏浏览。
-*   **统一分类：** 无缝切换 Misskey 动态、论坛讨论、网盘资源、消息通知与个人中心。
+*   **统一分类：** 无缝切换 Misskey 动态、网盘资源、消息通知与个人中心。
 
 ### 🪐 Misskey 集成（"动" 态层）
 *   **实时流 (Real-time Streaming)：** 连接 Misskey WebSocket (`streaming`)，实现动态、通知与私信的毫秒级推送。
@@ -109,7 +109,7 @@ Nyachi 将导航逻辑与内容展示分离，在不同设备上提供符合直�
 
 4.  **运行应用：**
     ```bash
-    # 移动端
+    # 移动端 (需要先链接移动设备，然后在 VSCode 选择一个移动设备，最后运行以下命令)
     flutter run
 
     # 桌面端 (macOS/Windows/Linux)

@@ -5,6 +5,24 @@ import 'package:url_launcher/url_launcher.dart';
 import '/oss_licenses.dart';
 import '/src/core/widgets/settings_widgets.dart';
 
+/// 从 license 文本中提取 SPDX 标识符
+extension _SpdxIdentifier on Package {
+  List<String> get spdxIdentifiers {
+    final text = license ?? '';
+    final ids = <String>[];
+    if (RegExp(r'Apache License,?\s*Version\s*2\.?0', caseSensitive: false).hasMatch(text)) ids.add('Apache-2.0');
+    if (RegExp(r'\bMIT\b').hasMatch(text)) ids.add('MIT');
+    if (RegExp(r'\bBSD\b').hasMatch(text)) ids.add('BSD');
+    final gplMatch = RegExp(r'GNU General Public License.*?v(\d)', caseSensitive: false).firstMatch(text);
+    if (gplMatch != null) ids.add('GPL-${gplMatch.group(1)}.0');
+    if (RegExp(r'\bISC\b').hasMatch(text)) ids.add('ISC');
+    if (RegExp(r'\bMPL\b').hasMatch(text)) ids.add('MPL-2.0');
+    if (RegExp(r'\bLGPL\b').hasMatch(text)) ids.add('LGPL');
+    if (RegExp(r'\bAGPL\b').hasMatch(text)) ids.add('AGPL-3.0');
+    return ids;
+  }
+}
+
 /// 开源许可证页面
 ///
 /// 显示应用程序和所有依赖项的开源许可证信息

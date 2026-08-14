@@ -64,7 +64,7 @@ abstract class _$TimelineAnimation extends $Notifier<TimelineAnimationState> {
   TimelineAnimationState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<TimelineAnimationState, TimelineAnimationState>;
     final element =
@@ -75,6 +75,6 @@ abstract class _$TimelineAnimation extends $Notifier<TimelineAnimationState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

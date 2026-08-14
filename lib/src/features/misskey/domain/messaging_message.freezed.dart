@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'messaging_message.dart';
@@ -9,14 +9,14 @@ part of 'messaging_message.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$MessagingMessage {
 
- String get id; DateTime get createdAt; String? get text; String? get userId; MisskeyUser? get user; String? get recipientId; MisskeyUser? get recipient; bool get isRead; String? get fileId; DriveFile? get file;// Support for Chat API grouping and rooms
- Map<String, dynamic>? get group; String? get roomId; ChatRoom? get room;
+ String get id; DateTime get createdAt; String? get text; String? get userId; MisskeyUser? get user; String? get recipientId; MisskeyUser? get recipient; bool get isRead; String? get fileId; DriveFile? get file; Map<String, dynamic>? get group; String? get roomId; ChatRoom? get room;
 /// Create a copy of MessagingMessage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -67,7 +67,7 @@ class _$MessagingMessageCopyWithImpl<$Res>
 /// Create a copy of MessagingMessage
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? text = freezed,Object? userId = freezed,Object? user = freezed,Object? recipientId = freezed,Object? recipient = freezed,Object? isRead = null,Object? fileId = freezed,Object? file = freezed,Object? group = freezed,Object? roomId = freezed,Object? room = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(MessagingMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,text: freezed == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
@@ -270,7 +270,7 @@ return $default(_that.id,_that.createdAt,_that.text,_that.userId,_that.user,_tha
 @JsonSerializable()
 
 class _MessagingMessage implements MessagingMessage {
-  const _MessagingMessage({required this.id, required this.createdAt, this.text, this.userId, this.user, this.recipientId, this.recipient, this.isRead = false, this.fileId, this.file, final  Map<String, dynamic>? group, this.roomId, this.room}): _group = group;
+  const _MessagingMessage({required this.id, required this.createdAt, this.text, this.userId, this.user, this.recipientId, this.recipient, this.isRead = false, this.fileId, this.file,  Map<String, dynamic>? group, this.roomId, this.room}): _group = group;
   factory _MessagingMessage.fromJson(Map<String, dynamic> json) => _$MessagingMessageFromJson(json);
 
 @override final  String id;
@@ -283,9 +283,7 @@ class _MessagingMessage implements MessagingMessage {
 @override@JsonKey() final  bool isRead;
 @override final  String? fileId;
 @override final  DriveFile? file;
-// Support for Chat API grouping and rooms
  final  Map<String, dynamic>? _group;
-// Support for Chat API grouping and rooms
 @override Map<String, dynamic>? get group {
   final value = _group;
   if (value == null) return null;

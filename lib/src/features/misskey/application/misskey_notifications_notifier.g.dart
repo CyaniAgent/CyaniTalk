@@ -38,14 +38,14 @@ final class MisskeyNotificationsNotifierProvider
 }
 
 String _$misskeyNotificationsNotifierHash() =>
-    r'5ec68359dbc3ddf60c4f04833bed57d16b980521';
+    r'e87a17166f9dea944bb3b8fc0c8afdef49af382f';
 
 abstract class _$MisskeyNotificationsNotifier
     extends $AsyncNotifier<List<MisskeyNotification>> {
   FutureOr<List<MisskeyNotification>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<
@@ -63,6 +63,6 @@ abstract class _$MisskeyNotificationsNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

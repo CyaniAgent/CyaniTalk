@@ -61,7 +61,7 @@ abstract class _$LoginFormController extends $Notifier<LoginFormData> {
   LoginFormData build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<LoginFormData, LoginFormData>;
     final element =
         ref.element
@@ -71,6 +71,6 @@ abstract class _$LoginFormController extends $Notifier<LoginFormData> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

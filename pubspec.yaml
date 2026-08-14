@@ -18,7 +18,7 @@ publish_to: "none" # 如果你想发布到 pub.dev，请删除此行
 version: 1.3.4+224
 
 environment:
-  sdk: ^3.10.4
+  sdk: ^3.13.0
 
 # 依赖项指定了你的包需要的其他包才能工作。
 # 要自动将你的包依赖项升级到最新版本
@@ -45,7 +45,7 @@ dependencies:
   # WebSocket通信支持，用于实时数据传输
   web_socket_channel: ^3.0.3
   # Riverpod状态管理库的Flutter实现，提供声明式状态管理
-  flutter_riverpod: ^3.1.0
+  flutter_riverpod: ^3.4.2
   # 声明式路由管理库，支持嵌套路由、重定向、守卫等
   go_router: ^17.0.1
   # 自适应脚手架组件，支持不同屏幕尺寸的响应式布局
@@ -53,9 +53,9 @@ dependencies:
   # React风格的Hooks支持，允许在函数组件中使用状态和副作用
   flutter_hooks: ^0.21.3+1
   # Flutter Hooks和Riverpod的结合，提供Hooks风格的Riverpod使用方式
-  hooks_riverpod: ^3.1.0
+  hooks_riverpod: ^3.4.2
   # Riverpod的注解库，用于生成Riverpod相关代码
-  riverpod_annotation: ^4.0.0
+  riverpod_annotation: ^4.0.6
   # 安全存储库，用于存储敏感数据如令牌、密码等
   flutter_secure_storage: ^10.0.0
   # UUID生成库，用于生成唯一标识符
@@ -65,7 +65,7 @@ dependencies:
   # Freezed的注解库，用于生成不可变数据类
   freezed_annotation: ^3.1.0
   # JSON序列化的注解库，用于生成JSON转换代码
-  json_annotation: ^4.9.0
+  json_annotation: ^4.11.0
   # 强大的Flutter动画库，提供流畅的动画效果
   flutter_animate: ^4.5.2
   # 跨平台获取应用信息，如版本号、包名等
@@ -80,6 +80,8 @@ dependencies:
   dio_http2_adapter: ^2.6.0
   # 轻量级本地存储库，用于存储键值对数据
   shared_preferences: ^2.5.4
+  # 跨平台文件选择器，用于选择本地文件
+  file_picker: ^10.3.10
   # 跨平台WebView组件，支持Android、iOS、macOS、Windows、Linux
   flutter_inappwebview: ^6.1.5
   # 强大的日志库，支持不同级别的日志输出和格式化
@@ -92,8 +94,6 @@ dependencies:
   video_player_win: ^3.2.2
   # 图片查看器库，支持缩放、平移等手势操作
   photo_view: ^0.15.0
-  # 文件选择器库，用于选择本地文件
-  file_picker: ^10.3.10
   # 跨平台设备信息获取库，用于获取设备型号、操作系统等信息
   device_info_plus: ^12.0.0
   # 图片缓存库，支持图片缓存和加载优化
@@ -107,12 +107,12 @@ dependencies:
   # 后台任务服务库，支持在应用后台持续运行任务
   flutter_background_service: ^5.1.0
   # 本地通知库，用于发送系统级通知
-  flutter_local_notifications: ^20.0.0
+  flutter_local_notifications: ^22.3.0
   # 时间格式化库，将时间戳转换为“几分钟前”等友好格式
   timeago: ^3.7.1
   mfm: ^1.0.9
   haptic_feedback: ^0.6.4+3
-  window_manager: ^0.4.1
+  window_manager: ^0.5.2
   fl_chart: ^1.2.0
   highlight: ^0.7.0
   flutter_highlight: ^0.7.0
@@ -135,21 +135,18 @@ dev_dependencies:
   # Flutter代码规范检查库，提供一组推荐的lint规则
   flutter_lints: ^6.0.0
   # Riverpod的代码生成器，用于生成Riverpod相关代码
-  riverpod_generator: ^4.0.0+1
+  riverpod_generator: ^4.0.8
   # Dart代码生成工具，用于运行各种代码生成器
-  build_runner: ^2.10.5
-  # 自定义lint规则支持，允许创建自定义代码规范检查
-  custom_lint: ^0.8.1
-  # Riverpod专用的lint规则，提供Riverpod使用的最佳实践检查
-  riverpod_lint: ^3.1.0
+  build_runner: ^2.16.0
   # 不可变数据类生成器，用于生成Freezed数据类
-  freezed: ^3.2.3
+  # 需要 SDK 3.12+；解锁 analyzer 高版本约束，让整套工具链回归最新版
+  freezed: ^4.0.0-dev.3
   # JSON序列化代码生成器，用于生成JSON转换代码
-  json_serializable: ^6.11.2
+  json_serializable: ^6.14.1
   # 应用图标生成工具，用于生成不同平台的应用图标
   flutter_launcher_icons: ^0.14.4
   mocktail: ^1.0.4
-  dart_pubspec_licenses: ^3.0.15
+  dart_pubspec_licenses: ^3.0.12
 
 flutter_launcher_icons:
   android: "launcher_icon"

@@ -35,14 +35,14 @@ final class AppearanceSettingsNotifierProvider
 }
 
 String _$appearanceSettingsNotifierHash() =>
-    r'1d6d557e3aa1cb5640d042e2ca91f3480add31d6';
+    r'e0c052623d187bd0ce9185a82d3d65f5091f1214';
 
 abstract class _$AppearanceSettingsNotifier
     extends $AsyncNotifier<AppearanceSettings> {
   FutureOr<AppearanceSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<AppearanceSettings>, AppearanceSettings>;
     final element =
@@ -53,6 +53,6 @@ abstract class _$AppearanceSettingsNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

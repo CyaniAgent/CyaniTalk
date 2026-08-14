@@ -73,7 +73,7 @@ final class AudioPlayerControllerProvider
 }
 
 String _$audioPlayerControllerHash() =>
-    r'88f14c855cdf72097cae0af42bb26e6dcbb9653b';
+    r'c94c24785291527f5d8cacc4abc110f42739b433';
 
 final class AudioPlayerControllerFamily extends $Family
     with $FunctionalFamilyOverride<AudioPlayerController, String> {
@@ -148,7 +148,7 @@ final class AudioPlayerStateProvider
   }
 }
 
-String _$audioPlayerStateHash() => r'f1bc658e4e20d8e84cf4002da5ccb4730c48c942';
+String _$audioPlayerStateHash() => r'b92fc90ca42d764c93d93dac9e593c544907a6e0';
 
 final class AudioPlayerStateFamily extends $Family
     with $FunctionalFamilyOverride<Stream<AudioPlayerState>, String> {

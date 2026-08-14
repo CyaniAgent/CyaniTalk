@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'note.dart';
@@ -9,6 +9,7 @@ part of 'note.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$NoteCopyWithImpl<$Res>
 /// Create a copy of Note
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? userId = freezed,Object? user = freezed,Object? text = freezed,Object? cw = freezed,Object? fileIds = null,Object? files = null,Object? replyId = freezed,Object? renoteId = freezed,Object? reply = freezed,Object? renote = freezed,Object? reactions = null,Object? renoteCount = null,Object? repliesCount = null,Object? visibility = freezed,Object? localOnly = null,Object? myReaction = freezed,Object? emojis = freezed,Object? poll = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(Note(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,userId: freezed == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -276,7 +277,7 @@ return $default(_that.id,_that.createdAt,_that.userId,_that.user,_that.text,_tha
 @JsonSerializable()
 
 class _Note implements Note {
-  const _Note({required this.id, required this.createdAt, this.userId, this.user, this.text, this.cw, final  List<String> fileIds = const [], final  List<Map<String, dynamic>> files = const [], this.replyId, this.renoteId, this.reply, this.renote, final  Map<String, int> reactions = const {}, this.renoteCount = 0, this.repliesCount = 0, this.visibility, this.localOnly = false, this.myReaction, final  Map<String, String>? emojis, this.poll}): _fileIds = fileIds,_files = files,_reactions = reactions,_emojis = emojis;
+  const _Note({required this.id, required this.createdAt, this.userId, this.user, this.text, this.cw,  List<String> fileIds = const [],  List<Map<String, dynamic>> files = const [], this.replyId, this.renoteId, this.reply, this.renote,  Map<String, int> reactions = const {}, this.renoteCount = 0, this.repliesCount = 0, this.visibility, this.localOnly = false, this.myReaction,  Map<String, String>? emojis, this.poll}): _fileIds = fileIds,_files = files,_reactions = reactions,_emojis = emojis;
   factory _Note.fromJson(Map<String, dynamic> json) => _$NoteFromJson(json);
 
 @override final  String id;

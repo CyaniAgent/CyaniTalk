@@ -44,7 +44,7 @@ final class NavigationPathProvider
   }
 }
 
-String _$navigationPathHash() => r'4d672cd58866ad2469fa70019d59b30ac1d06b89';
+String _$navigationPathHash() => r'693af4ffcc0478ff96a9bbcf7856ef4017e19890';
 
 /// 导航路径状态
 
@@ -52,7 +52,7 @@ abstract class _$NavigationPath extends $Notifier<String> {
   String build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<String, String>;
     final element =
         ref.element
@@ -62,6 +62,6 @@ abstract class _$NavigationPath extends $Notifier<String> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

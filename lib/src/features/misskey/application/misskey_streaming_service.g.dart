@@ -42,13 +42,13 @@ final class MisskeyStreamingServiceProvider
 }
 
 String _$misskeyStreamingServiceHash() =>
-    r'65beea925e098eea2571c2e5a5ed7d87f740caff';
+    r'64138cffe22f275c00d5ac28a8cdea9bc9a216b7';
 
 abstract class _$MisskeyStreamingService extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -58,6 +58,6 @@ abstract class _$MisskeyStreamingService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

@@ -55,4 +55,4 @@ final class NotificationManagerProvider
 }
 
 String _$notificationManagerHash() =>
-    r'7ed4c6c9a8f1c3a5a2552e05c9360443efc5eff2';
+    r'e94f2710cbae0fb35ad4578203f0ec86ace4b94f';

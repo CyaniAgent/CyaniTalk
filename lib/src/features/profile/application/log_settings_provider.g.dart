@@ -34,13 +34,13 @@ final class LogSettingsNotifierProvider
 }
 
 String _$logSettingsNotifierHash() =>
-    r'42a9baa798bd096b7a7e65a1fcd2b7356f258a12';
+    r'ce4ff023a940aaf4549ed79962a5f832350ae0a1';
 
 abstract class _$LogSettingsNotifier extends $AsyncNotifier<LogSettings> {
   FutureOr<LogSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<LogSettings>, LogSettings>;
     final element =
         ref.element
@@ -50,6 +50,6 @@ abstract class _$LogSettingsNotifier extends $AsyncNotifier<LogSettings> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

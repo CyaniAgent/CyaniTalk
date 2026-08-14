@@ -45,7 +45,7 @@ abstract class _$FontSettingsNotifier extends $AsyncNotifier<FontSettings> {
   FutureOr<FontSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<FontSettings>, FontSettings>;
     final element =
         ref.element
@@ -55,7 +55,7 @@ abstract class _$FontSettingsNotifier extends $AsyncNotifier<FontSettings> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

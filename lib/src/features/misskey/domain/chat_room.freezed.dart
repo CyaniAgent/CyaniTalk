@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'chat_room.dart';
@@ -9,15 +9,14 @@ part of 'chat_room.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$ChatRoom {
 
- String get id; DateTime get createdAt; String? get name; String? get topic; bool get isPublic; List<String> get userIds; String? get userId;// For direct message rooms
- MisskeyUser? get user; String? get type;// 'room' or 'user'
- MessagingMessage? get lastMessage; int get unreadCount; bool get isMuted; bool get isPinned;
+ String get id; DateTime get createdAt; String? get name; String? get topic; bool get isPublic; List<String> get userIds; String? get userId; MisskeyUser? get user; String? get type; MessagingMessage? get lastMessage; int get unreadCount; bool get isMuted; bool get isPinned;
 /// Create a copy of ChatRoom
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -68,7 +67,7 @@ class _$ChatRoomCopyWithImpl<$Res>
 /// Create a copy of ChatRoom
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? createdAt = null,Object? name = freezed,Object? topic = freezed,Object? isPublic = null,Object? userIds = null,Object? userId = freezed,Object? user = freezed,Object? type = freezed,Object? lastMessage = freezed,Object? unreadCount = null,Object? isMuted = null,Object? isPinned = null,}) {
-  return _then(_self.copyWith(
+  return _then(ChatRoom(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -247,7 +246,7 @@ return $default(_that.id,_that.createdAt,_that.name,_that.topic,_that.isPublic,_
 @JsonSerializable()
 
 class _ChatRoom implements ChatRoom {
-  const _ChatRoom({required this.id, required this.createdAt, this.name, this.topic, this.isPublic = false, final  List<String> userIds = const [], this.userId, this.user, this.type, this.lastMessage, this.unreadCount = 0, this.isMuted = false, this.isPinned = false}): _userIds = userIds;
+  const _ChatRoom({required this.id, required this.createdAt, this.name, this.topic, this.isPublic = false,  List<String> userIds = const [], this.userId, this.user, this.type, this.lastMessage, this.unreadCount = 0, this.isMuted = false, this.isPinned = false}): _userIds = userIds;
   factory _ChatRoom.fromJson(Map<String, dynamic> json) => _$ChatRoomFromJson(json);
 
 @override final  String id;
@@ -263,10 +262,8 @@ class _ChatRoom implements ChatRoom {
 }
 
 @override final  String? userId;
-// For direct message rooms
 @override final  MisskeyUser? user;
 @override final  String? type;
-// 'room' or 'user'
 @override final  MessagingMessage? lastMessage;
 @override@JsonKey() final  int unreadCount;
 @override@JsonKey() final  bool isMuted;

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'poll.dart';
@@ -9,6 +9,7 @@ part of 'poll.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$PollChoiceCopyWithImpl<$Res>
 /// Create a copy of PollChoice
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? text = null,}) {
-  return _then(_self.copyWith(
+  return _then(PollChoice(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,
   ));
@@ -335,7 +336,7 @@ class _$PollCopyWithImpl<$Res>
 /// Create a copy of Poll
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? choices = null,Object? multiple = null,Object? mode = null,Object? expiresAt = freezed,Object? relativeValue = freezed,Object? relativeUnit = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(Poll(
 choices: null == choices ? _self.choices : choices // ignore: cast_nullable_to_non_nullable
 as List<String>,multiple: null == multiple ? _self.multiple : multiple // ignore: cast_nullable_to_non_nullable
 as bool,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
@@ -483,7 +484,7 @@ return $default(_that.choices,_that.multiple,_that.mode,_that.expiresAt,_that.re
 @JsonSerializable()
 
 class _Poll implements Poll {
-  const _Poll({required final  List<String> choices, this.multiple = false, this.mode = PollMode.permanent, this.expiresAt, this.relativeValue, this.relativeUnit}): _choices = choices;
+  const _Poll({required  List<String> choices, this.multiple = false, this.mode = PollMode.permanent, this.expiresAt, this.relativeValue, this.relativeUnit}): _choices = choices;
   factory _Poll.fromJson(Map<String, dynamic> json) => _$PollFromJson(json);
 
 /// 投票选项列表（2-10 个）
@@ -626,7 +627,7 @@ class _$PollResultCopyWithImpl<$Res>
 /// Create a copy of PollResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? choices = null,Object? multiple = null,Object? expiresAt = freezed,Object? votesCount = null,}) {
-  return _then(_self.copyWith(
+  return _then(PollResult(
 choices: null == choices ? _self.choices : choices // ignore: cast_nullable_to_non_nullable
 as List<PollChoiceResult>,multiple: null == multiple ? _self.multiple : multiple // ignore: cast_nullable_to_non_nullable
 as bool,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
@@ -772,7 +773,7 @@ return $default(_that.choices,_that.multiple,_that.expiresAt,_that.votesCount);c
 @JsonSerializable()
 
 class _PollResult implements PollResult {
-  const _PollResult({required final  List<PollChoiceResult> choices, this.multiple = false, this.expiresAt, this.votesCount = 0}): _choices = choices;
+  const _PollResult({required  List<PollChoiceResult> choices, this.multiple = false, this.expiresAt, this.votesCount = 0}): _choices = choices;
   factory _PollResult.fromJson(Map<String, dynamic> json) => _$PollResultFromJson(json);
 
  final  List<PollChoiceResult> _choices;
@@ -904,7 +905,7 @@ class _$PollChoiceResultCopyWithImpl<$Res>
 /// Create a copy of PollChoiceResult
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? text = null,Object? votes = null,Object? isVoted = null,}) {
-  return _then(_self.copyWith(
+  return _then(PollChoiceResult(
 text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,votes: null == votes ? _self.votes : votes // ignore: cast_nullable_to_non_nullable
 as int,isVoted: null == isVoted ? _self.isVoted : isVoted // ignore: cast_nullable_to_non_nullable
@@ -1173,7 +1174,7 @@ class _$PollTimeSettingCopyWithImpl<$Res>
 /// Create a copy of PollTimeSetting
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? expiresAt = freezed,Object? relativeValue = freezed,Object? relativeUnit = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(PollTimeSetting(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as PollMode,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,relativeValue: freezed == relativeValue ? _self.relativeValue : relativeValue // ignore: cast_nullable_to_non_nullable

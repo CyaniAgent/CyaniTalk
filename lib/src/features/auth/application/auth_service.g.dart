@@ -45,7 +45,7 @@ final class AuthServiceProvider
   AuthService create() => AuthService();
 }
 
-String _$authServiceHash() => r'5f65a413942a1cf31f03aeb5b6c03ecd9702309d';
+String _$authServiceHash() => r'5e6e0bd3340cdcf4a4ed9915e01a17ac90abf997';
 
 /// 认证服务类
 ///
@@ -56,7 +56,7 @@ abstract class _$AuthService extends $AsyncNotifier<List<Account>> {
   FutureOr<List<Account>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<List<Account>>, List<Account>>;
     final element =
         ref.element
@@ -66,7 +66,7 @@ abstract class _$AuthService extends $AsyncNotifier<List<Account>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -105,7 +105,7 @@ final class SelectedMisskeyAccountProvider
 }
 
 String _$selectedMisskeyAccountHash() =>
-    r'419b8a883b4c1d0f151fe7300b970ed2bbbd77d5';
+    r'c190af268f56bc317c326846ce4af2c8f465051c';
 
 /// 选中的Misskey账户提供者
 ///
@@ -115,7 +115,7 @@ abstract class _$SelectedMisskeyAccount extends $AsyncNotifier<Account?> {
   FutureOr<Account?> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<Account?>, Account?>;
     final element =
         ref.element
@@ -125,7 +125,7 @@ abstract class _$SelectedMisskeyAccount extends $AsyncNotifier<Account?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 

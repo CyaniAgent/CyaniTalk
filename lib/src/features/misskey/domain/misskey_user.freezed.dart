@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'misskey_user.dart';
@@ -9,6 +9,7 @@ part of 'misskey_user.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$MisskeyUserCopyWithImpl<$Res>
 /// Create a copy of MisskeyUser
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = freezed,Object? username = null,Object? host = freezed,Object? avatarUrl = freezed,Object? bannerUrl = freezed,Object? description = freezed,Object? createdAt = freezed,Object? notesCount = freezed,Object? followingCount = freezed,Object? followersCount = freezed,Object? badgeRoles = null,Object? roles = null,Object? isAdmin = null,Object? isModerator = null,Object? isBot = null,Object? isCat = null,Object? driveCapacityMb = freezed,Object? driveUsage = freezed,Object? emojis = freezed,Object? followedMessage = freezed,Object? location = freezed,Object? birthday = freezed,Object? lang = freezed,Object? fields = null,Object? policies = null,}) {
-  return _then(_self.copyWith(
+  return _then(MisskeyUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -234,7 +235,7 @@ return $default(_that.id,_that.name,_that.username,_that.host,_that.avatarUrl,_t
 @JsonSerializable()
 
 class _MisskeyUser implements MisskeyUser {
-  const _MisskeyUser({required this.id, this.name, required this.username, this.host, this.avatarUrl, this.bannerUrl, this.description, this.createdAt, this.notesCount, this.followingCount, this.followersCount, final  List<Map<String, dynamic>> badgeRoles = const [], final  List<Map<String, dynamic>> roles = const [], this.isAdmin = false, this.isModerator = false, this.isBot = false, this.isCat = false, this.driveCapacityMb, this.driveUsage, final  Map<String, String>? emojis, this.followedMessage, this.location, this.birthday, this.lang, final  List<Map<String, dynamic>> fields = const [], final  Map<String, dynamic> policies = const {}}): _badgeRoles = badgeRoles,_roles = roles,_emojis = emojis,_fields = fields,_policies = policies;
+  const _MisskeyUser({required this.id, this.name, required this.username, this.host, this.avatarUrl, this.bannerUrl, this.description, this.createdAt, this.notesCount, this.followingCount, this.followersCount,  List<Map<String, dynamic>> badgeRoles = const [],  List<Map<String, dynamic>> roles = const [], this.isAdmin = false, this.isModerator = false, this.isBot = false, this.isCat = false, this.driveCapacityMb, this.driveUsage,  Map<String, String>? emojis, this.followedMessage, this.location, this.birthday, this.lang,  List<Map<String, dynamic>> fields = const [],  Map<String, dynamic> policies = const {}}): _badgeRoles = badgeRoles,_roles = roles,_emojis = emojis,_fields = fields,_policies = policies;
   factory _MisskeyUser.fromJson(Map<String, dynamic> json) => _$MisskeyUserFromJson(json);
 
 @override final  String id;

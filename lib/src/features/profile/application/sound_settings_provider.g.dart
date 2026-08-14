@@ -40,7 +40,7 @@ abstract class _$SoundSettingsNotifier extends $AsyncNotifier<SoundSettings> {
   FutureOr<SoundSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<SoundSettings>, SoundSettings>;
     final element =
         ref.element
@@ -50,6 +50,6 @@ abstract class _$SoundSettingsNotifier extends $AsyncNotifier<SoundSettings> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

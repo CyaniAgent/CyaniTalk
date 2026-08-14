@@ -45,7 +45,7 @@ abstract class _$NotificationSettingsNotifier
   FutureOr<NotificationSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<NotificationSettings>, NotificationSettings>;
@@ -60,6 +60,6 @@ abstract class _$NotificationSettingsNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

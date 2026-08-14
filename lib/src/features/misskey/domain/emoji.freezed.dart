@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'emoji.dart';
@@ -9,6 +9,7 @@ part of 'emoji.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$EmojiCopyWithImpl<$Res>
 /// Create a copy of Emoji
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? aliases = null,Object? name = null,Object? category = freezed,Object? url = null,}) {
-  return _then(_self.copyWith(
+  return _then(Emoji(
 aliases: null == aliases ? _self.aliases : aliases // ignore: cast_nullable_to_non_nullable
 as List<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
@@ -212,7 +213,7 @@ return $default(_that.aliases,_that.name,_that.category,_that.url);case _:
 @JsonSerializable()
 
 class _Emoji implements Emoji {
-  const _Emoji({required final  List<String> aliases, required this.name, this.category, required this.url}): _aliases = aliases;
+  const _Emoji({required  List<String> aliases, required this.name, this.category, required this.url}): _aliases = aliases;
   factory _Emoji.fromJson(Map<String, dynamic> json) => _$EmojiFromJson(json);
 
  final  List<String> _aliases;
@@ -344,7 +345,7 @@ class _$EmojiDetailCopyWithImpl<$Res>
 /// Create a copy of EmojiDetail
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? aliases = null,Object? name = null,Object? category = freezed,Object? host = freezed,Object? url = null,Object? license = freezed,Object? isSensitive = null,Object? localOnly = null,Object? roleIdsThatCanBeUsedThisEmojiAsReaction = null,}) {
-  return _then(_self.copyWith(
+  return _then(EmojiDetail(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,aliases: null == aliases ? _self.aliases : aliases // ignore: cast_nullable_to_non_nullable
 as List<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -496,7 +497,7 @@ return $default(_that.id,_that.aliases,_that.name,_that.category,_that.host,_tha
 @JsonSerializable()
 
 class _EmojiDetail implements EmojiDetail {
-  const _EmojiDetail({required this.id, required final  List<String> aliases, required this.name, this.category, this.host, required this.url, this.license, this.isSensitive = false, this.localOnly = false, final  List<String> roleIdsThatCanBeUsedThisEmojiAsReaction = const []}): _aliases = aliases,_roleIdsThatCanBeUsedThisEmojiAsReaction = roleIdsThatCanBeUsedThisEmojiAsReaction;
+  const _EmojiDetail({required this.id, required  List<String> aliases, required this.name, this.category, this.host, required this.url, this.license, this.isSensitive = false, this.localOnly = false,  List<String> roleIdsThatCanBeUsedThisEmojiAsReaction = const []}): _aliases = aliases,_roleIdsThatCanBeUsedThisEmojiAsReaction = roleIdsThatCanBeUsedThisEmojiAsReaction;
   factory _EmojiDetail.fromJson(Map<String, dynamic> json) => _$EmojiDetailFromJson(json);
 
 @override final  String id;
@@ -646,7 +647,7 @@ class _$EmojisResponseCopyWithImpl<$Res>
 /// Create a copy of EmojisResponse
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? emojis = null,}) {
-  return _then(_self.copyWith(
+  return _then(EmojisResponse(
 emojis: null == emojis ? _self.emojis : emojis // ignore: cast_nullable_to_non_nullable
 as List<Emoji>,
   ));
@@ -789,7 +790,7 @@ return $default(_that.emojis);case _:
 @JsonSerializable()
 
 class _EmojisResponse implements EmojisResponse {
-  const _EmojisResponse({required final  List<Emoji> emojis}): _emojis = emojis;
+  const _EmojisResponse({required  List<Emoji> emojis}): _emojis = emojis;
   factory _EmojisResponse.fromJson(Map<String, dynamic> json) => _$EmojisResponseFromJson(json);
 
  final  List<Emoji> _emojis;

@@ -39,14 +39,14 @@ final class MisskeyMessagingHistoryNotifierProvider
 }
 
 String _$misskeyMessagingHistoryNotifierHash() =>
-    r'4e5c20e535c2a098f1a7170c24269f13f1e98a33';
+    r'8472e3262cf52d32777968f4336b63125bd8ff1c';
 
 abstract class _$MisskeyMessagingHistoryNotifier
     extends $AsyncNotifier<List<MessagingMessage>> {
   FutureOr<List<MessagingMessage>> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<List<MessagingMessage>>, List<MessagingMessage>>;
@@ -61,7 +61,7 @@ abstract class _$MisskeyMessagingHistoryNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }
 
@@ -112,7 +112,7 @@ final class MisskeyMessagingNotifierProvider
 }
 
 String _$misskeyMessagingNotifierHash() =>
-    r'4f9f022e2d464b5ddfb85a180401541f79191205';
+    r'01c495607c3961e03d8a2d4c386e028a033bc82f';
 
 final class MisskeyMessagingNotifierFamily extends $Family
     with
@@ -147,7 +147,7 @@ abstract class _$MisskeyMessagingNotifier
   FutureOr<List<MessagingMessage>> build(String userId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<List<MessagingMessage>>, List<MessagingMessage>>;
@@ -162,7 +162,7 @@ abstract class _$MisskeyMessagingNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -213,7 +213,7 @@ final class MisskeyChatRoomNotifierProvider
 }
 
 String _$misskeyChatRoomNotifierHash() =>
-    r'5061a7b81a2cb134e5ae38e3695d09e55155d2b1';
+    r'e4614a19776e71ac8d7694b3f1777ac6fc9dac1d';
 
 final class MisskeyChatRoomNotifierFamily extends $Family
     with
@@ -248,7 +248,7 @@ abstract class _$MisskeyChatRoomNotifier
   FutureOr<List<MessagingMessage>> build(String roomId);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref
             as $Ref<AsyncValue<List<MessagingMessage>>, List<MessagingMessage>>;
@@ -263,6 +263,6 @@ abstract class _$MisskeyChatRoomNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

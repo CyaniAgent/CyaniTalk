@@ -60,7 +60,7 @@ abstract class _$FileUpload extends $Notifier<List<UploadTask>> {
   List<UploadTask> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<List<UploadTask>, List<UploadTask>>;
     final element =
         ref.element
@@ -70,6 +70,6 @@ abstract class _$FileUpload extends $Notifier<List<UploadTask>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

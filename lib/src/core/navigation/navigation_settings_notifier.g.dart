@@ -38,7 +38,7 @@ final class NavigationSettingsNotifierProvider
 }
 
 String _$navigationSettingsNotifierHash() =>
-    r'3723d8ff99b1aadab6e4c58d03dc0669c4239cf5';
+    r'03b91413ea25a2f6276ccc4196ee3134025b1183';
 
 /// 导航设置状态管理器
 
@@ -47,7 +47,7 @@ abstract class _$NavigationSettingsNotifier
   FutureOr<NavigationSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<NavigationSettings>, NavigationSettings>;
     final element =
@@ -58,6 +58,6 @@ abstract class _$NavigationSettingsNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

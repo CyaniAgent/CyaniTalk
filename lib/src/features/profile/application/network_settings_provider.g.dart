@@ -37,7 +37,7 @@ final class NetworkSettingsNotifierProvider
 }
 
 String _$networkSettingsNotifierHash() =>
-    r'429b21d943104e23a4cb69f0dae4b94361519eee';
+    r'c24e8865aafa293e5f33fa6f8941afaba4b46146';
 
 /// 网络设置状态管理器
 
@@ -46,7 +46,7 @@ abstract class _$NetworkSettingsNotifier
   FutureOr<NetworkSettings> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<AsyncValue<NetworkSettings>, NetworkSettings>;
     final element =
         ref.element
@@ -56,6 +56,6 @@ abstract class _$NetworkSettingsNotifier
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    return element.handleCreate(ref, build);
   }
 }

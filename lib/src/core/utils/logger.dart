@@ -286,7 +286,7 @@ class AppLogger {
       if (_logFilePath == null) await initialize();
       final file = File(_logFilePath!);
       if (file.existsSync()) {
-        return file.readAsLines();
+        return await file.readAsLines();
       }
     } catch (e) {
       // 忽略错误

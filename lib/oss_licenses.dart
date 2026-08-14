@@ -13,10 +13,8 @@ const thisPackage = _Nyachi;
 /// All dependencies including transitive dependencies.
 const allDependencies = <Package>[
   __fe_analyzer_shared,
-  _analysis_server_plugin,
   _analyzer,
   _analyzer_buffer,
-  _analyzer_plugin,
   _app_bar_m3e,
   _archive,
   _args,
@@ -35,7 +33,6 @@ const allDependencies = <Package>[
   _cached_network_image_web,
   _characters,
   _checked_yaml,
-  _ci,
   _cli_config,
   _cli_util,
   _clock,
@@ -50,9 +47,6 @@ const allDependencies = <Package>[
   _crypto,
   _csslib,
   _cupertino_icons,
-  _custom_lint,
-  _custom_lint_core,
-  _custom_lint_visitor,
   _dart_pubspec_licenses,
   _dart_style,
   _dbus,
@@ -85,11 +79,20 @@ const allDependencies = <Package>[
   _flutter_cache_manager,
   _flutter_highlight,
   _flutter_hooks,
+  _flutter_inappwebview,
+  _flutter_inappwebview_android,
+  _flutter_inappwebview_internal_annotations,
+  _flutter_inappwebview_ios,
+  _flutter_inappwebview_macos,
+  _flutter_inappwebview_platform_interface,
+  _flutter_inappwebview_web,
+  _flutter_inappwebview_windows,
   _flutter_launcher_icons,
   _flutter_lints,
   _flutter_local_notifications,
   _flutter_local_notifications_linux,
   _flutter_local_notifications_platform_interface,
+  _flutter_local_notifications_web,
   _flutter_local_notifications_windows,
   _flutter_plugin_android_lifecycle,
   _flutter_riverpod,
@@ -123,18 +126,19 @@ const allDependencies = <Package>[
   _io,
   _jni,
   _jni_flutter,
+  _jni_util,
   _json_annotation,
   _json_serializable,
   _leak_tracker,
   _leak_tracker_flutter_testing,
   _leak_tracker_testing,
   _lints,
+  _listen,
   _loading_indicator_m3e,
   _logger,
   _logging,
   _m3e_collection,
   _m3e_design,
-  _markdown,
   _matcher,
   _material_color_utilities,
   _material_new_shapes,
@@ -154,7 +158,6 @@ const allDependencies = <Package>[
   _package_config,
   _package_info_plus,
   _package_info_plus_platform_interface,
-  _pana,
   _path,
   _path_provider,
   _path_provider_android,
@@ -173,14 +176,11 @@ const allDependencies = <Package>[
   _pub_semver,
   _pubspec_parse,
   _record_use,
-  _retry,
   _riverpod,
   _riverpod_analyzer_utils,
   _riverpod_annotation,
   _riverpod_generator,
-  _riverpod_lint,
   _rxdart,
-  _safe_url_check,
   _screen_retriever,
   _screen_retriever_linux,
   _screen_retriever_macos,
@@ -217,7 +217,6 @@ const allDependencies = <Package>[
   _stream_transform,
   _string_scanner,
   _synchronized,
-  _tar,
   _term_glyph,
   _test,
   _test_api,
@@ -250,18 +249,12 @@ const allDependencies = <Package>[
   _web_socket,
   _web_socket_channel,
   _webkit_inspection_protocol,
-  _webview_flutter,
-  _webview_flutter_android,
-  _webview_flutter_platform_interface,
-  _webview_flutter_wkwebview,
-  _webview_windows,
   _win32,
   _win32_registry,
   _window_manager,
   _xdg_directories,
   _xml,
-  _yaml,
-  _yaml_edit
+  _yaml
 ];
 
 /// Direct `dependencies`.
@@ -270,6 +263,7 @@ const dependencies = <Package>[
   _cupertino_icons,
   _intl,
   _easy_localization,
+  _dynamic_color,
   _dio,
   _web_socket_channel,
   _flutter_riverpod,
@@ -290,14 +284,13 @@ const dependencies = <Package>[
   _cookie_jar,
   _dio_http2_adapter,
   _shared_preferences,
-  _webview_flutter,
-  _webview_windows,
+  _file_picker,
+  _flutter_inappwebview,
   _logger,
   _path_provider,
   _video_player,
   _video_player_win,
   _photo_view,
-  _file_picker,
   _device_info_plus,
   _cached_network_image,
   _sqflite,
@@ -324,8 +317,6 @@ const devDependencies = <Package>[
   _flutter_lints,
   _riverpod_generator,
   _build_runner,
-  _custom_lint,
-  _riverpod_lint,
   _freezed,
   _json_serializable,
   _flutter_launcher_icons,
@@ -357,8 +348,6 @@ class Package {
   final String? version;
   /// License
   final String? license;
-  /// The [SPDX](https://spdx.org/licenses/) license identifiers, if detected.
-  final List<String> spdxIdentifiers;
 
   const Package({
     required this.name,
@@ -372,7 +361,6 @@ class Package {
     this.repository,
     this.version,
     this.license,
-    this.spdxIdentifiers = const [],
   });
 }
 
@@ -384,18 +372,13 @@ class PackageRef {
   Package resolve() => allDependencies.firstWhere((d) => d.name == name);
 }
 
-/// _fe_analyzer_shared 91.0.0
+/// _fe_analyzer_shared 103.0.0
 const __fe_analyzer_shared = Package(
     name: '_fe_analyzer_shared',
     description: 'Logic that is shared between the front_end and analyzer packages.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/_fe_analyzer_shared',
     authors: [],
-    version: '91.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta')],
-    devDependencies: [PackageRef('collection'), PackageRef('test')],
+    version: '103.0.0',
     license: '''Copyright 2019, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -423,60 +406,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// analysis_server_plugin 0.3.3
-const _analysis_server_plugin = Package(
-    name: 'analysis_server_plugin',
-    description: 'A framework and support code for building plugins for the analysis server.',
-    repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/analysis_server_plugin',
-    authors: [],
-    version: '0.3.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('meta'), PackageRef('yaml'), PackageRef('yaml_edit')],
-    devDependencies: [PackageRef('async'), PackageRef('lints'), PackageRef('path'), PackageRef('test')],
-    license: '''Copyright 2024, the Dart project authors.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    dependencies: [PackageRef('meta')],
+    devDependencies: [PackageRef('collection'), PackageRef('test')],
   );
 
-/// analyzer 8.4.0
+/// analyzer 13.3.0
 const _analyzer = Package(
     name: 'analyzer',
     description: 'This package provides a library that performs static analysis of Dart code.',
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/analyzer',
     authors: [],
-    version: '8.4.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('_fe_analyzer_shared'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('glob'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('watcher'), PackageRef('yaml')],
-    devDependencies: [PackageRef('args'), PackageRef('async'), PackageRef('lints'), PackageRef('matcher'), PackageRef('test'), PackageRef('vm_service')],
+    version: '13.3.0',
     license: '''Copyright 2013, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -504,20 +446,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('_fe_analyzer_shared'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('glob'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('watcher'), PackageRef('yaml')],
+    devDependencies: [PackageRef('args'), PackageRef('async'), PackageRef('lints'), PackageRef('matcher'), PackageRef('test'), PackageRef('vm_service')],
   );
 
-/// analyzer_buffer 0.1.11
+/// analyzer_buffer 0.3.3
 const _analyzer_buffer = Package(
     name: 'analyzer_buffer',
     description: 'A package to help writing code-generators while supporting import prefixes and default values',
     repository: 'https://github.com/rrousselGit/analyzer_buffer',
     authors: [],
-    version: '0.1.11',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('meta'), PackageRef('path'), PackageRef('source_gen')],
-    devDependencies: [PackageRef('test')],
+    version: '0.3.3',
     license: '''MIT License
 
 Copyright (c) 2025 Remi Rousselet
@@ -539,47 +480,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
-  );
-
-/// analyzer_plugin 0.13.10
-const _analyzer_plugin = Package(
-    name: 'analyzer_plugin',
-    description: 'A framework and support code for building plugins for the analysis server.',
-    repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/analyzer_plugin',
-    authors: [],
-    version: '0.13.10',
-    spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('pub_semver'), PackageRef('yaml'), PackageRef('path')],
-    devDependencies: [PackageRef('lints'), PackageRef('meta'), PackageRef('test')],
-    license: '''Copyright 2017, the Dart project authors.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('meta'), PackageRef('path'), PackageRef('source_gen')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// app_bar_m3e 0.1.2
@@ -589,11 +493,6 @@ const _app_bar_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/app_bar_m3e',
     authors: [],
     version: '0.1.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025 Emily Moonstone
@@ -615,6 +514,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
 /// archive 4.0.9
@@ -624,11 +527,6 @@ const _archive = Package(
     repository: 'https://github.com/brendan-duncan/archive',
     authors: [],
     version: '4.0.9',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('path'), PackageRef('posix')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('lints'), PackageRef('test'), PackageRef('web')],
     license: '''The MIT License
 
 Copyright (c) 2013-2021 Brendan Duncan.
@@ -651,6 +549,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('path'), PackageRef('posix')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('lints'), PackageRef('test'), PackageRef('web')],
   );
 
 /// args 2.7.0
@@ -660,11 +562,6 @@ const _args = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/args',
     authors: [],
     version: '2.7.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -692,6 +589,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// async 2.13.1
@@ -701,11 +602,6 @@ const _async = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/async',
     authors: [],
     version: '2.13.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta')],
-    devDependencies: [PackageRef('fake_async'), PackageRef('stack_trace'), PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -733,6 +629,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('meta')],
+    devDependencies: [PackageRef('fake_async'), PackageRef('stack_trace'), PackageRef('test')],
   );
 
 /// boolean_selector 2.1.2
@@ -742,11 +642,6 @@ const _boolean_selector = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/boolean_selector',
     authors: [],
     version: '2.1.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('source_span'), PackageRef('string_scanner')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -774,20 +669,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('source_span'), PackageRef('string_scanner')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// build 4.0.6
+/// build 4.0.10
 const _build = Package(
     name: 'build',
     description: 'A package for authoring build_runner compatible code generators.',
     repository: 'https://github.com/dart-lang/build/tree/master/build',
     authors: [],
-    version: '4.0.6',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('crypto'), PackageRef('glob'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path')],
-    devDependencies: [PackageRef('test')],
+    version: '4.0.10',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -815,20 +709,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('crypto'), PackageRef('glob'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// build_config 1.3.0
+/// build_config 1.3.2
 const _build_config = Package(
     name: 'build_config',
     description: 'Format definition and support for parsing `build.yaml` configuration.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_config',
     authors: [],
-    version: '1.3.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('checked_yaml'), PackageRef('json_annotation'), PackageRef('path'), PackageRef('pubspec_parse')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('term_glyph'), PackageRef('test')],
+    version: '1.3.2',
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -856,20 +749,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('checked_yaml'), PackageRef('json_annotation'), PackageRef('path'), PackageRef('pubspec_parse')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('term_glyph'), PackageRef('test')],
   );
 
-/// build_daemon 4.1.1
+/// build_daemon 4.1.5
 const _build_daemon = Package(
     name: 'build_daemon',
     description: 'A daemon for running Dart builds.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_daemon',
     authors: [],
-    version: '4.1.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('crypto'), PackageRef('http_multi_server'), PackageRef('logging'), PackageRef('path'), PackageRef('pool'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
+    version: '4.1.5',
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -897,20 +789,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('crypto'), PackageRef('http_multi_server'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel'), PackageRef('yaml')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('test')],
   );
 
-/// build_runner 2.15.0
+/// build_runner 2.16.0
 const _build_runner = Package(
     name: 'build_runner',
     description: 'A build system for Dart code generation and modular compilation.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_runner',
     authors: [],
-    version: '2.15.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('build_daemon'), PackageRef('built_collection'), PackageRef('built_value'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('dart_style'), PackageRef('glob'), PackageRef('graphs'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('json_annotation'), PackageRef('logging'), PackageRef('meta'), PackageRef('mime'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel'), PackageRef('yaml')],
-    devDependencies: [PackageRef('stream_channel'), PackageRef('test')],
+    version: '2.16.0',
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -938,6 +829,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('build_daemon'), PackageRef('built_collection'), PackageRef('built_value'), PackageRef('collection'), PackageRef('convert'), PackageRef('crypto'), PackageRef('dart_style'), PackageRef('glob'), PackageRef('graphs'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('json_annotation'), PackageRef('logging'), PackageRef('meta'), PackageRef('mime'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel'), PackageRef('yaml')],
+    devDependencies: [PackageRef('stream_channel'), PackageRef('test')],
   );
 
 /// built_collection 5.1.1
@@ -948,11 +843,6 @@ const _built_collection = Package(
     homepage: 'https://github.com/google/built_collection.dart',
     authors: [],
     version: '5.1.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -981,21 +871,20 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
-/// built_value 8.12.6
+/// built_value 8.12.7
 const _built_value = Package(
     name: 'built_value',
     description: '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
 ''',
     repository: 'https://github.com/google/built_value.dart/tree/master/built_value',
     authors: [],
-    version: '8.12.6',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('built_collection'), PackageRef('collection'), PackageRef('fixnum'), PackageRef('meta')],
-    devDependencies: [PackageRef('test')],
+    version: '8.12.7',
     license: '''Copyright 2015, Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1024,6 +913,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('built_collection'), PackageRef('collection'), PackageRef('fixnum'), PackageRef('meta')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// button_group_m3e 0.3.1
@@ -1033,11 +926,6 @@ const _button_group_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/button_group_m3e',
     authors: [],
     version: '0.3.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('button_m3e')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025 Emily Moonstone
@@ -1059,6 +947,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('button_m3e')],
+    devDependencies: [],
   );
 
 /// button_m3e 0.1.2
@@ -1068,12 +960,11 @@ const _button_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/button_m3e',
     authors: [],
     version: '0.1.2',
-    spdxIdentifiers: [],
+    license: 'MIT License',
     isMarkdown: false,
     isSdk: false,
     dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
     devDependencies: [],
-    license: 'MIT License',
   );
 
 /// cached_network_image 3.4.1
@@ -1083,11 +974,6 @@ const _cached_network_image = Package(
     homepage: 'https://github.com/Baseflow/flutter_cached_network_image',
     authors: [],
     version: '3.4.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('cached_network_image_platform_interface'), PackageRef('cached_network_image_web'), PackageRef('flutter'), PackageRef('flutter_cache_manager'), PackageRef('octo_image')],
-    devDependencies: [PackageRef('file'), PackageRef('flutter_lints'), PackageRef('mocktail')],
     license: '''The MIT License (MIT)
 
 Copyright (c) 2018 Rene Floor
@@ -1109,6 +995,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('cached_network_image_platform_interface'), PackageRef('cached_network_image_web'), PackageRef('flutter'), PackageRef('flutter_cache_manager'), PackageRef('octo_image')],
+    devDependencies: [PackageRef('file'), PackageRef('flutter_lints'), PackageRef('mocktail')],
   );
 
 /// cached_network_image_platform_interface 4.1.1
@@ -1118,11 +1008,6 @@ const _cached_network_image_platform_interface = Package(
     homepage: 'https://github.com/Baseflow/flutter_cached_network_image',
     authors: [],
     version: '4.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_cache_manager')],
-    devDependencies: [PackageRef('file'), PackageRef('flutter_lints')],
     license: '''The MIT License (MIT)
 
 Copyright (c) 2018 Rene Floor
@@ -1144,6 +1029,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_cache_manager')],
+    devDependencies: [PackageRef('file'), PackageRef('flutter_lints')],
   );
 
 /// cached_network_image_web 1.3.1
@@ -1153,11 +1042,6 @@ const _cached_network_image_web = Package(
     homepage: 'https://github.com/Baseflow/flutter_cached_network_image',
     authors: [],
     version: '1.3.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('cached_network_image_platform_interface'), PackageRef('flutter'), PackageRef('flutter_cache_manager'), PackageRef('web')],
-    devDependencies: [PackageRef('file'), PackageRef('flutter_lints')],
     license: '''The MIT License (MIT)
 
 Copyright (c) 2018 Rene Floor
@@ -1179,6 +1063,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('cached_network_image_platform_interface'), PackageRef('flutter'), PackageRef('flutter_cache_manager'), PackageRef('web')],
+    devDependencies: [PackageRef('file'), PackageRef('flutter_lints')],
   );
 
 /// characters 1.4.1
@@ -1188,11 +1076,6 @@ const _characters = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/characters',
     authors: [],
     version: '1.4.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1220,6 +1103,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// checked_yaml 2.0.4
@@ -1229,11 +1116,6 @@ const _checked_yaml = Package(
     repository: 'https://github.com/google/json_serializable.dart/tree/master/checked_yaml',
     authors: [],
     version: '2.0.4',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('json_annotation'), PackageRef('source_span'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('path'), PackageRef('test')],
     license: '''Copyright 2019, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1260,221 +1142,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// ci 0.1.0
-const _ci = Package(
-    name: 'ci',
-    description: "Detect whether you're running in a CI environment and information about the CI vendor.",
-    repository: 'https://github.com/invertase/dart-cli-utilities/tree/main/packages/ci',
-    authors: [],
-    version: '0.1.0',
-    spdxIdentifiers: ['Apache-2.0'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('http'), PackageRef('test')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright 2021 Invertase Limited
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
+    dependencies: [PackageRef('json_annotation'), PackageRef('source_span'), PackageRef('yaml')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('path'), PackageRef('test')],
   );
 
 /// cli_config 0.2.0
@@ -1484,11 +1155,6 @@ const _cli_config = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/cli_config',
     authors: [],
     version: '0.2.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('yaml')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -1516,6 +1182,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('args'), PackageRef('yaml')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// cli_util 0.4.2
@@ -1525,11 +1195,6 @@ const _cli_util = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/cli_util',
     authors: [],
     version: '0.4.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('path')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1557,6 +1222,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('path')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// clock 1.1.2
@@ -1566,11 +1235,6 @@ const _clock = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/clock',
     authors: [],
     version: '1.1.2',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -1772,6 +1436,10 @@ const _clock = Package(
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// code_assets 1.2.1
@@ -1781,11 +1449,6 @@ const _code_assets = Package(
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/code_assets',
     authors: [],
     version: '1.2.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('hooks')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2025, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -1813,6 +1476,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('hooks')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// code_builder 4.11.1
@@ -1822,11 +1489,6 @@ const _code_builder = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/code_builder',
     authors: [],
     version: '4.11.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('collection'), PackageRef('matcher'), PackageRef('meta')],
-    devDependencies: [PackageRef('build'), PackageRef('build_runner'), PackageRef('dart_style'), PackageRef('source_gen'), PackageRef('test')],
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1854,6 +1516,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('collection'), PackageRef('matcher'), PackageRef('meta')],
+    devDependencies: [PackageRef('build'), PackageRef('build_runner'), PackageRef('dart_style'), PackageRef('source_gen'), PackageRef('test')],
   );
 
 /// collection 1.19.1
@@ -1863,11 +1529,6 @@ const _collection = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/collection',
     authors: [],
     version: '1.19.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -1895,6 +1556,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// colorfilter_generator 0.0.8
@@ -1905,11 +1570,6 @@ const _colorfilter_generator = Package(
     repository: 'https://github.com/hsbijarniya/colorfilter_generator',
     authors: [],
     version: '0.0.8',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('matrix2d')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2022 hsbijarniya@gmail.com
@@ -1930,6 +1590,10 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('matrix2d')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// convert 3.1.2
@@ -1939,11 +1603,6 @@ const _convert = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/convert',
     authors: [],
     version: '3.1.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('typed_data')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -1971,6 +1630,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('typed_data')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// cookie_jar 4.0.9
@@ -1980,11 +1643,6 @@ const _cookie_jar = Package(
     repository: 'https://github.com/flutterchina/cookie_jar',
     authors: [],
     version: '4.0.9',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('universal_io')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
     license: '''MIT License
 
 Copyright (c) 2018 wendux
@@ -2006,6 +1664,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('universal_io')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
 /// coverage 1.15.1
@@ -2015,11 +1677,6 @@ const _coverage = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/coverage',
     authors: [],
     version: '1.15.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('cli_config'), PackageRef('glob'), PackageRef('logging'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('source_maps'), PackageRef('stack_trace'), PackageRef('vm_service'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2047,20 +1704,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('args'), PackageRef('cli_config'), PackageRef('glob'), PackageRef('logging'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('source_maps'), PackageRef('stack_trace'), PackageRef('vm_service'), PackageRef('yaml')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
   );
 
-/// cross_file 0.3.5+2
+/// cross_file 0.3.5+4
 const _cross_file = Package(
     name: 'cross_file',
     description: 'An abstraction to allow working with files across multiple platforms.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/cross_file',
     authors: [],
-    version: '0.3.5+2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('web')],
-    devDependencies: [PackageRef('path'), PackageRef('test')],
+    version: '0.3.5+4',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2086,6 +1742,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('web')],
+    devDependencies: [PackageRef('path'), PackageRef('test')],
   );
 
 /// crypto 3.0.7
@@ -2095,11 +1755,6 @@ const _crypto = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/crypto',
     authors: [],
     version: '3.0.7',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('typed_data')],
-    devDependencies: [PackageRef('convert'), PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -2127,6 +1782,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('typed_data')],
+    devDependencies: [PackageRef('convert'), PackageRef('test')],
   );
 
 /// csslib 1.0.2
@@ -2136,11 +1795,6 @@ const _csslib = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/csslib',
     authors: [],
     version: '1.0.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('source_span')],
-    devDependencies: [PackageRef('path'), PackageRef('term_glyph'), PackageRef('test')],
     license: '''Copyright 2013, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2168,6 +1822,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('source_span')],
+    devDependencies: [PackageRef('path'), PackageRef('term_glyph'), PackageRef('test')],
   );
 
 /// cupertino_icons 1.0.9
@@ -2177,11 +1835,6 @@ const _cupertino_icons = Package(
     repository: 'https://github.com/flutter/packages/tree/main/third_party/packages/cupertino_icons',
     authors: [],
     version: '1.0.9',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('path')],
     license: '''The MIT License (MIT)
 
 Copyright (c) 2016 Vladimir Kharlampidi
@@ -2202,666 +1855,20 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
-  );
-
-/// custom_lint 0.8.1
-const _custom_lint = Package(
-    name: 'custom_lint',
-    description: 'Lint rules are a powerful way to improve the maintainability of a project. Custom Lint allows package authors and developers to easily write custom lint rules.',
-    repository: 'https://github.com/invertase/dart_custom_lint',
-    authors: [],
-    version: '0.8.1',
-    spdxIdentifiers: ['Apache-2.0'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('args'), PackageRef('async'), PackageRef('ci'), PackageRef('cli_util'), PackageRef('collection'), PackageRef('custom_lint_core'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('rxdart'), PackageRef('uuid'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('file'), PackageRef('freezed'), PackageRef('glob'), PackageRef('json_serializable'), PackageRef('test')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright 2020 Invertase Limited
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
+    dependencies: [],
+    devDependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('path')],
   );
 
-/// custom_lint_core 0.8.1
-const _custom_lint_core = Package(
-    name: 'custom_lint_core',
-    description: 'A package to help writing custom linters',
-    repository: 'https://github.com/invertase/dart_custom_lint',
-    authors: [],
-    version: '0.8.1',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('collection'), PackageRef('custom_lint_visitor'), PackageRef('glob'), PackageRef('matcher'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pubspec_parse'), PackageRef('source_span'), PackageRef('uuid'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('test')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright 2020 Invertase Limited
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
-  );
-
-/// custom_lint_visitor 1.0.0+8.4.0
-const _custom_lint_visitor = Package(
-    name: 'custom_lint_visitor',
-    description: 'A package that exports visitors for CustomLint.',
-    repository: 'https://github.com/invertase/dart_custom_lint',
-    authors: [],
-    version: '1.0.0+8.4.0',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('test')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright 2020 Invertase Limited
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
-  );
-
-/// dart_pubspec_licenses 3.0.15
+/// dart_pubspec_licenses 3.0.12
 const _dart_pubspec_licenses = Package(
     name: 'dart_pubspec_licenses',
     description: 'A library to make it easy to extract OSS license information from Dart packages using pubspec.yaml',
     homepage: 'https://github.com/espresso3389/flutter_oss_licenses/tree/master/packages/dart_pubspec_licenses',
     repository: 'https://github.com/espresso3389/flutter_oss_licenses',
     authors: [],
-    version: '3.0.15',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('yaml'), PackageRef('path'), PackageRef('json_annotation'), PackageRef('args'), PackageRef('pana')],
-    devDependencies: [PackageRef('lints'), PackageRef('json_serializable'), PackageRef('build_runner')],
+    version: '3.0.12',
     license: '''MIT License
 
 Copyright (c) 2019 Takashi Kawasaki
@@ -2883,20 +1890,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('yaml'), PackageRef('path'), PackageRef('json_annotation'), PackageRef('args')],
+    devDependencies: [PackageRef('lints'), PackageRef('json_serializable'), PackageRef('build_runner')],
   );
 
-/// dart_style 3.1.3
+/// dart_style 3.1.12
 const _dart_style = Package(
     name: 'dart_style',
     description: 'Opinionated, automatic Dart source code formatter. Provides an API and a CLI tool.',
     repository: 'https://github.com/dart-lang/dart_style',
     authors: [],
-    version: '3.1.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('yaml')],
-    devDependencies: [PackageRef('test')],
+    version: '3.1.12',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -2924,6 +1930,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('collection'), PackageRef('package_config'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('yaml')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// dbus 0.7.14
@@ -2933,11 +1943,6 @@ const _dbus = Package(
     homepage: 'https://github.com/canonical/dbus.dart',
     authors: [],
     version: '0.7.14',
-    spdxIdentifiers: ['MPL-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('ffi'), PackageRef('meta'), PackageRef('xml')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
     license: '''Mozilla Public License Version 2.0
 ==================================
 
@@ -3311,6 +2316,10 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('args'), PackageRef('ffi'), PackageRef('meta'), PackageRef('xml')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
 /// device_info_plus 12.4.0
@@ -3321,11 +2330,6 @@ const _device_info_plus = Package(
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/device_info_plus/device_info_plus',
     authors: [],
     version: '12.4.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('device_info_plus_platform_interface'), PackageRef('ffi'), PackageRef('file'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('meta'), PackageRef('web'), PackageRef('win32'), PackageRef('win32_registry')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito'), PackageRef('test')],
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -3353,6 +2357,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('device_info_plus_platform_interface'), PackageRef('ffi'), PackageRef('file'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('meta'), PackageRef('web'), PackageRef('win32'), PackageRef('win32_registry')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito'), PackageRef('test')],
   );
 
 /// device_info_plus_platform_interface 7.0.3
@@ -3363,11 +2371,6 @@ const _device_info_plus_platform_interface = Package(
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/',
     authors: [],
     version: '7.0.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito')],
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -3395,9 +2398,13 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito')],
   );
 
-/// dio 5.9.2
+/// dio 5.11.0
 const _dio = Package(
     name: 'dio',
     description: '''A powerful HTTP networking package,
@@ -3408,12 +2415,7 @@ Custom adapters, Transformers, etc.
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/dio',
     authors: [],
-    version: '5.9.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('mime'), PackageRef('path'), PackageRef('dio_web_adapter')],
-    devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('build_runner'), PackageRef('coverage'), PackageRef('crypto'), PackageRef('mockito')],
+    version: '5.11.0',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -3436,21 +2438,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('mime'), PackageRef('path'), PackageRef('dio_web_adapter')],
+    devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('build_runner'), PackageRef('coverage'), PackageRef('crypto'), PackageRef('mockito')],
   );
 
-/// dio_cookie_manager 3.4.0
+/// dio_cookie_manager 3.5.0
 const _dio_cookie_manager = Package(
     name: 'dio_cookie_manager',
     description: 'A cookie manager combines cookie_jar and dio, based on the interceptor algorithm.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/cookie_manager',
     authors: [],
-    version: '3.4.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('cookie_jar'), PackageRef('dio')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
+    version: '3.5.0',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -3473,21 +2474,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('cookie_jar'), PackageRef('dio')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
-/// dio_http2_adapter 2.7.1
+/// dio_http2_adapter 2.8.0
 const _dio_http2_adapter = Package(
     name: 'dio_http2_adapter',
     description: 'An adapter that combines HTTP/2 and dio. Supports reusing connections, header compression, etc.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/http2_adapter',
     authors: [],
-    version: '2.7.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('dio'), PackageRef('http2'), PackageRef('meta')],
-    devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('crypto'), PackageRef('path')],
+    version: '2.8.0',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -3510,21 +2510,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('dio'), PackageRef('http2'), PackageRef('meta')],
+    devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('crypto'), PackageRef('path')],
   );
 
-/// dio_web_adapter 2.1.2
+/// dio_web_adapter 2.2.1
 const _dio_web_adapter = Package(
     name: 'dio_web_adapter',
     description: 'An adapter that supports Dio on Web.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/web_adapter',
     authors: [],
-    version: '2.1.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('dio'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
+    version: '2.2.1',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -3547,6 +2546,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('dio'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
 /// dotted_border 3.1.0
@@ -3556,11 +2559,6 @@ const _dotted_border = Package(
     homepage: 'https://github.com/ajilo297/Flutter-Dotted-Border',
     authors: [],
     version: '3.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2019 Ajil Oommen
@@ -3609,20 +2607,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [],
   );
 
-/// dynamic_color 1.8.1
+/// dynamic_color 1.9.0
 const _dynamic_color = Package(
     name: 'dynamic_color',
     description: "A Flutter package to create Material color schemes based on a platform's implementation of dynamic color.",
     repository: 'https://github.com/material-foundation/flutter-packages/tree/main/packages/dynamic_color',
     authors: [],
-    version: '1.8.1',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('material_color_utilities')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('meta')],
+    version: '1.9.0',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -3824,6 +2821,10 @@ const _dynamic_color = Package(
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('material_color_utilities')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('meta')],
   );
 
 /// easy_localization 3.0.8
@@ -3833,11 +2834,6 @@ const _easy_localization = Package(
     homepage: 'https://github.com/aissat/easy_localization',
     authors: [],
     version: '3.0.8',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences'), PackageRef('intl'), PackageRef('args'), PackageRef('path'), PackageRef('easy_logger')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2018 
@@ -3859,6 +2855,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences'), PackageRef('intl'), PackageRef('args'), PackageRef('path'), PackageRef('easy_logger')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// easy_logger 0.0.2
@@ -3867,11 +2867,6 @@ const _easy_logger = Package(
     description: 'Easy logger',
     authors: [],
     version: '0.0.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2021 
@@ -3893,21 +2888,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [],
   );
 
-/// equatable 2.0.8
+/// equatable 2.1.0
 const _equatable = Package(
     name: 'equatable',
     description: 'A Dart package that helps to implement value based equality without needing to explicitly override == and hashCode.',
     homepage: 'https://github.com/felangel/equatable',
     repository: 'https://github.com/felangel/equatable',
     authors: [],
-    version: '2.0.8',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta')],
-    devDependencies: [PackageRef('test')],
+    version: '2.1.0',
     license: '''MIT License
 
 Copyright (c) 2026 Felix Angelov
@@ -3929,6 +2923,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('meta')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// expressive_refresh 0.1.2
@@ -3938,11 +2936,6 @@ const _expressive_refresh = Package(
     homepage: 'https://github.com/alvaronp/expressive-refresh',
     authors: [],
     version: '0.1.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('material_new_shapes')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2025 Álvaro N
@@ -3964,6 +2957,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('material_new_shapes')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// fab_m3e 0.1.1
@@ -3973,11 +2970,6 @@ const _fab_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/fab_m3e',
     authors: [],
     version: '0.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) ...
@@ -3999,6 +2991,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
 /// fake_async 1.3.3
@@ -4008,11 +3004,6 @@ const _fake_async = Package(
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/fake_async',
     authors: [],
     version: '1.3.3',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('clock'), PackageRef('collection')],
-    devDependencies: [PackageRef('async'), PackageRef('test')],
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -4214,6 +3205,10 @@ const _fake_async = Package(
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('clock'), PackageRef('collection')],
+    devDependencies: [PackageRef('async'), PackageRef('test')],
   );
 
 /// ffi 2.2.0
@@ -4223,11 +3218,6 @@ const _ffi = Package(
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/ffi',
     authors: [],
     version: '2.2.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -4255,6 +3245,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// file 7.0.1
@@ -4264,11 +3258,6 @@ const _file = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/file',
     authors: [],
     version: '7.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('path')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
     license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -4295,6 +3284,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('path')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
 /// file_picker 10.3.10
@@ -4305,11 +3298,6 @@ const _file_picker = Package(
     repository: 'https://github.com/miguelpruivo/flutter_file_picker',
     authors: [],
     version: '10.3.10',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('flutter_plugin_android_lifecycle'), PackageRef('plugin_platform_interface'), PackageRef('ffi'), PackageRef('path'), PackageRef('win32'), PackageRef('cross_file'), PackageRef('web'), PackageRef('dbus')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2018 Miguel Ruivo
@@ -4331,6 +3319,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('flutter_plugin_android_lifecycle'), PackageRef('plugin_platform_interface'), PackageRef('ffi'), PackageRef('path'), PackageRef('win32'), PackageRef('cross_file'), PackageRef('web'), PackageRef('dbus')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// fixnum 1.1.1
@@ -4340,11 +3332,6 @@ const _fixnum = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/fixnum',
     authors: [],
     version: '1.1.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -4372,6 +3359,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// fl_chart 1.2.0
@@ -4382,11 +3373,6 @@ const _fl_chart = Package(
     repository: 'https://github.com/imaNNeo/fl_chart',
     authors: [],
     version: '1.2.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('equatable'), PackageRef('flutter'), PackageRef('vector_math')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
     license: '''MIT License
 
 Copyright (c) 2022 Flutter 4 Fun
@@ -4408,20 +3394,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('equatable'), PackageRef('flutter'), PackageRef('vector_math')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
   );
 
-/// flutter 3.44.4
+/// flutter 3.47.0
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.44.4',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: true,
-    dependencies: [PackageRef('characters'), PackageRef('collection'), PackageRef('material_color_utilities'), PackageRef('meta'), PackageRef('vector_math')],
-    devDependencies: [PackageRef('fake_async'), PackageRef('leak_tracker_flutter_testing'), PackageRef('leak_tracker_testing'), PackageRef('leak_tracker'), PackageRef('web'), PackageRef('clock'), PackageRef('file'), PackageRef('path'), PackageRef('platform')],
+    version: '3.47.0',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -4447,6 +3432,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: true,
+    dependencies: [PackageRef('characters'), PackageRef('collection'), PackageRef('material_color_utilities'), PackageRef('meta'), PackageRef('vector_math')],
+    devDependencies: [PackageRef('fake_async'), PackageRef('leak_tracker_flutter_testing'), PackageRef('leak_tracker_testing'), PackageRef('leak_tracker'), PackageRef('web'), PackageRef('clock'), PackageRef('file'), PackageRef('path'), PackageRef('platform')],
   );
 
 /// flutter_adaptive_scaffold 0.3.3+1
@@ -4456,11 +3445,6 @@ const _flutter_adaptive_scaffold = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/flutter_adaptive_scaffold',
     authors: [],
     version: '0.3.3+1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -4486,6 +3470,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [],
   );
 
 /// flutter_animate 4.5.2
@@ -4495,11 +3483,6 @@ const _flutter_animate = Package(
     repository: 'https://github.com/gskinner/flutter_animate',
     authors: [],
     version: '4.5.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_shaders')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''BSD 3-Clause License
 
 Copyright (c) 2022, Grant Skinner
@@ -4529,6 +3512,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_shaders')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// flutter_background_service 5.1.0
@@ -4538,11 +3525,6 @@ const _flutter_background_service = Package(
     repository: 'https://github.com/ekasetiawans/flutter_background_service',
     authors: [],
     version: '5.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_background_service_platform_interface'), PackageRef('flutter_background_service_android'), PackageRef('flutter_background_service_ios')],
-    devDependencies: [],
     license: '''Copyright 2022 Eka Setiawan Saputra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -4550,6 +3532,10 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_background_service_platform_interface'), PackageRef('flutter_background_service_android'), PackageRef('flutter_background_service_ios')],
+    devDependencies: [],
   );
 
 /// flutter_background_service_android 6.3.1
@@ -4559,11 +3545,6 @@ const _flutter_background_service_android = Package(
     repository: 'https://github.com/ekasetiawans/flutter_background_service',
     authors: [],
     version: '6.3.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_background_service_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2022 Eka Setiawan Saputra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -4571,6 +3552,10 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_background_service_platform_interface')],
+    devDependencies: [],
   );
 
 /// flutter_background_service_ios 5.0.3
@@ -4580,11 +3565,6 @@ const _flutter_background_service_ios = Package(
     repository: 'https://github.com/ekasetiawans/flutter_background_service',
     authors: [],
     version: '5.0.3',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_background_service_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2022 Eka Setiawan Saputra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -4592,6 +3572,10 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_background_service_platform_interface')],
+    devDependencies: [],
   );
 
 /// flutter_background_service_platform_interface 5.1.2
@@ -4601,11 +3585,6 @@ const _flutter_background_service_platform_interface = Package(
     repository: 'https://github.com/ekasetiawans/flutter_background_service',
     authors: [],
     version: '5.1.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''Copyright 2022 Eka Setiawan Saputra
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -4613,20 +3592,19 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
-/// flutter_cache_manager 3.4.1
+/// flutter_cache_manager 3.4.2
 const _flutter_cache_manager = Package(
     name: 'flutter_cache_manager',
     description: 'Generic cache manager for flutter. Saves web files on the storages of the device and saves the cache info using sqflite.',
     homepage: 'https://github.com/Baseflow/flutter_cache_manager/tree/develop/flutter_cache_manager',
     authors: [],
-    version: '3.4.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('file'), PackageRef('flutter'), PackageRef('http'), PackageRef('path'), PackageRef('path_provider'), PackageRef('rxdart'), PackageRef('sqflite'), PackageRef('uuid')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('flutter_lints'), PackageRef('mockito')],
+    version: '3.4.2',
     license: '''The MIT License (MIT)
 
 Copyright (c) 2017 Rene Floor
@@ -4648,6 +3626,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('file'), PackageRef('flutter'), PackageRef('http'), PackageRef('path'), PackageRef('path_provider'), PackageRef('rxdart'), PackageRef('sqflite'), PackageRef('uuid')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('flutter_lints'), PackageRef('mockito')],
   );
 
 /// flutter_highlight 0.7.0
@@ -4657,11 +3639,6 @@ const _flutter_highlight = Package(
     homepage: 'https://github.com/git-touch/highlight',
     authors: [],
     version: '0.7.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('highlight')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2019 Rongjian Zhang
@@ -4683,6 +3660,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('highlight')],
+    devDependencies: [],
   );
 
 /// flutter_hooks 0.21.3+1
@@ -4693,11 +3674,6 @@ const _flutter_hooks = Package(
     repository: 'https://github.com/rrousselGit/flutter_hooks/tree/master/packages/flutter_hooks',
     authors: [],
     version: '0.21.3+1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [PackageRef('mockito')],
     license: '''MIT License
 
 Copyright (c) 2018 Remi Rousselet
@@ -4719,6 +3695,1729 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [PackageRef('mockito')],
+  );
+
+/// flutter_inappwebview 6.1.5
+const _flutter_inappwebview = Package(
+    name: 'flutter_inappwebview',
+    description: 'A Flutter plugin that allows you to add an inline webview, to use an headless webview, and to open an in-app browser window.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview',
+    authors: [],
+    version: '6.1.5',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_inappwebview_platform_interface'), PackageRef('flutter_inappwebview_android'), PackageRef('flutter_inappwebview_ios'), PackageRef('flutter_inappwebview_macos'), PackageRef('flutter_inappwebview_web'), PackageRef('flutter_inappwebview_windows')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('build_runner')],
+  );
+
+/// flutter_inappwebview_android 1.1.3
+const _flutter_inappwebview_android = Package(
+    name: 'flutter_inappwebview_android',
+    description: 'Android implementation of the flutter_inappwebview plugin.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview/tree/master/flutter_inappwebview_android',
+    authors: [],
+    version: '1.1.3',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_inappwebview_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('plugin_platform_interface')],
+  );
+
+/// flutter_inappwebview_internal_annotations 1.3.0
+const _flutter_inappwebview_internal_annotations = Package(
+    name: 'flutter_inappwebview_internal_annotations',
+    description: 'Internal annotations used by the generator of flutter_inappwebview plugin',
+    homepage: 'https://github.com/pichillilorenzo/flutter_inappwebview',
+    authors: [],
+    version: '1.3.0',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
+  );
+
+/// flutter_inappwebview_ios 1.1.2
+const _flutter_inappwebview_ios = Package(
+    name: 'flutter_inappwebview_ios',
+    description: 'iOS implementation of the flutter_inappwebview plugin.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview/tree/master/flutter_inappwebview_ios',
+    authors: [],
+    version: '1.1.2',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_inappwebview_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('plugin_platform_interface')],
+  );
+
+/// flutter_inappwebview_macos 1.1.2
+const _flutter_inappwebview_macos = Package(
+    name: 'flutter_inappwebview_macos',
+    description: 'macOS implementation of the flutter_inappwebview plugin.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview/tree/master/flutter_inappwebview_macos',
+    authors: [],
+    version: '1.1.2',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_inappwebview_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('plugin_platform_interface')],
+  );
+
+/// flutter_inappwebview_platform_interface 1.3.0+1
+const _flutter_inappwebview_platform_interface = Package(
+    name: 'flutter_inappwebview_platform_interface',
+    description: 'A common platform interface for the flutter_inappwebview plugin.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview/tree/master/flutter_inappwebview_platform_interface',
+    authors: [],
+    version: '1.3.0+1',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_inappwebview_internal_annotations'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('build_runner')],
+  );
+
+/// flutter_inappwebview_web 1.1.2
+const _flutter_inappwebview_web = Package(
+    name: 'flutter_inappwebview_web',
+    description: 'Web implementation of the flutter_inappwebview plugin.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview/tree/master/flutter_inappwebview_web',
+    authors: [],
+    version: '1.1.2',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('web'), PackageRef('flutter_inappwebview_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('plugin_platform_interface')],
+  );
+
+/// flutter_inappwebview_windows 0.6.0
+const _flutter_inappwebview_windows = Package(
+    name: 'flutter_inappwebview_windows',
+    description: 'Windows implementation of the flutter_inappwebview plugin.',
+    homepage: 'https://inappwebview.dev/',
+    repository: 'https://github.com/pichillilorenzo/flutter_inappwebview/tree/master/flutter_inappwebview_windows',
+    authors: [],
+    version: '0.6.0',
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright 2023 Lorenzo Pichilli
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_inappwebview_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// flutter_launcher_icons 0.14.4
@@ -4729,11 +5428,6 @@ const _flutter_launcher_icons = Package(
     repository: 'https://github.com/fluttercommunity/flutter_launcher_icons/',
     authors: [],
     version: '0.14.4',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('checked_yaml'), PackageRef('cli_util'), PackageRef('image'), PackageRef('json_annotation'), PackageRef('path'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('mockito'), PackageRef('test')],
     license: '''MIT License
 
 Copyright (c) 2019 Mark O'Sullivan
@@ -4755,6 +5449,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('args'), PackageRef('checked_yaml'), PackageRef('cli_util'), PackageRef('image'), PackageRef('json_annotation'), PackageRef('path'), PackageRef('yaml')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('mockito'), PackageRef('test')],
   );
 
 /// flutter_lints 6.0.0
@@ -4764,11 +5462,6 @@ const _flutter_lints = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/flutter_lints',
     authors: [],
     version: '6.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('lints')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -4794,20 +5487,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('lints')],
+    devDependencies: [],
   );
 
-/// flutter_local_notifications 20.1.0
+/// flutter_local_notifications 22.3.0
 const _flutter_local_notifications = Package(
     name: 'flutter_local_notifications',
     description: 'A cross platform plugin for displaying and scheduling local notifications for Flutter applications with the ability to customise for each platform.',
     homepage: 'https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications',
     authors: [],
-    version: '20.1.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('clock'), PackageRef('flutter'), PackageRef('flutter_local_notifications_linux'), PackageRef('flutter_local_notifications_windows'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('timezone')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito'), PackageRef('plugin_platform_interface')],
+    version: '22.3.0',
     license: '''Copyright 2018 Michael Bui. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -4835,20 +5527,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('clock'), PackageRef('flutter'), PackageRef('flutter_local_notifications_linux'), PackageRef('flutter_local_notifications_windows'), PackageRef('flutter_local_notifications_web'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('timezone')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito'), PackageRef('plugin_platform_interface')],
   );
 
-/// flutter_local_notifications_linux 7.0.0
+/// flutter_local_notifications_linux 8.0.1
 const _flutter_local_notifications_linux = Package(
     name: 'flutter_local_notifications_linux',
     description: 'Linux implementation of the flutter_local_notifications plugin',
     homepage: 'https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications',
     authors: [],
-    version: '7.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('dbus'), PackageRef('ffi'), PackageRef('flutter'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('path'), PackageRef('xdg_directories')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('flutter_lints'), PackageRef('mockito')],
+    version: '8.0.1',
     license: '''Copyright 2018 Michael Bui. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -4876,20 +5567,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('dbus'), PackageRef('ffi'), PackageRef('flutter'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('path'), PackageRef('xdg_directories')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('flutter_lints'), PackageRef('mockito')],
   );
 
-/// flutter_local_notifications_platform_interface 10.0.0
+/// flutter_local_notifications_platform_interface 12.2.0
 const _flutter_local_notifications_platform_interface = Package(
     name: 'flutter_local_notifications_platform_interface',
     description: 'A common platform interface for the flutter_local_notifications plugin.',
     homepage: 'https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications_platform_interface',
     authors: [],
-    version: '10.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito')],
+    version: '12.2.0',
     license: '''Copyright 2020 Michael Bui. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -4917,20 +5607,59 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('plugin_platform_interface'), PackageRef('timezone')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito')],
   );
 
-/// flutter_local_notifications_windows 2.0.1
+/// flutter_local_notifications_web 1.0.0
+const _flutter_local_notifications_web = Package(
+    name: 'flutter_local_notifications_web',
+    description: 'Web implementation of the flutter_local_notifications plugin',
+    homepage: 'https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications_web',
+    authors: [],
+    version: '1.0.0',
+    license: '''Copyright 2020 Michael Bui. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of the copyright holder nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('timezone'), PackageRef('web')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('flutter_lints')],
+  );
+
+/// flutter_local_notifications_windows 3.1.1
 const _flutter_local_notifications_windows = Package(
     name: 'flutter_local_notifications_windows',
     description: 'Windows implementation of the flutter_local_notifications plugin',
     homepage: 'https://github.com/MaikuB/flutter_local_notifications/tree/master/flutter_local_notifications_windows',
     authors: [],
-    version: '2.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('ffi'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('meta'), PackageRef('timezone'), PackageRef('xml')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('test')],
+    version: '3.1.1',
     license: '''Copyright 2024 Michael Bui. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -4958,6 +5687,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('ffi'), PackageRef('flutter_local_notifications_platform_interface'), PackageRef('meta'), PackageRef('timezone'), PackageRef('xml')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('test')],
   );
 
 /// flutter_plugin_android_lifecycle 2.0.35
@@ -4967,11 +5700,6 @@ const _flutter_plugin_android_lifecycle = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/flutter_plugin_android_lifecycle',
     authors: [],
     version: '2.0.35',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -4997,9 +5725,13 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [],
   );
 
-/// flutter_riverpod 3.1.0
+/// flutter_riverpod 3.4.2
 const _flutter_riverpod = Package(
     name: 'flutter_riverpod',
     description: '''A reactive caching and data-binding framework. Riverpod makes working with asynchronous code a breeze.
@@ -5007,12 +5739,7 @@ const _flutter_riverpod = Package(
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '3.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('meta'), PackageRef('riverpod'), PackageRef('state_notifier')],
-    devDependencies: [PackageRef('mockito'), PackageRef('stack_trace')],
+    version: '3.4.2',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -5034,6 +5761,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('meta'), PackageRef('riverpod'), PackageRef('state_notifier')],
+    devDependencies: [PackageRef('mockito'), PackageRef('stack_trace')],
   );
 
 /// flutter_secure_storage 10.3.1
@@ -5043,11 +5774,6 @@ const _flutter_secure_storage = Package(
     repository: 'https://github.com/mogol/flutter_secure_storage/tree/develop/flutter_secure_storage',
     authors: [],
     version: '10.3.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_secure_storage_darwin'), PackageRef('flutter_secure_storage_linux'), PackageRef('flutter_secure_storage_platform_interface'), PackageRef('flutter_secure_storage_web'), PackageRef('flutter_secure_storage_windows'), PackageRef('meta')],
-    devDependencies: [PackageRef('mocktail'), PackageRef('plugin_platform_interface')],
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -5077,6 +5803,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_secure_storage_darwin'), PackageRef('flutter_secure_storage_linux'), PackageRef('flutter_secure_storage_platform_interface'), PackageRef('flutter_secure_storage_web'), PackageRef('flutter_secure_storage_windows'), PackageRef('meta')],
+    devDependencies: [PackageRef('mocktail'), PackageRef('plugin_platform_interface')],
   );
 
 /// flutter_secure_storage_darwin 0.3.2
@@ -5086,11 +5816,6 @@ const _flutter_secure_storage_darwin = Package(
     homepage: 'https://github.com/juliansteenbakker/flutter_secure_storage',
     authors: [],
     version: '0.3.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
-    devDependencies: [],
     license: '''BSD 3-Clause License
 
 Copyright 2025 Julian Steenbakker
@@ -5120,20 +5845,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
+    devDependencies: [],
   );
 
-/// flutter_secure_storage_linux 3.0.1
+/// flutter_secure_storage_linux 3.0.2
 const _flutter_secure_storage_linux = Package(
     name: 'flutter_secure_storage_linux',
     description: 'Linux implementation of flutter_secure_storage',
     repository: 'https://github.com/mogol/flutter_secure_storage',
     authors: [],
-    version: '3.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_secure_storage_platform_interface')],
-    devDependencies: [],
+    version: '3.0.2',
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -5163,20 +5887,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_secure_storage_platform_interface')],
+    devDependencies: [],
   );
 
-/// flutter_secure_storage_platform_interface 2.0.1
+/// flutter_secure_storage_platform_interface 2.0.3
 const _flutter_secure_storage_platform_interface = Package(
     name: 'flutter_secure_storage_platform_interface',
     description: 'A common platform interface for the flutter_secure_storage plugin.',
     homepage: 'https://github.com/mogol/flutter_secure_storage',
     authors: [],
-    version: '2.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('mockito')],
+    version: '2.0.3',
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -5206,6 +5929,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('mockito')],
   );
 
 /// flutter_secure_storage_web 2.1.1
@@ -5215,11 +5942,6 @@ const _flutter_secure_storage_web = Package(
     repository: 'https://github.com/mogol/flutter_secure_storage',
     authors: [],
     version: '2.1.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_secure_storage_platform_interface'), PackageRef('flutter_web_plugins'), PackageRef('web')],
-    devDependencies: [],
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -5249,6 +5971,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_secure_storage_platform_interface'), PackageRef('flutter_web_plugins'), PackageRef('web')],
+    devDependencies: [],
   );
 
 /// flutter_secure_storage_windows 4.1.0
@@ -5258,11 +5984,6 @@ const _flutter_secure_storage_windows = Package(
     repository: 'https://github.com/mogol/flutter_secure_storage',
     authors: [],
     version: '4.1.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('flutter_secure_storage_platform_interface'), PackageRef('path'), PackageRef('path_provider'), PackageRef('win32')],
-    devDependencies: [],
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -5292,6 +6013,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('flutter_secure_storage_platform_interface'), PackageRef('path'), PackageRef('path_provider'), PackageRef('win32')],
+    devDependencies: [],
   );
 
 /// flutter_shaders 0.1.3
@@ -5301,11 +6026,6 @@ const _flutter_shaders = Package(
     repository: 'https://github.com/jonahwilliams/flutter_shaders',
     authors: [],
     version: '0.1.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('vector_math')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -5331,20 +6051,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('vector_math')],
+    devDependencies: [],
   );
 
-/// flutter_soloud 4.0.11
+/// flutter_soloud 4.1.7
 const _flutter_soloud = Package(
     name: 'flutter_soloud',
     description: 'A low-level audio plugin for Flutter, mainly meant for games and immersive apps. Based on the SoLoud (C++) audio engine.',
     homepage: 'https://github.com/alnitak/flutter_soloud',
     authors: [],
-    version: '4.0.11',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('http'), PackageRef('logging'), PackageRef('meta'), PackageRef('path'), PackageRef('path_provider'), PackageRef('plugin_platform_interface'), PackageRef('web')],
-    devDependencies: [PackageRef('test')],
+    version: '4.1.7',
     license: '''Copyright (c) 2024 The flutter_soloud Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -5364,6 +6083,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('http'), PackageRef('logging'), PackageRef('meta'), PackageRef('path'), PackageRef('path_provider'), PackageRef('plugin_platform_interface'), PackageRef('web')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// flutter_web_plugins null
@@ -5372,26 +6095,20 @@ const _flutter_web_plugins = Package(
     description: 'Library to register Flutter Web plugins',
     homepage: 'https://flutter.dev',
     authors: [],
-    spdxIdentifiers: [],
     isMarkdown: false,
     isSdk: true,
     dependencies: [PackageRef('flutter')],
     devDependencies: [],
   );
 
-/// freezed 3.2.3
+/// freezed 4.0.0-dev.3
 const _freezed = Package(
     name: 'freezed',
     description: '''Code generation for immutable classes that has a simple syntax/API without compromising on the features.
 ''',
     repository: 'https://github.com/rrousselGit/freezed',
     authors: [],
-    version: '3.2.3',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_gen'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('dart_style'), PackageRef('pub_semver')],
-    devDependencies: [PackageRef('json_serializable'), PackageRef('build_runner'), PackageRef('test'), PackageRef('matcher'), PackageRef('flutter')],
+    version: '4.0.0-dev.3',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -5413,6 +6130,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_gen'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('dart_style'), PackageRef('pub_semver'), PackageRef('analyzer_buffer')],
+    devDependencies: [PackageRef('json_serializable'), PackageRef('build_runner'), PackageRef('test'), PackageRef('matcher'), PackageRef('flutter'), PackageRef('file')],
   );
 
 /// freezed_annotation 3.1.0
@@ -5423,11 +6144,6 @@ const _freezed_annotation = Package(
     repository: 'https://github.com/rrousselGit/freezed',
     authors: [],
     version: '3.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('json_annotation'), PackageRef('meta')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('test')],
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -5449,6 +6165,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('json_annotation'), PackageRef('meta')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('test')],
   );
 
 /// frontend_server_client 4.0.0
@@ -5458,11 +6178,6 @@ const _frontend_server_client = Package(
     repository: 'https://github.com/dart-lang/webdev/tree/master/frontend_server_client',
     authors: [],
     version: '4.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('path')],
-    devDependencies: [PackageRef('package_config'), PackageRef('shelf'), PackageRef('shelf_packages_handler'), PackageRef('shelf_static'), PackageRef('test'), PackageRef('vm_service')],
     license: '''Copyright 2020, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5490,6 +6205,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('path')],
+    devDependencies: [PackageRef('package_config'), PackageRef('shelf'), PackageRef('shelf_packages_handler'), PackageRef('shelf_static'), PackageRef('test'), PackageRef('vm_service')],
   );
 
 /// glob 2.1.3
@@ -5499,11 +6218,6 @@ const _glob = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/glob',
     authors: [],
     version: '2.1.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('file'), PackageRef('path'), PackageRef('string_scanner')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5531,20 +6245,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('file'), PackageRef('path'), PackageRef('string_scanner')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// go_router 17.3.0
+/// go_router 17.5.0
 const _go_router = Package(
     name: 'go_router',
     description: 'A declarative router for Flutter based on Navigation 2 supporting deep linking, data-driven routes and more',
     repository: 'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
-    version: '17.3.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('logging'), PackageRef('meta')],
-    devDependencies: [PackageRef('io'), PackageRef('leak_tracker_flutter_testing'), PackageRef('path')],
+    version: '17.5.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -5570,6 +6283,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('logging'), PackageRef('meta')],
+    devDependencies: [PackageRef('io'), PackageRef('leak_tracker_flutter_testing'), PackageRef('path')],
   );
 
 /// graphs 2.3.2
@@ -5579,11 +6296,6 @@ const _graphs = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/graphs',
     authors: [],
     version: '2.3.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection')],
-    devDependencies: [PackageRef('test'), PackageRef('analyzer'), PackageRef('path'), PackageRef('pool')],
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5611,20 +6323,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection')],
+    devDependencies: [PackageRef('test'), PackageRef('analyzer'), PackageRef('path'), PackageRef('pool')],
   );
 
-/// haptic_feedback 0.6.4+3
+/// haptic_feedback 0.6.5
 const _haptic_feedback = Package(
     name: 'haptic_feedback',
     description: 'A Flutter plugin for haptic feedback. While it utilizes standard iOS haptics, it aims to emulate these same haptic patterns on Android for a consistent experience across platforms.',
     repository: 'https://github.com/nohli/haptic_feedback',
     authors: [],
-    version: '0.6.4+3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints')],
+    version: '0.6.5',
     license: '''BSD 3-Clause License
 
 Copyright (c) 2023, Joachim Nohl
@@ -5653,6 +6364,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// highlight 0.7.0
@@ -5662,11 +6377,6 @@ const _highlight = Package(
     homepage: 'https://github.com/pd4d10/highlight',
     authors: [],
     version: '0.7.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection')],
-    devDependencies: [PackageRef('test'), PackageRef('path')],
     license: '''MIT License
 
 Copyright (c) 2019 Rongjian Zhang
@@ -5688,20 +6398,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection')],
+    devDependencies: [PackageRef('test'), PackageRef('path')],
   );
 
-/// hooks 2.0.2
+/// hooks 2.1.0
 const _hooks = Package(
     name: 'hooks',
     description: 'A library that contains a Dart API for the JSON-based protocol for `hook/build.dart` and `hook/link.dart`.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/hooks',
     authors: [],
-    version: '2.0.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('crypto'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver'), PackageRef('record_use'), PackageRef('yaml')],
-    devDependencies: [PackageRef('args'), PackageRef('code_assets'), PackageRef('glob'), PackageRef('path'), PackageRef('test')],
+    version: '2.1.0',
     license: '''Copyright 2025, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -5729,9 +6438,13 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('crypto'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver'), PackageRef('record_use'), PackageRef('yaml')],
+    devDependencies: [PackageRef('args'), PackageRef('code_assets'), PackageRef('glob'), PackageRef('path'), PackageRef('test')],
   );
 
-/// hooks_riverpod 3.1.0
+/// hooks_riverpod 3.4.2
 const _hooks_riverpod = Package(
     name: 'hooks_riverpod',
     description: '''A reactive caching and data-binding framework. Riverpod makes working with asynchronous code a breeze.
@@ -5739,12 +6452,7 @@ const _hooks_riverpod = Package(
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '3.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('flutter_hooks'), PackageRef('flutter_riverpod'), PackageRef('riverpod'), PackageRef('state_notifier')],
-    devDependencies: [PackageRef('mockito'), PackageRef('pub_semver'), PackageRef('pubspec_parse')],
+    version: '3.4.2',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -5766,6 +6474,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('flutter_hooks'), PackageRef('flutter_riverpod'), PackageRef('riverpod'), PackageRef('state_notifier')],
+    devDependencies: [PackageRef('mockito'), PackageRef('pub_semver'), PackageRef('pubspec_parse')],
   );
 
 /// html 0.15.6
@@ -5775,11 +6487,6 @@ const _html = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/html',
     authors: [],
     version: '0.15.6',
-    spdxIdentifiers: [],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('csslib'), PackageRef('source_span')],
-    devDependencies: [PackageRef('dart_style'), PackageRef('path'), PackageRef('test')],
     license: '''Copyright (c) 2006-2012 The Authors
 
 Contributors:
@@ -5803,6 +6510,10 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('csslib'), PackageRef('source_span')],
+    devDependencies: [PackageRef('dart_style'), PackageRef('path'), PackageRef('test')],
   );
 
 /// http 1.6.0
@@ -5812,11 +6523,6 @@ const _http = Package(
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http',
     authors: [],
     version: '1.6.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')],
-    devDependencies: [PackageRef('fake_async'), PackageRef('shelf'), PackageRef('stream_channel'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5844,6 +6550,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('http_parser'), PackageRef('meta'), PackageRef('web')],
+    devDependencies: [PackageRef('fake_async'), PackageRef('shelf'), PackageRef('stream_channel'), PackageRef('test')],
   );
 
 /// http2 2.3.1
@@ -5853,11 +6563,6 @@ const _http2 = Package(
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http2',
     authors: [],
     version: '2.3.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5885,6 +6590,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
   );
 
 /// http_multi_server 3.2.2
@@ -5894,11 +6603,6 @@ const _http_multi_server = Package(
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http_multi_server',
     authors: [],
     version: '3.2.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async')],
-    devDependencies: [PackageRef('http'), PackageRef('shelf'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -5926,6 +6630,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async')],
+    devDependencies: [PackageRef('http'), PackageRef('shelf'), PackageRef('test')],
   );
 
 /// http_parser 4.1.2
@@ -5935,11 +6643,6 @@ const _http_parser = Package(
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/http_parser',
     authors: [],
     version: '4.1.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('source_span'), PackageRef('string_scanner'), PackageRef('typed_data')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -5967,6 +6670,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('source_span'), PackageRef('string_scanner'), PackageRef('typed_data')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// icon_button_m3e 0.2.1
@@ -5976,11 +6683,6 @@ const _icon_button_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e',
     authors: [],
     version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2025 Emily Moonstone
@@ -6002,6 +6704,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// image 4.8.0
@@ -6011,11 +6717,6 @@ const _image = Package(
     homepage: 'https://github.com/brendan-duncan/image',
     authors: [],
     version: '4.8.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('archive'), PackageRef('meta'), PackageRef('xml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('intl'), PackageRef('lints'), PackageRef('test'), PackageRef('web')],
     license: '''The MIT License
 
 Copyright (c) 2013-2022 Brendan Duncan.
@@ -6038,20 +6739,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('archive'), PackageRef('meta'), PackageRef('xml')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('intl'), PackageRef('lints'), PackageRef('test'), PackageRef('web')],
   );
 
-/// intl 0.20.2
+/// intl 0.20.3
 const _intl = Package(
     name: 'intl',
     description: 'Contains code to deal with internationalized/localized messages, date and number formatting and parsing, bi-directional text, and other internationalization issues.',
     repository: 'https://github.com/dart-lang/i18n/tree/main/pkgs/intl',
     authors: [],
-    version: '0.20.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('clock'), PackageRef('meta'), PackageRef('path')],
-    devDependencies: [PackageRef('ffi'), PackageRef('fixnum'), PackageRef('lints'), PackageRef('test')],
+    version: '0.20.3',
     license: '''Copyright 2013, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6079,6 +6779,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('clock'), PackageRef('meta'), PackageRef('path')],
+    devDependencies: [PackageRef('ffi'), PackageRef('fixnum'), PackageRef('lints'), PackageRef('test')],
   );
 
 /// io 1.0.5
@@ -6088,11 +6792,6 @@ const _io = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/io',
     authors: [],
     version: '1.0.5',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('path'), PackageRef('string_scanner')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -6120,20 +6819,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('path'), PackageRef('string_scanner')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// jni 1.0.0
+/// jni 1.0.3
 const _jni = Package(
     name: 'jni',
     description: 'A library to access JNI from Dart and Flutter that acts as a support library for package:jnigen.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/jni',
     authors: [],
-    version: '1.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('collection'), PackageRef('ffi'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('dart_style'), PackageRef('logging'), PackageRef('test')],
+    version: '1.0.3',
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6161,20 +6859,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('args'), PackageRef('collection'), PackageRef('ffi'), PackageRef('jni_util'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('dart_style'), PackageRef('logging'), PackageRef('test')],
   );
 
-/// jni_flutter 1.0.1
+/// jni_flutter 1.0.2
 const _jni_flutter = Package(
     name: 'jni_flutter',
     description: 'A library to access Flutter Android specific APIs from Dart.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/jni_flutter',
     authors: [],
-    version: '1.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('jni')],
-    devDependencies: [],
+    version: '1.0.2',
     license: '''Copyright 2026, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6202,20 +6899,59 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('jni')],
+    devDependencies: [],
   );
 
-/// json_annotation 4.9.0
+/// jni_util 1.0.0
+const _jni_util = Package(
+    name: 'jni_util',
+    description: 'Shared utility functions for package:jni and package:jnigen.',
+    repository: 'https://github.com/dart-lang/native/tree/main/pkgs/jni_util',
+    authors: [],
+    version: '1.0.0',
+    license: '''Copyright 2026, the Dart project authors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google LLC nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('path')],
+    devDependencies: [PackageRef('test')],
+  );
+
+/// json_annotation 4.12.0
 const _json_annotation = Package(
     name: 'json_annotation',
     description: 'Classes and helper functions that support JSON code generation via the `json_serializable` package.',
     repository: 'https://github.com/google/json_serializable.dart/tree/master/json_annotation',
     authors: [],
-    version: '4.9.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta')],
-    devDependencies: [],
+    version: '4.12.0',
     license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -6242,20 +6978,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta')],
+    devDependencies: [],
   );
 
-/// json_serializable 6.11.2
+/// json_serializable 6.14.1
 const _json_serializable = Package(
     name: 'json_serializable',
     description: 'Automatically generate code for converting to and from JSON by annotating Dart classes.',
     repository: 'https://github.com/google/json_serializable.dart/tree/master/json_serializable',
     authors: [],
-    version: '6.11.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('dart_style'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('source_gen'), PackageRef('source_helper')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('collection'), PackageRef('logging'), PackageRef('test'), PackageRef('yaml')],
+    version: '6.14.1',
     license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -6282,6 +7017,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('build_config'), PackageRef('dart_style'), PackageRef('json_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('source_gen'), PackageRef('source_helper')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('collection'), PackageRef('logging'), PackageRef('test'), PackageRef('yaml')],
   );
 
 /// leak_tracker 11.0.2
@@ -6291,11 +7030,6 @@ const _leak_tracker = Package(
     repository: 'https://github.com/dart-lang/leak_tracker/tree/main/pkgs/leak_tracker',
     authors: [],
     version: '11.0.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('meta'), PackageRef('path'), PackageRef('vm_service')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6323,6 +7057,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('clock'), PackageRef('collection'), PackageRef('meta'), PackageRef('path'), PackageRef('vm_service')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// leak_tracker_flutter_testing 3.0.10
@@ -6332,11 +7070,6 @@ const _leak_tracker_flutter_testing = Package(
     repository: 'https://github.com/dart-lang/leak_tracker/tree/main/pkgs/leak_tracker_flutter_testing',
     authors: [],
     version: '3.0.10',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('leak_tracker'), PackageRef('leak_tracker_testing'), PackageRef('matcher'), PackageRef('meta')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6364,6 +7097,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('leak_tracker'), PackageRef('leak_tracker_testing'), PackageRef('matcher'), PackageRef('meta')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// leak_tracker_testing 3.0.2
@@ -6373,11 +7110,6 @@ const _leak_tracker_testing = Package(
     repository: 'https://github.com/dart-lang/leak_tracker/tree/main/pkgs/leak_tracker_testing',
     authors: [],
     version: '3.0.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('leak_tracker'), PackageRef('matcher'), PackageRef('meta')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6405,6 +7137,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('leak_tracker'), PackageRef('matcher'), PackageRef('meta')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// lints 6.1.0
@@ -6415,11 +7151,6 @@ const _lints = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/lints',
     authors: [],
     version: '6.1.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('http'), PackageRef('path'), PackageRef('yaml')],
     license: '''Copyright 2021, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6447,6 +7178,48 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('http'), PackageRef('path'), PackageRef('yaml')],
+  );
+
+/// listen 1.0.1
+const _listen = Package(
+    name: 'listen',
+    description: 'A package to notify state changes to interested listeners in pure Dart.',
+    repository: 'https://github.com/flutter/core-packages/tree/main/packages/listen',
+    authors: [],
+    version: '1.0.1',
+    license: '''Copyright 2013 The Flutter Authors
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// loading_indicator_m3e 0.1.1
@@ -6456,11 +7229,6 @@ const _loading_indicator_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e',
     authors: [],
     version: '0.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('material_new_shapes')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) ...
@@ -6482,6 +7250,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('material_new_shapes')],
+    devDependencies: [],
   );
 
 /// logger 2.7.0
@@ -6491,11 +7263,6 @@ const _logger = Package(
     repository: 'https://github.com/SourceHorizon/logger',
     authors: [],
     version: '2.7.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('clock')],
-    devDependencies: [PackageRef('test'), PackageRef('lints'), PackageRef('file')],
     license: '''MIT License
 
 Copyright (c) 2019 Simon Leier
@@ -6519,6 +7286,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('clock')],
+    devDependencies: [PackageRef('test'), PackageRef('lints'), PackageRef('file')],
   );
 
 /// logging 1.3.0
@@ -6528,11 +7299,6 @@ const _logging = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/logging',
     authors: [],
     version: '1.3.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -6560,6 +7326,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// m3e_collection 0.3.7
@@ -6569,11 +7339,6 @@ const _m3e_collection = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/m3e_collection',
     authors: [],
     version: '0.3.7',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('app_bar_m3e'), PackageRef('button_group_m3e'), PackageRef('button_m3e'), PackageRef('expressive_refresh'), PackageRef('fab_m3e'), PackageRef('flutter'), PackageRef('icon_button_m3e'), PackageRef('loading_indicator_m3e'), PackageRef('m3e_design'), PackageRef('material_new_shapes'), PackageRef('navigation_bar_m3e'), PackageRef('navigation_rail_m3e'), PackageRef('progress_indicator_m3e'), PackageRef('slider_m3e'), PackageRef('split_button_m3e'), PackageRef('toolbar_m3e')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025 Emily Moonstone
@@ -6595,6 +7360,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('app_bar_m3e'), PackageRef('button_group_m3e'), PackageRef('button_m3e'), PackageRef('expressive_refresh'), PackageRef('fab_m3e'), PackageRef('flutter'), PackageRef('icon_button_m3e'), PackageRef('loading_indicator_m3e'), PackageRef('m3e_design'), PackageRef('material_new_shapes'), PackageRef('navigation_bar_m3e'), PackageRef('navigation_rail_m3e'), PackageRef('progress_indicator_m3e'), PackageRef('slider_m3e'), PackageRef('split_button_m3e'), PackageRef('toolbar_m3e')],
+    devDependencies: [],
   );
 
 /// m3e_design 0.2.1
@@ -6604,11 +7373,6 @@ const _m3e_design = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/m3e_design',
     authors: [],
     version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('dynamic_color'), PackageRef('flutter')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025 Emily Moonstone
@@ -6630,61 +7394,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
-  );
-
-/// markdown 7.3.1
-const _markdown = Package(
-    name: 'markdown',
-    description: 'A portable Markdown library written in Dart that can parse Markdown into HTML.',
-    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/markdown',
-    authors: [],
-    version: '7.3.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('meta')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('collection'), PackageRef('html'), PackageRef('http'), PackageRef('io'), PackageRef('path'), PackageRef('pool'), PackageRef('tar'), PackageRef('test'), PackageRef('web'), PackageRef('yaml')],
-    license: '''Copyright 2012, the Dart project authors. 
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    dependencies: [PackageRef('dynamic_color'), PackageRef('flutter')],
+    devDependencies: [],
   );
 
-/// matcher 0.12.19
+/// matcher 0.12.20
 const _matcher = Package(
     name: 'matcher',
     description: 'Support for specifying test expectations via an extensible Matcher class. Also includes a number of built-in Matcher implementations for common cases.',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/matcher',
     authors: [],
-    version: '0.12.19',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('meta'), PackageRef('stack_trace'), PackageRef('term_glyph'), PackageRef('test_api')],
-    devDependencies: [PackageRef('fake_async'), PackageRef('test')],
+    version: '0.12.20',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -6712,6 +7434,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('meta'), PackageRef('stack_trace'), PackageRef('term_glyph'), PackageRef('test_api')],
+    devDependencies: [PackageRef('fake_async'), PackageRef('test')],
   );
 
 /// material_color_utilities 0.13.0
@@ -6721,11 +7447,6 @@ const _material_color_utilities = Package(
     repository: 'https://github.com/material-foundation/material-color-utilities/tree/main/dart',
     authors: [],
     version: '0.13.0',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection')],
-    devDependencies: [PackageRef('matcher'), PackageRef('test')],
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -6927,6 +7648,10 @@ const _material_color_utilities = Package(
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection')],
+    devDependencies: [PackageRef('matcher'), PackageRef('test')],
   );
 
 /// material_new_shapes 1.0.0
@@ -6937,11 +7662,6 @@ const _material_new_shapes = Package(
     repository: 'https://github.com/ulims/material_shapes',
     authors: [],
     version: '1.0.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('vector_math')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025 Agbama Gifted
@@ -6963,6 +7683,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('vector_math')],
+    devDependencies: [],
   );
 
 /// matrix2d 1.0.4
@@ -6972,11 +7696,6 @@ const _matrix2d = Package(
     homepage: 'https://github.com/n4ze3m/matrix2d',
     authors: [],
     version: '1.0.4',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright (c) 2020 Buckthorn Dev
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -6996,20 +7715,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
-/// meta 1.18.0
+/// meta 1.19.0
 const _meta = Package(
     name: 'meta',
     description: "Annotations used to express developer intentions that can't otherwise be deduced by statically analyzing source code.",
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/meta',
     authors: [],
-    version: '1.18.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('lints')],
+    version: '1.19.0',
     license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -7037,20 +7755,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('lints')],
   );
 
-/// mfm 1.0.9
+/// mfm 1.0.10
 const _mfm = Package(
     name: 'mfm',
     description: 'A MFM (Misskey Flavored Markup language) Renderer for Flutter.',
     homepage: 'https://github.com/shiosyakeyakini-info/mfm_renderer',
     authors: [],
-    version: '1.0.9',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('colorfilter_generator'), PackageRef('dotted_border'), PackageRef('flutter'), PackageRef('mfm_parser'), PackageRef('vector_math')],
-    devDependencies: [PackageRef('flutter_lints')],
+    version: '1.0.10',
     license: '''MIT License
 
 Copyright (c) 2023 sorairo
@@ -7072,20 +7789,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('colorfilter_generator'), PackageRef('dotted_border'), PackageRef('flutter'), PackageRef('mfm_parser'), PackageRef('vector_math')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
-/// mfm_parser 1.0.6
+/// mfm_parser 1.0.7
 const _mfm_parser = Package(
     name: 'mfm_parser',
     description: 'mfm (Markup Language For Misskey) parser for dart. it provides feature that text convert misskey node and properties.',
     homepage: 'https://github.com/shiosyakeyakini-info/dart_mfm_parser',
     authors: [],
-    version: '1.0.6',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
+    version: '1.0.7',
     license: '''MIT License
 
 Copyright (c) 2023 sorairo
@@ -7107,6 +7823,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
 /// mime 2.0.0
@@ -7116,11 +7836,6 @@ const _mime = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/mime',
     authors: [],
     version: '2.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -7148,20 +7863,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
-/// mockito 5.6.4
+/// mockito 5.8.1
 const _mockito = Package(
     name: 'mockito',
     description: 'A mock framework inspired by Mockito with APIs for Fakes, Mocks, behavior verification, and stubbing.',
     repository: 'https://github.com/dart-lang/build/tree/master/builder_pkgs/mockito',
     authors: [],
-    version: '5.6.4',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('code_builder'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('matcher'), PackageRef('meta'), PackageRef('path'), PackageRef('source_gen'), PackageRef('test_api')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('lints'), PackageRef('logging'), PackageRef('package_config'), PackageRef('test')],
+    version: '5.8.1',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -7363,6 +8077,10 @@ const _mockito = Package(
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('build'), PackageRef('code_builder'), PackageRef('collection'), PackageRef('dart_style'), PackageRef('matcher'), PackageRef('meta'), PackageRef('path'), PackageRef('source_gen'), PackageRef('test_api')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('http'), PackageRef('logging'), PackageRef('package_config'), PackageRef('test')],
   );
 
 /// mocktail 1.0.5
@@ -7373,11 +8091,6 @@ const _mocktail = Package(
     repository: 'https://github.com/felangel/mocktail',
     authors: [],
     version: '1.0.5',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('matcher'), PackageRef('test_api')],
-    devDependencies: [PackageRef('meta'), PackageRef('test')],
     license: '''The MIT License (MIT)
 Copyright (c) 2026 Felix Angelov
 
@@ -7399,20 +8112,19 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('matcher'), PackageRef('test_api')],
+    devDependencies: [PackageRef('meta'), PackageRef('test')],
   );
 
-/// native_toolchain_c 0.19.1
+/// native_toolchain_c 0.19.3
 const _native_toolchain_c = Package(
     name: 'native_toolchain_c',
     description: 'A library to invoke the native C compiler installed on the host machine.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/native_toolchain_c',
     authors: [],
-    version: '0.19.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('code_assets'), PackageRef('glob'), PackageRef('hooks'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver')],
-    devDependencies: [PackageRef('collection'), PackageRef('test')],
+    version: '0.19.3',
     license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -7440,6 +8152,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('code_assets'), PackageRef('glob'), PackageRef('hooks'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver')],
+    devDependencies: [PackageRef('collection'), PackageRef('test')],
   );
 
 /// navigation_bar_m3e 0.1.1
@@ -7449,11 +8165,6 @@ const _navigation_bar_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e',
     authors: [],
     version: '0.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) ...
@@ -7475,6 +8186,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
 /// navigation_rail_m3e 0.3.5
@@ -7485,11 +8200,6 @@ const _navigation_rail_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e',
     authors: [],
     version: '0.3.5',
-    spdxIdentifiers: [],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('fab_m3e'), PackageRef('icon_button_m3e'), PackageRef('button_m3e')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2025
@@ -7511,6 +8221,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('fab_m3e'), PackageRef('icon_button_m3e'), PackageRef('button_m3e')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// node_preamble 2.0.2
@@ -7520,11 +8234,6 @@ const _node_preamble = Package(
     homepage: 'https://github.com/mbullington/node_preamble.dart',
     authors: ['Michael Bullington <mikebullingtn@gmail.com>'],
     version: '2.0.2',
-    spdxIdentifiers: ['BSD-3-Clause', 'MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [],
     license: '''The MIT License (MIT)
 
 Copyright (c) 2015 Michael Bullington
@@ -7573,20 +8282,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [],
   );
 
-/// objective_c 9.4.1
+/// objective_c 9.5.0
 const _objective_c = Package(
     name: 'objective_c',
     description: 'A library to access Objective C from Flutter that acts as a support library for package:ffigen.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/objective_c',
     authors: [],
-    version: '9.4.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('code_assets'), PackageRef('collection'), PackageRef('ffi'), PackageRef('hooks'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver')],
-    devDependencies: [PackageRef('args'), PackageRef('path'), PackageRef('test'), PackageRef('yaml')],
+    version: '9.5.0',
     license: '''Copyright 2024, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -7614,6 +8322,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('code_assets'), PackageRef('collection'), PackageRef('ffi'), PackageRef('hooks'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver')],
+    devDependencies: [PackageRef('args'), PackageRef('path'), PackageRef('test'), PackageRef('yaml')],
   );
 
 /// octo_image 2.1.0
@@ -7623,11 +8335,6 @@ const _octo_image = Package(
     homepage: 'https://github.com/Baseflow/octo_image',
     authors: [],
     version: '2.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''MIT License
 
 Copyright (c) 2020 Baseflow
@@ -7649,6 +8356,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// package_config 2.2.0
@@ -7658,11 +8369,6 @@ const _package_config = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/package_config',
     authors: [],
     version: '2.2.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('path')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -7690,6 +8396,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('path')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// package_info_plus 9.0.1
@@ -7700,11 +8410,6 @@ const _package_info_plus = Package(
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/package_info_plus/package_info_plus',
     authors: [],
     version: '9.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('http'), PackageRef('meta'), PackageRef('path'), PackageRef('package_info_plus_platform_interface'), PackageRef('web'), PackageRef('win32'), PackageRef('clock')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('test')],
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -7732,6 +8437,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('http'), PackageRef('meta'), PackageRef('path'), PackageRef('package_info_plus_platform_interface'), PackageRef('web'), PackageRef('win32'), PackageRef('clock')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('test')],
   );
 
 /// package_info_plus_platform_interface 3.2.1
@@ -7742,11 +8451,6 @@ const _package_info_plus_platform_interface = Package(
     repository: 'https://github.com/fluttercommunity/plus_plugins/tree/main/packages/',
     authors: [],
     version: '3.2.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('mockito'), PackageRef('flutter_lints')],
     license: '''Copyright 2017 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -7774,47 +8478,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// pana 0.22.24
-const _pana = Package(
-    name: 'pana',
-    description: 'PAckage aNAlyzer - produce a report summarizing the health and quality of a Dart package.',
-    repository: 'https://github.com/dart-lang/pana',
-    authors: [],
-    version: '0.22.24',
-    spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('cli_util'), PackageRef('collection'), PackageRef('crypto'), PackageRef('html'), PackageRef('http'), PackageRef('io'), PackageRef('json_annotation'), PackageRef('lints'), PackageRef('logging'), PackageRef('markdown'), PackageRef('meta'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('pubspec_parse'), PackageRef('retry'), PackageRef('safe_url_check'), PackageRef('source_span'), PackageRef('string_scanner'), PackageRef('tar'), PackageRef('test'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build'), PackageRef('build_config'), PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('shelf'), PackageRef('source_gen')],
-    license: '''Copyright 2017, the Dart project authors. 
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('mockito'), PackageRef('flutter_lints')],
   );
 
 /// path 1.9.1
@@ -7824,11 +8491,6 @@ const _path = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/path',
     authors: [],
     version: '1.9.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -7856,6 +8518,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// path_provider 2.1.6
@@ -7865,11 +8531,6 @@ const _path_provider = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider',
     authors: [],
     version: '2.1.6',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('path_provider_android'), PackageRef('path_provider_foundation'), PackageRef('path_provider_linux'), PackageRef('path_provider_platform_interface'), PackageRef('path_provider_windows')],
-    devDependencies: [PackageRef('plugin_platform_interface'), PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -7895,6 +8556,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('path_provider_android'), PackageRef('path_provider_foundation'), PackageRef('path_provider_linux'), PackageRef('path_provider_platform_interface'), PackageRef('path_provider_windows')],
+    devDependencies: [PackageRef('plugin_platform_interface'), PackageRef('test')],
   );
 
 /// path_provider_android 2.3.1
@@ -7904,11 +8569,6 @@ const _path_provider_android = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_android',
     authors: [],
     version: '2.3.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('jni'), PackageRef('jni_flutter'), PackageRef('path_provider_platform_interface')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -7934,6 +8594,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('jni'), PackageRef('jni_flutter'), PackageRef('path_provider_platform_interface')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// path_provider_foundation 2.6.0
@@ -7943,11 +8607,6 @@ const _path_provider_foundation = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_foundation',
     authors: [],
     version: '2.6.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('objective_c'), PackageRef('path_provider_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -7973,6 +8632,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('objective_c'), PackageRef('path_provider_platform_interface')],
+    devDependencies: [],
   );
 
 /// path_provider_linux 2.2.2
@@ -7982,11 +8645,6 @@ const _path_provider_linux = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_linux',
     authors: [],
     version: '2.2.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface'), PackageRef('xdg_directories')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8012,6 +8670,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface'), PackageRef('xdg_directories')],
+    devDependencies: [],
   );
 
 /// path_provider_platform_interface 2.1.3
@@ -8021,11 +8683,6 @@ const _path_provider_platform_interface = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_platform_interface',
     authors: [],
     version: '2.1.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('plugin_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8051,6 +8708,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('plugin_platform_interface')],
+    devDependencies: [],
   );
 
 /// path_provider_windows 2.3.0
@@ -8060,11 +8721,6 @@ const _path_provider_windows = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/path_provider/path_provider_windows',
     authors: [],
     version: '2.3.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8090,6 +8746,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface')],
+    devDependencies: [],
   );
 
 /// pausable_timer 3.1.0+3
@@ -8100,11 +8760,6 @@ const _pausable_timer = Package(
     repository: 'https://github.com/llucax/pausable_timer',
     authors: [],
     version: '3.1.0+3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('clock')],
-    devDependencies: [PackageRef('coverage'), PackageRef('fake_async'), PackageRef('lints'), PackageRef('test')],
     license: '''BSD 3-Clause License
 
 Copyright (c) 2020, Google LLC.
@@ -8136,6 +8791,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('clock')],
+    devDependencies: [PackageRef('coverage'), PackageRef('fake_async'), PackageRef('lints'), PackageRef('test')],
   );
 
 /// petitparser 7.0.2
@@ -8146,11 +8805,6 @@ const _petitparser = Package(
     repository: 'https://github.com/petitparser/dart-petitparser',
     authors: [],
     version: '7.0.2',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('collection')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
     license: '''The MIT License
 
 Copyright (c) 2006-2024 Lukas Renggli.
@@ -8173,6 +8827,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('collection')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
 /// photo_view 0.15.0
@@ -8182,11 +8840,6 @@ const _photo_view = Package(
     homepage: 'https://github.com/renancaraujo/photo_view',
     authors: [],
     version: '0.15.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2024 Renan C. Araújo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -8194,6 +8847,10 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// platform 3.1.6
@@ -8203,11 +8860,6 @@ const _platform = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/platform',
     authors: [],
     version: '3.1.6',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2017, the Dart project authors. All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -8234,6 +8886,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('test')],
   );
 
 /// plugin_platform_interface 2.1.8
@@ -8243,11 +8899,6 @@ const _plugin_platform_interface = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/plugin_platform_interface',
     authors: [],
     version: '2.1.8',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta')],
-    devDependencies: [PackageRef('mockito'), PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -8273,6 +8924,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta')],
+    devDependencies: [PackageRef('mockito'), PackageRef('test')],
   );
 
 /// pool 1.5.2
@@ -8282,11 +8937,6 @@ const _pool = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/pool',
     authors: [],
     version: '1.5.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('stack_trace')],
-    devDependencies: [PackageRef('fake_async'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8314,20 +8964,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('stack_trace')],
+    devDependencies: [PackageRef('fake_async'), PackageRef('test')],
   );
 
-/// posix 6.5.0
+/// posix 6.5.2
 const _posix = Package(
     name: 'posix',
     description: 'Exposes the POSIX api on OSx and Linux',
     homepage: 'https://github.com/onepub-dev/dart_posix',
     authors: [],
-    version: '6.5.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('meta'), PackageRef('path')],
-    devDependencies: [PackageRef('logger'), PackageRef('logging'), PackageRef('stack_trace'), PackageRef('test'), PackageRef('uuid')],
+    version: '6.5.2',
     license: '''MIT License
 
 Copyright (c) 2020 Brett Sutton
@@ -8349,6 +8998,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('meta'), PackageRef('path')],
+    devDependencies: [PackageRef('logger'), PackageRef('logging'), PackageRef('stack_trace'), PackageRef('test'), PackageRef('uuid')],
   );
 
 /// progress_indicator_m3e 0.1.1
@@ -8358,11 +9011,6 @@ const _progress_indicator_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/progress_indicator_m3e',
     authors: [],
     version: '0.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025 Emily Moonstone
@@ -8384,6 +9032,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
 /// pub_semver 2.2.0
@@ -8393,11 +9045,6 @@ const _pub_semver = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/pub_semver',
     authors: [],
     version: '2.2.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -8425,6 +9072,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// pubspec_parse 1.5.0
@@ -8434,11 +9085,6 @@ const _pubspec_parse = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/pubspec_parse',
     authors: [],
     version: '1.5.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('checked_yaml'), PackageRef('collection'), PackageRef('json_annotation'), PackageRef('pub_semver'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('path'), PackageRef('source_gen'), PackageRef('stack_trace'), PackageRef('test')],
     license: '''Copyright 2018, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -8466,21 +9112,20 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('checked_yaml'), PackageRef('collection'), PackageRef('json_annotation'), PackageRef('pub_semver'), PackageRef('yaml')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('path'), PackageRef('source_gen'), PackageRef('stack_trace'), PackageRef('test')],
   );
 
-/// record_use 0.6.0
+/// record_use 1.1.0
 const _record_use = Package(
     name: 'record_use',
-    description: '''The serialization logic and API for the usage recording SDK feature.
+    description: '''Dart API to access `@RecordUse()` recorded usages in link hooks.
 ''',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/record_use',
     authors: [],
-    version: '0.6.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('pub_semver')],
-    devDependencies: [PackageRef('test')],
+    version: '1.1.0',
     license: '''Copyright 2024, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -8508,225 +9153,13 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// retry 3.1.2
-const _retry = Package(
-    name: 'retry',
-    description: 'Utility for wrapping an asynchronous function in automatic retry logic with exponential back-off, useful when making requests over network.',
-    homepage: 'https://github.com/google/dart-neats/tree/master/retry',
-    repository: 'https://github.com/google/dart-neats.git',
-    authors: [],
-    version: '3.1.2',
-    spdxIdentifiers: ['Apache-2.0'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('test'), PackageRef('lints')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright [yyyy] [name of copyright owner]
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
+    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('pub_semver')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// riverpod 3.1.0
+/// riverpod 3.4.2
 const _riverpod = Package(
     name: 'riverpod',
     description: '''A reactive caching and data-binding framework. Riverpod makes working with asynchronous code a breeze.
@@ -8734,12 +9167,7 @@ const _riverpod = Package(
     homepage: 'https://riverpod.dev',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '3.1.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('clock'), PackageRef('collection'), PackageRef('meta'), PackageRef('state_notifier'), PackageRef('test')],
-    devDependencies: [PackageRef('analyzer'), PackageRef('mockito'), PackageRef('path')],
+    version: '3.4.2',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -8761,20 +9189,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('clock'), PackageRef('collection'), PackageRef('listen'), PackageRef('meta'), PackageRef('stack_trace'), PackageRef('state_notifier'), PackageRef('test'), PackageRef('uuid')],
+    devDependencies: [PackageRef('analyzer'), PackageRef('build_runner'), PackageRef('mockito'), PackageRef('path')],
   );
 
-/// riverpod_analyzer_utils 1.0.0-dev.8
+/// riverpod_analyzer_utils 1.0.0-dev.11
 const _riverpod_analyzer_utils = Package(
     name: 'riverpod_analyzer_utils',
     description: 'A project for analyzing Riverpod code. This is internally used by riverpod_lint and riverpod_generator',
     repository: 'https://github.com/rrousselGit/river_pod',
     authors: [],
-    version: '1.0.0-dev.8',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_buffer'), PackageRef('collection'), PackageRef('crypto'), PackageRef('freezed_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('source_span')],
-    devDependencies: [PackageRef('build'), PackageRef('build_runner'), PackageRef('freezed'), PackageRef('lints'), PackageRef('test')],
+    version: '1.0.0-dev.11',
     license: '''MIT License
 
 Copyright (c) 2023 Remi Rousselet
@@ -8796,20 +9223,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_buffer'), PackageRef('collection'), PackageRef('crypto'), PackageRef('freezed_annotation'), PackageRef('meta'), PackageRef('path'), PackageRef('source_span')],
+    devDependencies: [PackageRef('build'), PackageRef('build_runner'), PackageRef('freezed'), PackageRef('lints'), PackageRef('test')],
   );
 
-/// riverpod_annotation 4.0.0
+/// riverpod_annotation 4.0.6
 const _riverpod_annotation = Package(
     name: 'riverpod_annotation',
     description: 'A package exposing annotations for riverpod_generator',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '4.0.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('riverpod')],
-    devDependencies: [PackageRef('test')],
+    version: '4.0.6',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -8831,20 +9257,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('riverpod')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// riverpod_generator 4.0.0+1
+/// riverpod_generator 4.0.8
 const _riverpod_generator = Package(
     name: 'riverpod_generator',
     description: 'A code generator for Riverpod. This both simplifies the syntax empowers it, such as allowing stateful hot-reload.',
     repository: 'https://github.com/rrousselGit/riverpod',
     authors: [],
-    version: '4.0.0+1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_buffer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('crypto'), PackageRef('meta'), PackageRef('mockito'), PackageRef('path'), PackageRef('riverpod_analyzer_utils'), PackageRef('riverpod_annotation'), PackageRef('source_gen')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('freezed'), PackageRef('freezed_annotation'), PackageRef('package_config'), PackageRef('riverpod'), PackageRef('test')],
+    version: '4.0.8',
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -8866,42 +9291,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
-  );
-
-/// riverpod_lint 3.1.0
-const _riverpod_lint = Package(
-    name: 'riverpod_lint',
-    description: 'Riverpod_lint is a developer tool for users of Riverpod, designed to help stop common issues and simplify repetitive tasks.',
-    homepage: 'https://riverpod.dev',
-    repository: 'https://github.com/rrousselGit/river_pod',
-    authors: [],
-    version: '3.1.0',
-    spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('analysis_server_plugin'), PackageRef('analyzer'), PackageRef('analyzer_plugin'), PackageRef('collection'), PackageRef('meta'), PackageRef('path'), PackageRef('riverpod'), PackageRef('riverpod_analyzer_utils'), PackageRef('source_span'), PackageRef('yaml')],
-    devDependencies: [PackageRef('mockito'), PackageRef('test'), PackageRef('watcher')],
-    license: '''MIT License
-
-Copyright (c) 2023 Remi Rousselet
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
+    dependencies: [PackageRef('analyzer'), PackageRef('analyzer_buffer'), PackageRef('build'), PackageRef('build_config'), PackageRef('collection'), PackageRef('crypto'), PackageRef('meta'), PackageRef('mockito'), PackageRef('path'), PackageRef('riverpod_analyzer_utils'), PackageRef('riverpod_annotation'), PackageRef('source_gen')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('freezed'), PackageRef('freezed_annotation'), PackageRef('package_config'), PackageRef('riverpod'), PackageRef('test')],
   );
 
 /// rxdart 0.28.0
@@ -8912,442 +9305,220 @@ const _rxdart = Package(
     repository: 'https://github.com/ReactiveX/rxdart',
     authors: [],
     version: '0.28.0',
-    spdxIdentifiers: ['Apache-2.0'],
+    license: '''Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.''',
     isMarkdown: false,
     isSdk: false,
     dependencies: [],
     devDependencies: [PackageRef('lints'), PackageRef('stack_trace'), PackageRef('test')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright [yyyy] [name of copyright owner]
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
   );
 
-/// safe_url_check 1.1.2
-const _safe_url_check = Package(
-    name: 'safe_url_check',
-    description: 'Check if an untrusted URL is broken, without allowing connections to a private IP address.',
-    homepage: 'https://github.com/google/dart-neats/tree/master/safe_url_check',
-    repository: 'https://github.com/google/dart-neats.git',
-    authors: [],
-    version: '1.1.2',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('retry')],
-    devDependencies: [PackageRef('test'), PackageRef('lints'), PackageRef('build_runner')],
-    license: '''Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-
-   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-   1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
-      not limited to compiled object code, generated documentation,
-      and conversions to other media types.
-
-      "Work" shall mean the work of authorship, whether in Source or
-      Object form, made available under the License, as indicated by a
-      copyright notice that is included in or attached to the work
-      (an example is provided in the Appendix below).
-
-      "Derivative Works" shall mean any work, whether in Source or Object
-      form, that is based on (or derived from) the Work and for which the
-      editorial revisions, annotations, elaborations, or other modifications
-      represent, as a whole, an original work of authorship. For the purposes
-      of this License, Derivative Works shall not include works that remain
-      separable from, or merely link (or bind by name) to the interfaces of,
-      the Work and Derivative Works thereof.
-
-      "Contribution" shall mean any work of authorship, including
-      the original version of the Work and any modifications or additions
-      to that Work or Derivative Works thereof, that is intentionally
-      submitted to Licensor for inclusion in the Work by the copyright owner
-      or by an individual or Legal Entity authorized to submit on behalf of
-      the copyright owner. For the purposes of this definition, "submitted"
-      means any form of electronic, verbal, or written communication sent
-      to the Licensor or its representatives, including but not limited to
-      communication on electronic mailing lists, source code control systems,
-      and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
-      excluding communication that is conspicuously marked or otherwise
-      designated in writing by the copyright owner as "Not a Contribution."
-
-      "Contributor" shall mean Licensor and any individual or Legal Entity
-      on behalf of whom a Contribution has been received by Licensor and
-      subsequently incorporated within the Work.
-
-   2. Grant of Copyright License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
-      Work and such Derivative Works in Source or Object form.
-
-   3. Grant of Patent License. Subject to the terms and conditions of
-      this License, each Contributor hereby grants to You a perpetual,
-      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      (except as stated in this section) patent license to make, have made,
-      use, offer to sell, sell, import, and otherwise transfer the Work,
-      where such license applies only to those patent claims licensable
-      by such Contributor that are necessarily infringed by their
-      Contribution(s) alone or by combination of their Contribution(s)
-      with the Work to which such Contribution(s) was submitted. If You
-      institute patent litigation against any entity (including a
-      cross-claim or counterclaim in a lawsuit) alleging that the Work
-      or a Contribution incorporated within the Work constitutes direct
-      or contributory patent infringement, then any patent licenses
-      granted to You under this License for that Work shall terminate
-      as of the date such litigation is filed.
-
-   4. Redistribution. You may reproduce and distribute copies of the
-      Work or Derivative Works thereof in any medium, with or without
-      modifications, and in Source or Object form, provided that You
-      meet the following conditions:
-
-      (a) You must give any other recipients of the Work or
-          Derivative Works a copy of this License; and
-
-      (b) You must cause any modified files to carry prominent notices
-          stating that You changed the files; and
-
-      (c) You must retain, in the Source form of any Derivative Works
-          that You distribute, all copyright, patent, trademark, and
-          attribution notices from the Source form of the Work,
-          excluding those notices that do not pertain to any part of
-          the Derivative Works; and
-
-      (d) If the Work includes a "NOTICE" text file as part of its
-          distribution, then any Derivative Works that You distribute must
-          include a readable copy of the attribution notices contained
-          within such NOTICE file, excluding those notices that do not
-          pertain to any part of the Derivative Works, in at least one
-          of the following places: within a NOTICE text file distributed
-          as part of the Derivative Works; within the Source form or
-          documentation, if provided along with the Derivative Works; or,
-          within a display generated by the Derivative Works, if and
-          wherever such third-party notices normally appear. The contents
-          of the NOTICE file are for informational purposes only and
-          do not modify the License. You may add Your own attribution
-          notices within Derivative Works that You distribute, alongside
-          or as an addendum to the NOTICE text from the Work, provided
-          that such additional attribution notices cannot be construed
-          as modifying the License.
-
-      You may add Your own copyright statement to Your modifications and
-      may provide additional or different license terms and conditions
-      for use, reproduction, or distribution of Your modifications, or
-      for any such Derivative Works as a whole, provided Your use,
-      reproduction, and distribution of the Work otherwise complies with
-      the conditions stated in this License.
-
-   5. Submission of Contributions. Unless You explicitly state otherwise,
-      any Contribution intentionally submitted for inclusion in the Work
-      by You to the Licensor shall be under the terms and conditions of
-      this License, without any additional terms or conditions.
-      Notwithstanding the above, nothing herein shall supersede or modify
-      the terms of any separate license agreement you may have executed
-      with Licensor regarding such Contributions.
-
-   6. Trademarks. This License does not grant permission to use the trade
-      names, trademarks, service marks, or product names of the Licensor,
-      except as required for reasonable and customary use in describing the
-      origin of the Work and reproducing the content of the NOTICE file.
-
-   7. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides the Work (and each
-      Contributor provides its Contributions) on an "AS IS" BASIS,
-      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-      implied, including, without limitation, any warranties or conditions
-      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-      PARTICULAR PURPOSE. You are solely responsible for determining the
-      appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
-
-   8. Limitation of Liability. In no event and under no legal theory,
-      whether in tort (including negligence), contract, or otherwise,
-      unless required by applicable law (such as deliberate and grossly
-      negligent acts) or agreed to in writing, shall any Contributor be
-      liable to You for damages, including any direct, indirect, special,
-      incidental, or consequential damages of any character arising as a
-      result of this License or out of the use or inability to use the
-      Work (including but not limited to damages for loss of goodwill,
-      work stoppage, computer failure or malfunction, or any and all
-      other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
-
-   9. Accepting Warranty or Additional Liability. While redistributing
-      the Work or Derivative Works thereof, You may choose to offer,
-      and charge a fee for, acceptance of support, warranty, indemnity,
-      or other liability obligations and/or rights consistent with this
-      License. However, in accepting such obligations, You may act only
-      on Your own behalf and on Your sole responsibility, not on behalf
-      of any other Contributor, and only if You agree to indemnify,
-      defend, and hold each Contributor harmless for any liability
-      incurred by, or claims asserted against, such Contributor by reason
-      of your accepting any such warranty or additional liability.
-
-   END OF TERMS AND CONDITIONS
-
-   APPENDIX: How to apply the Apache License to your work.
-
-      To apply the Apache License to your work, attach the following
-      boilerplate notice, with the fields enclosed by brackets "[]"
-      replaced with your own identifying information. (Don't include
-      the brackets!)  The text should be enclosed in the appropriate
-      comment syntax for the file format. We also recommend that a
-      file or class name and description of purpose be included on the
-      same "printed page" as the copyright notice for easier
-      identification within third-party archives.
-
-   Copyright [yyyy] [name of copyright owner]
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.''',
-  );
-
-/// screen_retriever 0.2.1
+/// screen_retriever 0.2.2
 const _screen_retriever = Package(
     name: 'screen_retriever',
     description: 'This plugin allows Flutter desktop apps to Retrieve information about screen size, displays, cursor position, etc.',
     homepage: 'https://github.com/leanflutter/screen_retriever',
     authors: [],
-    version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_linux'), PackageRef('screen_retriever_macos'), PackageRef('screen_retriever_platform_interface'), PackageRef('screen_retriever_windows')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('plugin_platform_interface')],
+    version: '0.2.2',
     license: '''MIT License
 
 Copyright (c) 2022-2024 LiJianying <lijy91@foxmail.com>
@@ -9369,20 +9540,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_linux'), PackageRef('screen_retriever_macos'), PackageRef('screen_retriever_platform_interface'), PackageRef('screen_retriever_windows')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('plugin_platform_interface')],
   );
 
-/// screen_retriever_linux 0.2.1
+/// screen_retriever_linux 0.2.2
 const _screen_retriever_linux = Package(
     name: 'screen_retriever_linux',
     description: 'Linux implementation of the screen_retriever plugin.',
     repository: 'https://github.com/leanflutter/screen_retriever/tree/main/packages/screen_retriever_linux',
     authors: [],
-    version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints')],
+    version: '0.2.2',
     license: '''MIT License
 
 Copyright (c) 2022-2024 LiJianying <lijy91@foxmail.com>
@@ -9404,20 +9574,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
-/// screen_retriever_macos 0.2.1
+/// screen_retriever_macos 0.2.2
 const _screen_retriever_macos = Package(
     name: 'screen_retriever_macos',
     description: 'macOS implementation of the screen_retriever plugin.',
     repository: 'https://github.com/leanflutter/screen_retriever/tree/main/packages/screen_retriever_macos',
     authors: [],
-    version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints')],
+    version: '0.2.2',
     license: '''MIT License
 
 Copyright (c) 2022-2024 LiJianying <lijy91@foxmail.com>
@@ -9439,20 +9608,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
-/// screen_retriever_platform_interface 0.2.1
+/// screen_retriever_platform_interface 0.2.2
 const _screen_retriever_platform_interface = Package(
     name: 'screen_retriever_platform_interface',
     description: 'A common platform interface for the screen_retriever plugin.',
     homepage: 'https://github.com/leanflutter/screen_retriever/blob/main/packages/screen_retriever_platform_interface',
     authors: [],
-    version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('json_annotation'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('flutter_lints')],
+    version: '0.2.2',
     license: '''MIT License
 
 Copyright (c) 2022-2024 LiJianying <lijy91@foxmail.com>
@@ -9474,20 +9642,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('json_annotation'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('flutter_lints')],
   );
 
-/// screen_retriever_windows 0.2.1
+/// screen_retriever_windows 0.2.2
 const _screen_retriever_windows = Package(
     name: 'screen_retriever_windows',
     description: 'Windows implementation of the screen_retriever plugin.',
     repository: 'https://github.com/leanflutter/screen_retriever/tree/main/packages/screen_retriever_windows',
     authors: [],
-    version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints')],
+    version: '0.2.2',
     license: '''MIT License
 
 Copyright (c) 2022-2024 LiJianying <lijy91@foxmail.com>
@@ -9509,6 +9676,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('screen_retriever_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// shared_preferences 2.5.5
@@ -9518,11 +9689,6 @@ const _shared_preferences = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences',
     authors: [],
     version: '2.5.5',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_android'), PackageRef('shared_preferences_foundation'), PackageRef('shared_preferences_linux'), PackageRef('shared_preferences_platform_interface'), PackageRef('shared_preferences_web'), PackageRef('shared_preferences_windows')],
-    devDependencies: [PackageRef('path')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9548,20 +9714,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_android'), PackageRef('shared_preferences_foundation'), PackageRef('shared_preferences_linux'), PackageRef('shared_preferences_platform_interface'), PackageRef('shared_preferences_web'), PackageRef('shared_preferences_windows')],
+    devDependencies: [PackageRef('path')],
   );
 
-/// shared_preferences_android 2.4.23
+/// shared_preferences_android 2.4.27
 const _shared_preferences_android = Package(
     name: 'shared_preferences_android',
     description: 'Android implementation of the shared_preferences plugin',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_android',
     authors: [],
-    version: '2.4.23',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_platform_interface')],
-    devDependencies: [],
+    version: '2.4.27',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9587,6 +9752,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('shared_preferences_platform_interface')],
+    devDependencies: [],
   );
 
 /// shared_preferences_foundation 2.5.6
@@ -9596,11 +9765,6 @@ const _shared_preferences_foundation = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_foundation',
     authors: [],
     version: '2.5.6',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9626,6 +9790,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_platform_interface')],
+    devDependencies: [],
   );
 
 /// shared_preferences_linux 2.4.1
@@ -9635,11 +9803,6 @@ const _shared_preferences_linux = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_linux',
     authors: [],
     version: '2.4.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('file'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_linux'), PackageRef('path_provider_platform_interface'), PackageRef('shared_preferences_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9665,6 +9828,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('file'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_linux'), PackageRef('path_provider_platform_interface'), PackageRef('shared_preferences_platform_interface')],
+    devDependencies: [],
   );
 
 /// shared_preferences_platform_interface 2.4.2
@@ -9674,11 +9841,6 @@ const _shared_preferences_platform_interface = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_platform_interface',
     authors: [],
     version: '2.4.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9704,6 +9866,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
+    devDependencies: [],
   );
 
 /// shared_preferences_web 2.4.3
@@ -9713,11 +9879,6 @@ const _shared_preferences_web = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_web',
     authors: [],
     version: '2.4.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('shared_preferences_platform_interface'), PackageRef('web')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9743,6 +9904,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('shared_preferences_platform_interface'), PackageRef('web')],
+    devDependencies: [],
   );
 
 /// shared_preferences_windows 2.4.1
@@ -9752,11 +9917,6 @@ const _shared_preferences_windows = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_windows',
     authors: [],
     version: '2.4.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('file'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface'), PackageRef('path_provider_windows'), PackageRef('shared_preferences_platform_interface')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9782,6 +9942,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('file'), PackageRef('flutter'), PackageRef('path'), PackageRef('path_provider_platform_interface'), PackageRef('path_provider_windows'), PackageRef('shared_preferences_platform_interface')],
+    devDependencies: [],
   );
 
 /// shelf 1.4.2
@@ -9792,11 +9956,6 @@ const _shelf = Package(
     repository: 'https://github.com/dart-lang/shelf/tree/master/pkgs/shelf',
     authors: [],
     version: '1.4.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('path'), PackageRef('stack_trace'), PackageRef('stream_channel')],
-    devDependencies: [PackageRef('http'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -9824,6 +9983,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('http_parser'), PackageRef('path'), PackageRef('stack_trace'), PackageRef('stream_channel')],
+    devDependencies: [PackageRef('http'), PackageRef('test')],
   );
 
 /// shelf_packages_handler 3.0.2
@@ -9833,11 +9996,6 @@ const _shelf_packages_handler = Package(
     repository: 'https://github.com/dart-lang/shelf/tree/master/pkgs/shelf_packages_handler',
     authors: [],
     version: '3.0.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('path'), PackageRef('shelf'), PackageRef('shelf_static')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2016, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -9865,6 +10023,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('path'), PackageRef('shelf'), PackageRef('shelf_static')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// shelf_static 1.1.3
@@ -9874,11 +10036,6 @@ const _shelf_static = Package(
     repository: 'https://github.com/dart-lang/shelf/tree/master/pkgs/shelf_static',
     authors: [],
     version: '1.1.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('convert'), PackageRef('http_parser'), PackageRef('mime'), PackageRef('path'), PackageRef('shelf')],
-    devDependencies: [PackageRef('args'), PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -9906,6 +10063,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('convert'), PackageRef('http_parser'), PackageRef('mime'), PackageRef('path'), PackageRef('shelf')],
+    devDependencies: [PackageRef('args'), PackageRef('test')],
   );
 
 /// shelf_web_socket 3.0.0
@@ -9915,11 +10076,6 @@ const _shelf_web_socket = Package(
     repository: 'https://github.com/dart-lang/shelf/tree/master/pkgs/shelf_web_socket',
     authors: [],
     version: '3.0.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('shelf'), PackageRef('stream_channel'), PackageRef('web_socket_channel')],
-    devDependencies: [PackageRef('http'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -9947,6 +10103,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('shelf'), PackageRef('stream_channel'), PackageRef('web_socket_channel')],
+    devDependencies: [PackageRef('http'), PackageRef('test')],
   );
 
 /// slider_m3e 0.1.1
@@ -9956,11 +10116,6 @@ const _slider_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/slider_m3e',
     authors: [],
     version: '0.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) ...
@@ -9982,20 +10137,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
-/// source_gen 4.2.3
+/// source_gen 4.2.4
 const _source_gen = Package(
     name: 'source_gen',
     description: 'Source code generation builders and utilities for the Dart build system',
     repository: 'https://github.com/dart-lang/source_gen/tree/master/source_gen',
     authors: [],
-    version: '4.2.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('dart_style'), PackageRef('glob'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('yaml')],
-    devDependencies: [PackageRef('logging'), PackageRef('term_glyph'), PackageRef('test')],
+    version: '4.2.4',
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -10023,20 +10177,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('build'), PackageRef('dart_style'), PackageRef('glob'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('source_span'), PackageRef('yaml')],
+    devDependencies: [PackageRef('logging'), PackageRef('term_glyph'), PackageRef('test')],
   );
 
-/// source_helper 1.3.8
+/// source_helper 1.3.13
 const _source_helper = Package(
     name: 'source_helper',
     description: 'Utilities to help with Dart source code generation. Includes utilities for properly generating String literals from any String value.',
     repository: 'https://github.com/google/source_helper.dart',
     authors: [],
-    version: '1.3.8',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('source_gen')],
-    devDependencies: [PackageRef('test')],
+    version: '1.3.13',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -10238,6 +10391,10 @@ const _source_helper = Package(
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('source_gen')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// source_map_stack_trace 2.1.2
@@ -10247,11 +10404,6 @@ const _source_map_stack_trace = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/source_map_stack_trace',
     authors: [],
     version: '2.1.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('path'), PackageRef('source_maps'), PackageRef('stack_trace')],
-    devDependencies: [PackageRef('source_span'), PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -10279,6 +10431,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('path'), PackageRef('source_maps'), PackageRef('stack_trace')],
+    devDependencies: [PackageRef('source_span'), PackageRef('test')],
   );
 
 /// source_maps 0.10.13
@@ -10288,11 +10444,6 @@ const _source_maps = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/source_maps',
     authors: [],
     version: '0.10.13',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('source_span')],
-    devDependencies: [PackageRef('term_glyph'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -10320,6 +10471,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('source_span')],
+    devDependencies: [PackageRef('term_glyph'), PackageRef('test')],
   );
 
 /// source_span 1.10.2
@@ -10329,11 +10484,6 @@ const _source_span = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/source_span',
     authors: [],
     version: '1.10.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('path'), PackageRef('term_glyph')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -10361,6 +10511,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('path'), PackageRef('term_glyph')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// split_button_m3e 0.2.1
@@ -10370,11 +10524,6 @@ const _split_button_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/split_button_m3e',
     authors: [],
     version: '0.2.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) 2025
@@ -10396,20 +10545,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
-/// sqflite 2.4.2+1
+/// sqflite 2.4.3
 const _sqflite = Package(
     name: 'sqflite',
     description: 'Flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite',
     authors: [],
-    version: '2.4.2+1',
-    spdxIdentifiers: ['BSD-2-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('sqflite_android'), PackageRef('sqflite_darwin'), PackageRef('sqflite_platform_interface'), PackageRef('sqflite_common'), PackageRef('path')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
+    version: '2.4.3',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10435,20 +10583,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('sqflite_android'), PackageRef('sqflite_darwin'), PackageRef('sqflite_platform_interface'), PackageRef('sqflite_common'), PackageRef('path')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_android 2.4.2+3
+/// sqflite_android 2.4.3
 const _sqflite_android = Package(
     name: 'sqflite_android',
     description: 'Android flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_android',
     authors: [],
-    version: '2.4.2+3',
-    spdxIdentifiers: ['BSD-2-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('sqflite_common'), PackageRef('path'), PackageRef('sqflite_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
+    version: '2.4.3',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10474,20 +10621,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('sqflite_common'), PackageRef('path'), PackageRef('sqflite_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_common 2.5.8
+/// sqflite_common 2.5.11
 const _sqflite_common = Package(
     name: 'sqflite_common',
     description: 'Dart wrapper on SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     homepage: 'https://github.com/tekartik/sqflite/tree/master/sqflite_common',
     authors: [],
-    version: '2.5.8',
-    spdxIdentifiers: ['BSD-2-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('synchronized'), PackageRef('path'), PackageRef('meta')],
-    devDependencies: [PackageRef('lints'), PackageRef('http'), PackageRef('test'), PackageRef('test_api'), PackageRef('pub_semver')],
+    version: '2.5.11',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10513,20 +10659,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('synchronized'), PackageRef('path'), PackageRef('meta')],
+    devDependencies: [PackageRef('lints'), PackageRef('http'), PackageRef('test'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_common_ffi 2.4.0+3
+/// sqflite_common_ffi 2.4.2
 const _sqflite_common_ffi = Package(
     name: 'sqflite_common_ffi',
     description: 'sqflite ffi based implementation, for desktop and units tests.',
     homepage: 'https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi',
     authors: [],
-    version: '2.4.0+3',
-    spdxIdentifiers: ['BSD-2-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('sqlite3'), PackageRef('sqflite_common'), PackageRef('synchronized'), PackageRef('path'), PackageRef('meta')],
-    devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('pub_semver'), PackageRef('archive'), PackageRef('http')],
+    version: '2.4.2',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10552,20 +10697,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('sqlite3'), PackageRef('sqflite_common'), PackageRef('synchronized'), PackageRef('path'), PackageRef('meta')],
+    devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('pub_semver'), PackageRef('archive'), PackageRef('http')],
   );
 
-/// sqflite_darwin 2.4.2
+/// sqflite_darwin 2.4.3+1
 const _sqflite_darwin = Package(
     name: 'sqflite_darwin',
     description: 'iOS/MacOS flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_darwin',
     authors: [],
-    version: '2.4.2',
-    spdxIdentifiers: ['BSD-2-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('sqflite_platform_interface'), PackageRef('meta'), PackageRef('sqflite_common'), PackageRef('path')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
+    version: '2.4.3+1',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10591,20 +10735,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('sqflite_platform_interface'), PackageRef('meta'), PackageRef('sqflite_common'), PackageRef('path')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_platform_interface 2.4.0
+/// sqflite_platform_interface 2.4.1
 const _sqflite_platform_interface = Package(
     name: 'sqflite_platform_interface',
     description: 'Flutter plugin interface for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_platform_interface',
     authors: [],
-    version: '2.4.0',
-    spdxIdentifiers: ['BSD-2-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('sqflite_common'), PackageRef('plugin_platform_interface'), PackageRef('meta')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('test_api'), PackageRef('pub_semver')],
+    version: '2.4.1',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10630,20 +10773,19 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('platform'), PackageRef('sqflite_common'), PackageRef('plugin_platform_interface'), PackageRef('meta')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqlite3 3.3.3
+/// sqlite3 3.5.1
 const _sqlite3 = Package(
     name: 'sqlite3',
     description: 'Provides lightweight yet convenient bindings to SQLite by using dart:ffi',
     homepage: 'https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3',
     authors: [],
-    version: '3.3.3',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('ffi'), PackageRef('meta'), PackageRef('path'), PackageRef('web'), PackageRef('typed_data'), PackageRef('hooks'), PackageRef('code_assets'), PackageRef('native_toolchain_c'), PackageRef('crypto')],
-    devDependencies: [PackageRef('analyzer'), PackageRef('build_daemon'), PackageRef('build_runner'), PackageRef('dart_style'), PackageRef('http'), PackageRef('lints'), PackageRef('shelf'), PackageRef('shelf_static'), PackageRef('stream_channel'), PackageRef('test'), PackageRef('pub_semver'), PackageRef('convert'), PackageRef('package_config'), PackageRef('logging')],
+    version: '3.5.1',
     license: '''MIT License
 
 Copyright (c) 2020 Simon Binder
@@ -10665,6 +10807,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('ffi'), PackageRef('meta'), PackageRef('path'), PackageRef('web'), PackageRef('typed_data'), PackageRef('hooks'), PackageRef('code_assets'), PackageRef('native_toolchain_c'), PackageRef('crypto')],
+    devDependencies: [PackageRef('analyzer'), PackageRef('build_daemon'), PackageRef('build_runner'), PackageRef('dart_style'), PackageRef('http'), PackageRef('lints'), PackageRef('shelf'), PackageRef('shelf_static'), PackageRef('stream_channel'), PackageRef('test'), PackageRef('pub_semver'), PackageRef('convert'), PackageRef('package_config'), PackageRef('logging')],
   );
 
 /// stack_trace 1.12.1
@@ -10674,11 +10820,6 @@ const _stack_trace = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/stack_trace',
     authors: [],
     version: '1.12.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('path')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -10706,6 +10847,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('path')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// state_notifier 1.0.0
@@ -10715,11 +10860,6 @@ const _state_notifier = Package(
     homepage: 'https://github.com/rrousselGit/state_notifier',
     authors: [],
     version: '1.0.0',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta')],
-    devDependencies: [PackageRef('mockito'), PackageRef('test')],
     license: '''MIT License
 
 Copyright (c) 2020 Remi Rousselet
@@ -10741,6 +10881,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta')],
+    devDependencies: [PackageRef('mockito'), PackageRef('test')],
   );
 
 /// stream_channel 2.1.4
@@ -10750,11 +10894,6 @@ const _stream_channel = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/stream_channel',
     authors: [],
     version: '2.1.4',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -10782,6 +10921,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// stream_transform 2.1.1
@@ -10791,11 +10934,6 @@ const _stream_transform = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/stream_transform',
     authors: [],
     version: '2.1.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('async'), PackageRef('fake_async'), PackageRef('test')],
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -10823,6 +10961,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('async'), PackageRef('fake_async'), PackageRef('test')],
   );
 
 /// string_scanner 1.4.1
@@ -10832,11 +10974,6 @@ const _string_scanner = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/string_scanner',
     authors: [],
     version: '1.4.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('source_span')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -10864,20 +11001,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('source_span')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// synchronized 3.4.0+1
+/// synchronized 3.4.1+1
 const _synchronized = Package(
     name: 'synchronized',
     description: 'Lock mechanism to prevent concurrent access to asynchronous code.',
     homepage: 'https://github.com/tekartik/synchronized.dart/tree/master/synchronized',
     authors: [],
-    version: '3.4.0+1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('web'), PackageRef('lints'), PackageRef('pub_semver'), PackageRef('test'), PackageRef('build_runner'), PackageRef('yaml')],
+    version: '3.4.1+1',
     license: '''MIT License
 
 Copyright (c) 2016, Alexandre Roux Tekartik.
@@ -10899,41 +11035,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
-  );
-
-/// tar 2.0.2
-const _tar = Package(
-    name: 'tar',
-    description: 'Memory-efficient, streaming implementation of the tar file format',
-    repository: 'https://github.com/simolus3/tar/',
-    authors: [],
-    version: '2.0.2',
-    spdxIdentifiers: ['MIT'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('meta'), PackageRef('typed_data')],
-    devDependencies: [PackageRef('lints'), PackageRef('file'), PackageRef('path'), PackageRef('test')],
-    license: '''MIT License
-
-Copyright (c) 2021 Simon Binder
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
+    dependencies: [],
+    devDependencies: [PackageRef('web'), PackageRef('lints'), PackageRef('pub_semver'), PackageRef('test'), PackageRef('build_runner'), PackageRef('yaml')],
   );
 
 /// term_glyph 1.2.2
@@ -10943,11 +11048,6 @@ const _term_glyph = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/term_glyph',
     authors: [],
     version: '1.2.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('dart_style'), PackageRef('test')],
     license: '''Copyright 2017, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -10975,20 +11075,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('dart_style'), PackageRef('test')],
   );
 
-/// test 1.31.0
+/// test 1.31.1
 const _test = Package(
     name: 'test',
     description: 'A full featured library for writing and running Dart tests across platforms.',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/test',
     authors: [],
-    version: '1.31.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('coverage'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('matcher'), PackageRef('node_preamble'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('shelf'), PackageRef('shelf_packages_handler'), PackageRef('shelf_static'), PackageRef('shelf_web_socket'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('test_api'), PackageRef('test_core'), PackageRef('typed_data'), PackageRef('web_socket_channel'), PackageRef('webkit_inspection_protocol'), PackageRef('yaml')],
-    devDependencies: [PackageRef('fake_async'), PackageRef('glob')],
+    version: '1.31.1',
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -11016,20 +11115,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('coverage'), PackageRef('http_multi_server'), PackageRef('io'), PackageRef('matcher'), PackageRef('node_preamble'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('shelf'), PackageRef('shelf_packages_handler'), PackageRef('shelf_static'), PackageRef('shelf_web_socket'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('test_api'), PackageRef('test_core'), PackageRef('typed_data'), PackageRef('web_socket_channel'), PackageRef('webkit_inspection_protocol'), PackageRef('yaml')],
+    devDependencies: [PackageRef('fake_async'), PackageRef('glob')],
   );
 
-/// test_api 0.7.11
+/// test_api 0.7.12
 const _test_api = Package(
     name: 'test_api',
     description: 'The user facing API for structuring Dart tests and checking expectations.',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/test_api',
     authors: [],
-    version: '0.7.11',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('string_scanner'), PackageRef('term_glyph')],
-    devDependencies: [PackageRef('analyzer'), PackageRef('fake_async'), PackageRef('glob'), PackageRef('graphs'), PackageRef('path'), PackageRef('test'), PackageRef('test_core')],
+    version: '0.7.12',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -11057,20 +11155,19 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('meta'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('string_scanner'), PackageRef('term_glyph')],
+    devDependencies: [PackageRef('analyzer'), PackageRef('fake_async'), PackageRef('glob'), PackageRef('graphs'), PackageRef('path'), PackageRef('test'), PackageRef('test_core')],
   );
 
-/// test_core 0.6.17
+/// test_core 0.6.18
 const _test_core = Package(
     name: 'test_core',
     description: 'A basic library for writing tests and running them on the VM.',
     repository: 'https://github.com/dart-lang/test/tree/master/pkgs/test_core',
     authors: [],
-    version: '0.6.17',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('coverage'), PackageRef('frontend_server_client'), PackageRef('glob'), PackageRef('io'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('source_map_stack_trace'), PackageRef('source_maps'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('test_api'), PackageRef('vm_service'), PackageRef('yaml')],
-    devDependencies: [PackageRef('test')],
+    version: '0.6.18',
     license: '''Copyright 2018, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -11098,6 +11195,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('analyzer'), PackageRef('args'), PackageRef('async'), PackageRef('boolean_selector'), PackageRef('collection'), PackageRef('coverage'), PackageRef('frontend_server_client'), PackageRef('glob'), PackageRef('io'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('source_map_stack_trace'), PackageRef('source_maps'), PackageRef('source_span'), PackageRef('stack_trace'), PackageRef('stream_channel'), PackageRef('test_api'), PackageRef('vm_service'), PackageRef('yaml')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// timeago 3.7.1
@@ -11108,11 +11209,6 @@ const _timeago = Package(
     homepage: 'https://github.com/andresaraujo/timeago.dart',
     authors: [],
     version: '3.7.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('intl')],
-    devDependencies: [PackageRef('test'), PackageRef('build_runner')],
     license: '''The MIT License (MIT)
 
 Copyright (c) 2015 Andres Araujo
@@ -11134,20 +11230,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
-  );
-
-/// timezone 0.10.1
-const _timezone = Package(
-    name: 'timezone',
-    description: 'Time zone database and time zone aware DateTime.',
-    repository: 'https://github.com/srawlins/timezone',
-    authors: [],
-    version: '0.10.1',
-    spdxIdentifiers: ['BSD-2-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('http'), PackageRef('path')],
-    devDependencies: [PackageRef('args'), PackageRef('file'), PackageRef('glob'), PackageRef('lints'), PackageRef('logging'), PackageRef('test')],
+    dependencies: [PackageRef('intl')],
+    devDependencies: [PackageRef('test'), PackageRef('build_runner')],
+  );
+
+/// timezone 0.11.1
+const _timezone = Package(
+    name: 'timezone',
+    description: 'Time zone databases and time zone aware `DateTime`.',
+    repository: 'https://github.com/dart-lang/labs/tree/main/pkgs/timezone',
+    authors: [],
+    version: '0.11.1',
     license: '''Copyright (c) 2014, timezone project authors.
 All rights reserved.
 
@@ -11170,6 +11265,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('http'), PackageRef('path')],
+    devDependencies: [PackageRef('args'), PackageRef('file'), PackageRef('glob'), PackageRef('logging'), PackageRef('test')],
   );
 
 /// toastification 3.2.0
@@ -11180,11 +11279,6 @@ const _toastification = Package(
     repository: 'https://github.com/payam-zahedi/toastification',
     authors: [],
     version: '3.2.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('equatable'), PackageRef('uuid'), PackageRef('pausable_timer'), PackageRef('collection')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('test'), PackageRef('mockito'), PackageRef('build_runner')],
     license: '''BSD 3-Clause License
 
 Copyright (c) 2023, Payam Zahedi
@@ -11213,6 +11307,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('equatable'), PackageRef('uuid'), PackageRef('pausable_timer'), PackageRef('collection')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('test'), PackageRef('mockito'), PackageRef('build_runner')],
   );
 
 /// toolbar_m3e 0.1.1
@@ -11222,11 +11320,6 @@ const _toolbar_m3e = Package(
     repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/toolbar_m3e',
     authors: [],
     version: '0.1.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
     license: '''MIT License
 
 Copyright (c) ...
@@ -11248,6 +11341,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
+    devDependencies: [],
   );
 
 /// typed_data 1.4.0
@@ -11257,11 +11354,6 @@ const _typed_data = Package(
     repository: 'https://github.com/dart-lang/core/tree/main/pkgs/typed_data',
     authors: [],
     version: '1.4.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -11289,6 +11381,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// universal_io 2.3.1
@@ -11298,11 +11394,6 @@ const _universal_io = Package(
     homepage: 'https://github.com/dart-io-packages/universal_io',
     authors: [],
     version: '2.3.1',
-    spdxIdentifiers: ['Apache-2.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('typed_data')],
-    devDependencies: [PackageRef('async'), PackageRef('lints'), PackageRef('stream_channel'), PackageRef('test')],
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -11479,6 +11570,10 @@ const _universal_io = Package(
       of your accepting any such warranty or additional liability.
 
    END OF TERMS AND CONDITIONS''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('typed_data')],
+    devDependencies: [PackageRef('async'), PackageRef('lints'), PackageRef('stream_channel'), PackageRef('test')],
   );
 
 /// url_launcher 6.3.2
@@ -11488,11 +11583,6 @@ const _url_launcher = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher',
     authors: [],
     version: '6.3.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_android'), PackageRef('url_launcher_ios'), PackageRef('url_launcher_linux'), PackageRef('url_launcher_macos'), PackageRef('url_launcher_platform_interface'), PackageRef('url_launcher_web'), PackageRef('url_launcher_windows')],
-    devDependencies: [PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11518,20 +11608,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_android'), PackageRef('url_launcher_ios'), PackageRef('url_launcher_linux'), PackageRef('url_launcher_macos'), PackageRef('url_launcher_platform_interface'), PackageRef('url_launcher_web'), PackageRef('url_launcher_windows')],
+    devDependencies: [PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
   );
 
-/// url_launcher_android 6.3.30
+/// url_launcher_android 6.3.32
 const _url_launcher_android = Package(
     name: 'url_launcher_android',
     description: 'Android implementation of the url_launcher plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_android',
     authors: [],
-    version: '6.3.30',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('url_launcher_platform_interface')],
-    devDependencies: [PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
+    version: '6.3.32',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11557,6 +11646,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('url_launcher_platform_interface')],
+    devDependencies: [PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
   );
 
 /// url_launcher_ios 6.4.1
@@ -11566,11 +11659,6 @@ const _url_launcher_ios = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_ios',
     authors: [],
     version: '6.4.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11596,6 +11684,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
   );
 
 /// url_launcher_linux 3.2.2
@@ -11605,11 +11697,6 @@ const _url_launcher_linux = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_linux',
     authors: [],
     version: '3.2.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11635,6 +11722,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// url_launcher_macos 3.2.5
@@ -11644,11 +11735,6 @@ const _url_launcher_macos = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_macos',
     authors: [],
     version: '3.2.5',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11674,6 +11760,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// url_launcher_platform_interface 2.3.2
@@ -11683,11 +11773,6 @@ const _url_launcher_platform_interface = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_platform_interface',
     authors: [],
     version: '2.3.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('mockito')],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11713,6 +11798,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
+    devDependencies: [PackageRef('mockito')],
   );
 
 /// url_launcher_web 2.4.3
@@ -11722,11 +11811,6 @@ const _url_launcher_web = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_web',
     authors: [],
     version: '2.4.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('url_launcher_platform_interface'), PackageRef('web')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11752,6 +11836,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('url_launcher_platform_interface'), PackageRef('web')],
+    devDependencies: [],
   );
 
 /// url_launcher_windows 3.1.5
@@ -11761,11 +11849,6 @@ const _url_launcher_windows = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_windows',
     authors: [],
     version: '3.1.5',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11791,21 +11874,20 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('url_launcher_platform_interface')],
+    devDependencies: [PackageRef('test')],
   );
 
-/// uuid 4.5.3
+/// uuid 4.6.0
 const _uuid = Package(
     name: 'uuid',
     description: '''RFC4122 (v1, v4, v5, v6, v7, v8) UUID Generator and Parser for Dart
 ''',
     repository: 'https://github.com/Daegalus/dart-uuid',
     authors: [],
-    version: '4.5.3',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('crypto'), PackageRef('fixnum')],
-    devDependencies: [PackageRef('lints'), PackageRef('test')],
+    version: '4.6.0',
     license: '''Copyright (c) 2021 Yulian Kuncheff
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -11813,80 +11895,57 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('crypto'), PackageRef('fixnum')],
+    devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
-/// vector_math 2.2.0
+/// vector_math 2.4.2
 const _vector_math = Package(
     name: 'vector_math',
-    description: 'A Vector Math library for 2D and 3D applications.',
-    repository: 'https://github.com/google/vector_math.dart',
+    description: 'A vector math library for 2D and 3D applications, supporting 2D, 3D, and 4D matrices.',
+    repository: 'https://github.com/flutter/core-packages/tree/main/packages/vector_math',
     authors: [],
-    version: '2.2.0',
-    spdxIdentifiers: ['Zlib', 'BSD-3-Clause'],
+    version: '2.4.2',
+    license: '''Copyright 2013 The Flutter Authors
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
     dependencies: [],
     devDependencies: [PackageRef('build_runner'), PackageRef('path'), PackageRef('test')],
-    license: '''Copyright 2015, Google Inc. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Copyright (C) 2013 Andrew Magill
-
-This software is provided 'as-is', without any express or implied
-warranty.  In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgment in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution.''',
   );
 
-/// video_player 2.11.1
+/// video_player 2.14.0
 const _video_player = Package(
     name: 'video_player',
     description: 'Flutter plugin for displaying inline video with other Flutter widgets on Android, iOS, macOS and web.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player',
     authors: [],
-    version: '2.11.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('html'), PackageRef('video_player_android'), PackageRef('video_player_avfoundation'), PackageRef('video_player_platform_interface'), PackageRef('video_player_web')],
-    devDependencies: [PackageRef('leak_tracker_flutter_testing')],
+    version: '2.14.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11912,20 +11971,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('flutter'), PackageRef('html'), PackageRef('video_player_android'), PackageRef('video_player_avfoundation'), PackageRef('video_player_platform_interface'), PackageRef('video_player_web')],
+    devDependencies: [PackageRef('leak_tracker_flutter_testing')],
   );
 
-/// video_player_android 2.9.5
+/// video_player_android 2.12.0
 const _video_player_android = Package(
     name: 'video_player_android',
     description: 'Android implementation of the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_android',
     authors: [],
-    version: '2.9.5',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('video_player_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
+    version: '2.12.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11951,20 +12009,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('video_player_platform_interface')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
   );
 
-/// video_player_avfoundation 2.10.0
+/// video_player_avfoundation 2.11.0
 const _video_player_avfoundation = Package(
     name: 'video_player_avfoundation',
     description: 'iOS and macOS implementation of the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_avfoundation',
     authors: [],
-    version: '2.10.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('video_player_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
+    version: '2.11.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11990,20 +12047,19 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('video_player_platform_interface')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
   );
 
-/// video_player_platform_interface 6.8.0
+/// video_player_platform_interface 6.9.0
 const _video_player_platform_interface = Package(
     name: 'video_player_platform_interface',
     description: 'A common platform interface for the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_platform_interface',
     authors: [],
-    version: '6.8.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
-    devDependencies: [],
+    version: '6.9.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -12029,6 +12085,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface')],
+    devDependencies: [],
   );
 
 /// video_player_web 2.4.0
@@ -12038,11 +12098,6 @@ const _video_player_web = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_web',
     authors: [],
     version: '2.4.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('video_player_platform_interface'), PackageRef('web')],
-    devDependencies: [],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -12068,6 +12123,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('flutter_web_plugins'), PackageRef('video_player_platform_interface'), PackageRef('web')],
+    devDependencies: [],
   );
 
 /// video_player_win 3.2.2
@@ -12078,11 +12137,6 @@ const _video_player_win = Package(
     repository: 'https://github.com/jakky1/video_player_win',
     authors: [],
     version: '3.2.2',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface'), PackageRef('video_player_platform_interface')],
-    devDependencies: [PackageRef('flutter_lints')],
     license: '''BSD 3-Clause License
 
 Copyright 2022, jakky1 (jakky1@gmail.com)
@@ -12111,6 +12165,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('plugin_platform_interface'), PackageRef('video_player_platform_interface')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// vm_service 15.2.0
@@ -12120,11 +12178,6 @@ const _vm_service = Package(
     repository: 'https://github.com/dart-lang/sdk/tree/main/pkg/vm_service',
     authors: [],
     version: '15.2.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('lints'), PackageRef('logging'), PackageRef('markdown'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('stack_trace'), PackageRef('test')],
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -12152,6 +12205,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('async'), PackageRef('collection'), PackageRef('lints'), PackageRef('logging'), PackageRef('path'), PackageRef('pub_semver'), PackageRef('stack_trace'), PackageRef('test')],
   );
 
 /// watcher 1.2.1
@@ -12161,11 +12218,6 @@ const _watcher = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/watcher',
     authors: [],
     version: '1.2.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('path')],
-    devDependencies: [PackageRef('clock'), PackageRef('fake_async'), PackageRef('test')],
     license: '''Copyright 2014, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -12193,6 +12245,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('path')],
+    devDependencies: [PackageRef('clock'), PackageRef('fake_async'), PackageRef('test')],
   );
 
 /// web 1.1.1
@@ -12202,11 +12258,6 @@ const _web = Package(
     repository: 'https://github.com/dart-lang/web',
     authors: [],
     version: '1.1.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [],
-    devDependencies: [PackageRef('path'), PackageRef('test')],
     license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -12233,6 +12284,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [],
+    devDependencies: [PackageRef('path'), PackageRef('test')],
   );
 
 /// web_socket 1.0.1
@@ -12242,11 +12297,6 @@ const _web_socket = Package(
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/web_socket',
     authors: [],
     version: '1.0.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('web')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2024, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -12274,6 +12324,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('web')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// web_socket_channel 3.0.3
@@ -12283,11 +12337,6 @@ const _web_socket_channel = Package(
     repository: 'https://github.com/dart-lang/http/tree/master/pkgs/web_socket_channel',
     authors: [],
     version: '3.0.3',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('async'), PackageRef('crypto'), PackageRef('stream_channel'), PackageRef('web'), PackageRef('web_socket')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2016, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -12315,6 +12364,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('async'), PackageRef('crypto'), PackageRef('stream_channel'), PackageRef('web'), PackageRef('web_socket')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// webkit_inspection_protocol 1.2.1
@@ -12325,11 +12378,6 @@ const _webkit_inspection_protocol = Package(
     repository: 'https://github.com/google/webkit_inspection_protocol.dart',
     authors: [],
     version: '1.2.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('logging')],
-    devDependencies: [PackageRef('args'), PackageRef('lints'), PackageRef('shelf_static'), PackageRef('shelf_web_socket'), PackageRef('shelf'), PackageRef('test'), PackageRef('web_socket_channel')],
     license: '''Copyright 2013, Google Inc.
 All rights reserved.
 
@@ -12358,206 +12406,10 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// webview_flutter 4.14.0
-const _webview_flutter = Package(
-    name: 'webview_flutter',
-    description: 'A Flutter plugin that provides a WebView widget backed by the system webview.',
-    repository: 'https://github.com/flutter/packages/tree/main/packages/webview_flutter/webview_flutter',
-    authors: [],
-    version: '4.14.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('webview_flutter_android'), PackageRef('webview_flutter_platform_interface'), PackageRef('webview_flutter_wkwebview')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('plugin_platform_interface')],
-    license: '''Copyright 2013 The Flutter Authors
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// webview_flutter_android 4.12.0
-const _webview_flutter_android = Package(
-    name: 'webview_flutter_android',
-    description: 'A Flutter plugin that provides a WebView widget on Android.',
-    repository: 'https://github.com/flutter/packages/tree/main/packages/webview_flutter/webview_flutter_android',
-    authors: [],
-    version: '4.12.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('webview_flutter_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
-    license: '''Copyright 2013 The Flutter Authors
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// webview_flutter_platform_interface 2.15.1
-const _webview_flutter_platform_interface = Package(
-    name: 'webview_flutter_platform_interface',
-    description: 'A common platform interface for the webview_flutter plugin.',
-    repository: 'https://github.com/flutter/packages/tree/main/packages/webview_flutter/webview_flutter_platform_interface',
-    authors: [],
-    version: '2.15.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('plugin_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
-    license: '''Copyright 2013 The Flutter Authors
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// webview_flutter_wkwebview 3.25.1
-const _webview_flutter_wkwebview = Package(
-    name: 'webview_flutter_wkwebview',
-    description: "A Flutter plugin that provides a WebView widget based on Apple's WKWebView control.",
-    repository: 'https://github.com/flutter/packages/tree/main/packages/webview_flutter/webview_flutter_wkwebview',
-    authors: [],
-    version: '3.25.1',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('path'), PackageRef('webview_flutter_platform_interface')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
-    license: '''Copyright 2013 The Flutter Authors
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-  );
-
-/// webview_windows 0.4.0
-const _webview_windows = Package(
-    name: 'webview_windows',
-    description: 'A WebView2-powered webview implementation for the Windows platform.',
-    homepage: 'https://jns.io',
-    repository: 'https://github.com/jnschulze/flutter-webview-windows',
-    authors: [],
-    version: '0.4.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter')],
-    devDependencies: [],
-    license: '''BSD 3-Clause License
-
-Copyright (c) 2021 Niklas Schulze
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    dependencies: [PackageRef('logging')],
+    devDependencies: [PackageRef('args'), PackageRef('lints'), PackageRef('shelf_static'), PackageRef('shelf_web_socket'), PackageRef('shelf'), PackageRef('test'), PackageRef('web_socket_channel')],
   );
 
 /// win32 5.15.0
@@ -12569,11 +12421,6 @@ const _win32 = Package(
     repository: 'https://github.com/halildurmus/win32',
     authors: [],
     version: '5.15.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi')],
-    devDependencies: [PackageRef('args'), PackageRef('hooks'), PackageRef('path'), PackageRef('test')],
     license: '''BSD 3-Clause License
 
 Copyright (c) 2024, Halil Durmus
@@ -12602,6 +12449,10 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi')],
+    devDependencies: [PackageRef('args'), PackageRef('hooks'), PackageRef('path'), PackageRef('test')],
   );
 
 /// win32_registry 2.1.0
@@ -12611,11 +12462,6 @@ const _win32_registry = Package(
     repository: 'https://github.com/halildurmus/win32_registry',
     authors: [],
     version: '2.1.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('ffi'), PackageRef('meta'), PackageRef('win32')],
-    devDependencies: [PackageRef('hooks'), PackageRef('lints'), PackageRef('test')],
     license: '''BSD 3-Clause License
 
 Copyright (c) 2023, Halil Durmus
@@ -12644,20 +12490,20 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('ffi'), PackageRef('meta'), PackageRef('win32')],
+    devDependencies: [PackageRef('hooks'), PackageRef('lints'), PackageRef('test')],
   );
 
-/// window_manager 0.4.3
+/// window_manager 0.5.2
 const _window_manager = Package(
     name: 'window_manager',
     description: 'This plugin allows Flutter desktop apps to resizing and repositioning the window.',
-    homepage: 'https://github.com/leanflutter/window_manager',
+    homepage: 'https://leanflutter.dev',
+    repository: 'https://github.com/leanflutter/window_manager',
     authors: [],
-    version: '0.4.3',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('path'), PackageRef('screen_retriever')],
-    devDependencies: [],
+    version: '0.5.2',
     license: '''MIT License
 
 Copyright (c) 2022-present LiJianying <lijy91@foxmail.com>
@@ -12679,6 +12525,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('path'), PackageRef('screen_retriever')],
+    devDependencies: [],
   );
 
 /// xdg_directories 1.1.0
@@ -12688,11 +12538,6 @@ const _xdg_directories = Package(
     repository: 'https://github.com/flutter/packages/tree/main/packages/xdg_directories',
     authors: [],
     version: '1.1.0',
-    spdxIdentifiers: ['BSD-3-Clause'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('meta'), PackageRef('path')],
-    devDependencies: [PackageRef('test')],
     license: '''Copyright 2013 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -12718,6 +12563,10 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
 ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('path')],
+    devDependencies: [PackageRef('test')],
   );
 
 /// xml 6.6.1
@@ -12727,11 +12576,6 @@ const _xml = Package(
     homepage: 'https://github.com/renggli/dart-xml',
     authors: [],
     version: '6.6.1',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('petitparser')],
-    devDependencies: [PackageRef('args'), PackageRef('lints'), PackageRef('test')],
     license: '''The MIT License
 
 Copyright (c) 2006-2025 Lukas Renggli.
@@ -12754,6 +12598,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('petitparser')],
+    devDependencies: [PackageRef('args'), PackageRef('lints'), PackageRef('test')],
   );
 
 /// yaml 3.1.3
@@ -12763,11 +12611,6 @@ const _yaml = Package(
     repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/yaml',
     authors: [],
     version: '3.1.3',
-    spdxIdentifiers: ['MIT'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('source_span'), PackageRef('string_scanner')],
-    devDependencies: [PackageRef('path'), PackageRef('test')],
     license: '''Copyright (c) 2014, the Dart project authors.
 Copyright (c) 2006, Kirill Simonov.
 
@@ -12788,46 +12631,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
-  );
-
-/// yaml_edit 2.2.4
-const _yaml_edit = Package(
-    name: 'yaml_edit',
-    description: 'A library for YAML manipulation with comment and whitespace preservation.',
-    repository: 'https://github.com/dart-lang/tools/tree/main/pkgs/yaml_edit',
-    authors: [],
-    version: '2.2.4',
-    spdxIdentifiers: ['BSD-3-Clause'],
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('collection'), PackageRef('meta'), PackageRef('source_span'), PackageRef('yaml')],
-    devDependencies: [PackageRef('coverage'), PackageRef('path'), PackageRef('test')],
-    license: '''Copyright 2020, the Dart project authors.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
+    dependencies: [PackageRef('collection'), PackageRef('source_span'), PackageRef('string_scanner')],
+    devDependencies: [PackageRef('path'), PackageRef('test')],
   );
 
 /// Nyachi 1.3.4+224
@@ -12836,11 +12643,6 @@ const _Nyachi = Package(
     description: 'A comprehensive, multi-functional social application built with Flutter, connecting Misskey and Flarum, and belonging to CyaniAgent.',
     authors: [],
     version: '1.3.4+224',
-    spdxIdentifiers: ['AGPL-3.0'],
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('flutter_soloud'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('webview_flutter'), PackageRef('webview_windows'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('file_picker'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('sqflite'), PackageRef('sqflite_common_ffi'), PackageRef('path'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago'), PackageRef('mfm'), PackageRef('haptic_feedback'), PackageRef('window_manager'), PackageRef('fl_chart'), PackageRef('highlight'), PackageRef('flutter_highlight'), PackageRef('slider_m3e'), PackageRef('m3e_collection'), PackageRef('m3e_design'), PackageRef('loading_indicator_m3e'), PackageRef('toastification')],
-    devDependencies: [PackageRef('flutter_lints'), PackageRef('riverpod_generator'), PackageRef('build_runner'), PackageRef('custom_lint'), PackageRef('riverpod_lint'), PackageRef('freezed'), PackageRef('json_serializable'), PackageRef('flutter_launcher_icons'), PackageRef('mocktail'), PackageRef('dart_pubspec_licenses')],
     license: '''GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 
@@ -13502,5 +13304,9 @@ specific requirements.
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dynamic_color'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('flutter_soloud'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('file_picker'), PackageRef('flutter_inappwebview'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('sqflite'), PackageRef('sqflite_common_ffi'), PackageRef('path'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago'), PackageRef('mfm'), PackageRef('haptic_feedback'), PackageRef('window_manager'), PackageRef('fl_chart'), PackageRef('highlight'), PackageRef('flutter_highlight'), PackageRef('slider_m3e'), PackageRef('m3e_collection'), PackageRef('m3e_design'), PackageRef('loading_indicator_m3e'), PackageRef('toastification')],
+    devDependencies: [PackageRef('flutter_lints'), PackageRef('riverpod_generator'), PackageRef('build_runner'), PackageRef('freezed'), PackageRef('json_serializable'), PackageRef('flutter_launcher_icons'), PackageRef('mocktail'), PackageRef('dart_pubspec_licenses')],
   );
 

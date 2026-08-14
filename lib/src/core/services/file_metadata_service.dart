@@ -109,7 +109,7 @@ class FileMetadataService {
       }
       
       // HEAD 请求未返回 Content-Length 时，回退到 Range 请求
-      return _fetchFileSizeWithRange(fileUrl);
+      return await _fetchFileSizeWithRange(fileUrl);
     } catch (e) {
       logger.error('FileMetadataService: Error fetching file size from $fileUrl', e);
       return null;
