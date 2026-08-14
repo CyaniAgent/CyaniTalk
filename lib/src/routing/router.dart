@@ -35,35 +35,24 @@ part 'router.g.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final routerRefreshNotifier = ValueNotifier<int>(0);
 
-/// 自定义安全转换页面，防止 Windows AXTree 报错
+/// 安全构建页面。
+///
+/// 使用 [MaterialPage] 平台默认转场（Windows/Linux/Android 为
+/// ZoomPageTransitionsBuilder，macOS/iOS 为 CupertinoPageTransitionsBuilder）。
+///
+/// 注：原实现使用 CustomTransitionPage（fade+slide）并在转场期间包
+/// ExcludeSemantics 屏蔽语义树，防止 Windows AXTree 报错。Flutter 3.44
+/// 平台默认转场已修复大部分 AXTree 问题，故不再保留该防护；若 Windows
+/// 上出现 AXTree 相关崩溃，需重新评估转场期间的语义处理。
 Page<T> _buildSafePage<T>({
   required LocalKey key,
   required Widget child,
   bool fullScreenDialog = false,
 }) {
-  return CustomTransitionPage<T>(
+  return MaterialPage<T>(
     key: key,
-    child: child,
     fullscreenDialog: fullScreenDialog,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(
-        opacity: animation,
-        child: SlideTransition(
-          position: animation.drive(
-            Tween<Offset>(
-              begin: const Offset(0.0, 0.02),
-              end: Offset.zero,
-            ).chain(CurveTween(curve: Curves.easeOutCubic)),
-          ),
-          child: ExcludeSemantics(
-            // 动画进行中完全屏蔽语义，防止 Windows AXTree 报错
-            excluding:
-                !animation.isCompleted || !secondaryAnimation.isDismissed,
-            child: child,
-          ),
-        ),
-      );
-    },
+    child: child,
   );
 }
 
