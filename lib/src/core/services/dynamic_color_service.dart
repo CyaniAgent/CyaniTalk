@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 
-/// Windows 专用动态取色服务
+/// 跨平台动态取色服务
 ///
-/// 通过原生 WM_DWMCOLORIZATIONCOLORCHANGED 消息实时监听系统主题色变化。
-/// Android/macOS/Linux 使用 DynamicColorBuilder（见 app.dart）。
+/// - Windows: 通过原生 WM_DWMCOLORIZATIONCOLORCHANGED 消息实时监听系统主题色变化
+/// - Android 12+: 优先通过 CorePalette 获取系统动态色（还原度最高）
+/// - macOS/Linux/其他: App 回到前台时轮询对比
+/// - 提供 [accentColor] ValueNotifier 供主题系统监听
 class DynamicColorService extends WidgetsBindingObserver {
   DynamicColorService._();
   static final instance = DynamicColorService._();
@@ -71,6 +73,20 @@ class DynamicColorService extends WidgetsBindingObserver {
   Future<void> _fetchAccentColor() async {
     if (!Platform.isWindows) return;
 
+    // Android 12+：优先通过 CorePalette 获取系统动态色（还原度最高）
+    // iOS：该 dynamic_color 版本未实现，返回 null/异常后走桌面通道
+    try {
+      final corePalette = await DynamicColorPlugin.getCorePalette();
+      if (corePalette != null) {
+        // 以系统主色调（tone 40）作为种子色，由 _updateColor 生成 ColorScheme
+        _updateColor(Color(corePalette.primary.get(40)));
+        return;
+      }
+    } catch (e) {
+      // 非 Android 平台 getCorePalette 不受支持，回退到 getAccentColor
+    }
+
+    // macOS / Windows / Linux：获取系统强调色
     try {
       final color = await DynamicColorPlugin.getAccentColor();
       if (color != null) {

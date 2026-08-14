@@ -6,6 +6,7 @@ import 'package:Nyachi/src/core/navigation/navigation.dart';
 import 'package:Nyachi/src/core/navigation/navigation_element.dart';
 import 'package:Nyachi/src/core/navigation/sub_navigation_notifier.dart';
 import 'package:Nyachi/src/shared/widgets/user_navigation_header.dart';
+import 'package:Nyachi/src/features/profile/application/developer_settings_provider.dart';
 
 class RootNavigationDrawer extends ConsumerWidget {
   final int selectedRootIndex;
@@ -20,6 +21,8 @@ class RootNavigationDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navigationSettings = ref.watch(navigationSettingsProvider).value;
+    final developerMode =
+        ref.watch(developerSettingsProvider).asData?.value ?? false;
 
     // We only care about the first 3 roots: Misskey, Drive, Messages
     // 'me' is now handled by the header.
@@ -33,7 +36,12 @@ class RootNavigationDrawer extends ConsumerWidget {
             .cast<NavigationItemElement>()
             .where(
               (itemElement) =>
-                  itemElement.item.isEnabled && itemElement.item.id != 'me',
+                  itemElement.item.isEnabled &&
+                  itemElement.item.id != 'me' &&
+                  NavigationService.isItemVisible(
+                    itemElement.item.id,
+                    developerMode,
+                  ),
             )
             .map((e) => e.item)
             .toList() ??
@@ -55,6 +63,7 @@ class RootNavigationDrawer extends ConsumerWidget {
               NavigationService.mapBranchIndexToDisplayIndex(
                 NavigationService.getBranchIndexForItem('me'),
                 navigationSettings!,
+                developerMode: developerMode,
               ),
             );
           },

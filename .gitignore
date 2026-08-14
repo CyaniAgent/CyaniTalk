@@ -132,7 +132,7 @@ rust/target/
 rust/*.rs.bk
 
 # AI Agent related
-AGENTS.md
+.omo/
 GEMINI.md
 .claude/
 

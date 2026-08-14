@@ -142,10 +142,16 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.of(context).padding;
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final padding = MediaQuery.paddingOf(context);
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(24, 0, 24, 24 + padding.bottom),
+      padding: EdgeInsets.fromLTRB(
+        24,
+        0,
+        24,
+        24 + viewInsets.bottom + padding.bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

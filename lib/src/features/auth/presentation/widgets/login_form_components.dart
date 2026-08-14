@@ -245,6 +245,7 @@ class MisskeyLoginStep extends ConsumerWidget {
               prefixText: 'https://',
             ),
             autofocus: true,
+            scrollPadding: const EdgeInsets.only(bottom: 120),
           ),
           const SizedBox(height: 32),
           FilledButton.icon(
