@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+import 'package:m3e_core/m3e_core.dart';
 
 class CyaniLoadingIndicator extends StatelessWidget {
   final double size;
@@ -15,10 +15,15 @@ class CyaniLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingIndicatorM3E(
-      variant: contained
-          ? LoadingIndicatorM3EVariant.contained
-          : LoadingIndicatorM3EVariant.defaultStyle,
+    if (contained) {
+      return M3EContainedLoadingIndicator(
+        width: size,
+        height: size,
+        padding: EdgeInsets.zero,
+        indicatorColor: color,
+      );
+    }
+    return M3ELoadingIndicator(
       color: color,
       constraints: BoxConstraints.tight(Size(size, size)),
     );

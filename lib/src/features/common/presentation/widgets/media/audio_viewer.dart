@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
-import 'package:slider_m3e/slider_m3e.dart';
+import 'package:m3e_core/m3e_core.dart';
 import '/src/core/utils/logger.dart';
 import '/src/core/utils/cache_manager.dart';
 import '/src/core/utils/performance_monitor.dart';
@@ -179,18 +179,16 @@ class _AudioViewerState extends State<AudioViewer> {
                   const SizedBox(height: 20),
                   Text(
                     '音频加载失败',
-                    style: TextStyle(
+                    style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.error,
-                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _errorMessage!,
-                    style: TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
-                      fontSize: 12,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -236,23 +234,22 @@ class _AudioViewerState extends State<AudioViewer> {
                     ),
                   Opacity(
                     opacity: _isLoading ? 0.5 : 1.0,
-                    child: SliderM3E(
+                    child: M3ESlider(
                       value: _duration.inMilliseconds > 0
                           ? (_position.inMilliseconds /
                                   _duration.inMilliseconds)
                               .clamp(0.0, 1.0)
                           : 0.0,
-                      onChanged: _isLoading || _handle == const SoundHandle(0)
-                          ? null
-                          : (v) {
-                              final seekMs =
-                                  (_duration.inMilliseconds * v).round();
-                              _soloud.seek(
-                                  _handle, Duration(milliseconds: seekMs));
-                              setState(() {
-                                _position = Duration(milliseconds: seekMs);
-                              });
-                            },
+                      enabled: !_isLoading && _handle != const SoundHandle(0),
+                      onChanged: (v) {
+                        final seekMs =
+                            (_duration.inMilliseconds * v).round();
+                        _soloud.seek(
+                            _handle, Duration(milliseconds: seekMs));
+                        setState(() {
+                          _position = Duration(milliseconds: seekMs);
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(height: 8),

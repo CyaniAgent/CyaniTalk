@@ -5,7 +5,7 @@ import '/src/shared/widgets/toast_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '/src/core/theme/design_tokens.dart';
 import '/src/shared/widgets/adaptive_sheet.dart';
-import '/src/shared/widgets/expressive_slider.dart';
+import 'package:m3e_core/m3e_core.dart';
 import '/src/core/utils/download_utils.dart';
 import '/src/features/misskey/application/audio_player_notifier.dart';
 import '/src/features/common/presentation/widgets/media/media_item.dart';
@@ -311,12 +311,12 @@ class _M3ESlider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: isLoading ? 0.5 : 1.0,
-      child: ExpressiveSlider(
+      child: M3ESlider(
         value: value,
         min: 0,
         max: 1,
-        onChanged: isLoading ? null : onChanged,
-        showIndicator: false,
+        enabled: !isLoading,
+        onChanged: onChanged,
       ),
     );
   }
@@ -593,7 +593,9 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               '$error',
-              style: TextStyle(color: colorScheme.error),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.error,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),

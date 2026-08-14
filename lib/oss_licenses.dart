@@ -15,7 +15,6 @@ const allDependencies = <Package>[
   __fe_analyzer_shared,
   _analyzer,
   _analyzer_buffer,
-  _app_bar_m3e,
   _archive,
   _args,
   _async,
@@ -26,8 +25,6 @@ const allDependencies = <Package>[
   _build_runner,
   _built_collection,
   _built_value,
-  _button_group_m3e,
-  _button_m3e,
   _cached_network_image,
   _cached_network_image_platform_interface,
   _cached_network_image_web,
@@ -61,8 +58,6 @@ const allDependencies = <Package>[
   _easy_localization,
   _easy_logger,
   _equatable,
-  _expressive_refresh,
-  _fab_m3e,
   _fake_async,
   _ffi,
   _file,
@@ -120,13 +115,11 @@ const allDependencies = <Package>[
   _http2,
   _http_multi_server,
   _http_parser,
-  _icon_button_m3e,
   _image,
   _intl,
   _io,
   _jni,
   _jni_flutter,
-  _jni_util,
   _json_annotation,
   _json_serializable,
   _leak_tracker,
@@ -134,14 +127,11 @@ const allDependencies = <Package>[
   _leak_tracker_testing,
   _lints,
   _listen,
-  _loading_indicator_m3e,
   _logger,
   _logging,
-  _m3e_collection,
-  _m3e_design,
+  _m3e_core,
   _matcher,
   _material_color_utilities,
-  _material_new_shapes,
   _matrix2d,
   _meta,
   _mfm,
@@ -149,9 +139,8 @@ const allDependencies = <Package>[
   _mime,
   _mockito,
   _mocktail,
+  _motor,
   _native_toolchain_c,
-  _navigation_bar_m3e,
-  _navigation_rail_m3e,
   _node_preamble,
   _objective_c,
   _octo_image,
@@ -159,6 +148,8 @@ const allDependencies = <Package>[
   _package_info_plus,
   _package_info_plus_platform_interface,
   _path,
+  _path_drawing,
+  _path_parsing,
   _path_provider,
   _path_provider_android,
   _path_provider_foundation,
@@ -172,7 +163,6 @@ const allDependencies = <Package>[
   _plugin_platform_interface,
   _pool,
   _posix,
-  _progress_indicator_m3e,
   _pub_semver,
   _pubspec_parse,
   _record_use,
@@ -197,13 +187,11 @@ const allDependencies = <Package>[
   _shelf_packages_handler,
   _shelf_static,
   _shelf_web_socket,
-  _slider_m3e,
   _source_gen,
   _source_helper,
   _source_map_stack_trace,
   _source_maps,
   _source_span,
-  _split_button_m3e,
   _sqflite,
   _sqflite_android,
   _sqflite_common,
@@ -224,7 +212,6 @@ const allDependencies = <Package>[
   _timeago,
   _timezone,
   _toastification,
-  _toolbar_m3e,
   _typed_data,
   _universal_io,
   _url_launcher,
@@ -305,10 +292,7 @@ const dependencies = <Package>[
   _fl_chart,
   _highlight,
   _flutter_highlight,
-  _slider_m3e,
-  _m3e_collection,
-  _m3e_design,
-  _loading_indicator_m3e,
+  _m3e_core,
   _toastification
 ];
 
@@ -484,40 +468,6 @@ SOFTWARE.''',
     isSdk: false,
     dependencies: [PackageRef('analyzer'), PackageRef('collection'), PackageRef('meta'), PackageRef('path'), PackageRef('source_gen')],
     devDependencies: [PackageRef('test')],
-  );
-
-/// app_bar_m3e 0.1.2
-const _app_bar_m3e = Package(
-    name: 'app_bar_m3e',
-    description: 'Expressive App Bar (Material 3 Expressive) with small/medium/large variants and Sliver integration.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/app_bar_m3e',
-    authors: [],
-    version: '0.1.2',
-    license: '''MIT License
-
-Copyright (c) 2025 Emily Moonstone
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
   );
 
 /// archive 4.0.9
@@ -755,13 +705,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('build_runner'), PackageRef('term_glyph'), PackageRef('test')],
   );
 
-/// build_daemon 4.1.5
+/// build_daemon 4.1.1
 const _build_daemon = Package(
     name: 'build_daemon',
     description: 'A daemon for running Dart builds.',
     repository: 'https://github.com/dart-lang/build/tree/master/build_daemon',
     authors: [],
-    version: '4.1.5',
+    version: '4.1.1',
     license: '''Copyright 2019, the Dart project authors. 
 
 Redistribution and use in source and binary forms, with or without
@@ -791,8 +741,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('crypto'), PackageRef('http_multi_server'), PackageRef('logging'), PackageRef('package_config'), PackageRef('path'), PackageRef('pool'), PackageRef('pub_semver'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel'), PackageRef('yaml')],
-    devDependencies: [PackageRef('build_runner'), PackageRef('test')],
+    dependencies: [PackageRef('built_collection'), PackageRef('built_value'), PackageRef('crypto'), PackageRef('http_multi_server'), PackageRef('logging'), PackageRef('path'), PackageRef('pool'), PackageRef('shelf'), PackageRef('shelf_web_socket'), PackageRef('stream_transform'), PackageRef('watcher'), PackageRef('web_socket_channel')],
+    devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
   );
 
 /// build_runner 2.16.0
@@ -877,14 +827,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// built_value 8.12.7
+/// built_value 8.12.6
 const _built_value = Package(
     name: 'built_value',
     description: '''Value types with builders, Dart classes as enums, and serialization. This library is the runtime dependency.
 ''',
     repository: 'https://github.com/google/built_value.dart/tree/master/built_value',
     authors: [],
-    version: '8.12.7',
+    version: '8.12.6',
     license: '''Copyright 2015, Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -917,54 +867,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isSdk: false,
     dependencies: [PackageRef('built_collection'), PackageRef('collection'), PackageRef('fixnum'), PackageRef('meta')],
     devDependencies: [PackageRef('test')],
-  );
-
-/// button_group_m3e 0.3.1
-const _button_group_m3e = Package(
-    name: 'button_group_m3e',
-    description: 'Wrapper-only Button Group for Material 3 Expressive (layout, shape, size propagation).',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/button_group_m3e',
-    authors: [],
-    version: '0.3.1',
-    license: '''MIT License
-
-Copyright (c) 2025 Emily Moonstone
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('button_m3e')],
-    devDependencies: [],
-  );
-
-/// button_m3e 0.1.2
-const _button_m3e = Package(
-    name: 'button_m3e',
-    description: 'Material 3 Expressive Buttons for Flutter with 5 styles, 5 sizes, round/square shapes, and toggle selection.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/button_m3e',
-    authors: [],
-    version: '0.1.2',
-    license: 'MIT License',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
   );
 
 /// cached_network_image 3.4.1
@@ -1710,13 +1612,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('build_runner'), PackageRef('mockito'), PackageRef('test')],
   );
 
-/// cross_file 0.3.5+4
+/// cross_file 0.3.5+2
 const _cross_file = Package(
     name: 'cross_file',
     description: 'An abstraction to allow working with files across multiple platforms.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/cross_file',
     authors: [],
-    version: '0.3.5+4',
+    version: '0.3.5+2',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -2404,7 +2306,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('flutter_lints'), PackageRef('mockito')],
   );
 
-/// dio 5.11.0
+/// dio 5.9.2
 const _dio = Package(
     name: 'dio',
     description: '''A powerful HTTP networking package,
@@ -2415,7 +2317,7 @@ Custom adapters, Transformers, etc.
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/dio',
     authors: [],
-    version: '5.11.0',
+    version: '5.9.2',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -2444,14 +2346,14 @@ SOFTWARE.''',
     devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('build_runner'), PackageRef('coverage'), PackageRef('crypto'), PackageRef('mockito')],
   );
 
-/// dio_cookie_manager 3.5.0
+/// dio_cookie_manager 3.4.0
 const _dio_cookie_manager = Package(
     name: 'dio_cookie_manager',
     description: 'A cookie manager combines cookie_jar and dio, based on the interceptor algorithm.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/cookie_manager',
     authors: [],
-    version: '3.5.0',
+    version: '3.4.0',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -2480,14 +2382,14 @@ SOFTWARE.''',
     devDependencies: [PackageRef('lints'), PackageRef('test')],
   );
 
-/// dio_http2_adapter 2.8.0
+/// dio_http2_adapter 2.7.1
 const _dio_http2_adapter = Package(
     name: 'dio_http2_adapter',
     description: 'An adapter that combines HTTP/2 and dio. Supports reusing connections, header compression, etc.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/http2_adapter',
     authors: [],
-    version: '2.8.0',
+    version: '2.7.1',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -2516,14 +2418,14 @@ SOFTWARE.''',
     devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('crypto'), PackageRef('path')],
   );
 
-/// dio_web_adapter 2.2.1
+/// dio_web_adapter 2.1.2
 const _dio_web_adapter = Package(
     name: 'dio_web_adapter',
     description: 'An adapter that supports Dio on Web.',
     homepage: 'https://github.com/cfug/dio',
     repository: 'https://github.com/cfug/dio/blob/main/plugins/web_adapter',
     authors: [],
-    version: '2.2.1',
+    version: '2.1.2',
     license: '''MIT License
 
 Copyright (c) 2018 Wen Du (wendux)
@@ -2613,13 +2515,13 @@ SOFTWARE.''',
     devDependencies: [],
   );
 
-/// dynamic_color 1.9.0
+/// dynamic_color 1.8.1
 const _dynamic_color = Package(
     name: 'dynamic_color',
     description: "A Flutter package to create Material color schemes based on a platform's implementation of dynamic color.",
     repository: 'https://github.com/material-foundation/flutter-packages/tree/main/packages/dynamic_color',
     authors: [],
-    version: '1.9.0',
+    version: '1.8.1',
     license: '''Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -2894,14 +2796,14 @@ SOFTWARE.''',
     devDependencies: [],
   );
 
-/// equatable 2.1.0
+/// equatable 2.0.8
 const _equatable = Package(
     name: 'equatable',
     description: 'A Dart package that helps to implement value based equality without needing to explicitly override == and hashCode.',
     homepage: 'https://github.com/felangel/equatable',
     repository: 'https://github.com/felangel/equatable',
     authors: [],
-    version: '2.1.0',
+    version: '2.0.8',
     license: '''MIT License
 
 Copyright (c) 2026 Felix Angelov
@@ -2927,74 +2829,6 @@ SOFTWARE.''',
     isSdk: false,
     dependencies: [PackageRef('collection'), PackageRef('meta')],
     devDependencies: [PackageRef('test')],
-  );
-
-/// expressive_refresh 0.1.2
-const _expressive_refresh = Package(
-    name: 'expressive_refresh',
-    description: 'On refresh indicator styled with Material 3 Expressive design system',
-    homepage: 'https://github.com/alvaronp/expressive-refresh',
-    authors: [],
-    version: '0.1.2',
-    license: '''MIT License
-
-Copyright (c) 2025 Álvaro N
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('material_new_shapes')],
-    devDependencies: [PackageRef('flutter_lints')],
-  );
-
-/// fab_m3e 0.1.1
-const _fab_m3e = Package(
-    name: 'fab_m3e',
-    description: 'Material 3 Expressive Floating Action Button (FAB), Extended FAB, and FAB Menu for Flutter using M3E tokens.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/fab_m3e',
-    authors: [],
-    version: '0.1.1',
-    license: '''MIT License
-
-Copyright (c) ...
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
   );
 
 /// fake_async 1.3.3
@@ -3400,13 +3234,13 @@ SOFTWARE.''',
     devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
   );
 
-/// flutter 3.47.0
+/// flutter 3.47.0 • channel stable • https://github.com/flutter/flutter.git
 const _flutter = Package(
     name: 'flutter',
     description: 'A framework for writing Flutter applications',
     homepage: 'https://flutter.dev',
     authors: [],
-    version: '3.47.0',
+    version: '3.47.0 • channel stable • https://github.com/flutter/flutter.git',
     license: '''Copyright 2014 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -3598,13 +3432,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     devDependencies: [PackageRef('flutter_lints')],
   );
 
-/// flutter_cache_manager 3.4.2
+/// flutter_cache_manager 3.4.1
 const _flutter_cache_manager = Package(
     name: 'flutter_cache_manager',
     description: 'Generic cache manager for flutter. Saves web files on the storages of the device and saves the cache info using sqflite.',
     homepage: 'https://github.com/Baseflow/flutter_cache_manager/tree/develop/flutter_cache_manager',
     authors: [],
-    version: '3.4.2',
+    version: '3.4.1',
     license: '''The MIT License (MIT)
 
 Copyright (c) 2017 Rene Floor
@@ -5851,13 +5685,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [],
   );
 
-/// flutter_secure_storage_linux 3.0.2
+/// flutter_secure_storage_linux 3.0.1
 const _flutter_secure_storage_linux = Package(
     name: 'flutter_secure_storage_linux',
     description: 'Linux implementation of flutter_secure_storage',
     repository: 'https://github.com/mogol/flutter_secure_storage',
     authors: [],
-    version: '3.0.2',
+    version: '3.0.1',
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -5893,13 +5727,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [],
   );
 
-/// flutter_secure_storage_platform_interface 2.0.3
+/// flutter_secure_storage_platform_interface 2.0.1
 const _flutter_secure_storage_platform_interface = Package(
     name: 'flutter_secure_storage_platform_interface',
     description: 'A common platform interface for the flutter_secure_storage plugin.',
     homepage: 'https://github.com/mogol/flutter_secure_storage',
     authors: [],
-    version: '2.0.3',
+    version: '2.0.1',
     license: '''BSD 3-Clause License
 
 Copyright 2017 German Saprykin
@@ -6057,13 +5891,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [],
   );
 
-/// flutter_soloud 4.1.7
+/// flutter_soloud 4.0.11
 const _flutter_soloud = Package(
     name: 'flutter_soloud',
     description: 'A low-level audio plugin for Flutter, mainly meant for games and immersive apps. Based on the SoLoud (C++) audio engine.',
     homepage: 'https://github.com/alnitak/flutter_soloud',
     authors: [],
-    version: '4.1.7',
+    version: '4.0.11',
     license: '''Copyright (c) 2024 The flutter_soloud Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -6251,13 +6085,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// go_router 17.5.0
+/// go_router 17.3.0
 const _go_router = Package(
     name: 'go_router',
     description: 'A declarative router for Flutter based on Navigation 2 supporting deep linking, data-driven routes and more',
     repository: 'https://github.com/flutter/packages/tree/main/packages/go_router',
     authors: [],
-    version: '17.5.0',
+    version: '17.3.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -6329,13 +6163,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test'), PackageRef('analyzer'), PackageRef('path'), PackageRef('pool')],
   );
 
-/// haptic_feedback 0.6.5
+/// haptic_feedback 0.6.4+3
 const _haptic_feedback = Package(
     name: 'haptic_feedback',
     description: 'A Flutter plugin for haptic feedback. While it utilizes standard iOS haptics, it aims to emulate these same haptic patterns on Android for a consistent experience across platforms.',
     repository: 'https://github.com/nohli/haptic_feedback',
     authors: [],
-    version: '0.6.5',
+    version: '0.6.4+3',
     license: '''BSD 3-Clause License
 
 Copyright (c) 2023, Joachim Nohl
@@ -6404,13 +6238,13 @@ SOFTWARE.''',
     devDependencies: [PackageRef('test'), PackageRef('path')],
   );
 
-/// hooks 2.1.0
+/// hooks 2.0.2
 const _hooks = Package(
     name: 'hooks',
     description: 'A library that contains a Dart API for the JSON-based protocol for `hook/build.dart` and `hook/link.dart`.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/hooks',
     authors: [],
-    version: '2.1.0',
+    version: '2.0.2',
     license: '''Copyright 2025, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6676,40 +6510,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// icon_button_m3e 0.2.1
-const _icon_button_m3e = Package(
-    name: 'icon_button_m3e',
-    description: 'Material 3 Expressive IconButton with sizes, variants, shapes, toggle, and accessible hit targets.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/icon_button_m3e',
-    authors: [],
-    version: '0.2.1',
-    license: '''MIT License
-
-Copyright (c) 2025 Emily Moonstone
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [PackageRef('flutter_lints')],
-  );
-
 /// image 4.8.0
 const _image = Package(
     name: 'image',
@@ -6825,13 +6625,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// jni 1.0.3
+/// jni 1.0.0
 const _jni = Package(
     name: 'jni',
     description: 'A library to access JNI from Dart and Flutter that acts as a support library for package:jnigen.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/jni',
     authors: [],
-    version: '1.0.3',
+    version: '1.0.0',
     license: '''Copyright 2022, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6861,17 +6661,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('args'), PackageRef('collection'), PackageRef('ffi'), PackageRef('jni_util'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('plugin_platform_interface')],
+    dependencies: [PackageRef('args'), PackageRef('collection'), PackageRef('ffi'), PackageRef('meta'), PackageRef('package_config'), PackageRef('path'), PackageRef('plugin_platform_interface')],
     devDependencies: [PackageRef('dart_style'), PackageRef('logging'), PackageRef('test')],
   );
 
-/// jni_flutter 1.0.2
+/// jni_flutter 1.0.1
 const _jni_flutter = Package(
     name: 'jni_flutter',
     description: 'A library to access Flutter Android specific APIs from Dart.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/jni_flutter',
     authors: [],
-    version: '1.0.2',
+    version: '1.0.1',
     license: '''Copyright 2026, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -6903,46 +6703,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isSdk: false,
     dependencies: [PackageRef('flutter'), PackageRef('jni')],
     devDependencies: [],
-  );
-
-/// jni_util 1.0.0
-const _jni_util = Package(
-    name: 'jni_util',
-    description: 'Shared utility functions for package:jni and package:jnigen.',
-    repository: 'https://github.com/dart-lang/native/tree/main/pkgs/jni_util',
-    authors: [],
-    version: '1.0.0',
-    license: '''Copyright 2026, the Dart project authors.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google LLC nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('path')],
-    devDependencies: [PackageRef('test')],
   );
 
 /// json_annotation 4.12.0
@@ -7222,40 +6982,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// loading_indicator_m3e 0.1.1
-const _loading_indicator_m3e = Package(
-    name: 'loading_indicator_m3e',
-    description: 'Material 3 Expressive Loading Indicator (morphing polygons) for Flutter, with Default and Contained variants.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/loading_indicator_m3e',
-    authors: [],
-    version: '0.1.1',
-    license: '''MIT License
-
-Copyright (c) ...
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('material_new_shapes')],
-    devDependencies: [],
-  );
-
 /// logger 2.7.0
 const _logger = Package(
     name: 'logger',
@@ -7332,16 +7058,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// m3e_collection 0.3.7
-const _m3e_collection = Package(
-    name: 'm3e_collection',
-    description: 'Aggregated exports of all Material 3 Expressive components for Flutter.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/m3e_collection',
+/// m3e_core 0.1.5
+const _m3e_core = Package(
+    name: 'm3e_core',
+    description: 'A single Flutter package providing Material 3 expressive components like material shapes, card list, dismissible cards, expandable cards and dropdown menu.',
+    homepage: 'https://github.com/Mudit200408/m3e_core',
+    repository: 'https://github.com/Mudit200408/m3e_core',
     authors: [],
-    version: '0.3.7',
+    version: '0.1.5',
     license: '''MIT License
 
-Copyright (c) 2025 Emily Moonstone
+Copyright (c) 2026 Mudit Purohit
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -7362,42 +7089,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('app_bar_m3e'), PackageRef('button_group_m3e'), PackageRef('button_m3e'), PackageRef('expressive_refresh'), PackageRef('fab_m3e'), PackageRef('flutter'), PackageRef('icon_button_m3e'), PackageRef('loading_indicator_m3e'), PackageRef('m3e_design'), PackageRef('material_new_shapes'), PackageRef('navigation_bar_m3e'), PackageRef('navigation_rail_m3e'), PackageRef('progress_indicator_m3e'), PackageRef('slider_m3e'), PackageRef('split_button_m3e'), PackageRef('toolbar_m3e')],
-    devDependencies: [],
-  );
-
-/// m3e_design 0.2.1
-const _m3e_design = Package(
-    name: 'm3e_design',
-    description: 'Material 3 Expressive design language for Flutter (tokens, ThemeExtension, motion).',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/m3e_design',
-    authors: [],
-    version: '0.2.1',
-    license: '''MIT License
-
-Copyright (c) 2025 Emily Moonstone
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('dynamic_color'), PackageRef('flutter')],
-    devDependencies: [],
+    dependencies: [PackageRef('flutter'), PackageRef('motor'), PackageRef('path_drawing'), PackageRef('vector_math'), PackageRef('material_color_utilities'), PackageRef('meta')],
+    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// matcher 0.12.20
@@ -7654,41 +7347,6 @@ const _material_color_utilities = Package(
     devDependencies: [PackageRef('matcher'), PackageRef('test')],
   );
 
-/// material_new_shapes 1.0.0
-const _material_new_shapes = Package(
-    name: 'material_new_shapes',
-    description: 'Material Shapes',
-    homepage: 'https://github.com/ulims/material_shapes',
-    repository: 'https://github.com/ulims/material_shapes',
-    authors: [],
-    version: '1.0.0',
-    license: '''MIT License
-
-Copyright (c) 2025 Agbama Gifted
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('vector_math')],
-    devDependencies: [],
-  );
-
 /// matrix2d 1.0.4
 const _matrix2d = Package(
     name: 'matrix2d',
@@ -7761,13 +7419,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('lints')],
   );
 
-/// mfm 1.0.10
+/// mfm 1.0.9
 const _mfm = Package(
     name: 'mfm',
     description: 'A MFM (Misskey Flavored Markup language) Renderer for Flutter.',
     homepage: 'https://github.com/shiosyakeyakini-info/mfm_renderer',
     authors: [],
-    version: '1.0.10',
+    version: '1.0.9',
     license: '''MIT License
 
 Copyright (c) 2023 sorairo
@@ -7795,13 +7453,13 @@ SOFTWARE.''',
     devDependencies: [PackageRef('flutter_lints')],
   );
 
-/// mfm_parser 1.0.7
+/// mfm_parser 1.0.6
 const _mfm_parser = Package(
     name: 'mfm_parser',
     description: 'mfm (Markup Language For Misskey) parser for dart. it provides feature that text convert misskey node and properties.',
     homepage: 'https://github.com/shiosyakeyakini-info/dart_mfm_parser',
     authors: [],
-    version: '1.0.7',
+    version: '1.0.6',
     license: '''MIT License
 
 Copyright (c) 2023 sorairo
@@ -8118,13 +7776,48 @@ USE OR OTHER DEALINGS IN THE SOFTWARE.''',
     devDependencies: [PackageRef('meta'), PackageRef('test')],
   );
 
-/// native_toolchain_c 0.19.3
+/// motor 1.1.0
+const _motor = Package(
+    name: 'motor',
+    description: 'A unified motion system for Flutter - physics-based springs and duration-based curves under one API.',
+    homepage: 'https://whynotmake.it',
+    repository: 'https://github.com/whynotmake-it/rivership/tree/main/packages/motor',
+    authors: [],
+    version: '1.1.0',
+    license: '''MIT License
+
+Copyright (c) 2024 Tim Lehmann for whynotmake.it
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('equatable'), PackageRef('flutter'), PackageRef('meta')],
+    devDependencies: [PackageRef('mocktail')],
+  );
+
+/// native_toolchain_c 0.19.1
 const _native_toolchain_c = Package(
     name: 'native_toolchain_c',
     description: 'A library to invoke the native C compiler installed on the host machine.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/native_toolchain_c',
     authors: [],
-    version: '0.19.3',
+    version: '0.19.1',
     license: '''Copyright 2023, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -8156,75 +7849,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isSdk: false,
     dependencies: [PackageRef('code_assets'), PackageRef('glob'), PackageRef('hooks'), PackageRef('logging'), PackageRef('meta'), PackageRef('pub_semver')],
     devDependencies: [PackageRef('collection'), PackageRef('test')],
-  );
-
-/// navigation_bar_m3e 0.1.1
-const _navigation_bar_m3e = Package(
-    name: 'navigation_bar_m3e',
-    description: 'Material 3 Expressive Navigation Bar for Flutter with token-driven colors, shapes, and badges.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_bar_m3e',
-    authors: [],
-    version: '0.1.1',
-    license: '''MIT License
-
-Copyright (c) ...
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
-  );
-
-/// navigation_rail_m3e 0.3.5
-const _navigation_rail_m3e = Package(
-    name: 'navigation_rail_m3e',
-    description: 'Material 3 Expressive navigation rail (collapsed & expanded) with modal/standard modes, badges, sections, and m3e_design token integration.',
-    homepage: 'https://github.com/EmilyMonestone/material_3_expressive',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/navigation_rail_m3e',
-    authors: [],
-    version: '0.3.5',
-    license: '''MIT License
-
-Copyright (c) 2025
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to do so, subject to the
-following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design'), PackageRef('fab_m3e'), PackageRef('icon_button_m3e'), PackageRef('button_m3e')],
-    devDependencies: [PackageRef('flutter_lints')],
   );
 
 /// node_preamble 2.0.2
@@ -8288,13 +7912,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [],
   );
 
-/// objective_c 9.5.0
+/// objective_c 9.4.1
 const _objective_c = Package(
     name: 'objective_c',
     description: 'A library to access Objective C from Flutter that acts as a support library for package:ffigen.',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/objective_c',
     authors: [],
-    version: '9.5.0',
+    version: '9.4.1',
     license: '''Copyright 2024, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -8522,6 +8146,72 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isSdk: false,
     dependencies: [],
     devDependencies: [PackageRef('test')],
+  );
+
+/// path_drawing 1.0.1
+const _path_drawing = Package(
+    name: 'path_drawing',
+    description: '''A flutter library to help with (Canvas) Path creation and manipulation
+''',
+    homepage: 'https://github.com/dnfield/flutter_path_drawing',
+    authors: [],
+    version: '1.0.1',
+    license: '''Copyright (c) 2018 Dan Field
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('vector_math'), PackageRef('meta'), PackageRef('path_parsing'), PackageRef('flutter')],
+    devDependencies: [PackageRef('path'), PackageRef('test')],
+  );
+
+/// path_parsing 1.1.0
+const _path_parsing = Package(
+    name: 'path_parsing',
+    description: '''A Dart library to help with SVG Path parsing and code generation.  Used by Flutter SVG.
+''',
+    repository: 'https://github.com/flutter/packages/tree/main/third_party/packages/path_parsing',
+    authors: [],
+    version: '1.1.0',
+    license: '''Copyright (c) 2018 Dan Field
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.''',
+    isMarkdown: false,
+    isSdk: false,
+    dependencies: [PackageRef('meta'), PackageRef('vector_math')],
+    devDependencies: [PackageRef('path'), PackageRef('test')],
   );
 
 /// path_provider 2.1.6
@@ -8970,13 +8660,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('fake_async'), PackageRef('test')],
   );
 
-/// posix 6.5.2
+/// posix 6.5.0
 const _posix = Package(
     name: 'posix',
     description: 'Exposes the POSIX api on OSx and Linux',
     homepage: 'https://github.com/onepub-dev/dart_posix',
     authors: [],
-    version: '6.5.2',
+    version: '6.5.0',
     license: '''MIT License
 
 Copyright (c) 2020 Brett Sutton
@@ -9002,40 +8692,6 @@ SOFTWARE.''',
     isSdk: false,
     dependencies: [PackageRef('ffi'), PackageRef('meta'), PackageRef('path')],
     devDependencies: [PackageRef('logger'), PackageRef('logging'), PackageRef('stack_trace'), PackageRef('test'), PackageRef('uuid')],
-  );
-
-/// progress_indicator_m3e 0.1.1
-const _progress_indicator_m3e = Package(
-    name: 'progress_indicator_m3e',
-    description: 'Material 3 Expressive progress indicators.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/progress_indicator_m3e',
-    authors: [],
-    version: '0.1.1',
-    license: '''MIT License
-
-Copyright (c) 2025 Emily Moonstone
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
   );
 
 /// pub_semver 2.2.0
@@ -9118,14 +8774,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('build_runner'), PackageRef('json_serializable'), PackageRef('path'), PackageRef('source_gen'), PackageRef('stack_trace'), PackageRef('test')],
   );
 
-/// record_use 1.1.0
+/// record_use 0.6.0
 const _record_use = Package(
     name: 'record_use',
-    description: '''Dart API to access `@RecordUse()` recorded usages in link hooks.
+    description: '''The serialization logic and API for the usage recording SDK feature.
 ''',
     repository: 'https://github.com/dart-lang/native/tree/main/pkgs/record_use',
     authors: [],
-    version: '1.1.0',
+    version: '0.6.0',
     license: '''Copyright 2024, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -9720,13 +9376,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('path')],
   );
 
-/// shared_preferences_android 2.4.27
+/// shared_preferences_android 2.4.23
 const _shared_preferences_android = Package(
     name: 'shared_preferences_android',
     description: 'Android implementation of the shared_preferences plugin',
     repository: 'https://github.com/flutter/packages/tree/main/packages/shared_preferences/shared_preferences_android',
     authors: [],
-    version: '2.4.27',
+    version: '2.4.23',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -9754,7 +9410,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('shared_preferences_platform_interface')],
+    dependencies: [PackageRef('flutter'), PackageRef('shared_preferences_platform_interface')],
     devDependencies: [],
   );
 
@@ -10109,47 +9765,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('http'), PackageRef('test')],
   );
 
-/// slider_m3e 0.1.1
-const _slider_m3e = Package(
-    name: 'slider_m3e',
-    description: 'Material 3 Expressive Sliders (single & range) for Flutter, powered by M3E tokens.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/slider_m3e',
-    authors: [],
-    version: '0.1.1',
-    license: '''MIT License
-
-Copyright (c) ...
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
-  );
-
-/// source_gen 4.2.4
+/// source_gen 4.2.3
 const _source_gen = Package(
     name: 'source_gen',
     description: 'Source code generation builders and utilities for the Dart build system',
     repository: 'https://github.com/dart-lang/source_gen/tree/master/source_gen',
     authors: [],
-    version: '4.2.4',
+    version: '4.2.3',
     license: '''Copyright 2015, the Dart project authors.
 
 Redistribution and use in source and binary forms, with or without
@@ -10517,47 +10139,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// split_button_m3e 0.2.1
-const _split_button_m3e = Package(
-    name: 'split_button_m3e',
-    description: 'Material 3 Expressive Split Button with sizes, variants, shapes, a11y, and menu.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/split_button_m3e',
-    authors: [],
-    version: '0.2.1',
-    license: '''MIT License
-
-Copyright (c) 2025
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
-  );
-
-/// sqflite 2.4.3
+/// sqflite 2.4.2+1
 const _sqflite = Package(
     name: 'sqflite',
     description: 'Flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite',
     authors: [],
-    version: '2.4.3',
+    version: '2.4.2+1',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10589,13 +10177,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_android 2.4.3
+/// sqflite_android 2.4.2+3
 const _sqflite_android = Package(
     name: 'sqflite_android',
     description: 'Android flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_android',
     authors: [],
-    version: '2.4.3',
+    version: '2.4.2+3',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10627,13 +10215,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_common 2.5.11
+/// sqflite_common 2.5.8
 const _sqflite_common = Package(
     name: 'sqflite_common',
     description: 'Dart wrapper on SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     homepage: 'https://github.com/tekartik/sqflite/tree/master/sqflite_common',
     authors: [],
-    version: '2.5.11',
+    version: '2.5.8',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10665,13 +10253,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('lints'), PackageRef('http'), PackageRef('test'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_common_ffi 2.4.2
+/// sqflite_common_ffi 2.4.0+3
 const _sqflite_common_ffi = Package(
     name: 'sqflite_common_ffi',
     description: 'sqflite ffi based implementation, for desktop and units tests.',
     homepage: 'https://github.com/tekartik/sqflite/tree/master/sqflite_common_ffi',
     authors: [],
-    version: '2.4.2',
+    version: '2.4.0+3',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10703,13 +10291,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('lints'), PackageRef('test'), PackageRef('pub_semver'), PackageRef('archive'), PackageRef('http')],
   );
 
-/// sqflite_darwin 2.4.3+1
+/// sqflite_darwin 2.4.2
 const _sqflite_darwin = Package(
     name: 'sqflite_darwin',
     description: 'iOS/MacOS flutter plugin for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_darwin',
     authors: [],
-    version: '2.4.3+1',
+    version: '2.4.2',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10741,13 +10329,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('flutter_lints'), PackageRef('http'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqflite_platform_interface 2.4.1
+/// sqflite_platform_interface 2.4.0
 const _sqflite_platform_interface = Package(
     name: 'sqflite_platform_interface',
     description: 'Flutter plugin interface for SQLite, a self-contained, high-reliability, embedded, SQL database engine.',
     repository: 'https://github.com/tekartik/sqflite/tree/master/sqflite_platform_interface',
     authors: [],
-    version: '2.4.1',
+    version: '2.4.0',
     license: '''BSD 2-Clause License
 
 Copyright (c) 2019, Alexandre Roux Tekartik
@@ -10779,13 +10367,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('flutter_lints'), PackageRef('test_api'), PackageRef('pub_semver')],
   );
 
-/// sqlite3 3.5.1
+/// sqlite3 3.3.3
 const _sqlite3 = Package(
     name: 'sqlite3',
     description: 'Provides lightweight yet convenient bindings to SQLite by using dart:ffi',
     homepage: 'https://github.com/simolus3/sqlite3.dart/tree/main/sqlite3',
     authors: [],
-    version: '3.5.1',
+    version: '3.3.3',
     license: '''MIT License
 
 Copyright (c) 2020 Simon Binder
@@ -11007,13 +10595,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// synchronized 3.4.1+1
+/// synchronized 3.4.0+1
 const _synchronized = Package(
     name: 'synchronized',
     description: 'Lock mechanism to prevent concurrent access to asynchronous code.',
     homepage: 'https://github.com/tekartik/synchronized.dart/tree/master/synchronized',
     authors: [],
-    version: '3.4.1+1',
+    version: '3.4.0+1',
     license: '''MIT License
 
 Copyright (c) 2016, Alexandre Roux Tekartik.
@@ -11313,40 +10901,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('flutter_lints'), PackageRef('test'), PackageRef('mockito'), PackageRef('build_runner')],
   );
 
-/// toolbar_m3e 0.1.1
-const _toolbar_m3e = Package(
-    name: 'toolbar_m3e',
-    description: 'Material 3 Expressive Toolbars for Flutter with token-driven colors, shapes, density, and overflow handling.',
-    repository: 'https://github.com/EmilyMoonstone/material_3_expressive/tree/main/packages/toolbar_m3e',
-    authors: [],
-    version: '0.1.1',
-    license: '''MIT License
-
-Copyright (c) ...
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.''',
-    isMarkdown: false,
-    isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('m3e_design')],
-    devDependencies: [],
-  );
-
 /// typed_data 1.4.0
 const _typed_data = Package(
     name: 'typed_data',
@@ -11614,13 +11168,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('mockito'), PackageRef('plugin_platform_interface'), PackageRef('test')],
   );
 
-/// url_launcher_android 6.3.32
+/// url_launcher_android 6.3.30
 const _url_launcher_android = Package(
     name: 'url_launcher_android',
     description: 'Android implementation of the url_launcher plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/url_launcher/url_launcher_android',
     authors: [],
-    version: '6.3.32',
+    version: '6.3.30',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11880,14 +11434,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('test')],
   );
 
-/// uuid 4.6.0
+/// uuid 4.5.3
 const _uuid = Package(
     name: 'uuid',
     description: '''RFC4122 (v1, v4, v5, v6, v7, v8) UUID Generator and Parser for Dart
 ''',
     repository: 'https://github.com/Daegalus/dart-uuid',
     authors: [],
-    version: '4.6.0',
+    version: '4.5.3',
     license: '''Copyright (c) 2021 Yulian Kuncheff
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -11939,13 +11493,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('build_runner'), PackageRef('path'), PackageRef('test')],
   );
 
-/// video_player 2.14.0
+/// video_player 2.11.1
 const _video_player = Package(
     name: 'video_player',
     description: 'Flutter plugin for displaying inline video with other Flutter widgets on Android, iOS, macOS and web.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player',
     authors: [],
-    version: '2.14.0',
+    version: '2.11.1',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -11977,13 +11531,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('leak_tracker_flutter_testing')],
   );
 
-/// video_player_android 2.12.0
+/// video_player_android 2.9.5
 const _video_player_android = Package(
     name: 'video_player_android',
     description: 'Android implementation of the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_android',
     authors: [],
-    version: '2.12.0',
+    version: '2.9.5',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -12011,17 +11565,17 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('meta'), PackageRef('video_player_platform_interface')],
+    dependencies: [PackageRef('flutter'), PackageRef('video_player_platform_interface')],
     devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
   );
 
-/// video_player_avfoundation 2.11.0
+/// video_player_avfoundation 2.10.0
 const _video_player_avfoundation = Package(
     name: 'video_player_avfoundation',
     description: 'iOS and macOS implementation of the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_avfoundation',
     authors: [],
-    version: '2.11.0',
+    version: '2.10.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -12053,13 +11607,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''',
     devDependencies: [PackageRef('build_runner'), PackageRef('mockito')],
   );
 
-/// video_player_platform_interface 6.9.0
+/// video_player_platform_interface 6.8.0
 const _video_player_platform_interface = Package(
     name: 'video_player_platform_interface',
     description: 'A common platform interface for the video_player plugin.',
     repository: 'https://github.com/flutter/packages/tree/main/packages/video_player/video_player_platform_interface',
     authors: [],
-    version: '6.9.0',
+    version: '6.8.0',
     license: '''Copyright 2013 The Flutter Authors
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -13306,7 +12860,7 @@ For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.''',
     isMarkdown: false,
     isSdk: false,
-    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dynamic_color'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('flutter_soloud'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('file_picker'), PackageRef('flutter_inappwebview'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('sqflite'), PackageRef('sqflite_common_ffi'), PackageRef('path'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago'), PackageRef('mfm'), PackageRef('haptic_feedback'), PackageRef('window_manager'), PackageRef('fl_chart'), PackageRef('highlight'), PackageRef('flutter_highlight'), PackageRef('slider_m3e'), PackageRef('m3e_collection'), PackageRef('m3e_design'), PackageRef('loading_indicator_m3e'), PackageRef('toastification')],
+    dependencies: [PackageRef('flutter'), PackageRef('cupertino_icons'), PackageRef('intl'), PackageRef('easy_localization'), PackageRef('dynamic_color'), PackageRef('dio'), PackageRef('web_socket_channel'), PackageRef('flutter_riverpod'), PackageRef('go_router'), PackageRef('flutter_adaptive_scaffold'), PackageRef('flutter_hooks'), PackageRef('hooks_riverpod'), PackageRef('riverpod_annotation'), PackageRef('flutter_secure_storage'), PackageRef('uuid'), PackageRef('url_launcher'), PackageRef('freezed_annotation'), PackageRef('json_annotation'), PackageRef('flutter_animate'), PackageRef('package_info_plus'), PackageRef('flutter_soloud'), PackageRef('dio_cookie_manager'), PackageRef('cookie_jar'), PackageRef('dio_http2_adapter'), PackageRef('shared_preferences'), PackageRef('file_picker'), PackageRef('flutter_inappwebview'), PackageRef('logger'), PackageRef('path_provider'), PackageRef('video_player'), PackageRef('video_player_win'), PackageRef('photo_view'), PackageRef('device_info_plus'), PackageRef('cached_network_image'), PackageRef('sqflite'), PackageRef('sqflite_common_ffi'), PackageRef('path'), PackageRef('flutter_background_service'), PackageRef('flutter_local_notifications'), PackageRef('timeago'), PackageRef('mfm'), PackageRef('haptic_feedback'), PackageRef('window_manager'), PackageRef('fl_chart'), PackageRef('highlight'), PackageRef('flutter_highlight'), PackageRef('m3e_core'), PackageRef('toastification')],
     devDependencies: [PackageRef('flutter_lints'), PackageRef('riverpod_generator'), PackageRef('build_runner'), PackageRef('freezed'), PackageRef('json_serializable'), PackageRef('flutter_launcher_icons'), PackageRef('mocktail'), PackageRef('dart_pubspec_licenses')],
   );
 

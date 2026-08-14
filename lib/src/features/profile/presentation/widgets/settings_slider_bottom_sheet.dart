@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:Nyachi/src/shared/widgets/adaptive_sheet.dart';
-import 'package:Nyachi/src/shared/widgets/expressive_slider.dart';
+import 'package:m3e_core/m3e_core.dart';
 
 /// 底部弹窗滑块组件
 class SettingsSliderBottomSheet extends StatefulWidget {
@@ -122,12 +122,11 @@ class _SettingsSliderBottomSheetState extends State<SettingsSliderBottomSheet> {
             const SizedBox(height: 24),
 
             // 滑块
-            ExpressiveSlider(
+            M3ESlider(
               value: _currentValue.toDouble(),
               min: widget.minValue.toDouble(),
               max: widget.maxValue.toDouble(),
               divisions: widget.step != null ? (widget.maxValue - widget.minValue) ~/ widget.step! : null,
-              showIndicator: false,
               onChanged: (value) {
                 setState(() {
                   if (widget.step != null) {
@@ -162,7 +161,10 @@ class _SettingsSliderBottomSheetState extends State<SettingsSliderBottomSheet> {
                   widget.onConfirm(_currentValue);
                   Navigator.pop(context);
                 },
-                child: Text('Confirm'.tr(), style: const TextStyle(fontSize: 16)),
+                child: Text(
+                  'Confirm'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
             ),
           ],

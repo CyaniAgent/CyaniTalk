@@ -119,10 +119,6 @@ dependencies:
   
   # Material 3 Expressive 组件库
   m3e_core: ^0.1.5
-  slider_m3e: ^0.1.1
-  m3e_collection: ^0.3.7
-  m3e_design: ^0.2.1
-  loading_indicator_m3e: ^0.1.1
   toastification: ^3.2.0
 
 dev_dependencies:
