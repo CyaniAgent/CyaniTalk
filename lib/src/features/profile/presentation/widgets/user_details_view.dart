@@ -278,7 +278,9 @@ class UserDetailsView extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 child: SelectableText(
                   const JsonEncoder.withIndent('  ').convert(data),
-                  style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'JetBrainsMono'),
                 ),
               ),
             ),

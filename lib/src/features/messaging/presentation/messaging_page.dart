@@ -32,11 +32,14 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
       appBar: AppBar(
         leading: CircleIconButton(
           icon: Icons.menu,
-          onPressed: () => ref.read(navigationControllerProvider.notifier).openDrawer(),
+          onPressed: () =>
+              ref.read(navigationControllerProvider.notifier).openDrawer(),
         ),
         title: Text(
           'nav_messages'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           CircleIconButton(
@@ -75,7 +78,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
               selectedColor: Theme.of(
                 context,
               ).colorScheme.primary.withAlpha(51), // 0.2 * 255
-              labelStyle: TextStyle(
+              labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : null,
@@ -277,7 +280,9 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
           Expanded(
             child: Text(
               otherUser.name ?? otherUser.username,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -328,7 +333,9 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
           Expanded(
             child: Text(
               room.name ?? 'Group Chat',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -379,7 +386,7 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
       ),
       title: Text(
         'notifications_title'.tr(),
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
         _getNotificationText(latest),
@@ -419,7 +426,9 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
       leading: _buildAvatar(null, Icons.settings),
       title: Text(
         'messaging_system_unknown'.tr(),
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(
         message.text ?? '',
@@ -479,9 +488,8 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
             const SizedBox(height: 8),
             Text(
               'messaging_empty_description'.tr(),
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 14,
               ),
               textAlign: TextAlign.center,
             ),
@@ -541,18 +549,16 @@ class _MessagingPageState extends ConsumerState<MessagingPage> {
             const SizedBox(height: 8),
             Text(
               'messaging_error_description'.tr(),
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 14,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             Text(
               err.toString(),
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.error,
-                fontSize: 12,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,

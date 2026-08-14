@@ -9,7 +9,7 @@ import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/core/utils/logger.dart';
 
 /// 投票卡片组件
-/// 
+///
 /// 用于在笔记中显示投票选项和结果，具有日系次元化动效。
 class PollCard extends ConsumerStatefulWidget {
   final String noteId;
@@ -43,15 +43,16 @@ class _PollCardState extends ConsumerState<PollCard> {
   }
 
   bool get _hasVoted => widget.poll.choices.any((c) => c.isVoted);
-  bool get _isExpired => widget.poll.expiresAt != null && 
-                         widget.poll.expiresAt!.isBefore(DateTime.now());
+  bool get _isExpired =>
+      widget.poll.expiresAt != null &&
+      widget.poll.expiresAt!.isBefore(DateTime.now());
   bool get _showResults => _hasVoted || _isExpired;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final poll = widget.poll;
-    
+
     // Miku Green 及其变体
     final mikuGreen = theme.colorScheme.primary;
     final mikuGreenSoft = mikuGreen.withValues(alpha: 0.2);
@@ -64,7 +65,7 @@ class _PollCardState extends ConsumerState<PollCard> {
           final choice = entry.value;
           final totalVotes = poll.votesCount;
           final percentage = totalVotes > 0 ? (choice.votes / totalVotes) : 0.0;
-          
+
           return _buildChoiceRow(
             index: index,
             choice: choice,
@@ -74,7 +75,7 @@ class _PollCardState extends ConsumerState<PollCard> {
             theme: theme,
           );
         }),
-        
+
         _buildFooter(theme),
       ],
     );
@@ -125,26 +126,30 @@ class _PollCardState extends ConsumerState<PollCard> {
           // 进度条背景 (结果显示模式下)
           if (_showResults)
             Positioned.fill(
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: percentage,
-                child: Container(
-                  color: choice.isVoted ? mikuGreenSoft : theme.colorScheme.surfaceContainerHighest,
-                ).animate().shimmer(
-                  duration: 1500.ms,
-                  color: mikuGreen.withValues(alpha: 0.1),
-                ),
-              ).animate().custom(
-                duration: 800.ms,
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) {
-                  return FractionallySizedBox(
+              child:
+                  FractionallySizedBox(
                     alignment: Alignment.centerLeft,
-                    widthFactor: value * percentage,
-                    child: child,
-                  );
-                },
-              ),
+                    widthFactor: percentage,
+                    child:
+                        Container(
+                          color: choice.isVoted
+                              ? mikuGreenSoft
+                              : theme.colorScheme.surfaceContainerHighest,
+                        ).animate().shimmer(
+                          duration: 1500.ms,
+                          color: mikuGreen.withValues(alpha: 0.1),
+                        ),
+                  ).animate().custom(
+                    duration: 800.ms,
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) {
+                      return FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: value * percentage,
+                        child: child,
+                      );
+                    },
+                  ),
             ),
 
           // 内容层
@@ -162,32 +167,34 @@ class _PollCardState extends ConsumerState<PollCard> {
                       child: widget.poll.multiple
                           ? Checkbox(
                               value: isSelected,
-                              onChanged: _isVoting ? null : (val) {
-                                setState(() {
-                                  if (val == true) {
-                                    _selectedChoices[index] = true;
-                                  } else {
-                                    _selectedChoices.remove(index);
-                                  }
-                                });
-                              },
+                              onChanged: _isVoting
+                                  ? null
+                                  : (val) {
+                                      setState(() {
+                                        if (val == true) {
+                                          _selectedChoices[index] = true;
+                                        } else {
+                                          _selectedChoices.remove(index);
+                                        }
+                                      });
+                                    },
                               activeColor: mikuGreen,
                             )
-                          : Radio<int>(
-                              value: index,
-                              activeColor: mikuGreen,
-                            ),
+                          : Radio<int>(value: index, activeColor: mikuGreen),
                     ),
                   ),
-                
+
                 // 选项文本
                 Expanded(
                   child: Text(
                     choice.text,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: choice.isVoted ? FontWeight.bold : FontWeight.normal,
-                      color: choice.isVoted ? mikuGreen : theme.colorScheme.onSurface,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: choice.isVoted
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: choice.isVoted
+                          ? mikuGreen
+                          : theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -203,7 +210,12 @@ class _PollCardState extends ConsumerState<PollCard> {
     );
   }
 
-  Widget _buildResultInfo(PollChoiceResult choice, double percentage, Color mikuGreen, ThemeData theme) {
+  Widget _buildResultInfo(
+    PollChoiceResult choice,
+    double percentage,
+    Color mikuGreen,
+    ThemeData theme,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -214,10 +226,11 @@ class _PollCardState extends ConsumerState<PollCard> {
           ),
         Text(
           '${(percentage * 100).toStringAsFixed(1)}%',
-          style: TextStyle(
-            fontSize: 12,
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: choice.isVoted ? mikuGreen : theme.colorScheme.onSurfaceVariant,
+            color: choice.isVoted
+                ? mikuGreen
+                : theme.colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(width: 8),
@@ -241,9 +254,13 @@ class _PollCardState extends ConsumerState<PollCard> {
       } else {
         final remaining = poll.expiresAt!.difference(DateTime.now());
         if (remaining.inDays > 0) {
-          expiresText = 'poll_ends_in_days'.tr(args: [remaining.inDays.toString()]);
+          expiresText = 'poll_ends_in_days'.tr(
+            args: [remaining.inDays.toString()],
+          );
         } else if (remaining.inHours > 0) {
-          expiresText = 'poll_ends_in_hours'.tr(args: [remaining.inHours.toString()]);
+          expiresText = 'poll_ends_in_hours'.tr(
+            args: [remaining.inHours.toString()],
+          );
         } else {
           expiresText = 'poll_ends_soon'.tr();
         }
@@ -266,31 +283,40 @@ class _PollCardState extends ConsumerState<PollCard> {
         children: [
           Text(
             'poll_total_votes'.tr(args: [poll.votesCount.toString()]),
-            style: TextStyle(
-              fontSize: 11,
+            style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          
+
           Text(
             expiresText,
-            style: TextStyle(
-              fontSize: 11,
-              color: _isExpired ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: _isExpired
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
 
-          if (!_showResults && widget.poll.multiple && _selectedChoices.isNotEmpty)
+          if (!_showResults &&
+              widget.poll.multiple &&
+              _selectedChoices.isNotEmpty)
             TextButton(
               onPressed: _isVoting ? null : _handleMultipleVote,
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 0,
+                ),
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: _isVoting 
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                : Text('poll_submit'.tr()),
+              child: _isVoting
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('poll_submit'.tr()),
             ),
         ],
       ),
@@ -324,7 +350,7 @@ class _PollCardState extends ConsumerState<PollCard> {
     setState(() => _isVoting = true);
     try {
       final repository = await ref.read(misskeyRepositoryProvider.future);
-      
+
       // Misskey 投票 API 通常一个一个投
       for (final index in indices) {
         await repository.votePoll(widget.noteId, index);
@@ -332,21 +358,29 @@ class _PollCardState extends ConsumerState<PollCard> {
 
       // 刷新笔记以获取最新投票结果
       final updatedNote = await repository.getNote(widget.noteId);
-      
+
       // 触发 UI 更新
       if (widget.timelineType != null) {
-        ref.read(misskeyTimelineProvider(widget.timelineType!).notifier).updateNote(updatedNote);
+        ref
+            .read(misskeyTimelineProvider(widget.timelineType!).notifier)
+            .updateNote(updatedNote);
       } else {
         MisskeyTimelineNotifier.cacheManager.putNote(updatedNote);
       }
-      
+
       if (mounted) {
-        showToast(title: 'poll_voted_successfully'.tr(), type: ToastificationType.success);
+        showToast(
+          title: 'poll_voted_successfully'.tr(),
+          type: ToastificationType.success,
+        );
       }
     } catch (e) {
       logger.error('Error voting: $e');
       if (mounted) {
-        showToast(title: 'poll_vote_failed'.tr(namedArgs: {'error': e.toString()}), type: ToastificationType.error);
+        showToast(
+          title: 'poll_vote_failed'.tr(namedArgs: {'error': e.toString()}),
+          type: ToastificationType.error,
+        );
       }
     } finally {
       if (mounted) setState(() => _isVoting = false);

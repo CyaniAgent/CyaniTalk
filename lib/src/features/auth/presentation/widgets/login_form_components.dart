@@ -6,26 +6,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'login_form_components.g.dart';
 
 /// 登录表单步骤枚举
-enum LoginStep {
-  select,
-  misskeyLogin,
-  misskeyCheckAuth,
-}
+enum LoginStep { select, misskeyLogin, misskeyCheckAuth }
 
 /// 登录表单数据模型
 class LoginFormData {
   final String? misskeyHost;
   final String? misskeySession;
 
-  const LoginFormData({
-    this.misskeyHost,
-    this.misskeySession,
-  });
+  const LoginFormData({this.misskeyHost, this.misskeySession});
 
-  LoginFormData copyWith({
-    String? misskeyHost,
-    String? misskeySession,
-  }) {
+  LoginFormData copyWith({String? misskeyHost, String? misskeySession}) {
     return LoginFormData(
       misskeyHost: misskeyHost ?? this.misskeyHost,
       misskeySession: misskeySession ?? this.misskeySession,
@@ -123,16 +113,17 @@ class PlatformSelectionCard extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           Text(
                             subtitle,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
                           ),
                         ],
                       ),
@@ -153,10 +144,7 @@ class PlatformSelectionCard extends StatelessWidget {
 class PlatformSelectionStep extends StatelessWidget {
   final VoidCallback onMisskeySelected;
 
-  const PlatformSelectionStep({
-    super.key,
-    required this.onMisskeySelected,
-  });
+  const PlatformSelectionStep({super.key, required this.onMisskeySelected});
 
   @override
   Widget build(BuildContext context) {
@@ -179,8 +167,7 @@ class PlatformSelectionStep extends StatelessWidget {
               ).createShader(bounds),
               child: Text(
                 'auth_choose_platform'.tr(),
-                style: TextStyle(
-                  fontSize: 24,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.surface,
                 ),
@@ -345,11 +332,7 @@ class LoginFormHeader extends StatelessWidget {
   final LoginStep currentStep;
   final VoidCallback? onBack;
 
-  const LoginFormHeader({
-    super.key,
-    required this.currentStep,
-    this.onBack,
-  });
+  const LoginFormHeader({super.key, required this.currentStep, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -368,10 +351,7 @@ class LoginFormHeader extends StatelessWidget {
     return Row(
       children: [
         if (currentStep != LoginStep.select)
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: onBack,
-          ),
+          IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack),
         Expanded(
           child: Text(
             title,

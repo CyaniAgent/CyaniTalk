@@ -45,12 +45,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 48),
 
                   Text(
-                    'auth_welcome'.tr(),
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  )
+                        'auth_welcome'.tr(),
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
                       .animate()
                       .fadeIn(delay: 200.ms, duration: 600.ms)
                       .slideY(begin: -0.05, end: 0, duration: 600.ms),
@@ -58,12 +58,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 8),
 
                   Text(
-                    'auth_welcome_subtitle'.tr(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  )
+                        'auth_welcome_subtitle'.tr(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
                       .animate()
                       .fadeIn(delay: 300.ms, duration: 600.ms)
                       .slideY(begin: -0.05, end: 0, duration: 600.ms),
@@ -71,30 +71,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 32),
 
                   Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      side: BorderSide(
-                        color: colorScheme.outline.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(24),
-                      child: LoginForm(
-                        showPlatformSelection: true,
-                        isBottomSheet: false,
-                      ),
-                    ),
-                  )
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: BorderSide(
+                            color: colorScheme.outline.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: LoginForm(
+                            showPlatformSelection: true,
+                            isBottomSheet: false,
+                          ),
+                        ),
+                      )
                       .animate()
                       .fadeIn(delay: 400.ms, duration: 600.ms)
                       .slideY(begin: 0.05, end: 0, duration: 600.ms),
 
                   const SizedBox(height: 24),
 
-                  _buildFooter(theme, colorScheme)
-                      .animate()
-                      .fadeIn(delay: 500.ms, duration: 600.ms),
+                  _buildFooter(
+                    theme,
+                    colorScheme,
+                  ).animate().fadeIn(delay: 500.ms, duration: 600.ms),
                 ],
               ),
             ),
@@ -124,7 +125,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
             Text(
               ' · ',
-              style: TextStyle(color: colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             TextButton(
               onPressed: () {},

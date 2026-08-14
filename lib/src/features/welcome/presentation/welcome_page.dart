@@ -96,14 +96,22 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     }
 
     switch (step) {
-      case 0: return _buildStep0(theme);
-      case 1: return _buildStep1(theme);
-      case 2: return _buildStep2(theme);
-      case 3: return _buildStep3(theme);
-      case 4: return _buildStep4(theme);
-      case 5: return _buildStep5(theme);
-      case 6: return _buildStep6(theme);
-      default: return const SizedBox.shrink();
+      case 0:
+        return _buildStep0(theme);
+      case 1:
+        return _buildStep1(theme);
+      case 2:
+        return _buildStep2(theme);
+      case 3:
+        return _buildStep3(theme);
+      case 4:
+        return _buildStep4(theme);
+      case 5:
+        return _buildStep5(theme);
+      case 6:
+        return _buildStep6(theme);
+      default:
+        return const SizedBox.shrink();
     }
   }
 
@@ -243,7 +251,11 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
           ],
         ),
       ),
@@ -251,7 +263,11 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   }
 
   Widget _buildStep2(ThemeData theme) {
-    final displayMode = ref.watch(appearanceSettingsProvider).asData?.value.displayMode;
+    final displayMode = ref
+        .watch(appearanceSettingsProvider)
+        .asData
+        ?.value
+        .displayMode;
 
     return Column(
       key: const ValueKey(2),
@@ -359,7 +375,11 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
           ],
         ),
       ),
@@ -367,11 +387,13 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   }
 
   Widget _buildFontOption(ThemeData theme, String fontId) {
-    final currentFont = ref.watch(fontSettingsProvider).asData?.value.selectedFontId;
+    final currentFont = ref
+        .watch(fontSettingsProvider)
+        .asData
+        ?.value
+        .selectedFontId;
     final isSelected = currentFont == fontId;
-    final label = fontId == 'MiSans'
-        ? 'MiSans'
-        : 'appearance_system_font'.tr();
+    final label = fontId == 'MiSans' ? 'MiSans' : 'appearance_system_font'.tr();
 
     return InkWell(
       onTap: () => _selectFont(fontId),
@@ -396,13 +418,16 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontFamily: fontId == 'MiSans' ? 'MiSans' : null,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 20),
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
           ],
         ),
       ),
@@ -410,7 +435,9 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   }
 
   Future<void> _selectFont(String fontId) async {
-    final fontFamily = await ref.read(fontSettingsProvider.notifier).selectFont(fontId);
+    final fontFamily = await ref
+        .read(fontSettingsProvider.notifier)
+        .selectFont(fontId);
     if (fontFamily != null && mounted) {
       await ref
           .read(appearanceSettingsProvider.notifier)
@@ -476,7 +503,9 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             onPressed: () => ref.read(welcomeStepProvider.notifier).next(),
             child: Text(
               'welcome_step3_skip'.tr(),
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
@@ -504,7 +533,9 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             onPressed: () => ref.read(welcomeStepProvider.notifier).next(),
             child: Text(
               'welcome_step3_skip'.tr(),
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -516,16 +547,12 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     final displayName = (account.name != null && account.name!.isNotEmpty)
         ? account.name!
         : (account.username ?? 'Unknown');
-    final subtitle = account.username != null
-        ? '@${account.username}'
-        : '';
+    final subtitle = account.username != null ? '@${account.username}' : '';
 
     return Card(
       elevation: 0,
       color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () async {
@@ -617,8 +644,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                 theme: theme,
                 icon: Icons.notifications_active,
                 title: 'welcome_step4_notification_title'.tr(),
-                description:
-                    'welcome_step4_notification_description'.tr(),
+                description: 'welcome_step4_notification_description'.tr(),
                 buttonLabel: 'welcome_step4_notification_button'.tr(),
                 onPressed: _requestNotificationPermission,
               ),
@@ -627,8 +653,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                 theme: theme,
                 icon: Icons.battery_charging_full,
                 title: 'welcome_step4_background_title'.tr(),
-                description:
-                    'welcome_step4_background_description'.tr(),
+                description: 'welcome_step4_background_description'.tr(),
                 isInfoOnly: true,
               ),
             ],
@@ -703,13 +728,17 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
   Future<void> _requestNotificationPermission() async {
     if (Platform.isAndroid) {
       final plugin = FlutterLocalNotificationsPlugin();
-      final androidImpl = plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final androidImpl = plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       await androidImpl?.requestNotificationsPermission();
     } else if (Platform.isIOS) {
       final plugin = FlutterLocalNotificationsPlugin();
-      final iosImpl = plugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
+      final iosImpl = plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >();
       await iosImpl?.requestPermissions(alert: true, badge: true, sound: true);
     }
   }
@@ -724,10 +753,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Spacer(),
-        CyaniLoadingIndicator(
-          color: theme.colorScheme.primary,
-          size: 48,
-        ),
+        CyaniLoadingIndicator(color: theme.colorScheme.primary, size: 48),
         const SizedBox(height: 24),
         Text(
           'welcome_step5_title'.tr(),
@@ -775,8 +801,11 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.warning_amber_rounded,
-                    size: 20, color: Colors.amber[700]),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20,
+                  color: Colors.amber[700],
+                ),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
@@ -973,17 +1002,15 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
     return SizedBox(
       width: double.infinity,
       child: filled
-          ? FilledButton(
-              style: style,
-              onPressed: onPressed,
-              child: Text(label),
-            )
+          ? FilledButton(style: style, onPressed: onPressed, child: Text(label))
           : OutlinedButton(
               style: style,
               onPressed: onPressed,
               child: Text(
                 label,
-                style: TextStyle(color: primaryColor),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(color: primaryColor),
               ),
             ),
     );

@@ -295,7 +295,9 @@ class _EmojiPickerState extends ConsumerState<EmojiPicker>
           borderRadius: BorderRadius.circular(8),
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
-        child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24))),
+        child: Center(
+          child: Text(emoji, style: Theme.of(context).textTheme.headlineSmall),
+        ),
       ),
     );
   }

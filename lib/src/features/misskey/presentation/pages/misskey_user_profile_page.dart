@@ -30,8 +30,7 @@ class MisskeyUserProfilePage extends ConsumerStatefulWidget {
       _MisskeyUserProfilePageState();
 }
 
-class _MisskeyUserProfilePageState
-    extends ConsumerState<MisskeyUserProfilePage>
+class _MisskeyUserProfilePageState extends ConsumerState<MisskeyUserProfilePage>
     with SingleTickerProviderStateMixin {
   static int _heroCounter = 0;
   late final String _heroSuffix;
@@ -73,7 +72,9 @@ class _MisskeyUserProfilePageState
       final repository = await ref.read(misskeyRepositoryProvider.future);
       final relation = await repository.getFollowRelation(widget.userId);
       final isFollowing = relation['isFollowing'] ?? false;
-      logger.info('Follow relation for ${widget.userId}: isFollowing=$isFollowing');
+      logger.info(
+        'Follow relation for ${widget.userId}: isFollowing=$isFollowing',
+      );
 
       // Check if the target user follows the current user
       // by fetching a page of our followers and checking membership
@@ -83,14 +84,11 @@ class _MisskeyUserProfilePageState
         if (account != null) {
           // Account.id format is "userId@host", extract userId
           final myUserId = account.id.split('@').first;
-          final followers = await repository.getFollowers(
-            myUserId,
-            limit: 100,
+          final followers = await repository.getFollowers(myUserId, limit: 100);
+          isFollowedByTarget = followers.any((f) => f['id'] == widget.userId);
+          logger.info(
+            'Target user ${widget.userId} follows me: $isFollowedByTarget',
           );
-          isFollowedByTarget = followers.any(
-            (f) => f['id'] == widget.userId,
-          );
-          logger.info('Target user ${widget.userId} follows me: $isFollowedByTarget');
         }
       } catch (e) {
         logger.error('Error checking if target follows current user: $e');
@@ -127,11 +125,7 @@ class _MisskeyUserProfilePageState
       logger.error('Error toggling follow: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _isFollowing ? '取消关注失败' : '关注失败',
-            ),
-          ),
+          SnackBar(content: Text(_isFollowing ? '取消关注失败' : '关注失败')),
         );
       }
     }
@@ -181,8 +175,11 @@ class _MisskeyUserProfilePageState
     );
   }
 
-  Widget _buildProfile(BuildContext context, MisskeyUser user,
-      {bool isLoading = false}) {
+  Widget _buildProfile(
+    BuildContext context,
+    MisskeyUser user, {
+    bool isLoading = false,
+  }) {
     if (user.id != _loadedEmojiUserId &&
         user.emojis != null &&
         user.emojis!.isNotEmpty) {
@@ -246,9 +243,7 @@ class _MisskeyUserProfilePageState
                 ),
               ),
               // Tab content
-              Expanded(
-                child: _buildTabContent(user),
-              ),
+              Expanded(child: _buildTabContent(user)),
             ],
           ),
         ),
@@ -303,203 +298,206 @@ class _MisskeyUserProfilePageState
     );
   }
 
-  Widget _buildLeftPanel(BuildContext context, MisskeyUser user, double bannerHeight) {
+  Widget _buildLeftPanel(
+    BuildContext context,
+    MisskeyUser user,
+    double bannerHeight,
+  ) {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        // Banner
-        Hero(
-          tag: 'profile_banner_${user.id}$_heroSuffix',
-          child: Container(
-            height: bannerHeight,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              image: user.bannerUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(user.bannerUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-              gradient: user.bannerUrl == null
-                  ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        theme.colorScheme.primaryContainer,
-                        theme.colorScheme.primary,
-                      ],
-                    )
-                  : null,
-            ),
+          // Banner
+          Hero(
+            tag: 'profile_banner_${user.id}$_heroSuffix',
             child: Container(
+              height: bannerHeight,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    theme.colorScheme.surface.withAlpha(100),
-                  ],
-                  stops: const [0.6, 1.0],
-                ),
+                color: theme.colorScheme.primary,
+                image: user.bannerUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(user.bannerUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+                gradient: user.bannerUrl == null
+                    ? LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          theme.colorScheme.primaryContainer,
+                          theme.colorScheme.primary,
+                        ],
+                      )
+                    : null,
               ),
-            ),
-          ),
-        ),
-
-        // Avatar + Name section
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar
-              Transform.translate(
-                offset: const Offset(0, -45),
-                child: Hero(
-                  tag: 'profile_avatar_${user.id}',
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.colorScheme.surface,
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.colorScheme.shadow.withAlpha(50),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: CircleAvatar(
-                      radius: 45,
-                      backgroundColor: theme.colorScheme.surface,
-                      backgroundImage: user.avatarUrl != null
-                          ? NetworkImage(user.avatarUrl!)
-                          : null,
-                      child: user.avatarUrl == null
-                          ? Icon(
-                              Icons.person,
-                              size: 50,
-                              color: theme.colorScheme.primary,
-                            )
-                          : null,
-                    ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      theme.colorScheme.surface.withAlpha(100),
+                    ],
+                    stops: const [0.6, 1.0],
                   ),
                 ),
               ),
+            ),
+          ),
 
-              // Name + Username
-              Transform.translate(
-                offset: const Offset(0, -20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name + Badge roles
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      children: [
-                        Text(
-                          user.name ?? user.username,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+          // Avatar + Name section
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Avatar
+                Transform.translate(
+                  offset: const Offset(0, -45),
+                  child: Hero(
+                    tag: 'profile_avatar_${user.id}',
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: theme.colorScheme.surface,
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.shadow.withAlpha(50),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: 45,
+                        backgroundColor: theme.colorScheme.surface,
+                        backgroundImage: user.avatarUrl != null
+                            ? NetworkImage(user.avatarUrl!)
+                            : null,
+                        child: user.avatarUrl == null
+                            ? Icon(
+                                Icons.person,
+                                size: 50,
+                                color: theme.colorScheme.primary,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Name + Username
+                Transform.translate(
+                  offset: const Offset(0, -20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name + Badge roles
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        children: [
+                          Text(
+                            user.name ?? user.username,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          if (user.badgeRoles.isNotEmpty)
+                            ...user.badgeRoles.map((role) {
+                              final name = role['name'] as String?;
+                              if (name == null) return const SizedBox.shrink();
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                                child: Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: theme.colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            }),
+                        ],
+                      ),
+
+                      // Username
+                      Text(
+                        '@${user.username}${user.host != null ? "@${user.host}" : ""}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Follow button
+                      _buildFollowButton(user),
+
+                      const SizedBox(height: 16),
+
+                      // Description (MFM)
+                      if (user.description != null &&
+                          user.description!.isNotEmpty) ...[
+                        _mfmRenderer.processTextToRichText(
+                          user.description!,
+                          context,
+                          textStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface,
                           ),
+                          onEmojiLoaded: () {
+                            if (mounted) setState(() {});
+                          },
                         ),
-                        if (user.badgeRoles.isNotEmpty)
-                          ...user.badgeRoles.map((role) {
-                            final name = role['name'] as String?;
-                            if (name == null) return const SizedBox.shrink();
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                              child: Text(
-                                name,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: theme.colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            );
-                          }),
+                        const SizedBox(height: 16),
                       ],
-                    ),
 
-                    // Username
-                    Text(
-                      '@${user.username}${user.host != null ? "@${user.host}" : ""}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Follow button
-                    _buildFollowButton(user),
-
-                    const SizedBox(height: 16),
-
-                    // Description (MFM)
-                    if (user.description != null &&
-                        user.description!.isNotEmpty) ...[
-                      _mfmRenderer.processTextToRichText(
-                        user.description!,
-                        context,
-                        textStyle: TextStyle(
-                          fontSize: 14,
-                          color: theme.colorScheme.onSurface,
+                      // Registration time
+                      if (user.createdAt != null) ...[
+                        _buildInfoRow(
+                          Icons.calendar_today,
+                          '注册时间',
+                          DateFormat(
+                            'yyyy/MM/dd HH:mm:ss',
+                          ).format(user.createdAt!),
                         ),
-                        onEmojiLoaded: () {
-                          if (mounted) setState(() {});
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 4),
+                        _buildInfoRow(
+                          Icons.access_time,
+                          '',
+                          _formatTimeAgo(user.createdAt!),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
 
-                    // Registration time
-                    if (user.createdAt != null) ...[
-                      _buildInfoRow(
-                        Icons.calendar_today,
-                        '注册时间',
-                        DateFormat('yyyy/MM/dd HH:mm:ss').format(user.createdAt!),
-                      ),
-                      const SizedBox(height: 4),
-                      _buildInfoRow(
-                        Icons.access_time,
-                        '',
-                        _formatTimeAgo(user.createdAt!),
-                      ),
-                      const SizedBox(height: 16),
+                      // Stats
+                      _buildStatsRow(user),
                     ],
-
-                    // Stats
-                    _buildStatsRow(user),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -526,7 +524,9 @@ class _MisskeyUserProfilePageState
                 ? Theme.of(context).colorScheme.onSurfaceVariant
                 : null,
           ),
-          child: Text(_isFollowing ? 'user_following'.tr() : 'user_follow'.tr()),
+          child: Text(
+            _isFollowing ? 'user_following'.tr() : 'user_follow'.tr(),
+          ),
         ),
         if (_isFollowedByTarget) ...[
           const SizedBox(width: 8),
@@ -538,8 +538,7 @@ class _MisskeyUserProfilePageState
             ),
             child: Text(
               'user_following_you'.tr(),
-              style: TextStyle(
-                fontSize: 12,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
@@ -567,10 +566,7 @@ class _MisskeyUserProfilePageState
         Expanded(
           child: Text(
             value,
-            style: TextStyle(
-              fontSize: 13,
-              color: theme.colorScheme.onSurface,
-            ),
+            style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurface),
           ),
         ),
       ],
@@ -602,8 +598,7 @@ class _MisskeyUserProfilePageState
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
+          style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -645,8 +640,7 @@ class _MisskeyUserProfilePageState
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -657,12 +651,14 @@ class _MisskeyUserProfilePageState
           ),
         ),
       );
-      sections.add(Divider(
-        height: 1,
-        indent: 20,
-        endIndent: 20,
-        color: theme.colorScheme.outlineVariant,
-      ));
+      sections.add(
+        Divider(
+          height: 1,
+          indent: 20,
+          endIndent: 20,
+          color: theme.colorScheme.outlineVariant,
+        ),
+      );
     }
 
     if (user.followedMessage != null && user.followedMessage!.isNotEmpty) {
@@ -671,8 +667,7 @@ class _MisskeyUserProfilePageState
         _mfmRenderer.processTextToRichText(
           user.followedMessage!,
           context,
-          textStyle: TextStyle(
-            fontSize: 14,
+          textStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface,
           ),
           onEmojiLoaded: () {
@@ -688,8 +683,7 @@ class _MisskeyUserProfilePageState
         _mfmRenderer.processTextToRichText(
           user.description!,
           context,
-          textStyle: TextStyle(
-            fontSize: 14,
+          textStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface,
           ),
           onEmojiLoaded: () {
@@ -704,13 +698,15 @@ class _MisskeyUserProfilePageState
         '位置',
         Row(
           children: [
-            Icon(Icons.location_on_outlined,
-                size: 16, color: theme.colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.location_on_outlined,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 6),
             Text(
               user.location!,
-              style: TextStyle(
-                fontSize: 14,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
             ),
@@ -724,13 +720,15 @@ class _MisskeyUserProfilePageState
         '生日',
         Row(
           children: [
-            Icon(Icons.cake_outlined,
-                size: 16, color: theme.colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.cake_outlined,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 6),
             Text(
               user.birthday!,
-              style: TextStyle(
-                fontSize: 14,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
             ),
@@ -744,13 +742,15 @@ class _MisskeyUserProfilePageState
         '语言',
         Row(
           children: [
-            Icon(Icons.language,
-                size: 16, color: theme.colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.language,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 6),
             Text(
               user.lang!,
-              style: TextStyle(
-                fontSize: 14,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurface,
               ),
             ),
@@ -767,14 +767,14 @@ class _MisskeyUserProfilePageState
       return Center(
         child: Text(
           '暂无信息',
-          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
 
-    return ListView(
-      children: sections,
-    );
+    return ListView(children: sections);
   }
 
   // ===== Tab: Notes =====
@@ -809,8 +809,7 @@ class _MisskeyUserProfilePageState
           ),
           child: SelectableText(
             prettyJson,
-            style: TextStyle(
-              fontSize: 12,
+            style: theme.textTheme.bodySmall?.copyWith(
               fontFamily: 'JetBrainsMono',
               color: theme.colorScheme.onSurface,
               height: 1.5,
@@ -836,7 +835,7 @@ class _MisskeyUserProfilePageState
           const SizedBox(height: 16),
           Text(
             '$tabName 功能即将推出…',
-            style: TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
@@ -859,8 +858,7 @@ class _MisskeyUserProfilePageState
             children: [
               Text(
                 name,
-                style: TextStyle(
-                  fontSize: 11,
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -869,8 +867,7 @@ class _MisskeyUserProfilePageState
               _mfmRenderer.processTextToRichText(
                 value,
                 context,
-                textStyle: TextStyle(
-                  fontSize: 14,
+                textStyle: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
                 onEmojiLoaded: () {
@@ -1004,7 +1001,7 @@ class _UserNotesTabState extends ConsumerState<_UserNotesTab>
       return Center(
         child: Text(
           '暂无帖子',
-          style: TextStyle(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -1024,9 +1021,7 @@ class _UserNotesTabState extends ConsumerState<_UserNotesTab>
               child: Center(child: CyaniLoadingIndicator()),
             );
           }
-          return ModernNoteCard(
-            note: _notes[index],
-          );
+          return ModernNoteCard(note: _notes[index]);
         },
       ),
     );
@@ -1126,7 +1121,7 @@ class _UserFilesTabState extends ConsumerState<_UserFilesTab>
       return Center(
         child: Text(
           '暂无文件',
-          style: TextStyle(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -1308,7 +1303,7 @@ class _UserGalleryTabState extends ConsumerState<_UserGalleryTab>
       return Center(
         child: Text(
           '暂无图集',
-          style: TextStyle(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -1364,14 +1359,13 @@ class _GalleryGridItem extends StatelessWidget {
                 ? Image.network(
                     thumbnailUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Center(
-                          child: Icon(
-                            Icons.image,
-                            size: 32,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Icon(
+                        Icons.image,
+                        size: 32,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   )
                 : Center(
                     child: Icon(
@@ -1386,8 +1380,7 @@ class _GalleryGridItem extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 12,
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
                 maxLines: 1,
@@ -1413,7 +1406,10 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: tabBar,

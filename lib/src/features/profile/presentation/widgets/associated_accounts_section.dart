@@ -15,10 +15,7 @@ import 'user_details_view.dart';
 class AssociatedAccountsSection extends ConsumerStatefulWidget {
   final bool showRemoveButton;
 
-  const AssociatedAccountsSection({
-    super.key,
-    this.showRemoveButton = true,
-  });
+  const AssociatedAccountsSection({super.key, this.showRemoveButton = true});
 
   @override
   ConsumerState<AssociatedAccountsSection> createState() =>
@@ -211,8 +208,9 @@ class _AssociatedAccountsSectionState
     final primaryName = (account.name != null && account.name!.isNotEmpty)
         ? account.name!
         : (account.username ?? 'Unknown');
-    final secondaryName =
-        account.username != null ? '@${account.username}' : '';
+    final secondaryName = account.username != null
+        ? '@${account.username}'
+        : '';
 
     return Row(
       children: [
@@ -269,7 +267,11 @@ class _AssociatedAccountsSectionState
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
-      leading: Icon(Icons.code, size: 20, color: Theme.of(context).colorScheme.primary),
+      leading: Icon(
+        Icons.code,
+        size: 20,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       children: [
         detailsAsync.when(
           data: (data) => Padding(
@@ -278,27 +280,31 @@ class _AssociatedAccountsSectionState
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: SelectableText(
                   const JsonEncoder.withIndent('  ').convert(data),
-                  style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontFamily: 'JetBrainsMono'),
                 ),
               ),
             ),
           ),
           loading: () => const Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Center(child: SizedBox(
-              width: 24, height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
           ),
           error: (err, _) => Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -336,7 +342,9 @@ class _AssociatedAccountsSectionState
             },
             child: Text(
               'accounts_remove_confirm_button'.tr(),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],
@@ -376,17 +384,20 @@ class _AccountAvatarItem extends StatelessWidget {
             shape: BoxShape.circle,
             border: Border.all(color: borderColor, width: 2),
             boxShadow: isActive
-                ? [BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.25),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  )]
+                ? [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(alpha: 0.25),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ]
                 : null,
           ),
           child: CircleAvatar(
             radius: 22,
-            backgroundImage:
-                account.avatarUrl != null ? NetworkImage(account.avatarUrl!) : null,
+            backgroundImage: account.avatarUrl != null
+                ? NetworkImage(account.avatarUrl!)
+                : null,
             child: account.avatarUrl == null
                 ? Text(account.username?[0].toUpperCase() ?? '?')
                 : null,
@@ -418,7 +429,11 @@ class _AddAccountButton extends StatelessWidget {
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
           ),
-          child: Icon(Icons.add, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          child: Icon(
+            Icons.add,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );

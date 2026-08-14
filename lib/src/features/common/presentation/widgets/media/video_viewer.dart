@@ -43,84 +43,95 @@ class _VideoViewerState extends State<VideoViewer> {
     if (widget.mediaItem.videoController == null) {
       if (widget.mediaItem.cachedPath != null) {
         final startTime = DateTime.now();
-        widget.mediaItem.videoController = VideoPlayerController.file(
-          File(widget.mediaItem.cachedPath!),
-        )..initialize().then((_) {
-            if (mounted) {
-              setState(() {
-                widget.mediaItem.videoController?.play();
-                _resetHideTimer();
-              });
-              
-              // 记录本地视频加载性能
-              final duration = DateTime.now().difference(startTime);
-              performanceMonitor.trackMediaLoading(
-                widget.mediaItem.cachedPath!,
-                duration,
-                'video_local',
-              );
-            }
-          }).catchError((error) {
-            logger.error('Error initializing video controller from file', error);
-            // Fallback to network if file initialization fails
-            if (mounted) {
-              _initializeVideoFromNetwork();
-            }
-            
-            // 记录本地视频加载失败性能
-            final duration = DateTime.now().difference(startTime);
-            performanceMonitor.trackMediaLoading(
-              widget.mediaItem.cachedPath!,
-              duration,
-              'video_local',
-            );
-          });
+        widget.mediaItem.videoController =
+            VideoPlayerController.file(File(widget.mediaItem.cachedPath!))
+              ..initialize()
+                  .then((_) {
+                    if (mounted) {
+                      setState(() {
+                        widget.mediaItem.videoController?.play();
+                        _resetHideTimer();
+                      });
+
+                      // 记录本地视频加载性能
+                      final duration = DateTime.now().difference(startTime);
+                      performanceMonitor.trackMediaLoading(
+                        widget.mediaItem.cachedPath!,
+                        duration,
+                        'video_local',
+                      );
+                    }
+                  })
+                  .catchError((error) {
+                    logger.error(
+                      'Error initializing video controller from file',
+                      error,
+                    );
+                    // Fallback to network if file initialization fails
+                    if (mounted) {
+                      _initializeVideoFromNetwork();
+                    }
+
+                    // 记录本地视频加载失败性能
+                    final duration = DateTime.now().difference(startTime);
+                    performanceMonitor.trackMediaLoading(
+                      widget.mediaItem.cachedPath!,
+                      duration,
+                      'video_local',
+                    );
+                  });
       } else {
         _initializeVideoFromNetwork();
       }
     }
   }
 
-    void _initializeVideoFromNetwork() {
-      final startTime = DateTime.now();
-      widget.mediaItem.videoController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.mediaItem.url),
-      )..initialize().then((_) {
-          if (mounted) {
-            setState(() {
-              widget.mediaItem.videoController?.play();
-              _resetHideTimer();
-            });
-            
-            // 记录网络视频加载性能
-            final duration = DateTime.now().difference(startTime);
-            performanceMonitor.trackMediaLoading(
-              widget.mediaItem.url,
-              duration,
-              'video_network',
-            );
-          }
-        }).catchError((error) {
-          logger.error('Error initializing video controller from network', error);
-          if (mounted) {
-            setState(() {
-              // Video initialization failed, handle error state
-            });
-          }
-          
-          // 记录网络视频加载失败性能
-          final duration = DateTime.now().difference(startTime);
-          performanceMonitor.trackMediaLoading(
-            widget.mediaItem.url,
-            duration,
-            'video_network',
-          );
-        });
-  
-      // 设置视频播放器的音频流类型为媒体类型
-      // 注意：video_player插件在Android上通常会自动使用适当的音频流类型
-      // 但我们可以尝试确保其使用正确的音频会话
-    }
+  void _initializeVideoFromNetwork() {
+    final startTime = DateTime.now();
+    widget.mediaItem.videoController =
+        VideoPlayerController.networkUrl(Uri.parse(widget.mediaItem.url))
+          ..initialize()
+              .then((_) {
+                if (mounted) {
+                  setState(() {
+                    widget.mediaItem.videoController?.play();
+                    _resetHideTimer();
+                  });
+
+                  // 记录网络视频加载性能
+                  final duration = DateTime.now().difference(startTime);
+                  performanceMonitor.trackMediaLoading(
+                    widget.mediaItem.url,
+                    duration,
+                    'video_network',
+                  );
+                }
+              })
+              .catchError((error) {
+                logger.error(
+                  'Error initializing video controller from network',
+                  error,
+                );
+                if (mounted) {
+                  setState(() {
+                    // Video initialization failed, handle error state
+                  });
+                }
+
+                // 记录网络视频加载失败性能
+                final duration = DateTime.now().difference(startTime);
+                performanceMonitor.trackMediaLoading(
+                  widget.mediaItem.url,
+                  duration,
+                  'video_network',
+                );
+              });
+
+    // 设置视频播放器的音频流类型为媒体类型
+    // 注意：video_player插件在Android上通常会自动使用适当的音频流类型
+    // 但我们可以尝试确保其使用正确的音频会话
+  }
+
   // 重置自动隐藏定时器
   void _resetHideTimer() {
     _hideControlsTimer?.cancel();
@@ -217,7 +228,8 @@ class _VideoViewerState extends State<VideoViewer> {
                                     const SizedBox(height: 8),
                                     // 播放/暂停按钮和时间显示
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         // 播放/暂停按钮
                                         IconButton(
@@ -230,7 +242,8 @@ class _VideoViewerState extends State<VideoViewer> {
                                           ),
                                           style: IconButton.styleFrom(
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(28),
+                                              borderRadius:
+                                                  BorderRadius.circular(28),
                                             ),
                                             padding: const EdgeInsets.all(8),
                                           ),
@@ -238,10 +251,12 @@ class _VideoViewerState extends State<VideoViewer> {
                                         // 时间显示
                                         Text(
                                           '${_formatDuration(videoController.value.position)} / ${_formatDuration(videoController.value.duration)}',
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.onSurface,
-                                            fontSize: 12,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurface,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -258,46 +273,44 @@ class _VideoViewerState extends State<VideoViewer> {
               ),
             )
           : hasError
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 50,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '视频加载失败',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        videoController?.value.errorDescription ?? '未知错误',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          // 尝试重新加载
-                          videoController?.dispose();
-                          widget.mediaItem.videoController = null;
-                          _initializeVideo();
-                        },
-                        child: const Text('重试'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 50,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                )
-              : const Center(child: CyaniLoadingIndicator()),
+                  const SizedBox(height: 16),
+                  Text(
+                    '视频加载失败',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    videoController?.value.errorDescription ?? '未知错误',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // 尝试重新加载
+                      videoController?.dispose();
+                      widget.mediaItem.videoController = null;
+                      _initializeVideo();
+                    },
+                    child: const Text('重试'),
+                  ),
+                ],
+              ),
+            )
+          : const Center(child: CyaniLoadingIndicator()),
     );
   }
 }

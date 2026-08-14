@@ -56,7 +56,10 @@ class _VerificationWindowState extends State<VerificationWindow> {
           }
         }
       } catch (e) {
-        logger.warning('VerificationWindow: Failed to parse verification cookie', e);
+        logger.warning(
+          'VerificationWindow: Failed to parse verification cookie',
+          e,
+        );
       }
     });
   }
@@ -76,7 +79,8 @@ class _VerificationWindowState extends State<VerificationWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = Theme.of(context).platform == TargetPlatform.windows ||
+    final isDesktop =
+        Theme.of(context).platform == TargetPlatform.windows ||
         Theme.of(context).platform == TargetPlatform.macOS ||
         Theme.of(context).platform == TargetPlatform.linux;
 
@@ -100,9 +104,11 @@ class _VerificationWindowState extends State<VerificationWindow> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Security Verification',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -115,9 +121,7 @@ class _VerificationWindowState extends State<VerificationWindow> {
                 child: Stack(
                   children: [
                     InAppWebView(
-                      initialUrlRequest: URLRequest(
-                        url: WebUri(widget.url),
-                      ),
+                      initialUrlRequest: URLRequest(url: WebUri(widget.url)),
                       initialSettings: InAppWebViewSettings(
                         javaScriptEnabled: true,
                         transparentBackground: true,

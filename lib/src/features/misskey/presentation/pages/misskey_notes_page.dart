@@ -85,7 +85,9 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                       ),
                       title: Text(
                         clip.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,9 +120,7 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
                 } else {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),
-                    child: Center(
-                      child: CyaniLoadingIndicator(size: 30),
-                    ),
+                    child: Center(child: CyaniLoadingIndicator(size: 30)),
                   );
                 }
               },
@@ -130,9 +130,7 @@ class _MisskeyNotesPageState extends ConsumerState<MisskeyNotesPage> {
             physics: AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverFillRemaining(
-                child: Center(
-                  child: CyaniLoadingIndicator(size: 60),
-                ),
+                child: Center(child: CyaniLoadingIndicator(size: 60)),
               ),
             ],
           ),

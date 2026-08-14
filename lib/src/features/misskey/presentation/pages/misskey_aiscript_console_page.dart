@@ -217,9 +217,8 @@ class _MisskeyAiScriptConsolePageState
             controller: _codeController,
             maxLines: null,
             expands: true,
-            style: const TextStyle(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontFamily: 'JetBrainsMono',
-              fontSize: 14,
               height: 1.5,
             ),
             decoration: InputDecoration(

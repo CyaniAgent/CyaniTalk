@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,17 +22,37 @@ class NoteDetailsSheet extends StatelessWidget {
     this.replyAuthorUsername,
   });
 
-  static void show(BuildContext context, Note note, {String? replyAuthorName, String? replyAuthorUsername}) {
+  static void show(
+    BuildContext context,
+    Note note, {
+    String? replyAuthorName,
+    String? replyAuthorUsername,
+  }) {
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
     if (isWideScreen) {
-      showSideSheet(context, note, replyAuthorName: replyAuthorName, replyAuthorUsername: replyAuthorUsername);
+      showSideSheet(
+        context,
+        note,
+        replyAuthorName: replyAuthorName,
+        replyAuthorUsername: replyAuthorUsername,
+      );
     } else {
-      showBottomSheet(context, note, replyAuthorName: replyAuthorName, replyAuthorUsername: replyAuthorUsername);
+      showBottomSheet(
+        context,
+        note,
+        replyAuthorName: replyAuthorName,
+        replyAuthorUsername: replyAuthorUsername,
+      );
     }
   }
 
-  static void showBottomSheet(BuildContext context, Note note, {String? replyAuthorName, String? replyAuthorUsername}) {
+  static void showBottomSheet(
+    BuildContext context,
+    Note note, {
+    String? replyAuthorName,
+    String? replyAuthorUsername,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -55,7 +75,12 @@ class NoteDetailsSheet extends StatelessWidget {
     );
   }
 
-  static void showSideSheet(BuildContext context, Note note, {String? replyAuthorName, String? replyAuthorUsername}) {
+  static void showSideSheet(
+    BuildContext context,
+    Note note, {
+    String? replyAuthorName,
+    String? replyAuthorUsername,
+  }) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -82,13 +107,10 @@ class NoteDetailsSheet extends StatelessWidget {
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          )),
+          position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero)
+              .animate(
+                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              ),
           child: child,
         );
       },
@@ -115,7 +137,8 @@ class _NoteDetailsContent extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_NoteDetailsContent> createState() => _NoteDetailsContentState();
+  ConsumerState<_NoteDetailsContent> createState() =>
+      _NoteDetailsContentState();
 }
 
 class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
@@ -202,7 +225,9 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
               children: [
                 _buildSection(
                   context,
-                  title: isReply ? 'note_detail_reply_author'.tr() : 'note_detail_author'.tr(),
+                  title: isReply
+                      ? 'note_detail_reply_author'.tr()
+                      : 'note_detail_author'.tr(),
                   icon: Icons.person_outline,
                   child: _buildUserInfo(context),
                 ),
@@ -226,7 +251,8 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
                 ),
                 const SizedBox(height: 20),
 
-                if (widget.note.text != null && widget.note.text!.isNotEmpty) ...[
+                if (widget.note.text != null &&
+                    widget.note.text!.isNotEmpty) ...[
                   _buildSection(
                     context,
                     title: 'note_detail_content'.tr(),
@@ -368,7 +394,11 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
 
     return Row(
       children: [
-        Icon(Icons.person_outline, size: 24, color: theme.colorScheme.onSurfaceVariant),
+        Icon(
+          Icons.person_outline,
+          size: 24,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -405,9 +435,9 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           value: widget.note.id,
           onTap: () {
             Clipboard.setData(ClipboardData(text: widget.note.id));
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('post_id_copied'.tr())),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('post_id_copied'.tr())));
           },
         ),
         const SizedBox(height: 8),
@@ -460,10 +490,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                entry.key,
-                style: const TextStyle(fontSize: 16),
-              ),
+              Text(entry.key, style: theme.textTheme.bodyLarge),
               const SizedBox(width: 4),
               Text(
                 entry.value.toString(),
@@ -498,7 +525,10 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           context,
           icon: Icons.emoji_emotions,
           label: 'note_detail_reactions'.tr(),
-          value: widget.note.reactions.values.fold(0, (sum, count) => sum + count),
+          value: widget.note.reactions.values.fold(
+            0,
+            (sum, count) => sum + count,
+          ),
         ),
       ],
     );
@@ -549,15 +579,21 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           label: 'note_detail_local_only'.tr(),
           value: widget.note.localOnly ? 'common_yes'.tr() : 'common_no'.tr(),
           icon: widget.note.localOnly ? Icons.check_circle : Icons.cancel,
-          color: widget.note.localOnly ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.localOnly
+              ? theme.colorScheme.tertiary
+              : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
           context,
           label: 'note_detail_has_poll'.tr(),
-          value: widget.note.poll != null ? 'common_yes'.tr() : 'common_no'.tr(),
+          value: widget.note.poll != null
+              ? 'common_yes'.tr()
+              : 'common_no'.tr(),
           icon: widget.note.poll != null ? Icons.check_circle : Icons.cancel,
-          color: widget.note.poll != null ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.poll != null
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
@@ -565,15 +601,23 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           label: 'note_detail_has_cw'.tr(),
           value: widget.note.cw != null ? 'common_yes'.tr() : 'common_no'.tr(),
           icon: widget.note.cw != null ? Icons.check_circle : Icons.cancel,
-          color: widget.note.cw != null ? theme.colorScheme.secondary : theme.colorScheme.onSurfaceVariant,
+          color: widget.note.cw != null
+              ? theme.colorScheme.secondary
+              : theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 8),
         _buildFlagRow(
           context,
           label: 'note_detail_has_files'.tr(),
-          value: widget.note.fileIds.isNotEmpty ? 'common_yes'.tr() : 'common_no'.tr(),
-          icon: widget.note.fileIds.isNotEmpty ? Icons.check_circle : Icons.cancel,
-          color: widget.note.fileIds.isNotEmpty ? theme.colorScheme.tertiary : theme.colorScheme.onSurfaceVariant,
+          value: widget.note.fileIds.isNotEmpty
+              ? 'common_yes'.tr()
+              : 'common_no'.tr(),
+          icon: widget.note.fileIds.isNotEmpty
+              ? Icons.check_circle
+              : Icons.cancel,
+          color: widget.note.fileIds.isNotEmpty
+              ? theme.colorScheme.tertiary
+              : theme.colorScheme.onSurfaceVariant,
         ),
       ],
     );
@@ -591,12 +635,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
       children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
@@ -627,7 +666,10 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           onTap: widget.note.user?.host != null
               ? () {
                   Clipboard.setData(
-                    ClipboardData(text: 'https://${widget.note.user!.host}/notes/${widget.note.id}'),
+                    ClipboardData(
+                      text:
+                          'https://${widget.note.user!.host}/notes/${widget.note.id}',
+                    ),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('post_link_copied'.tr())),
@@ -676,7 +718,8 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
           _buildInfoRow(
             context,
             label: 'note_detail_files'.tr(),
-            value: '${widget.note.fileIds.length} ${'note_detail_files_count'.tr()}',
+            value:
+                '${widget.note.fileIds.length} ${'note_detail_files_count'.tr()}',
           ),
         ],
       ],
@@ -715,11 +758,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
         ),
         if (onTap != null) ...[
           const SizedBox(width: 4),
-          Icon(
-            Icons.copy,
-            size: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          Icon(Icons.copy, size: 14, color: theme.colorScheme.onSurfaceVariant),
         ],
       ],
     );
@@ -773,9 +812,9 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
       case 'home':
         return scheme.primary;
       case 'followers':
-        return HSLColor.fromColor(scheme.secondary).withHue(
-          (HSLColor.fromColor(scheme.secondary).hue + 30) % 360,
-        ).toColor();
+        return HSLColor.fromColor(scheme.secondary)
+            .withHue((HSLColor.fromColor(scheme.secondary).hue + 30) % 360)
+            .toColor();
       case 'specified':
         return scheme.secondary;
       default:
@@ -801,7 +840,9 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
               size: 18,
             ),
             label: Text(
-              _showRawData ? 'note_detail_hide_raw_data'.tr() : 'note_detail_show_raw_data'.tr(),
+              _showRawData
+                  ? 'note_detail_hide_raw_data'.tr()
+                  : 'note_detail_show_raw_data'.tr(),
             ),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -839,7 +880,9 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
     final buffer = StringBuffer();
     buffer.writeln('{');
     buffer.writeln('  "id": "${widget.note.id}",');
-    buffer.writeln('  "createdAt": "${widget.note.createdAt.toIso8601String()}",');
+    buffer.writeln(
+      '  "createdAt": "${widget.note.createdAt.toIso8601String()}",',
+    );
     if (widget.note.text != null) {
       buffer.writeln('  "text": "${widget.note.text}",');
     }
@@ -851,8 +894,12 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
     buffer.writeln('  "localOnly": ${widget.note.localOnly},');
     buffer.writeln('  "renoteCount": ${widget.note.renoteCount},');
     buffer.writeln('  "repliesCount": ${widget.note.repliesCount},');
-    buffer.writeln('  "reactionCount": ${widget.note.reactions.values.fold(0, (sum, count) => sum + count)},');
-    buffer.writeln('  "fileIds": [${widget.note.fileIds.map((id) => '"$id"').join(', ')}],');
+    buffer.writeln(
+      '  "reactionCount": ${widget.note.reactions.values.fold(0, (sum, count) => sum + count)},',
+    );
+    buffer.writeln(
+      '  "fileIds": [${widget.note.fileIds.map((id) => '"$id"').join(', ')}],',
+    );
     if (widget.note.replyId != null) {
       buffer.writeln('  "replyId": "${widget.note.replyId}",');
     }

@@ -40,7 +40,8 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
         data: (settings) {
           final fonts = FontManager.getAllFonts();
 
-          final isXiaomi = xiaomiInfoAsync.whenOrNull(
+          final isXiaomi =
+              xiaomiInfoAsync.whenOrNull(
                 data: (info) => info.isXiaomiWithMiSystem,
               ) ??
               false;
@@ -89,9 +90,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
         ),
         error: (error, stack) => SizedBox(
           height: 200,
-          child: Center(
-            child: Text('settings_font_load_error'.tr()),
-          ),
+          child: Center(child: Text('settings_font_load_error'.tr())),
         ),
       ),
       actions: [
@@ -129,7 +128,10 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       final fontId = await FontManager.registerLocalFont(filePath);
       if (fontId == null) {
         if (mounted) {
-          showToast(title: '字体加载失败，请确认文件格式为 .ttf 或 .otf', type: ToastificationType.error);
+          showToast(
+            title: '字体加载失败，请确认文件格式为 .ttf 或 .otf',
+            type: ToastificationType.error,
+          );
         }
         return;
       }
@@ -145,9 +147,9 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       if (!mounted) return;
 
       if (fontFamily != null) {
-        await ref.read(appearanceSettingsProvider.notifier).updateFontFamily(
-              fontFamily,
-            );
+        await ref
+            .read(appearanceSettingsProvider.notifier)
+            .updateFontFamily(fontFamily);
 
         if (!mounted) return;
 
@@ -167,12 +169,16 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       return;
     }
 
-    final fontFamily = await ref.read(fontSettingsProvider.notifier).selectFont(font.id);
+    final fontFamily = await ref
+        .read(fontSettingsProvider.notifier)
+        .selectFont(font.id);
 
     if (!mounted) return;
 
     if (fontFamily != null || font.type == FontType.systemFont) {
-      await ref.read(appearanceSettingsProvider.notifier).updateFontFamily(
+      await ref
+          .read(appearanceSettingsProvider.notifier)
+          .updateFontFamily(
             font.type == FontType.systemFont ? '' : fontFamily!,
           );
 
@@ -185,11 +191,23 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
   }
 
   Future<void> _handleDownload(FontInfo font) async {
-    final success = await ref.read(fontSettingsProvider.notifier).downloadFont(font.id);
+    final success = await ref
+        .read(fontSettingsProvider.notifier)
+        .downloadFont(font.id);
     if (success && mounted) {
-      showToast(title: 'settings_font_downloaded'.tr(namedArgs: {'font': font.displayName}), type: ToastificationType.success);
+      showToast(
+        title: 'settings_font_downloaded'.tr(
+          namedArgs: {'font': font.displayName},
+        ),
+        type: ToastificationType.success,
+      );
     } else if (mounted) {
-      showToast(title: 'settings_font_download_failed'.tr(namedArgs: {'font': font.displayName}), type: ToastificationType.error);
+      showToast(
+        title: 'settings_font_download_failed'.tr(
+          namedArgs: {'font': font.displayName},
+        ),
+        type: ToastificationType.error,
+      );
     }
   }
 
@@ -198,7 +216,11 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('settings_font_download_title'.tr()),
-        content: Text('settings_font_download_prompt'.tr(namedArgs: {'font': font.displayName})),
+        content: Text(
+          'settings_font_download_prompt'.tr(
+            namedArgs: {'font': font.displayName},
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -220,7 +242,7 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
       ),
     );
   }
- 
+
   void _applyFontChange(String fontName) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -230,7 +252,12 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        showToast(title: 'settings_font_change_success'.tr(namedArgs: {'font': fontName}), type: ToastificationType.success);
+        showToast(
+          title: 'settings_font_change_success'.tr(
+            namedArgs: {'font': fontName},
+          ),
+          type: ToastificationType.success,
+        );
       }
     });
   }
@@ -267,11 +294,9 @@ class FontListTile extends StatelessWidget {
       leading: _buildLeadingIcon(context),
       title: Text(
         font.displayName,
-        style: TextStyle(
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isDisabled
-              ? Theme.of(context).colorScheme.outline
-              : null,
+          color: isDisabled ? Theme.of(context).colorScheme.outline : null,
         ),
       ),
       subtitle: _buildSubtitle(context),
@@ -296,8 +321,8 @@ class FontListTile extends StatelessWidget {
         color: isSelected
             ? theme.colorScheme.primary
             : isDisabled
-                ? theme.colorScheme.outline
-                : null,
+            ? theme.colorScheme.outline
+            : null,
       );
     } else {
       return Icon(
@@ -305,8 +330,8 @@ class FontListTile extends StatelessWidget {
         color: isSelected
             ? theme.colorScheme.primary
             : isCached
-                ? theme.colorScheme.secondary
-                : theme.colorScheme.outline,
+            ? theme.colorScheme.secondary
+            : theme.colorScheme.outline,
       );
     }
   }
@@ -319,8 +344,7 @@ class FontListTile extends StatelessWidget {
         padding: const EdgeInsets.only(top: 4),
         child: Text(
           disabledMessage!,
-          style: TextStyle(
-            fontSize: 12,
+          style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.outline.withValues(alpha: 0.8),
             height: 1.4,
           ),
@@ -331,12 +355,16 @@ class FontListTile extends StatelessWidget {
     if (font.type == FontType.appFont) {
       return Text(
         'settings_font_type_app'.tr(),
-        style: TextStyle(color: theme.colorScheme.outline),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.outline,
+        ),
       );
     } else if (font.type == FontType.systemFont) {
       return Text(
         'settings_font_type_system'.tr(),
-        style: TextStyle(color: theme.colorScheme.outline),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.outline,
+        ),
       );
     } else {
       if (isDownloading) {
@@ -346,7 +374,9 @@ class FontListTile extends StatelessWidget {
           children: [
             Text(
               'settings_font_downloading'.tr(),
-              style: TextStyle(color: theme.colorScheme.primary),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
             ),
             const SizedBox(height: 4),
             LinearProgressIndicator(
@@ -358,12 +388,16 @@ class FontListTile extends StatelessWidget {
       } else if (isCached) {
         return Text(
           'settings_font_cached'.tr(),
-          style: TextStyle(color: theme.colorScheme.secondary),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.secondary,
+          ),
         );
       } else {
         return Text(
           'settings_font_need_download'.tr(),
-          style: TextStyle(color: theme.colorScheme.outline),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.outline,
+          ),
         );
       }
     }

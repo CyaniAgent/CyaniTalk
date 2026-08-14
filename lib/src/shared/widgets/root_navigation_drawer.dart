@@ -153,14 +153,11 @@ class RootNavigationDrawer extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         rootItem.title,
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: isSelected
                               ? theme.colorScheme.onSecondaryContainer
                               : theme.colorScheme.onSurfaceVariant,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : null,
                         ),
                       ),
                     ),
@@ -364,10 +361,8 @@ class RootNavigationDrawer extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     'navigation_settings'.tr(),
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 14,
                     ),
                   ),
                 ),

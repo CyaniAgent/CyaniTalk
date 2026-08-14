@@ -82,9 +82,8 @@ class _MentionedUserChipState extends ConsumerState<MentionedUserChip> {
                       widget.username.isNotEmpty
                           ? widget.username[0].toUpperCase()
                           : '?',
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: primaryColor,
-                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     )

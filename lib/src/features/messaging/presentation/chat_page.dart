@@ -161,8 +161,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -226,7 +225,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                           !isMe) {
                         Future.microtask(
                           () => ref
-                              .read(misskeyMessagingProvider(widget.id).notifier)
+                              .read(
+                                misskeyMessagingProvider(widget.id).notifier,
+                              )
                               .markAsRead(message.id),
                         );
                       }
@@ -299,7 +300,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
               ),
               child: Text(
                 message.text ?? '',
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: isMe
                       ? theme.colorScheme.onPrimary
                       : theme.colorScheme.onSurfaceVariant,

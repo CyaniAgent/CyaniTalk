@@ -76,8 +76,7 @@ class ReactionDisplay extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Text(
                   count.toString(),
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: isMyReaction
                         ? FontWeight.bold
                         : FontWeight.normal,
@@ -161,7 +160,7 @@ class ReactionDisplay extends ConsumerWidget {
               child: Center(
                 child: Text(
                   emojiName[0].toUpperCase(),
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             );

@@ -16,7 +16,8 @@ class NavigationSettingsPage extends ConsumerStatefulWidget {
       _NavigationSettingsPageState();
 }
 
-class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage> {
+class _NavigationSettingsPageState
+    extends ConsumerState<NavigationSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final navigationSettingsAsync = ref.watch(navigationSettingsProvider);
@@ -82,15 +83,17 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
                           index: index,
                           onToggle: item.isRemovable
                               ? () => navigationNotifier.updateItemEnabled(
-                                    item.id,
-                                    !item.isEnabled,
-                                    context,
-                                  )
+                                  item.id,
+                                  !item.isEnabled,
+                                  context,
+                                )
                               : null,
                         );
                       },
                       onReorderItem: (oldIndex, newIndex) {
-                        final newOrder = itemElements.map((e) => e.item).toList();
+                        final newOrder = itemElements
+                            .map((e) => e.item)
+                            .toList();
                         final moved = newOrder.removeAt(oldIndex);
                         newOrder.insert(newIndex, moved);
                         navigationNotifier.updateItemOrder(newOrder);
@@ -127,15 +130,15 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
       child: Container(
         height: 64,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
         child: Row(
           children: [
             const SizedBox(width: 8),
             CircleAvatar(
               radius: 18,
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHigh,
               child: Icon(
                 Icons.person,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -145,9 +148,9 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
             Expanded(
               child: Text(
                 '用户（固定）',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
             Icon(
@@ -179,7 +182,9 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: item.isEnabled
-              ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.75)
+              ? Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer.withValues(alpha: 0.75)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -195,11 +200,11 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
             Expanded(
               child: Text(
                 item.title,
-                style: TextStyle(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: item.isEnabled
                       ? Theme.of(context).colorScheme.onSecondaryContainer
                       : Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: item.isEnabled ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: item.isEnabled ? FontWeight.w700 : null,
                 ),
               ),
             ),
@@ -213,7 +218,9 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
               IconButton.filledTonal(
                 tooltip: item.isEnabled ? '删除该导航项' : '添加该导航项',
                 onPressed: onToggle,
-                icon: Icon(item.isEnabled ? Icons.remove_rounded : Icons.add_rounded),
+                icon: Icon(
+                  item.isEnabled ? Icons.remove_rounded : Icons.add_rounded,
+                ),
                 visualDensity: VisualDensity.compact,
               ),
             const SizedBox(width: 2),
@@ -238,7 +245,9 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
       ),
       title: Text(
         'nav_settings'.tr(),
-        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
       trailing: Icon(
         Icons.chevron_right_rounded,
@@ -266,7 +275,10 @@ class _NavigationSettingsPageState extends ConsumerState<NavigationSettingsPage>
             onPressed: () {
               notifier.resetSettings();
               Navigator.of(context).pop();
-              showToast(title: 'settings_navigation_reset_done'.tr(), type: ToastificationType.success);
+              showToast(
+                title: 'settings_navigation_reset_done'.tr(),
+                type: ToastificationType.success,
+              );
             },
             child: Text('post_reset'.tr()),
           ),

@@ -113,17 +113,17 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     _mfmRenderer.mentionTap = (userName, host, acct) async {
       try {
         final repository = await ref.read(misskeyRepositoryProvider.future);
-        final user = await repository.findUserByUsername(
-          userName,
-          host: host,
-        );
+        final user = await repository.findUserByUsername(userName, host: host);
         if (mounted) {
           context.push('/misskey/user/${user.id}', extra: user);
         }
       } catch (e) {
         logger.debug('Mention tap: could not find user $acct');
         if (mounted) {
-          showToast(title: 'User not found: $acct', type: ToastificationType.info);
+          showToast(
+            title: 'User not found: $acct',
+            type: ToastificationType.info,
+          );
         }
       }
     };
@@ -189,10 +189,13 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                           onTap: () {
                             final me = ref.read(misskeyMeProvider).value;
                             if (me != null && me.id == user.id) {
-                            context.go('/profile');
-                          } else {
-                            context.push('/misskey/user/${user.id}', extra: user);
-                          }
+                              context.go('/profile');
+                            } else {
+                              context.push(
+                                '/misskey/user/${user.id}',
+                                extra: user,
+                              );
+                            }
                           },
                         )
                       else
@@ -212,9 +215,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                             _mfmRenderer.processTextToRichText(
                               user?.name ?? user?.username ?? 'Unknown',
                               context,
-                              textStyle: TextStyle(
+                              textStyle: theme.textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
                                 color: theme.colorScheme.primary,
                               ),
                               maxLines: 1,
@@ -226,18 +228,20 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                             Text.rich(
                               TextSpan(
                                 text: '@${user?.username}',
-                                style: TextStyle(
-                                  fontSize: 12,
+                                style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                                 children: user?.host != null
                                     ? [
                                         TextSpan(
                                           text: '@${user!.host}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
-                                          ),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant
+                                                    .withValues(alpha: 0.45),
+                                              ),
                                         ),
                                       ]
                                     : null,
@@ -249,8 +253,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                       ),
                       Text(
                         _formatTime(note.createdAt),
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -383,7 +386,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   children: [
                     _buildAction(
                       Icons.reply,
-                      note.repliesCount > 0 ? note.repliesCount.toString() : null,
+                      note.repliesCount > 0
+                          ? note.repliesCount.toString()
+                          : null,
                       _handleReply,
                       tooltip: 'Reply',
                     ),
@@ -397,7 +402,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                     const SizedBox(width: 4),
                     _buildAction(
                       Icons.favorite_border,
-                      note.reactions.isNotEmpty ? note.reactions.length.toString() : null,
+                      note.reactions.isNotEmpty
+                          ? note.reactions.length.toString()
+                          : null,
                       _handleReaction,
                       tooltip: 'Reaction',
                     ),
@@ -426,10 +433,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         curve: Curves.easeOut,
         decoration: BoxDecoration(
           border: Border(
-            left: BorderSide(
-              color: colorScheme.primary,
-              width: 3,
-            ),
+            left: BorderSide(color: colorScheme.primary, width: 3),
           ),
           color: colorScheme.primaryContainer.withValues(alpha: 0.25),
         ),
@@ -490,7 +494,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       case 'copy_content':
         if (widget.note.text != null) {
           Clipboard.setData(ClipboardData(text: widget.note.text!));
-          showToast(title: 'post_copied'.tr(), type: ToastificationType.success);
+          showToast(
+            title: 'post_copied'.tr(),
+            type: ToastificationType.success,
+          );
         }
         break;
       case 'copy_link':
@@ -510,7 +517,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
         break;
       case 'copy_id':
         Clipboard.setData(ClipboardData(text: widget.note.id));
-        showToast(title: 'post_id_copied'.tr(), type: ToastificationType.success);
+        showToast(
+          title: 'post_id_copied'.tr(),
+          type: ToastificationType.success,
+        );
         break;
     }
   }
@@ -526,7 +536,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final url = 'https://$host/notes/${widget.note.id}';
       await Clipboard.setData(ClipboardData(text: url));
       if (mounted) {
-        showToast(title: 'post_link_copied'.tr(), type: ToastificationType.success);
+        showToast(
+          title: 'post_link_copied'.tr(),
+          type: ToastificationType.success,
+        );
       }
     } catch (e) {
       // Ignore
@@ -538,7 +551,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       final repository = await ref.read(misskeyRepositoryProvider.future);
       await repository.bookmark(widget.note.id);
       if (mounted) {
-        showToast(title: 'post_bookmarked'.tr(), type: ToastificationType.success);
+        showToast(
+          title: 'post_bookmarked'.tr(),
+          type: ToastificationType.success,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -600,12 +616,18 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                     reason,
                   );
                   if (mounted) {
-                    showToast(title: 'post_reported'.tr(), type: ToastificationType.success);
+                    showToast(
+                      title: 'post_reported'.tr(),
+                      type: ToastificationType.success,
+                    );
                   }
                 }
               } catch (e) {
                 if (mounted) {
-                  showToast(title: 'post_report_failed'.tr(), type: ToastificationType.error);
+                  showToast(
+                    title: 'post_report_failed'.tr(),
+                    type: ToastificationType.error,
+                  );
                 }
               }
             },
@@ -639,8 +661,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                   padding: const EdgeInsets.only(left: 4),
                   child: Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -817,7 +838,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 );
                 await repository.renote(widget.note.id);
                 if (mounted) {
-                  showToast(title: 'note_renoted_successfully'.tr(), type: ToastificationType.success);
+                  showToast(
+                    title: 'note_renoted_successfully'.tr(),
+                    type: ToastificationType.success,
+                  );
                 }
               } catch (e) {
                 if (mounted) {
@@ -868,7 +892,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 );
                 await repository.reply(widget.note.id, textController.text);
                 if (mounted) {
-                  showToast(title: 'note_reply_sent'.tr(), type: ToastificationType.success);
+                  showToast(
+                    title: 'note_reply_sent'.tr(),
+                    type: ToastificationType.success,
+                  );
                 }
               } catch (e) {
                 if (mounted) {
@@ -925,7 +952,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
   void _handleShare() {
     // Placeholder for share functionality
-    showToast(title: 'note_share_coming_soon'.tr(), type: ToastificationType.info);
+    showToast(
+      title: 'note_share_coming_soon'.tr(),
+      type: ToastificationType.info,
+    );
   }
 
   /// 构建回复原帖预览
@@ -1004,11 +1034,13 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                               replyNote.user?.username ??
                               'Unknown',
                           context,
-                          textStyle: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          textStyle: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           onEmojiLoaded: () {
@@ -1020,7 +1052,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                             text: '@${replyNote.user?.username}',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                             children: replyNote.user?.host != null
                                 ? [
@@ -1028,7 +1062,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                                       text: '@${replyNote.user!.host}',
                                       style: TextStyle(
                                         fontSize: 10,
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
+                                            .withValues(alpha: 0.45),
                                       ),
                                     ),
                                   ]
@@ -1054,8 +1091,7 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
                 },
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                textStyle: TextStyle(
-                  fontSize: 12,
+                textStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.4,
                 ),
@@ -1095,7 +1131,10 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       }
     }
 
-    if (imageFiles.isEmpty && videoFiles.isEmpty && audioFiles.isEmpty && otherFiles.isEmpty) {
+    if (imageFiles.isEmpty &&
+        videoFiles.isEmpty &&
+        audioFiles.isEmpty &&
+        otherFiles.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -1118,13 +1157,16 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
 
         // 音频区
         if (audioFiles.isNotEmpty) ...[
-          if (imageFiles.isNotEmpty || videoFiles.isNotEmpty) const SizedBox(height: 8),
+          if (imageFiles.isNotEmpty || videoFiles.isNotEmpty)
+            const SizedBox(height: 8),
           _buildAudioGrid(audioFiles),
         ],
 
         // 其他文件区
         if (otherFiles.isNotEmpty) ...[
-          if (imageFiles.isNotEmpty || videoFiles.isNotEmpty || audioFiles.isNotEmpty)
+          if (imageFiles.isNotEmpty ||
+              videoFiles.isNotEmpty ||
+              audioFiles.isNotEmpty)
             const SizedBox(height: 8),
           _buildOtherFilesButton(otherFiles),
         ],
@@ -1239,7 +1281,8 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: GestureDetector(
-        onTap: () => _openMediaViewer(context, widget.note.files, url, heroTag: heroTag),
+        onTap: () =>
+            _openMediaViewer(context, widget.note.files, url, heroTag: heroTag),
         child: Hero(
           tag: heroTag,
           child: SizedBox(
@@ -1280,7 +1323,9 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.6),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.scrim.withValues(alpha: 0.6),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -1309,10 +1354,12 @@ class _ModernNoteCardState extends ConsumerState<ModernNoteCard> {
       } else {
         rowChildren.add(const Spacer());
       }
-      rows.add(Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Row(children: rowChildren),
-      ));
+      rows.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(children: rowChildren),
+        ),
+      );
     }
     return Column(children: rows);
   }
@@ -1456,7 +1503,8 @@ class _DesktopImageGridWithNav extends StatefulWidget {
   const _DesktopImageGridWithNav({required this.images});
 
   @override
-  State<_DesktopImageGridWithNav> createState() => _DesktopImageGridWithNavState();
+  State<_DesktopImageGridWithNav> createState() =>
+      _DesktopImageGridWithNavState();
 }
 
 class _DesktopImageGridWithNavState extends State<_DesktopImageGridWithNav> {
@@ -1469,7 +1517,10 @@ class _DesktopImageGridWithNavState extends State<_DesktopImageGridWithNav> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final startIndex = _currentPage * _itemsPerPage;
-    final endIndex = (startIndex + _itemsPerPage).clamp(0, widget.images.length);
+    final endIndex = (startIndex + _itemsPerPage).clamp(
+      0,
+      widget.images.length,
+    );
     final currentImages = widget.images.sublist(startIndex, endIndex);
 
     return Column(
@@ -1499,11 +1550,13 @@ class _DesktopImageGridWithNavState extends State<_DesktopImageGridWithNav> {
                       builder: (context) => MediaViewerPage(
                         mediaItems: widget.images
                             .where((f) => f['url'] != null)
-                            .map((f) => MediaItem(
-                                  url: f['url'] as String,
-                                  type: MediaType.image,
-                                  fileName: f['name'] as String?,
-                                ))
+                            .map(
+                              (f) => MediaItem(
+                                url: f['url'] as String,
+                                type: MediaType.image,
+                                fileName: f['name'] as String?,
+                              ),
+                            )
                             .toList(),
                         initialIndex: startIndex + index,
                         heroTag: heroTag,
@@ -1612,7 +1665,8 @@ class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
   }
 
   void _calculatePosition() {
-    final renderBox = widget.menuKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderBox =
+        widget.menuKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       final menuSize = renderBox.size;
       final screenSize = MediaQuery.of(context).size;
@@ -1669,7 +1723,8 @@ class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
 
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (event) => _handleTapDown(TapDownDetails(globalPosition: event.position)),
+      onPointerDown: (event) =>
+          _handleTapDown(TapDownDetails(globalPosition: event.position)),
       child: Stack(
         children: [
           Positioned(
@@ -1684,7 +1739,9 @@ class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
                   color: widget.menuColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outlineVariant.withValues(alpha: 0.3),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -1695,7 +1752,10 @@ class _FastPopupMenuOverlayState extends State<_FastPopupMenuOverlay>
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 6,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: items.map((item) {
@@ -1771,7 +1831,9 @@ class _FastMenuItemState extends State<_FastMenuItem> {
             duration: const Duration(milliseconds: 150),
             decoration: BoxDecoration(
               color: _isHovered && widget.enabled
-                  ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08)
+                  ? theme.colorScheme.primary.withValues(
+                      alpha: isDark ? 0.15 : 0.08,
+                    )
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
@@ -1783,18 +1845,20 @@ class _FastMenuItemState extends State<_FastMenuItem> {
                     widget.icon,
                     size: 20,
                     color: widget.enabled
-                        ? (_isHovered ? theme.colorScheme.primary : (widget.iconColor ?? theme.colorScheme.onSurface))
+                        ? (_isHovered
+                              ? theme.colorScheme.primary
+                              : (widget.iconColor ??
+                                    theme.colorScheme.onSurface))
                         : theme.colorScheme.outline,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       widget.label,
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         color: widget.enabled
                             ? (widget.textColor ?? theme.colorScheme.onSurface)
                             : theme.colorScheme.outline,
-                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -1873,7 +1937,7 @@ class _AudioItemWidgetState extends State<_AudioItemWidget> {
         widget.fileId!,
         widget.url,
       );
-      
+
       if (mounted) {
         setState(() {
           _durationMs = duration;
@@ -1943,7 +2007,7 @@ class _AudioItemWidgetState extends State<_AudioItemWidget> {
 
   Widget _buildInfoText(ThemeData theme) {
     final sizeText = FileMetadataService.formatFileSize(widget.fileSize);
-    
+
     if (_isLoading) {
       // 显示文件大小 · 计算中...
       return Text(
@@ -1997,13 +2061,13 @@ class _OtherFilesDialogState extends State<_OtherFilesDialog> {
 
   Future<void> _loadAllFileSizes() async {
     final metadataService = FileMetadataService();
-    
+
     for (int i = 0; i < widget.otherFiles.length; i++) {
       final file = widget.otherFiles[i];
       final fileId = file['id'] as String?;
       final fileUrl = file['url'] as String?;
       final existingSize = file['size'] as int?;
-      
+
       // 如果已有大小且大于0，直接使用
       if (existingSize != null && existingSize > 0) {
         setState(() {
@@ -2011,15 +2075,15 @@ class _OtherFilesDialogState extends State<_OtherFilesDialog> {
         });
         continue;
       }
-      
+
       // 否则从网络获取
       if (fileId != null && fileUrl != null) {
         setState(() {
           _loadingStates[i] = true;
         });
-        
+
         final size = await metadataService.getFileSize(fileId, fileUrl);
-        
+
         if (mounted) {
           setState(() {
             _fileSizes[i] = size;
@@ -2040,9 +2104,9 @@ class _OtherFilesDialogState extends State<_OtherFilesDialog> {
         children: [
           Text(
             '其它文件',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Flexible(
@@ -2055,10 +2119,14 @@ class _OtherFilesDialogState extends State<_OtherFilesDialog> {
                 final type = file['type'] as String? ?? '';
                 final size = _fileSizes[index];
                 final isLoading = _loadingStates[index] ?? false;
-                
+
                 return ListTile(
                   leading: const Icon(Icons.insert_drive_file),
-                  title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  title: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   subtitle: Text(_buildSubtitle(type, size, isLoading)),
                   onTap: () {
                     Navigator.pop(context);
@@ -2076,7 +2144,7 @@ class _OtherFilesDialogState extends State<_OtherFilesDialog> {
     if (isLoading) {
       return '$type - ${'file_calculating_size'.tr()}';
     }
-    
+
     final sizeText = FileMetadataService.formatFileSize(size);
     return '$type - $sizeText';
   }

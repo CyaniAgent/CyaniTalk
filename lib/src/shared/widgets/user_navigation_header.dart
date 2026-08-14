@@ -115,10 +115,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                     Expanded(
                       child: Text(
                         isLoggedIn
-                            ? _getUserName(
-                                misskeyAccount,
-                                misskeyUser,
-                              )
+                            ? _getUserName(misskeyAccount, misskeyUser)
                             : 'nav_no_account'.tr(),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -213,12 +210,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
           children: [
             Row(
               children: [
-                _buildAvatar(
-                  context,
-                  misskeyAccount,
-                  misskeyUser,
-                  radius: 24,
-                ),
+                _buildAvatar(context, misskeyAccount, misskeyUser, radius: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -226,10 +218,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                     children: [
                       Text(
                         isLoggedIn
-                            ? _getUserName(
-                                misskeyAccount,
-                                misskeyUser,
-                              )
+                            ? _getUserName(misskeyAccount, misskeyUser)
                             : 'nav_no_account'.tr(),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -321,7 +310,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                           child: account.avatarUrl == null
                               ? Text(
                                   account.username?[0].toUpperCase() ?? '?',
-                                  style: const TextStyle(fontSize: 12),
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 )
                               : null,
                         ),
@@ -333,9 +322,8 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                             children: [
                               Text(
                                 account.name ?? account.username ?? 'Unknown',
-                                style: const TextStyle(
+                                style: theme.textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
                                 ),
                               ),
                               Text(
@@ -381,10 +369,9 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                       const SizedBox(width: 8),
                       Text(
                         'accounts_add_account'.tr(),
-                        style: TextStyle(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -428,10 +415,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
     });
   }
 
-  String _getUserName(
-    Account? misskeyAccount,
-    dynamic misskeyUser,
-  ) {
+  String _getUserName(Account? misskeyAccount, dynamic misskeyUser) {
     if (misskeyAccount != null) {
       return misskeyUser?.name ??
           misskeyAccount.name ??
@@ -447,9 +431,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
     dynamic misskeyUser, {
     double radius = 32,
   }) {
-    final avatarUrl =
-        misskeyUser?.avatarUrl ??
-        misskeyAccount?.avatarUrl;
+    final avatarUrl = misskeyUser?.avatarUrl ?? misskeyAccount?.avatarUrl;
 
     if (avatarUrl != null) {
       return ClipRRect(
@@ -545,7 +527,7 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                   const SizedBox(width: 8),
                   Text(
                     'menu_login'.tr(),
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
@@ -702,7 +684,9 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
                       children: [
                         Text(
                           account.name ?? account.username ?? 'Unknown',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           '@${account.username}',
@@ -745,7 +729,9 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
               const SizedBox(width: 8),
               Text(
                 'menu_logout'.tr(),
-                style: TextStyle(color: theme.colorScheme.error),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             ],
           ),
@@ -792,7 +778,9 @@ class _UserNavigationHeaderState extends ConsumerState<UserNavigationHeader> {
             },
             child: Text(
               'menu_logout'.tr(),
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],

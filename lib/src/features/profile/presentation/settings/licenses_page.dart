@@ -109,22 +109,31 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
           child: Row(
             children: [
               Container(
-                width: 40, height: 40,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.code, color: Theme.of(context).colorScheme.primary, size: 20),
+                child: Icon(
+                  Icons.code,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(package.name, style: Theme.of(context).textTheme.bodyLarge),
+                    Text(
+                      package.name,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                     if (package.version != null) ...[
                       const SizedBox(height: 2),
-                      Text('Version: ${package.version}',
+                      Text(
+                        'Version: ${package.version}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -134,14 +143,17 @@ class _LicensesPageState extends ConsumerState<LicensesPage> {
                       const SizedBox(height: 1),
                       Text(
                         '${'licenses_spdx_identifiers'.tr()}: ${package.spdxIdentifiers.first}',
-                        style: const TextStyle(fontSize: 12),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ],
                 ),
               ),
               const SizedBox(width: 16),
-              Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ],
           ),
         ),
@@ -242,9 +254,10 @@ class LicenseDetailPage extends StatelessWidget {
                         backgroundColor: Theme.of(
                           context,
                         ).colorScheme.primaryContainer,
-                        labelStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        labelStyle: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     )
                     .toList(),
@@ -267,7 +280,9 @@ class LicenseDetailPage extends StatelessWidget {
               ),
               child: SelectableText(
                 package.license ?? 'licenses_not_available'.tr(),
-                style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(fontFamily: 'JetBrainsMono'),
               ),
             ),
             const SizedBox(height: 16),
@@ -320,7 +335,7 @@ class LicenseDetailPage extends StatelessWidget {
           Expanded(
             child: Text(
               url,
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.primary,
                 decoration: TextDecoration.underline,
               ),

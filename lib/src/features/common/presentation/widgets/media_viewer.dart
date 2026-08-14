@@ -284,7 +284,10 @@ class _MediaViewerState extends State<MediaViewer> {
                           ),
                           child: Text(
                             '${_currentIndex + 1}/${widget.mediaItems.length}',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                           ),
                         ),
 

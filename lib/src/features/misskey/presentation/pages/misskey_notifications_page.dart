@@ -20,7 +20,9 @@ class MisskeyNotificationsPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'notifications_title'.tr(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           CircleIconButton(
@@ -158,7 +160,7 @@ class MisskeyNotificationsPage extends ConsumerWidget {
         _getNotificationText(notification),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 14),
+        style: theme.textTheme.bodyMedium,
       ),
       subtitle: Text(
         timeago.format(notification.createdAt),

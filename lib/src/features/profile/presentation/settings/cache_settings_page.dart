@@ -95,10 +95,18 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
       final totalSize = await cacheManager.getTotalCacheSize();
       final sqliteSize = await MisskeyImageCacheDatabase().getTotalCacheSize();
 
-      final contentImage = await cacheManager.getCategoryCacheSize(CacheCategory.image);
-      final contentAudio = await cacheManager.getCategoryCacheSize(CacheCategory.audio);
-      final contentTimeline = await cacheManager.getCategoryCacheSize(CacheCategory.timeline);
-      final contentOther = await cacheManager.getCategoryCacheSize(CacheCategory.other);
+      final contentImage = await cacheManager.getCategoryCacheSize(
+        CacheCategory.image,
+      );
+      final contentAudio = await cacheManager.getCategoryCacheSize(
+        CacheCategory.audio,
+      );
+      final contentTimeline = await cacheManager.getCategoryCacheSize(
+        CacheCategory.timeline,
+      );
+      final contentOther = await cacheManager.getCategoryCacheSize(
+        CacheCategory.other,
+      );
 
       final imageDb = MisskeyImageCacheDatabase();
       final sqliteByType = await imageDb.getCacheSizeByType();
@@ -107,9 +115,16 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
       final bannerSize = sqliteByType['banner'] ?? 0;
       final emojiSize = sqliteByType['emoji'] ?? 0;
       final thumbnailSize = sqliteByType['thumbnail'] ?? 0;
-      final sqliteOther = sqliteSize - avatarSize - postImageSize - bannerSize - emojiSize - thumbnailSize;
+      final sqliteOther =
+          sqliteSize -
+          avatarSize -
+          postImageSize -
+          bannerSize -
+          emojiSize -
+          thumbnailSize;
 
-      final timelineSize = await TimelineCacheDatabase().getTotalApproximateSize();
+      final timelineSize = await TimelineCacheDatabase()
+          .getTotalApproximateSize();
 
       if (mounted) {
         setState(() {
@@ -162,14 +177,20 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('确认重置应用'),
-        content: Text('这将清除所有账户、设置 and 缓存数据，使应用恢复到首次打开的状态。此操作无法撤销，应用将自动退出。'.tr()),
+        content: Text(
+          '这将清除所有账户、设置 and 缓存数据，使应用恢复到首次打开的状态。此操作无法撤销，应用将自动退出。'.tr(),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('取消'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('确认重置'),
           ),
@@ -216,7 +237,11 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
             child: const Text('取消'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('确定'),
           ),
@@ -254,7 +279,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('确定清理'),
@@ -316,11 +343,7 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
               padding: const EdgeInsets.only(top: 8, bottom: 32),
               children: [
                 // ── 缓存路径 ──────────────────────────────────
-                SettingsCardGroup(
-                  children: [
-                    _cachePathRow(colorScheme),
-                  ],
-                ),
+                SettingsCardGroup(children: [_cachePathRow(colorScheme)]),
 
                 const SizedBox(height: 16),
 
@@ -332,7 +355,10 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+                          side: BorderSide(
+                            color: colorScheme.outlineVariant,
+                            width: 0.5,
+                          ),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -341,34 +367,84 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(child: _buildSectorChart(
-                                    slices: [
-                                      _SectorSlice('图片', _contentImageSize, _chartPalette(context)[0]),
-                                      _SectorSlice('音频', _contentAudioSize, _chartPalette(context)[1]),
-                                      _SectorSlice('时间线文件', _contentTimelineSize, _chartPalette(context)[2]),
-                                      _SectorSlice('其他', _contentOtherSize, _chartPalette(context)[3]),
-                                    ],
-                                    touchedIndex: _touchedContentIndex,
-                                    onTouch: (i) => setState(() => _touchedContentIndex = i),
-                                    label: '内容缓存',
-                                  )),
+                                  Expanded(
+                                    child: _buildSectorChart(
+                                      slices: [
+                                        _SectorSlice(
+                                          '图片',
+                                          _contentImageSize,
+                                          _chartPalette(context)[0],
+                                        ),
+                                        _SectorSlice(
+                                          '音频',
+                                          _contentAudioSize,
+                                          _chartPalette(context)[1],
+                                        ),
+                                        _SectorSlice(
+                                          '时间线文件',
+                                          _contentTimelineSize,
+                                          _chartPalette(context)[2],
+                                        ),
+                                        _SectorSlice(
+                                          '其他',
+                                          _contentOtherSize,
+                                          _chartPalette(context)[3],
+                                        ),
+                                      ],
+                                      touchedIndex: _touchedContentIndex,
+                                      onTouch: (i) => setState(
+                                        () => _touchedContentIndex = i,
+                                      ),
+                                      label: '内容缓存',
+                                    ),
+                                  ),
                                   const SizedBox(width: 16),
-                                  Expanded(child: _buildSectorChart(
-                                    slices: [
-                                      _SectorSlice('时间线', _sqliteTimelineSize, _chartPalette(context)[0]),
-                                      _SectorSlice('用户头像', _sqliteAvatarSize, _chartPalette(context)[4]),
-                                      _SectorSlice('帖文图片', _sqlitePostImageSize, _chartPalette(context)[5]),
-                                      _SectorSlice('表情', _sqliteEmojiSize, _chartPalette(context)[6]),
-                                      _SectorSlice('横幅/缩略图', _sqliteBannerSize + _sqliteThumbnailSize, _chartPalette(context)[7]),
-                                      _SectorSlice('其他', _sqliteOtherSize, _chartPalette(context)[3]),
-                                    ],
-                                    touchedIndex: _touchedSqliteIndex,
-                                    onTouch: (i) => setState(() => _touchedSqliteIndex = i),
-                                    label: 'SQLite 缓存',
-                                  )),
+                                  Expanded(
+                                    child: _buildSectorChart(
+                                      slices: [
+                                        _SectorSlice(
+                                          '时间线',
+                                          _sqliteTimelineSize,
+                                          _chartPalette(context)[0],
+                                        ),
+                                        _SectorSlice(
+                                          '用户头像',
+                                          _sqliteAvatarSize,
+                                          _chartPalette(context)[4],
+                                        ),
+                                        _SectorSlice(
+                                          '帖文图片',
+                                          _sqlitePostImageSize,
+                                          _chartPalette(context)[5],
+                                        ),
+                                        _SectorSlice(
+                                          '表情',
+                                          _sqliteEmojiSize,
+                                          _chartPalette(context)[6],
+                                        ),
+                                        _SectorSlice(
+                                          '横幅/缩略图',
+                                          _sqliteBannerSize +
+                                              _sqliteThumbnailSize,
+                                          _chartPalette(context)[7],
+                                        ),
+                                        _SectorSlice(
+                                          '其他',
+                                          _sqliteOtherSize,
+                                          _chartPalette(context)[3],
+                                        ),
+                                      ],
+                                      touchedIndex: _touchedSqliteIndex,
+                                      onTouch: (i) => setState(
+                                        () => _touchedSqliteIndex = i,
+                                      ),
+                                      label: 'SQLite 缓存',
+                                    ),
+                                  ),
                                 ],
                               ),
-                              if (_touchedContentIndex >= 0 || _touchedSqliteIndex >= 0) ...[
+                              if (_touchedContentIndex >= 0 ||
+                                  _touchedSqliteIndex >= 0) ...[
                                 const SizedBox(height: 12),
                                 _buildTooltip(colorScheme),
                               ],
@@ -376,12 +452,27 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
                               const Divider(height: 1),
                               const SizedBox(height: 12),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('总计', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
                                   Text(
-                                    _formatBytes(_totalCacheSize + _sqliteCacheSize),
-                                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: colorScheme.primary),
+                                    '总计',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  Text(
+                                    _formatBytes(
+                                      _totalCacheSize + _sqliteCacheSize,
+                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: colorScheme.primary,
+                                        ),
                                   ),
                                 ],
                               ),
@@ -452,12 +543,17 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
       child: Row(
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: _chartPalette(context)[0].withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.folder_outlined, color: _chartPalette(context)[0], size: 20),
+            child: Icon(
+              Icons.folder_outlined,
+              color: _chartPalette(context)[0],
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -496,8 +592,12 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
   String _formatBytes(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    if (bytes < 1024 * 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+    if (bytes < 1024 * 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    }
     return '${(bytes / (1024 * 1024 * 1024 * 1024)).toStringAsFixed(1)} TB';
   }
 
@@ -508,7 +608,9 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
     required String label,
   }) {
     final nonZeroSlices = slices.where((s) => s.size > 0).toList();
-    final sections = List<PieChartSectionData>.generate(nonZeroSlices.length, (i) {
+    final sections = List<PieChartSectionData>.generate(nonZeroSlices.length, (
+      i,
+    ) {
       final isTouched = touchedIndex == i;
       return PieChartSectionData(
         value: nonZeroSlices[i].size.toDouble(),
@@ -542,13 +644,14 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
               sectionsSpace: 1,
               startDegreeOffset: -90,
               pieTouchData: PieTouchData(
-                touchCallback: (FlTouchEvent event, PieTouchResponse? response) {
-                  if (response == null || response.touchedSection == null) {
-                    onTouch(-1);
-                    return;
-                  }
-                  onTouch(response.touchedSection!.touchedSectionIndex);
-                },
+                touchCallback:
+                    (FlTouchEvent event, PieTouchResponse? response) {
+                      if (response == null || response.touchedSection == null) {
+                        onTouch(-1);
+                        return;
+                      }
+                      onTouch(response.touchedSection!.touchedSectionIndex);
+                    },
               ),
             ),
           ),
@@ -556,32 +659,40 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
         const SizedBox(height: 10),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 6),
-        ...nonZeroSlices.map((s) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 1.5),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 7, height: 7,
-                decoration: BoxDecoration(color: s.color, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 5),
-              Text(s.label, style: const TextStyle(fontSize: 11)),
-              const SizedBox(width: 4),
-              Text(
-                _formatBytes(s.size),
-                style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-            ],
+        ...nonZeroSlices.map(
+          (s) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 1.5),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: s.color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(s.label, style: Theme.of(context).textTheme.labelSmall),
+                const SizedBox(width: 4),
+                Text(
+                  _formatBytes(s.size),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -598,14 +709,20 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
       _SectorSlice('用户头像', _sqliteAvatarSize, _chartPalette(context)[4]),
       _SectorSlice('帖文图片', _sqlitePostImageSize, _chartPalette(context)[5]),
       _SectorSlice('表情', _sqliteEmojiSize, _chartPalette(context)[6]),
-      _SectorSlice('横幅/缩略图', _sqliteBannerSize + _sqliteThumbnailSize, _chartPalette(context)[7]),
+      _SectorSlice(
+        '横幅/缩略图',
+        _sqliteBannerSize + _sqliteThumbnailSize,
+        _chartPalette(context)[7],
+      ),
       _SectorSlice('其他', _sqliteOtherSize, _chartPalette(context)[3]),
     ];
 
     _SectorSlice? slice;
-    if (_touchedContentIndex >= 0 && _touchedContentIndex < contentSlices.length) {
+    if (_touchedContentIndex >= 0 &&
+        _touchedContentIndex < contentSlices.length) {
       slice = contentSlices[_touchedContentIndex];
-    } else if (_touchedSqliteIndex >= 0 && _touchedSqliteIndex < sqliteSlices.length) {
+    } else if (_touchedSqliteIndex >= 0 &&
+        _touchedSqliteIndex < sqliteSlices.length) {
       slice = sqliteSlices[_touchedSqliteIndex];
     }
 
@@ -622,15 +739,24 @@ class _CacheSettingsPageState extends ConsumerState<CacheSettingsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 10, height: 10,
-              decoration: BoxDecoration(color: slice.color, shape: BoxShape.circle),
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: slice.color,
+                shape: BoxShape.circle,
+              ),
             ),
             const SizedBox(width: 8),
-            Text(slice.label, style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              slice.label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(width: 8),
             Text(
               _formatBytes(slice.size),
-              style: TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),

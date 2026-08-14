@@ -18,11 +18,7 @@ class _UploadItem {
   double progress = 0;
   String? errorMessage;
 
-  _UploadItem({
-    required this.name,
-    required this.path,
-    required this.size,
-  });
+  _UploadItem({required this.name, required this.path, required this.size});
 }
 
 String _formatMaxSize(int maxFileSizeMb) {
@@ -88,11 +84,9 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
     setState(() {
       for (final file in result.files) {
         if (file.path != null && !_items.any((i) => i.path == file.path)) {
-          _items.add(_UploadItem(
-            name: file.name,
-            path: file.path!,
-            size: file.size,
-          ));
+          _items.add(
+            _UploadItem(name: file.name, path: file.path!, size: file.size),
+          );
         }
       }
     });
@@ -187,25 +181,34 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
         Expanded(
           child: Text(
             '你可以上传最大 ${_formatMaxSize(widget.maxFileSizeMb)} 的文件。',
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildFileList(ScrollController scrollController, ColorScheme colorScheme) {
+  Widget _buildFileList(
+    ScrollController scrollController,
+    ColorScheme colorScheme,
+  ) {
     if (_items.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_upload_outlined, size: 48, color: colorScheme.onSurface.withValues(alpha: 0.3)),
+            Icon(
+              Icons.cloud_upload_outlined,
+              size: 48,
+              color: colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 8),
-            Text('cloud_upload_empty'.tr(), style: TextStyle(color: colorScheme.onSurfaceVariant)),
+            Text(
+              'cloud_upload_empty'.tr(),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 16),
             _buildAddFileButton(colorScheme),
           ],
@@ -245,7 +248,7 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
                   children: [
                     Text(
                       item.name,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                      style: Theme.of(context).textTheme.labelLarge,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -254,9 +257,11 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
                       item.status == _UploadStatus.uploading
                           ? '上传中 ${(item.progress * 100).toInt()}%'
                           : item.status == _UploadStatus.failed
-                              ? '上传失败: ${item.errorMessage ?? "未知错误"}'
-                              : _formatFileSize(item.size),
-                      style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                          ? '上传失败: ${item.errorMessage ?? "未知错误"}'
+                          : _formatFileSize(item.size),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -267,12 +272,18 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    value: item.progress > 0 && item.progress < 1 ? null : item.progress,
+                    value: item.progress > 0 && item.progress < 1
+                        ? null
+                        : item.progress,
                   ),
                 ),
               if (item.status == _UploadStatus.failed && !_isUploading)
                 IconButton(
-                  icon: Icon(Icons.refresh_rounded, size: 18, color: colorScheme.error),
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    size: 18,
+                    color: colorScheme.error,
+                  ),
                   onPressed: () {
                     setState(() {
                       item.status = _UploadStatus.pending;
@@ -282,17 +293,27 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
                   },
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                 ),
               if (item.status == _UploadStatus.pending && !_isUploading)
                 IconButton(
-                  icon: Icon(Icons.close_rounded, size: 18, color: colorScheme.onSurfaceVariant),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                   onPressed: () {
                     setState(() => _items.remove(item));
                   },
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                 ),
             ],
           ),
@@ -316,13 +337,17 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
   }
 
   Widget _buildFileCountInfo(ColorScheme colorScheme) {
-    final completed = _items.where((i) => i.status == _UploadStatus.completed).length;
+    final completed = _items
+        .where((i) => i.status == _UploadStatus.completed)
+        .length;
     final failed = _items.where((i) => i.status == _UploadStatus.failed).length;
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Text(
         '共 ${_items.length} 个文件，$completed 成功${failed > 0 ? "，$failed 失败" : ""}',
-        style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
         textAlign: TextAlign.center,
       ),
     );
@@ -339,7 +364,9 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
             style: OutlinedButton.styleFrom(
               foregroundColor: colorScheme.onSurface,
               side: BorderSide(color: colorScheme.outline),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
@@ -349,14 +376,18 @@ class _CloudUploadSheetState extends ConsumerState<_CloudUploadSheet> {
           child: FilledButton.icon(
             onPressed: _isUploading || _items.isEmpty ? null : _startUpload,
             icon: Icon(
-              _isUploading ? Icons.hourglass_top_rounded : Icons.cloud_upload_rounded,
+              _isUploading
+                  ? Icons.hourglass_top_rounded
+                  : Icons.cloud_upload_rounded,
               size: 18,
             ),
             label: Text(_isUploading ? '上传中...' : 'cloud_upload'.tr()),
             style: FilledButton.styleFrom(
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),

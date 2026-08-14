@@ -45,11 +45,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final primaryAccount = selectedMisskey;
 
     final misskeyUser = primaryAccount?.platform == 'misskey'
-        ? ref.watch(misskeyMeProvider).when(
-            data: (user) => user,
-            loading: () => null,
-            error: (_, _) => null,
-          )
+        ? ref
+              .watch(misskeyMeProvider)
+              .when(
+                data: (user) => user,
+                loading: () => null,
+                error: (_, _) => null,
+              )
         : null;
 
     final bool isLoggedIn = primaryAccount != null;
@@ -60,9 +62,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           SliverAppBar(
             leading: CircleIconButton(
               icon: Icons.menu,
-              onPressed: () => ref
-                  .read(navigationControllerProvider.notifier)
-                  .openDrawer(),
+              onPressed: () =>
+                  ref.read(navigationControllerProvider.notifier).openDrawer(),
             ),
             title: Text('nav_me'.tr()),
             centerTitle: true,
@@ -110,7 +111,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               }
                             : null,
                         child: Hero(
-                          tag: 'profile_banner_${misskeyUser?.id ?? 'default'}$_heroSuffix',
+                          tag:
+                              'profile_banner_${misskeyUser?.id ?? 'default'}$_heroSuffix',
                           child: Container(
                             height: bannerHeight,
                             decoration: BoxDecoration(
@@ -263,11 +265,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                         primaryAccount.name ??
                                         primaryAccount.username ??
                                         'CyaniUser',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface,
-                                    ),
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.onSurface,
+                                        ),
                                   ),
                                   if (misskeyUser != null &&
                                       misskeyUser.badgeRoles.isNotEmpty)
@@ -308,8 +310,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                               ),
                               Text(
                                 '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
-                                style: TextStyle(
-                                  fontSize: 14,
+                                style: theme.textTheme.bodyMedium?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
@@ -321,9 +322,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 const SizedBox(width: 32),
-                Expanded(
-                  child: _buildUserStats(context, misskeyUser),
-                ),
+                Expanded(child: _buildUserStats(context, misskeyUser)),
               ],
             )
           else
@@ -350,8 +349,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   primaryAccount.name ??
                                   primaryAccount.username ??
                                   'CyaniUser',
-                              style: TextStyle(
-                                fontSize: 24,
+                              style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: theme.colorScheme.onSurface,
                               ),
@@ -390,8 +388,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         ),
                         Text(
                           '@${misskeyUser?.username ?? primaryAccount.username}@${primaryAccount.host}',
-                          style: TextStyle(
-                            fontSize: 14,
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -529,10 +526,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     AddAccountBottomSheet.show(context);
   }
 
-  Widget _buildUserStats(
-    BuildContext context,
-    MisskeyUser? misskeyUser,
-  ) {
+  Widget _buildUserStats(BuildContext context, MisskeyUser? misskeyUser) {
     if (misskeyUser == null) {
       return const SizedBox.shrink();
     }
@@ -594,16 +588,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       children: [
         Text(
           value,
-          style: TextStyle(
-            fontSize: 16,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),

@@ -29,7 +29,10 @@ class NotificationSettingsPage extends ConsumerWidget {
           children: [
             if (isDesktop)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -46,11 +49,12 @@ class NotificationSettingsPage extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'settings_notif_mobile_only'.tr(),
-                          style: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onErrorContainer,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onErrorContainer,
+                              ),
                         ),
                       ),
                     ],
@@ -117,7 +121,9 @@ class NotificationSettingsPage extends ConsumerWidget {
                   title: granted
                       ? 'settings_notif_permission_granted'.tr()
                       : 'settings_notif_permission_denied'.tr(),
-                  type: granted ? ToastificationType.success : ToastificationType.error,
+                  type: granted
+                      ? ToastificationType.success
+                      : ToastificationType.error,
                 );
               }
             },

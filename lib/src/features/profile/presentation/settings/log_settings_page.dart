@@ -46,11 +46,16 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
     if (mounted) {
       if (file != null) {
         showToast(
-          title: 'settings_logs_export_success'.tr(namedArgs: {'path': file.path}),
+          title: 'settings_logs_export_success'.tr(
+            namedArgs: {'path': file.path},
+          ),
           type: ToastificationType.success,
         );
       } else {
-        showToast(title: 'settings_logs_export_failed'.tr(), type: ToastificationType.error);
+        showToast(
+          title: 'settings_logs_export_failed'.tr(),
+          type: ToastificationType.error,
+        );
       }
     }
   }
@@ -81,7 +86,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       await logger.deleteLogs();
       await _refreshFileList();
       if (mounted) {
-        showToast(title: 'settings_logs_delete_success'.tr(), type: ToastificationType.success);
+        showToast(
+          title: 'settings_logs_delete_success'.tr(),
+          type: ToastificationType.success,
+        );
       }
     }
   }
@@ -96,10 +104,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       appBar: AppBar(
         title: Text('settings_logs_title'.tr()),
         actions: [
-          CircleIconButton(
-            icon: Icons.refresh,
-            onPressed: _refreshFileList,
-          ),
+          CircleIconButton(icon: Icons.refresh, onPressed: _refreshFileList),
         ],
       ),
       body: settings.when(
@@ -170,21 +175,30 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       child: Row(
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: SettingsIconColors.brown.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.tune, color: SettingsIconColors.brown, size: 20),
+            child: const Icon(
+              Icons.tune,
+              color: SettingsIconColors.brown,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('settings_logs_level'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  'settings_logs_level'.tr(),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
                 const SizedBox(height: 2),
-                Text('settings_logs_level_desc'.tr(),
+                Text(
+                  'settings_logs_level_desc'.tr(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -196,7 +210,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           DropdownButton<String>(
             value: config.logLevel.toLowerCase(),
             items: ['debug', 'info', 'warning', 'error']
-                .map((l) => DropdownMenuItem(value: l, child: Text(l.toUpperCase())))
+                .map(
+                  (l) =>
+                      DropdownMenuItem(value: l, child: Text(l.toUpperCase())),
+                )
                 .toList(),
             onChanged: (value) {
               if (value != null) {
@@ -216,21 +233,30 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       child: Row(
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: SettingsIconColors.cyan.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.storage, color: SettingsIconColors.cyan, size: 20),
+            child: const Icon(
+              Icons.storage,
+              color: SettingsIconColors.cyan,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('settings_logs_max_size'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  'settings_logs_max_size'.tr(),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
                 const SizedBox(height: 2),
-                Text('settings_logs_max_size_desc'.tr(),
+                Text(
+                  'settings_logs_max_size_desc'.tr(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -244,8 +270,13 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
             child: TextField(
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
-              decoration: const InputDecoration(suffixText: ' MB', isDense: true),
-              controller: TextEditingController(text: config.maxLogSize.toString()),
+              decoration: const InputDecoration(
+                suffixText: ' MB',
+                isDense: true,
+              ),
+              controller: TextEditingController(
+                text: config.maxLogSize.toString(),
+              ),
               onSubmitted: (value) {
                 final size = int.tryParse(value);
                 if (size != null && size > 0) {
@@ -266,21 +297,30 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       child: Row(
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: SettingsIconColors.amber.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.auto_delete, color: SettingsIconColors.amber, size: 20),
+            child: const Icon(
+              Icons.auto_delete,
+              color: SettingsIconColors.amber,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('settings_logs_auto_clear'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  'settings_logs_auto_clear'.tr(),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
                 const SizedBox(height: 2),
-                Text('settings_logs_auto_clear_desc'.tr(),
+                Text(
+                  'settings_logs_auto_clear_desc'.tr(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -291,7 +331,8 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
           const SizedBox(width: 16),
           ExpressiveSwitch(
             value: config.autoClear,
-            onChanged: (value) => ref.read(logSettingsProvider.notifier).setAutoClear(value),
+            onChanged: (value) =>
+                ref.read(logSettingsProvider.notifier).setAutoClear(value),
           ),
         ],
       ),
@@ -305,21 +346,30 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       child: Row(
         children: [
           Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: SettingsIconColors.amber.withAlpha(25),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.calendar_today, color: SettingsIconColors.amber, size: 20),
+            child: const Icon(
+              Icons.calendar_today,
+              color: SettingsIconColors.amber,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('settings_logs_retention_days'.tr(), style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  'settings_logs_retention_days'.tr(),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
                 const SizedBox(height: 2),
-                Text('settings_logs_retention_days_desc'.tr(),
+                Text(
+                  'settings_logs_retention_days_desc'.tr(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -333,8 +383,13 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
             child: TextField(
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
-              decoration: const InputDecoration(suffixText: ' Days', isDense: true),
-              controller: TextEditingController(text: config.retentionDays.toString()),
+              decoration: const InputDecoration(
+                suffixText: ' Days',
+                isDense: true,
+              ),
+              controller: TextEditingController(
+                text: config.retentionDays.toString(),
+              ),
               onSubmitted: (value) {
                 final days = int.tryParse(value);
                 if (days != null && days > 0) {
@@ -371,7 +426,7 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
             : Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Text(
           letter,
-          style: TextStyle(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: isCurrent
                 ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -381,7 +436,9 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
       ),
       title: Text(
         fileName,
-        style: TextStyle(fontWeight: isCurrent ? FontWeight.bold : null),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: isCurrent ? FontWeight.bold : null,
+        ),
       ),
       subtitle: Text('${stat.modified.toString().split('.').first} • $size KB'),
       onTap: () => _viewFileContent(context, file),
@@ -422,7 +479,10 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
                     ClipboardData(text: content.join('\n')),
                   );
                   if (context.mounted) {
-                    showToast(title: 'Copied to clipboard', type: ToastificationType.success);
+                    showToast(
+                      title: 'Copied to clipboard',
+                      type: ToastificationType.success,
+                    );
                   }
                 },
               ),
@@ -465,9 +525,8 @@ class _LogSettingsPageState extends ConsumerState<LogSettingsPage> {
 
     return SelectableText(
       line,
-      style: TextStyle(
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
         fontFamily: 'JetBrainsMono',
-        fontSize: 11,
         color: color,
         fontWeight: weight,
       ),
