@@ -259,7 +259,7 @@ class _PermissionGroup extends StatelessWidget {
                     Text(
                       p.scope,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        fontFamily: 'monospace',
+                        fontFamily: 'JetBrainsMono',
                         fontWeight: FontWeight.w500,
                       ),
                     ),

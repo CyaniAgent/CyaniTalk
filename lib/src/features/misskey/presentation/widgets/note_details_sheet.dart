@@ -826,7 +826,7 @@ class _NoteDetailsContentState extends ConsumerState<_NoteDetailsContent> {
             child: SelectableText(
               _getNoteRawData(),
               style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
+                fontFamily: 'JetBrainsMono',
               ),
             ),
           ),

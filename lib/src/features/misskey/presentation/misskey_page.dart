@@ -152,10 +152,6 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
               backgroundColor: isTimelineSelected
                   ? desktopColors.timelineBackground
                   : desktopColors.contentBackground,
-              surfaceTintColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
               leading: CircleIconButton(
                 icon: Icons.menu,
                 onPressed: () => ref

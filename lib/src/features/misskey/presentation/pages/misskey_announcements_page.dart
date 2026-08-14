@@ -48,32 +48,27 @@ class _MisskeyAnnouncementsPageState
   Widget build(BuildContext context) {
     final announcementsAsync = ref.watch(misskeyAnnouncementsProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('misskey_page_announcements'.tr()),
-      ),
-      body: announcementsAsync.when(
-        data: (announcements) {
-          if (announcements.isEmpty) {
-            return _buildEmptyState();
-          }
-          return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(misskeyAnnouncementsProvider.notifier).refresh(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: announcements.length,
-              separatorBuilder: (context, index) => const Divider(height: 32),
-              itemBuilder: (context, index) {
-                final announcement = announcements[index];
-                return _buildAnnouncementCard(announcement, index);
-              },
-            ),
-          );
-        },
-        loading: () => const Center(child: CyaniLoadingIndicator()),
-        error: (err, stack) => _buildErrorState(err),
-      ),
+    return announcementsAsync.when(
+      data: (announcements) {
+        if (announcements.isEmpty) {
+          return _buildEmptyState();
+        }
+        return RefreshIndicator(
+          onRefresh: () =>
+              ref.read(misskeyAnnouncementsProvider.notifier).refresh(),
+          child: ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: announcements.length,
+            separatorBuilder: (context, index) => const Divider(height: 32),
+            itemBuilder: (context, index) {
+              final announcement = announcements[index];
+              return _buildAnnouncementCard(announcement, index);
+            },
+          ),
+        );
+      },
+      loading: () => const Center(child: CyaniLoadingIndicator()),
+      error: (err, stack) => _buildErrorState(err),
     );
   }
 

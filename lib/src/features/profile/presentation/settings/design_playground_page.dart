@@ -611,7 +611,7 @@ class _ColorRow extends StatelessWidget {
             '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+            ).textTheme.bodySmall?.copyWith(fontFamily: 'JetBrainsMono'),
           ),
         ],
       ),
@@ -639,7 +639,7 @@ class _TypeRow extends StatelessWidget {
           Text(
             label,
             style: textTheme.bodySmall?.copyWith(
-              fontFamily: 'monospace',
+              fontFamily: 'JetBrainsMono',
               color: Theme.of(context).colorScheme.outline,
             ),
           ),
@@ -679,7 +679,7 @@ class _ShapeExample extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+          ).textTheme.bodyMedium?.copyWith(fontFamily: 'JetBrainsMono'),
         ),
         const Spacer(),
         Text(
@@ -707,7 +707,7 @@ class _TokenRow extends StatelessWidget {
               label,
               style: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.copyWith(fontFamily: 'monospace'),
+              ).textTheme.bodyMedium?.copyWith(fontFamily: 'JetBrainsMono'),
             ),
           ),
           Text(
@@ -783,7 +783,7 @@ class _ExpressiveSliderExampleState extends State<_ExpressiveSliderExample> {
         Text(
           widget.label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontFamily: 'monospace',
+            fontFamily: 'JetBrainsMono',
             color: theme.colorScheme.outline,
           ),
         ),
@@ -825,7 +825,7 @@ class _ExpressiveRangeSliderExampleState
         Text(
           widget.label,
           style: theme.textTheme.bodySmall?.copyWith(
-            fontFamily: 'monospace',
+            fontFamily: 'JetBrainsMono',
             color: theme.colorScheme.outline,
           ),
         ),

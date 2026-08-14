@@ -267,7 +267,7 @@ class LicenseDetailPage extends StatelessWidget {
               ),
               child: SelectableText(
                 package.license ?? 'licenses_not_available'.tr(),
-                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12),
               ),
             ),
             const SizedBox(height: 16),

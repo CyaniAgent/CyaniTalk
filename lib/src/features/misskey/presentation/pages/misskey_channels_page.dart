@@ -5,6 +5,8 @@ import 'package:Nyachi/src/features/misskey/application/misskey_notifier.dart';
 import 'package:Nyachi/src/features/misskey/domain/channel.dart';
 import 'package:Nyachi/src/features/misskey/presentation/pages/misskey_channel_details_page.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
+import '/src/shared/widgets/empty_state.dart';
+import '/src/shared/widgets/error_state.dart';
 
 /// Misskey 频道页面组件
 ///
@@ -36,29 +38,33 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('misskey_page_channels'.tr()),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: [
-            Tab(text: 'channels_tab_featured'.tr()),
-            Tab(text: 'channels_tab_favorites'.tr()),
-            Tab(text: 'channels_tab_following'.tr()),
-            Tab(text: 'channels_tab_managing'.tr()),
-          ],
+    return Column(
+      children: [
+        Material(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          child: TabBar(
+            controller: _tabController,
+            isScrollable: true,
+            tabs: [
+              Tab(text: 'channels_tab_featured'.tr()),
+              Tab(text: 'channels_tab_favorites'.tr()),
+              Tab(text: 'channels_tab_following'.tr()),
+              Tab(text: 'channels_tab_managing'.tr()),
+            ],
+          ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildChannelGrid(MisskeyChannelListType.featured),
-          _buildChannelGrid(MisskeyChannelListType.favorites),
-          _buildChannelGrid(MisskeyChannelListType.following),
-          _buildChannelGrid(MisskeyChannelListType.managing),
-        ],
-      ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildChannelGrid(MisskeyChannelListType.featured),
+              _buildChannelGrid(MisskeyChannelListType.favorites),
+              _buildChannelGrid(MisskeyChannelListType.following),
+              _buildChannelGrid(MisskeyChannelListType.managing),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -138,34 +144,15 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
         );
       },
       loading: () => const Center(child: CyaniLoadingIndicator()),
-      error: (err, stack) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-            const SizedBox(height: 16),
-            Text(
-              'common_loading_failed'.tr(),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Error: $err',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => ref
-                  .read(
-                    misskeyChannelsProvider(type: type, query: query).notifier,
-                  )
-                  .refresh(),
-              icon: const Icon(Icons.refresh),
-              label: Text('common_reload'.tr()),
-            ),
-          ],
-        ),
+      error: (err, stack) => ErrorState(
+        message: '${'common_loading_failed'.tr()}\nError: $err',
+        retryLabel: 'common_reload'.tr(),
+        onRetry: () => ref
+            .read(
+              misskeyChannelsProvider(type: type, query: query).notifier,
+            )
+            .refresh(),
+      ),
       ),
     );
   }
@@ -317,19 +304,6 @@ class _MisskeyChannelsPageState extends ConsumerState<MisskeyChannelsPage>
       message = 'search_no_results'.tr();
     }
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.forum_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(message),
-        ],
-      ),
-    );
+    return EmptyState(icon: Icons.forum_outlined, title: message);
   }
 }

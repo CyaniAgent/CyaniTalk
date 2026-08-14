@@ -12,7 +12,7 @@ import '/src/features/misskey/data/misskey_repository.dart';
 import '/src/features/misskey/presentation/widgets/modern_note_card.dart';
 import '/src/core/utils/logger.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
-import '/src/shared/widgets/cyani_error_widget.dart';
+import '/src/shared/widgets/error_state.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 
 class MisskeyUserProfilePage extends ConsumerStatefulWidget {
@@ -174,8 +174,8 @@ class _MisskeyUserProfilePageState
             ? _buildProfile(context, widget.initialUser!, isLoading: true)
             : const Center(child: CyaniLoadingIndicator()),
         error: (err, stack) => Scaffold(
-          appBar: AppBar(title: const Text('Error')),
-          body: CyaniErrorWidget(message: err.toString()),
+          appBar: AppBar(title: Text('common_error_occurred'.tr())),
+          body: ErrorState(message: err.toString()),
         ),
       ),
     );
@@ -811,7 +811,7 @@ class _MisskeyUserProfilePageState
             prettyJson,
             style: TextStyle(
               fontSize: 12,
-              fontFamily: 'monospace',
+              fontFamily: 'JetBrainsMono',
               color: theme.colorScheme.onSurface,
               height: 1.5,
             ),

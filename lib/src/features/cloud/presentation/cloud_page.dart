@@ -1798,7 +1798,7 @@ class _CloudPageState extends ConsumerState<CloudPage> with WidgetsBindingObserv
                         child: SelectableText(
                           file.url,
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(fontFamily: 'Monospace'),
+                              ?.copyWith(fontFamily: 'JetBrainsMono'),
                         ),
                       ),
                       const SizedBox(height: 16),

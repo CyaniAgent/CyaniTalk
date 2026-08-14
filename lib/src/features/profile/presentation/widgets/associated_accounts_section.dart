@@ -288,7 +288,7 @@ class _AssociatedAccountsSectionState
                 scrollDirection: Axis.horizontal,
                 child: SelectableText(
                   const JsonEncoder.withIndent('  ').convert(data),
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                  style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 12),
                 ),
               ),
             ),

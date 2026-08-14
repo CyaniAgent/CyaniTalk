@@ -68,7 +68,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                             maxLines: 3,
                             minLines: 2,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontFamily: 'monospace',
+                              fontFamily: 'JetBrainsMono',
                             ),
                             decoration: InputDecoration(
                               hintText: 'settings_network_custom_ua_hint'.tr(),
@@ -103,7 +103,7 @@ class _NetworkSettingsPageState extends ConsumerState<NetworkSettingsPage> {
                       child: Text(
                         Constants.getUserAgent(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
+                          fontFamily: 'JetBrainsMono',
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
