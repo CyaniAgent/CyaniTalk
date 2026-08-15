@@ -54,5 +54,18 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>cyaniagent.miauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nyachi-app</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

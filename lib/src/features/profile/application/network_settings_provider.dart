@@ -30,6 +30,9 @@ class NetworkSettings {
   /// HTTP 请求超时（秒）
   final int httpRequestTimeout;
 
+  /// 是否禁用 SSL 证书验证（用于自签名证书的实例）
+  final bool disableCertificateValidation;
+
   const NetworkSettings({
     required this.useCustomAgent,
     required this.customUserAgent,
@@ -39,6 +42,7 @@ class NetworkSettings {
     required this.webSocketReconnectAttempts,
     required this.webSocketBackgroundMaxDuration,
     required this.httpRequestTimeout,
+    required this.disableCertificateValidation,
   });
 
   static const NetworkSettings defaults = NetworkSettings(
@@ -50,6 +54,7 @@ class NetworkSettings {
     webSocketReconnectAttempts: 5,
     webSocketBackgroundMaxDuration: 3600,
     httpRequestTimeout: 30,
+    disableCertificateValidation: false,
   );
 
   /// 获取有效的 User Agent 字符串
@@ -69,6 +74,7 @@ class NetworkSettings {
     int? webSocketReconnectAttempts,
     int? webSocketBackgroundMaxDuration,
     int? httpRequestTimeout,
+    bool? disableCertificateValidation,
   }) {
     return NetworkSettings(
       useCustomAgent: useCustomAgent ?? this.useCustomAgent,
@@ -79,6 +85,7 @@ class NetworkSettings {
       webSocketReconnectAttempts: webSocketReconnectAttempts ?? this.webSocketReconnectAttempts,
       webSocketBackgroundMaxDuration: webSocketBackgroundMaxDuration ?? this.webSocketBackgroundMaxDuration,
       httpRequestTimeout: httpRequestTimeout ?? this.httpRequestTimeout,
+      disableCertificateValidation: disableCertificateValidation ?? this.disableCertificateValidation,
     );
   }
 
@@ -94,7 +101,8 @@ class NetworkSettings {
           loadEmojiMaxDuration == other.loadEmojiMaxDuration &&
           webSocketReconnectAttempts == other.webSocketReconnectAttempts &&
           webSocketBackgroundMaxDuration == other.webSocketBackgroundMaxDuration &&
-          httpRequestTimeout == other.httpRequestTimeout;
+          httpRequestTimeout == other.httpRequestTimeout &&
+          disableCertificateValidation == other.disableCertificateValidation;
 
   @override
   int get hashCode =>
@@ -105,7 +113,8 @@ class NetworkSettings {
       loadEmojiMaxDuration.hashCode ^
       webSocketReconnectAttempts.hashCode ^
       webSocketBackgroundMaxDuration.hashCode ^
-      httpRequestTimeout.hashCode;
+      httpRequestTimeout.hashCode ^
+      disableCertificateValidation.hashCode;
 }
 
 /// 网络设置状态管理器
@@ -119,6 +128,7 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
   static const String _webSocketReconnectAttemptsKey = 'network_websocket_reconnect_attempts';
   static const String _webSocketBackgroundMaxDurationKey = 'network_websocket_background_max_duration';
   static const String _httpRequestTimeoutKey = 'network_http_request_timeout';
+  static const String _disableCertificateValidationKey = 'network_disable_certificate_validation';
 
   @override
   Future<NetworkSettings> build() async {
@@ -133,6 +143,7 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
       webSocketReconnectAttempts: prefs.getInt(_webSocketReconnectAttemptsKey) ?? NetworkSettings.defaults.webSocketReconnectAttempts,
       webSocketBackgroundMaxDuration: prefs.getInt(_webSocketBackgroundMaxDurationKey) ?? NetworkSettings.defaults.webSocketBackgroundMaxDuration,
       httpRequestTimeout: prefs.getInt(_httpRequestTimeoutKey) ?? NetworkSettings.defaults.httpRequestTimeout,
+      disableCertificateValidation: prefs.getBool(_disableCertificateValidationKey) ?? NetworkSettings.defaults.disableCertificateValidation,
     );
   }
 
@@ -192,6 +203,13 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     state = AsyncData(state.value!.copyWith(httpRequestTimeout: duration));
   }
 
+  /// 切换 SSL 证书验证禁用状态
+  Future<void> toggleDisableCertificateValidation(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_disableCertificateValidationKey, value);
+    state = AsyncData(state.value!.copyWith(disableCertificateValidation: value));
+  }
+
   /// 恢复默认设置
   Future<void> restoreDefaults() async {
     final prefs = await SharedPreferences.getInstance();
@@ -203,6 +221,7 @@ class NetworkSettingsNotifier extends _$NetworkSettingsNotifier {
     await prefs.remove(_webSocketReconnectAttemptsKey);
     await prefs.remove(_webSocketBackgroundMaxDurationKey);
     await prefs.remove(_httpRequestTimeoutKey);
+    await prefs.remove(_disableCertificateValidationKey);
     state = const AsyncData(NetworkSettings.defaults);
   }
 }

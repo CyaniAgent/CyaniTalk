@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -48,29 +49,34 @@ class RetryInterceptor extends Interceptor {
   }
 
   bool _shouldRetry(DioException err) {
-    // 显式捕获 HandshakeException 和 Connection closed 错误喵！
-    final errorStr = err.toString().toLowerCase();
-    final isHandshakeError = errorStr.contains('handshake') || 
-                             errorStr.contains('terminated') ||
-                             errorStr.contains('connection closed');
-
-    // 特别处理 Windows 上的 "信号灯超时" (semaphore timeout) 错误
-    final isSemaphoreTimeout = errorStr.contains('121') || errorStr.contains('semaphore');
-
-    return err.type == DioExceptionType.connectionTimeout ||
-           err.type == DioExceptionType.sendTimeout ||
-           err.type == DioExceptionType.receiveTimeout ||
-           err.type == DioExceptionType.connectionError ||
-           err.type == DioExceptionType.unknown ||
-           isHandshakeError ||
-           isSemaphoreTimeout ||
-           (err.type == DioExceptionType.badResponse && 
-             (err.response?.statusCode != null &&
-              err.response!.statusCode! >= 500 && 
-              err.response!.statusCode! < 600 &&
-              err.response!.statusCode! != 500 &&
-              err.response!.statusCode! != 504 &&
-              err.response!.statusCode! != 524));  // 500/504/524 = 服务器内部错误/过载，重试只会加重伤害
+    // 基于 DioException.type 进行精确判断，避免依赖错误消息的字符串格式
+    // （字符串匹配在 Dart/Flutter 版本升级时可能静默失效）
+    switch (err.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return true;
+      case DioExceptionType.unknown:
+        // unknown 类型包含 HandshakeException、SocketException 等底层异常
+        // 检查底层错误类型以精确判断
+        final error = err.error;
+        return error is HandshakeException ||
+               error is SocketException ||
+               error is HttpException;
+      case DioExceptionType.badResponse:
+        final statusCode = err.response?.statusCode;
+        if (statusCode == null) return false;
+        // 5xx 服务器错误可重试，但排除过载场景（500/504/524 重试只会加重伤害）
+        return statusCode >= 500 &&
+               statusCode < 600 &&
+               statusCode != 500 &&
+               statusCode != 504 &&
+               statusCode != 524;
+      default:
+        // badCertificate / cancel / badResponse(4xx) 不重试
+        return false;
+    }
   }
 }
 
@@ -83,12 +89,15 @@ class NetworkClient {
   NetworkClient._internal();
 
   /// Creates a pre-configured Dio instance for a specific host and token.
+  ///
+  /// [timeout] 请求超时时间（秒），默认 30 秒。可通过 NetworkSettings.httpRequestTimeout 配置。
+  /// 证书验证由全局 [CyaniHttpOverrides] 统一管理，无需在此单独配置。
   Dio createDio({
     required String host,
     String? token,
     String? userAgent,
     Map<String, dynamic>? extraHeaders,
-    bool enableCertificateValidation = true,
+    int timeout = 30,
   }) {
     // 防御性清理：移除无效端口号（如 :0），防止 500/524 等错误
     final sanitizedHost = sanitizeHost(host);
@@ -96,14 +105,16 @@ class NetworkClient {
       logger.warning('NetworkClient: Sanitized host from "$host" to "$sanitizedHost"');
     }
 
-    logger.info('NetworkClient: Creating Dio instance for $sanitizedHost');
+    logger.info('NetworkClient: Creating Dio instance for $sanitizedHost (timeout=${timeout}s)');
+
+    final timeoutDuration = Duration(seconds: timeout);
 
     final dio = Dio(
       BaseOptions(
         baseUrl: 'https://$sanitizedHost',
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
+        connectTimeout: timeoutDuration,
+        receiveTimeout: timeoutDuration,
+        sendTimeout: timeoutDuration,
         headers: {
           'User-Agent': userAgent, 
           'Accept': '*/*', 
@@ -138,19 +149,51 @@ class NetworkClient {
         final client = HttpClient();
         
         // 针对桌面端常驻稳定性调优
-        client.connectionTimeout = const Duration(seconds: 30);
+        client.connectionTimeout = timeoutDuration;
         client.idleTimeout = const Duration(seconds: 100); // 增加闲置超时，避免连接被系统过早回收
         
-        if (!enableCertificateValidation) {
-          logger.warning('NetworkClient: SSL certificate validation disabled for $host');
-          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-        }
-        
+        // 证书验证由全局 CyaniHttpOverrides 统一管理，此处不再单独处理
         return client;
       },
-      validateCertificate: (cert, host, port) {
-        if (!enableCertificateValidation) return true;
-        return true; // Use default validation
+    );
+
+    return dio;
+  }
+
+  /// 创建用于文件下载的 Dio 实例。
+  ///
+  /// 与 [createDio] 不同，下载实例不设置 baseUrl（下载 URL 通常是完整路径），
+  /// 但仍享受 RetryInterceptor、PerformanceInterceptor 等拦截器栈。
+  /// 证书验证由全局 CyaniHttpOverrides 统一管理。
+  Dio createDownloadDio({
+    int timeout = 30,
+  }) {
+    final timeoutDuration = Duration(seconds: timeout);
+
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: timeoutDuration,
+        receiveTimeout: timeoutDuration,
+        sendTimeout: timeoutDuration,
+        headers: {
+          'Accept': '*/*',
+          'Connection': 'keep-alive',
+        },
+        validateStatus: (status) {
+          return status != null && status >= 200 && status < 400;
+        },
+      ),
+    );
+
+    dio.transformer = BackgroundTransformer();
+    dio.interceptors.add(PerformanceInterceptor());
+
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.connectionTimeout = timeoutDuration;
+        client.idleTimeout = const Duration(seconds: 100);
+        return client;
       },
     );
 
@@ -205,28 +248,78 @@ class PerformanceInterceptor extends Interceptor {
 }
 
 /// Rate limit interceptor to prevent excessive requests
+///
+/// 使用端点级别的滑动窗口限流，每端点每分钟最多 60 次请求。
+/// 带有定期清理旧键（防内存泄漏）和等待后重新检查（防竞态）。
 class RateLimitInterceptor extends Interceptor {
   final Map<String, List<DateTime>> _requestTimes = {};
-  final int _maxRequestsPerMinute = 60; // Adjust based on API limits
+  final int _maxRequestsPerMinute = 60;
+
+  /// 正在等待限流恢复的端点集合，防止多个并发请求同时绕过限流
+  final Set<String> _waitingEndpoints = {};
+
+  /// 定期清理旧键的计时器
+  Timer? _cleanupTimer;
+
+  RateLimitInterceptor() {
+    _cleanupTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      _cleanupStaleKeys();
+    });
+  }
 
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     final key = '${options.baseUrl}${options.path}';
     final now = DateTime.now();
 
-    // Clean up old requests
     _requestTimes.putIfAbsent(key, () => []);
-    _requestTimes[key]?.removeWhere((time) => now.difference(time).inMinutes > 1);
+    _requestTimes[key]!.removeWhere((time) => now.difference(time).inMinutes > 1);
 
-    // Check if we've exceeded the rate limit
+    // 检查是否超过限流
     if (_requestTimes[key]!.length >= _maxRequestsPerMinute) {
-      logger.warning('NetworkClient: Rate limit exceeded for ${options.path}, waiting...');
-      // Wait for 1 second before retrying
+      // 防止多个并发请求同时进入等待（竞态条件保护）
+      if (_waitingEndpoints.contains(key)) {
+        logger.debug('NetworkClient: Another request already waiting for ${options.path}, queuing...');
+      } else {
+        _waitingEndpoints.add(key);
+        logger.warning('NetworkClient: Rate limit exceeded for ${options.path}, waiting...');
+      }
+
+      // 等待 1 秒后重新检查，而非盲目放行
       await Future.delayed(const Duration(seconds: 1));
+
+      // 重新清理过期记录并再次检查
+      _requestTimes[key]!.removeWhere((time) => DateTime.now().difference(time).inMinutes > 1);
+      _waitingEndpoints.remove(key);
     }
 
-    // Record this request
-    _requestTimes[key]?.add(now);
+    // 记录本次请求（使用当前时间，确保滑动窗口准确）
+    _requestTimes[key]!.add(DateTime.now());
     return handler.next(options);
+  }
+
+  /// 清理长时间无请求的端点键，防止内存泄漏
+  void _cleanupStaleKeys() {
+    final now = DateTime.now();
+    final staleKeys = <String>[];
+
+    for (final entry in _requestTimes.entries) {
+      // 如果该端点最后一条记录已超过 5 分钟，移除整个键
+      if (entry.value.isEmpty ||
+          entry.value.every((time) => now.difference(time).inMinutes > 5)) {
+        staleKeys.add(entry.key);
+      }
+    }
+
+    for (final key in staleKeys) {
+      _requestTimes.remove(key);
+    }
+  }
+
+  /// 释放资源
+  void dispose() {
+    _cleanupTimer?.cancel();
+    _requestTimes.clear();
+    _waitingEndpoints.clear();
   }
 }

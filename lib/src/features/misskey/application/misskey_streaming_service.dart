@@ -35,10 +35,12 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   final Set<String> _activeTimelineSubscriptions = {};
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
+  Timer? _pongWatchdogTimer;
   Timer? _backgroundMaxTimer;
   Timer? _toastHideTimer;
   Future<void>? _audioPlayFuture;
   DateTime? _backgroundStartTime;
+  DateTime _lastPongReceived = DateTime.now();
   int _reconnectAttempts = 0;
   StreamingStatus _status = StreamingStatus.disconnected;
 
@@ -109,6 +111,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   void _cleanup() {
     _reconnectTimer?.cancel();
     _heartbeatTimer?.cancel();
+    _pongWatchdogTimer?.cancel();
     _backgroundMaxTimer?.cancel();
     _toastHideTimer?.cancel();
     _backgroundStartTime = null;
@@ -188,14 +191,21 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     logger.info('MisskeyStreaming: Connecting to $uri');
 
     try {
+      final networkSettings = ref.read(networkSettingsProvider).value;
+      final disableCertValidation = networkSettings?.disableCertificateValidation ?? false;
+
       final client = HttpClient();
-      client.badCertificateCallback = (cert, host, port) => true;
-      // 增加连接超时到 30s，防止后台被挂起时超时
-      client.connectionTimeout = const Duration(seconds: 30); 
+      // 仅在用户明确禁用证书验证时跳过（用于自签名证书的实例）
+      if (disableCertValidation) {
+        logger.warning('MisskeyStreaming: SSL certificate validation disabled by user setting');
+        client.badCertificateCallback = (cert, host, port) => true;
+      }
+      // 使用用户配置的超时时间（默认 30s），防止后台被挂起时超时
+      final timeoutSeconds = networkSettings?.httpRequestTimeout ?? 30;
+      client.connectionTimeout = Duration(seconds: timeoutSeconds);
       // 显式设置闲置超时
       client.idleTimeout = const Duration(seconds: 120);
 
-      final networkSettings = ref.read(networkSettingsProvider).value;
       final userAgent = networkSettings?.effectiveUserAgent ?? Constants.getUserAgent();
 
       // 使用局部变量防止竞态条件
@@ -341,21 +351,40 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
+    _pongWatchdogTimer?.cancel();
+    _lastPongReceived = DateTime.now(); // 连接刚建立，重置计时
     final interval = _heartbeatInterval;
+
+    // 心跳发送定时器
     _heartbeatTimer = Timer.periodic(interval, (timer) {
       if (_status == StreamingStatus.connected && _channel != null) {
         try {
-          // Misskey 官方网页客户端通常会发送一个简单的 "h" 作为应用层心跳
-          // 这在通过一些会超时断开连接的代理（如 Nginx/Cloudflare）时非常有效
           _channel!.sink.add('h');
           logger.debug('MisskeyStreaming: Sent app-level heartbeat ("h")');
         } catch (e) {
-          logger.error('MisskeyStreaming: Heartbeat failed: $e');
-          // 心跳失败可能表示连接已断开，尝试重连
+          logger.error('MisskeyStreaming: Heartbeat send failed: $e');
           final account = ref.read(selectedMisskeyAccountProvider).value;
           if (account != null) {
             _handleDisconnect(account);
           }
+        }
+      }
+    });
+
+    // Pong 监视定时器：检查是否在 2× 心跳间隔内收到过 pong/h 响应
+    // 如果超时未收到，说明连接已死但未触发 onDone
+    final watchdogInterval = Duration(seconds: interval.inSeconds * 2);
+    _pongWatchdogTimer = Timer.periodic(watchdogInterval, (timer) {
+      if (_status != StreamingStatus.connected || _channel == null) return;
+      final elapsed = DateTime.now().difference(_lastPongReceived);
+      if (elapsed > watchdogInterval) {
+        logger.warning(
+          'MisskeyStreaming: No pong/h received in ${elapsed.inSeconds}s '
+          '(expected ${watchdogInterval.inSeconds}s). Triggering reconnect.',
+        );
+        final account = ref.read(selectedMisskeyAccountProvider).value;
+        if (account != null) {
+          _handleDisconnect(account);
         }
       }
     });
@@ -441,8 +470,11 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   }
 
   void _handleMessage(dynamic message) {
-    // 忽略心跳响应
-    if (message == 'h' || message == 'pong') return;
+    // 忽略心跳响应，但更新最后 pong 时间用于连接活性检测
+    if (message == 'h' || message == 'pong') {
+      _lastPongReceived = DateTime.now();
+      return;
+    }
     
     logger.debug('MisskeyStreaming Received: $message');
 

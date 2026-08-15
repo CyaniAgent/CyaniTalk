@@ -60,22 +60,25 @@ class ApiRequestManager {
     });
   }
 
-  /// 生成请求键（包含账号标识，防止不同账号串台）
-  String _generateKey(String endpoint, [Map<String, dynamic>? params]) {
+  /// 生成请求键（包含账号标识 + HTTP 方法 + 端点 + 参数，防止不同账号串台和方法混淆）
+  String _generateKey(String method, String endpoint, [Map<String, dynamic>? params]) {
     final paramsString = params != null ? params.toString() : '';
-    return '$_accountKey:$endpoint:$paramsString';
+    return '$_accountKey:$method:$endpoint:$paramsString';
   }
 
   /// 执行 API 请求，支持缓存和去重
+  ///
+  /// [method] HTTP 方法（GET/POST 等），用于生成唯一的缓存键。
   Future<T> execute<T>(
     String endpoint,
     Future<T> Function() request, {
+    String method = 'POST',
     Map<String, dynamic>? params,
     Duration? cacheTtl,
     bool useCache = true,
     bool useDeduplication = true,
   }) async {
-    final key = _generateKey(endpoint, params);
+    final key = _generateKey(method, endpoint, params);
 
     // 检查是否有缓存且缓存有效
     if (useCache) {

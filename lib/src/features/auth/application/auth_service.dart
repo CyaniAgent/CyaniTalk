@@ -6,12 +6,21 @@ import 'package:dio/dio.dart';
 import '/src/features/auth/data/auth_repository.dart';
 import '/src/features/auth/domain/account.dart';
 import '/src/features/auth/domain/misskey_permissions.dart';
-import '/src/core/api/network_client.dart';
 import '/src/core/core.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/profile/application/network_settings_provider.dart';
 
 part 'auth_service.g.dart';
+
+/// MiAuth 单次检查结果
+enum MiAuthCheckResult {
+  /// 认证成功，已保存账户
+  success,
+  /// 用户尚未授权（服务器返回 ok: false）
+  pending,
+  /// 网络或服务器临时错误，可重试
+  networkError,
+}
 
 /// 认证服务类
 ///
@@ -19,6 +28,9 @@ part 'auth_service.g.dart';
 /// 管理认证状态和账户信息。
 @Riverpod(keepAlive: true)
 class AuthService extends _$AuthService {
+  /// MiAuth 轮询期间为 true，用于阻止 app.dart 切换后台模式
+  bool isMiAuthInProgress = false;
+
   /// 初始化认证服务状态
   ///
   /// 从认证仓库中获取所有已保存的账户，并将其作为初始状态。
@@ -41,6 +53,18 @@ class AuthService extends _$AuthService {
   /// @param host Misskey实例的主机地址
   /// @return 返回会话ID，用于后续检查认证状态
   Future<String> startMiAuth(String host) async {
+    return startMiAuthWithCallback(host);
+  }
+
+  /// 启动Misskey的MiAuth认证流程（带 Deep Link 回调）
+  ///
+  /// 生成会话ID，构建包含 `callback=nyachi-app://miauth` 的 MiAuth URL，
+  /// 然后打开浏览器进行授权。浏览器授权完成后会通过 Deep Link 回调
+  /// 将 session 参数带回应用，无需轮询。
+  ///
+  /// @param host Misskey实例的主机地址
+  /// @return 返回会话ID，用于后续检查认证状态
+  Future<String> startMiAuthWithCallback(String host) async {
     final sanitizedHost = _sanitizeHost(host);
     logger.info('开始Misskey MiAuth认证流程，主机: $sanitizedHost (原始: $host)');
     final accounts = await ref.read(authRepositoryProvider).getAccounts();
@@ -61,6 +85,7 @@ class AuthService extends _$AuthService {
     final uri = Uri.https(sanitizedHost, '/miauth/$session', {
       'name': 'Nyachi',
       'permission': MisskeyPermissions.toMiAuthString(),
+      'callback': 'nyachi-app://miauth',
     });
 
     logger.debug('生成MiAuth URL: ${uri.toString()}');
@@ -98,67 +123,62 @@ class AuthService extends _$AuthService {
 
   /// 成功时保存账户信息并刷新状态，失败时抛出异常
 
-  /// 检查Misskey MiAuth认证状态
+  /// 单次检查 MiAuth 认证状态（无内部循环，由调用方通过 Timer 轮询）
   ///
-  /// [host] - Misskey实例的主机地址
-  /// [session] - 认证会话ID
+  /// [host] Misskey 实例主机地址
+  /// [session] MiAuth 会话 ID
   ///
-  /// 成功时保存账户信息并刷新状态，失败时抛出异常
-  Future<void> checkMiAuth(String host, String session) async {
+  /// 返回 [MiAuthCheckResult] 枚举：
+  /// - [MiAuthCheckResult.success] 已保存账户
+  /// - [MiAuthCheckResult.pending] 用户尚未授权，可继续轮询
+  /// - [MiAuthCheckResult.networkError] 网络/服务器临时错误，可重试
+  Future<MiAuthCheckResult> checkMiAuth(
+    String host,
+    String session, {
+    CancelToken? cancelToken,
+  }) async {
     final sanitizedHost = _sanitizeHost(host);
-    logger.info('检查Misskey MiAuth认证状态，主机: $sanitizedHost');
+    logger.debug('MiAuth 单次检查: $sanitizedHost');
 
     final networkSettings = ref.read(networkSettingsProvider).value;
-    final dio = NetworkClient().createDio(
-      host: sanitizedHost,
-      userAgent: networkSettings?.effectiveUserAgent,
-    );
+    // 使用无 RetryInterceptor 的 Dio，避免与外部轮询机制叠加
+    // 超时设为 20 秒以兼容响应较慢的实例（如 hub.imikufans.com）
+    final dio = Dio(BaseOptions(
+      baseUrl: 'https://$sanitizedHost',
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
+      headers: {
+        'User-Agent': networkSettings?.effectiveUserAgent,
+        'Accept': 'application/json',
+      },
+    ));
 
-    int retryCount = 0;
-    const maxRetries = 10; // Increased retries for better UX on Android
+    try {
+      final response = await dio.post(
+        '/api/miauth/$session/check',
+        data: {},
+        cancelToken: cancelToken,
+      );
 
-    while (retryCount < maxRetries) {
-      try {
-        if (retryCount > 0) {
-          logger.debug('重试检查MiAuth状态 (${retryCount + 1}/$maxRetries)...');
-          // Adaptive delay: wait longer between retries later on
-          final delaySeconds = retryCount < 5 ? 2 : 4;
-          await Future.delayed(Duration(seconds: delaySeconds));
-        } else {
-          // Initial wait
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        logger.debug('发送MiAuth状态检查请求: /api/miauth/$session/check');
-        final response = await dio.post('/api/miauth/$session/check', data: {});
-        logger.debug('收到MiAuth状态检查响应');
-
-        final data = response.data;
-        // Check for both 'ok' field and strict 'true' value
-        if (data is Map && data['ok'] == true) {
-          await _handleSuccessfulAuth(data, sanitizedHost);
-          return;
-        } else {
-          // If 'ok' is false, it might mean 'pending' or 'denied'.
-          // However, Misskey API usually returns ok: true if authorized, and separate error otherwise?
-          // Actually, if it's still pending, it might just return ok: false or error.
-          // We will retry if it's likely a timing issue, or throw if it's definitive.
-          logger.debug('MiAuth检查未通过: $data');
-        }
-      } on DioException catch (e) {
-        logger.warning('检查MiAuth HTTP错误 (尝试 ${retryCount + 1}): ${e.message}');
-        if (e.response != null) {
-          logger.warning('响应体: ${e.response?.data}');
-        }
-        // Don't rethrow immediately on network glitches, try again
-      } catch (e) {
-        logger.error('检查MiAuth非预期错误: $e');
+      final data = response.data;
+      if (data is Map && data['ok'] == true) {
+        await _handleSuccessfulAuth(data, sanitizedHost);
+        return MiAuthCheckResult.success;
       }
 
-      retryCount++;
+      // ok: false — 用户尚未授权或已拒绝
+      logger.debug('MiAuth 未就绪: $data');
+      return MiAuthCheckResult.pending;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        return MiAuthCheckResult.pending; // 被取消，静默返回
+      }
+      logger.warning('MiAuth 网络错误: ${e.message}');
+      return MiAuthCheckResult.networkError;
+    } catch (e) {
+      logger.error('MiAuth 非预期错误: $e');
+      return MiAuthCheckResult.networkError;
     }
-
-    throw Exception('无法完成认证，请确认您已在浏览器中批准授权。');
   }
 
   Future<void> _handleSuccessfulAuth(
@@ -216,6 +236,123 @@ class AuthService extends _$AuthService {
     state = AsyncData(updatedAccounts);
 
     logger.info('Misskey MiAuth认证流程完成');
+  }
+
+  /// 通过 Deep Link 回调完成 MiAuth 认证
+  ///
+  /// 当浏览器重定向到 `nyachi-app://miauth?session=...&host=...` 时，
+  /// DeepLinkHandler 解析出 session 和 host，调用此方法完成认证。
+  /// 只需一次 /check 调用即可获取 token，无需轮询。
+  ///
+  /// [host] Misskey 实例主机地址
+  /// [session] MiAuth 会话 ID
+  ///
+  /// 返回 [MiAuthCheckResult] 枚举：成功或网络错误（不应返回 pending）
+  Future<MiAuthCheckResult> completeMiAuthFromDeepLink(
+    String host,
+    String session,
+  ) async {
+    logger.info('MiAuth Deep Link 回调完成: host=$host, session=$session');
+    return checkMiAuth(host, session);
+  }
+
+  /// 通过访问令牌（Access Token）直接登录 Misskey 实例
+  ///
+  /// 验证流程：调用 `/api/i` 端点获取当前用户信息，
+  /// 验证成功后保存账户。
+  ///
+  /// [host] Misskey 实例主机地址
+  /// [token] 用户的访问令牌
+  ///
+  /// 返回 true 表示登录成功，false 或抛出异常表示失败
+  Future<bool> loginWithToken(String host, String token) async {
+    final sanitizedHost = _sanitizeHost(host);
+    logger.info('通过访问令牌登录 Misskey: $sanitizedHost');
+
+    // 检查账户数量限制
+    final accounts = await ref.read(authRepositoryProvider).getAccounts();
+    final misskeyAccounts = accounts
+        .where((a) => a.platform == 'misskey')
+        .length;
+
+    if (misskeyAccounts >= 10) {
+      logger.warning('Misskey账户数量达到上限 (10个)');
+      throw Exception('已达到 10 个 Misskey 账户上限');
+    }
+
+    final networkSettings = ref.read(networkSettingsProvider).value;
+    final dio = Dio(BaseOptions(
+      baseUrl: 'https://$sanitizedHost',
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
+      headers: {
+        'User-Agent': networkSettings?.effectiveUserAgent,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ));
+
+    try {
+      // 使用访问令牌调用 /api/i 获取用户信息
+      final response = await dio.post(
+        '/api/i',
+        data: {'i': token},
+      );
+
+      final data = response.data;
+      if (data is Map && data['id'] != null) {
+        final accountId = '${data['id']}@$sanitizedHost';
+        logger.info('令牌验证成功，用户: ${data['username']}, 账户ID: $accountId');
+
+        final account = Account(
+          id: accountId,
+          platform: 'misskey',
+          host: sanitizedHost,
+          username: data['username'],
+          name: data['name'],
+          avatarUrl: data['avatarUrl'],
+          token: token,
+        );
+
+        await ref.read(authRepositoryProvider).saveAccount(account);
+        await ref.read(authRepositoryProvider).saveSelectedMisskeyId(account.id);
+
+        // 刷新状态
+        final updatedAccounts = await ref.read(authRepositoryProvider).getAccounts();
+        state = AsyncData(updatedAccounts);
+
+        logger.info('MiAuth Token 登录完成');
+        return true;
+      } else {
+        logger.error('令牌验证失败：响应格式异常');
+        throw Exception('访问令牌无效：服务器返回异常数据');
+      }
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      String message;
+      switch (statusCode) {
+        case 401:
+        case 403:
+          message = '访问令牌无效或已过期';
+          break;
+        case 404:
+          message = '实例地址错误或不支持 Misskey';
+          break;
+        case 500:
+        case 502:
+        case 503:
+          message = '服务器内部错误，请稍后重试';
+          break;
+        default:
+          message = '网络错误：${e.message}';
+      }
+      logger.error('MiAuth Token 登录失败: $message (HTTP $statusCode)');
+      throw Exception(message);
+    } catch (e) {
+      if (e is Exception) rethrow;
+      logger.error('MiAuth Token 登录非预期错误: $e');
+      throw Exception('登录失败：$e');
+    }
   }
 
   /// 删除指定ID的账户

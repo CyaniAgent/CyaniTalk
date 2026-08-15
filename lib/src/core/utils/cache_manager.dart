@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '/src/core/core.dart';
@@ -496,16 +495,7 @@ class CacheManager {
         final dio = Dio()..options.connectTimeout = downloadTimeout;
         dio.options.receiveTimeout = downloadTimeout;
 
-        // 处理 SSL/TLS 证书验证 (HandshakeException fix)
-        dio.httpClientAdapter = IOHttpClientAdapter(
-          createHttpClient: () {
-            final client = HttpClient();
-            client.badCertificateCallback =
-                (X509Certificate cert, String host, int port) => true;
-            return client;
-          },
-        );
-
+        // 证书验证由全局 CyaniHttpOverrides 统一管理
         await dio.download(url, cacheFilePath);
 
         // 检查缓存时间限制

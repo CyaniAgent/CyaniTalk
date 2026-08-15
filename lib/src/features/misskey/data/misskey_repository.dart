@@ -1478,6 +1478,7 @@ Future<IMisskeyRepository> misskeyRepository(Ref ref) async {
     host: account.host,
     token: account.token,
     userAgent: networkSettings?.effectiveUserAgent,
+    timeout: networkSettings?.httpRequestTimeout ?? 30,
   );
   return MisskeyRepository(api);
 }

@@ -94,63 +94,38 @@ abstract class BaseApi {
   /// ```
   Future<T> executeApiCall<T>(
     String operationName,
-    Future<Response> Function() apiCall,
+    Future<Response> Function(CancelToken?) apiCall,
     T Function(Response) parser, {
+    CancelToken? cancelToken,
     Map<String, dynamic>? params,
     Duration? cacheTtl,
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 2,
-    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
+    // 重试逻辑由 NetworkClient 中的 RetryInterceptor 统一处理（Dio 拦截器层），
+    // 业务层不再重复重试，避免双重重试导致最多 4 次尝试的问题。
     return apiRequestManager.execute(
       operationName,
       () async {
-        int retryCount = 0;
-
-        while (true) {
-          try {
-            if (retryCount > 0) {
-              logger.info(
-                '$operationName: 重试 (尝试 ${retryCount + 1}/$maxRetries)',
-              );
-            } else {
-              logger.info(
-                '$operationName: 开始 (尝试 ${retryCount + 1}/$maxRetries)',
-              );
-            }
-            final response = await apiCall();
-            final (data, error) = processResponse<T>(
-              response,
-              operationName,
-              parser: (_) => parser(response),
-            );
-            if (error != null) {
-              throw error;
-            }
-            if (data == null) {
-              throw Exception('$operationName 数据解析失败');
-            }
-            return data;
-          } catch (e) {
-            if (e is DioException) {
-              // 检查是否是可重试的错误
-              if (_isRetryableError(e) && retryCount < maxRetries) {
-                retryCount++;
-                // 优化：更加积极的指数退避策略
-                final delay = retryDelay * (1 << (retryCount - 1));
-                logger.warning(
-                  '$operationName: 检测到临时错误，${delay.inSeconds}秒后重试 (尝试 $retryCount/$maxRetries): ${e.message}',
-                );
-                await Future.delayed(delay);
-                continue;
-              }
-            }
-
-            if (e is Exception) rethrow;
-            throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+        try {
+          logger.info('$operationName: 开始');
+          final response = await apiCall(cancelToken);
+          final (data, error) = processResponse<T>(
+            response,
+            operationName,
+            parser: (_) => parser(response),
+          );
+          if (error != null) {
+            throw error;
           }
+          if (data == null) {
+            throw Exception('$operationName 数据解析失败');
+          }
+          return data;
+        } catch (e) {
+          if (e is Exception) rethrow;
+          throw handleError(e, operationName, dioErrorParser: dioErrorParser);
         }
       },
       params: params,
@@ -164,61 +139,36 @@ abstract class BaseApi {
   /// 当你想在更高层次处理错误时非常有用
   Future<(T?, Exception?)> executeApiCallSafe<T>(
     String operationName,
-    Future<Response> Function() apiCall,
+    Future<Response> Function(CancelToken?) apiCall,
     T Function(Response) parser, {
+    CancelToken? cancelToken,
     Map<String, dynamic>? params,
     Duration? cacheTtl,
     bool useCache = false,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 2,
-    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
+    // 重试逻辑由 RetryInterceptor 统一处理，业务层不再重复重试。
     return apiRequestManager.execute(
       operationName,
       () async {
-        int retryCount = 0;
-
-        while (true) {
-          try {
-            if (retryCount > 0) {
-              logger.info(
-                '$operationName: 重试 (尝试 ${retryCount + 1}/$maxRetries)',
-              );
-            } else {
-              logger.info(
-                '$operationName: 开始 (尝试 ${retryCount + 1}/$maxRetries)',
-              );
-            }
-            final response = await apiCall();
-            final (data, error) = processResponse<T>(
-              response,
-              operationName,
-              parser: (_) => parser(response),
-            );
-            return (data, error);
-          } catch (e) {
-            if (e is DioException) {
-              // check if retryable
-              if (_isRetryableError(e) && retryCount < maxRetries) {
-                retryCount++;
-                final delay = retryDelay * (1 << (retryCount - 1));
-                logger.warning(
-                  '$operationName: Transient error, retrying in ${delay.inMilliseconds}ms (attempt $retryCount/$maxRetries): ${e.message}',
-                );
-                await Future.delayed(delay);
-                continue;
-              }
-            }
-
-            if (e is Exception) {
-              return (null, e);
-            }
-            return (
-              null,
-              handleError(e, operationName, dioErrorParser: dioErrorParser),
-            );
+        try {
+          logger.info('$operationName: 开始');
+          final response = await apiCall(cancelToken);
+          final (data, error) = processResponse<T>(
+            response,
+            operationName,
+            parser: (_) => parser(response),
+          );
+          return (data, error);
+        } catch (e) {
+          if (e is Exception) {
+            return (null, e);
           }
+          return (
+            null,
+            handleError(e, operationName, dioErrorParser: dioErrorParser),
+          );
         }
       },
       params: params,
@@ -228,91 +178,41 @@ abstract class BaseApi {
     );
   }
 
-  /// 检查错误是否可重试
-  /// 包括超时、连接重置(RST)、握手失败等特殊情况
-  bool _isRetryableError(DioException error) {
-    // 显式捕获 HandshakeException、Connection closed 和 RST 错误
-    final errorStr = error.toString().toLowerCase();
-    final isNetworkError =
-        errorStr.contains('handshake') ||
-        errorStr.contains('terminated') ||
-        errorStr.contains('connection closed') ||
-        errorStr.contains('reset by peer') || // RST 错误
-        errorStr.contains('connection reset'); // 连接重置
-
-    return error.type == DioExceptionType.connectionTimeout || // 连接超时
-        error.type == DioExceptionType.sendTimeout || // 发送超时
-        error.type == DioExceptionType.receiveTimeout || // 接收超时
-        error.type == DioExceptionType.connectionError || // 连接错误
-        error.type == DioExceptionType.unknown || // 未知错误
-        isNetworkError || // 网络错误
-        (error.response?.statusCode != null &&
-            error.response!.statusCode! >= 502 &&
-            (error.response!.statusCode! == 429 ||
-             error.response!.statusCode! == 502 ||
-             error.response!.statusCode! == 503));  // 502/503 + 429 才重试，500/504/524 不重试
-  }
-
   /// 类似于 executeApiCall，但用于不返回数据的操作（无返回值操作）
   Future<void> executeApiCallVoid(
     String operationName,
-    Future<Response> Function() apiCall, {
+    Future<Response> Function(CancelToken?) apiCall, {
+    CancelToken? cancelToken,
     Map<String, dynamic>? params,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 2,
-    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
+    // 重试逻辑由 RetryInterceptor 统一处理，业务层不再重复重试。
     await apiRequestManager.execute(
       operationName,
       () async {
-        int retryCount = 0;
-
-        while (true) {
-          try {
-            if (retryCount > 0) {
-              logger.info(
-                '$operationName: Retrying (attempt ${retryCount + 1}/$maxRetries)',
-              );
-            } else {
-              logger.info(
-                '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
-              );
-            }
-            final response = await apiCall();
-            final (_, error) = processResponse<void>(response, operationName);
-            if (error != null) {
-              throw error;
-            }
-            return null;
-          } catch (e) {
-            if (e is DioException) {
-              // 检查是否是 400 错误，提供更详细的错误信息
-              if (e.response?.statusCode == 400) {
-                final errorMessage =
-                    e.response?.data?['error']?['message'] ?? 'Bad request';
-                logger.error(
-                  '$operationName: 400 Bad Request: $errorMessage',
-                  e,
-                );
-                throw Exception('$operationName failed: 400 - $errorMessage');
-              }
-
-              // 检查是否是可重试的错误
-              if (_isRetryableError(e) && retryCount < maxRetries) {
-                retryCount++;
-                final delay = retryDelay * (1 << (retryCount - 1));
-                logger.warning(
-                  '$operationName: Transient error detected, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
-                );
-                await Future.delayed(delay);
-                continue;
-              }
-            }
-
-            if (e is Exception) rethrow;
-            throw handleError(e, operationName, dioErrorParser: dioErrorParser);
+        try {
+          logger.info('$operationName: 开始');
+          final response = await apiCall(cancelToken);
+          final (_, error) = processResponse<void>(response, operationName);
+          if (error != null) {
+            throw error;
           }
+          return null;
+        } catch (e) {
+          // 检查是否是 400 错误，提供更详细的错误信息
+          if (e is DioException && e.response?.statusCode == 400) {
+            final errorMessage =
+                e.response?.data?['error']?['message'] ?? 'Bad request';
+            logger.error(
+              '$operationName: 400 Bad Request: $errorMessage',
+              e,
+            );
+            throw Exception('$operationName failed: 400 - $errorMessage');
+          }
+
+          if (e is Exception) rethrow;
+          throw handleError(e, operationName, dioErrorParser: dioErrorParser);
         }
       },
       params: params,
@@ -330,55 +230,29 @@ abstract class BaseApi {
   /// 当你想在更高层次处理错误时非常有用
   Future<(void, Exception?)> executeApiCallSafeVoid(
     String operationName,
-    Future<Response> Function() apiCall, {
+    Future<Response> Function(CancelToken?) apiCall, {
+    CancelToken? cancelToken,
     Map<String, dynamic>? params,
     bool useDeduplication = true,
     String Function(DioException)? dioErrorParser,
-    int maxRetries = 2,
-    Duration retryDelay = const Duration(milliseconds: 500),
   }) async {
+    // 重试逻辑由 RetryInterceptor 统一处理，业务层不再重复重试。
     return apiRequestManager.execute(
       operationName,
       () async {
-        int retryCount = 0;
-
-        while (true) {
-          try {
-            if (retryCount > 0) {
-              logger.info(
-                '$operationName: Retrying (attempt ${retryCount + 1}/$maxRetries)',
-              );
-            } else {
-              logger.info(
-                '$operationName: Starting (attempt ${retryCount + 1}/$maxRetries)',
-              );
-            }
-            final response = await apiCall();
-            final (_, error) = processResponse<void>(response, operationName);
-            return (null, error);
-          } catch (e) {
-            if (e is DioException) {
-              // 检查是否是可重试的错误
-              if (_isRetryableError(e) && retryCount < maxRetries) {
-                retryCount++;
-                // 优化：更加积极的指数退避策略
-                final delay = retryDelay * (1 << (retryCount - 1));
-                logger.warning(
-                  '$operationName: Transient error detected, retrying in ${delay.inSeconds}s (attempt $retryCount/$maxRetries): ${e.message}',
-                );
-                await Future.delayed(delay);
-                continue;
-              }
-            }
-
-            if (e is Exception) {
-              return (null, e);
-            }
-            return (
-              null,
-              handleError(e, operationName, dioErrorParser: dioErrorParser),
-            );
+        try {
+          logger.info('$operationName: 开始');
+          final response = await apiCall(cancelToken);
+          final (_, error) = processResponse<void>(response, operationName);
+          return (null, error);
+        } catch (e) {
+          if (e is Exception) {
+            return (null, e);
           }
+          return (
+            null,
+            handleError(e, operationName, dioErrorParser: dioErrorParser),
+          );
         }
       },
       params: params,

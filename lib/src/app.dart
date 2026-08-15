@@ -13,7 +13,9 @@ import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
 import 'core/services/dynamic_color_service.dart';
+import 'core/utils/deep_link_handler.dart';
 import 'routing/router.dart';
+import 'features/auth/application/auth_service.dart';
 import 'features/misskey/application/misskey_streaming_service.dart';
 import 'features/misskey/application/misskey_notifier.dart';
 import 'features/misskey/application/misskey_notifications_notifier.dart';
@@ -78,6 +80,9 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
     // 初始化动态取色服务（实时监听系统主题色变化）
     DynamicColorService.instance.initialize();
 
+    // 初始化 Deep Link 处理器（监听 nyachi-app:// URL Scheme 回调）
+    DeepLinkHandler.instance.initialize();
+
     // 初始化性能监控
     performanceMonitor.initialize();
 
@@ -98,6 +103,8 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
     WidgetsBinding.instance.removeObserver(this);
     // 清理动态取色服务
     DynamicColorService.instance.dispose();
+    // 清理 Deep Link 处理器
+    DeepLinkHandler.instance.dispose();
     super.dispose();
   }
 
@@ -125,6 +132,11 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
 
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
+      // MiAuth 轮询期间不切换后台模式，保持前台心跳
+      if (ref.read(authServiceProvider.notifier).isMiAuthInProgress) {
+        logger.info('NyachiApp: MiAuth 进行中，忽略后台事件');
+        return;
+      }
       // 应用进入后台：降低心跳频率省电，保留通知流/时间线流
       logger.info('NyachiApp: 应用进入后台，降低心跳频率...');
       ref

@@ -21,14 +21,21 @@ class MisskeyApi extends BaseApi {
   /// @param host Misskey实例的主机名
   /// @param token 认证令牌
   /// @param userAgent 可选的自定义 User Agent，为 null 时使用默认精简 UA
-  MisskeyApi({required this.host, required this.token, String? userAgent}) {
-    logger.info('MisskeyApi: Initializing for host: $host');
+  /// @param timeout 请求超时时间（秒），默认 30 秒
+  MisskeyApi({required this.host, required this.token, String? userAgent, int timeout = 30}) {
+    logger.info('MisskeyApi: Initializing for host: $host (timeout=${timeout}s)');
 
     _dio = NetworkClient().createDio(
       host: host,
       token: token,
       userAgent: userAgent ?? Constants.getUserAgent(),
+      timeout: timeout,
     );
+  }
+
+  /// 统一的 POST 请求辅助方法，自动传递 [cancelToken]。
+  Future<Response> _post(String path, {dynamic data, CancelToken? cancelToken}) {
+    return _dio.post(path, data: data, cancelToken: cancelToken);
   }
 
   /// 安全地将响应数据转换为 Map
@@ -53,7 +60,7 @@ class MisskeyApi extends BaseApi {
   /// @return (用户信息的Map对象, 错误) 元组
   Future<(Map<String, dynamic>?, Exception?)> i() => executeApiCallSafe(
     'MisskeyApi.i',
-    () => _dio.post('/api/i', data: {'i': token}),
+    (cancelToken) => _post('/api/i', data: {'i': token}),
     (response) => _toMap(response.data),
   );
 
@@ -69,7 +76,7 @@ class MisskeyApi extends BaseApi {
     if (noteId.isEmpty) return false;
     try {
       logger.debug('MisskeyApi: Checking if note exists: $noteId');
-      final response = await _dio.post(
+      final response = await _post(
         '/api/notes/show',
         data: {'i': token, 'noteId': noteId},
       );
@@ -110,7 +117,7 @@ class MisskeyApi extends BaseApi {
     if (noteId.isEmpty) throw Exception('noteId cannot be empty');
     logger.debug('MisskeyApi: Getting note: $noteId');
     try {
-      final response = await _dio.post(
+      final response = await _post(
         '/api/notes/show',
         data: {'i': token, 'noteId': noteId},
       );
@@ -143,7 +150,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> getDriveInfo() => executeApiCall(
     'MisskeyApi.getDriveInfo',
-    () => _dio.post('/api/drive', data: {'i': token}),
+    (cancelToken) => _post('/api/drive', data: {'i': token}),
     (response) => _toMap(response.data),
   );
 
@@ -163,7 +170,7 @@ class MisskeyApi extends BaseApi {
     Map<String, dynamic> data,
   ) => executeApiCall(
     operationName,
-    () => _dio.post(endpoint, data: {'i': token, ...data}),
+    (cancelToken) => _post(endpoint, data: {'i': token, ...data}),
     (response) {
       final responseData = response.data;
       if (responseData is List) {
@@ -299,7 +306,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> showChannel(String channelId) => executeApiCall(
     'MisskeyApi.showChannel',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/channels/show',
       data: {'i': token, 'channelId': channelId},
     ),
@@ -384,7 +391,7 @@ class MisskeyApi extends BaseApi {
     Map<String, dynamic>? poll,
   }) => executeApiCallSafeVoid(
     'MisskeyApi.createNote',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/notes/create',
       data: {
         'i': token,
@@ -422,7 +429,7 @@ class MisskeyApi extends BaseApi {
   Future<(void, Exception?)> createReaction(String noteId, String reaction) =>
       executeApiCallSafeVoid(
         'MisskeyApi.createReaction',
-        () => _dio.post(
+        (cancelToken) => _post(
           '/api/notes/reactions/create',
           data: {'i': token, 'noteId': noteId, 'reaction': reaction},
         ),
@@ -437,7 +444,7 @@ class MisskeyApi extends BaseApi {
   /// @return (void, 错误) 元组
   Future<(void, Exception?)> deleteReaction(String noteId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteReaction',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/notes/reactions/delete',
       data: {'i': token, 'noteId': noteId},
     ),
@@ -494,7 +501,7 @@ class MisskeyApi extends BaseApi {
     String? parentId,
   }) => executeApiCallSafe(
     'MisskeyApi.createDriveFolder',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/drive/folders/create',
       data: {'i': token, 'name': name, 'parentId': ?parentId},
     ),
@@ -509,7 +516,7 @@ class MisskeyApi extends BaseApi {
   /// @return (void, 错误) 元组
   Future<(void, Exception?)> deleteDriveFile(String fileId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteDriveFile',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/drive/files/delete',
       data: {'i': token, 'fileId': fileId},
     ),
@@ -524,7 +531,7 @@ class MisskeyApi extends BaseApi {
   /// @return (void, 错误) 元组
   Future<(void, Exception?)> deleteDriveFolder(String folderId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteDriveFolder',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/drive/folders/delete',
       data: {'i': token, 'folderId': folderId},
     ),
@@ -550,7 +557,7 @@ class MisskeyApi extends BaseApi {
     String? comment,
   }) => executeApiCallSafe(
     'MisskeyApi.updateDriveFile',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/drive/files/update',
       data: {
         'i': token,
@@ -574,7 +581,7 @@ class MisskeyApi extends BaseApi {
     String fileId,
   ) => executeApiCallSafe(
     'MisskeyApi.showDriveFile',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/drive/files/show',
       data: {'i': token, 'fileId': fileId},
     ),
@@ -596,7 +603,7 @@ class MisskeyApi extends BaseApi {
     String? parentId,
   }) => executeApiCallSafe(
     'MisskeyApi.updateDriveFolder',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/drive/folders/update',
       data: {
         'i': token,
@@ -624,7 +631,7 @@ class MisskeyApi extends BaseApi {
     final safeName = _sanitizeFileName(filename);
     return executeApiCallSafe(
       'MisskeyApi.uploadDriveFile',
-      () => _dio.post(
+      (cancelToken) => _post(
         '/api/drive/files/create',
         data: FormData.fromMap({
           'i': token,
@@ -690,14 +697,14 @@ class MisskeyApi extends BaseApi {
   /// @param limit 返回的消息数量限制，默认 10
   /// @return (消息历史记录列表, 错误) 元组
   Future<(List<dynamic>?, Exception?)> getMessagingHistory({int limit = 10}) =>
-      executeApiCallSafe('MisskeyApi.getMessagingHistory', () async {
+      executeApiCallSafe('MisskeyApi.getMessagingHistory', (cancelToken) async {
         try {
-          return await _dio.post(
+          return await _post(
             '/api/chat/history',
             data: {'i': token, 'limit': limit},
           );
         } catch (e) {
-          return await _dio.post(
+          return await _post(
             '/api/messaging/history',
             data: {'i': token, 'limit': limit},
           );
@@ -733,14 +740,14 @@ class MisskeyApi extends BaseApi {
 
     return executeApiCallSafe(
       'MisskeyApi.getMessagingMessages',
-      () async {
+      (cancelToken) async {
         try {
-          return await _dio.post(
+          return await _post(
             '/api/chat/messages/user-timeline',
             data: data,
           );
         } catch (e) {
-          return await _dio.post('/api/messaging/messages', data: data);
+          return await _post('/api/messaging/messages', data: data);
         }
       },
       (response) => response.data as List<dynamic>,
@@ -771,14 +778,14 @@ class MisskeyApi extends BaseApi {
 
     return executeApiCallSafe(
       'MisskeyApi.createMessagingMessage',
-      () async {
+      (cancelToken) async {
         try {
-          return await _dio.post(
+          return await _post(
             '/api/chat/messages/create-to-user',
             data: data,
           );
         } catch (e) {
-          return await _dio.post('/api/messaging/messages/create', data: data);
+          return await _post('/api/messaging/messages/create', data: data);
         }
       },
       (response) => _toMap(response.data),
@@ -793,7 +800,7 @@ class MisskeyApi extends BaseApi {
   /// @param messageId 要标记为已读的消息 ID
   Future<(void, Exception?)> readMessagingMessage(String messageId) => executeApiCallSafeVoid(
     'MisskeyApi.readMessagingMessage',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/messaging/messages/read',
       data: {'i': token, 'messageId': messageId},
     ),
@@ -808,7 +815,7 @@ class MisskeyApi extends BaseApi {
   /// @return (void, 错误) 元组
   Future<(void, Exception?)> deleteMessagingMessage(String messageId) => executeApiCallSafeVoid(
     'MisskeyApi.deleteMessagingMessage',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/chat/messages/delete',
       data: {'i': token, 'messageId': messageId},
     ),
@@ -826,7 +833,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> createChatRoom(String name) => executeApiCall(
     'MisskeyApi.createChatRoom',
-    () => _dio.post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
+    (cancelToken) => _post('/api/chat/rooms/create', data: {'i': token, 'name': name}),
     (response) => _toMap(response.data),
     params: {'name': name},
   );
@@ -840,11 +847,11 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果所有端点都请求失败
   Future<List<dynamic>> getChatRooms() => executeApiCall(
     'MisskeyApi.getChatRooms',
-    () async {
+    (cancelToken) async {
       try {
-        return await _dio.post('/api/chat/rooms/joining', data: {'i': token});
+        return await _post('/api/chat/rooms/joining', data: {'i': token});
       } catch (e) {
-        return await _dio.post('/api/users/groups/joined', data: {'i': token});
+        return await _post('/api/users/groups/joined', data: {'i': token});
       }
     },
     (response) => response.data as List<dynamic>,
@@ -879,7 +886,7 @@ class MisskeyApi extends BaseApi {
     String? fileId,
   }) => executeApiCallVoid(
     'MisskeyApi.sendChatRoomMessage',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/chat/messages/create-to-room',
       data: {'i': token, 'roomId': roomId, 'text': ?text, 'fileId': ?fileId},
     ),
@@ -903,7 +910,7 @@ class MisskeyApi extends BaseApi {
     String? description,
   }) => executeApiCall(
     'MisskeyApi.createClip',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/clips/create',
       data: {
         'i': token,
@@ -926,7 +933,7 @@ class MisskeyApi extends BaseApi {
   Future<void> addNoteToClip(String clipId, String noteId) =>
       executeApiCallVoid(
         'MisskeyApi.addNoteToClip',
-        () => _dio.post(
+        (cancelToken) => _post(
           '/api/clips/add-note',
           data: {'i': token, 'clipId': clipId, 'noteId': noteId},
         ),
@@ -944,7 +951,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<Map<String, dynamic>> showUser(String userId) => executeApiCall(
     'MisskeyApi.showUser',
-    () => _dio.post('/api/users/show', data: {'i': token, 'userId': userId}),
+    (cancelToken) => _post('/api/users/show', data: {'i': token, 'userId': userId}),
     (response) => _toMap(response.data),
     params: {'userId': userId},
   );
@@ -960,7 +967,7 @@ class MisskeyApi extends BaseApi {
   }) =>
       executeApiCall(
         'MisskeyApi.showUserByUsername',
-        () => _dio.post(
+        (cancelToken) => _post(
           '/api/users/show',
           data: {
             'i': token,
@@ -978,7 +985,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<void> createFollow(String userId) => executeApiCallVoid(
     'MisskeyApi.createFollow',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/following/create',
       data: {'i': token, 'userId': userId},
     ),
@@ -991,7 +998,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<void> deleteFollow(String userId) => executeApiCallVoid(
     'MisskeyApi.deleteFollow',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/following/delete',
       data: {'i': token, 'userId': userId},
     ),
@@ -1006,7 +1013,7 @@ class MisskeyApi extends BaseApi {
   Future<Map<String, dynamic>> getFollowRelation(String userId) =>
       executeApiCall(
         'MisskeyApi.getFollowRelation',
-        () => _dio.post(
+        (cancelToken) => _post(
           '/api/users/relation',
           data: {'i': token, 'userId': userId},
         ),
@@ -1042,7 +1049,7 @@ class MisskeyApi extends BaseApi {
   /// @throws DioException 如果请求失败
   Future<void> reportUser(String userId, String comment) => executeApiCallVoid(
     'MisskeyApi.reportUser',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/users/report-abuse',
       data: {'i': token, 'userId': userId, 'comment': comment},
     ),
@@ -1102,7 +1109,7 @@ class MisskeyApi extends BaseApi {
   /// @return (实例元数据的 Map 对象, 错误) 元组
   Future<(Map<String, dynamic>?, Exception?)> getMeta() => executeApiCallSafe(
     'MisskeyApi.getMeta',
-    () => _dio.post('/api/meta', data: {'i': token}),
+    (cancelToken) => _post('/api/meta', data: {'i': token}),
     (response) => _toMap(response.data),
   );
 
@@ -1172,7 +1179,7 @@ class MisskeyApi extends BaseApi {
   /// @return (表情详细信息的 Map 对象, 错误) 元组
   Future<(Map<String, dynamic>?, Exception?)> getEmoji(String name) => executeApiCallSafe(
     'MisskeyApi.getEmoji',
-    () => _dio.post('/api/emoji', data: {'i': token, 'name': name}),
+    (cancelToken) => _post('/api/emoji', data: {'i': token, 'name': name}),
     (response) => _toMap(response.data),
     params: {'name': name},
     cacheTtl: const Duration(minutes: 5),
@@ -1185,7 +1192,7 @@ class MisskeyApi extends BaseApi {
   /// @return (表情列表的 Map 对象, 错误) 元组
   Future<(Map<String, dynamic>?, Exception?)> getEmojis() => executeApiCallSafe(
     'MisskeyApi.getEmojis',
-    () => _dio.post('/api/emojis', data: {'i': token}),
+    (cancelToken) => _post('/api/emojis', data: {'i': token}),
     (response) => _toMap(response.data),
     cacheTtl: const Duration(minutes: 5),
   );
@@ -1218,7 +1225,7 @@ class MisskeyApi extends BaseApi {
   /// @return (void, 错误) 元组
   Future<(void, Exception?)> readAnnouncement(String announcementId) => executeApiCallSafeVoid(
     'MisskeyApi.readAnnouncement',
-    () => _dio.post(
+    (cancelToken) => _post(
       '/api/i/read-announcement',
       data: {'i': token, 'announcementId': announcementId},
     ),
@@ -1248,7 +1255,7 @@ class MisskeyApi extends BaseApi {
   }) =>
       executeApiCallSafe(
         'MisskeyApi.getNoteReactions',
-        () => _dio.post(
+        (cancelToken) => _post(
           '/api/notes/reactions',
           data: {
             'i': token,
@@ -1285,7 +1292,7 @@ class MisskeyApi extends BaseApi {
   Future<(void, Exception?)> votePoll(String noteId, int choice) =>
       executeApiCallSafeVoid(
         'MisskeyApi.votePoll',
-        () => _dio.post(
+        (cancelToken) => _post(
           '/api/notes/polls/vote',
           data: {'i': token, 'noteId': noteId, 'choice': choice},
         ),

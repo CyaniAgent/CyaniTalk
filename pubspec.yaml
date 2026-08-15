@@ -62,6 +62,10 @@ dependencies:
   uuid: ^4.5.3
   # URL启动器，用于打开浏览器、邮件、电话等
   url_launcher: ^6.3.2
+  # 跨平台Deep Link处理（自定义URL Scheme回调）
+  app_links: ^7.2.1
+  # Windows注册表操作（用于注册自定义URL协议）
+  win32_registry: ^2.1.0
   # Freezed的注解库，用于生成不可变数据类
   freezed_annotation: ^3.1.0
   # JSON序列化的注解库，用于生成JSON转换代码
@@ -72,12 +76,6 @@ dependencies:
   package_info_plus: ^9.0.0
   # 跨平台音频引擎，基于 SoLoud + miniaudio，支持 OGG/MP3/WAV/FLAC
   flutter_soloud: ^4.0.11
-  # Dio的Cookie管理器，用于处理HTTP请求中的Cookie
-  dio_cookie_manager: ^3.3.0
-  # Cookie存储库，用于持久化存储Cookie
-  cookie_jar: ^4.0.8
-  # Dio的HTTP/2适配器，支持HTTP/2协议
-  dio_http2_adapter: ^2.6.0
   # 轻量级本地存储库，用于存储键值对数据
   shared_preferences: ^2.5.4
   # 跨平台文件选择器，用于选择本地文件

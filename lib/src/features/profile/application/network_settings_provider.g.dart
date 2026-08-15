@@ -37,7 +37,7 @@ final class NetworkSettingsNotifierProvider
 }
 
 String _$networkSettingsNotifierHash() =>
-    r'c24e8865aafa293e5f33fa6f8941afaba4b46146';
+    r'5d29b8f8df1ba3bb889a44032b5fac9d311d0556';
 
 /// 网络设置状态管理器
 

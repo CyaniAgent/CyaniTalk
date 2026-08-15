@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 import '/src/core/services/timeline_cache_database.dart';
 import '/src/core/utils/logger.dart';
@@ -93,21 +93,24 @@ class FileMetadataService {
   }
 
   /// 从网络获取文件大小（通过 HEAD 请求获取 Content-Length）
+  ///
+  /// 使用 [Dio] 代替原始 [HttpClient]，享受全局 CyaniHttpOverrides 证书验证
+  /// 和统一的超时配置。
   Future<int?> _fetchFileSize(String fileUrl) async {
     try {
-      final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 30);
-      
-      final request = await client.headUrl(Uri.parse(fileUrl));
-      final response = await request.close();
-      
-      final contentLength = response.contentLength;
-      client.close();
-      
-      if (contentLength > 0) {
-        return contentLength;
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ));
+
+      final response = await dio.head(fileUrl);
+      final contentLength = response.headers.value('content-length');
+      final parsed = contentLength != null ? int.tryParse(contentLength) : null;
+
+      if (parsed != null && parsed > 0) {
+        return parsed;
       }
-      
+
       // HEAD 请求未返回 Content-Length 时，回退到 Range 请求
       return await _fetchFileSizeWithRange(fileUrl);
     } catch (e) {
@@ -119,16 +122,18 @@ class FileMetadataService {
   /// 使用 Range 请求获取文件大小（仅下载 1 字节）
   Future<int?> _fetchFileSizeWithRange(String fileUrl) async {
     try {
-      final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 30);
-      
-      final request = await client.getUrl(Uri.parse(fileUrl));
-      request.headers.set('Range', 'bytes=0-0');
-      final response = await request.close();
-      
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ));
+
+      final response = await dio.get(
+        fileUrl,
+        options: Options(headers: {'Range': 'bytes=0-0'}),
+      );
+
       final contentRange = response.headers.value('content-range');
-      client.close();
-      
+
       if (contentRange != null) {
         // 格式: bytes 0-0/12345
         final totalMatch = RegExp(r'/(\d+)').firstMatch(contentRange);
@@ -136,7 +141,7 @@ class FileMetadataService {
           return int.tryParse(totalMatch.group(1)!);
         }
       }
-      
+
       return null;
     } catch (e) {
       logger.error('FileMetadataService: Error fetching file size with range from $fileUrl', e);

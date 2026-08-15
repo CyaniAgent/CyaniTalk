@@ -45,7 +45,7 @@ final class AuthServiceProvider
   AuthService create() => AuthService();
 }
 
-String _$authServiceHash() => r'5e6e0bd3340cdcf4a4ed9915e01a17ac90abf997';
+String _$authServiceHash() => r'9440f71fd38e3a35573f86e55386f305431030df';
 
 /// 认证服务类
 ///
