@@ -1,0 +1,4 @@
+files:
+  - source: /assets/translations/zh-CN.json
+    translation: translated/%original_file_name%
+    multilingual: 1
