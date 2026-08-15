@@ -702,13 +702,11 @@
   "settings_network_restore_confirm": "所有网络设置将恢复为默认值。",
   "settings_network_restore_button": "恢复",
   "settings_network_restored": "设置已恢复为默认值",
-
   "appearance_light": "浅色模式",
   "appearance_dark": "深色模式",
   "appearance_system": "跟随系统",
   "appearance_system_font": "系统默认",
   "timeline": "时间线",
-
   "welcome_title": "欢迎使用 Nyachi !",
   "welcome_subtitle": "一款连接 Misskey 实例的实时通信 App。",
   "welcome_step0_button": "让我们开始吧！",
