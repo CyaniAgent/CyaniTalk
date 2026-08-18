@@ -59,13 +59,8 @@ class RootNavigationDrawer extends ConsumerWidget {
           isDrawer: true,
           isSelected: effectiveSelectedRootIndex == -1,
           onTap: () {
-            onRootSelected(
-              NavigationService.mapBranchIndexToDisplayIndex(
-                NavigationService.getBranchIndexForItem('me'),
-                navigationSettings!,
-                developerMode: developerMode,
-              ),
-            );
+            // 关闭抽屉
+            Navigator.of(context).pop();
           },
         ),
         const Divider(indent: 12, endIndent: 12),

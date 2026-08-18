@@ -23,6 +23,7 @@ import 'pages/misskey_follow_requests_page.dart';
 import 'pages/misskey_notes_page.dart';
 import 'pages/misskey_post_page.dart';
 import 'pages/misskey_timeline_page.dart';
+import 'widgets/avatar_menu_card.dart';
 import '/src/shared/widgets/circle_icon_button.dart';
 import '/src/shared/widgets/cyani_loading_indicator.dart';
 import 'widgets/timeline_selector_sheet.dart';
@@ -180,10 +181,28 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
                           .dismissToastAndReconnect();
                     },
                   ),
-                CircleIconButton(
-                  icon: Icons.search,
-                  tooltip: 'misskey_page_global_search'.tr(),
-                  onPressed: () => context.push('/search'),
+                // 用户头像按钮
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: GestureDetector(
+                    onTap: () {
+                      _showAvatarMenu(context);
+                    },
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      backgroundImage: selectedAccountAsync.value?.avatarUrl != null
+                          ? NetworkImage(selectedAccountAsync.value!.avatarUrl!)
+                          : null,
+                      child: selectedAccountAsync.value?.avatarUrl == null
+                          ? Icon(
+                              Icons.person,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            )
+                          : null,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -248,9 +267,30 @@ class _MisskeyPageState extends ConsumerState<MisskeyPage>
       if (mounted) {
         if (!context.mounted) return;
         showToast(title: 'misskey_page_please_login'.tr(), type: ToastificationType.warning);
-        context.go('/profile');
       }
     }
+  }
+
+  void _showAvatarMenu(BuildContext context) {
+    final overlay = Overlay.of(context);
+    final renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+
+    // 头像在 AppBar actions 区域的右侧，估算位置
+    final avatarCenter = Offset(
+      size.width - 24,
+      MediaQuery.of(context).padding.top + 28,
+    );
+
+    late OverlayEntry overlayEntry;
+    overlayEntry = OverlayEntry(
+      builder: (context) => _AnimatedAvatarMenu(
+        cardTop: avatarCenter.dy + 16,
+        cardRight: size.width - avatarCenter.dx + 8,
+        onDismiss: () => overlayEntry.remove(),
+      ),
+    );
+    overlay.insert(overlayEntry);
   }
 
   Widget _buildNoAccountState(BuildContext context) {
@@ -480,6 +520,102 @@ class _PulsingOnlineDotState extends State<_PulsingOnlineDot>
           ],
         );
       },
+    );
+  }
+}
+
+/// 带弹出/收起动画的头像菜单 Overlay 组件
+class _AnimatedAvatarMenu extends StatefulWidget {
+  final double cardTop;
+  final double cardRight;
+  final VoidCallback onDismiss;
+
+  const _AnimatedAvatarMenu({
+    required this.cardTop,
+    required this.cardRight,
+    required this.onDismiss,
+  });
+
+  @override
+  State<_AnimatedAvatarMenu> createState() => _AnimatedAvatarMenuState();
+}
+
+class _AnimatedAvatarMenuState extends State<_AnimatedAvatarMenu>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnim;
+  late final Animation<double> _fadeAnim;
+  bool _isClosing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _scaleAnim = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    _fadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
+    );
+    _controller.forward();
+  }
+
+  void _close() {
+    if (_isClosing) return;
+    _isClosing = true;
+    _controller.reverse().then((_) {
+      widget.onDismiss();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // 半透明遮罩（带淡入/淡出）
+        FadeTransition(
+          opacity: _fadeAnim,
+          child: GestureDetector(
+            onTap: _close,
+            child: Container(color: Colors.black54),
+          ),
+        ),
+        // 卡片（带缩放 + 淡入/淡出，从右上方展开）
+        Positioned(
+          top: widget.cardTop,
+          right: widget.cardRight,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _scaleAnim.value,
+                alignment: Alignment.topRight,
+                child: child,
+              );
+            },
+            child: Material(
+              color: Colors.transparent,
+              child: GestureDetector(
+                onTap: () {},
+                child: AvatarMenuCard(onDismiss: _close),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

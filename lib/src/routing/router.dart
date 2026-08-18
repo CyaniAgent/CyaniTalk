@@ -18,7 +18,6 @@ import 'package:Nyachi/src/features/misskey/presentation/pages/misskey_notificat
 import 'package:Nyachi/src/features/misskey/presentation/pages/misskey_user_profile_page.dart';
 import 'package:Nyachi/src/features/profile/application/developer_settings_provider.dart';
 import 'package:Nyachi/src/shared/widgets/error_state.dart';
-import 'package:Nyachi/src/features/profile/presentation/profile_page.dart';
 import 'package:Nyachi/src/features/profile/presentation/settings/about_page.dart';
 import 'package:Nyachi/src/features/profile/presentation/settings/developer_settings_page.dart';
 import 'package:Nyachi/src/features/profile/presentation/settings/licenses_page.dart';
@@ -155,17 +154,6 @@ GoRouter goRouter(Ref ref) {
                 pageBuilder: (context, state) => _buildSafePage(
                   key: state.pageKey,
                   child: _buildMessagingPage(context, state),
-                ),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/profile',
-                pageBuilder: (context, state) => _buildSafePage(
-                  key: state.pageKey,
-                  child: const ProfilePage(),
                 ),
               ),
             ],

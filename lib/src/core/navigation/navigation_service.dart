@@ -11,7 +11,6 @@ class NavigationService {
     'misskey': 0,
     'drive': 1,
     'messages': 2,
-    'me': 3,
   };
 
   /// 获取导航项对应的分支索引

@@ -166,7 +166,20 @@ class _MisskeyUserProfilePageState extends ConsumerState<MisskeyUserProfilePage>
         data: (user) => _buildProfile(context, user),
         loading: () => widget.initialUser != null
             ? _buildProfile(context, widget.initialUser!, isLoading: true)
-            : const Center(child: CyaniLoadingIndicator()),
+            : Column(
+                children: [
+                  AppBar(
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    title: const Text(''),
+                  ),
+                  const Expanded(
+                    child: Center(child: CyaniLoadingIndicator()),
+                  ),
+                ],
+              ),
         error: (err, stack) => Scaffold(
           appBar: AppBar(title: Text('common_error_occurred'.tr())),
           body: ErrorState(message: err.toString()),
@@ -508,6 +521,28 @@ class _MisskeyUserProfilePageState extends ConsumerState<MisskeyUserProfilePage>
         width: 24,
         height: 24,
         child: CircularProgressIndicator(strokeWidth: 2),
+      );
+    }
+
+    // 检查是否是自己的主页
+    final account = ref.read(selectedMisskeyAccountProvider).value;
+    final myUserId = account?.id.split('@').first;
+    final isSelf = myUserId == user.id;
+
+    if (isSelf) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          'user_cannot_follow_self'.tr(),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 14,
+          ),
+        ),
       );
     }
 

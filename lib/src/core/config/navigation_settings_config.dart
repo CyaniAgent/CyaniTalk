@@ -50,15 +50,6 @@ class NavigationSettingsConfig {
       'isRemovable': true,
       'subItems': [],
     },
-    {
-      'id': 'me',
-      'titleKey': 'nav_me',
-      'icon': Icons.person_outlined,
-      'selectedIcon': Icons.person,
-      'isEnabled': true,
-      'isRemovable': false, // 个人页面不可移除
-      'subItems': [],
-    },
   ];
 
   /// 默认导航元素配置

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
-export 'package:toastification/toastification.dart' show ToastificationType, toastification;
+export 'package:toastification/toastification.dart' show ToastificationItem, ToastificationType, toastification;
 
-void showToast({
+/// 显示一个 Toast 通知，返回 [ToastificationItem] 可用于后续 dismiss。
+ToastificationItem showToast({
   required String title,
   ToastificationType type = ToastificationType.info,
   String? description,
@@ -11,7 +12,7 @@ void showToast({
   VoidCallback? onTap,
   bool showIcon = true,
 }) {
-  toastification.show(
+  return toastification.show(
     type: type,
     style: ToastificationStyle.flatColored,
     title: Text(title),

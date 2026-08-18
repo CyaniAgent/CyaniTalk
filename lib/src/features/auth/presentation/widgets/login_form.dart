@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:dio/dio.dart';
 import 'package:Nyachi/src/shared/widgets/toast_helper.dart';
 import 'login_form_components.dart';
 import 'package:Nyachi/src/features/auth/application/auth_service.dart';
@@ -48,6 +49,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   String? _misskeyHost;
   String? _misskeySession;
   String? _proxyWarning;
+  String? _connectivityWarning;
 
   Timer? _miauthPollTimer;
   bool _previousMiauthState = false;
@@ -318,8 +320,49 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     }
 
     logger.info('LoginForm: Starting Misskey Direct auth for $displayHost');
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _connectivityWarning = null;
+    });
     try {
+      // ── 连通性测试：向实例发送 ping 请求，验证网络可达 ──
+      final testDio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ));
+      bool connectivityOk = true;
+      try {
+        final testResponse = await testDio.post(
+          'https://$displayHost/api/ping',
+          data: <String, dynamic>{},
+        );
+        if (testResponse.statusCode != null &&
+            testResponse.statusCode! >= 500) {
+          logger.warning(
+            'LoginForm: 实例返回 5xx: ${testResponse.statusCode}',
+          );
+          connectivityOk = false;
+        }
+      } on DioException catch (e) {
+        logger.warning(
+          'LoginForm: 实例连通性测试失败: ${e.type} - ${e.message}',
+        );
+        connectivityOk = false;
+      }
+
+      if (!connectivityOk) {
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _connectivityWarning =
+                'auth_miauth_connectivity_failed'.tr();
+            _currentStep = LoginStep.tokenInstructions;
+          });
+        }
+        return;
+      }
+
+      // ── 连通性正常，开始 MiAuth 认证 ──
       final proxyList = await detectProxyOrVpn();
       final warning = proxyList.isNotEmpty
           ? '检测到 ${proxyList.join('、')} 服务正在运行，可能影响 MiAuth 登录，建议关闭后重试。'
@@ -456,7 +499,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       case LoginStep.tokenInstructions:
         return TokenInstructionsStep(
           onUnderstood: () => _setStep(LoginStep.tokenInput),
-          onBack: () => _setStep(LoginStep.loginMethod),
+          onBack: () {
+            _connectivityWarning = null;
+            _setStep(LoginStep.loginMethod);
+          },
+          connectivityWarning: _connectivityWarning,
         );
       case LoginStep.tokenInput:
         return TokenInputStep(

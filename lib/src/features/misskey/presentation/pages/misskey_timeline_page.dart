@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:Nyachi/src/core/utils/logger.dart';
 import 'package:Nyachi/src/features/misskey/application/misskey_notifier.dart';
 import 'package:Nyachi/src/features/misskey/application/timeline_animation_state.dart';
@@ -206,44 +207,87 @@ class _MisskeyTimelinePageState extends ConsumerState<MisskeyTimelinePage> {
 
     return Listener(
       onPointerSignal: _onPointerSignal,
-      child: ListView.builder(
-        controller: _scrollController,
-      itemCount: notes.length + 1,
-      scrollCacheExtent: ScrollCacheExtent.pixels(isWindows ? 500 : 1500),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      physics: const AlwaysScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        if (index < notes.length) {
-          final note = notes[index];
-          final isRecent = animNotifier.isRecent(note.id);
-          final isHighlighted = animNotifier.isHighlighted(note.id);
+      child: Column(
+        children: [
+          // 搜索框
+          _buildSearchBar(),
+          // 帖子列表
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: notes.length + 1,
+              scrollCacheExtent: ScrollCacheExtent.pixels(isWindows ? 500 : 1500),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                if (index < notes.length) {
+                  final note = notes[index];
+                  final isRecent = animNotifier.isRecent(note.id);
+                  final isHighlighted = animNotifier.isHighlighted(note.id);
 
-          Widget card = ModernNoteCard(
-            key: ValueKey(note.id),
-            note: note,
-            timelineType: widget.timelineType,
-            isHighlighted: isHighlighted,
-            onHighlightEnd: () {
-              animNotifier.clearHighlight(note.id);
-            },
-          );
+                  Widget card = ModernNoteCard(
+                    key: ValueKey(note.id),
+                    note: note,
+                    timelineType: widget.timelineType,
+                    isHighlighted: isHighlighted,
+                    onHighlightEnd: () {
+                      animNotifier.clearHighlight(note.id);
+                    },
+                  );
 
-          if (isRecent) {
-            card = card
-                .animate(onComplete: (c) => c.stop())
-                .slideY(begin: -0.4, end: 0, duration: 350.ms,
-                    curve: Curves.easeOutCubic)
-                .fadeIn(duration: 350.ms, curve: Curves.easeOut);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              animNotifier.dismissRecent(note.id);
-            });
-          }
+                  if (isRecent) {
+                    card = card
+                        .animate(onComplete: (c) => c.stop())
+                        .slideY(begin: -0.4, end: 0, duration: 350.ms,
+                            curve: Curves.easeOutCubic)
+                        .fadeIn(duration: 350.ms, curve: Curves.easeOut);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      animNotifier.dismissRecent(note.id);
+                    });
+                  }
 
-          return card;
-        }
-        return _buildLoadMoreIndicator();
+                  return card;
+                }
+                return _buildLoadMoreIndicator();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return GestureDetector(
+      onTap: () {
+        context.push('/search');
       },
-    ),);
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(128),
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.search,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '搜索帖子、用户...',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildEmptyState(BuildContext context) {

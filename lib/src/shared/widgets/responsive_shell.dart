@@ -66,7 +66,6 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
                   element.type == NavigationElementType.item &&
                   element is NavigationItemElement &&
                   element.item.isEnabled &&
-                  element.item.id != 'me' &&
                   NavigationService.isItemVisible(
                     element.item.id,
                     developerMode,
@@ -100,11 +99,7 @@ class _ResponsiveShellState extends ConsumerState<ResponsiveShell> {
           developerMode: developerMode,
         );
 
-        final bool isMeSelected =
-            widget.navigationShell.currentIndex ==
-            NavigationService.getBranchIndexForItem('me');
-
-        if (isMeSelected || selectedRootIndex >= rootItems.length) {
+        if (selectedRootIndex >= rootItems.length) {
           selectedRootIndex = -1;
         }
 

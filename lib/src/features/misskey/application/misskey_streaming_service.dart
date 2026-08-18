@@ -32,6 +32,9 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   final _statusController = StreamController<StreamingStatus>.broadcast();
   final _toastVisibilityController = StreamController<bool>.broadcast();
 
+  /// 当前显示的重连 toast 引用，用于在显示新 toast 前关闭旧的
+  ToastificationItem? _currentReconnectToast;
+
   final Set<String> _activeTimelineSubscriptions = {};
   Timer? _reconnectTimer;
   Timer? _heartbeatTimer;
@@ -307,8 +310,11 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   }
 
   void _showReconnectToast() {
+    // 关闭旧的重连 toast，避免屏幕上堆积多个提示
+    _dismissCurrentReconnectToast();
+
     _toastVisibilityController.add(true);
-    showToast(
+    _currentReconnectToast = showToast(
       title: 'stream_disconnected'.tr(),
       description: 'stream_reconnecting'.tr(namedArgs: {'n': _reconnectAttempts.toString()}),
       type: ToastificationType.warning,
@@ -324,6 +330,9 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   }
 
   void _showMaxRetryToast() {
+    // 关闭旧的重连 toast，避免屏幕上堆积多个提示
+    _dismissCurrentReconnectToast();
+
     final soundAsync = ref.read(soundSettingsProvider);
     final soundPath = soundAsync.value?.streamErrorSound;
     if (soundPath != null && soundPath.isNotEmpty) {
@@ -332,7 +341,7 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     }
 
     _toastVisibilityController.add(true);
-    showToast(
+    _currentReconnectToast = showToast(
       title: 'stream_reconnect_failed_title'.tr(),
       description: 'stream_reconnect_failed_body'.tr(),
       type: ToastificationType.error,
@@ -340,13 +349,22 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
     );
   }
 
-  /// 关闭所有 Toast 并隐藏刷新按钮，然后尝试重连
+  /// 关闭当前 Toast 并隐藏刷新按钮，然后尝试重连
   void dismissToastAndReconnect() {
+    _dismissCurrentReconnectToast();
     toastification.dismissAll();
     _toastVisibilityController.add(false);
     _reconnectAttempts = 0;
     _reconnectTimer?.cancel();
     reconnect();
+  }
+
+  /// 关闭当前显示的重连 toast
+  void _dismissCurrentReconnectToast() {
+    if (_currentReconnectToast != null) {
+      toastification.dismiss(_currentReconnectToast!);
+      _currentReconnectToast = null;
+    }
   }
 
   void _startHeartbeat() {

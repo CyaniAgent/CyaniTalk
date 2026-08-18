@@ -10,7 +10,6 @@ class NavigationConfig {
     'misskey': 0,
     'drive': 1,
     'messages': 2,
-    'me': 3,
   };
 
   /// 页面ID与路由的映射关系
@@ -19,7 +18,6 @@ class NavigationConfig {
     'misskey': '/misskey',
     'drive': '/cloud',
     'messages': '/messaging',
-    'me': '/profile',
     'profile': '/profile',
     'search': '/search',
     'settings': '/settings',

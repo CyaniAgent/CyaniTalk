@@ -247,11 +247,13 @@ class HostInputStep extends StatelessWidget {
 class TokenInstructionsStep extends StatelessWidget {
   final VoidCallback onUnderstood;
   final VoidCallback onBack;
+  final String? connectivityWarning;
 
   const TokenInstructionsStep({
     super.key,
     required this.onUnderstood,
     required this.onBack,
+    this.connectivityWarning,
   });
 
   @override
@@ -262,6 +264,35 @@ class TokenInstructionsStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (connectivityWarning != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: theme.colorScheme.error,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      connectivityWarning!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           Text(
             'auth_token_instructions_intro'.tr(),
             style: theme.textTheme.bodyLarge,
