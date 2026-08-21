@@ -755,5 +755,8 @@
   "settings_developer_welcome_title": "喵",
   "settings_developer_welcome_description": "喵",
   "settings_developer_design_playground": "喵",
-  "settings_developer_design_playground_description": "喵"
+  "settings_developer_design_playground_description": "喵",
+  "settings_developer_network_debug_title": "喵",
+  "settings_developer_network_debug_description": "喵",
+  "settings_developer_network_debug_enabled_hint": "喵"
 }

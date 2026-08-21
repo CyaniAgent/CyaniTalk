@@ -9,6 +9,7 @@ import '/src/features/auth/domain/misskey_permissions.dart';
 import '/src/core/core.dart';
 import '/src/features/misskey/application/misskey_notifier.dart';
 import '/src/features/profile/application/network_settings_provider.dart';
+import '/src/features/http-server/miauth_local_server.dart';
 
 part 'auth_service.g.dart';
 
@@ -107,6 +108,67 @@ class AuthService extends _$AuthService {
       }
     } catch (e) {
       logger.error('启动MiAuth URL时发生错误: $e', e);
+      throw Exception('授权流程启动失败: 请检查您的设备是否安装了浏览器');
+    }
+  }
+
+  /// 启动 Misskey MiAuth 认证流程（桌面端：本地 HTTP 服务器回调）
+  ///
+  /// 在桌面端启动临时 HTTP 服务器，使用 http://127.0.0.1:{port}/miauth
+  /// 作为回调 URL，等待 Misskey 服务器回调。
+  ///
+  /// @param host Misskey 实例的主机地址
+  /// @return 返回 (session, 本地服务器实例)
+  Future<(String, MiAuthLocalServer)> startMiAuthDesktop(String host) async {
+    final sanitizedHost = _sanitizeHost(host);
+    logger.info('开始 Misskey MiAuth 桌面端认证流程，主机: $sanitizedHost');
+    final accounts = await ref.read(authRepositoryProvider).getAccounts();
+
+    final misskeyAccounts = accounts
+        .where((a) => a.platform == 'misskey')
+        .length;
+
+    logger.info('当前 Misskey 账户数量: $misskeyAccounts');
+    if (misskeyAccounts >= 10) {
+      logger.warning('Misskey 账户数量达到上限 (10个)');
+      throw Exception('You have reached the limit of 10 Misskey accounts.');
+    }
+
+    // 启动本地 HTTP 服务器
+    final server = MiAuthLocalServer();
+    final callbackBaseUrl = await server.start();
+    final callbackUrl = '$callbackBaseUrl?session={session}&host={host}';
+
+    logger.info('MiAuth 本地回调服务器已启动，回调 URL: $callbackUrl');
+
+    final session = const Uuid().v4();
+    logger.debug('生成 MiAuth 会话 ID: $session');
+
+    final uri = Uri.https(sanitizedHost, '/miauth/$session', {
+      'name': 'Nyachi',
+      'permission': MisskeyPermissions.toMiAuthString(),
+      'callback': '$callbackBaseUrl?session=$session&host=$sanitizedHost',
+    });
+
+    logger.debug('生成 MiAuth URL: ${uri.toString()}');
+
+    try {
+      logger.info('尝试启动浏览器进行 MiAuth 授权');
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) {
+        logger.info('MiAuth 授权页面已成功打开');
+        return (session, server);
+      } else {
+        await server.stop();
+        logger.error('启动 URL 返回失败: ${uri.toString()}');
+        throw Exception('无法打开浏览器进行授权');
+      }
+    } catch (e) {
+      await server.stop();
+      logger.error('启动 MiAuth URL 时发生错误: $e', e);
       throw Exception('授权流程启动失败: 请检查您的设备是否安装了浏览器');
     }
   }

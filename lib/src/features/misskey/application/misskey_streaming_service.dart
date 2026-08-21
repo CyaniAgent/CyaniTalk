@@ -45,6 +45,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
   DateTime? _backgroundStartTime;
   DateTime _lastPongReceived = DateTime.now();
   int _reconnectAttempts = 0;
+  int _preResetReconnectAttempts = 0;
+  DateTime? _connectionEstablishedAt;
   StreamingStatus _status = StreamingStatus.disconnected;
 
   static const _foregroundHeartbeat = Duration(seconds: 30);
@@ -231,6 +233,8 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
       }
 
       _updateStatus(StreamingStatus.connected);
+      _preResetReconnectAttempts = _reconnectAttempts;
+      _connectionEstablishedAt = DateTime.now();
       _reconnectAttempts = 0;
 
       channel.stream.listen(
@@ -280,6 +284,19 @@ class MisskeyStreamingService extends _$MisskeyStreamingService
 
     final settingsAsync = ref.read(networkSettingsProvider);
     final maxAttempts = settingsAsync.value?.webSocketReconnectAttempts ?? 5;
+
+    // 如果连接存活时间过短（<10秒），不重置退避计数，防止1秒重连风暴
+    if (_connectionEstablishedAt != null) {
+      final alive = DateTime.now().difference(_connectionEstablishedAt!);
+      if (alive < const Duration(seconds: 10)) {
+        _reconnectAttempts = _preResetReconnectAttempts;
+        logger.info(
+          'MisskeyStreaming: 连接仅存活 ${alive.inSeconds}s，'
+          '恢复退避计数为 $_reconnectAttempts',
+        );
+      }
+    }
+    _connectionEstablishedAt = null;
 
     _reconnectAttempts++;
 

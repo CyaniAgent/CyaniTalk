@@ -119,6 +119,9 @@ dependencies:
   m3e_core: ^0.1.5
   toastification: ^3.2.0
 
+  # 开发者调试工具（网络检查器、性能监控等，仅开发者模式启用）
+  debug_deck: ^0.7.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

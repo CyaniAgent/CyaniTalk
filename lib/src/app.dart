@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:debug_deck/debug_deck.dart';
 import 'core/core.dart';
 import 'core/theme/font_manager.dart';
 import 'core/theme/font_refresh_notifier.dart';
@@ -27,6 +28,7 @@ import 'features/update/presentation/update_bottom_sheet.dart';
 import 'core/services/audio_engine.dart';
 import 'core/services/timeline_cache_database.dart';
 import 'shared/widgets/custom_title_bar.dart';
+import 'features/profile/application/developer_settings_provider.dart';
 
 /// Nyachi应用程序的根组件
 ///
@@ -85,6 +87,9 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
 
     // 初始化性能监控
     performanceMonitor.initialize();
+
+    // 初始化 debug_deck（默认关闭，由开发者模式开关控制）
+    DebugTools.init(enabled: false);
 
     // 延迟检查更新（等待 UI 就绪）
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -194,6 +199,14 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
     // 监听欢迎页完成状态，触发路由刷新
     ref.listen(welcomeCompletedProvider, (prev, next) {
       routerRefreshNotifier.value++;
+    });
+
+    // 监听开发者模式变化，动态开关 debug_deck
+    ref.listen(developerSettingsProvider, (prev, next) {
+      next.whenData((isDevMode) {
+        DebugTools.setEnabled(isDevMode);
+        logger.info('NyachiApp: debug_deck ${isDevMode ? "已启用" : "已禁用"}');
+      });
     });
 
     // Get appearance settings
@@ -326,8 +339,9 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
                     supportedLocales: context.supportedLocales,
                     locale: context.locale,
                     builder: (context, child) {
+                      Widget content;
                       if (useCustomTitleBar) {
-                        return Stack(
+                        content = Stack(
                           children: [
                             Padding(
                               padding: EdgeInsets.only(
@@ -347,8 +361,33 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
                             ),
                           ],
                         );
+                      } else {
+                        content = child!;
                       }
-                      return child!;
+                      // debug_deck 浮动调试面板（始终挂载，通过 ValueListenableBuilder 驱动重建）
+                      // 使用两层 ValueListenableBuilder 分别监听 enabled 和 overlayHidden：
+                      // - 外层监听 enabledListenable：控制 Offstage 挂载/卸载，避免 widget 树替换
+                      // - 内层监听 overlayHidden：确保 showOverlay()/hideOverlay() 触发 rebuild
+                      // 这样彻底避免 DebugToolsHost 条件渲染导致的 node.built 断言失败
+                      return Stack(
+                        children: [
+                          content,
+                          ValueListenableBuilder<bool>(
+                            valueListenable: DebugTools.enabledListenable,
+                            builder: (context, enabled, _) {
+                              return ValueListenableBuilder<bool>(
+                                valueListenable: DebugTools.overlayHidden,
+                                builder: (context, _, _) {
+                                  return Offstage(
+                                    offstage: !enabled,
+                                    child: const DebugOverlay(),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ),

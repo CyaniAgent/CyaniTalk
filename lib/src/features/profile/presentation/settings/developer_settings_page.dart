@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:debug_deck/debug_deck.dart';
 import '/src/features/profile/application/developer_settings_provider.dart';
 import '/src/features/welcome/application/welcome_state.dart';
 import '/src/features/welcome/presentation/welcome_page.dart';
@@ -23,6 +24,18 @@ class DeveloperSettingsPage extends ConsumerStatefulWidget {
 
 class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
   // Colors moved to SettingsIconColors in core/theme/color_constants.dart
+
+  /// 打开网络调试工具（全端通用）
+  void _openNetworkDebugger() {
+    // 启用 debug_deck overlay 并重置可见性
+    DebugTools.setEnabled(true);
+    DebugTools.showOverlay();
+
+    showToast(
+      title: 'settings_developer_network_debug_enabled_hint'.tr(),
+      type: ToastificationType.info,
+    );
+  }
 
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
@@ -96,6 +109,13 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
               const SizedBox(height: 16),
               SettingsCardGroup(
                 children: [
+                  SettingsTile(
+                    icon: Icons.network_check,
+                    iconColor: SettingsIconColors.cyan,
+                    title: 'settings_developer_network_debug_title'.tr(),
+                    subtitle: 'settings_developer_network_debug_description'.tr(),
+                    onTap: _openNetworkDebugger,
+                  ),
                   SettingsTile(
                     icon: Icons.open_in_new,
                     iconColor: SettingsIconColors.amber,

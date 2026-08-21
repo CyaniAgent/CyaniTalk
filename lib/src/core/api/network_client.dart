@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:debug_deck/debug_deck.dart';
 import '/src/core/utils/utils.dart';
 
 /// A custom interceptor that retries failed requests up to a specified number of times.
@@ -132,6 +133,9 @@ class NetworkClient {
 
     dio.interceptors.add(RetryInterceptor(dio: dio, maxRetries: 2));
     dio.interceptors.add(PerformanceInterceptor());
+    // ── debug_deck 网络检查器（开发者模式时激活） ──
+    dio.interceptors.add(DebugTools.dioInterceptor());
+
     dio.interceptors.add(
       LogInterceptor(
         requestHeader: false,

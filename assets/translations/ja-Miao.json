@@ -753,5 +753,8 @@
   "settings_developer_welcome_title": "ウェルカムページを開くにゃー",
   "settings_developer_welcome_description": "初回設定ページを再度表示するにゃー（デバッグ用）。",
   "settings_developer_design_playground": "デザインプレイグラウンドにゃー",
-  "settings_developer_design_playground_description": "このアプリで使用されているすべてのデザインコンポーネントを表示するにゃー。Material Design 3 ベースにゃー。"
+  "settings_developer_design_playground_description": "このアプリで使用されているすべてのデザインコンポーネントを表示するにゃー。Material Design 3 ベースにゃー。",
+  "settings_developer_network_debug_title": "ネットワークデバッガーを開くにゃー",
+  "settings_developer_network_debug_description": "開発者以外は推奨しませんにゃー！高度なネットワークデバッグが可能ですにゃー",
+  "settings_developer_network_debug_enabled_hint": "ネットワークデバッグパネルが有効になりましたにゃー。🐛アイコンをクリックして開きますにゃー"
 }

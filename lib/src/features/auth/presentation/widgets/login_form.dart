@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:Nyachi/src/features/misskey/application/misskey_streaming_servic
 import 'package:Nyachi/src/core/utils/logger.dart';
 import 'package:Nyachi/src/core/utils/proxy_detection.dart';
 import 'package:Nyachi/src/core/utils/deep_link_handler.dart';
+import 'package:Nyachi/src/features/http-server/miauth_local_server.dart';
 
 /// 统一的登录表单控件
 ///
@@ -57,6 +59,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   int _consecutiveNetworkErrors = 0;
   bool _isManualChecking = false;
 
+  /// 桌面端 MiAuth 本地 HTTP 服务器
+  MiAuthLocalServer? _desktopServer;
+
   @override
   void initState() {
     super.initState();
@@ -71,6 +76,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     _cancelMiAuthTimeout();
     _restoreMiAuthLifecycle();
     _unregisterDeepLinkCallback();
+    _desktopServer?.stop();
     _misskeyHostController.dispose();
     _tokenHostController.dispose();
     _tokenController.dispose();
@@ -79,9 +85,31 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   // ── MiAuth Deep Link + 轮询回退 ────────────────────────────────
 
+  /// 当前平台是否为桌面端（Windows/macOS/Linux）
+  static bool get _isDesktop => Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+
   void _startMiAuthVerification() {
     _consecutiveNetworkErrors = 0;
 
+    // 桌面端：不启动轮询，等待本地 HTTP 服务器回调
+    if (_isDesktop) {
+      logger.info('LoginForm: 桌面端模式，跳过轮询，等待本地 HTTP 服务器回调');
+      _cancelMiAuthTimeout();
+      _miauthTimeoutTimer = Timer(const Duration(seconds: 90), () {
+        if (!mounted) return;
+        logger.warning('LoginForm: MiAuth 90 秒超时');
+        _desktopServer?.stop();
+        _restoreMiAuthLifecycle();
+        setState(() => _currentStep = LoginStep.misskeyDirectLogin);
+        showToast(
+          title: 'MiAuth 认证超时（90 秒），请重试',
+          type: ToastificationType.error,
+        );
+      });
+      return;
+    }
+
+    // 移动端：使用 Deep Link + 轮询
     DeepLinkHandler.instance.onMiAuthCallback = _onDeepLinkCallback;
     logger.info('LoginForm: 已注册 Deep Link MiAuth 回调');
 
@@ -368,25 +396,126 @@ class _LoginFormState extends ConsumerState<LoginForm> {
           ? '检测到 ${proxyList.join('、')} 服务正在运行，可能影响 MiAuth 登录，建议关闭后重试。'
           : null;
 
-      final session = await ref
-          .read(authServiceProvider.notifier)
-          .startMiAuth(host);
-      if (mounted) {
-        setState(() {
-          _misskeyHost = host;
-          _misskeySession = session;
-          _proxyWarning = warning;
-          _currentStep = LoginStep.misskeyCheckAuth;
-          _loading = false;
-        });
-        _suppressMiAuthLifecycle();
-        _startMiAuthVerification();
+      if (_isDesktop) {
+        // 桌面端：启动本地 HTTP 服务器接收回调
+        final (session, server) = await ref
+            .read(authServiceProvider.notifier)
+            .startMiAuthDesktop(host);
+        _desktopServer = server;
+        if (mounted) {
+          setState(() {
+            _misskeyHost = host;
+            _misskeySession = session;
+            _proxyWarning = warning;
+            _currentStep = LoginStep.misskeyCheckAuth;
+            _loading = false;
+          });
+          _suppressMiAuthLifecycle();
+          _startMiAuthVerification();
+          // 启动后台监听等待回调
+          _waitForDesktopCallback(server, session, host);
+        }
+      } else {
+        // 移动端：使用 Deep Link + 轮询
+        final session = await ref
+            .read(authServiceProvider.notifier)
+            .startMiAuth(host);
+        if (mounted) {
+          setState(() {
+            _misskeyHost = host;
+            _misskeySession = session;
+            _proxyWarning = warning;
+            _currentStep = LoginStep.misskeyCheckAuth;
+            _loading = false;
+          });
+          _suppressMiAuthLifecycle();
+          _startMiAuthVerification();
+        }
       }
     } catch (e) {
       logger.error('LoginForm: MiAuth Direct error', e);
+      _desktopServer?.stop();
+      _desktopServer = null;
       if (mounted) {
         setState(() => _loading = false);
         _showError(e.toString());
+      }
+    }
+  }
+
+  /// 桌面端：等待本地 HTTP 服务器回调，完成后验证 session
+  Future<void> _waitForDesktopCallback(
+    MiAuthLocalServer server,
+    String session,
+    String host,
+  ) async {
+    try {
+      logger.info('LoginForm: 桌面端等待 MiAuth 回调...');
+      final callbackResult = await server.waitForCallback();
+
+      // 收到回调，关闭服务器（一次性使用）
+      await server.stop();
+
+      if (!mounted) return;
+
+      // session 匹配校验
+      if (callbackResult.session != session) {
+        logger.warning(
+          'LoginForm: 桌面端回调 session 不匹配 (expected=$session, got=${callbackResult.session})',
+        );
+        showToast(
+          title: '认证失败：session 不匹配',
+          type: ToastificationType.error,
+        );
+        _cancelMiAuth();
+        return;
+      }
+
+      // 通过 /api/miauth/{session}/check 完成认证（与 Deep Link 相同流程）
+      final authService = ref.read(authServiceProvider.notifier);
+      final result = await authService.completeMiAuthFromDeepLink(
+        callbackResult.host,
+        callbackResult.session,
+      );
+
+      if (!mounted) return;
+
+      switch (result) {
+        case MiAuthCheckResult.success:
+          _cancelMiAuthTimeout();
+          _restoreMiAuthLifecycle();
+          logger.info('LoginForm: 桌面端 MiAuth 登录成功');
+          widget.onLoginSuccess?.call();
+          if (widget.isBottomSheet) Navigator.pop(context);
+          break;
+        case MiAuthCheckResult.pending:
+          // check 已经收到回调，不应返回 pending
+          logger.warning('LoginForm: 桌面端 checkMiAuth 返回 pending');
+          showToast(
+            title: '认证失败：服务端未返回有效凭证',
+            type: ToastificationType.error,
+          );
+          _cancelMiAuth();
+          break;
+        case MiAuthCheckResult.networkError:
+          logger.warning('LoginForm: 桌面端 checkMiAuth 网络错误');
+          showToast(
+            title: '认证失败：网络错误，请重试',
+            type: ToastificationType.error,
+          );
+          _cancelMiAuth();
+          break;
+      }
+    } catch (e) {
+      logger.error('LoginForm: 桌面端 MiAuth 回调处理失败', e);
+      await _desktopServer?.stop();
+      _desktopServer = null;
+      if (mounted) {
+        showToast(
+          title: '认证失败：${e.toString()}',
+          type: ToastificationType.error,
+        );
+        _cancelMiAuth();
       }
     }
   }
@@ -396,6 +525,8 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     _cancelMiAuthTimeout();
     _unregisterDeepLinkCallback();
     _restoreMiAuthLifecycle();
+    _desktopServer?.stop();
+    _desktopServer = null;
     setState(() => _currentStep = LoginStep.misskeyDirectLogin);
   }
 

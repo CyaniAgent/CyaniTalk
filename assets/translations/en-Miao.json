@@ -753,5 +753,8 @@
   "settings_developer_welcome_title": "Open Welcome Page nyaa~",
   "settings_developer_welcome_description": "Re-enter the initial setup page for debugging nyaa~",
   "settings_developer_design_playground": "Design Playground nyaa~",
-  "settings_developer_design_playground_description": "Showcases all design components used in this app, based on Material Design 3 component library nyaa~"
+  "settings_developer_design_playground_description": "Showcases all design components used in this app, based on Material Design 3 component library nyaa~",
+  "settings_developer_network_debug_title": "Open Network Debugger nyaa~",
+  "settings_developer_network_debug_description": "Not recommended for non-developers nyaa! Provides advanced network debugging nyaa~",
+  "settings_developer_network_debug_enabled_hint": "Network debug panel enabled nyaa~. Click the 🐛 icon to open nyaa~"
 }

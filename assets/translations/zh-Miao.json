@@ -753,5 +753,8 @@
   "settings_developer_welcome_title": "打开欢迎页面喵~",
   "settings_developer_welcome_description": "进入第一次配置的页面，作为页面调试使用喵~。",
   "settings_developer_design_playground": "设计展示喵~",
-  "settings_developer_design_playground_description": "展示本 App 使用的所有设计，基于 Material Design 3 等组件库喵~。"
+  "settings_developer_design_playground_description": "展示本 App 使用的所有设计，基于 Material Design 3 等组件库喵~。",
+  "settings_developer_network_debug_title": "打开网络调试工具喵~",
+  "settings_developer_network_debug_description": "非专业开发者不建议使用喵！可进行高级的网络调试喵~。",
+  "settings_developer_network_debug_enabled_hint": "网络调试面板已启用喵~，点击 🐛 图标打开喵~"
 }
