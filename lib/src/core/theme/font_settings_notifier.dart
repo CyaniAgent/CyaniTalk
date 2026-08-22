@@ -239,7 +239,7 @@ String? currentFontFamily(Ref ref) {
   return settingsAsync.when(
     data: (settings) {
       final font = settings.selectedFont;
-      if (font == null) return 'MiSans'; // 默认字体
+      if (font == null) return 'Linar Sans'; // 默认字体
 
       if (font.type == FontType.systemFont) {
         return null; // 使用系统默认字体
@@ -252,7 +252,7 @@ String? currentFontFamily(Ref ref) {
       // 下载字体，返回字体 ID 作为字体族名
       return font.id;
     },
-    loading: () => 'MiSans',
-    error: (error, stackTrace) => 'MiSans',
+    loading: () => 'Linar Sans',
+    error: (error, stackTrace) => 'Linar Sans',
   );
 }

@@ -321,7 +321,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              _buildFontOption(theme, 'MiSans'),
+              _buildFontOption(theme, 'linar_sans'),
               const SizedBox(height: 8),
               _buildFontOption(theme, 'system'),
             ],
@@ -393,7 +393,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
         ?.value
         .selectedFontId;
     final isSelected = currentFont == fontId;
-    final label = fontId == 'MiSans' ? 'MiSans' : 'appearance_system_font'.tr();
+    final label = fontId == 'linar_sans' ? 'Linar Sans' : 'appearance_system_font'.tr();
 
     return InkWell(
       onTap: () => _selectFont(fontId),
@@ -417,7 +417,7 @@ class _WelcomePageState extends ConsumerState<WelcomePage> {
               child: Text(
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  fontFamily: fontId == 'MiSans' ? 'MiSans' : null,
+                  fontFamily: fontId == 'linar_sans' ? 'Linar Sans' : null,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),

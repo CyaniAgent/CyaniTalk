@@ -70,11 +70,11 @@ class FontManager {
   /// 预定义字体列表
   static const List<FontInfo> availableFonts = [
     FontInfo(
-      id: 'misans',
+      id: 'linar_sans',
       metadataId: 0,
-      displayName: 'MiSans (App Font)',
+      displayName: 'Linar Sans',
       type: FontType.appFont,
-      localPath: 'MiSans',
+      localPath: 'Linar Sans',
     ),
     FontInfo(
       id: 'system',
@@ -82,22 +82,6 @@ class FontManager {
       displayName: 'System Font',
       type: FontType.systemFont,
       localPath: null,
-    ),
-    FontInfo(
-      id: 'star_rail',
-      metadataId: 2,
-      displayName: 'Star Rail',
-      type: FontType.downloadedFont,
-      downloadUrl: 'https://bavoice.imikufans.cn/Nyachi_data/fonts/StarRailFont.ttf',
-      fileName: 'StarRailFont.ttf',
-    ),
-    FontInfo(
-      id: 'gakumas_sans',
-      metadataId: 3,
-      displayName: 'Gakumas Sans',
-      type: FontType.downloadedFont,
-      downloadUrl: 'https://bavoice.imikufans.cn/Nyachi_data/fonts/gakumas-font.ttf',
-      fileName: 'gakumas-font.ttf',
     ),
   ];
 
@@ -274,8 +258,8 @@ class FontManager {
       return null; // 使用系统默认
     }
     
-    if (fontId == 'misans') {
-      return baseTheme; // 使用内置 MiSans
+    if (fontId == 'linar_sans') {
+      return baseTheme; // 使用内置 Linar Sans
     }
 
     // 检查是否已注册
@@ -341,10 +325,10 @@ class FontManager {
   static Future<String> getSelectedFontId() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_prefSelectedFont) ?? 'misans'; // 默认使用 MiSans
+      return prefs.getString(_prefSelectedFont) ?? 'linar_sans'; // 默认使用 Linar Sans
     } catch (e) {
       logger.error('FontManager: Failed to get selected font ID', e);
-      return 'misans';
+      return 'linar_sans';
     }
   }
 

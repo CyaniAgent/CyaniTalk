@@ -221,9 +221,11 @@ flutter:
   # 有关来自包依赖项的字体的详细信息，请查看
   # https://flutter.dev/to/font-from-package
   fonts:
-    - family: MiSans
+    - family: Linar Sans
       fonts:
-        - asset: assets/fonts/MiSans VF.ttf
+        - asset: assets/fonts/Quicksand/Quicksand-VariableFont_wght.ttf
+        - asset: assets/fonts/Noto_Sans_SC/NotoSansSC-VariableFont_wght.ttf
+        - asset: assets/fonts/Noto_Sans_JP/NotoSansJP-VariableFont_wght.ttf
     - family: JetBrainsMono
       fonts:
         - asset: assets/fonts/monospace/JetBrainsMono.ttf

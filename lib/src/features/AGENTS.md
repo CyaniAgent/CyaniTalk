@@ -21,7 +21,7 @@ Full 4-layer ONLY in `auth` + `misskey`; the rest are thinner (application+prese
 | `profile/` | 30 | Profile tab + full settings subsystem. **SEE `profile/AGENTS.md`** (application+presentation). |
 | `auth/` | 14 | MiAuth login, token storage, session setup. Smallest complete 4-layer example. |
 | `common/` | 9 | Cross-feature media: `presentation/widgets/media/` (7 files; `audio_player_sheet` 570) + `media_viewer`. Presentation-only. |
-| `update/` | 6 | In-app updater: polls `api.github.com/repos/CyaniAgent/CyaniTalk/releases/latest`, opens GitHub Releases (application+domain+presentation). |
+| `update/` | 6 | In-app updater: polls `api.github.com/repos/CyaniAgent/Nyachi/releases/latest`, opens GitHub Releases (application+domain+presentation). |
 | `welcome/` | 3 | Onboarding. `welcome_page.dart` 958 (application+presentation). |
 | `cloud/` | 2 | Drive UI. `cloud_page.dart` 2078 (presentation-only). |
 | `messaging/` | 2 | Messaging tab. `messaging_page.dart` 551 (presentation-only). |

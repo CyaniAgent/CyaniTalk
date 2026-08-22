@@ -201,11 +201,13 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
       routerRefreshNotifier.value++;
     });
 
-    // 监听开发者模式变化，动态开关 debug_deck
+    // 监听开发者模式变化，关闭开发者模式时自动禁用 debug_deck
     ref.listen(developerSettingsProvider, (prev, next) {
       next.whenData((isDevMode) {
-        DebugTools.setEnabled(isDevMode);
-        logger.info('NyachiApp: debug_deck ${isDevMode ? "已启用" : "已禁用"}');
+        if (!isDevMode) {
+          DebugTools.setEnabled(false);
+          logger.info('NyachiApp: debug_deck 已禁用（开发者模式关闭）');
+        }
       });
     });
 
@@ -444,7 +446,7 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
     }
 
     // 获取字体ID
-    final fontFamilyId = settings.fontFamily ?? 'misans';
+    final fontFamilyId = settings.fontFamily ?? 'linar_sans';
     final isSystemFont = fontFamilyId.isEmpty || fontFamilyId == 'system';
 
     // 获取基础 TextTheme
@@ -462,12 +464,12 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
         displayColor: colorScheme.onSurface,
       );
       effectiveFontFamily = null;
-    } else if (fontFamilyId == 'misans') {
+    } else if (fontFamilyId == 'linar_sans') {
       textTheme = baseTextTheme.apply(
         bodyColor: colorScheme.onSurface,
         displayColor: colorScheme.onSurface,
       );
-      effectiveFontFamily = 'MiSans';
+      effectiveFontFamily = 'Linar Sans';
     } else {
       final coloredTextTheme = baseTextTheme.apply(
         bodyColor: colorScheme.onSurface,
@@ -483,7 +485,7 @@ class _NyachiAppState extends ConsumerState<NyachiApp>
         effectiveFontFamily = fontFamilyId;
       } else {
         textTheme = coloredTextTheme;
-        effectiveFontFamily = 'MiSans';
+        effectiveFontFamily = 'Linar Sans';
       }
     }
 

@@ -25,16 +25,20 @@ class DeveloperSettingsPage extends ConsumerStatefulWidget {
 class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
   // Colors moved to SettingsIconColors in core/theme/color_constants.dart
 
-  /// 打开网络调试工具（全端通用）
-  void _openNetworkDebugger() {
-    // 启用 debug_deck overlay 并重置可见性
-    DebugTools.setEnabled(true);
-    DebugTools.showOverlay();
+  /// 网络调试工具开关状态
+  bool _debugToolsEnabled = DebugTools.enabled;
 
-    showToast(
-      title: 'settings_developer_network_debug_enabled_hint'.tr(),
-      type: ToastificationType.info,
-    );
+  /// 切换网络调试工具（全端通用）
+  void _toggleDebugTools(bool value) {
+    setState(() => _debugToolsEnabled = value);
+    DebugTools.setEnabled(value);
+    if (value) {
+      DebugTools.showOverlay();
+      showToast(
+        title: 'settings_developer_network_debug_enabled_hint'.tr(),
+        type: ToastificationType.info,
+      );
+    }
   }
 
   Future<void> _launchUrl(String urlString) async {
@@ -109,12 +113,13 @@ class _DeveloperSettingsPageState extends ConsumerState<DeveloperSettingsPage> {
               const SizedBox(height: 16),
               SettingsCardGroup(
                 children: [
-                  SettingsTile(
+                  SettingsSwitchTile(
                     icon: Icons.network_check,
                     iconColor: SettingsIconColors.cyan,
                     title: 'settings_developer_network_debug_title'.tr(),
                     subtitle: 'settings_developer_network_debug_description'.tr(),
-                    onTap: _openNetworkDebugger,
+                    value: _debugToolsEnabled,
+                    onChanged: _toggleDebugTools,
                   ),
                   SettingsTile(
                     icon: Icons.open_in_new,

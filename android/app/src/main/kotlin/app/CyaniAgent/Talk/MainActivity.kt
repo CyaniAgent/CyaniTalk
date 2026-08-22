@@ -1,4 +1,4 @@
-package app.CyaniAgent.Talk
+package app.CyaniAgent.Nyachi
 
 import io.flutter.embedding.android.FlutterActivity
 

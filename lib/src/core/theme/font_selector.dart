@@ -5,7 +5,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '/src/shared/widgets/toast_helper.dart';
 import '/src/features/profile/presentation/settings/appearance_page.dart';
-import '/src/core/services/device_info_service.dart';
 import 'font_manager.dart';
 import 'font_settings_notifier.dart';
 import 'font_refresh_notifier.dart';
@@ -31,7 +30,6 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(fontSettingsProvider);
-    final xiaomiInfoAsync = ref.watch(xiaomiDeviceInfoProvider);
 
     return AlertDialog(
       title: Text('settings_font_selector_title'.tr()),
@@ -40,47 +38,36 @@ class _FontSelectorDialogState extends ConsumerState<FontSelectorDialog> {
         data: (settings) {
           final fonts = FontManager.getAllFonts();
 
-          final isXiaomi =
-              xiaomiInfoAsync.whenOrNull(
-                data: (info) => info.isXiaomiWithMiSystem,
-              ) ??
-              false;
-
           return SizedBox(
             width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: fonts.length + (isXiaomi ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (isXiaomi && index == fonts.length) {
-                  return _buildAddLocalFontTile(context);
-                }
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: fonts.length,
+                    itemBuilder: (context, index) {
+                      final font = fonts[index];
+                      final isSelected = settings.selectedFontId == font.id;
+                      final isCached = settings.cacheStatus[font.id] ?? false;
+                      final isDownloading = settings.downloadingFontId == font.id;
+                      final downloadProgress = settings.downloadProgress;
 
-                final font = fonts[index];
-                final isSelected = settings.selectedFontId == font.id;
-                final isCached = settings.cacheStatus[font.id] ?? false;
-                final isDownloading = settings.downloadingFontId == font.id;
-                final downloadProgress = settings.downloadProgress;
-
-                final isSystemFontOnXiaomi =
-                    isXiaomi && font.type == FontType.systemFont;
-
-                return FontListTile(
-                  font: font,
-                  isSelected: isSelected,
-                  isCached: isCached,
-                  isDownloading: isDownloading,
-                  downloadProgress: downloadProgress,
-                  onTap: isSystemFontOnXiaomi
-                      ? null
-                      : () => _handleFontTap(font, isCached),
-                  onDownload: () => _handleDownload(font),
-                  isDisabled: isSystemFontOnXiaomi,
-                  disabledMessage: isSystemFontOnXiaomi
-                      ? '该手机为小米手机，默认字体为 MiSans，本应用使用了相同的字体。如果想要更改为小米兰亭等经典系统字体，请点击下方按钮从本地添加。'
-                      : null,
-                );
-              },
+                      return FontListTile(
+                        font: font,
+                        isSelected: isSelected,
+                        isCached: isCached,
+                        isDownloading: isDownloading,
+                        downloadProgress: downloadProgress,
+                        onTap: () => _handleFontTap(font, isCached),
+                        onDownload: () => _handleDownload(font),
+                      );
+                    },
+                  ),
+                ),
+                _buildAddLocalFontTile(context),
+              ],
             ),
           );
         },
@@ -440,7 +427,7 @@ class FontSelectorButton extends ConsumerWidget {
         return ListTile(
           leading: const Icon(Icons.text_fields),
           title: Text('settings_font_title'.tr()),
-          subtitle: Text(font?.displayName ?? 'MiSans'),
+          subtitle: Text(font?.displayName ?? 'Linar Sans'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => _showFontSelector(context),
         );
@@ -454,7 +441,7 @@ class FontSelectorButton extends ConsumerWidget {
       error: (error, stackTrace) => ListTile(
         leading: const Icon(Icons.text_fields),
         title: Text('settings_font_title'.tr()),
-        subtitle: const Text('MiSans'),
+        subtitle: const Text('Linar Sans'),
         onTap: () => _showFontSelector(context),
       ),
     );

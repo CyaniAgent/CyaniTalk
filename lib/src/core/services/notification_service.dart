@@ -40,7 +40,7 @@ class NotificationService {
       linux: initializationSettingsLinux,
       windows: WindowsInitializationSettings(
         appName: 'Nyachi',
-        appUserModelId: 'app.CyaniAgent.Talk',
+        appUserModelId: 'app.CyaniAgent.Nyachi',
         guid: '3F2504E0-4F89-11D3-9A0C-0305E82C3301',
       ),
     );

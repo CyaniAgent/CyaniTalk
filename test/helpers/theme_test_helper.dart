@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:Nyachi/src/core/theme/design_tokens.dart';
 import 'package:Nyachi/src/core/theme/desktop_semantic_colors.dart';
 
-/// 镜像 `lib/src/app.dart` 中 `_CyaniTalkAppState._buildTheme`（L425-528）的
+/// 镜像 `lib/src/app.dart` 中 `_NyachiAppState._buildTheme`（L425-528）的
 /// MD3 主题构建逻辑。
 ///
 /// 目的：`_buildTheme` 是私有方法且依赖大量 provider/service（pump 整个
-/// CyaniTalkApp 需要 mock 一整套 Riverpod provider），这里用与生产代码完全
+/// NyachiApp 需要 mock 一整套 Riverpod provider），这里用与生产代码完全
 /// 相同的参数构造 ThemeData，供组件主题 / token 注册类测试断言。若生产主题
 /// 增减组件主题或 token，此辅助函数需同步更新（见 learnings.md 测试基建记录）。
 ThemeData buildTestTheme(Brightness brightness) {

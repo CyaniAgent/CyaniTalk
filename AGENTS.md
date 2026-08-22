@@ -2,7 +2,7 @@
 
 
 ## OVERVIEW
-CyaniTalk: cross-platform (Android/iOS/Windows/macOS/Linux) Flutter social client bridging **Misskey** (microblogging + realtime streaming) and **Flarum** (forums), by CyaniAgent. Riverpod 3 + go_router + dio + freezed codegen; Material 3 Expressive; AGPL-3.0. Version 1.3.4+224.
+Nyachi: cross-platform (Android/iOS/Windows/macOS/Linux) Flutter social client bridging **Misskey** (microblogging + realtime streaming) and **Flarum** (forums), by CyaniAgent. Riverpod 3 + go_router + dio + freezed codegen; Material 3 Expressive; AGPL-3.0. Version 1.3.4+224.
 
 ## STRUCTURE
 ```
@@ -41,7 +41,7 @@ LSP/codegraph unavailable in this env — centrality unmeasured; from source rea
 | Symbol | Type | Location | Refs | Role |
 |--------|------|----------|------|------|
 | `main()` | function | `lib/main.dart` | n/a | bootstrap entry |
-| `CyaniTalkApp` | widget | `lib/src/app.dart` | n/a | root widget |
+| `NyachiApp` | widget | `lib/src/app.dart` | n/a | root widget |
 | `goRouterProvider` | provider | `lib/src/routing/router.dart` | n/a | route hub, 4-shell branches |
 | `MisskeyRepository` | class | `lib/src/features/misskey/data/misskey_repository.dart` | n/a | 1384 lines, misskey data layer |
 | `MisskeyNotifier` | notifier | `lib/src/features/misskey/application/misskey_notifier.dart` | n/a | 779 lines, state core |
@@ -77,8 +77,8 @@ LSP/codegraph unavailable in this env — centrality unmeasured; from source rea
 - Custom "Miao" locales (zh-Miao, en-Miao, ja-Miao, miao-Miao) — Easter-egg language.
 - Custom MFM renderer (misskey/domain/mfm_renderer.dart) instead of packaged renderer; `mfm` package only for parsing.
 - Material 3 Expressive ecosystem: `m3e_collection`, `m3e_design`, `slider_m3e`, `loading_indicator_m3e`.
-- In-app updater polls `api.github.com/repos/CyaniAgent/CyaniTalk/releases/latest`; distribution = GitHub Releases page.
-- Windows MSI (`CyaniTalk-SetupFiles/`) built locally, NOT in CI.
+- In-app updater polls `api.github.com/repos/CyaniAgent/Nyachi/releases/latest`; distribution = GitHub Releases page.
+- Windows MSI (`Nyachi-SetupFiles/`) built locally, NOT in CI.
 
 ## COMMANDS
 ```bash
@@ -99,4 +99,4 @@ flutter build ios --release --no-codesign
 - Primary branch is **Dev** (CI builds on push); main/Beta exist.
 - `docs/ARCHITECTURE.md` is stale: references `constants/`, `messages/`, `admin/`, `l10n/`, bitsdojo_window, audioplayers — actual: `config/`, `messaging/`, window_manager, flutter_soloud.
 - `custom_lint`/`riverpod_lint` declared but NOT activated (no plugins: section, no custom_lint.yaml).
-- Generated-only clutter on disk (gitignored): `.dart_tool/`, `build/`, `android/.gradle`, platform `flutter/ephemeral/`, `CyaniTalk-cache/`, `CyaniTalk-SetupFiles/`.
+- Generated-only clutter on disk (gitignored): `.dart_tool/`, `build/`, `android/.gradle`, platform `flutter/ephemeral/`, `Nyachi-cache/`, `Nyachi-SetupFiles/`.

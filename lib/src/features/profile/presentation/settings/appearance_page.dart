@@ -102,7 +102,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
           ? Color(primaryColorValue)
           : SaucePalette.mikuGreen;
 
-      final fontFamily = prefs.getString('appearance_font_family') ?? 'MiSans';
+      final fontFamily = prefs.getString('appearance_font_family') ?? 'Linar Sans';
 
       final isDesktop = defaultTargetPlatform == TargetPlatform.windows ||
           defaultTargetPlatform == TargetPlatform.macOS ||
@@ -128,7 +128,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
         useDynamicColor: true,
         useCustomColor: false,
         primaryColor: SaucePalette.mikuGreen,
-        fontFamily: 'MiSans',
+        fontFamily: 'Linar Sans',
         useCustomTitleBar: isDesktop,
       );
     }
@@ -210,7 +210,7 @@ class AppearanceSettingsNotifier extends _$AppearanceSettingsNotifier {
       useDynamicColor: true,
       useCustomColor: false,
       primaryColor: SaucePalette.mikuGreen,
-      fontFamily: 'MiSans',
+      fontFamily: 'Linar Sans',
       useCustomTitleBar: isDesktop,
     );
     state = AsyncData(newState);
@@ -294,7 +294,7 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
                     icon: Icons.font_download_outlined,
                     iconColor: SettingsIconColors.cyan,
                     title: 'settings_font_title'.tr(),
-                    subtitle: appearanceSettings.fontFamily ?? 'MiSans',
+                    subtitle: appearanceSettings.fontFamily ?? 'Linar Sans',
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => const FontSelectorDialog(),
@@ -304,7 +304,17 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
               ),
 
               const SizedBox(height: 16),
-              _buildPreviewCard(context, appearanceSettings),
+              SettingsCardGroup(
+                children: [
+                  SettingsTile(
+                    icon: Icons.view_carousel_outlined,
+                    iconColor: SettingsIconColors.cyan,
+                    title: 'settings_appearance_layout_switch_title'.tr(),
+                    subtitle: 'settings_appearance_layout_switch_subtitle'.tr(),
+                    onTap: _showLayoutPicker,
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 24),
               Padding(
@@ -564,184 +574,266 @@ class _AppearancePageState extends ConsumerState<AppearancePage> {
     );
   }
 
-  // ── Preview Card (kept from original) ────────────────────────
-  Widget _buildPreviewCard(BuildContext context, AppearanceSettings settings) {
+  // ── Layout Picker ──────────────────────────────────────────
+  void _showLayoutPicker() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDesktop = defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: colorScheme.outlineVariant, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.auto_awesome, color: colorScheme.primary, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'settings_appearance_design_example'.tr(),
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+    Widget buildLayoutOption({
+      required IconData icon,
+      required String title,
+      required String subtitle,
+      required bool selected,
+      required bool enabled,
+      required VoidCallback onTap,
+    }) {
+      return InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: selected
+                ? colorScheme.primaryContainer.withAlpha(80)
+                : colorScheme.surfaceContainerHighest.withAlpha(100),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? colorScheme.primaryContainer
+                      : colorScheme.surfaceContainerHighest,
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'settings_appearance_design_example_subtitle'.tr(),
-              style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.outline),
-            ),
-            const SizedBox(height: 20),
-            Card(
-              elevation: 0,
-              color: colorScheme.surfaceContainerLow,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+                child: Icon(
+                  icon,
+                  color: selected
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.outline,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 14,
-                          backgroundColor: colorScheme.primary,
-                          child: Text("01", style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 10, fontWeight: FontWeight.bold)),
-                        ),
-                        const SizedBox(width: 10),
-                        Container(
-                          width: 100, height: 8,
-                          decoration: BoxDecoration(color: colorScheme.outlineVariant, borderRadius: BorderRadius.circular(4)),
-                        ),
-                        const Spacer(),
-                        Icon(Icons.notifications_none, size: 18, color: colorScheme.primary),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16), topRight: Radius.circular(16),
-                            bottomRight: Radius.circular(16), bottomLeft: Radius.circular(4),
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: selected
+                                  ? colorScheme.onSurface
+                                  : colorScheme.outline,
+                            ),
                           ),
                         ),
-                        child: Text(
-                          "Producer-san, let's make the best stage! (≧▽≦)",
-                          style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onPrimaryContainer),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Card(
-                      elevation: 0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 32, height: 32,
-                                  decoration: BoxDecoration(color: colorScheme.secondaryContainer, shape: BoxShape.circle),
-                                  child: Icon(Icons.person, size: 16, color: colorScheme.onSecondaryContainer),
-                                ),
-                                const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 60, height: 6,
-                                      decoration: BoxDecoration(color: colorScheme.onSurface, borderRadius: BorderRadius.circular(3)),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      width: 40, height: 4,
-                                      decoration: BoxDecoration(color: colorScheme.outline, borderRadius: BorderRadius.circular(2)),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                        if (!enabled) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
                             ),
-                            const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity, height: 60,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    colorScheme.primaryContainer.withAlpha(80),
-                                    colorScheme.secondaryContainer.withAlpha(60),
-                                    colorScheme.tertiaryContainer.withAlpha(40),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Center(
-                                child: Icon(Icons.play_circle_outline, color: colorScheme.primary, size: 32),
+                            decoration: BoxDecoration(
+                              color: colorScheme.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'settings_appearance_layout_experimental'.tr(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onTertiaryContainer,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildMockButton(colorScheme.primary, Icons.favorite),
-                        _buildMockButton(colorScheme.secondary, Icons.share),
-                        _buildMockButton(colorScheme.tertiary, Icons.bookmark),
+                          ),
+                        ],
                       ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: selected
+                            ? colorScheme.onSurfaceVariant
+                            : colorScheme.outline,
+                      ),
                     ),
                   ],
                 ),
               ),
+              if (selected)
+                Icon(
+                  Icons.check_circle,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget buildSheetContent({required bool isBottomSheet}) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isBottomSheet) ...[
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            Wrap(
-              spacing: 8, runSpacing: 8,
+          ],
+          Padding(
+            padding: isBottomSheet
+                ? const EdgeInsets.symmetric(horizontal: 24)
+                : const EdgeInsets.fromLTRB(24, 24, 24, 8),
+            child: Row(
               children: [
-                _buildStatusChip(settings.isDarkMode ? 'Dark Mode' : 'Light Mode', settings.isDarkMode ? Icons.dark_mode : Icons.light_mode),
-                if (settings.useDynamicColor) _buildStatusChip('Dynamic', Icons.auto_fix_high),
-                if (settings.useCustomColor) _buildStatusChip('Custom', Icons.palette),
+                Icon(
+                  Icons.view_carousel_outlined,
+                  color: colorScheme.primary,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'settings_appearance_layout_sheet_title'.tr(),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                if (!isBottomSheet)
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMockButton(Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
-      child: Icon(icon, color: color, size: 18),
-    );
-  }
-
-  Widget _buildStatusChip(String label, IconData icon) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(8)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: colorScheme.onSecondaryContainer),
-          const SizedBox(width: 4),
-          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: colorScheme.onSecondaryContainer, fontWeight: FontWeight.bold,
-          )),
+          ),
+          Padding(
+            padding: isBottomSheet
+                ? const EdgeInsets.fromLTRB(24, 0, 24, 20)
+                : const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Text(
+              'settings_appearance_layout_sheet_subtitle'.tr(),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.outline,
+              ),
+            ),
+          ),
+          Padding(
+            padding: isBottomSheet
+                ? const EdgeInsets.fromLTRB(16, 0, 16, 24)
+                : const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: Column(
+              children: [
+                buildLayoutOption(
+                  icon: Icons.account_tree_outlined,
+                  title: 'settings_appearance_layout_classic_title'.tr(),
+                  subtitle: 'settings_appearance_layout_classic_desc'.tr(),
+                  selected: true,
+                  enabled: true,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    showToast(
+                      title: 'settings_appearance_layout_switch_done'.tr(),
+                      type: ToastificationType.success,
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                buildLayoutOption(
+                  icon: Icons.dashboard_outlined,
+                  title: 'settings_appearance_layout_deck_title'.tr(),
+                  subtitle: 'settings_appearance_layout_deck_desc'.tr(),
+                  selected: false,
+                  enabled: false,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    showToast(
+                      title: 'settings_appearance_layout_deck_coming_soon'.tr(),
+                      type: ToastificationType.info,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
-      ),
-    );
+      );
+    }
+
+    if (isDesktop) {
+      // 桌面端：右侧弹出 Side Sheet
+      showDialog(
+        context: context,
+        builder: (ctx) => Align(
+          alignment: Alignment.centerRight,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: 380,
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(25),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: buildSheetContent(isBottomSheet: false),
+            ),
+          ),
+        ),
+      );
+    } else {
+      // 移动端/平板端：底部弹出 Bottom Sheet
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (ctx) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            12,
+            24,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: buildSheetContent(isBottomSheet: true),
+        ),
+      );
+    }
   }
 }
